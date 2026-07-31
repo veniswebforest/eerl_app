@@ -1,0 +1,256 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "EERL App",
+  "@appTitle": { "description": "Application title" },
+
+  "home": "Home",
+  "@home": { "description": "Home tab label" },
+
+  "profile": "Profile",
+  "@profile": { "description": "Profile tab label" },
+
+  "settings": "Settings",
+  "@settings": { "description": "Settings tab label" },
+
+  "details": "Details",
+  "@details": { "description": "Details screen title" },
+
+  "welcomeMessage": "Welcome to EERL",
+  "@welcomeMessage": { "description": "Welcome greeting on home screen" },
+
+  "welcomeSubtitle": "Your production-ready Flutter application",
+  "@welcomeSubtitle": { "description": "Subtitle on home screen" },
+
+  "exploreFeatures": "Explore Features",
+  "@exploreFeatures": { "description": "Section title for feature cards" },
+
+  "localization": "Localization",
+  "@localization": { "description": "Localization feature name" },
+
+  "localizationDesc": "Multi-language support with English and Hindi",
+  "@localizationDesc": { "description": "Description of localization feature" },
+
+  "darkMode": "Dark Mode",
+  "@darkMode": { "description": "Dark mode feature name" },
+
+  "darkModeDesc": "Seamless light and dark theme switching",
+  "@darkModeDesc": { "description": "Description of dark mode feature" },
+
+  "theming": "Theming",
+  "@theming": { "description": "Theming feature name" },
+
+  "themingDesc": "Centralized color and style management",
+  "@themingDesc": { "description": "Description of theming feature" },
+
+  "navigation": "Navigation",
+  "@navigation": { "description": "Navigation feature name" },
+
+  "navigationDesc": "Declarative routing with GoRouter",
+  "@navigationDesc": { "description": "Description of navigation feature" },
+
+  "viewDetails": "View Details",
+  "@viewDetails": { "description": "Button text to view details" },
+
+  "featureDetail": "Feature Detail",
+  "@featureDetail": { "description": "Title for feature detail screen" },
+
+  "featureDetailBody": "This screen demonstrates route navigation with arguments. The feature you selected is displayed below.",
+  "@featureDetailBody": { "description": "Body text for feature detail screen" },
+
+  "featureName": "Feature: {name}",
+  "@featureName": {
+    "description": "Displays feature name with label",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "goBack": "Go Back",
+  "@goBack": { "description": "Button text to navigate back" },
+
+  "profileTitle": "My Profile",
+  "@profileTitle": { "description": "Profile screen title" },
+
+  "profileName": "EERL User",
+  "@profileName": { "description": "Default profile name" },
+
+  "profileEmail": "user@eerl.app",
+  "@profileEmail": { "description": "Default profile email" },
+
+  "profileBio": "A Flutter developer building amazing applications.",
+  "@profileBio": { "description": "Default profile bio" },
+
+  "editProfile": "Edit Profile",
+  "@editProfile": { "description": "Button text to edit profile" },
+
+  "accountInfo": "Account Information",
+  "@accountInfo": { "description": "Section title for account info" },
+
+  "memberSince": "Member Since",
+  "@memberSince": { "description": "Label for member since date" },
+
+  "memberSinceDate": "January 2025",
+  "@memberSinceDate": { "description": "Default member since date" },
+
+  "appVersion": "App Version",
+  "@appVersion": { "description": "Label for app version" },
+
+  "appVersionNumber": "1.0.0",
+  "@appVersionNumber": { "description": "Current app version number" },
+
+  "status": "Status",
+  "@status": { "description": "Label for account status" },
+
+  "activeStatus": "Active",
+  "@activeStatus": { "description": "Active status text" },
+
+  "settingsTitle": "Settings",
+  "@settingsTitle": { "description": "Settings screen title" },
+
+  "appearance": "Appearance",
+  "@appearance": { "description": "Appearance section title" },
+
+  "theme": "Theme",
+  "@theme": { "description": "Theme setting label" },
+
+  "systemTheme": "System Default",
+  "@systemTheme": { "description": "System theme option" },
+
+  "lightTheme": "Light",
+  "@lightTheme": { "description": "Light theme option" },
+
+  "darkThemeOption": "Dark",
+  "@darkThemeOption": { "description": "Dark theme option" },
+
+  "language": "Language",
+  "@language": { "description": "Language setting label" },
+
+  "english": "English",
+  "@english": { "description": "English language name" },
+
+  "hindi": "हिन्दी",
+  "@hindi": { "description": "Hindi language name" },
+
+  "general": "General",
+  "@general": { "description": "General section title" },
+
+  "notifications": "Notifications",
+  "@notifications": { "description": "Notifications setting label" },
+
+  "notificationsDesc": "Receive push notifications",
+  "@notificationsDesc": { "description": "Notifications setting description" },
+
+  "about": "About",
+  "@about": { "description": "About section title" },
+
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": { "description": "Privacy policy label" },
+
+  "termsOfService": "Terms of Service",
+  "@termsOfService": { "description": "Terms of service label" },
+
+  "licenses": "Open Source Licenses",
+  "@licenses": { "description": "Licenses label" },
+
+  "showBottomSheet": "Show Bottom Sheet",
+  "@showBottomSheet": { "description": "Button text to show bottom sheet" },
+
+  "showDialog": "Show Dialog",
+  "@showDialog": { "description": "Button text to show dialog" },
+
+  "showSnackbar": "Show Snackbar",
+  "@showSnackbar": { "description": "Button text to show snackbar" },
+
+  "sampleBottomSheetTitle": "Bottom Sheet",
+  "@sampleBottomSheetTitle": { "description": "Title for sample bottom sheet" },
+
+  "sampleBottomSheetMessage": "This is a themed bottom sheet that adapts to light and dark modes with localized text.",
+  "@sampleBottomSheetMessage": { "description": "Message in sample bottom sheet" },
+
+  "sampleDialogTitle": "Confirmation",
+  "@sampleDialogTitle": { "description": "Title for sample dialog" },
+
+  "sampleDialogMessage": "This dialog adapts to both light and dark themes. All text is localized.",
+  "@sampleDialogMessage": { "description": "Message in sample dialog" },
+
+  "sampleSnackbarMessage": "This is a themed snackbar message! ✨",
+  "@sampleSnackbarMessage": { "description": "Message in sample snackbar" },
+
+  "cancel": "Cancel",
+  "@cancel": { "description": "Cancel button text" },
+
+  "confirm": "Confirm",
+  "@confirm": { "description": "Confirm button text" },
+
+  "close": "Close",
+  "@close": { "description": "Close button text" },
+
+  "ok": "OK",
+  "@ok": { "description": "OK button text" },
+
+  "error": "Error",
+  "@error": { "description": "Error title" },
+
+  "pageNotFound": "Page Not Found",
+  "@pageNotFound": { "description": "404 error title" },
+
+  "pageNotFoundMessage": "The page you're looking for doesn't exist.",
+  "@pageNotFoundMessage": { "description": "404 error message" },
+
+  "returnHome": "Return Home",
+  "@returnHome": { "description": "Button text to return to home" },
+
+  "quickActions": "Quick Actions",
+  "@quickActions": { "description": "Section title for quick actions" },
+
+  "selectTheme": "Select Theme",
+  "@selectTheme": { "description": "Title for theme selection dialog" },
+
+  "selectLanguage": "Select Language",
+  "@selectLanguage": { "description": "Title for language selection dialog" },
+
+  "loginWelcome": "Welcome!",
+  "@loginWelcome": { "description": "Welcome title on login screen" },
+
+  "loginSubtitle": "Login with your phone number",
+  "@loginSubtitle": { "description": "Subtitle on login screen" },
+
+  "mobileNumberLabel": "Enter Your Mobile Number",
+  "@mobileNumberLabel": { "description": "Label for mobile input" },
+
+  "mobileNumberHint": "Enter your number",
+  "@mobileNumberHint": { "description": "Hint for mobile input" },
+
+  "invalidMobileNumber": "Please Enter Valid Mobile Number",
+  "@invalidMobileNumber": { "description": "Error message for invalid mobile number" },
+
+  "continueBtn": "Continue",
+  "@continueBtn": { "description": "Continue button text" },
+
+  "otpTitle": "Enter OTP Code",
+  "@otpTitle": { "description": "Title on OTP screen" },
+
+  "otpDescription": "We sent a security code to your Reporting Manager for approval ({phone})",
+  "@otpDescription": {
+    "description": "Description on OTP screen",
+    "placeholders": {
+      "phone": { "type": "String" }
+    }
+  },
+
+  "invalidOtp": "This Code has expired, Please Request New One.",
+  "@invalidOtp": { "description": "Error message for invalid OTP" },
+
+  "otpVerified": "OTP Verified Successfully!",
+  "@otpVerified": { "description": "Success message for OTP verification" },
+
+  "didntGetOtp": "Didn't get OTP?",
+  "@didntGetOtp": { "description": "Prompt for resending OTP" },
+
+  "resendOtp": "Resend",
+  "@resendOtp": { "description": "Resend OTP button text" },
+
+  "verifyBtn": "Verify",
+  "@verifyBtn": { "description": "Verify button text" }
+}

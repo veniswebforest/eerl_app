@@ -1,0 +1,165 @@
+{
+  "@@locale": "hi",
+
+  "appTitle": "ईआरएल ऐप",
+
+  "home": "होम",
+
+  "profile": "प्रोफाइल",
+
+  "settings": "सेटिंग्स",
+
+  "details": "विवरण",
+
+  "welcomeMessage": "ईआरएल में आपका स्वागत है",
+
+  "welcomeSubtitle": "आपका प्रोडक्शन-रेडी फ़्लटर ऐप्लिकेशन",
+
+  "exploreFeatures": "विशेषताएँ देखें",
+
+  "localization": "भाषा समर्थन",
+
+  "localizationDesc": "अंग्रेज़ी और हिन्दी में बहु-भाषा समर्थन",
+
+  "darkMode": "डार्क मोड",
+
+  "darkModeDesc": "लाइट और डार्क थीम के बीच आसान स्विचिंग",
+
+  "theming": "थीमिंग",
+
+  "themingDesc": "केंद्रीकृत रंग और शैली प्रबंधन",
+
+  "navigation": "नेविगेशन",
+
+  "navigationDesc": "GoRouter के साथ डिक्लेरेटिव रूटिंग",
+
+  "viewDetails": "विवरण देखें",
+
+  "featureDetail": "फ़ीचर विवरण",
+
+  "featureDetailBody": "यह स्क्रीन आर्गुमेंट्स के साथ रूट नेविगेशन दर्शाती है। आपके द्वारा चुनी गई सुविधा नीचे प्रदर्शित है।",
+
+  "featureName": "फ़ीचर: {name}",
+
+  "goBack": "वापस जाएँ",
+
+  "profileTitle": "मेरी प्रोफाइल",
+
+  "profileName": "ईआरएल उपयोगकर्ता",
+
+  "profileEmail": "user@eerl.app",
+
+  "profileBio": "अद्भुत ऐप्लिकेशन बनाने वाला एक फ़्लटर डेवलपर।",
+
+  "editProfile": "प्रोफाइल संपादित करें",
+
+  "accountInfo": "खाता जानकारी",
+
+  "memberSince": "सदस्य तिथि",
+
+  "memberSinceDate": "जनवरी 2025",
+
+  "appVersion": "ऐप संस्करण",
+
+  "appVersionNumber": "1.0.0",
+
+  "status": "स्थिति",
+
+  "activeStatus": "सक्रिय",
+
+  "settingsTitle": "सेटिंग्स",
+
+  "appearance": "दिखावट",
+
+  "theme": "थीम",
+
+  "systemTheme": "सिस्टम डिफ़ॉल्ट",
+
+  "lightTheme": "लाइट",
+
+  "darkThemeOption": "डार्क",
+
+  "language": "भाषा",
+
+  "english": "English",
+
+  "hindi": "हिन्दी",
+
+  "general": "सामान्य",
+
+  "notifications": "सूचनाएँ",
+
+  "notificationsDesc": "पुश सूचनाएँ प्राप्त करें",
+
+  "about": "ऐप के बारे में",
+
+  "privacyPolicy": "गोपनीयता नीति",
+
+  "termsOfService": "सेवा की शर्तें",
+
+  "licenses": "ओपन सोर्स लाइसेंस",
+
+  "showBottomSheet": "बॉटम शीट दिखाएँ",
+
+  "showDialog": "डायलॉग दिखाएँ",
+
+  "showSnackbar": "स्नैकबार दिखाएँ",
+
+  "sampleBottomSheetTitle": "बॉटम शीट",
+
+  "sampleBottomSheetMessage": "यह एक थीम्ड बॉटम शीट है जो लाइट और डार्क मोड में स्थानीयकृत टेक्स्ट के साथ अनुकूलित होती है।",
+
+  "sampleDialogTitle": "पुष्टिकरण",
+
+  "sampleDialogMessage": "यह डायलॉग लाइट और डार्क दोनों थीम में अनुकूलित होता है। सभी टेक्स्ट स्थानीयकृत हैं।",
+
+  "sampleSnackbarMessage": "यह एक थीम्ड स्नैकबार संदेश है! ✨",
+
+  "cancel": "रद्द करें",
+
+  "confirm": "पुष्टि करें",
+
+  "close": "बंद करें",
+
+  "ok": "ठीक है",
+
+  "error": "त्रुटि",
+
+  "pageNotFound": "पृष्ठ नहीं मिला",
+
+  "pageNotFoundMessage": "आप जिस पृष्ठ की तलाश कर रहे हैं वह मौजूद नहीं है।",
+
+  "returnHome": "होम पर वापस जाएँ",
+
+  "quickActions": "त्वरित कार्य",
+
+  "selectTheme": "थीम चुनें",
+
+  "selectLanguage": "भाषा चुनें",
+
+  "loginWelcome": "स्वागत है!",
+
+  "loginSubtitle": "अपने फोन नंबर से लॉगिन करें",
+
+  "mobileNumberLabel": "अपना मोबाइल नंबर दर्ज करें",
+
+  "mobileNumberHint": "अपना नंबर दर्ज करें",
+
+  "invalidMobileNumber": "कृपया मान्य मोबाइल नंबर दर्ज करें",
+
+  "continueBtn": "आगे बढ़ें",
+
+  "otpTitle": "OTP कोड दर्ज करें",
+
+  "otpDescription": "हमने अनुमोदन के लिए आपके रिपोर्टिंग प्रबंधक को एक सुरक्षा कोड भेजा है ({phone})",
+
+  "invalidOtp": "यह कोड समाप्त हो गया है, कृपया नए का अनुरोध करें।",
+
+  "otpVerified": "OTP सफलतापूर्वक सत्यापित हो गया!",
+
+  "didntGetOtp": "क्या आपको OTP नहीं मिला?",
+
+  "resendOtp": "पुनः भेजें",
+
+  "verifyBtn": "सत्यापित करें"
+}
