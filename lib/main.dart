@@ -2,6 +2,7 @@ import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'core/providers/auth_provider.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
@@ -13,6 +14,7 @@ void main() async {
   // Initialise providers and load persisted preferences.
   final themeProvider = ThemeProvider();
   final localeProvider = LocaleProvider();
+  final authProvider = AuthProvider();
 
   await Future.wait([
     themeProvider.loadTheme(),
@@ -24,6 +26,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider.value(value: themeProvider),
         ChangeNotifierProvider.value(value: localeProvider),
+        ChangeNotifierProvider.value(value: authProvider),
       ],
       child: const EerlApp(),
     ),

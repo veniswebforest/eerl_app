@@ -40,8 +40,6 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.palette_outlined,
             title: l10n.theme,
             subtitle: _themeModeLabel(themeProvider.themeMode, l10n),
-            isDark: isDark,
-            theme: theme,
             onTap: () => _showThemePicker(context, themeProvider),
           ),
           const SizedBox(height: 8),
@@ -51,8 +49,6 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.language,
             title: l10n.language,
             subtitle: _localeName(localeProvider.locale, l10n),
-            isDark: isDark,
-            theme: theme,
             onTap: () => _showLanguagePicker(context, localeProvider),
           ),
 
@@ -68,8 +64,6 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.notifications_outlined,
             title: l10n.notifications,
             subtitle: l10n.notificationsDesc,
-            isDark: isDark,
-            theme: theme,
             trailing: Switch(
               value: true,
               onChanged: (_) {
@@ -89,24 +83,18 @@ class SettingsScreen extends StatelessWidget {
           _SettingsTile(
             icon: Icons.privacy_tip_outlined,
             title: l10n.privacyPolicy,
-            isDark: isDark,
-            theme: theme,
             onTap: () {},
           ),
           const SizedBox(height: 8),
           _SettingsTile(
             icon: Icons.description_outlined,
             title: l10n.termsOfService,
-            isDark: isDark,
-            theme: theme,
             onTap: () {},
           ),
           const SizedBox(height: 8),
           _SettingsTile(
             icon: Icons.code,
             title: l10n.licenses,
-            isDark: isDark,
-            theme: theme,
             onTap: () => showLicensePage(
               context: context,
               applicationName: l10n.appTitle,
@@ -280,8 +268,6 @@ class _SettingsTile extends StatelessWidget {
   const _SettingsTile({
     required this.icon,
     required this.title,
-    required this.isDark,
-    required this.theme,
     this.subtitle,
     this.trailing,
     this.onTap,
@@ -291,15 +277,13 @@ class _SettingsTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final Widget? trailing;
-  final bool isDark;
-  final ThemeData theme;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
     return Material(
-      color:
-          isDark ? AppColors.surfaceContainerDark : AppColors.surfaceContainerLight,
+      color: context.palette.surfaceContainer,
       borderRadius: BorderRadius.circular(14),
       clipBehavior: Clip.antiAlias,
       child: InkWell(

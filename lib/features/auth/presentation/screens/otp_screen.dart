@@ -1,23 +1,18 @@
-import 'dart:async';
+import 'package:eerl_app/core/providers/auth_provider.dart';
+import 'package:eerl_app/core/theme/app_palette.dart';
+import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/widget/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../widgets/logo_component.dart';
 import '../widgets/otp_input.dart';
 import '../widgets/primary_button.dart';
-import '../widgets/validation_message.dart';
 
-/// OTP verification screen.
-///
-/// Features:
-/// - Six-digit OTP input with auto-focus
-/// - Countdown timer for resend
-/// - Error state with red highlights
-/// - Verify button with loading state
-/// - Smooth animations
+/// OTP verification screen using AuthProvider for state management.
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key, required this.phoneNumber});
 
@@ -29,15 +24,6 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen>
     with SingleTickerProviderStateMixin {
-  String _otp = '';
-  bool _hasError = false;
-  bool _isLoading = false;
-  bool _isVerified = false;
-
-  // Resend timer
-  int _resendSeconds = 30;
-  Timer? _resendTimer;
-
   late AnimationController _animController;
   late Animation<double> _fadeIn;
   late Animation<Offset> _slideUp;
@@ -50,43 +36,21 @@ class _OtpScreenState extends State<OtpScreen>
       duration: const Duration(milliseconds: 600),
     );
 
-    _fadeIn = CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeOut,
-    );
+    _fadeIn = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
 
-    _slideUp = Tween<Offset>(
-      begin: const Offset(0, 0.08),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeOutCubic,
-    ));
+    _slideUp = Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
+        );
 
     _animController.forward();
-    _startResendTimer();
   }
 
   @override
   void dispose() {
-    _resendTimer?.cancel();
     _animController.dispose();
     super.dispose();
   }
-
-  void _startResendTimer() {
-    _resendSeconds = 30;
-    _resendTimer?.cancel();
-    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_resendSeconds == 0) {
-        timer.cancel();
-      } else {
-        setState(() => _resendSeconds--);
-      }
-    });
-  }
-
-  bool get _isOtpComplete => _otp.length == 6;
 
   String get _maskedPhone {
     if (widget.phoneNumber.length >= 10) {
@@ -96,76 +60,40 @@ class _OtpScreenState extends State<OtpScreen>
   }
 
   void _onOtpCompleted(String otp) {
-    setState(() {
-      _otp = otp;
-      _hasError = false;
-    });
+    final authProvider = context.read<AuthProvider>();
+    authProvider.setOtp(otp);
   }
 
   void _onOtpChanged(String otp) {
-    setState(() {
-      _otp = otp;
-      if (_hasError) _hasError = false;
-    });
+    final authProvider = context.read<AuthProvider>();
+    authProvider.setOtp(otp);
   }
 
-  void _onVerify() {
-    if (!_isOtpComplete) return;
-
-    setState(() => _isLoading = true);
-
-    // Simulate verification
-    Future.delayed(const Duration(milliseconds: 1200), () {
-      if (!mounted) return;
-
-      // Demo: "123456" is correct, anything else fails
-      if (_otp == '123456') {
-        setState(() {
-          _isLoading = false;
-          _isVerified = true;
-        });
-
-        // Navigate to home after success animation
-        Future.delayed(const Duration(milliseconds: 600), () {
-          if (mounted) context.go(AppRoutes.home);
-        });
-      } else {
-        setState(() {
-          _isLoading = false;
-          _hasError = true;
-        });
-      }
-    });
-  }
-
-  void _onResend() {
-    if (_resendSeconds > 0) return;
-    _startResendTimer();
-    setState(() => _hasError = false);
+  void _onVerify() async {
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.verifyOtp();
+    if (success && mounted) {
+      context.go(AppRoutes.home);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isDark = context.isDarkMode;
+    final authProvider = context.watch<AuthProvider>();
+
+    final isOtpComplete = authProvider.isOtpComplete;
+    final hasError = authProvider.hasOtpError;
+    final isLoading = authProvider.isLoading;
+    final isVerified = authProvider.isVerified;
+    final resendSeconds = authProvider.resendSeconds;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            size: 20,
-            color: isDark
-                ? AppColors.textPrimaryDark
-                : AppColors.textPrimaryLight,
-          ),
-          onPressed: () => context.pop(),
-        ),
-      ),
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
+      appBar: const CustomAppBar(),
       body: SafeArea(
         child: FadeTransition(
           opacity: _fadeIn,
@@ -176,78 +104,83 @@ class _OtpScreenState extends State<OtpScreen>
               child: Column(
                 children: [
                   // ── Scrollable Content ──────────────────────────
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 16),
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 48),
 
-                          // Logo
-                          const LogoComponent(
-                            size: LogoSize.small,
-                            showSubtitle: false,
+                        Text(
+                          l10n.otpTitle,
+                          style: AppTextStyles.boldH5_24.copyWith(
+                            color: context.palette.primary900,
                           ),
-                          const SizedBox(height: 36),
-
-                          // Title
-                          Text(
-                            l10n.otpTitle,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              color: isDark
-                                  ? AppColors.textPrimaryDark
-                                  : AppColors.textPrimaryLight,
-                            ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.otpDescription(_maskedPhone),
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.regularB7_14.copyWith(
+                            color: context.palette.neutral950,
                           ),
-                          const SizedBox(height: 10),
+                        ),
 
-                          // Description
-                          Text(
-                            l10n.otpDescription(_maskedPhone),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: isDark
-                                  ? AppColors.textSecondaryDark
-                                  : AppColors.textSecondaryLight,
-                              height: 1.5,
-                            ),
-                          ),
+                        const SizedBox(height: 32),
 
-                          const SizedBox(height: 36),
+                        // OTP Input
+                        OtpInput(
+                          hasError: hasError,
+                          isVerified: isVerified,
+                          onCompleted: _onOtpCompleted,
+                          onChanged: _onOtpChanged,
+                        ),
 
-                          // OTP Input
-                          OtpInput(
-                            hasError: _hasError,
-                            onCompleted: _onOtpCompleted,
-                            onChanged: _onOtpChanged,
-                          ),
-
-                          // Error Message
-                          if (_hasError)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: ValidationMessage(
-                                message: l10n.invalidOtp,
+                        // Error Message
+                        if (hasError)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Text(
+                              'This Code has expired. Please Request New One.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: context.palette.error,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
+                          ),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
+                  ),
 
-                          // Success Message
-                          if (_isVerified)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 12),
-                              child: ValidationMessage(
-                                message: l10n.otpVerified,
-                                type: ValidationType.success,
-                              ),
+                  // ── Bottom Section ───────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 24, top: 12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PrimaryButton(
+                          label: l10n.verifyBtn,
+                          isEnabled:
+                              isOtpComplete &&
+                              !isLoading &&
+                              !isVerified &&
+                              !hasError,
+                          isLoading: isLoading,
+                          onPressed: _onVerify,
+                        ),
+                        const SizedBox(height: 16),
+                        if (isVerified)
+                          Text(
+                            'Code Will Expire in 01:13',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: context.palette.primary,
                             ),
-
-                          const SizedBox(height: 16),
-
-                          // Resend
+                          )
+                        else
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -256,41 +189,29 @@ class _OtpScreenState extends State<OtpScreen>
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: isDark
-                                      ? AppColors.textSecondaryDark
-                                      : AppColors.textSecondaryLight,
+                                      ? AppColors.neutral400
+                                      : AppColors.neutral600,
                                 ),
                               ),
                               const SizedBox(width: 4),
                               GestureDetector(
-                                onTap: _onResend,
+                                onTap: authProvider.resendOtp,
                                 child: Text(
-                                  _resendSeconds > 0
-                                      ? '${l10n.resendOtp} (${_resendSeconds}s)'
+                                  resendSeconds > 0
+                                      ? '${l10n.resendOtp} (${resendSeconds}s)'
                                       : l10n.resendOtp,
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: _resendSeconds > 0
-                                        ? AppColors.disabled
-                                        : AppColors.primaryLight,
+                                    color: resendSeconds > 0
+                                        ? AppColors.neutral300
+                                        : context.palette.primary,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // ── Verify Button ───────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 24, top: 12),
-                    child: PrimaryButton(
-                      label: l10n.verifyBtn,
-                      isEnabled: _isOtpComplete && !_isLoading && !_isVerified,
-                      isLoading: _isLoading,
-                      onPressed: _onVerify,
+                      ],
                     ),
                   ),
                 ],

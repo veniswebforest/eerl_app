@@ -1,6 +1,8 @@
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 
+import '../theme/app_palette.dart';
+
 /// Convenience extensions on [BuildContext] for quick access to
 /// theme, color scheme, text theme, localization, and brightness checks.
 extension ContextExtensions on BuildContext {
@@ -17,6 +19,10 @@ extension ContextExtensions on BuildContext {
 
   /// Whether the current theme is dark.
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
+
+  /// Current dynamic color [AppPalette].
+  AppPalette get palette => isDarkMode ? AppPalette.dark : AppPalette.light;
+
 
   // ── Localization ───────────────────────────────────────────────────
 

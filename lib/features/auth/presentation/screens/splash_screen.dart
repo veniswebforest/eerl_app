@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../widget/loader_widget.dart';
 import '../widgets/logo_component.dart';
 
 /// Splash screen with eco-themed decorative graphics.
@@ -20,36 +23,20 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeIn;
-  late Animation<double> _scaleUp;
+  late final AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
 
-    _fadeIn = CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-    );
+    _controller = AnimationController(vsync: this);
 
-    _scaleUp = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
-      ),
-    );
-
-    _controller.forward();
-
-    // Navigate to login after delay
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        // Lottie animation completed
+        print('Lottie completed');
         context.go(AppRoutes.login);
+        // Your callback/action here
       }
     });
   }
@@ -63,58 +50,30 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = context.isDarkMode;
-    final screenSize = context.screenSize;
+    // final screenSize = context.screenSize;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-      body:SvgPicture.asset(
-      'assets/images/ic_splash.svg' ,
-        width: screenSize.width,
-        height: screenSize.height,
+      backgroundColor: isDark
+          ? AppColors.backgroundDark
+          : AppColors.backgroundLight,
+      body: Lottie.asset(
+        controller: _controller,
+        "${AppConstants.assetLottie}ic_splash.json",
+        decoder: customDecoder,
+        repeat: false,
+        height: double.infinity,
+        width: double.infinity,
         fit: BoxFit.cover,
+
+        onLoaded: (composition) {
+          debugPrint("lottie start ===>");
+          _controller
+            ..duration = composition.duration
+            ..forward(); // Play once
+        },
+        // height: 100,
       ),
     );
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-//  DECORATIVE ELEMENTS
-// ═══════════════════════════════════════════════════════════════════
-
-class _DecorativeCircle extends StatelessWidget {
-  const _DecorativeCircle({required this.size, required this.color});
-
-  final double size;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
-    );
-  }
-}
-
-class _DecorativeDot extends StatelessWidget {
-  const _DecorativeDot({required this.size, required this.color});
-
-  final double size;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
-    );
-  }
-}

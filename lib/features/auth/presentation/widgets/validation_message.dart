@@ -11,10 +11,12 @@ class ValidationMessage extends StatelessWidget {
     super.key,
     required this.message,
     this.type = ValidationType.error,
+    this.showIcon = true,
   });
 
   final String message;
   final ValidationType type;
+  final bool showIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +31,12 @@ class ValidationMessage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 6),
+          if (showIcon) ...[
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 6),
+          ],
           Expanded(
             child: Text(
               message,

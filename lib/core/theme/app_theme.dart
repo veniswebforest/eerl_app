@@ -36,7 +36,7 @@ class AppTheme {
         backgroundColor: AppColors.surfaceLight,
         foregroundColor: AppColors.textPrimaryLight,
         surfaceTintColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: AppColors.textPrimaryLight),
+        iconTheme: IconThemeData(color: AppColors.textPrimaryLight),
         titleTextStyle: AppTextStyles.titleLarge.copyWith(
           color: AppColors.textPrimaryLight,
         ),
@@ -50,9 +50,9 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.borderLight, width: 0.5),
+          side: BorderSide(color: AppColors.borderLight, width: 0.5),
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       ),
 
       // ── ElevatedButton ──────────────────────────────────────────
@@ -61,7 +61,7 @@ class AppTheme {
           elevation: 0,
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
-          minimumSize: const Size(double.infinity, 52),
+          minimumSize: Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -75,7 +75,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: colorScheme.primary,
-          minimumSize: const Size(double.infinity, 52),
+          minimumSize: Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -99,24 +99,21 @@ class AppTheme {
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
 
       // ── InputDecoration ─────────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceContainerLight,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderSide: BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderLight),
+          borderSide: BorderSide(color: AppColors.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -124,11 +121,11 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error),
+          borderSide: BorderSide(color: AppColors.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+          borderSide: BorderSide(color: AppColors.error, width: 1.5),
         ),
         hintStyle: AppTextStyles.bodyMedium.copyWith(
           color: AppColors.textDisabledLight,
@@ -136,13 +133,11 @@ class AppTheme {
         labelStyle: AppTextStyles.bodyMedium.copyWith(
           color: AppColors.textSecondaryLight,
         ),
-        errorStyle: AppTextStyles.bodySmall.copyWith(
-          color: AppColors.error,
-        ),
+        errorStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.error),
       ),
 
       // ── BottomSheet ─────────────────────────────────────────────
-      bottomSheetTheme: const BottomSheetThemeData(
+      bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: AppColors.surfaceLight,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
@@ -156,9 +151,7 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surfaceLight,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         titleTextStyle: AppTextStyles.titleLarge.copyWith(
           color: AppColors.textPrimaryLight,
         ),
@@ -170,9 +163,7 @@ class AppTheme {
       // ── SnackBar ────────────────────────────────────────────────
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         backgroundColor: AppColors.textPrimaryLight,
         contentTextStyle: AppTextStyles.bodyMedium.copyWith(
           color: AppColors.surfaceLight,
@@ -211,25 +202,19 @@ class AppTheme {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(color: colorScheme.primary, size: 24);
           }
-          return const IconThemeData(
-            color: AppColors.textSecondaryLight,
-            size: 24,
-          );
+          return IconThemeData(color: AppColors.textSecondaryLight, size: 24);
         }),
       ),
 
       // ── Divider ─────────────────────────────────────────────────
-      dividerTheme: const DividerThemeData(
+      dividerTheme: DividerThemeData(
         color: AppColors.dividerLight,
         thickness: 1,
         space: 1,
       ),
 
       // ── Icon ────────────────────────────────────────────────────
-      iconTheme: const IconThemeData(
-        color: AppColors.textSecondaryLight,
-        size: 24,
-      ),
+      iconTheme: IconThemeData(color: AppColors.textSecondaryLight, size: 24),
 
       // ── Chip ────────────────────────────────────────────────────
       chipTheme: ChipThemeData(
@@ -238,19 +223,14 @@ class AppTheme {
         labelStyle: AppTextStyles.labelMedium.copyWith(
           color: AppColors.textPrimaryLight,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         side: BorderSide.none,
       ),
 
       // ── ListTile ────────────────────────────────────────────────
       listTileTheme: ListTileThemeData(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         titleTextStyle: AppTextStyles.bodyLarge.copyWith(
           color: AppColors.textPrimaryLight,
         ),
@@ -302,7 +282,7 @@ class AppTheme {
         backgroundColor: AppColors.surfaceDark,
         foregroundColor: AppColors.textPrimaryDark,
         surfaceTintColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: AppColors.textPrimaryDark),
+        iconTheme: IconThemeData(color: AppColors.textPrimaryDark),
         titleTextStyle: AppTextStyles.titleLarge.copyWith(
           color: AppColors.textPrimaryDark,
         ),
@@ -316,9 +296,9 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.borderDark, width: 0.5),
+          side: BorderSide(color: AppColors.borderDark, width: 0.5),
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       ),
 
       // ── ElevatedButton ──────────────────────────────────────────
@@ -327,7 +307,7 @@ class AppTheme {
           elevation: 0,
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
-          minimumSize: const Size(double.infinity, 52),
+          minimumSize: Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -341,7 +321,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: colorScheme.primary,
-          minimumSize: const Size(double.infinity, 52),
+          minimumSize: Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
@@ -365,24 +345,21 @@ class AppTheme {
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
 
       // ── InputDecoration ─────────────────────────────────────────
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surfaceContainerDark,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderDark),
+          borderSide: BorderSide(color: AppColors.borderDark),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderDark),
+          borderSide: BorderSide(color: AppColors.borderDark),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -390,11 +367,11 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.errorDark),
+          borderSide: BorderSide(color: AppColors.errorDark),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.errorDark, width: 1.5),
+          borderSide: BorderSide(color: AppColors.errorDark, width: 1.5),
         ),
         hintStyle: AppTextStyles.bodyMedium.copyWith(
           color: AppColors.textDisabledDark,
@@ -408,7 +385,7 @@ class AppTheme {
       ),
 
       // ── BottomSheet ─────────────────────────────────────────────
-      bottomSheetTheme: const BottomSheetThemeData(
+      bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: AppColors.surfaceDark,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
@@ -422,9 +399,7 @@ class AppTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: AppColors.surfaceDark,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         titleTextStyle: AppTextStyles.titleLarge.copyWith(
           color: AppColors.textPrimaryDark,
         ),
@@ -436,9 +411,7 @@ class AppTheme {
       // ── SnackBar ────────────────────────────────────────────────
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         backgroundColor: AppColors.surfaceVariantDark,
         contentTextStyle: AppTextStyles.bodyMedium.copyWith(
           color: AppColors.textPrimaryDark,
@@ -477,25 +450,19 @@ class AppTheme {
           if (states.contains(WidgetState.selected)) {
             return IconThemeData(color: colorScheme.primary, size: 24);
           }
-          return const IconThemeData(
-            color: AppColors.textSecondaryDark,
-            size: 24,
-          );
+          return IconThemeData(color: AppColors.textSecondaryDark, size: 24);
         }),
       ),
 
       // ── Divider ─────────────────────────────────────────────────
-      dividerTheme: const DividerThemeData(
+      dividerTheme: DividerThemeData(
         color: AppColors.dividerDark,
         thickness: 1,
         space: 1,
       ),
 
       // ── Icon ────────────────────────────────────────────────────
-      iconTheme: const IconThemeData(
-        color: AppColors.textSecondaryDark,
-        size: 24,
-      ),
+      iconTheme: IconThemeData(color: AppColors.textSecondaryDark, size: 24),
 
       // ── Chip ────────────────────────────────────────────────────
       chipTheme: ChipThemeData(
@@ -504,19 +471,14 @@ class AppTheme {
         labelStyle: AppTextStyles.labelMedium.copyWith(
           color: AppColors.textPrimaryDark,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         side: BorderSide.none,
       ),
 
       // ── ListTile ────────────────────────────────────────────────
       listTileTheme: ListTileThemeData(
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         titleTextStyle: AppTextStyles.bodyLarge.copyWith(
           color: AppColors.textPrimaryDark,
         ),

@@ -1,15 +1,11 @@
+import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
-/// Mobile number input with country code selector.
-///
-/// Features:
-/// - Integrated country code picker (defaults to +91)
-/// - Rounded input field matching EcoVision design
-/// - Error/focus state animations
-/// - 10-digit number formatting
+/// Mobile number input with separate country code and phone number containers.
 class MobileNumberInput extends StatelessWidget {
   const MobileNumberInput({
     super.key,
@@ -32,86 +28,58 @@ class MobileNumberInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
 
     final borderColor = hasError
-        ? AppColors.error
+        ? palette.error
         : focusNode.hasFocus
-            ? AppColors.primaryLight
-            : (isDark ? AppColors.borderDark : AppColors.borderLight);
+        ? palette.cool900
+        : palette.cool400;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      height: 56,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: borderColor,
-          width: hasError || focusNode.hasFocus ? 1.5 : 1,
-        ),
-        color: isDark ? AppColors.surfaceContainerDark : Colors.white,
-      ),
-      child: Row(
-        children: [
-          // ── Country Code ────────────────────────────────────────
-          GestureDetector(
-            onTap: onCountryCodeTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              height: double.infinity,
-              decoration: BoxDecoration(
-                border: Border(
-                  right: BorderSide(
-                    color: isDark ? AppColors.borderDark : AppColors.borderLight,
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '🇮🇳',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    countryCode,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: isDark
-                          ? AppColors.textPrimaryDark
-                          : AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 18,
-                    color: isDark
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
-                  ),
-                ],
+    final textColor = hasError ? palette.error : palette.textPrimary;
+
+    final containerBg = palette.surface;
+
+    return Row(
+      children: [
+        // ── Country Code Container ──────────────────────────────────
+        GestureDetector(
+          onTap: onCountryCodeTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 72,
+            height: 56,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: borderColor),
+            ),
+            child: Text(
+              countryCode,
+              style: AppTextStyles.mediumSH8_14.copyWith(
+                color: context.palette.neutral900,
               ),
             ),
           ),
+        ),
+        const SizedBox(width: 12),
 
-          // ── Number Input ────────────────────────────────────────
-          Expanded(
+        // ── Number Input Container ──────────────────────────────────
+        Expanded(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 56,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+            ),
             child: TextField(
               controller: controller,
               focusNode: focusNode,
               keyboardType: TextInputType.phone,
               maxLength: 10,
               onChanged: onChanged,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
+              style: AppTextStyles.regularB7_14.copyWith(
+                color: context.palette.neutral900,
               ),
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
@@ -122,18 +90,30 @@ class MobileNumberInput extends StatelessWidget {
                 hintStyle: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textDisabledLight,
+                  color: palette.textDisabled,
                 ),
                 counterText: '',
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.cool400),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.cool400),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.cool900),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -26,10 +27,10 @@ class PrimaryButton extends StatelessWidget {
       width: double.infinity,
       height: 52,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         color: isEnabled && !isLoading
             ? AppColors.primaryLight
-            : AppColors.disabled,
+            : AppColors.neutral400,
         boxShadow: isEnabled && !isLoading
             ? [
                 BoxShadow(
@@ -57,11 +58,8 @@ class PrimaryButton extends StatelessWidget {
                   )
                 : Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: isEnabled ? Colors.white : Colors.white70,
-                      letterSpacing: 0.3,
+                    style: AppTextStyles.boldH7_16.copyWith(
+                      color: AppColors.neutral50,
                     ),
                   ),
           ),
