@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
-
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/app_routes.dart';
@@ -10,10 +9,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../widget/loader_widget.dart';
 import '../widgets/logo_component.dart';
 
-/// Splash screen with eco-themed decorative graphics.
-///
-/// Displays the EcoVision logo with animated entry and
-/// automatically navigates to the login screen after a delay.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -76,4 +71,3 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
-

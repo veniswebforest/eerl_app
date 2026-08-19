@@ -5,14 +5,12 @@ import 'package:eerl_app/widget/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/otp_input.dart';
 import '../widgets/primary_button.dart';
 
-/// OTP verification screen using AuthProvider for state management.
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key, required this.phoneNumber});
 
