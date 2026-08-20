@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/app_colors.dart';
 
 /// EcoVision logo component used across splash and auth screens.
@@ -66,7 +67,9 @@ class LogoComponent extends StatelessWidget {
               style: TextStyle(
                 fontSize: _titleSize,
                 fontWeight: FontWeight.w900,
-                color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
                 letterSpacing: 2,
                 height: 1,
               ),
@@ -96,11 +99,13 @@ class LogoComponent extends StatelessWidget {
         if (showSubtitle) ...[
           SizedBox(height: size == LogoSize.large ? 8 : 4),
           Text(
-            'PLASTIC WASTE MANAGEMENT',
+            context.l10n.plasticWasteManagement,
             style: TextStyle(
               fontSize: _subtitleSize,
               fontWeight: FontWeight.w600,
-              color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
               letterSpacing: 3,
             ),
           ),

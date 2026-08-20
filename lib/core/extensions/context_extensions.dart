@@ -23,7 +23,6 @@ extension ContextExtensions on BuildContext {
   /// Current dynamic color [AppPalette].
   AppPalette get palette => isDarkMode ? AppPalette.dark : AppPalette.light;
 
-
   // ── Localization ───────────────────────────────────────────────────
 
   /// Shorthand for [AppLocalizations.of(context)].

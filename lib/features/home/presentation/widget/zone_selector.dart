@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/extensions/context_extensions.dart';
+import 'home_assets.dart';
 
 /// Dropdown card showing the currently selected EERL zone.
 class ZoneSelector extends StatelessWidget {
@@ -8,55 +12,42 @@ class ZoneSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE6EBEE), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Location icon
-          Container(
-            padding: const EdgeInsets.all(7),
-            decoration: BoxDecoration(
-              color: AppColors.primary100,
-              borderRadius: BorderRadius.circular(8),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 60),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: AppColors.neutral50,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.primary500),
+        ),
+        child: Row(
+          children: [
+            // Location icon
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: AppColors.primary100,
+                shape: BoxShape.circle,
+              ),
+              child: SvgPicture.asset(HomeAssets.zone, width: 24, height: 24),
             ),
-            child: const Icon(
-              Icons.location_on_outlined,
-              size: 18,
-              color: AppColors.primary500,
-            ),
-          ),
-          const SizedBox(width: 10),
+            const SizedBox(width: 10),
 
-          // Zone label
-          const Expanded(
-            child: Text(
-              'EERL · Surat Zone',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF1A202C),
+            // Zone label
+            Expanded(
+              child: Text(
+                context.l10n.zoneName,
+                style: AppTextStyles.semiboldH9_14.copyWith(
+                  color: AppColors.neutral950,
+                ),
               ),
             ),
-          ),
 
-          // Dropdown arrow
-          const Icon(
-            Icons.keyboard_arrow_down_rounded,
-            color: Color(0xFF92A3B0),
-          ),
-        ],
+            // Dropdown arrow
+            SvgPicture.asset(HomeAssets.chevronDown, width: 24, height: 24),
+          ],
+        ),
       ),
     );
   }

@@ -139,6 +139,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hindi => 'हिन्दी';
 
   @override
+  String get gujarati => 'ગુજરાતી';
+
+  @override
   String get general => 'General';
 
   @override
@@ -259,4 +262,135 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verifyBtn => 'Verify';
+
+  @override
+  String get welcomeBack => 'Welcome back';
+
+  @override
+  String get homeDateZone => 'Wed, 22 Jul · Surat Zone';
+
+  @override
+  String get zoneName => 'EERL - Surat Zone';
+
+  @override
+  String get onlineStatus => 'You’re Online';
+
+  @override
+  String pendingCollections(int count) {
+    return '$count collection pending';
+  }
+
+  @override
+  String get syncNow => 'Sync Now';
+
+  @override
+  String get todaysSummary => 'Today\'s Summary';
+
+  @override
+  String get collectedToday => 'Collected Today';
+
+  @override
+  String weightKg(int value) {
+    return '$value KG';
+  }
+
+  @override
+  String get verifiedEntries => 'Verified Entries';
+
+  @override
+  String get transferRequests => 'Transfer Requests';
+
+  @override
+  String get walletBalance => 'Wallet Balance';
+
+  @override
+  String walletAmount(String amount) {
+    return '₹$amount';
+  }
+
+  @override
+  String get startCollection => 'Start Collection';
+
+  @override
+  String get recordWeightProof => 'Record weight & upload proof.';
+
+  @override
+  String get addCollection => 'Add Collection';
+
+  @override
+  String get walletLogExpense => 'Wallet & Log Expense';
+
+  @override
+  String get trackFieldSpending => 'Track field spending.';
+
+  @override
+  String get logExpense => 'Log Expense';
+
+  @override
+  String get collectionTypes => 'Collection types';
+
+  @override
+  String get d2d => 'D2D';
+
+  @override
+  String get smcVehicle => 'SMC Vehicle';
+
+  @override
+  String get mrfStation => 'MRF Station';
+
+  @override
+  String get materialRecoveryFacility => 'Material Recovery Facility';
+
+  @override
+  String get ramp => 'Ramp';
+
+  @override
+  String get retailDealer => 'Retail Dealer';
+
+  @override
+  String get collectionDrafts => 'Collection Drafts';
+
+  @override
+  String get viewAll => 'View All';
+
+  @override
+  String get pendingSubmission => 'Pending Submission';
+
+  @override
+  String get draftStationName => 'MRF Station Aanjana';
+
+  @override
+  String get draftLocation => 'Udhna, Sardar Market, Surat';
+
+  @override
+  String get continueCollection => 'Continue Collection';
+
+  @override
+  String get dayClosure => 'Day Closure';
+
+  @override
+  String get endMyDay => 'End My Day';
+
+  @override
+  String get reviewCloseDay =>
+      'Review today\'s work, sync data and close your day.';
+
+  @override
+  String get reports => 'Reports';
+
+  @override
+  String get collections => 'Collections';
+
+  @override
+  String otpExpiresIn(String time) {
+    return 'Code will expire in $time';
+  }
+
+  @override
+  String resendOtpCountdown(String label, int seconds) {
+    return '$label (${seconds}s)';
+  }
+
+  @override
+  String get plasticWasteManagement => 'PLASTIC WASTE MANAGEMENT';
 }

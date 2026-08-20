@@ -138,6 +138,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get hindi => 'हिन्दी';
 
   @override
+  String get gujarati => 'ગુજરાતી';
+
+  @override
   String get general => 'सामान्य';
 
   @override
@@ -258,4 +261,135 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get verifyBtn => 'सत्यापित करें';
+
+  @override
+  String get welcomeBack => 'वापसी पर स्वागत है';
+
+  @override
+  String get homeDateZone => 'बुध, 22 जुलाई · सूरत ज़ोन';
+
+  @override
+  String get zoneName => 'EERL - सूरत ज़ोन';
+
+  @override
+  String get onlineStatus => 'आप ऑनलाइन हैं';
+
+  @override
+  String pendingCollections(int count) {
+    return '$count संग्रह लंबित';
+  }
+
+  @override
+  String get syncNow => 'अभी सिंक करें';
+
+  @override
+  String get todaysSummary => 'आज का सारांश';
+
+  @override
+  String get collectedToday => 'आज का संग्रह';
+
+  @override
+  String weightKg(int value) {
+    return '$value किग्रा';
+  }
+
+  @override
+  String get verifiedEntries => 'सत्यापित प्रविष्टियाँ';
+
+  @override
+  String get transferRequests => 'स्थानांतरण अनुरोध';
+
+  @override
+  String get walletBalance => 'वॉलेट शेष';
+
+  @override
+  String walletAmount(String amount) {
+    return '₹$amount';
+  }
+
+  @override
+  String get startCollection => 'संग्रह शुरू करें';
+
+  @override
+  String get recordWeightProof => 'वज़न दर्ज करें और प्रमाण अपलोड करें।';
+
+  @override
+  String get addCollection => 'संग्रह जोड़ें';
+
+  @override
+  String get walletLogExpense => 'वॉलेट और खर्च दर्ज करें';
+
+  @override
+  String get trackFieldSpending => 'फील्ड खर्च पर नज़र रखें।';
+
+  @override
+  String get logExpense => 'खर्च दर्ज करें';
+
+  @override
+  String get collectionTypes => 'संग्रह के प्रकार';
+
+  @override
+  String get d2d => 'घर-घर';
+
+  @override
+  String get smcVehicle => 'एसएमसी वाहन';
+
+  @override
+  String get mrfStation => 'एमआरएफ स्टेशन';
+
+  @override
+  String get materialRecoveryFacility => 'सामग्री पुनर्प्राप्ति केंद्र';
+
+  @override
+  String get ramp => 'रैम्प';
+
+  @override
+  String get retailDealer => 'खुदरा विक्रेता';
+
+  @override
+  String get collectionDrafts => 'संग्रह ड्राफ्ट';
+
+  @override
+  String get viewAll => 'सभी देखें';
+
+  @override
+  String get pendingSubmission => 'जमा करना लंबित';
+
+  @override
+  String get draftStationName => 'एमआरएफ स्टेशन आंजना';
+
+  @override
+  String get draftLocation => 'उधना, सरदार मार्केट, सूरत';
+
+  @override
+  String get continueCollection => 'संग्रह जारी रखें';
+
+  @override
+  String get dayClosure => 'दिन का समापन';
+
+  @override
+  String get endMyDay => 'मेरा दिन समाप्त करें';
+
+  @override
+  String get reviewCloseDay =>
+      'आज के काम की समीक्षा करें, डेटा सिंक करें और दिन समाप्त करें।';
+
+  @override
+  String get reports => 'रिपोर्ट';
+
+  @override
+  String get collections => 'संग्रह';
+
+  @override
+  String otpExpiresIn(String time) {
+    return 'कोड $time में समाप्त होगा';
+  }
+
+  @override
+  String resendOtpCountdown(String label, int seconds) {
+    return '$label ($seconds सेकंड)';
+  }
+
+  @override
+  String get plasticWasteManagement => 'प्लास्टिक अपशिष्ट प्रबंधन';
 }

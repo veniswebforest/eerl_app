@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/extensions/context_extensions.dart';
+import 'home_assets.dart';
+import 'home_styles.dart';
 
 /// Pending collection drafts section with a "View All" link and draft card.
 class CollectionDrafts extends StatelessWidget {
@@ -15,14 +20,13 @@ class CollectionDrafts extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Collection Drafts',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1A202C),
+            Expanded(
+              child: Text(
+                context.l10n.collectionDrafts,
+                style: HomeStyles.sectionTitle,
               ),
             ),
+            const SizedBox(width: 12),
             TextButton(
               onPressed: () {},
               style: TextButton.styleFrom(
@@ -31,28 +35,23 @@ class CollectionDrafts extends StatelessWidget {
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text(
-                'View All',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              child: Text(
+                context.l10n.viewAll,
+                style: AppTextStyles.boldH7_16.copyWith(
+                  color: AppColors.primary500,
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 16),
 
         // Draft card
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFE6EBEE), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            color: AppColors.neutral50,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [HomeStyles.cardShadow],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,34 +59,30 @@ class CollectionDrafts extends StatelessWidget {
               // Pending Submission tag
               Container(
                 margin: const EdgeInsets.fromLTRB(14, 12, 14, 0),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF2C6),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: const Color(0xFFFFBF29),
-                    width: 0.5,
-                  ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
                 ),
-                child: const Text(
-                  'Pending Submission',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFF9AE00),
+                decoration: BoxDecoration(
+                  color: AppColors.yellow100,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: AppColors.yellow400, width: 0.5),
+                ),
+                child: Text(
+                  context.l10n.pendingSubmission,
+                  style: AppTextStyles.semiboldH9_14.copyWith(
+                    color: AppColors.yellow600,
                   ),
                 ),
               ),
 
               // Draft title
-              const Padding(
+              Padding(
                 padding: EdgeInsets.fromLTRB(14, 10, 14, 0),
                 child: Text(
-                  'MRF Station Aanjana',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A202C),
+                  context.l10n.draftStationName,
+                  style: AppTextStyles.semiboldH7_18.copyWith(
+                    color: AppColors.neutral950,
                   ),
                 ),
               ),
@@ -96,19 +91,18 @@ class CollectionDrafts extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 6, 14, 0),
                 child: Row(
-                  children: const [
-                    Icon(
-                      Icons.location_on_outlined,
-                      size: 14,
-                      color: Color(0xFF92A3B0),
+                  children: [
+                    SvgPicture.asset(
+                      HomeAssets.location,
+                      width: 20,
+                      height: 20,
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Lidhna, Sardar Market, Surat',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF92A3B0),
+                        context.l10n.draftLocation,
+                        style: AppTextStyles.mediumSH8_14.copyWith(
+                          color: AppColors.neutral700,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -121,16 +115,18 @@ class CollectionDrafts extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
                 child: Row(
-                  children: const [
-                    Icon(
-                      Icons.image_outlined,
-                      size: 14,
-                      color: Color(0xFF92A3B0),
+                  children: [
+                    SvgPicture.asset(
+                      HomeAssets.draftWeight,
+                      width: 20,
+                      height: 20,
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 8),
                     Text(
                       '...',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF92A3B0)),
+                      style: AppTextStyles.mediumSH8_14.copyWith(
+                        color: AppColors.neutral700,
+                      ),
                     ),
                   ],
                 ),
@@ -146,18 +142,15 @@ class CollectionDrafts extends StatelessWidget {
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary500,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: AppColors.neutral50,
+                      minimumSize: const Size.fromHeight(52),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 0,
-                      textStyle: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      textStyle: AppTextStyles.boldH7_16,
                     ),
-                    child: const Text('Continue Collection'),
+                    child: Text(context.l10n.continueCollection),
                   ),
                 ),
               ),

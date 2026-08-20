@@ -27,6 +27,9 @@ class AppRouter {
       // ── Shell route for bottom navigation ────────────────────────
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
+          if (navigationShell.currentIndex == 0) {
+            return navigationShell;
+          }
           return _ScaffoldWithNavBar(navigationShell: navigationShell);
         },
         branches: [
@@ -184,10 +187,7 @@ class _ErrorPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                l10n.pageNotFound,
-                style: theme.textTheme.titleLarge,
-              ),
+              Text(l10n.pageNotFound, style: theme.textTheme.titleLarge),
               const SizedBox(height: 8),
               Text(
                 l10n.pageNotFoundMessage,

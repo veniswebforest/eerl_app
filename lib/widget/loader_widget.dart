@@ -15,14 +15,13 @@ class LoadingWidget extends StatelessWidget {
         child: Lottie.asset(
           "${AppConstants.assetLottie}ic_loader.json",
           decoder: customDecoder,
+
           // repeat: false,
           // height: double.infinity,
           // width: double.infinity,
           // fit: BoxFit.cover,
-
           onLoaded: (composition) {
             debugPrint("lottie start ===>");
-
           },
           // height: 100,
         ),
@@ -30,12 +29,13 @@ class LoadingWidget extends StatelessWidget {
     );
   }
 }
+
 Future<LottieComposition?> customDecoder(List<int> bytes) {
   return LottieComposition.decodeZip(
     bytes,
     filePicker: (files) {
       return files.firstWhere(
-            (f) => f.name.startsWith('animations/') && f.name.endsWith('.json'),
+        (f) => f.name.startsWith('animations/') && f.name.endsWith('.json'),
       );
     },
   );

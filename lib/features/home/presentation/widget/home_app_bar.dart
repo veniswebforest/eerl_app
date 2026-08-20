@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../../core/router/app_routes.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/extensions/context_extensions.dart';
+import 'home_assets.dart';
 
 /// Top app bar for the home screen.
 /// Shows welcome text, date/zone, calendar, and notification icons.
@@ -8,41 +16,38 @@ class HomeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.only(top: 14),
       child: Row(
         children: [
           // Hamburger menu
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF4FAF5),
-              borderRadius: BorderRadius.circular(10),
+          InkWell(
+            onTap: () {
+              context.go(AppRoutes.profile);
+
+            },
+            child: SizedBox(
+              width: 28,
+              height: 28,
+              child: SvgPicture.asset(HomeAssets.menu, width: 28, height: 28),
             ),
-            child: const Icon(Icons.menu, size: 20, color: Color(0xFF2D3748)),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
 
           // Welcome text + date
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Welcome back',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A202C),
+                Text(
+                  context.l10n.welcomeBack,
+                  style: AppTextStyles.semiboldH6_20.copyWith(
+                    color: AppColors.primary950,
                   ),
                 ),
                 Text(
-                  'Wed, 22 Jul · Surat Zone',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade500,
-                    fontWeight: FontWeight.w400,
+                  context.l10n.homeDateZone,
+                  style: AppTextStyles.mediumSH9_12.copyWith(
+                    color: AppColors.neutral600,
                   ),
                 ),
               ],
@@ -51,50 +56,24 @@ class HomeAppBar extends StatelessWidget {
 
           // Calendar icon
           Container(
-            width: 36,
-            height: 36,
+            width: 45,
+            height: 45,
             decoration: BoxDecoration(
-              color: const Color(0xFFF4FAF5),
-              borderRadius: BorderRadius.circular(10),
+              color: AppColors.cool50,
+              shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.calendar_today_outlined,
-              size: 18,
-              color: Color(0xFF2D3748),
+            child: Center(
+              child: SvgPicture.asset(
+                HomeAssets.calendar,
+                width: 24,
+                height: 24,
+              ),
             ),
           ),
           const SizedBox(width: 8),
 
           // Notification icon with red badge
-          Stack(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4FAF5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.notifications_outlined,
-                  size: 20,
-                  color: Color(0xFF2D3748),
-                ),
-              ),
-              Positioned(
-                right: 4,
-                top: 4,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF43F3F),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          SvgPicture.asset(HomeAssets.notification, width: 45, height: 45),
         ],
       ),
     );

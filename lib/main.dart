@@ -16,10 +16,7 @@ void main() async {
   final localeProvider = LocaleProvider();
   final authProvider = AuthProvider();
 
-  await Future.wait([
-    themeProvider.loadTheme(),
-    localeProvider.loadLocale(),
-  ]);
+  await Future.wait([themeProvider.loadTheme(), localeProvider.loadLocale()]);
 
   runApp(
     MultiProvider(
@@ -44,7 +41,7 @@ class EerlApp extends StatelessWidget {
 
     return MaterialApp.router(
       // ── App Info ─────────────────────────────────────────────────
-      title: 'EERL App',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
 
       // ── Theme ───────────────────────────────────────────────────

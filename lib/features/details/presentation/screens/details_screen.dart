@@ -120,10 +120,7 @@ class DetailsScreen extends StatelessWidget {
                 message: l10n.sampleDialogMessage,
               );
               if (result == true && context.mounted) {
-                AppSnackbar.success(
-                  context,
-                  message: '${l10n.confirm} ✓',
-                );
+                AppSnackbar.success(context, message: '${l10n.confirm} ✓');
               }
             },
           ),
@@ -136,10 +133,7 @@ class DetailsScreen extends StatelessWidget {
             theme: theme,
             isDark: isDark,
             onTap: () {
-              AppSnackbar.show(
-                context,
-                message: l10n.sampleSnackbarMessage,
-              );
+              AppSnackbar.show(context, message: l10n.sampleSnackbarMessage);
             },
           ),
 
@@ -181,8 +175,9 @@ class _ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color:
-          isDark ? AppColors.surfaceContainerDark : AppColors.surfaceContainerLight,
+      color: isDark
+          ? AppColors.surfaceContainerDark
+          : AppColors.surfaceContainerLight,
       borderRadius: BorderRadius.circular(14),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -193,9 +188,7 @@ class _ActionButton extends StatelessWidget {
             children: [
               Icon(icon, size: 22, color: theme.colorScheme.primary),
               const SizedBox(width: 14),
-              Expanded(
-                child: Text(label, style: theme.textTheme.bodyLarge),
-              ),
+              Expanded(child: Text(label, style: theme.textTheme.bodyLarge)),
               Icon(
                 Icons.arrow_forward_ios,
                 size: 14,

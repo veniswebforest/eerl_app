@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/extensions/context_extensions.dart';
+import 'home_assets.dart';
 
 /// Bottom navigation bar for the home shell.
 class HomeBottomNav extends StatelessWidget {
@@ -8,28 +12,52 @@ class HomeBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: const [
-              NavItem(icon: Icons.home_filled, label: 'Home', isActive: true),
-              NavItem(icon: Icons.bar_chart_rounded, label: 'Reports', isActive: false),
-              NavItem(icon: Icons.inventory_2_outlined, label: 'Collections', isActive: false),
-              NavItem(icon: Icons.person_outline, label: 'Profile', isActive: false),
-            ],
+    return SafeArea(
+      minimum: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Center(
+        heightFactor: 1,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.primary900,
+              borderRadius: BorderRadius.circular(36),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.neutral950.withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  NavItem(
+                    iconAsset: HomeAssets.navHome,
+                    label: context.l10n.home,
+                    isActive: true,
+                  ),
+                  NavItem(
+                    iconAsset: HomeAssets.navCollections,
+                    label: context.l10n.reports,
+                    isActive: false,
+                  ),
+                  NavItem(
+                    iconAsset: HomeAssets.navWallet,
+                    label: context.l10n.collections,
+                    isActive: false,
+                  ),
+                  NavItem(
+                    iconAsset: HomeAssets.navProfile,
+                    label: context.l10n.profile,
+                    isActive: false,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -41,12 +69,12 @@ class HomeBottomNav extends StatelessWidget {
 class NavItem extends StatelessWidget {
   const NavItem({
     super.key,
-    required this.icon,
+    required this.iconAsset,
     required this.label,
     required this.isActive,
   });
 
-  final IconData icon;
+  final String iconAsset;
   final String label;
   final bool isActive;
 
@@ -54,34 +82,33 @@ class NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {},
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Active pill highlight
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            decoration: isActive
-                ? BoxDecoration(
-                    color: AppColors.primary100,
-                    borderRadius: BorderRadius.circular(20),
-                  )
-                : null,
-            child: Icon(
-              icon,
-              size: 22,
-              color: isActive ? AppColors.primary500 : const Color(0xFFB9C5CC),
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-              color: isActive ? AppColors.primary500 : const Color(0xFFB9C5CC),
-            ),
-          ),
-        ],
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: EdgeInsets.symmetric(
+          horizontal: isActive ? 10 : 12,
+          vertical: 8,
+        ),
+        decoration: isActive
+            ? BoxDecoration(
+                color: AppColors.primary700,
+                borderRadius: BorderRadius.circular(20),
+              )
+            : null,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(iconAsset, width: 28, height: 28),
+            if (isActive) ...[
+              const SizedBox(width: 5),
+              Text(
+                label,
+                style: AppTextStyles.semiboldH10_12.copyWith(
+                  color: AppColors.primary400,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

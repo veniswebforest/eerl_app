@@ -85,6 +85,8 @@
 
   "hindi": "हिन्दी",
 
+  "gujarati": "ગુજરાતી",
+
   "general": "सामान्य",
 
   "notifications": "सूचनाएँ",
@@ -161,5 +163,46 @@
 
   "resendOtp": "पुनः भेजें",
 
-  "verifyBtn": "सत्यापित करें"
+  "verifyBtn": "सत्यापित करें",
+
+  "welcomeBack": "वापसी पर स्वागत है",
+  "homeDateZone": "बुध, 22 जुलाई · सूरत ज़ोन",
+  "zoneName": "EERL - सूरत ज़ोन",
+  "onlineStatus": "आप ऑनलाइन हैं",
+  "pendingCollections": "{count} संग्रह लंबित",
+  "syncNow": "अभी सिंक करें",
+  "todaysSummary": "आज का सारांश",
+  "collectedToday": "आज का संग्रह",
+  "weightKg": "{value} किग्रा",
+  "verifiedEntries": "सत्यापित प्रविष्टियाँ",
+  "transferRequests": "स्थानांतरण अनुरोध",
+  "walletBalance": "वॉलेट शेष",
+  "walletAmount": "₹{amount}",
+  "startCollection": "संग्रह शुरू करें",
+  "recordWeightProof": "वज़न दर्ज करें और प्रमाण अपलोड करें।",
+  "addCollection": "संग्रह जोड़ें",
+  "walletLogExpense": "वॉलेट और खर्च दर्ज करें",
+  "trackFieldSpending": "फील्ड खर्च पर नज़र रखें।",
+  "logExpense": "खर्च दर्ज करें",
+  "collectionTypes": "संग्रह के प्रकार",
+  "d2d": "घर-घर",
+  "smcVehicle": "एसएमसी वाहन",
+  "mrfStation": "एमआरएफ स्टेशन",
+  "materialRecoveryFacility": "सामग्री पुनर्प्राप्ति केंद्र",
+  "ramp": "रैम्प",
+  "retailDealer": "खुदरा विक्रेता",
+  "collectionDrafts": "संग्रह ड्राफ्ट",
+  "viewAll": "सभी देखें",
+  "pendingSubmission": "जमा करना लंबित",
+  "draftStationName": "एमआरएफ स्टेशन आंजना",
+  "draftLocation": "उधना, सरदार मार्केट, सूरत",
+  "continueCollection": "संग्रह जारी रखें",
+  "dayClosure": "दिन का समापन",
+  "endMyDay": "मेरा दिन समाप्त करें",
+  "reviewCloseDay": "आज के काम की समीक्षा करें, डेटा सिंक करें और दिन समाप्त करें।",
+  "reports": "रिपोर्ट",
+  "collections": "संग्रह",
+  "otpExpiresIn": "कोड {time} में समाप्त होगा",
+  "resendOtpCountdown": "{label} ({seconds} सेकंड)",
+  "plasticWasteManagement": "प्लास्टिक अपशिष्ट प्रबंधन"
 }

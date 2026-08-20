@@ -14,11 +14,7 @@ class AppSnackbar {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: duration,
-          action: action,
-        ),
+        SnackBar(content: Text(message), duration: duration, action: action),
       );
   }
 

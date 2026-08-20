@@ -138,7 +138,7 @@ class _OtpScreenState extends State<OtpScreen>
                           Padding(
                             padding: const EdgeInsets.only(top: 16),
                             child: Text(
-                              'This Code has expired. Please Request New One.',
+                              l10n.invalidOtp,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: context.palette.error,
@@ -171,7 +171,7 @@ class _OtpScreenState extends State<OtpScreen>
                         const SizedBox(height: 16),
                         if (isVerified)
                           Text(
-                            'Code Will Expire in 01:13',
+                            l10n.otpExpiresIn('01:13'),
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -196,7 +196,10 @@ class _OtpScreenState extends State<OtpScreen>
                                 onTap: authProvider.resendOtp,
                                 child: Text(
                                   resendSeconds > 0
-                                      ? '${l10n.resendOtp} (${resendSeconds}s)'
+                                      ? l10n.resendOtpCountdown(
+                                          l10n.resendOtp,
+                                          resendSeconds,
+                                        )
                                       : l10n.resendOtp,
                                   style: TextStyle(
                                     fontSize: 13,

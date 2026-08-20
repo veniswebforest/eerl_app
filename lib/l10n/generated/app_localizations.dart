@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_gu.dart';
 import 'app_localizations_hi.dart';
 
 // ignore_for_file: type=lint
@@ -95,6 +96,7 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
+    Locale('gu'),
     Locale('hi'),
   ];
 
@@ -350,6 +352,12 @@ abstract class AppLocalizations {
   /// **'हिन्दी'**
   String get hindi;
 
+  /// Gujarati language name
+  ///
+  /// In en, this message translates to:
+  /// **'ગુજરાતી'**
+  String get gujarati;
+
   /// General section title
   ///
   /// In en, this message translates to:
@@ -583,6 +591,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verify'**
   String get verifyBtn;
+
+  /// No description provided for @welcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get welcomeBack;
+
+  /// No description provided for @homeDateZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed, 22 Jul · Surat Zone'**
+  String get homeDateZone;
+
+  /// No description provided for @zoneName.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat Zone'**
+  String get zoneName;
+
+  /// No description provided for @onlineStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re Online'**
+  String get onlineStatus;
+
+  /// No description provided for @pendingCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} collection pending'**
+  String pendingCollections(int count);
+
+  /// No description provided for @syncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Now'**
+  String get syncNow;
+
+  /// No description provided for @todaysSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Summary'**
+  String get todaysSummary;
+
+  /// No description provided for @collectedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected Today'**
+  String get collectedToday;
+
+  /// No description provided for @weightKg.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} KG'**
+  String weightKg(int value);
+
+  /// No description provided for @verifiedEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Entries'**
+  String get verifiedEntries;
+
+  /// No description provided for @transferRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Requests'**
+  String get transferRequests;
+
+  /// No description provided for @walletBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet Balance'**
+  String get walletBalance;
+
+  /// No description provided for @walletAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'₹{amount}'**
+  String walletAmount(String amount);
+
+  /// No description provided for @startCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Collection'**
+  String get startCollection;
+
+  /// No description provided for @recordWeightProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Record weight & upload proof.'**
+  String get recordWeightProof;
+
+  /// No description provided for @addCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Collection'**
+  String get addCollection;
+
+  /// No description provided for @walletLogExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet & Log Expense'**
+  String get walletLogExpense;
+
+  /// No description provided for @trackFieldSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Track field spending.'**
+  String get trackFieldSpending;
+
+  /// No description provided for @logExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Expense'**
+  String get logExpense;
+
+  /// No description provided for @collectionTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection types'**
+  String get collectionTypes;
+
+  /// No description provided for @d2d.
+  ///
+  /// In en, this message translates to:
+  /// **'D2D'**
+  String get d2d;
+
+  /// No description provided for @smcVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'SMC Vehicle'**
+  String get smcVehicle;
+
+  /// No description provided for @mrfStation.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF Station'**
+  String get mrfStation;
+
+  /// No description provided for @materialRecoveryFacility.
+  ///
+  /// In en, this message translates to:
+  /// **'Material Recovery Facility'**
+  String get materialRecoveryFacility;
+
+  /// No description provided for @ramp.
+  ///
+  /// In en, this message translates to:
+  /// **'Ramp'**
+  String get ramp;
+
+  /// No description provided for @retailDealer.
+  ///
+  /// In en, this message translates to:
+  /// **'Retail Dealer'**
+  String get retailDealer;
+
+  /// No description provided for @collectionDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Drafts'**
+  String get collectionDrafts;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get viewAll;
+
+  /// No description provided for @pendingSubmission.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Submission'**
+  String get pendingSubmission;
+
+  /// No description provided for @draftStationName.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF Station Aanjana'**
+  String get draftStationName;
+
+  /// No description provided for @draftLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Udhna, Sardar Market, Surat'**
+  String get draftLocation;
+
+  /// No description provided for @continueCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Collection'**
+  String get continueCollection;
+
+  /// No description provided for @dayClosure.
+  ///
+  /// In en, this message translates to:
+  /// **'Day Closure'**
+  String get dayClosure;
+
+  /// No description provided for @endMyDay.
+  ///
+  /// In en, this message translates to:
+  /// **'End My Day'**
+  String get endMyDay;
+
+  /// No description provided for @reviewCloseDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Review today\'s work, sync data and close your day.'**
+  String get reviewCloseDay;
+
+  /// No description provided for @reports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get reports;
+
+  /// No description provided for @collections.
+  ///
+  /// In en, this message translates to:
+  /// **'Collections'**
+  String get collections;
+
+  /// No description provided for @otpExpiresIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Code will expire in {time}'**
+  String otpExpiresIn(String time);
+
+  /// No description provided for @resendOtpCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ({seconds}s)'**
+  String resendOtpCountdown(String label, int seconds);
+
+  /// No description provided for @plasticWasteManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'PLASTIC WASTE MANAGEMENT'**
+  String get plasticWasteManagement;
 }
 
 class _AppLocalizationsDelegate
@@ -596,7 +844,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en', 'hi'].contains(locale.languageCode);
+      <String>['en', 'gu', 'hi'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -607,6 +855,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'gu':
+      return AppLocalizationsGu();
     case 'hi':
       return AppLocalizationsHi();
   }

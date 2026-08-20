@@ -48,10 +48,7 @@ class AppBottomSheet {
                 ),
 
                 // Optional custom content
-                if (content != null) ...[
-                  const SizedBox(height: 16),
-                  content,
-                ],
+                if (content != null) ...[const SizedBox(height: 16), content],
 
                 const SizedBox(height: 24),
 
@@ -59,10 +56,11 @@ class AppBottomSheet {
                 if (actions != null && actions.isNotEmpty)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: actions
-                        .expand((w) => [w, const SizedBox(width: 12)])
-                        .toList()
-                      ..removeLast(),
+                    children:
+                        actions
+                            .expand((w) => [w, const SizedBox(width: 12)])
+                            .toList()
+                          ..removeLast(),
                   )
                 else
                   SizedBox(

@@ -16,8 +16,7 @@ class LocaleProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString(AppConstants.localeKey);
 
-    if (saved != null &&
-        AppConstants.supportedLocaleCodes.contains(saved)) {
+    if (saved != null && AppConstants.supportedLocaleCodes.contains(saved)) {
       _locale = Locale(saved);
       notifyListeners();
     }

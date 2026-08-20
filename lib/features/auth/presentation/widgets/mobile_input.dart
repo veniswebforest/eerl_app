@@ -13,7 +13,7 @@ class MobileNumberInput extends StatelessWidget {
     required this.focusNode,
     this.hasError = false,
     this.countryCode = '+91',
-    this.hintText = 'Enter Your Mobile Number',
+    this.hintText,
     this.onChanged,
     this.onCountryCodeTap,
   });
@@ -22,7 +22,7 @@ class MobileNumberInput extends StatelessWidget {
   final FocusNode focusNode;
   final bool hasError;
   final String countryCode;
-  final String hintText;
+  final String? hintText;
   final ValueChanged<String>? onChanged;
   final VoidCallback? onCountryCodeTap;
 
@@ -69,9 +69,7 @@ class MobileNumberInput extends StatelessWidget {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             height: 56,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(14)),
             child: TextField(
               controller: controller,
               focusNode: focusNode,
@@ -86,7 +84,7 @@ class MobileNumberInput extends StatelessWidget {
                 LengthLimitingTextInputFormatter(10),
               ],
               decoration: InputDecoration(
-                hintText: hintText,
+                hintText: hintText ?? context.l10n.mobileNumberHint,
                 hintStyle: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/extensions/context_extensions.dart';
+import 'home_assets.dart';
+import 'home_styles.dart';
 
 /// List of available collection types: D2D, MRF Station, Ramp.
 class CollectionTypes extends StatelessWidget {
@@ -11,39 +16,32 @@ class CollectionTypes extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Collection types',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF1A202C),
-          ),
-        ),
-        const SizedBox(height: 10),
+        Text(context.l10n.collectionTypes, style: HomeStyles.sectionTitle),
+        const SizedBox(height: 16),
         CollectionTypeItem(
-          icon: Icons.local_shipping_outlined,
+          iconAsset: HomeAssets.collectionD2d,
           iconColor: AppColors.primary500,
           iconBg: AppColors.primary100,
-          title: 'D2D',
-          subtitle: 'SMC Vehicle',
+          title: context.l10n.d2d,
+          subtitle: context.l10n.smcVehicle,
           onTap: () {},
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         CollectionTypeItem(
-          icon: Icons.recycling_outlined,
+          iconAsset: HomeAssets.collectionMrf,
           iconColor: AppColors.orchid,
           iconBg: AppColors.orchidLight,
-          title: 'MRF Station',
-          subtitle: 'Material Recovery Facility',
+          title: context.l10n.mrfStation,
+          subtitle: context.l10n.materialRecoveryFacility,
           onTap: () {},
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
         CollectionTypeItem(
-          icon: Icons.person_outline,
+          iconAsset: HomeAssets.collectionRamp,
           iconColor: AppColors.purple,
           iconBg: AppColors.purpleLight,
-          title: 'Ramp',
-          subtitle: 'Retail Dealer',
+          title: context.l10n.ramp,
+          subtitle: context.l10n.retailDealer,
           onTap: () {},
         ),
       ],
@@ -55,7 +53,7 @@ class CollectionTypes extends StatelessWidget {
 class CollectionTypeItem extends StatelessWidget {
   const CollectionTypeItem({
     super.key,
-    required this.icon,
+    required this.iconAsset,
     required this.iconColor,
     required this.iconBg,
     required this.title,
@@ -63,7 +61,7 @@ class CollectionTypeItem extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final String iconAsset;
   final Color iconColor;
   final Color iconBg;
   final String title;
@@ -73,70 +71,69 @@ class CollectionTypeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
+      color: AppColors.neutral50,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFE6EBEE), width: 1),
-          ),
-          child: Row(
-            children: [
-              // Icon bubble
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, size: 20, color: iconColor),
-              ),
-              const SizedBox(width: 12),
+        borderRadius: BorderRadius.circular(16),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 82),
+          child: Container(
+            padding: const EdgeInsets.only(left: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [HomeStyles.cardShadow],
+            ),
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  // Icon bubble
+                  SvgPicture.asset(iconAsset, width: 24, height: 24),
+                  const SizedBox(width: 8),
 
-              // Title + subtitle
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A202C),
+                  // Title + subtitle
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          title,
+                          style: AppTextStyles.semiboldH7_18.copyWith(
+                            color: iconColor,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: AppTextStyles.mediumSH8_14.copyWith(
+                            color: AppColors.neutral600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Green chevron button
+                  Container(
+                    width: 56,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary500,
+                      borderRadius: const BorderRadius.horizontal(
+                        right: Radius.circular(16),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF92A3B0),
+                    child: Center(
+                      child: SvgPicture.asset(
+                        HomeAssets.chevronRight,
+                        width: 24,
+                        height: 24,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-
-              // Green chevron button
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppColors.primary500,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.chevron_right,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

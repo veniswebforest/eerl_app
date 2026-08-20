@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
-import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/providers/theme_provider.dart';
-import '../../../../core/theme/app_colors.dart';
 
 /// Settings screen — allows users to switch theme and language.
 ///
@@ -17,15 +15,10 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = context.theme;
-    final isDark = context.isDarkMode;
-
     final themeProvider = context.watch<ThemeProvider>();
-    final localeProvider = context.watch<LocaleProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.settingsTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
@@ -42,16 +35,6 @@ class SettingsScreen extends StatelessWidget {
             subtitle: _themeModeLabel(themeProvider.themeMode, l10n),
             onTap: () => _showThemePicker(context, themeProvider),
           ),
-          const SizedBox(height: 8),
-
-          // ── Language Picker ─────────────────────────────────────
-          _SettingsTile(
-            icon: Icons.language,
-            title: l10n.language,
-            subtitle: _localeName(localeProvider.locale, l10n),
-            onTap: () => _showLanguagePicker(context, localeProvider),
-          ),
-
           const SizedBox(height: 24),
 
           // ══════════════════════════════════════════════════════════
@@ -121,17 +104,6 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
-  String _localeName(Locale? locale, dynamic l10n) {
-    if (locale == null) return l10n.english;
-    switch (locale.languageCode) {
-      case 'hi':
-        return l10n.hindi;
-      case 'en':
-      default:
-        return l10n.english;
-    }
-  }
-
   void _showThemePicker(BuildContext context, ThemeProvider provider) {
     final l10n = context.l10n;
     final theme = context.theme;
@@ -177,55 +149,6 @@ class SettingsScreen extends StatelessWidget {
                   isSelected: provider.themeMode == ThemeMode.dark,
                   onTap: () {
                     provider.setThemeMode(ThemeMode.dark);
-                    Navigator.pop(ctx);
-                  },
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showLanguagePicker(BuildContext context, LocaleProvider provider) {
-    final l10n = context.l10n;
-    final theme = context.theme;
-
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.selectLanguage,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _ThemeOption(
-                  icon: Icons.language,
-                  label: l10n.english,
-                  isSelected:
-                      provider.locale == null ||
-                      provider.locale?.languageCode == 'en',
-                  onTap: () {
-                    provider.setLocale(const Locale('en'));
-                    Navigator.pop(ctx);
-                  },
-                ),
-                _ThemeOption(
-                  icon: Icons.translate,
-                  label: l10n.hindi,
-                  isSelected: provider.locale?.languageCode == 'hi',
-                  onTap: () {
-                    provider.setLocale(const Locale('hi'));
                     Navigator.pop(ctx);
                   },
                 ),

@@ -2,13 +2,11 @@
 class AppConstants {
   AppConstants._();
 
-
   static const assetImage = 'assets/images/';
   static const assetIcon = 'assets/icons/';
   static const assetSvg = 'assets/svg/';
   static const assetLottie = 'assets/lottie/';
   static const assetRoot = 'assets/';
-
 
   // App Info
   static const String appName = 'EERL App';
@@ -17,11 +15,9 @@ class AppConstants {
   static const String themeKey = 'app_theme_mode';
   static const String localeKey = 'app_locale';
 
-
-
   // Default Values
   static const String defaultLocale = 'en';
 
   // Supported Locales
-  static const List<String> supportedLocaleCodes = ['en', 'hi'];
+  static const List<String> supportedLocaleCodes = ['en', 'gu', 'hi'];
 }

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/extensions/context_extensions.dart';
+import 'home_assets.dart';
+import 'home_styles.dart';
 
 /// Quick Actions section with Start Collection and Wallet & Log Expense cards.
 class QuickActions extends StatelessWidget {
@@ -11,32 +16,25 @@ class QuickActions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Quick Actions',
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF1A202C),
-          ),
-        ),
-        const SizedBox(height: 10),
+        Text(context.l10n.quickActions, style: HomeStyles.sectionTitle),
+        const SizedBox(height: 16),
         QuickActionCard(
-          icon: Icons.add_box_outlined,
-          iconColor: AppColors.orchid,
-          iconBg: AppColors.orchidLight,
-          title: 'Start Collection',
-          subtitle: 'Record weight & upload proof.',
-          buttonLabel: 'Add Collection',
+          iconAsset: HomeAssets.startCollection,
+          iconColor: AppColors.orange,
+          iconBg: AppColors.orangeLight,
+          title: context.l10n.startCollection,
+          subtitle: context.l10n.recordWeightProof,
+          buttonLabel: context.l10n.addCollection,
           onTap: () {},
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 16),
         QuickActionCard(
-          icon: Icons.account_balance_wallet_outlined,
-          iconColor: AppColors.purple,
-          iconBg: AppColors.purpleLight,
-          title: 'Wallet & Log Expense',
-          subtitle: 'Track field spending.',
-          buttonLabel: 'Log Expense',
+          iconAsset: HomeAssets.walletExpense,
+          iconColor: AppColors.secondary500,
+          iconBg: AppColors.secondary100,
+          title: context.l10n.walletLogExpense,
+          subtitle: context.l10n.trackFieldSpending,
+          buttonLabel: context.l10n.logExpense,
           onTap: () {},
         ),
       ],
@@ -48,7 +46,7 @@ class QuickActions extends StatelessWidget {
 class QuickActionCard extends StatelessWidget {
   const QuickActionCard({
     super.key,
-    required this.icon,
+    required this.iconAsset,
     required this.iconColor,
     required this.iconBg,
     required this.title,
@@ -57,7 +55,7 @@ class QuickActionCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final String iconAsset;
   final Color iconColor;
   final Color iconBg;
   final String title;
@@ -68,18 +66,11 @@ class QuickActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE6EBEE), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppColors.neutral50,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [HomeStyles.cardShadow],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,12 +79,13 @@ class QuickActionCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: iconBg,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, size: 20, color: iconColor),
+                child: SvgPicture.asset(iconAsset, width: 24, height: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -102,18 +94,15 @@ class QuickActionCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A202C),
+                      style: AppTextStyles.semiboldH7_18.copyWith(
+                        color: AppColors.neutral950,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF92A3B0),
+                      style: AppTextStyles.mediumSH8_14.copyWith(
+                        color: AppColors.neutral600,
                       ),
                     ),
                   ],
@@ -121,7 +110,7 @@ class QuickActionCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
           // Action button
           SizedBox(
@@ -130,16 +119,13 @@ class QuickActionCard extends StatelessWidget {
               onPressed: onTap,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary500,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                foregroundColor: AppColors.neutral50,
+                minimumSize: const Size.fromHeight(52),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 0,
-                textStyle: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
+                textStyle: AppTextStyles.boldH7_16,
               ),
               child: Text(buttonLabel),
             ),

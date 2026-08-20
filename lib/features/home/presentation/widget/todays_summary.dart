@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/extensions/context_extensions.dart';
+import 'home_assets.dart';
+import 'home_styles.dart';
 
 /// 2×2 grid summary section showing today's collection stats.
 class TodaysSummary extends StatelessWidget {
@@ -11,56 +16,53 @@ class TodaysSummary extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Today's Summary",
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF1A202C),
-          ),
-        ),
-        const SizedBox(height: 10),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          childAspectRatio: 1.65,
-          children: const [
-            SummaryCard(
-              icon: Icons.inventory_2_outlined,
-              iconColor: AppColors.orchid,
-              iconBg: AppColors.orchidLight,
-              label: 'Collected Today',
-              value: '320 KG',
-              valueColor: AppColors.orchid,
-            ),
-            SummaryCard(
-              icon: Icons.check_circle_outline,
-              iconColor: AppColors.primary500,
-              iconBg: AppColors.primary100,
-              label: 'Verified Entries',
-              value: '18',
-              valueColor: AppColors.primary500,
-            ),
-            SummaryCard(
-              icon: Icons.swap_horiz_outlined,
-              iconColor: AppColors.orange,
-              iconBg: AppColors.orangeLight,
-              label: 'Transfer Requests',
-              value: '04',
-              valueColor: AppColors.orange,
-            ),
-            SummaryCard(
-              icon: Icons.account_balance_wallet_outlined,
-              iconColor: AppColors.purple,
-              iconBg: AppColors.purpleLight,
-              label: 'Wallet Balance',
-              value: '₹50,000',
-              valueColor: AppColors.purple,
-            ),
-          ],
+        Text(context.l10n.todaysSummary, style: HomeStyles.sectionTitle),
+        const SizedBox(height: 16),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final columns = constraints.maxWidth < 320 ? 1 : 2;
+            final cardWidth =
+                (constraints.maxWidth - (columns - 1) * 8) / columns;
+
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                SummaryCard(
+                  iconAsset: HomeAssets.collected,
+                  iconColor: AppColors.orchid,
+                  iconBg: AppColors.orchidLight,
+                  label: context.l10n.collectedToday,
+                  value: context.l10n.weightKg(320),
+                  valueColor: AppColors.orchid,
+                ),
+                SummaryCard(
+                  iconAsset: HomeAssets.verified,
+                  iconColor: AppColors.primary500,
+                  iconBg: AppColors.primary100,
+                  label: context.l10n.verifiedEntries,
+                  value: '18',
+                  valueColor: AppColors.primary500,
+                ),
+                SummaryCard(
+                  iconAsset: HomeAssets.transfer,
+                  iconColor: AppColors.purple,
+                  iconBg: AppColors.purpleLight,
+                  label: context.l10n.transferRequests,
+                  value: '04',
+                  valueColor: AppColors.purple,
+                ),
+                SummaryCard(
+                  iconAsset: HomeAssets.wallet,
+                  iconColor: AppColors.secondary500,
+                  iconBg: AppColors.secondary100,
+                  label: context.l10n.walletBalance,
+                  value: context.l10n.walletAmount('50,000'),
+                  valueColor: AppColors.secondary500,
+                ),
+              ].map((card) => SizedBox(width: cardWidth, child: card)).toList(),
+            );
+          },
         ),
       ],
     );
@@ -71,7 +73,7 @@ class TodaysSummary extends StatelessWidget {
 class SummaryCard extends StatelessWidget {
   const SummaryCard({
     super.key,
-    required this.icon,
+    required this.iconAsset,
     required this.iconColor,
     required this.iconBg,
     required this.label,
@@ -79,7 +81,7 @@ class SummaryCard extends StatelessWidget {
     required this.valueColor,
   });
 
-  final IconData icon;
+  final String iconAsset;
   final Color iconColor;
   final Color iconBg;
   final String label;
@@ -89,49 +91,37 @@ class SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE6EBEE), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: AppColors.neutral50,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [HomeStyles.cardShadow],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           // Icon bubble
           Container(
-            padding: const EdgeInsets.all(6),
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: iconBg,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: iconColor),
+            child: SvgPicture.asset(iconAsset, width: 24, height: 24),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFF92A3B0),
-              fontWeight: FontWeight.w400,
+            style: AppTextStyles.semiboldH9_14.copyWith(
+              color: AppColors.neutral900,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: valueColor,
-            ),
+            style: AppTextStyles.semiboldH6_20.copyWith(color: valueColor),
           ),
         ],
       ),

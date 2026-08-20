@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/providers/locale_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 
 /// Profile screen — displays user profile information.
@@ -14,11 +16,10 @@ class ProfileScreen extends StatelessWidget {
     final l10n = context.l10n;
     final theme = context.theme;
     final isDark = context.isDarkMode;
+    final localeProvider = context.watch<LocaleProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.profileTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.profileTitle)),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
@@ -83,6 +84,18 @@ class ProfileScreen extends StatelessWidget {
             label: Text(l10n.editProfile),
           ),
 
+          const SizedBox(height: 12),
+
+          // ── Language Button ──────────────────────────────────────
+          OutlinedButton.icon(
+            onPressed: () => _showLanguagePicker(context, localeProvider),
+            icon: const Icon(Icons.language, size: 18),
+            label: Text(
+              '${l10n.selectLanguage} · ${_localeName(localeProvider.locale, l10n)}',
+              textAlign: TextAlign.center,
+            ),
+          ),
+
           const SizedBox(height: 28),
 
           // ── Account Information ──────────────────────────────────
@@ -124,6 +137,125 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+
+  String _localeName(Locale? locale, dynamic l10n) {
+    return switch (locale?.languageCode) {
+      'gu' => l10n.gujarati,
+      'hi' => l10n.hindi,
+      _ => l10n.english,
+    };
+  }
+
+  void _showLanguagePicker(BuildContext context, LocaleProvider provider) {
+    final l10n = context.l10n;
+    final theme = context.theme;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.selectLanguage,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _LanguageOption(
+                    label: l10n.english,
+                    isSelected:
+                        provider.locale == null ||
+                        provider.locale?.languageCode == 'en',
+                    onTap: () => _selectLocale(
+                      sheetContext,
+                      provider,
+                      const Locale('en'),
+                    ),
+                  ),
+                  _LanguageOption(
+                    label: l10n.gujarati,
+                    isSelected: provider.locale?.languageCode == 'gu',
+                    onTap: () => _selectLocale(
+                      sheetContext,
+                      provider,
+                      const Locale('gu'),
+                    ),
+                  ),
+                  _LanguageOption(
+                    label: l10n.hindi,
+                    isSelected: provider.locale?.languageCode == 'hi',
+                    onTap: () => _selectLocale(
+                      sheetContext,
+                      provider,
+                      const Locale('hi'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _selectLocale(
+    BuildContext sheetContext,
+    LocaleProvider provider,
+    Locale locale,
+  ) {
+    provider.setLocale(locale);
+    Navigator.pop(sheetContext);
+  }
+}
+
+class _LanguageOption extends StatelessWidget {
+  const _LanguageOption({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.theme;
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        Icons.translate,
+        color: isSelected
+            ? theme.colorScheme.primary
+            : theme.colorScheme.onSurfaceVariant,
+      ),
+      title: Text(
+        label,
+        style: theme.textTheme.bodyLarge?.copyWith(
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.onSurface,
+        ),
+      ),
+      trailing: isSelected
+          ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
+          : null,
+      onTap: onTap,
+    );
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -152,7 +284,9 @@ class _InfoTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceContainerDark : AppColors.surfaceContainerLight,
+        color: isDark
+            ? AppColors.surfaceContainerDark
+            : AppColors.surfaceContainerLight,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark ? AppColors.borderDark : AppColors.borderLight,
@@ -163,12 +297,7 @@ class _InfoTile extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: theme.colorScheme.primary),
           const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodyMedium,
-            ),
-          ),
+          Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
           Text(
             value,
             style: theme.textTheme.bodyMedium?.copyWith(
