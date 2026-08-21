@@ -41,7 +41,11 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/images/collection_detail/
     - assets/icons/home/
+    - assets/icons/wallet/
+    - assets/icons/profile/
+    - assets/icons/records/
     - assets/lottie/
 
   fonts:

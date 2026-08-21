@@ -280,7 +280,7 @@ class AppLocalizationsGu extends AppLocalizations {
   }
 
   @override
-  String get syncNow => 'હમણાં સિંક કરો';
+  String get syncNow => 'હવે સિંક કરો';
 
   @override
   String get todaysSummary => 'આજનો સારાંશ';
@@ -392,4 +392,473 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get plasticWasteManagement => 'પ્લાસ્ટિક કચરો વ્યવસ્થાપન';
+
+  @override
+  String get walletTab => 'વૉલેટ';
+
+  @override
+  String get records => 'રેકોર્ડ્સ';
+
+  @override
+  String get dashboardEmptyMessage => 'કોઈ ડેશબોર્ડ પેજ ઉપલબ્ધ નથી.';
+
+  @override
+  String get walletFieldExpenses => 'વૉલેટ અને ફિલ્ડ ખર્ચ';
+
+  @override
+  String get availableCashBalance => 'ઉપલબ્ધ રોકડ બેલેન્સ';
+
+  @override
+  String get availableCashBalanceValue => '₹50,000';
+
+  @override
+  String get todaysSpent => 'આજનો ખર્ચ';
+
+  @override
+  String get todaysSpentValue => '₹4,500';
+
+  @override
+  String get fieldSpendingPrompt => 'ફિલ્ડ ખર્ચ નોંધવો છે?';
+
+  @override
+  String get fieldSpendingDescription =>
+      'ઇંધણ અથવા કામગીરીના ખર્ચ માટે રસીદ અપલોડ કરો અને મંજૂરી માગો.';
+
+  @override
+  String get recentExpenseClaims => 'તાજેતરના ખર્ચ દાવા';
+
+  @override
+  String get expenseSearchHint => 'રસીદ નંબર, નામ અથવા તારીખથી શોધો...';
+
+  @override
+  String get filterAll => 'બધા';
+
+  @override
+  String get filterPending => 'બાકી';
+
+  @override
+  String get filterClosed => 'બંધ';
+
+  @override
+  String get expenseFuelDiesel => 'ઇંધણ / ડીઝલ';
+
+  @override
+  String get expenseFuelDate => 'આજે • 08:15 AM';
+
+  @override
+  String get expenseFuelAmount => '-₹350';
+
+  @override
+  String get expensePendingSupervisor => 'સુપરવાઇઝરની મંજૂરી બાકી';
+
+  @override
+  String get expenseScaleFee => 'સ્કેલ / વેઇબ્રિજ ફી';
+
+  @override
+  String get expenseScaleDate => 'ગઈકાલે • 10:15 AM';
+
+  @override
+  String get expenseScaleAmount => '-₹720';
+
+  @override
+  String get expenseVerified => 'ચકાસાયેલ';
+
+  @override
+  String get expenseVehicleMaintenance => 'વાહન જાળવણી';
+
+  @override
+  String get expenseVehicleDate => '20 જુલાઈ 2026 • 01:15 PM';
+
+  @override
+  String get expenseVehicleAmount => '-₹1500';
+
+  @override
+  String get expenseFlagged => 'ચિહ્નિત';
+
+  @override
+  String get drawerUserName => 'રાહુલ પટેલ';
+
+  @override
+  String get drawerUserRole => 'સંગ્રહ એજન્ટ';
+
+  @override
+  String get drawerCollection => 'સંગ્રહ';
+
+  @override
+  String get drawerReceipts => 'રસીદો';
+
+  @override
+  String get drawerConfigureMaterials => 'સામગ્રી યાદી ગોઠવો';
+
+  @override
+  String get drawerSyncStatus => 'સિંક સ્થિતિ';
+
+  @override
+  String get drawerHelpSupport => 'મદદ અને સહાય';
+
+  @override
+  String get drawerLogout => 'લૉગ આઉટ';
+
+  @override
+  String get drawerPoweredBy => 'ઇકો વિઝન દ્વારા સંચાલિત';
+
+  @override
+  String get expenseCategoryLabel => 'ખર્ચ શ્રેણી';
+
+  @override
+  String get selectExpenseCategory => 'ખર્ચ શ્રેણી પસંદ કરો';
+
+  @override
+  String get expenseAmountLabel => 'ખર્ચની રકમ (₹)';
+
+  @override
+  String get expenseAmountHint => '₹ ખર્ચની રકમ દાખલ કરો';
+
+  @override
+  String get uploadReceiptLabel => 'રસીદ અપલોડ કરો';
+
+  @override
+  String get capturePhoto => 'ફોટો લો';
+
+  @override
+  String get receiptSupportMessage =>
+      'સમર્થિત: JPG, PNG (મહત્તમ 5MB). સુપરવાઇઝરની સમીક્ષા માટે રસીદ સ્પષ્ટ દેખાવી જોઈએ.';
+
+  @override
+  String get expenseDescriptionLabel => 'વર્ણન';
+
+  @override
+  String get expenseDescriptionHint => 'વર્ણન ઉમેરો';
+
+  @override
+  String get expenseDescriptionCounter => 'મહત્તમ 150 અક્ષરો';
+
+  @override
+  String get submitExpenseClaim => 'ખર્ચનો દાવો સબમિટ કરો';
+
+  @override
+  String get expensePendingPrefix => 'આ એન્ટ્રી ';
+
+  @override
+  String get expensePendingStatus => 'બાકી';
+
+  @override
+  String get expensePendingSuffix =>
+      ' તરીકે રહેશે જ્યાં સુધી સુપરવાઇઝર તેની સમીક્ષા ન કરે.';
+
+  @override
+  String get expenseCategoryLabour => 'મજૂરી';
+
+  @override
+  String get expenseCategoryFuel => 'ઇંધણ / ડીઝલ';
+
+  @override
+  String get expenseCategoryVehicle => 'વાહન જાળવણી';
+
+  @override
+  String get expenseCategoryFood => 'ભોજન / નાસ્તો';
+
+  @override
+  String get expenseCategorySupplies => 'પુરવઠો / લોડિંગ સામગ્રી';
+
+  @override
+  String get expenseCategoryOther => 'અન્ય ખર્ચ પ્રકારો';
+
+  @override
+  String get expenseClaimReference => '#EXP-2026-089';
+
+  @override
+  String get expenseDetailCategory => 'ખર્ચ શ્રેણી';
+
+  @override
+  String get expenseDetailAmount => 'રકમ';
+
+  @override
+  String get expenseDetailAmountValue => '₹350';
+
+  @override
+  String get expenseRequestedBy => 'વિનંતી કરનાર';
+
+  @override
+  String get expenseRequestedByValue => 'રાહુલ પટેલ';
+
+  @override
+  String get expenseDateTime => 'તારીખ અને સમય';
+
+  @override
+  String get expenseRequestStatus => 'વિનંતીની સ્થિતિ';
+
+  @override
+  String get expenseWaitingSupervisor => 'સુપરવાઇઝરની રાહમાં';
+
+  @override
+  String get expenseVerifiedSupervisor => 'સુપરવાઇઝર દ્વારા ચકાસાયેલ';
+
+  @override
+  String get expenseRejectedSupervisor => 'સુપરવાઇઝર દ્વારા નકારાયેલ';
+
+  @override
+  String get expenseUploadedPhoto => 'અપલોડ કરેલો ફોટો';
+
+  @override
+  String get expenseDetailDescription =>
+      'આ ખર્ચનો હેતુ અને સુપરવાઇઝરની મંજૂરી માટે જરૂરી સંબંધિત વિગતો જણાવો.';
+
+  @override
+  String get expenseRejectReasonTitle => 'નકારવાનું કારણ';
+
+  @override
+  String get expenseRejectReasonLabel => 'કારણ';
+
+  @override
+  String get expenseRejectReasonValue =>
+      'અમાન્ય / સ્પષ્ટ બિલ ઉપલબ્ધ નથી\nનીતિનો ભંગ / વ્યક્તિગત ખર્ચ';
+
+  @override
+  String get expenseRejectRemarksLabel => 'ટિપ્પણી';
+
+  @override
+  String get expenseRejectRemarksValue =>
+      'ડુપ્લિકેટ રસીદ સબમિટ થવાને કારણે આ વિનંતી કંપનીની નીતિનું ઉલ્લંઘન કરે છે. ખર્ચ નકારવામાં આવ્યો.';
+
+  @override
+  String get startYourCollections => 'તમારું સંગ્રહ શરૂ કરો';
+
+  @override
+  String get recentCollections => 'તાજેતરના સંગ્રહ';
+
+  @override
+  String get collectionReceipt248 => 'RC-000248';
+
+  @override
+  String get collectionReceipt247 => 'RC-000247';
+
+  @override
+  String get collectionReceipt246 => 'RC-000246';
+
+  @override
+  String get collectionWeight245 => '245 કિગ્રા';
+
+  @override
+  String get collectionWeight115 => '115 કિગ્રા';
+
+  @override
+  String get collectionWeight320 => '320 કિગ્રા';
+
+  @override
+  String get collectionRejectedSupervisor => 'સુપરવાઇઝર દ્વારા નકારાયેલ';
+
+  @override
+  String get recordsCollectionsTitle => 'કલેક્શન';
+
+  @override
+  String get recordsCollectionsSubtitle => 'તમારા બધા કલેક્શન મેનેજ કરો';
+
+  @override
+  String get recordsHistory => 'ઇતિહાસ';
+
+  @override
+  String get recordsDrafts => 'ડ્રાફ્ટ';
+
+  @override
+  String get recordsSearchHint => 'અહીં શોધો...';
+
+  @override
+  String get recordsTodayCollections => 'આજના કલેક્શન';
+
+  @override
+  String get recordsYesterdayCollections => 'ગઈકાલના કલેક્શન';
+
+  @override
+  String get recordsOctoberCollections => '22 ઑક્ટોબરના કલેક્શન';
+
+  @override
+  String get recordsCollectionDrafts => 'કલેક્શન ડ્રાફ્ટ';
+
+  @override
+  String get recordsTodayTime => 'આજે • 08:15 AM';
+
+  @override
+  String get recordsOctober22Time => '22 ઑક્ટોબર • 11:15 AM';
+
+  @override
+  String get recordsOctober21Time => '21 ઑક્ટોબર • 03:15 PM';
+
+  @override
+  String get recordsFiveItemsSelected => '5 વસ્તુ પસંદ કરી';
+
+  @override
+  String get recordsDiscard => 'કાઢી નાખો';
+
+  @override
+  String get recordsContinue => 'ચાલુ રાખો';
+
+  @override
+  String get recordsAreYouSure => 'શું તમને ખાતરી છે?';
+
+  @override
+  String get recordsDiscardConfirmation =>
+      'શું તમે આ કલેક્શન ડ્રાફ્ટ કાઢી નાખવા માંગો છો';
+
+  @override
+  String get recordsCancel => 'રદ કરો';
+
+  @override
+  String get recordsNoDrafts => 'હાલ કોઈ ડ્રાફ્ટ નથી';
+
+  @override
+  String get profileUserProfile => 'વપરાશકર્તા પ્રોફાઇલ';
+
+  @override
+  String get profileSubtitle => 'એકાઉન્ટની વિગતો અને માહિતી';
+
+  @override
+  String get profileAccountInformation => 'એકાઉન્ટ માહિતી';
+
+  @override
+  String get profileAssignedFacility => 'સોંપેલ સુવિધા';
+
+  @override
+  String get profileFacilityValue => 'EERL – સુરત સાઉથ';
+
+  @override
+  String get profileMobileNumber => 'મોબાઇલ નંબર';
+
+  @override
+  String get profileMobileValue => '+91 98765 43210';
+
+  @override
+  String get profileRole => 'ભૂમિકા';
+
+  @override
+  String get profileSessionExpires => 'સેશન સમાપ્ત થશે';
+
+  @override
+  String get profileSessionExpiryValue => '29 જુલાઈ';
+
+  @override
+  String get profileActions => 'ક્રિયાઓ';
+
+  @override
+  String get profileSyncData => 'ડેટા સિંક કરો';
+
+  @override
+  String get profileSyncSubtitle => 'તમારો ઑફલાઇન ડેટા સિંક કરો';
+
+  @override
+  String get profileAccount => 'એકાઉન્ટ';
+
+  @override
+  String get profileLogoutSubtitle => 'તમારા એકાઉન્ટમાંથી સાઇન આઉટ કરો';
+
+  @override
+  String get collectionDetailPending => 'સુપરવાઇઝર ચકાસણી બાકી';
+
+  @override
+  String get collectionDetailApproved => 'ચકાસાયેલ અને મંજૂર';
+
+  @override
+  String get collectionDetailReasonForReject => 'નકારવાનું કારણ';
+
+  @override
+  String get collectionDetailReasonLabel => 'કારણ';
+
+  @override
+  String get collectionDetailReasonValue => 'વાહન ઉપલબ્ધ નથી';
+
+  @override
+  String get collectionDetailRemarksLabel => 'ટિપ્પણી';
+
+  @override
+  String get collectionDetailRemarksValue =>
+      'યાર્ડના બધા ટ્રક હાલમાં બહાર છે. બપોરે 2 વાગ્યા પછી પ્રયાસ કરો.';
+
+  @override
+  String get collectionDetailId => 'કલેક્શન આઈડી:';
+
+  @override
+  String get collectionDetailDateTime => 'તારીખ અને સમય';
+
+  @override
+  String get collectionDetailDateValue => '24 ઑક્ટોબર 2026, 03:45 PM';
+
+  @override
+  String get collectionDetailType => 'કલેક્શન પ્રકાર';
+
+  @override
+  String get collectionDetailAgent => 'કલેક્શન એજન્ટ';
+
+  @override
+  String get collectionDetailReceivedItems => 'પ્રાપ્ત વસ્તુઓ';
+
+  @override
+  String get collectionDetailPetBottles => 'PET બોટલ્સ';
+
+  @override
+  String get collectionDetailHdpeRigid => 'HDPE રિજિડ';
+
+  @override
+  String get collectionDetailPpHardPlastics => 'PP હાર્ડ પ્લાસ્ટિક';
+
+  @override
+  String get collectionDetailCollectionWeight => 'કલેક્શન વજન *';
+
+  @override
+  String get collectionDetailVerifiedWeight => 'ચકાસાયેલ વજન';
+
+  @override
+  String get collectionDetailRate => 'દર: ₹45.00/KG';
+
+  @override
+  String get collectionDetailMaterialTotal => 'કુલ: ₹12,150.00';
+
+  @override
+  String get collectionDetailRampPersonPhoto => 'રેમ્પ વ્યક્તિનો ફોટો';
+
+  @override
+  String get collectionDetailTotalCollectionWeight => 'કુલ કલેક્શન વજન';
+
+  @override
+  String get collectionDetailTotalVerifiedWeight => 'કુલ ચકાસાયેલ વજન';
+
+  @override
+  String get collectionDetailWeightComparison => 'વજન સરખામણી';
+
+  @override
+  String get collectionDetailComparisonHint =>
+      '(ચોક્કસ મેળ હોય તો 0.00 KG તફાવત)';
+
+  @override
+  String get collectionDetailTotalPrice => 'કુલ કિંમત';
+
+  @override
+  String get collectionDetailPreviewSlip => 'સ્લિપ પૂર્વાવલોકન';
+
+  @override
+  String get syncOfflineDataTitle => 'ઑફલાઇન ડેટા સિંક કરો';
+
+  @override
+  String get syncPendingCollections => '3 કલેક્શન બાકી';
+
+  @override
+  String get syncAlreadySyncedTitle => 'ડેટા પહેલેથી સિંક છે';
+
+  @override
+  String get syncBack => 'પાછા';
+
+  @override
+  String get logoutConfirmationTitle => 'શું તમે ખરેખર લૉગ આઉટ કરવા માંગો છો?';
+
+  @override
+  String get logoutConfirmationMessage =>
+      'સિંક ન થયેલો ઑફલાઇન ડેટા તમારા આગામી સાઇન-ઇન સુધી આ ડિવાઇસ પર રહેશે.';
+
+  @override
+  String get logoutUnsyncedTripsPending => '3 સિંક ન થયેલી ટ્રિપ બાકી';
+
+  @override
+  String get logoutNo => 'ના';
+
+  @override
+  String get logoutYes => 'હા';
 }

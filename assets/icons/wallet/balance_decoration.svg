@@ -1,0 +1,13 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="92" height="90" viewBox="0 0 92 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame 1000007951">
+<g clip-path="url(#clip0_0_28)">
+<ellipse id="Ellipse 10" opacity="0.15" cx="85" cy="120.5" rx="89" ry="86.5" fill="#5A97D6"/>
+<ellipse id="Ellipse 10_2" opacity="0.15" cx="118" cy="-11.5" rx="89" ry="86.5" fill="#5A97D6"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_28">
+<path d="M0 0H80C86.6274 0 92 5.37258 92 12V78C92 84.6274 86.6274 90 80 90H0V0Z" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -1,13 +1,13 @@
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/auth/presentation/screens/login_screen.dart';
-import '../../features/auth/presentation/screens/otp_screen.dart';
-import '../../features/auth/presentation/screens/splash_screen.dart';
-import '../../features/details/presentation/screens/details_screen.dart';
-import '../../features/home/presentation/screens/home_screen.dart';
-import '../../features/profile/presentation/screens/profile_screen.dart';
-import '../../features/settings/presentation/screens/settings_screen.dart';
+import 'package:eerl_app/features/auth/view/login_screen.dart';
+import 'package:eerl_app/features/auth/view/otp_screen.dart';
+import 'package:eerl_app/features/auth/view/splash_screen.dart';
+import 'package:eerl_app/features/dashboard/view/main_dashboard_screen.dart';
+import 'package:eerl_app/features/details/view/details_screen.dart';
+import 'package:eerl_app/features/profile/view/profile_screen.dart';
+import 'package:eerl_app/features/settings/view/settings_screen.dart';
 import 'app_routes.dart';
 
 /// Application router configuration built with [GoRouter].
@@ -39,7 +39,7 @@ class AppRouter {
               GoRoute(
                 path: AppRoutes.home,
                 name: 'home',
-                builder: (context, state) => const HomeScreen(),
+                builder: (context, state) => const MainDashboardScreen(),
               ),
             ],
           ),

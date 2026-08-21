@@ -1,0 +1,1 @@
+enum LogoutDataStatus { pending, synced }

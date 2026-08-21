@@ -21,6 +21,8 @@ class AppColors {
   static const Color primary200 = Color(0xFFC3EFCB);
   static const Color primary100 = Color(0xFFE0F8E4);
   static const Color primary50 = Color(0xFFF2FBF3);
+  static const Color walletGradientStart = Color(0xFF48A35A);
+  static const Color walletGradientEnd = Color(0xFF001832);
 
   // ── Secondary Color ───────────────────────────────────────────────
   static const Color secondary950 = Color(0xFF13243E);
@@ -49,6 +51,7 @@ class AppColors {
   static const Color cool50 = Color(0xFFF8FAFA);
 
   // ── Neutral Color ─────────────────────────────────────────────────
+
   static const Color neutral950 = Color(0xFF111213);
   static const Color neutral900 = Color(0xFF3D3D3D);
   static const Color neutral800 = Color(0xFF454545);
@@ -68,6 +71,7 @@ class AppColors {
   static const Color red300 = Color(0xFFFFA2A2);
   static const Color red200 = Color(0xFFFFC8C8);
   static const Color red100 = Color(0xFFFFE1E1);
+  static const Color red50 = Color(0xFFFEF2F2);
 
   // ── Yellow Shade ──────────────────────────────────────────────────
   static const Color yellow600 = Color(0xFFF9AE00);
@@ -95,61 +99,97 @@ class AppColors {
   static const Color orangeLight = Color(0xFFFFE9E3);
 
   static Color get primaryLight => AppPalette.light.primary500;
+
   static Color get primaryDark => AppPalette.dark.primary500;
+
   static Color get onPrimaryLight => AppPalette.light.neutral50;
+
   static Color get onPrimaryDark => AppPalette.dark.primary950;
 
   static Color get secondaryLight => AppPalette.light.primary50;
+
   static Color get secondaryDark => AppPalette.dark.primary900;
+
   static Color get onSecondaryLight => AppPalette.light.primary900;
+
   static Color get onSecondaryDark => AppPalette.dark.primary200;
 
   static Color get tertiaryLight => AppPalette.light.primary700;
+
   static Color get tertiaryDark => AppPalette.dark.primary300;
+
   static Color get onTertiaryLight => AppPalette.light.neutral50;
+
   static Color get onTertiaryDark => AppPalette.dark.primary950;
 
   static Color get backgroundLight => AppPalette.light.backgroundColor;
+
   static Color get backgroundDark => AppPalette.dark.backgroundColor;
+
   static Color get surfaceLight => AppPalette.light.neutral50;
+
   static Color get surfaceDark => AppPalette.dark.neutral900;
+
   static Color get surfaceVariantLight => AppPalette.light.neutral100;
+
   static Color get surfaceVariantDark => AppPalette.dark.neutral800;
+
   static Color get surfaceContainerLight => AppPalette.light.neutral50;
+
   static Color get surfaceContainerDark => AppPalette.dark.neutral800;
 
   static Color get textPrimaryLight => AppPalette.light.neutral900;
+
   static Color get textPrimaryDark => AppPalette.dark.neutral200;
+
   static Color get textSecondaryLight => AppPalette.light.neutral600;
+
   static Color get textSecondaryDark => AppPalette.dark.neutral400;
+
   static Color get textDisabledLight => AppPalette.light.neutral300;
+
   static Color get textDisabledDark => AppPalette.dark.neutral600;
 
   static Color get borderLight => AppPalette.light.neutral200;
+
   static Color get borderDark => AppPalette.dark.neutral700;
+
   static Color get dividerLight => AppPalette.light.neutral100;
+
   static Color get dividerDark => AppPalette.dark.neutral800;
 
   static Color get success => AppPalette.light.green500;
+
   static Color get successLight => AppPalette.light.green100;
+
   static Color get successDark => AppPalette.dark.green500;
 
   static Color get error => AppPalette.light.red500;
+
   static Color get errorDark => AppPalette.dark.red500;
 
   static Color get warning => AppPalette.light.yellow400;
+
   static Color get warningLight => AppPalette.light.yellow50;
+
   static Color get warningDark => AppPalette.dark.yellow400;
 
   static Color get info => AppPalette.light.secondary500;
+
   static Color get infoLight => AppPalette.light.secondary100;
+
   static Color get infoDark => AppPalette.dark.secondary500;
 
   static Color get shadowLight => const Color(0x0F000000);
+
   static Color get shadowDark => const Color(0x40000000);
+
   static Color get shimmerBaseLight => AppPalette.light.neutral200;
+
   static Color get shimmerHighlightLight => AppPalette.light.neutral100;
+
   static Color get shimmerBaseDark => AppPalette.dark.neutral800;
+
   static Color get shimmerHighlightDark => AppPalette.dark.neutral700;
 
   static Color get disabled => AppPalette.light.neutral300;
