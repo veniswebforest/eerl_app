@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import '../model/collection_detail_status.dart';
 import '../model/collection_record_model.dart';
 import '../model/records_view_flag.dart';
@@ -31,7 +32,7 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.backgroundColor,
+    backgroundColor: Colors.white,
     body: SafeArea(
       bottom: false,
       child: Stack(
@@ -45,18 +46,9 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        context.l10n.recordsCollectionsTitle,
-                        style: AppTextStyles.semiboldH6_20.copyWith(
-                          color: AppColors.neutral950,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n.recordsCollectionsSubtitle,
-                        style: AppTextStyles.mediumSH8_14.copyWith(
-                          color: AppColors.neutral600,
-                        ),
+                      AppScreenHeader(
+                        title: context.l10n.recordsCollectionsTitle,
+                        subtitle: context.l10n.recordsCollectionsSubtitle,
                       ),
                       const SizedBox(height: 24),
                       RecordsSegmentedControl(

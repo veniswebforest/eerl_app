@@ -43,7 +43,7 @@ class ProfileActionCard extends StatelessWidget {
                 height: 40,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: iconBackground,
+                  // color: iconBackground,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: SvgPicture.asset(icon, width: 24, height: 24),

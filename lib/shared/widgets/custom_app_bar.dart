@@ -1,6 +1,7 @@
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'app_screen_header.dart';
 
 /// A reusable custom [AppBar] built using the design spec.
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -20,6 +21,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      toolbarHeight: AppScreenHeaderMetrics.height,
       leadingWidth: 60,
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -64,5 +66,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize =>
+      const Size.fromHeight(AppScreenHeaderMetrics.height);
 }

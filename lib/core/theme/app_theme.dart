@@ -30,6 +30,7 @@ class AppTheme {
 
       // ── AppBar ──────────────────────────────────────────────────
       appBarTheme: AppBarTheme(
+        toolbarHeight: 45,
         elevation: 0,
         scrolledUnderElevation: 1,
         centerTitle: true,
@@ -276,6 +277,7 @@ class AppTheme {
 
       // ── AppBar ──────────────────────────────────────────────────
       appBarTheme: AppBarTheme(
+        toolbarHeight: 45,
         elevation: 0,
         scrolledUnderElevation: 1,
         centerTitle: true,

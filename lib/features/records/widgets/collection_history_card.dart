@@ -33,7 +33,7 @@ class CollectionHistoryCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: AppColors.neutral50,
           borderRadius: BorderRadius.circular(12),
@@ -63,8 +63,8 @@ class CollectionHistoryCard extends StatelessWidget {
                 ),
                 SvgPicture.asset(
                   RecordsAssets.openDetails,
-                  width: 20,
-                  height: 20,
+                  width: 14,
+                  height: 14,
                   colorFilter: ColorFilter.mode(
                     item.status == CollectionRecordStatus.pending
                         ? AppColors.primary500
@@ -78,7 +78,7 @@ class CollectionHistoryCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.cool100,
+                // color: AppColors.cool100,
                 borderRadius: BorderRadius.circular(9),
               ),
               child: Row(

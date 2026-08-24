@@ -9,6 +9,7 @@ import '../model/collection_material_model.dart';
 import '../widgets/collection_detail_assets.dart';
 import '../widgets/collection_detail_cards.dart';
 import '../widgets/collection_material_card.dart';
+import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 
 class CollectionDetailScreen extends StatelessWidget {
   const CollectionDetailScreen({
@@ -45,26 +46,33 @@ class CollectionDetailScreen extends StatelessWidget {
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            AppScreenHeaderMetrics.topInset,
+            20,
+            20,
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 600),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  InkWell(
-                    key: const Key('collection-detail-back'),
-                    onTap: onBack,
-                    borderRadius: BorderRadius.circular(7),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary500,
-                        borderRadius: BorderRadius.circular(8),
+                  AppScreenHeader(
+                    leading: InkWell(
+                      key: const Key('collection-detail-back'),
+                      onTap: onBack,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary500,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: SvgPicture.asset(CollectionDetailAssets.back),
                       ),
-                      child: SvgPicture.asset(CollectionDetailAssets.back),
                     ),
                   ),
                   const SizedBox(height: 24),

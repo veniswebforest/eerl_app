@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import '../model/recent_collection_item_model.dart';
 import '../widgets/collection_assets.dart';
 import '../widgets/recent_collection_card.dart';
@@ -44,7 +45,12 @@ class CollectionsTabScreen extends StatelessWidget {
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            AppScreenHeaderMetrics.topInset,
+            20,
+            120,
+          ),
           children: [
             Center(
               child: ConstrainedBox(
@@ -52,28 +58,10 @@ class CollectionsTabScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.collections,
-                                style: AppTextStyles.semiboldH6_20.copyWith(
-                                  color: AppColors.neutral950,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                l10n.startYourCollections,
-                                style: AppTextStyles.mediumSH8_14.copyWith(
-                                  color: AppColors.neutral600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                    AppScreenHeader(
+                      title: l10n.collections,
+                      subtitle: l10n.startYourCollections,
+                      actions: [
                         SvgPicture.asset(
                           CollectionAssets.notification,
                           width: 45,

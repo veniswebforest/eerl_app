@@ -15,6 +15,7 @@ class CollectionDraftCard extends StatelessWidget {
     required this.continueLabel,
     required this.onDiscard,
   });
+
   final CollectionDraftModel item;
   final String pendingLabel;
   final String discardLabel;
@@ -61,7 +62,7 @@ class CollectionDraftCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.cool100,
+              // color: AppColors.cool100,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -108,8 +109,10 @@ class CollectionDraftCard extends StatelessWidget {
 
 class _DraftInfo extends StatelessWidget {
   const _DraftInfo({required this.icon, required this.text});
+
   final String icon;
   final String text;
+
   @override
   Widget build(BuildContext context) => Row(
     children: [
@@ -138,9 +141,11 @@ class _Button extends StatelessWidget {
     required this.color,
     required this.onTap,
   });
+
   final String label;
   final Color color;
   final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) => SizedBox(
     height: 48,

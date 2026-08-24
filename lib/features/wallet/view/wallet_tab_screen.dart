@@ -9,6 +9,7 @@ import '../widgets/expense_search_filters.dart';
 import '../widgets/wallet_action_card.dart';
 import '../widgets/wallet_balance_card.dart';
 import '../widgets/wallet_screen_header.dart';
+import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 
 class WalletTabScreen extends StatefulWidget {
   const WalletTabScreen({
@@ -38,7 +39,12 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 130),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            AppScreenHeaderMetrics.topInset,
+            20,
+            130,
+          ),
           children: [
             Center(
               child: ConstrainedBox(

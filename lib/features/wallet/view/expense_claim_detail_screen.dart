@@ -6,6 +6,7 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../model/expense_claim_detail_status.dart';
 import '../widgets/expense_detail_cards.dart';
 import '../widgets/wallet_screen_header.dart';
+import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 
 class ExpenseClaimDetailScreen extends StatelessWidget {
   const ExpenseClaimDetailScreen({
@@ -31,7 +32,12 @@ class ExpenseClaimDetailScreen extends StatelessWidget {
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            AppScreenHeaderMetrics.topInset,
+            20,
+            32,
+          ),
           children: [
             Center(
               child: ConstrainedBox(
@@ -39,7 +45,9 @@ class ExpenseClaimDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    WalletBackButton(onPressed: onBack),
+                    AppScreenHeader(
+                      leading: WalletBackButton(onPressed: onBack),
+                    ),
                     const SizedBox(height: 24),
                     ExpenseReferenceCard(reference: l10n.expenseClaimReference),
                     const SizedBox(height: 16),

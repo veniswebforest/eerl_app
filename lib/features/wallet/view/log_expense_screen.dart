@@ -7,6 +7,7 @@ import '../widgets/expense_category_selector.dart';
 import '../widgets/log_expense_field.dart';
 import '../widgets/receipt_upload_section.dart';
 import '../widgets/wallet_screen_header.dart';
+import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 
 class LogExpenseScreen extends StatefulWidget {
   const LogExpenseScreen({super.key, required this.onBack});
@@ -63,7 +64,12 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
       body: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            AppScreenHeaderMetrics.topInset,
+            20,
+            32,
+          ),
           children: [
             Center(
               child: ConstrainedBox(

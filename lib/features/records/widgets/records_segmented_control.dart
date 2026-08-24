@@ -29,7 +29,7 @@ class RecordsSegmentedControl extends StatelessWidget {
           BoxShadow(
             color: Color(0x26000000),
             blurRadius: 5,
-            offset: Offset(0, 2),
+            offset: Offset(0, 4),
           ),
         ],
       ),

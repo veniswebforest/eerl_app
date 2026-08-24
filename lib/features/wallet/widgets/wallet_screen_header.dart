@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
-import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'wallet_assets.dart';
 
 class WalletScreenHeader extends StatelessWidget {
@@ -17,20 +17,9 @@ class WalletScreenHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        WalletBackButton(onPressed: onBack),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Text(
-            title,
-            maxLines: 2,
-            style: AppTextStyles.semiboldH6_20.copyWith(
-              color: AppColors.neutral950,
-            ),
-          ),
-        ),
-      ],
+    return AppScreenHeader(
+      title: title,
+      leading: WalletBackButton(onPressed: onBack),
     );
   }
 }

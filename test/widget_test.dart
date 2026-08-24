@@ -634,6 +634,8 @@ void main() {
 
     final logoutAction = find.byKey(const Key('profile-logout'));
     await tester.ensureVisible(logoutAction);
+    await tester.drag(find.byType(ListView).first, const Offset(0, -120));
+    await tester.pumpAndSettle();
     await tester.tap(logoutAction);
     await tester.pumpAndSettle();
 
@@ -683,6 +685,8 @@ void main() {
     );
     final logoutAction = find.byKey(const Key('profile-logout'));
     await tester.ensureVisible(logoutAction);
+    await tester.drag(find.byType(ListView).first, const Offset(0, -120));
+    await tester.pumpAndSettle();
     await tester.tap(logoutAction);
     await tester.pumpAndSettle();
     await expectLater(

@@ -31,7 +31,7 @@ class ProfileInfoCard extends StatelessWidget {
         boxShadow: const [
           BoxShadow(
             color: Color(0x1A000000),
-            blurRadius: 5,
+            blurRadius: 1,
             offset: Offset(0, 2),
           ),
         ],
@@ -66,7 +66,7 @@ class _ProfileInfoRow extends StatelessWidget {
           height: 40,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primary50,
+            // color: AppColors.primary50,
             borderRadius: BorderRadius.circular(10),
           ),
           child: SvgPicture.asset(item.icon, width: 24, height: 24),

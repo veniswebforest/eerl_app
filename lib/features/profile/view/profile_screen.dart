@@ -6,6 +6,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/providers/locale_provider.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import '../widgets/profile_action_card.dart';
 import '../widgets/profile_assets.dart';
 import '../widgets/profile_info_card.dart';
@@ -22,12 +23,29 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 112),
-          child: Column(
+      body: Container(
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primary200,
+              AppColors.primary100,
+              AppColors.cool50,
+              AppColors.cool50,
+            ],
+            stops: [0, .25, .45, 1],
+          ),
+        ),
+
+        child: SafeArea(
+          bottom: false,
+          child: ListView(
+            padding: const EdgeInsets.only(
+              top: AppScreenHeaderMetrics.topInset,
+              bottom: 112,
+            ),
             children: [
               _ProfileHeader(
                 onNotificationTap: () =>
@@ -169,63 +187,30 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [AppColors.primary300, Color(0xFFCDEED3), AppColors.cool50],
-          stops: [0, 0.48, 1],
-        ),
-      ),
-      child: Center(
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
           child: Column(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.l10n.profileUserProfile,
-                          style: AppTextStyles.semiboldH6_20.copyWith(
-                            color: AppColors.neutral950,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          context.l10n.profileSubtitle,
-                          style: AppTextStyles.mediumSH8_14.copyWith(
-                            color: AppColors.neutral600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              AppScreenHeader(
+                title: context.l10n.profileUserProfile,
+                subtitle: context.l10n.profileSubtitle,
+                actions: [
                   InkWell(
                     key: const Key('profile-notification-button'),
                     onTap: onNotificationTap,
                     borderRadius: BorderRadius.circular(24),
-                    child: ClipOval(
-                      child: SvgPicture.asset(
-                        ProfileAssets.notification,
-                        width: 45,
-                        height: 45,
-                      ),
+                    child: SvgPicture.asset(
+                      ProfileAssets.notification,
+                      width: 45,
+                      height: 45,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 14),
               Container(
                 height: 220,
                 width: double.infinity,
