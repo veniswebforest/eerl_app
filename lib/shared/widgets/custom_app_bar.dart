@@ -1,5 +1,6 @@
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'app_screen_header.dart';
 
@@ -11,12 +12,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBackButton = true,
     this.actions,
     this.onBackTap,
+    this.backIconAsset,
   });
 
   final String? title;
   final bool showBackButton;
   final List<Widget>? actions;
   final VoidCallback? onBackTap;
+  final String? backIconAsset;
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +54,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     alignment: Alignment.center,
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                    child: backIconAsset == null
+                        ? const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                            size: 20,
+                          )
+                        : SvgPicture.asset(
+                            backIconAsset!,
+                            width: 20,
+                            height: 20,
+                          ),
                   ),
                 ),
               ),

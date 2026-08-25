@@ -11,7 +11,8 @@ import '../widgets/recent_collection_card.dart';
 import '../widgets/start_collection_card.dart';
 
 class CollectionsTabScreen extends StatelessWidget {
-  const CollectionsTabScreen({super.key});
+  const CollectionsTabScreen({super.key, this.onAddCollection});
+  final VoidCallback? onAddCollection;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +75,7 @@ class CollectionsTabScreen extends StatelessWidget {
                       title: l10n.startCollection,
                       description: l10n.recordWeightProof,
                       buttonLabel: l10n.addCollection,
-                      onPressed: () {},
+                      onPressed: onAddCollection ?? () {},
                     ),
                     const SizedBox(height: 28),
                     Text(

@@ -6,13 +6,13 @@ import '../constants/app_constants.dart';
 /// Manages the application theme mode (system, light, dark) and
 /// persists the user's choice to [SharedPreferences].
 class ThemeProvider extends ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode = ThemeMode.light;
 
   /// Current theme mode.
   ThemeMode get themeMode => _themeMode;
 
-  /// Whether the effective theme is dark (takes system brightness
-  /// into account when [ThemeMode.system] is active).
+  /// Whether the effective theme is dark (takes light brightness
+  /// into account when [ThemeMode.light] is active).
   bool isDarkMode(BuildContext context) {
     if (_themeMode == ThemeMode.system) {
       return MediaQuery.platformBrightnessOf(context) == Brightness.dark;

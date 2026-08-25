@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/features/collection/view/collections_tab_screen.dart';
+import 'package:eerl_app/features/collection/view/add_collection_screen.dart';
+import 'package:eerl_app/features/configure_material/view/configure_material_screen.dart';
 import 'package:eerl_app/features/home/view/home_screen.dart';
+import 'package:eerl_app/features/help_support/view/help_support_screen.dart';
 import 'package:eerl_app/features/profile/view/profile_screen.dart';
 import 'package:eerl_app/features/records/model/collection_detail_status.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
+import 'package:eerl_app/features/tasks/view/my_tasks_screen.dart';
+import 'package:eerl_app/features/tasks/view/task_detail_screen.dart';
+import 'package:eerl_app/features/tasks/model/task_list_item.dart';
 import 'package:eerl_app/features/wallet/model/expense_claim_detail_status.dart';
 import 'package:eerl_app/features/wallet/view/expense_claim_detail_screen.dart';
 import 'package:eerl_app/features/wallet/view/log_expense_screen.dart';
@@ -41,6 +47,11 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       : widget.initialPageKey;
   late bool _isWalletOpen = widget.initialPageKey == 'wallet';
   bool _isLogExpenseOpen = false;
+  bool _isHelpSupportOpen = false;
+  bool _isAddCollectionOpen = false;
+  bool _isConfigureMaterialOpen = false;
+  bool _isTasksOpen = false;
+  TaskListItem? _selectedTask;
   ExpenseClaimDetailStatus? _claimDetailStatus;
   CollectionDetailStatus? _collectionDetailStatus;
   bool _isDrawerOpen = false;
@@ -74,7 +85,29 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
 
     return Scaffold(
       extendBody: true,
-      body: _collectionDetailStatus != null
+      body: _isAddCollectionOpen
+          ? AddCollectionScreen(
+              onBack: () => setState(() => _isAddCollectionOpen = false),
+            )
+          : _isConfigureMaterialOpen
+          ? ConfigureMaterialScreen(
+              onBack: () => setState(() => _isConfigureMaterialOpen = false),
+            )
+          : _selectedTask != null
+          ? TaskDetailScreen(
+              task: _selectedTask!,
+              onBack: () => setState(() => _selectedTask = null),
+            )
+          : _isTasksOpen
+          ? MyTasksScreen(
+              onBack: () => setState(() => _isTasksOpen = false),
+              onTaskTap: (task) => setState(() => _selectedTask = task),
+            )
+          : _isHelpSupportOpen
+          ? HelpSupportScreen(
+              onBack: () => setState(() => _isHelpSupportOpen = false),
+            )
+          : _collectionDetailStatus != null
           ? CollectionDetailScreen(
               status: _collectionDetailStatus!,
               onBack: () => setState(() => _collectionDetailStatus = null),
@@ -102,7 +135,12 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
             ),
       bottomNavigationBar:
           _isWalletOpen ||
+              _isAddCollectionOpen ||
               _isLogExpenseOpen ||
+              _isHelpSupportOpen ||
+              _isConfigureMaterialOpen ||
+              _isTasksOpen ||
+              _selectedTask != null ||
               _claimDetailStatus != null ||
               _collectionDetailStatus != null ||
               _isDrawerOpen
@@ -137,6 +175,10 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         unselectedIcon: '$_navIconPath/nav_home.svg',
         page: HomeScreen(
           onWalletTap: () => setState(() => _isWalletOpen = true),
+          onHelpSupportTap: () => setState(() => _isHelpSupportOpen = true),
+          onConfigureMaterialTap: () =>
+              setState(() => _isConfigureMaterialOpen = true),
+          onTasksTap: () => setState(() => _isTasksOpen = true),
           onDrawerChanged: (isOpen) {
             if (_isDrawerOpen == isOpen) return;
             setState(() => _isDrawerOpen = isOpen);
@@ -150,7 +192,9 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         title: l10n.drawerCollection,
         selectedIcon: '$_navIconPath/nav_collections.svg',
         unselectedIcon: '$_navIconPath/nav_collections.svg',
-        page: CollectionsTabScreen(),
+        page: CollectionsTabScreen(
+          onAddCollection: () => setState(() => _isAddCollectionOpen = true),
+        ),
         pageKey: 'collections',
         roles: allRoles,
         permission: 'collections.view',

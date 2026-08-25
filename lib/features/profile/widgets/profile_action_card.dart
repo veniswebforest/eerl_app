@@ -25,7 +25,6 @@ class ProfileActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accent = destructive ? AppColors.red600 : AppColors.primary500;
-    final iconBackground = destructive ? AppColors.red50 : AppColors.primary50;
     return Material(
       color: AppColors.neutral50,
       borderRadius: BorderRadius.circular(12),

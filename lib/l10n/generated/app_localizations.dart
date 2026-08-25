@@ -1024,6 +1024,222 @@ abstract class AppLocalizations {
   /// **'Configure Material List'**
   String get drawerConfigureMaterials;
 
+  /// No description provided for @drawerTasksRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks & Requests'**
+  String get drawerTasksRequests;
+
+  /// No description provided for @drawerTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get drawerTasks;
+
+  /// No description provided for @drawerRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get drawerRequests;
+
+  /// No description provided for @myTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'My Tasks'**
+  String get myTasks;
+
+  /// No description provided for @taskOpenCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Open ({count})'**
+  String taskOpenCount(int count);
+
+  /// No description provided for @taskClosedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed ({count})'**
+  String taskClosedCount(int count);
+
+  /// No description provided for @taskSupervisorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Bhavesh Shah (Supervisor)'**
+  String get taskSupervisorName;
+
+  /// No description provided for @taskDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and verify the latest collection entry submitted by the field agent...'**
+  String get taskDescription;
+
+  /// No description provided for @taskPhotoAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Photo attached'**
+  String taskPhotoAttached(int count);
+
+  /// No description provided for @taskDueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Today, 5:00 PM'**
+  String get taskDueToday;
+
+  /// No description provided for @taskDueTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Tomorrow, 2:00 PM'**
+  String get taskDueTomorrow;
+
+  /// No description provided for @taskDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due 25 Aug 2026'**
+  String get taskDueDate;
+
+  /// No description provided for @taskCompletedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed: Today, 11:30 AM'**
+  String get taskCompletedTime;
+
+  /// No description provided for @taskPriorityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get taskPriorityHigh;
+
+  /// No description provided for @taskPriorityNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get taskPriorityNormal;
+
+  /// No description provided for @taskPriorityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get taskPriorityLow;
+
+  /// No description provided for @taskEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No Tasks for now'**
+  String get taskEmptyMessage;
+
+  /// No description provided for @configureMaterialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get configureMaterialsTitle;
+
+  /// No description provided for @configureMaterialsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag handle to reorder materials.'**
+  String get configureMaterialsSubtitle;
+
+  /// No description provided for @configurePlasticCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Plastic ({count})'**
+  String configurePlasticCount(int count);
+
+  /// No description provided for @configureNonPlasticCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-Plastic ({count})'**
+  String configureNonPlasticCount(int count);
+
+  /// No description provided for @configureSaveOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Order'**
+  String get configureSaveOrder;
+
+  /// No description provided for @configureSequenceSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Sequence saved successfully'**
+  String get configureSequenceSaved;
+
+  /// No description provided for @configurePetBottles.
+  ///
+  /// In en, this message translates to:
+  /// **'PET Bottles'**
+  String get configurePetBottles;
+
+  /// No description provided for @configureHdpeRigid.
+  ///
+  /// In en, this message translates to:
+  /// **'HDPE Rigid'**
+  String get configureHdpeRigid;
+
+  /// No description provided for @configureMilkPouch.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk Pouch / Soft Plastic'**
+  String get configureMilkPouch;
+
+  /// No description provided for @configurePpHardPlastics.
+  ///
+  /// In en, this message translates to:
+  /// **'PP Hard Plastics'**
+  String get configurePpHardPlastics;
+
+  /// No description provided for @configureMultiLayerPackaging.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-Layer Packaging'**
+  String get configureMultiLayerPackaging;
+
+  /// No description provided for @configurePvcPlastic.
+  ///
+  /// In en, this message translates to:
+  /// **'PVC Plastic'**
+  String get configurePvcPlastic;
+
+  /// No description provided for @configureMixedGarbage.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed Garbage'**
+  String get configureMixedGarbage;
+
+  /// No description provided for @configureMetals.
+  ///
+  /// In en, this message translates to:
+  /// **'Metals'**
+  String get configureMetals;
+
+  /// No description provided for @configureGlass.
+  ///
+  /// In en, this message translates to:
+  /// **'Glass'**
+  String get configureGlass;
+
+  /// No description provided for @configurePaperCardboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper & Cardboard'**
+  String get configurePaperCardboard;
+
+  /// No description provided for @configureOrganicWood.
+  ///
+  /// In en, this message translates to:
+  /// **'Organic & Wood'**
+  String get configureOrganicWood;
+
+  /// No description provided for @configureConcreteMasonry.
+  ///
+  /// In en, this message translates to:
+  /// **'Concrete, Brick & Masonry'**
+  String get configureConcreteMasonry;
+
+  /// No description provided for @configureCeramicsPorcelain.
+  ///
+  /// In en, this message translates to:
+  /// **'Ceramics & Porcelain'**
+  String get configureCeramicsPorcelain;
+
   /// No description provided for @drawerSyncStatus.
   ///
   /// In en, this message translates to:
@@ -1749,6 +1965,462 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Yes'**
   String get logoutYes;
+
+  /// No description provided for @helpCallSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Support'**
+  String get helpCallSupport;
+
+  /// No description provided for @helpCallSupportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Available 24/7 for field issues'**
+  String get helpCallSupportSubtitle;
+
+  /// No description provided for @helpInstantHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant Help'**
+  String get helpInstantHelp;
+
+  /// No description provided for @helpInstantHelpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with a support agent'**
+  String get helpInstantHelpSubtitle;
+
+  /// No description provided for @helpFrequentlyAskedQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently Asked Questions'**
+  String get helpFrequentlyAskedQuestions;
+
+  /// No description provided for @helpPrinterQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer is not printing receipts?'**
+  String get helpPrinterQuestion;
+
+  /// No description provided for @helpPrinterAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Turn Bluetooth OFF and ON.\n2. Restart thermal printer.\n3. Go to App Settings > Printer and run \'Test Print\'.'**
+  String get helpPrinterAnswer;
+
+  /// No description provided for @helpAddExpenseQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How to Add Expense?'**
+  String get helpAddExpenseQuestion;
+
+  /// No description provided for @helpAddExpenseAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Open Wallet & Log Expense.\n2. Tap Log Expense.\n3. Enter the details and add a receipt.'**
+  String get helpAddExpenseAnswer;
+
+  /// No description provided for @helpTransferQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How to Transfer Requests'**
+  String get helpTransferQuestion;
+
+  /// No description provided for @helpTransferAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Transfer Requests from the menu and follow the on-screen instructions.'**
+  String get helpTransferAnswer;
+
+  /// No description provided for @helpSyncQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How to do Sync Backup?'**
+  String get helpSyncQuestion;
+
+  /// No description provided for @helpSyncAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Sync Status from the menu and tap Sync Now.'**
+  String get helpSyncAnswer;
+
+  /// No description provided for @helpBluetoothQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What should I do if my Bluetooth printer won\'t connect?'**
+  String get helpBluetoothQuestion;
+
+  /// No description provided for @helpBluetoothAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure Bluetooth is enabled, restart the printer, then reconnect it from App Settings > Printer.'**
+  String get helpBluetoothAnswer;
+
+  /// No description provided for @collectionItemsReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Items Received'**
+  String get collectionItemsReceived;
+
+  /// No description provided for @collectionItemsReceivedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the items received from this Collection types and enter the quantity.'**
+  String get collectionItemsReceivedSubtitle;
+
+  /// No description provided for @collectionTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection types'**
+  String get collectionTypeLabel;
+
+  /// No description provided for @collectionSelectType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Collection type'**
+  String get collectionSelectType;
+
+  /// No description provided for @collectionAddItemLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Item'**
+  String get collectionAddItemLabel;
+
+  /// No description provided for @collectionSelectWasteItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Waste Item'**
+  String get collectionSelectWasteItem;
+
+  /// No description provided for @collectionItemsSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Items Selected'**
+  String collectionItemsSelected(int count);
+
+  /// No description provided for @collectionVehicleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Number Plate'**
+  String get collectionVehicleNumber;
+
+  /// No description provided for @collectionMrfAgentName.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF Agent Name'**
+  String get collectionMrfAgentName;
+
+  /// No description provided for @collectionPersonName.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Person Name'**
+  String get collectionPersonName;
+
+  /// No description provided for @collectionPlasticCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Plastic (12)'**
+  String get collectionPlasticCount;
+
+  /// No description provided for @collectionNonPlasticCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-Plastic (10)'**
+  String get collectionNonPlasticCount;
+
+  /// No description provided for @collectionMilkPouch.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk Pouch / Soft Plastic'**
+  String get collectionMilkPouch;
+
+  /// No description provided for @collectionMultiLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Multi-Layer Packaging'**
+  String get collectionMultiLayer;
+
+  /// No description provided for @collectionMixedGarbage.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed Garbage'**
+  String get collectionMixedGarbage;
+
+  /// No description provided for @collectionCaptureInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture all collection photos for review (JPG/PNG, under 5MB).'**
+  String get collectionCaptureInstruction;
+
+  /// No description provided for @collectionWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Weight'**
+  String get collectionWeight;
+
+  /// No description provided for @collectionVerifiedWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Weight'**
+  String get collectionVerifiedWeight;
+
+  /// No description provided for @collectionCapturePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Photo'**
+  String get collectionCapturePhoto;
+
+  /// No description provided for @collectionRampPersonPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Ramp Person Photo'**
+  String get collectionRampPersonPhoto;
+
+  /// No description provided for @collectionTotalWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Collection Weight'**
+  String get collectionTotalWeight;
+
+  /// No description provided for @collectionWeightDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight Comparison'**
+  String get collectionWeightDifference;
+
+  /// No description provided for @collectionTotalPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Price'**
+  String get collectionTotalPrice;
+
+  /// No description provided for @collectionSaveDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as Draft'**
+  String get collectionSaveDraft;
+
+  /// No description provided for @collectionSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get collectionSubmit;
+
+  /// No description provided for @collectionSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Submitted'**
+  String get collectionSubmitted;
+
+  /// No description provided for @collectionSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully!'**
+  String get collectionSuccessfully;
+
+  /// No description provided for @collectionSubmissionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection ID TRP-542586-04'**
+  String get collectionSubmissionId;
+
+  /// No description provided for @collectionPreviewSlip.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Slip'**
+  String get collectionPreviewSlip;
+
+  /// No description provided for @collectionAddNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Collection'**
+  String get collectionAddNew;
+
+  /// No description provided for @collectionCollectedItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected Items'**
+  String get collectionCollectedItems;
+
+  /// No description provided for @collectionThankYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank You'**
+  String get collectionThankYou;
+
+  /// No description provided for @collectionShareSlip.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Slip'**
+  String get collectionShareSlip;
+
+  /// No description provided for @collectionPrintSlip.
+  ///
+  /// In en, this message translates to:
+  /// **'Print Slip'**
+  String get collectionPrintSlip;
+
+  /// No description provided for @collectionSelectVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Vehicle Number Plate'**
+  String get collectionSelectVehicle;
+
+  /// No description provided for @collectionSelectPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Person Name'**
+  String get collectionSelectPerson;
+
+  /// No description provided for @collectionSelectMrfAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Select MRF Agent Name'**
+  String get collectionSelectMrfAgent;
+
+  /// No description provided for @collectionChoosePhotoSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Photo Source'**
+  String get collectionChoosePhotoSource;
+
+  /// No description provided for @collectionCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get collectionCamera;
+
+  /// No description provided for @collectionGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get collectionGallery;
+
+  /// No description provided for @collectionRampPhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a photo to record and verify person details.'**
+  String get collectionRampPhotoHint;
+
+  /// No description provided for @collectionReceiptDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date:'**
+  String get collectionReceiptDate;
+
+  /// No description provided for @collectionReceiptTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time:'**
+  String get collectionReceiptTime;
+
+  /// No description provided for @collectionReceiptTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'TOTAL'**
+  String get collectionReceiptTotal;
+
+  /// No description provided for @collectionReceiptAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Agent'**
+  String get collectionReceiptAgent;
+
+  /// No description provided for @collectionSystemGeneratedSlip.
+  ///
+  /// In en, this message translates to:
+  /// **'System Generated Slip'**
+  String get collectionSystemGeneratedSlip;
+
+  /// No description provided for @collectionPrinterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ensure your Bluetooth thermal printer is switched on and connected.'**
+  String get collectionPrinterHint;
+
+  /// No description provided for @collectionPetReceiptDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'120 KG × ₹12.00/KG'**
+  String get collectionPetReceiptDetail;
+
+  /// No description provided for @collectionHdpeReceiptDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'85.5 KG × ₹8.50/KG'**
+  String get collectionHdpeReceiptDetail;
+
+  /// No description provided for @collectionPpReceiptDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'12 KG × ₹45.00/KG'**
+  String get collectionPpReceiptDetail;
+
+  /// No description provided for @taskResolveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve Task'**
+  String get taskResolveTitle;
+
+  /// No description provided for @taskOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Collection Details'**
+  String get taskOverviewTitle;
+
+  /// No description provided for @taskOverviewDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight.'**
+  String get taskOverviewDescription;
+
+  /// No description provided for @taskAttachmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment from Supervisor'**
+  String get taskAttachmentTitle;
+
+  /// No description provided for @taskCompletionProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Completion Proof *'**
+  String get taskCompletionProof;
+
+  /// No description provided for @taskProofSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported: JPG, PNG (Max 5MB).'**
+  String get taskProofSupported;
+
+  /// No description provided for @taskDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description *'**
+  String get taskDescriptionLabel;
+
+  /// No description provided for @taskDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Description'**
+  String get taskDescriptionHint;
+
+  /// No description provided for @taskDescriptionMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Min 150 Characters'**
+  String get taskDescriptionMinimum;
+
+  /// No description provided for @taskFilledDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight scale calibrated using 10kg standard test weight. Zero-error verified.'**
+  String get taskFilledDescription;
+
+  /// No description provided for @taskMarkCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Completed'**
+  String get taskMarkCompleted;
 }
 
 class _AppLocalizationsDelegate

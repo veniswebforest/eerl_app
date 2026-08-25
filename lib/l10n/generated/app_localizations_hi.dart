@@ -491,6 +491,126 @@ class AppLocalizationsHi extends AppLocalizations {
   String get drawerConfigureMaterials => 'सामग्री सूची कॉन्फ़िगर करें';
 
   @override
+  String get drawerTasksRequests => 'कार्य और अनुरोध';
+
+  @override
+  String get drawerTasks => 'कार्य';
+
+  @override
+  String get drawerRequests => 'अनुरोध';
+
+  @override
+  String get myTasks => 'मेरे कार्य';
+
+  @override
+  String taskOpenCount(int count) {
+    return 'खुले ($count)';
+  }
+
+  @override
+  String taskClosedCount(int count) {
+    return 'बंद ($count)';
+  }
+
+  @override
+  String get taskSupervisorName => 'भावेश शाह (सुपरवाइज़र)';
+
+  @override
+  String get taskDescription =>
+      'फील्ड एजेंट द्वारा जमा की गई नवीनतम संग्रह प्रविष्टि की समीक्षा और सत्यापन करें...';
+
+  @override
+  String taskPhotoAttached(int count) {
+    return '$count फोटो संलग्न';
+  }
+
+  @override
+  String get taskDueToday => 'आज, शाम 5:00 बजे';
+
+  @override
+  String get taskDueTomorrow => 'कल, दोपहर 2:00 बजे';
+
+  @override
+  String get taskDueDate => '25 अगस्त 2026 तक';
+
+  @override
+  String get taskCompletedTime => 'पूर्ण: आज, सुबह 11:30 बजे';
+
+  @override
+  String get taskPriorityHigh => 'उच्च';
+
+  @override
+  String get taskPriorityNormal => 'सामान्य';
+
+  @override
+  String get taskPriorityLow => 'कम';
+
+  @override
+  String get taskEmptyMessage => 'अभी कोई कार्य नहीं है';
+
+  @override
+  String get configureMaterialsTitle => 'सामग्री';
+
+  @override
+  String get configureMaterialsSubtitle =>
+      'सामग्री का क्रम बदलने के लिए हैंडल खींचें।';
+
+  @override
+  String configurePlasticCount(int count) {
+    return 'प्लास्टिक ($count)';
+  }
+
+  @override
+  String configureNonPlasticCount(int count) {
+    return 'गैर-प्लास्टिक ($count)';
+  }
+
+  @override
+  String get configureSaveOrder => 'क्रम सहेजें';
+
+  @override
+  String get configureSequenceSaved => 'क्रम सफलतापूर्वक सहेजा गया';
+
+  @override
+  String get configurePetBottles => 'PET बोतलें';
+
+  @override
+  String get configureHdpeRigid => 'HDPE कठोर';
+
+  @override
+  String get configureMilkPouch => 'दूध की थैली / सॉफ्ट प्लास्टिक';
+
+  @override
+  String get configurePpHardPlastics => 'PP हार्ड प्लास्टिक';
+
+  @override
+  String get configureMultiLayerPackaging => 'मल्टी-लेयर पैकेजिंग';
+
+  @override
+  String get configurePvcPlastic => 'PVC प्लास्टिक';
+
+  @override
+  String get configureMixedGarbage => 'मिश्रित कचरा';
+
+  @override
+  String get configureMetals => 'धातु';
+
+  @override
+  String get configureGlass => 'कांच';
+
+  @override
+  String get configurePaperCardboard => 'कागज और कार्डबोर्ड';
+
+  @override
+  String get configureOrganicWood => 'जैविक और लकड़ी';
+
+  @override
+  String get configureConcreteMasonry => 'कंक्रीट, ईंट और चिनाई';
+
+  @override
+  String get configureCeramicsPorcelain => 'सिरेमिक और पोर्सिलेन';
+
+  @override
   String get drawerSyncStatus => 'सिंक स्थिति';
 
   @override
@@ -860,4 +980,246 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get logoutYes => 'हाँ';
+
+  @override
+  String get helpCallSupport => 'सहायता के लिए कॉल करें';
+
+  @override
+  String get helpCallSupportSubtitle => 'फ़ील्ड समस्याओं के लिए 24/7 उपलब्ध';
+
+  @override
+  String get helpInstantHelp => 'तत्काल सहायता';
+
+  @override
+  String get helpInstantHelpSubtitle => 'सपोर्ट एजेंट से चैट करें';
+
+  @override
+  String get helpFrequentlyAskedQuestions => 'अक्सर पूछे जाने वाले प्रश्न';
+
+  @override
+  String get helpPrinterQuestion => 'प्रिंटर रसीदें प्रिंट नहीं कर रहा है?';
+
+  @override
+  String get helpPrinterAnswer =>
+      '1. Bluetooth बंद करके फिर चालू करें।\n2. थर्मल प्रिंटर पुनः चालू करें।\n3. App Settings > Printer में जाकर \'Test Print\' चलाएँ।';
+
+  @override
+  String get helpAddExpenseQuestion => 'खर्च कैसे जोड़ें?';
+
+  @override
+  String get helpAddExpenseAnswer =>
+      '1. Wallet & Log Expense खोलें।\n2. Log Expense पर टैप करें।\n3. विवरण भरें और रसीद जोड़ें।';
+
+  @override
+  String get helpTransferQuestion => 'ट्रांसफर अनुरोध कैसे करें?';
+
+  @override
+  String get helpTransferAnswer =>
+      'मेनू से Transfer Requests खोलें और स्क्रीन पर दिए निर्देशों का पालन करें।';
+
+  @override
+  String get helpSyncQuestion => 'सिंक बैकअप कैसे करें?';
+
+  @override
+  String get helpSyncAnswer =>
+      'मेनू से Sync Status खोलें और Sync Now पर टैप करें।';
+
+  @override
+  String get helpBluetoothQuestion =>
+      'मेरा Bluetooth प्रिंटर कनेक्ट न हो तो क्या करूँ?';
+
+  @override
+  String get helpBluetoothAnswer =>
+      'Bluetooth चालू होने की पुष्टि करें, प्रिंटर पुनः चालू करें और App Settings > Printer से दोबारा कनेक्ट करें।';
+
+  @override
+  String get collectionItemsReceived => 'प्राप्त वस्तुएँ';
+
+  @override
+  String get collectionItemsReceivedSubtitle =>
+      'इस संग्रह प्रकार से प्राप्त वस्तुएँ चुनें और मात्रा दर्ज करें।';
+
+  @override
+  String get collectionTypeLabel => 'संग्रह प्रकार';
+
+  @override
+  String get collectionSelectType => 'संग्रह प्रकार चुनें';
+
+  @override
+  String get collectionAddItemLabel => 'वस्तु जोड़ें';
+
+  @override
+  String get collectionSelectWasteItem => 'कचरे की वस्तु चुनें';
+
+  @override
+  String collectionItemsSelected(int count) {
+    return '$count वस्तुएँ चुनी गईं';
+  }
+
+  @override
+  String get collectionVehicleNumber => 'वाहन नंबर प्लेट';
+
+  @override
+  String get collectionMrfAgentName => 'MRF एजेंट का नाम';
+
+  @override
+  String get collectionPersonName => 'व्यक्ति का नाम चुनें';
+
+  @override
+  String get collectionPlasticCount => 'प्लास्टिक (12)';
+
+  @override
+  String get collectionNonPlasticCount => 'गैर-प्लास्टिक (10)';
+
+  @override
+  String get collectionMilkPouch => 'दूध की थैली / नरम प्लास्टिक';
+
+  @override
+  String get collectionMultiLayer => 'मल्टी-लेयर पैकेजिंग';
+
+  @override
+  String get collectionMixedGarbage => 'मिश्रित कचरा';
+
+  @override
+  String get collectionCaptureInstruction =>
+      'समीक्षा के लिए सभी संग्रह फोटो लें (JPG/PNG, 5MB से कम)।';
+
+  @override
+  String get collectionWeight => 'संग्रह वजन';
+
+  @override
+  String get collectionVerifiedWeight => 'सत्यापित वजन';
+
+  @override
+  String get collectionCapturePhoto => 'फोटो लें';
+
+  @override
+  String get collectionRampPersonPhoto => 'रैंप व्यक्ति का फोटो अपलोड करें';
+
+  @override
+  String get collectionTotalWeight => 'कुल संग्रह वजन';
+
+  @override
+  String get collectionWeightDifference => 'वजन तुलना';
+
+  @override
+  String get collectionTotalPrice => 'कुल कीमत';
+
+  @override
+  String get collectionSaveDraft => 'ड्राफ्ट के रूप में सहेजें';
+
+  @override
+  String get collectionSubmit => 'सबमिट करें';
+
+  @override
+  String get collectionSubmitted => 'संग्रह सबमिट हुआ';
+
+  @override
+  String get collectionSuccessfully => 'सफलतापूर्वक!';
+
+  @override
+  String get collectionSubmissionId => 'संग्रह ID TRP-542586-04';
+
+  @override
+  String get collectionPreviewSlip => 'स्लिप पूर्वावलोकन';
+
+  @override
+  String get collectionAddNew => 'नया संग्रह जोड़ें';
+
+  @override
+  String get collectionCollectedItems => 'एकत्रित वस्तुएँ';
+
+  @override
+  String get collectionThankYou => 'धन्यवाद';
+
+  @override
+  String get collectionShareSlip => 'स्लिप साझा करें';
+
+  @override
+  String get collectionPrintSlip => 'स्लिप प्रिंट करें';
+
+  @override
+  String get collectionSelectVehicle => 'वाहन नंबर प्लेट चुनें';
+
+  @override
+  String get collectionSelectPerson => 'व्यक्ति का नाम चुनें';
+
+  @override
+  String get collectionSelectMrfAgent => 'MRF एजेंट का नाम चुनें';
+
+  @override
+  String get collectionChoosePhotoSource => 'फोटो स्रोत चुनें';
+
+  @override
+  String get collectionCamera => 'कैमरा';
+
+  @override
+  String get collectionGallery => 'गैलरी';
+
+  @override
+  String get collectionRampPhotoHint =>
+      'व्यक्ति का विवरण दर्ज और सत्यापित करने के लिए फोटो अपलोड करें।';
+
+  @override
+  String get collectionReceiptDate => 'दिनांक:';
+
+  @override
+  String get collectionReceiptTime => 'समय:';
+
+  @override
+  String get collectionReceiptTotal => 'कुल';
+
+  @override
+  String get collectionReceiptAgent => 'कलेक्शन एजेंट';
+
+  @override
+  String get collectionSystemGeneratedSlip => 'सिस्टम द्वारा बनाई गई स्लिप';
+
+  @override
+  String get collectionPrinterHint =>
+      'सुनिश्चित करें कि आपका Bluetooth थर्मल प्रिंटर चालू और कनेक्टेड है।';
+
+  @override
+  String get collectionPetReceiptDetail => '120 KG × ₹12.00/KG';
+
+  @override
+  String get collectionHdpeReceiptDetail => '85.5 KG × ₹8.50/KG';
+
+  @override
+  String get collectionPpReceiptDetail => '12 KG × ₹45.00/KG';
+
+  @override
+  String get taskResolveTitle => 'कार्य पूरा करें';
+
+  @override
+  String get taskOverviewTitle => 'कलेक्शन विवरण सत्यापित करें';
+
+  @override
+  String get taskOverviewDescription =>
+      'फ़ील्ड एजेंट द्वारा जमा की गई नवीनतम कलेक्शन प्रविष्टि की समीक्षा और सत्यापन करें। रिपोर्ट किए गए कलेक्शन वजन की सत्यापित वजन से तुलना करें।';
+
+  @override
+  String get taskAttachmentTitle => 'सुपरवाइज़र का अटैचमेंट';
+
+  @override
+  String get taskCompletionProof => 'कार्य पूर्णता प्रमाण *';
+
+  @override
+  String get taskProofSupported => 'समर्थित: JPG, PNG (अधिकतम 5MB)।';
+
+  @override
+  String get taskDescriptionLabel => 'विवरण *';
+
+  @override
+  String get taskDescriptionHint => 'विवरण जोड़ें';
+
+  @override
+  String get taskDescriptionMinimum => 'न्यूनतम 150 अक्षर';
+
+  @override
+  String get taskFilledDescription =>
+      '10 किलो मानक परीक्षण वजन से वेट स्केल कैलिब्रेट किया। शून्य-त्रुटि सत्यापित की।';
+
+  @override
+  String get taskMarkCompleted => 'पूर्ण के रूप में चिह्नित करें';
 }

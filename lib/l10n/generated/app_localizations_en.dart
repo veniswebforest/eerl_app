@@ -492,6 +492,125 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drawerConfigureMaterials => 'Configure Material List';
 
   @override
+  String get drawerTasksRequests => 'Tasks & Requests';
+
+  @override
+  String get drawerTasks => 'Tasks';
+
+  @override
+  String get drawerRequests => 'Requests';
+
+  @override
+  String get myTasks => 'My Tasks';
+
+  @override
+  String taskOpenCount(int count) {
+    return 'Open ($count)';
+  }
+
+  @override
+  String taskClosedCount(int count) {
+    return 'Closed ($count)';
+  }
+
+  @override
+  String get taskSupervisorName => 'Bhavesh Shah (Supervisor)';
+
+  @override
+  String get taskDescription =>
+      'Review and verify the latest collection entry submitted by the field agent...';
+
+  @override
+  String taskPhotoAttached(int count) {
+    return '$count Photo attached';
+  }
+
+  @override
+  String get taskDueToday => 'Due Today, 5:00 PM';
+
+  @override
+  String get taskDueTomorrow => 'Due Tomorrow, 2:00 PM';
+
+  @override
+  String get taskDueDate => 'Due 25 Aug 2026';
+
+  @override
+  String get taskCompletedTime => 'Completed: Today, 11:30 AM';
+
+  @override
+  String get taskPriorityHigh => 'High';
+
+  @override
+  String get taskPriorityNormal => 'Normal';
+
+  @override
+  String get taskPriorityLow => 'Low';
+
+  @override
+  String get taskEmptyMessage => 'No Tasks for now';
+
+  @override
+  String get configureMaterialsTitle => 'Materials';
+
+  @override
+  String get configureMaterialsSubtitle => 'Drag handle to reorder materials.';
+
+  @override
+  String configurePlasticCount(int count) {
+    return 'Plastic ($count)';
+  }
+
+  @override
+  String configureNonPlasticCount(int count) {
+    return 'Non-Plastic ($count)';
+  }
+
+  @override
+  String get configureSaveOrder => 'Save Order';
+
+  @override
+  String get configureSequenceSaved => 'Sequence saved successfully';
+
+  @override
+  String get configurePetBottles => 'PET Bottles';
+
+  @override
+  String get configureHdpeRigid => 'HDPE Rigid';
+
+  @override
+  String get configureMilkPouch => 'Milk Pouch / Soft Plastic';
+
+  @override
+  String get configurePpHardPlastics => 'PP Hard Plastics';
+
+  @override
+  String get configureMultiLayerPackaging => 'Multi-Layer Packaging';
+
+  @override
+  String get configurePvcPlastic => 'PVC Plastic';
+
+  @override
+  String get configureMixedGarbage => 'Mixed Garbage';
+
+  @override
+  String get configureMetals => 'Metals';
+
+  @override
+  String get configureGlass => 'Glass';
+
+  @override
+  String get configurePaperCardboard => 'Paper & Cardboard';
+
+  @override
+  String get configureOrganicWood => 'Organic & Wood';
+
+  @override
+  String get configureConcreteMasonry => 'Concrete, Brick & Masonry';
+
+  @override
+  String get configureCeramicsPorcelain => 'Ceramics & Porcelain';
+
+  @override
   String get drawerSyncStatus => 'Sync Status';
 
   @override
@@ -861,4 +980,246 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logoutYes => 'Yes';
+
+  @override
+  String get helpCallSupport => 'Call Support';
+
+  @override
+  String get helpCallSupportSubtitle => 'Available 24/7 for field issues';
+
+  @override
+  String get helpInstantHelp => 'Instant Help';
+
+  @override
+  String get helpInstantHelpSubtitle => 'Chat with a support agent';
+
+  @override
+  String get helpFrequentlyAskedQuestions => 'Frequently Asked Questions';
+
+  @override
+  String get helpPrinterQuestion => 'Printer is not printing receipts?';
+
+  @override
+  String get helpPrinterAnswer =>
+      '1. Turn Bluetooth OFF and ON.\n2. Restart thermal printer.\n3. Go to App Settings > Printer and run \'Test Print\'.';
+
+  @override
+  String get helpAddExpenseQuestion => 'How to Add Expense?';
+
+  @override
+  String get helpAddExpenseAnswer =>
+      '1. Open Wallet & Log Expense.\n2. Tap Log Expense.\n3. Enter the details and add a receipt.';
+
+  @override
+  String get helpTransferQuestion => 'How to Transfer Requests';
+
+  @override
+  String get helpTransferAnswer =>
+      'Open Transfer Requests from the menu and follow the on-screen instructions.';
+
+  @override
+  String get helpSyncQuestion => 'How to do Sync Backup?';
+
+  @override
+  String get helpSyncAnswer =>
+      'Open Sync Status from the menu and tap Sync Now.';
+
+  @override
+  String get helpBluetoothQuestion =>
+      'What should I do if my Bluetooth printer won\'t connect?';
+
+  @override
+  String get helpBluetoothAnswer =>
+      'Make sure Bluetooth is enabled, restart the printer, then reconnect it from App Settings > Printer.';
+
+  @override
+  String get collectionItemsReceived => 'Items Received';
+
+  @override
+  String get collectionItemsReceivedSubtitle =>
+      'Select the items received from this Collection types and enter the quantity.';
+
+  @override
+  String get collectionTypeLabel => 'Collection types';
+
+  @override
+  String get collectionSelectType => 'Select Collection type';
+
+  @override
+  String get collectionAddItemLabel => 'Add Item';
+
+  @override
+  String get collectionSelectWasteItem => 'Select Waste Item';
+
+  @override
+  String collectionItemsSelected(int count) {
+    return '$count Items Selected';
+  }
+
+  @override
+  String get collectionVehicleNumber => 'Vehicle Number Plate';
+
+  @override
+  String get collectionMrfAgentName => 'MRF Agent Name';
+
+  @override
+  String get collectionPersonName => 'Select Person Name';
+
+  @override
+  String get collectionPlasticCount => 'Plastic (12)';
+
+  @override
+  String get collectionNonPlasticCount => 'Non-Plastic (10)';
+
+  @override
+  String get collectionMilkPouch => 'Milk Pouch / Soft Plastic';
+
+  @override
+  String get collectionMultiLayer => 'Multi-Layer Packaging';
+
+  @override
+  String get collectionMixedGarbage => 'Mixed Garbage';
+
+  @override
+  String get collectionCaptureInstruction =>
+      'Capture all collection photos for review (JPG/PNG, under 5MB).';
+
+  @override
+  String get collectionWeight => 'Collection Weight';
+
+  @override
+  String get collectionVerifiedWeight => 'Verified Weight';
+
+  @override
+  String get collectionCapturePhoto => 'Capture Photo';
+
+  @override
+  String get collectionRampPersonPhoto => 'Upload Ramp Person Photo';
+
+  @override
+  String get collectionTotalWeight => 'Total Collection Weight';
+
+  @override
+  String get collectionWeightDifference => 'Weight Comparison';
+
+  @override
+  String get collectionTotalPrice => 'Total Price';
+
+  @override
+  String get collectionSaveDraft => 'Save as Draft';
+
+  @override
+  String get collectionSubmit => 'Submit';
+
+  @override
+  String get collectionSubmitted => 'Collection Submitted';
+
+  @override
+  String get collectionSuccessfully => 'Successfully!';
+
+  @override
+  String get collectionSubmissionId => 'Collection ID TRP-542586-04';
+
+  @override
+  String get collectionPreviewSlip => 'Preview Slip';
+
+  @override
+  String get collectionAddNew => 'Add New Collection';
+
+  @override
+  String get collectionCollectedItems => 'Collected Items';
+
+  @override
+  String get collectionThankYou => 'Thank You';
+
+  @override
+  String get collectionShareSlip => 'Share Slip';
+
+  @override
+  String get collectionPrintSlip => 'Print Slip';
+
+  @override
+  String get collectionSelectVehicle => 'Select Vehicle Number Plate';
+
+  @override
+  String get collectionSelectPerson => 'Select Person Name';
+
+  @override
+  String get collectionSelectMrfAgent => 'Select MRF Agent Name';
+
+  @override
+  String get collectionChoosePhotoSource => 'Choose Photo Source';
+
+  @override
+  String get collectionCamera => 'Camera';
+
+  @override
+  String get collectionGallery => 'Gallery';
+
+  @override
+  String get collectionRampPhotoHint =>
+      'Upload a photo to record and verify person details.';
+
+  @override
+  String get collectionReceiptDate => 'Date:';
+
+  @override
+  String get collectionReceiptTime => 'Time:';
+
+  @override
+  String get collectionReceiptTotal => 'TOTAL';
+
+  @override
+  String get collectionReceiptAgent => 'Collection Agent';
+
+  @override
+  String get collectionSystemGeneratedSlip => 'System Generated Slip';
+
+  @override
+  String get collectionPrinterHint =>
+      'Ensure your Bluetooth thermal printer is switched on and connected.';
+
+  @override
+  String get collectionPetReceiptDetail => '120 KG × ₹12.00/KG';
+
+  @override
+  String get collectionHdpeReceiptDetail => '85.5 KG × ₹8.50/KG';
+
+  @override
+  String get collectionPpReceiptDetail => '12 KG × ₹45.00/KG';
+
+  @override
+  String get taskResolveTitle => 'Resolve Task';
+
+  @override
+  String get taskOverviewTitle => 'Verify Collection Details';
+
+  @override
+  String get taskOverviewDescription =>
+      'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight.';
+
+  @override
+  String get taskAttachmentTitle => 'Attachment from Supervisor';
+
+  @override
+  String get taskCompletionProof => 'Task Completion Proof *';
+
+  @override
+  String get taskProofSupported => 'Supported: JPG, PNG (Max 5MB).';
+
+  @override
+  String get taskDescriptionLabel => 'Description *';
+
+  @override
+  String get taskDescriptionHint => 'Add Description';
+
+  @override
+  String get taskDescriptionMinimum => 'Min 150 Characters';
+
+  @override
+  String get taskFilledDescription =>
+      'Weight scale calibrated using 10kg standard test weight. Zero-error verified.';
+
+  @override
+  String get taskMarkCompleted => 'Mark as Completed';
 }

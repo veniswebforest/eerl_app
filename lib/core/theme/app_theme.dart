@@ -67,6 +67,7 @@ class AppTheme {
             borderRadius: BorderRadius.circular(14),
           ),
           textStyle: AppTextStyles.labelLarge.copyWith(
+            color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),

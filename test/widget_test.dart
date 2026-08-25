@@ -5,6 +5,7 @@
 
 import 'package:eerl_app/core/providers/locale_provider.dart';
 import 'package:eerl_app/features/home/view/home_screen.dart';
+import 'package:eerl_app/features/help_support/view/help_support_screen.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import 'package:eerl_app/features/records/model/collection_detail_status.dart';
 import 'package:eerl_app/features/wallet/model/expense_claim_detail_status.dart';
@@ -97,6 +98,14 @@ void main() {
     expect(find.text('Rahul Patel'), findsOneWidget);
     expect(find.text('Collection Agent'), findsOneWidget);
     expect(find.text('Transfer Requests'), findsWidgets);
+    expect(find.text('Tasks & Requests'), findsOneWidget);
+    expect(find.byKey(const Key('drawer-tasks')), findsNothing);
+
+    await tester.tap(find.byKey(const Key('drawer-tasks-requests')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('drawer-tasks')), findsOneWidget);
+    expect(find.byKey(const Key('drawer-requests')), findsOneWidget);
     expect(find.text('Powered by Eco Vision'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -692,6 +701,100 @@ void main() {
     await expectLater(
       find.byType(MaterialApp),
       matchesGoldenFile('profile_logout_preview.png'),
+    );
+  });
+
+  testWidgets('Help & Support opens from drawer and expands FAQ items', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => LocaleProvider(),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MainDashboardScreen(),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('home-menu-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('drawer-help-support')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HelpSupportScreen), findsOneWidget);
+    expect(find.text('Frequently Asked Questions'), findsOneWidget);
+    expect(find.byKey(const ValueKey('bottom-nav-home')), findsNothing);
+    expect(
+      find.textContaining('1. Turn Bluetooth OFF and ON.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const ValueKey('help-faq-1')));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('1. Open Wallet & Log Expense.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('1. Turn Bluetooth OFF and ON.'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('help-support-back')));
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeScreen), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Help & Support is responsive in Gujarati and Hindi', (
+    tester,
+  ) async {
+    for (final locale in const [Locale('gu'), Locale('hi')]) {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: HelpSupportScreen(onBack: _noop),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+  });
+
+  testWidgets('Help & Support matches review preview', (tester) async {
+    final fontLoader = FontLoader('Manrope')
+      ..addFont(rootBundle.load('assets/font/Manrope-Regular.ttf'))
+      ..addFont(rootBundle.load('assets/font/Manrope-Medium.ttf'))
+      ..addFont(rootBundle.load('assets/font/Manrope-SemiBold.ttf'))
+      ..addFont(rootBundle.load('assets/font/Manrope-Bold.ttf'));
+    await fontLoader.load();
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: HelpSupportScreen(onBack: _noop),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(HelpSupportScreen),
+      matchesGoldenFile('help_support_preview.png'),
     );
   });
 

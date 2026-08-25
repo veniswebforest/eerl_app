@@ -16,9 +16,21 @@ import '../widgets/zone_selector.dart';
 ///
 /// Each section is a separate, focused widget for maintainability.
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, this.onWalletTap, this.onDrawerChanged});
+  const HomeScreen({
+    super.key,
+    this.onWalletTap,
+    this.onHelpSupportTap,
+    this.onConfigureMaterialTap,
+    this.onTasksTap,
+    this.onRequestsTap,
+    this.onDrawerChanged,
+  });
 
   final VoidCallback? onWalletTap;
+  final VoidCallback? onHelpSupportTap;
+  final VoidCallback? onConfigureMaterialTap;
+  final VoidCallback? onTasksTap;
+  final VoidCallback? onRequestsTap;
   final ValueChanged<bool>? onDrawerChanged;
 
   @override
@@ -30,7 +42,13 @@ class HomeScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: AppColors.backgroundColor,
           extendBody: true,
-          drawer: HomeDrawer(onWalletTap: onWalletTap),
+          drawer: HomeDrawer(
+            onWalletTap: onWalletTap,
+            onHelpSupportTap: onHelpSupportTap,
+            onConfigureMaterialTap: onConfigureMaterialTap,
+            onTasksTap: onTasksTap,
+            onRequestsTap: onRequestsTap,
+          ),
           onDrawerChanged: onDrawerChanged,
           drawerScrimColor: Colors.black.withValues(alpha: 0.6),
           body: Container(

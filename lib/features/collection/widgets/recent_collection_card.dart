@@ -30,7 +30,8 @@ class RecentCollectionCard extends StatelessWidget {
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(      color: Colors.white,
+          decoration: BoxDecoration(
+            color: Colors.white,
 
             borderRadius: BorderRadius.circular(12),
             border: item.status == RecentCollectionStatus.pending

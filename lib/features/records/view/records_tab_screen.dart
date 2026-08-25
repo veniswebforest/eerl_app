@@ -39,8 +39,12 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
         children: [
           Positioned.fill(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 112),
-              child: Center(
+              padding: const EdgeInsets.fromLTRB(
+                20,
+                AppScreenHeaderMetrics.topInset,
+                20,
+                112,
+              ),              child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 600),
                   child: Column(
