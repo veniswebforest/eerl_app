@@ -4,8 +4,10 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/features/collection/view/collections_tab_screen.dart';
 import 'package:eerl_app/features/collection/view/add_collection_screen.dart';
 import 'package:eerl_app/features/configure_material/view/configure_material_screen.dart';
+import 'package:eerl_app/features/end_my_day/view/end_my_day_screen.dart';
 import 'package:eerl_app/features/home/view/home_screen.dart';
 import 'package:eerl_app/features/help_support/view/help_support_screen.dart';
+import 'package:eerl_app/features/notifications/view/notifications_screen.dart';
 import 'package:eerl_app/features/profile/view/profile_screen.dart';
 import 'package:eerl_app/features/records/model/collection_detail_status.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
@@ -51,6 +53,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   bool _isAddCollectionOpen = false;
   bool _isConfigureMaterialOpen = false;
   bool _isTasksOpen = false;
+  bool _isNotificationsOpen = false;
+  bool _isEndMyDayOpen = false;
   TaskListItem? _selectedTask;
   ExpenseClaimDetailStatus? _claimDetailStatus;
   CollectionDetailStatus? _collectionDetailStatus;
@@ -93,10 +97,20 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           ? ConfigureMaterialScreen(
               onBack: () => setState(() => _isConfigureMaterialOpen = false),
             )
+          : _isNotificationsOpen
+          ? NotificationsScreen(
+              onBack: () => setState(() => _isNotificationsOpen = false),
+            )
+          : _isEndMyDayOpen
+          ? EndMyDayScreen(
+              onBack: () => setState(() => _isEndMyDayOpen = false),
+              onEndDay: () => setState(() => _isEndMyDayOpen = false),
+            )
           : _selectedTask != null
           ? TaskDetailScreen(
               task: _selectedTask!,
               onBack: () => setState(() => _selectedTask = null),
+              onCompleted: () => setState(() => _selectedTask = null),
             )
           : _isTasksOpen
           ? MyTasksScreen(
@@ -139,6 +153,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               _isLogExpenseOpen ||
               _isHelpSupportOpen ||
               _isConfigureMaterialOpen ||
+              _isNotificationsOpen ||
+              _isEndMyDayOpen ||
               _isTasksOpen ||
               _selectedTask != null ||
               _claimDetailStatus != null ||
@@ -175,10 +191,13 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         unselectedIcon: '$_navIconPath/nav_home.svg',
         page: HomeScreen(
           onWalletTap: () => setState(() => _isWalletOpen = true),
+          onAddCollectionTap: () => setState(() => _isAddCollectionOpen = true),
           onHelpSupportTap: () => setState(() => _isHelpSupportOpen = true),
           onConfigureMaterialTap: () =>
               setState(() => _isConfigureMaterialOpen = true),
           onTasksTap: () => setState(() => _isTasksOpen = true),
+          onNotificationTap: () => setState(() => _isNotificationsOpen = true),
+          onEndMyDayTap: () => setState(() => _isEndMyDayOpen = true),
           onDrawerChanged: (isOpen) {
             if (_isDrawerOpen == isOpen) return;
             setState(() => _isDrawerOpen = isOpen);
@@ -194,6 +213,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         unselectedIcon: '$_navIconPath/nav_collections.svg',
         page: CollectionsTabScreen(
           onAddCollection: () => setState(() => _isAddCollectionOpen = true),
+          onNotificationTap: () => setState(() => _isNotificationsOpen = true),
         ),
         pageKey: 'collections',
         roles: allRoles,
@@ -215,7 +235,9 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         title: l10n.profile,
         selectedIcon: '$_navIconPath/nav_profile.svg',
         unselectedIcon: '$_navIconPath/nav_profile.svg',
-        page: ProfileScreen(),
+        page: ProfileScreen(
+          onNotificationTap: () => setState(() => _isNotificationsOpen = true),
+        ),
         pageKey: 'profile',
         roles: allRoles,
         permission: 'profile.view',

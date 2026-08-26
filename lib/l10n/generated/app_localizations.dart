@@ -2421,6 +2421,384 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mark as Completed'**
   String get taskMarkCompleted;
+
+  /// No description provided for @taskDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Details'**
+  String get taskDetailsTitle;
+
+  /// No description provided for @taskCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Completed!'**
+  String get taskCompletedTitle;
+
+  /// No description provided for @taskCompletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The task assigned by supervisor has been completed.'**
+  String get taskCompletedMessage;
+
+  /// No description provided for @taskBackToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to List'**
+  String get taskBackToList;
+
+  /// No description provided for @taskSupervisorDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor Details'**
+  String get taskSupervisorDetails;
+
+  /// No description provided for @taskCompletionProofPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Completion Proof'**
+  String get taskCompletionProofPlain;
+
+  /// No description provided for @taskDescriptionPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get taskDescriptionPlain;
+
+  /// No description provided for @notificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationTitle;
+
+  /// No description provided for @notificationToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today,'**
+  String get notificationToday;
+
+  /// No description provided for @notificationEarlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier,'**
+  String get notificationEarlier;
+
+  /// No description provided for @notificationEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All Caught Up!'**
+  String get notificationEmptyTitle;
+
+  /// No description provided for @notificationEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all caught up! Check back later for updates, task status, and system alerts.'**
+  String get notificationEmptyMessage;
+
+  /// No description provided for @notificationOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Mode'**
+  String get notificationOfflineTitle;
+
+  /// No description provided for @notificationOfflineMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Data will sync automatically when Connection Restored.'**
+  String get notificationOfflineMessage;
+
+  /// No description provided for @notificationTransferRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Reject'**
+  String get notificationTransferRejectedTitle;
+
+  /// No description provided for @notificationTransferRejectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Transfer entry requires your attention.'**
+  String get notificationTransferRejectedMessage;
+
+  /// No description provided for @notificationReceiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt Print'**
+  String get notificationReceiptTitle;
+
+  /// No description provided for @notificationReceiptMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt printing process completed successfully.'**
+  String get notificationReceiptMessage;
+
+  /// No description provided for @notificationCollectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Submitted'**
+  String get notificationCollectionTitle;
+
+  /// No description provided for @notificationCollectionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your collection entry has been verified by the Collection Supervisor.'**
+  String get notificationCollectionMessage;
+
+  /// No description provided for @notificationExpenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense added'**
+  String get notificationExpenseTitle;
+
+  /// No description provided for @notificationExpenseMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your expense bill has been rejected by supervisor'**
+  String get notificationExpenseMessage;
+
+  /// No description provided for @notificationSyncTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Complete'**
+  String get notificationSyncTitle;
+
+  /// No description provided for @notificationSyncMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'All pending data has been synced successfully.'**
+  String get notificationSyncMessage;
+
+  /// No description provided for @notificationJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get notificationJustNow;
+
+  /// No description provided for @notificationTenMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'10 Mins ago'**
+  String get notificationTenMinutes;
+
+  /// No description provided for @notificationFiveHours.
+  ///
+  /// In en, this message translates to:
+  /// **'5 Hours ago'**
+  String get notificationFiveHours;
+
+  /// No description provided for @notificationSevenHours.
+  ///
+  /// In en, this message translates to:
+  /// **'7 Hours ago'**
+  String get notificationSevenHours;
+
+  /// No description provided for @notificationYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday, 11:30 AM'**
+  String get notificationYesterday;
+
+  /// No description provided for @notificationPreviousDate.
+  ///
+  /// In en, this message translates to:
+  /// **'24 Oct, 08:00 AM'**
+  String get notificationPreviousDate;
+
+  /// No description provided for @homePendingTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Task'**
+  String get homePendingTask;
+
+  /// No description provided for @homePendingTaskSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View tasks assigned to you.'**
+  String get homePendingTaskSubtitle;
+
+  /// No description provided for @homeSuratEastZone.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat East Zone'**
+  String get homeSuratEastZone;
+
+  /// No description provided for @homeSuratNorthZone.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat North Zone'**
+  String get homeSuratNorthZone;
+
+  /// No description provided for @homeSuratSouthZone.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat South Zone'**
+  String get homeSuratSouthZone;
+
+  /// Button label to view pending tasks
+  ///
+  /// In en, this message translates to:
+  /// **'View Task'**
+  String get viewTask;
+
+  /// No description provided for @endDayOpeningBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Balance'**
+  String get endDayOpeningBalance;
+
+  /// No description provided for @endDayOpeningBalanceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'₹ 5,000.00'**
+  String get endDayOpeningBalanceValue;
+
+  /// No description provided for @endDayExpensesLogged.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Expenses Logged'**
+  String get endDayExpensesLogged;
+
+  /// No description provided for @endDayExpensesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'₹ 720.00'**
+  String get endDayExpensesValue;
+
+  /// No description provided for @endDayTotalPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Purchase (Money given at collection)'**
+  String get endDayTotalPurchase;
+
+  /// No description provided for @endDayPurchaseValue.
+  ///
+  /// In en, this message translates to:
+  /// **'₹ 6000.00'**
+  String get endDayPurchaseValue;
+
+  /// No description provided for @endDayClosingBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing Balance'**
+  String get endDayClosingBalance;
+
+  /// No description provided for @endDayClosingBalanceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'₹ 11,720.00'**
+  String get endDayClosingBalanceValue;
+
+  /// No description provided for @endDayBalanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated from recorded transactions.\nNon-verified collection not included.'**
+  String get endDayBalanceHint;
+
+  /// No description provided for @endDayActivitySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Today’s Activity Summary'**
+  String get endDayActivitySummary;
+
+  /// No description provided for @endDayCompletedCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed Collections'**
+  String get endDayCompletedCollections;
+
+  /// No description provided for @endDayPendingCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Collections'**
+  String get endDayPendingCollections;
+
+  /// No description provided for @endDayWasteCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Waste Collected'**
+  String get endDayWasteCollected;
+
+  /// No description provided for @endDayWasteValue.
+  ///
+  /// In en, this message translates to:
+  /// **'876 KG'**
+  String get endDayWasteValue;
+
+  /// No description provided for @endDayVerificationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification Pending'**
+  String get endDayVerificationPending;
+
+  /// No description provided for @endDayOfflineSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Pending Sync'**
+  String get endDayOfflineSync;
+
+  /// No description provided for @endDayPendingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get endDayPendingStatus;
+
+  /// No description provided for @endDayCompletedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'07'**
+  String get endDayCompletedValue;
+
+  /// No description provided for @endDayPendingValue.
+  ///
+  /// In en, this message translates to:
+  /// **'01'**
+  String get endDayPendingValue;
+
+  /// No description provided for @endDayExpensesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'02'**
+  String get endDayExpensesCount;
+
+  /// No description provided for @endDayWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Once you close the day, you won’t be able to\nadd or edit any entries.'**
+  String get endDayWarning;
+
+  /// Title of end-day confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'End Your Day?'**
+  String get endDayConfirmTitle;
+
+  /// Body message of end-day confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Once you close the day, all entries will be locked. Make sure all collections and expenses are logged before closing.'**
+  String get endDayConfirmMessage;
+
+  /// Confirm button in end-day dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, End My Day'**
+  String get endDayConfirmYes;
+
+  /// Cancel button in end-day dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Go Back'**
+  String get endDayConfirmNo;
+
+  /// Success title after day is closed
+  ///
+  /// In en, this message translates to:
+  /// **'Day Closed!'**
+  String get endDaySuccessTitle;
+
+  /// Success message after day is closed
+  ///
+  /// In en, this message translates to:
+  /// **'Your day has been closed successfully. All data has been synced.'**
+  String get endDaySuccessMessage;
 }
 
 class _AppLocalizationsDelegate

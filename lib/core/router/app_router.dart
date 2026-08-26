@@ -6,14 +6,15 @@ import 'package:eerl_app/features/auth/view/otp_screen.dart';
 import 'package:eerl_app/features/auth/view/splash_screen.dart';
 import 'package:eerl_app/features/dashboard/view/main_dashboard_screen.dart';
 import 'package:eerl_app/features/details/view/details_screen.dart';
-import 'package:eerl_app/features/profile/view/profile_screen.dart';
 import 'package:eerl_app/features/settings/view/settings_screen.dart';
 import 'app_routes.dart';
 
 /// Application router configuration built with [GoRouter].
 ///
-/// Uses a [StatefulShellRoute] to keep the bottom-navigation tabs
-/// alive while navigating between them.
+/// Uses a single [GoRoute] for the home shell which houses [MainDashboardScreen].
+/// [MainDashboardScreen] self-manages its own bottom-navigation tabs with
+/// [IndexedStack] and overlays (wallet, end-my-day, help-support, etc.)
+/// via internal state — no separate GoRouter branches needed for sub-tabs.
 class AppRouter {
   AppRouter._();
 
@@ -24,46 +25,12 @@ class AppRouter {
     navigatorKey: _rootNavigatorKey,
     initialLocation: AppRoutes.splash,
     routes: [
-      // ── Shell route for bottom navigation ────────────────────────
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          if (navigationShell.currentIndex == 0) {
-            return navigationShell;
-          }
-          return _ScaffoldWithNavBar(navigationShell: navigationShell);
-        },
-        branches: [
-          // Home
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.home,
-                name: 'home',
-                builder: (context, state) => const MainDashboardScreen(),
-              ),
-            ],
-          ),
-          // Profile
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.profile,
-                name: 'profile',
-                builder: (context, state) => const ProfileScreen(),
-              ),
-            ],
-          ),
-          // Settings
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.settings,
-                name: 'settings',
-                builder: (context, state) => const SettingsScreen(),
-              ),
-            ],
-          ),
-        ],
+      // ── Main dashboard shell (owns bottom nav + overlays) ─────────
+      GoRoute(
+        path: AppRoutes.home,
+        name: 'home',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const MainDashboardScreen(),
       ),
 
       // ── Auth routes ──────────────────────────────────────────────
@@ -89,7 +56,13 @@ class AppRouter {
         },
       ),
 
-      // ── Standalone routes ────────────────────────────────────────
+      // ── Miscellaneous standalone routes ──────────────────────────
+      GoRoute(
+        path: AppRoutes.settings,
+        name: 'settings',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const SettingsScreen(),
+      ),
       GoRoute(
         path: AppRoutes.details,
         name: 'details',
@@ -104,54 +77,6 @@ class AppRouter {
     // ── Error page ────────────────────────────────────────────────
     errorBuilder: (context, state) => const _ErrorPage(),
   );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  SCAFFOLD WITH BOTTOM NAVIGATION BAR
-// ═══════════════════════════════════════════════════════════════════
-
-class _ScaffoldWithNavBar extends StatelessWidget {
-  const _ScaffoldWithNavBar({required this.navigationShell});
-
-  final StatefulNavigationShell navigationShell;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) {
-          navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
-          );
-        },
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: l10n.home,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outlined),
-            selectedIcon: const Icon(Icons.person),
-            label: l10n.profile,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings),
-            label: l10n.settings,
-          ),
-        ],
-        backgroundColor: theme.colorScheme.surface,
-        indicatorColor: theme.colorScheme.primary.withValues(alpha: 0.12),
-      ),
-    );
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════════

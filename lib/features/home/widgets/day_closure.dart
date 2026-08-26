@@ -9,7 +9,9 @@ import 'home_styles.dart';
 
 /// Day Closure section with End My Day card and button.
 class DayClosure extends StatelessWidget {
-  const DayClosure({super.key});
+  const DayClosure({super.key, this.onEndMyDayTap});
+
+  final VoidCallback? onEndMyDayTap;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +71,8 @@ class DayClosure extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  key: const Key('home-end-my-day-button'),
+                  onPressed: onEndMyDayTap,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary500,
                     foregroundColor: AppColors.neutral50,

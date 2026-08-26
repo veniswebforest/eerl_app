@@ -14,7 +14,9 @@ import '../widgets/logout_confirmation_dialog.dart';
 import '../widgets/sync_data_dialog.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, this.onNotificationTap});
+
+  final VoidCallback? onNotificationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +50,9 @@ class ProfileScreen extends StatelessWidget {
             ),
             children: [
               _ProfileHeader(
-                onNotificationTap: () =>
-                    _showLanguagePicker(context, localeProvider),
+                onNotificationTap:
+                    onNotificationTap ??
+                    () => _showLanguagePicker(context, localeProvider),
               ),
               const SizedBox(height: 28),
               Padding(

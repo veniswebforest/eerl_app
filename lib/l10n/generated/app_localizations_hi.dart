@@ -1222,4 +1222,205 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get taskMarkCompleted => 'पूर्ण के रूप में चिह्नित करें';
+
+  @override
+  String get taskDetailsTitle => 'कार्य विवरण';
+
+  @override
+  String get taskCompletedTitle => 'कार्य पूर्ण हुआ!';
+
+  @override
+  String get taskCompletedMessage =>
+      'सुपरवाइज़र द्वारा सौंपा गया कार्य पूरा हो गया है।';
+
+  @override
+  String get taskBackToList => 'सूची पर वापस जाएँ';
+
+  @override
+  String get taskSupervisorDetails => 'सुपरवाइज़र विवरण';
+
+  @override
+  String get taskCompletionProofPlain => 'कार्य पूर्णता प्रमाण';
+
+  @override
+  String get taskDescriptionPlain => 'विवरण';
+
+  @override
+  String get notificationTitle => 'सूचनाएँ';
+
+  @override
+  String get notificationToday => 'आज,';
+
+  @override
+  String get notificationEarlier => 'पहले,';
+
+  @override
+  String get notificationEmptyTitle => 'सभी अपडेट देख लिए!';
+
+  @override
+  String get notificationEmptyMessage =>
+      'आपने सभी अपडेट देख लिए हैं! अपडेट, कार्य स्थिति और सिस्टम अलर्ट के लिए बाद में फिर देखें।';
+
+  @override
+  String get notificationOfflineTitle => 'ऑफलाइन मोड';
+
+  @override
+  String get notificationOfflineMessage =>
+      'इंटरनेट कनेक्शन नहीं है। कनेक्शन बहाल होने पर डेटा अपने आप सिंक होगा।';
+
+  @override
+  String get notificationTransferRejectedTitle => 'ट्रांसफर अस्वीकृत';
+
+  @override
+  String get notificationTransferRejectedMessage =>
+      'आपकी ट्रांसफर प्रविष्टि पर ध्यान देना आवश्यक है।';
+
+  @override
+  String get notificationReceiptTitle => 'रसीद प्रिंट';
+
+  @override
+  String get notificationReceiptMessage =>
+      'रसीद प्रिंट करने की प्रक्रिया सफलतापूर्वक पूरी हुई।';
+
+  @override
+  String get notificationCollectionTitle => 'कलेक्शन जमा हुआ';
+
+  @override
+  String get notificationCollectionMessage =>
+      'आपकी कलेक्शन प्रविष्टि कलेक्शन सुपरवाइज़र द्वारा सत्यापित की गई है।';
+
+  @override
+  String get notificationExpenseTitle => 'खर्च जोड़ा गया';
+
+  @override
+  String get notificationExpenseMessage =>
+      'आपका खर्च बिल सुपरवाइज़र द्वारा अस्वीकृत किया गया है';
+
+  @override
+  String get notificationSyncTitle => 'सिंक पूर्ण';
+
+  @override
+  String get notificationSyncMessage =>
+      'सभी लंबित डेटा सफलतापूर्वक सिंक हो गया है।';
+
+  @override
+  String get notificationJustNow => 'अभी';
+
+  @override
+  String get notificationTenMinutes => '10 मिनट पहले';
+
+  @override
+  String get notificationFiveHours => '5 घंटे पहले';
+
+  @override
+  String get notificationSevenHours => '7 घंटे पहले';
+
+  @override
+  String get notificationYesterday => 'कल, 11:30 AM';
+
+  @override
+  String get notificationPreviousDate => '24 अक्टू., 08:00 AM';
+
+  @override
+  String get homePendingTask => 'लंबित कार्य';
+
+  @override
+  String get homePendingTaskSubtitle => 'आपको सौंपे गए कार्य देखें।';
+
+  @override
+  String get homeSuratEastZone => 'EERL - सूरत पूर्व ज़ोन';
+
+  @override
+  String get homeSuratNorthZone => 'EERL - सूरत उत्तर ज़ोन';
+
+  @override
+  String get homeSuratSouthZone => 'EERL - सूरत दक्षिण ज़ोन';
+
+  @override
+  String get viewTask => 'टास्क देखें';
+
+  @override
+  String get endDayOpeningBalance => 'आरंभिक शेष';
+
+  @override
+  String get endDayOpeningBalanceValue => '₹ 5,000.00';
+
+  @override
+  String get endDayExpensesLogged => 'कुल दर्ज खर्च';
+
+  @override
+  String get endDayExpensesValue => '₹ 720.00';
+
+  @override
+  String get endDayTotalPurchase => 'कुल खरीद (कलेक्शन पर दिया गया पैसा)';
+
+  @override
+  String get endDayPurchaseValue => '₹ 6000.00';
+
+  @override
+  String get endDayClosingBalance => 'अंतिम शेष';
+
+  @override
+  String get endDayClosingBalanceValue => '₹ 11,720.00';
+
+  @override
+  String get endDayBalanceHint =>
+      'दर्ज लेनदेन से गणना की गई।\nअसत्यापित कलेक्शन शामिल नहीं है।';
+
+  @override
+  String get endDayActivitySummary => 'आज की गतिविधि का सारांश';
+
+  @override
+  String get endDayCompletedCollections => 'पूर्ण कलेक्शन';
+
+  @override
+  String get endDayPendingCollections => 'लंबित कलेक्शन';
+
+  @override
+  String get endDayWasteCollected => 'कुल एकत्रित कचरा';
+
+  @override
+  String get endDayWasteValue => '876 KG';
+
+  @override
+  String get endDayVerificationPending => 'सत्यापन लंबित';
+
+  @override
+  String get endDayOfflineSync => 'ऑफलाइन सिंक लंबित';
+
+  @override
+  String get endDayPendingStatus => 'लंबित';
+
+  @override
+  String get endDayCompletedValue => '07';
+
+  @override
+  String get endDayPendingValue => '01';
+
+  @override
+  String get endDayExpensesCount => '02';
+
+  @override
+  String get endDayWarning =>
+      'दिन बंद करने के बाद आप कोई प्रविष्टि\nजोड़ या संपादित नहीं कर पाएँगे।';
+
+  @override
+  String get endDayConfirmTitle => 'अपना दिन समाप्त करें?';
+
+  @override
+  String get endDayConfirmMessage =>
+      'दिन बंद होने के बाद, सभी प्रविष्टियाँ लॉक हो जाएंगी। बंद करने से पहले सुनिश्चित करें कि सभी संग्रह और खर्च दर्ज हैं।';
+
+  @override
+  String get endDayConfirmYes => 'हाँ, दिन समाप्त करें';
+
+  @override
+  String get endDayConfirmNo => 'वापस जाएं';
+
+  @override
+  String get endDaySuccessTitle => 'दिन बंद!';
+
+  @override
+  String get endDaySuccessMessage =>
+      'आपका दिन सफलतापूर्वक बंद हो गया। सभी डेटा सिंक हो गया।';
 }

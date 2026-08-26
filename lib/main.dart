@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'features/auth/presentation/auth_provider.dart';
@@ -15,7 +18,10 @@ void main() async {
   final themeProvider = ThemeProvider();
   final localeProvider = LocaleProvider();
   final authProvider = AuthProvider();
-
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   await Future.wait([themeProvider.loadTheme(), localeProvider.loadLocale()]);
 
   runApp(
@@ -40,6 +46,9 @@ class EerlApp extends StatelessWidget {
     final localeProvider = context.watch<LocaleProvider>();
 
     return MaterialApp.router(
+      builder: (context, child) {
+        return SafeAreaWrapper(child: child!);
+      },
       // ── App Info ─────────────────────────────────────────────────
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       debugShowCheckedModeBanner: false,
@@ -56,6 +65,21 @@ class EerlApp extends StatelessWidget {
 
       // ── Router ──────────────────────────────────────────────────
       routerConfig: AppRouter.router,
+    );
+  }
+}
+
+class SafeAreaWrapper extends StatelessWidget {
+  final Widget child;
+
+  const SafeAreaWrapper({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      bottom: Platform.isAndroid ? true : false,
+      top: false, // top safe area avoid kariye (AppBar handle kare che)
+      child: child,
     );
   }
 }

@@ -9,7 +9,16 @@ import 'home_styles.dart';
 
 /// Quick Actions section with Start Collection and Wallet & Log Expense cards.
 class QuickActions extends StatelessWidget {
-  const QuickActions({super.key});
+  const QuickActions({
+    super.key,
+    this.onAddCollectionTap,
+    this.onTasksTap,
+    this.onLogExpenseTap,
+  });
+
+  final VoidCallback? onAddCollectionTap;
+  final VoidCallback? onTasksTap;
+  final VoidCallback? onLogExpenseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -19,23 +28,37 @@ class QuickActions extends StatelessWidget {
         Text(context.l10n.quickActions, style: HomeStyles.sectionTitle),
         const SizedBox(height: 16),
         QuickActionCard(
+          key: const Key('home-start-collection-card'),
           iconAsset: HomeAssets.startCollection,
           iconColor: AppColors.orange,
           iconBg: AppColors.orangeLight,
           title: context.l10n.startCollection,
           subtitle: context.l10n.recordWeightProof,
           buttonLabel: context.l10n.addCollection,
-          onTap: () {},
+          onTap: onAddCollectionTap ?? () {},
         ),
         const SizedBox(height: 16),
         QuickActionCard(
+          key: const Key('home-pending-task-card'),
+          iconAsset: 'assets/icons/profile/sync_pending_collection.svg',
+          iconColor: AppColors.yellow600,
+          iconBg: AppColors.yellow50,
+          title: context.l10n.homePendingTask,
+          subtitle: context.l10n.homePendingTaskSubtitle,
+          buttonLabel: context.l10n.viewTask,
+          badge: '3',
+          onTap: onTasksTap ?? () {},
+        ),
+        const SizedBox(height: 16),
+        QuickActionCard(
+          key: const Key('home-wallet-expense-card'),
           iconAsset: HomeAssets.walletExpense,
           iconColor: AppColors.secondary500,
           iconBg: AppColors.secondary100,
           title: context.l10n.walletLogExpense,
           subtitle: context.l10n.trackFieldSpending,
           buttonLabel: context.l10n.logExpense,
-          onTap: () {},
+          onTap: onLogExpenseTap ?? () {},
         ),
       ],
     );
@@ -46,22 +69,26 @@ class QuickActions extends StatelessWidget {
 class QuickActionCard extends StatelessWidget {
   const QuickActionCard({
     super.key,
-    required this.iconAsset,
+    this.iconAsset,
+    this.iconData,
     required this.iconColor,
     required this.iconBg,
     required this.title,
     required this.subtitle,
     required this.buttonLabel,
     required this.onTap,
+    this.badge,
   });
 
-  final String iconAsset;
+  final String? iconAsset;
+  final IconData? iconData;
   final Color iconColor;
   final Color iconBg;
   final String title;
   final String subtitle;
   final String buttonLabel;
   final VoidCallback onTap;
+  final String? badge;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +113,9 @@ class QuickActionCard extends StatelessWidget {
                   color: iconBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: SvgPicture.asset(iconAsset, width: 24, height: 24),
+                child: iconAsset != null
+                    ? SvgPicture.asset(iconAsset!, width: 24, height: 24)
+                    : Icon(iconData, size: 24, color: iconColor),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -94,17 +123,35 @@ class QuickActionCard extends StatelessWidget {
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.semiboldH7_18.copyWith(
+                  style: AppTextStyles.semiboldH8_16.copyWith(
                     color: AppColors.neutral950,
                   ),
                 ),
               ),
+              if (badge != null) ...[
+                const SizedBox(width: 8),
+                Container(
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
+                  decoration: const BoxDecoration(
+                    color: AppColors.yellow600,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    badge!,
+                    style: AppTextStyles.semiboldH10_12.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 6),
           Text(
             subtitle,
-            style: AppTextStyles.mediumSH8_14.copyWith(
+            style: AppTextStyles.regularB8_12.copyWith(
               color: AppColors.neutral600,
             ),
           ),

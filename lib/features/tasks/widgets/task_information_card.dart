@@ -18,16 +18,9 @@ class TaskInformationCard extends StatelessWidget {
     width: double.infinity,
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: AppColors.cool200,
       border: Border.all(color: AppColors.cool100),
       borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x12000000),
-          blurRadius: 6,
-          offset: Offset(0, 2),
-        ),
-      ],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,7 +31,8 @@ class TaskInformationCard extends StatelessWidget {
             color: AppColors.neutral950,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8,),
+        Divider(color: AppColors.cool400,),
         child,
       ],
     ),

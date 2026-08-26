@@ -11,8 +11,13 @@ import '../widgets/recent_collection_card.dart';
 import '../widgets/start_collection_card.dart';
 
 class CollectionsTabScreen extends StatelessWidget {
-  const CollectionsTabScreen({super.key, this.onAddCollection});
+  const CollectionsTabScreen({
+    super.key,
+    this.onAddCollection,
+    this.onNotificationTap,
+  });
   final VoidCallback? onAddCollection;
+  final VoidCallback? onNotificationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +68,15 @@ class CollectionsTabScreen extends StatelessWidget {
                       title: l10n.collections,
                       subtitle: l10n.startYourCollections,
                       actions: [
-                        SvgPicture.asset(
-                          CollectionAssets.notification,
-                          width: 45,
-                          height: 45,
+                        InkWell(
+                          key: const Key('collections-notification-button'),
+                          onTap: onNotificationTap,
+                          borderRadius: BorderRadius.circular(24),
+                          child: SvgPicture.asset(
+                            CollectionAssets.notification,
+                            width: 45,
+                            height: 45,
+                          ),
                         ),
                       ],
                     ),

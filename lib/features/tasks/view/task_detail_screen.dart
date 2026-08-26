@@ -15,11 +15,13 @@ class TaskDetailScreen extends StatefulWidget {
     super.key,
     required this.task,
     required this.onBack,
+    this.onCompleted,
     this.initiallyFilled = false,
   });
 
   final TaskListItem task;
   final VoidCallback onBack;
+  final VoidCallback? onCompleted;
   final bool initiallyFilled;
 
   @override
@@ -45,14 +47,17 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _proofImages = widget.initiallyFilled ? [..._mockProofImages] : [];
+    _proofImages = widget.initiallyFilled || _isClosed
+        ? [..._mockProofImages]
+        : [];
     _descriptionController = TextEditingController();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (widget.initiallyFilled && _descriptionController.text.isEmpty) {
+    if ((widget.initiallyFilled || _isClosed) &&
+        _descriptionController.text.isEmpty) {
       _descriptionController.text = context.l10n.taskFilledDescription;
     }
   }
@@ -71,11 +76,26 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     });
   }
 
+  bool get _isClosed => widget.task.status == TaskListStatus.closed;
+
+  Future<void> _showCompletedDialog() => showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (dialogContext) => _TaskCompletedDialog(
+      onBackToList: () {
+        Navigator.of(dialogContext).pop();
+        widget.onCompleted?.call();
+      },
+    ),
+  );
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.backgroundColor,
     appBar: CustomAppBar(
-      title: context.l10n.taskResolveTitle,
+      title: _isClosed
+          ? context.l10n.taskDetailsTitle
+          : context.l10n.taskResolveTitle,
       onBackTap: widget.onBack,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
@@ -91,123 +111,132 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
                   children: [
                     _TaskStatusRow(task: widget.task),
-                    const SizedBox(height: 12),
-                    TaskInformationCard(
-                      title: context.l10n.taskOverviewTitle,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.taskOverviewDescription,
-                            style: AppTextStyles.regularB8_12.copyWith(
-                              color: AppColors.neutral700,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          _BySupervisor(label: context.l10n.taskSupervisorName),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TaskInformationCard(
-                      title: context.l10n.taskAttachmentTitle,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const TaskPhotoGrid(images: _supervisorImages),
-                          const SizedBox(height: 10),
-                          _BySupervisor(label: context.l10n.taskSupervisorName),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    _sectionLabel(context.l10n.taskCompletionProof),
-                    const SizedBox(height: 10),
-                    _CaptureProof(
-                      enabled: _proofImages.isEmpty,
-                      onTap: _addMockProof,
-                    ),
-                    if (_proofImages.isNotEmpty) ...[
+                    if (!_isClosed) ...[
                       const SizedBox(height: 12),
-                      TaskPhotoGrid(
-                        images: _proofImages,
-                        removable: true,
-                        onRemove: (index) =>
-                            setState(() => _proofImages.removeAt(index)),
+                      TaskInformationCard(
+                        title: context.l10n.taskOverviewTitle,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.l10n.taskOverviewDescription,
+                              style: AppTextStyles.regularB8_12.copyWith(
+                                color: AppColors.neutral700,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            _BySupervisor(
+                              label: context.l10n.taskSupervisorName,
+                            ),
+                          ],
+                        ),
                       ),
+                      const SizedBox(height: 12),
+                      TaskInformationCard(
+                        title: context.l10n.taskAttachmentTitle,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const TaskPhotoGrid(images: _supervisorImages),
+                            const SizedBox(height: 10),
+                            _BySupervisor(
+                              label: context.l10n.taskSupervisorName,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _sectionLabel(context.l10n.taskCompletionProof),
+                      const SizedBox(height: 10),
+                      _CaptureProof(
+                        enabled: _proofImages.isEmpty,
+                        onTap: _addMockProof,
+                      ),
+                      if (_proofImages.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        TaskPhotoGrid(
+                          images: _proofImages,
+                          removable: true,
+                          onRemove: (index) =>
+                              setState(() => _proofImages.removeAt(index)),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Text(
+                        context.l10n.taskProofSupported,
+                        style: AppTextStyles.regularB8_12.copyWith(
+                          color: AppColors.neutral500,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _sectionLabel(context.l10n.taskDescriptionLabel),
+                      const SizedBox(height: 10),
+                      TextField(
+                        key: const Key('task-description-field'),
+                        controller: _descriptionController,
+                        minLines: 5,
+                        maxLines: 5,
+                        maxLength: 150,
+                        onChanged: (_) => setState(() {}),
+                        style: AppTextStyles.regularB7_14,
+                        decoration: InputDecoration(
+                          hintText: context.l10n.taskDescriptionHint,
+                          hintStyle: AppTextStyles.regularB7_14.copyWith(
+                            color: AppColors.neutral400,
+                          ),
+                          counterText: context.l10n.taskDescriptionMinimum,
+                          counterStyle: AppTextStyles.regularB8_12.copyWith(
+                            color: AppColors.neutral400,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.all(14),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: AppColors.cool400,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: AppColors.primary500,
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ] else ...[
+                      ..._closedTaskContent(context),
                     ],
-                    const SizedBox(height: 8),
-                    Text(
-                      context.l10n.taskProofSupported,
-                      style: AppTextStyles.regularB8_12.copyWith(
-                        color: AppColors.neutral500,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    _sectionLabel(context.l10n.taskDescriptionLabel),
-                    const SizedBox(height: 10),
-                    TextField(
-                      key: const Key('task-description-field'),
-                      controller: _descriptionController,
-                      minLines: 5,
-                      maxLines: 5,
-                      maxLength: 150,
-                      onChanged: (_) => setState(() {}),
-                      style: AppTextStyles.regularB7_14,
-                      decoration: InputDecoration(
-                        hintText: context.l10n.taskDescriptionHint,
-                        hintStyle: AppTextStyles.regularB7_14.copyWith(
-                          color: AppColors.neutral400,
-                        ),
-                        counterText: context.l10n.taskDescriptionMinimum,
-                        counterStyle: AppTextStyles.regularB8_12.copyWith(
-                          color: AppColors.neutral400,
-                        ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.all(14),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.cool400,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: const BorderSide(
-                            color: AppColors.primary500,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                color: Colors.white,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    key: const Key('mark-task-completed-button'),
-                    onPressed: _canComplete ? () {} : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary500,
-                      disabledBackgroundColor: AppColors.neutral400,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+              if (!_isClosed)
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                  color: Colors.white,
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      key: const Key('mark-task-completed-button'),
+                      onPressed: _canComplete ? _showCompletedDialog : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary500,
+                        disabledBackgroundColor: AppColors.neutral400,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      context.l10n.taskMarkCompleted,
-                      style: AppTextStyles.semiboldH9_14,
+                      child: Text(
+                        context.l10n.taskMarkCompleted,
+                        style: AppTextStyles.semiboldH9_14,
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
@@ -219,6 +248,65 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     label,
     style: AppTextStyles.semiboldH9_14.copyWith(color: AppColors.neutral950),
   );
+
+  List<Widget> _closedTaskContent(BuildContext context) => [
+    const SizedBox(height: 16),
+    _sectionLabel(context.l10n.taskCompletionProofPlain),
+    const SizedBox(height: 10),
+    _CaptureProof(enabled: false, onTap: () {}),
+    const SizedBox(height: 12),
+    TaskPhotoGrid(images: _proofImages),
+    const SizedBox(height: 8),
+    Text(
+      context.l10n.taskProofSupported,
+      style: AppTextStyles.regularB8_12.copyWith(color: AppColors.neutral500),
+    ),
+    const SizedBox(height: 14),
+    _sectionLabel(context.l10n.taskDescriptionPlain),
+    const SizedBox(height: 10),
+    _ReadOnlyDescription(text: context.l10n.taskFilledDescription),
+    const SizedBox(height: 18),
+    _sectionLabel(context.l10n.taskSupervisorDetails),
+    const SizedBox(height: 10),
+    TaskInformationCard(
+      title: context.l10n.taskDescriptionPlain,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              // color: AppColors.cool100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              context.l10n.taskOverviewDescription,
+              style: AppTextStyles.regularB8_12.copyWith(
+                color: AppColors.neutral700,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          _BySupervisor(label: context.l10n.taskSupervisorName),
+        ],
+      ),
+    ),
+    const SizedBox(height: 12),
+    TaskInformationCard(
+      title: context.l10n.taskAttachmentTitle,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+
+          const TaskPhotoGrid(images: _supervisorImages),
+          const SizedBox(height: 10),
+          _BySupervisor(label: context.l10n.taskSupervisorName),
+        ],
+      ),
+    ),
+  ];
 }
 
 class _TaskStatusRow extends StatelessWidget {
@@ -239,19 +327,123 @@ class _TaskStatusRow extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: [
-        _DetailChip(
-          icon: Icons.calendar_today_outlined,
-          label: context.l10n.taskDueToday,
-          color: AppColors.purple,
-          background: const Color(0xFFF1EDFF),
+        if (task.status == TaskListStatus.closed)
+          _DetailChip(
+            icon: Icons.check_circle_outline_rounded,
+            label: context.l10n.taskCompletedTime,
+            color: AppColors.primary600,
+            background: AppColors.primary50,
+          )
+        else ...[
+          _DetailChip(
+            icon: Icons.calendar_today_outlined,
+            label: context.l10n.taskDueToday,
+            color: AppColors.purple,
+            background: const Color(0xFFF1EDFF),
+          ),
+          _DetailChip(
+            icon: Icons.schedule_rounded,
+            label: context.l10n.taskPriorityHigh,
+            color: AppColors.red600,
+            background: AppColors.red50,
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+class _ReadOnlyDescription extends StatelessWidget {
+  const _ReadOnlyDescription({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    constraints: const BoxConstraints(minHeight: 120),
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: AppColors.cool50,
+      border: Border.all(color: AppColors.cool400),
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          text,
+          style: AppTextStyles.regularB7_14.copyWith(
+            color: AppColors.neutral600,
+          ),
         ),
-        _DetailChip(
-          icon: Icons.schedule_rounded,
-          label: context.l10n.taskPriorityHigh,
-          color: AppColors.red600,
-          background: AppColors.red50,
+        const SizedBox(height: 28),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            context.l10n.taskDescriptionMinimum,
+            style: AppTextStyles.regularB8_12.copyWith(
+              color: AppColors.neutral400,
+            ),
+          ),
         ),
       ],
+    ),
+  );
+}
+
+class _TaskCompletedDialog extends StatelessWidget {
+  const _TaskCompletedDialog({required this.onBackToList});
+
+  final VoidCallback onBackToList;
+
+  @override
+  Widget build(BuildContext context) => Dialog(
+    insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    child: Padding(
+      padding: const EdgeInsets.fromLTRB(20, 42, 20, 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            context.l10n.taskCompletedTitle,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.boldH6_20.copyWith(
+              color: AppColors.neutral950,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            context.l10n.taskCompletedMessage,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.regularB7_14.copyWith(
+              color: AppColors.neutral600,
+            ),
+          ),
+          const SizedBox(height: 28),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              key: const Key('task-back-to-list-button'),
+              onPressed: onBackToList,
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: AppColors.cool200,
+                foregroundColor: AppColors.neutral950,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text(
+                context.l10n.taskBackToList,
+                style: AppTextStyles.semiboldH9_14,
+              ),
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }

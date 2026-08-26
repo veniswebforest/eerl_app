@@ -1222,4 +1222,206 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taskMarkCompleted => 'Mark as Completed';
+
+  @override
+  String get taskDetailsTitle => 'Task Details';
+
+  @override
+  String get taskCompletedTitle => 'Task Completed!';
+
+  @override
+  String get taskCompletedMessage =>
+      'The task assigned by supervisor has been completed.';
+
+  @override
+  String get taskBackToList => 'Back to List';
+
+  @override
+  String get taskSupervisorDetails => 'Supervisor Details';
+
+  @override
+  String get taskCompletionProofPlain => 'Task Completion Proof';
+
+  @override
+  String get taskDescriptionPlain => 'Description';
+
+  @override
+  String get notificationTitle => 'Notifications';
+
+  @override
+  String get notificationToday => 'Today,';
+
+  @override
+  String get notificationEarlier => 'Earlier,';
+
+  @override
+  String get notificationEmptyTitle => 'All Caught Up!';
+
+  @override
+  String get notificationEmptyMessage =>
+      'You\'re all caught up! Check back later for updates, task status, and system alerts.';
+
+  @override
+  String get notificationOfflineTitle => 'Offline Mode';
+
+  @override
+  String get notificationOfflineMessage =>
+      'No internet connection. Data will sync automatically when Connection Restored.';
+
+  @override
+  String get notificationTransferRejectedTitle => 'Transfer Reject';
+
+  @override
+  String get notificationTransferRejectedMessage =>
+      'Your Transfer entry requires your attention.';
+
+  @override
+  String get notificationReceiptTitle => 'Receipt Print';
+
+  @override
+  String get notificationReceiptMessage =>
+      'The receipt printing process completed successfully.';
+
+  @override
+  String get notificationCollectionTitle => 'Collection Submitted';
+
+  @override
+  String get notificationCollectionMessage =>
+      'Your collection entry has been verified by the Collection Supervisor.';
+
+  @override
+  String get notificationExpenseTitle => 'Expense added';
+
+  @override
+  String get notificationExpenseMessage =>
+      'Your expense bill has been rejected by supervisor';
+
+  @override
+  String get notificationSyncTitle => 'Sync Complete';
+
+  @override
+  String get notificationSyncMessage =>
+      'All pending data has been synced successfully.';
+
+  @override
+  String get notificationJustNow => 'Just now';
+
+  @override
+  String get notificationTenMinutes => '10 Mins ago';
+
+  @override
+  String get notificationFiveHours => '5 Hours ago';
+
+  @override
+  String get notificationSevenHours => '7 Hours ago';
+
+  @override
+  String get notificationYesterday => 'Yesterday, 11:30 AM';
+
+  @override
+  String get notificationPreviousDate => '24 Oct, 08:00 AM';
+
+  @override
+  String get homePendingTask => 'Pending Task';
+
+  @override
+  String get homePendingTaskSubtitle => 'View tasks assigned to you.';
+
+  @override
+  String get homeSuratEastZone => 'EERL - Surat East Zone';
+
+  @override
+  String get homeSuratNorthZone => 'EERL - Surat North Zone';
+
+  @override
+  String get homeSuratSouthZone => 'EERL - Surat South Zone';
+
+  @override
+  String get viewTask => 'View Task';
+
+  @override
+  String get endDayOpeningBalance => 'Opening Balance';
+
+  @override
+  String get endDayOpeningBalanceValue => '₹ 5,000.00';
+
+  @override
+  String get endDayExpensesLogged => 'Total Expenses Logged';
+
+  @override
+  String get endDayExpensesValue => '₹ 720.00';
+
+  @override
+  String get endDayTotalPurchase =>
+      'Total Purchase (Money given at collection)';
+
+  @override
+  String get endDayPurchaseValue => '₹ 6000.00';
+
+  @override
+  String get endDayClosingBalance => 'Closing Balance';
+
+  @override
+  String get endDayClosingBalanceValue => '₹ 11,720.00';
+
+  @override
+  String get endDayBalanceHint =>
+      'Calculated from recorded transactions.\nNon-verified collection not included.';
+
+  @override
+  String get endDayActivitySummary => 'Today’s Activity Summary';
+
+  @override
+  String get endDayCompletedCollections => 'Completed Collections';
+
+  @override
+  String get endDayPendingCollections => 'Pending Collections';
+
+  @override
+  String get endDayWasteCollected => 'Total Waste Collected';
+
+  @override
+  String get endDayWasteValue => '876 KG';
+
+  @override
+  String get endDayVerificationPending => 'Verification Pending';
+
+  @override
+  String get endDayOfflineSync => 'Offline Pending Sync';
+
+  @override
+  String get endDayPendingStatus => 'Pending';
+
+  @override
+  String get endDayCompletedValue => '07';
+
+  @override
+  String get endDayPendingValue => '01';
+
+  @override
+  String get endDayExpensesCount => '02';
+
+  @override
+  String get endDayWarning =>
+      'Once you close the day, you won’t be able to\nadd or edit any entries.';
+
+  @override
+  String get endDayConfirmTitle => 'End Your Day?';
+
+  @override
+  String get endDayConfirmMessage =>
+      'Once you close the day, all entries will be locked. Make sure all collections and expenses are logged before closing.';
+
+  @override
+  String get endDayConfirmYes => 'Yes, End My Day';
+
+  @override
+  String get endDayConfirmNo => 'Go Back';
+
+  @override
+  String get endDaySuccessTitle => 'Day Closed!';
+
+  @override
+  String get endDaySuccessMessage =>
+      'Your day has been closed successfully. All data has been synced.';
 }
