@@ -658,6 +658,342 @@ abstract class AppLocalizations {
   /// **'Transfer Requests'**
   String get transferRequests;
 
+  /// No description provided for @transferSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Here...'**
+  String get transferSearchHint;
+
+  /// No description provided for @transferFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get transferFilterAll;
+
+  /// No description provided for @transferFilterPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get transferFilterPending;
+
+  /// No description provided for @transferFilterDispatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispatch'**
+  String get transferFilterDispatch;
+
+  /// No description provided for @transferFilterClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get transferFilterClosed;
+
+  /// No description provided for @transferDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'To: City Processing Hub - Sector 4'**
+  String get transferDestination;
+
+  /// No description provided for @transferFromCurrentLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'(From Current Location)'**
+  String get transferFromCurrentLocation;
+
+  /// No description provided for @transferEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No Transfer Request Found'**
+  String get transferEmptyMessage;
+
+  /// No description provided for @transferStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get transferStatusPending;
+
+  /// No description provided for @transferStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get transferStatusApproved;
+
+  /// No description provided for @transferStatusDispatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispatch'**
+  String get transferStatusDispatch;
+
+  /// No description provided for @transferStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get transferStatusRejected;
+
+  /// No description provided for @transferTotalWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Total : {weight}'**
+  String transferTotalWeight(String weight);
+
+  /// No description provided for @transferDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} • {time}'**
+  String transferDateTime(String date, String time);
+
+  /// No description provided for @transferSelectItemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Items to Transfer'**
+  String get transferSelectItemsTitle;
+
+  /// No description provided for @transferSelectItemsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose items and enter the quantity you want to transfer.'**
+  String get transferSelectItemsSubtitle;
+
+  /// No description provided for @transferPlasticWaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Plastic Waste'**
+  String get transferPlasticWaste;
+
+  /// No description provided for @transferToyWaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Toy Waste'**
+  String get transferToyWaste;
+
+  /// No description provided for @transferCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity {weight}'**
+  String transferCapacity(String weight);
+
+  /// No description provided for @transferTotalKgLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total KG *'**
+  String get transferTotalKgLabel;
+
+  /// No description provided for @transferTotalKgHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter total KG'**
+  String get transferTotalKgHint;
+
+  /// No description provided for @transferKgPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'KG  '**
+  String get transferKgPrefix;
+
+  /// No description provided for @transferStockValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot enter more than available stock'**
+  String get transferStockValidation;
+
+  /// No description provided for @transferVehiclePlateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Number Plate *'**
+  String get transferVehiclePlateLabel;
+
+  /// No description provided for @transferVehiclePlateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Vehicle Number Plate'**
+  String get transferVehiclePlateHint;
+
+  /// No description provided for @transferVehicleTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle type'**
+  String get transferVehicleTypeLabel;
+
+  /// No description provided for @transferVehicleTypeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select vehicle type'**
+  String get transferVehicleTypeHint;
+
+  /// No description provided for @transferVehicleCapacityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Capacity'**
+  String get transferVehicleCapacityLabel;
+
+  /// No description provided for @transferVehicleCapacityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Vehicle Capacity'**
+  String get transferVehicleCapacityHint;
+
+  /// No description provided for @transferManagerArrangeVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'I will let my Manager arrange the vehicle'**
+  String get transferManagerArrangeVehicle;
+
+  /// No description provided for @transferVehicleTruck.
+  ///
+  /// In en, this message translates to:
+  /// **'Truck'**
+  String get transferVehicleTruck;
+
+  /// No description provided for @transferVehicleMiniTruck.
+  ///
+  /// In en, this message translates to:
+  /// **'Mini Truck'**
+  String get transferVehicleMiniTruck;
+
+  /// No description provided for @transferVehiclePickupTruck.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Truck'**
+  String get transferVehiclePickupTruck;
+
+  /// No description provided for @transferVehicleTempo.
+  ///
+  /// In en, this message translates to:
+  /// **'Tempo / Light Commercial Vehicle'**
+  String get transferVehicleTempo;
+
+  /// No description provided for @transferVehicleTrailer.
+  ///
+  /// In en, this message translates to:
+  /// **'Trailer / Heavy Truck'**
+  String get transferVehicleTrailer;
+
+  /// No description provided for @transferVehicleOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get transferVehicleOther;
+
+  /// No description provided for @transferSelectedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'✓  540.00 KG                                  ₹1960'**
+  String get transferSelectedSummary;
+
+  /// No description provided for @transferSelectedWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'540.00 KG'**
+  String get transferSelectedWeight;
+
+  /// No description provided for @transferSelectedPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'₹1960'**
+  String get transferSelectedPrice;
+
+  /// No description provided for @transferContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue  →'**
+  String get transferContinue;
+
+  /// No description provided for @transferSelectDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Destination'**
+  String get transferSelectDestination;
+
+  /// No description provided for @transferCurrentFacility.
+  ///
+  /// In en, this message translates to:
+  /// **'Central MRF Yard'**
+  String get transferCurrentFacility;
+
+  /// No description provided for @transferDestinationQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Where should this stock be transferred?'**
+  String get transferDestinationQuestion;
+
+  /// No description provided for @transferDestinationCityHub.
+  ///
+  /// In en, this message translates to:
+  /// **'City Processing Hub - Sector 4'**
+  String get transferDestinationCityHub;
+
+  /// No description provided for @transferDestinationCityAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Industrial Zone, 12 KM away'**
+  String get transferDestinationCityAddress;
+
+  /// No description provided for @transferDestinationHighway.
+  ///
+  /// In en, this message translates to:
+  /// **'Highway Yard Warehouse'**
+  String get transferDestinationHighway;
+
+  /// No description provided for @transferDestinationHighwayAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'National Highway 8, 24 KM away'**
+  String get transferDestinationHighwayAddress;
+
+  /// No description provided for @transferDestinationApex.
+  ///
+  /// In en, this message translates to:
+  /// **'Apex Recycling Hub'**
+  String get transferDestinationApex;
+
+  /// No description provided for @transferDestinationApexAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'GIDC Industrial Estate, 35 KM away'**
+  String get transferDestinationApexAddress;
+
+  /// No description provided for @transferDestinationSouthside.
+  ///
+  /// In en, this message translates to:
+  /// **'Southside Sorting Point'**
+  String get transferDestinationSouthside;
+
+  /// No description provided for @transferDestinationSouthsideAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Green Valley, 48 KM away'**
+  String get transferDestinationSouthsideAddress;
+
+  /// No description provided for @transferManagerApprovalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: This request will be sent to Manager for vehicle dispatch approval.'**
+  String get transferManagerApprovalNote;
+
+  /// No description provided for @transferSubmitRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Request  →'**
+  String get transferSubmitRequest;
+
+  /// No description provided for @transferSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request submitted Successfully!'**
+  String get transferSuccessTitle;
+
+  /// No description provided for @transferSuccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We will notify you once a vehicle is assigned by the Admin team.'**
+  String get transferSuccessSubtitle;
+
+  /// No description provided for @transferBackToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Transfer List'**
+  String get transferBackToList;
+
   /// No description provided for @walletBalance.
   ///
   /// In en, this message translates to:
@@ -1549,7 +1885,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordsCollectionsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Collections'**
+  /// **'Collections Records'**
   String get recordsCollectionsTitle;
 
   /// No description provided for @recordsCollectionsSubtitle.
@@ -1749,6 +2085,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign out from your account'**
   String get profileLogoutSubtitle;
+
+  /// No description provided for @profileDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get profileDeleteAccount;
+
+  /// No description provided for @profileDeleteAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete your account'**
+  String get profileDeleteAccountSubtitle;
+
+  /// No description provided for @profileLanguageEnglishShort.
+  ///
+  /// In en, this message translates to:
+  /// **'ENG'**
+  String get profileLanguageEnglishShort;
+
+  /// No description provided for @profileLanguageGujaratiShort.
+  ///
+  /// In en, this message translates to:
+  /// **'GUJ'**
+  String get profileLanguageGujaratiShort;
+
+  /// No description provided for @profileLanguageHindiShort.
+  ///
+  /// In en, this message translates to:
+  /// **'HIN'**
+  String get profileLanguageHindiShort;
 
   /// No description provided for @collectionDetailPending.
   ///
@@ -2799,6 +3165,510 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your day has been closed successfully. All data has been synced.'**
   String get endDaySuccessMessage;
+
+  /// No description provided for @requestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get requestTitle;
+
+  /// No description provided for @requestOpenCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Open ({count})'**
+  String requestOpenCount(int count);
+
+  /// No description provided for @requestClosedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed ({count})'**
+  String requestClosedCount(int count);
+
+  /// No description provided for @requestSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Here...'**
+  String get requestSearchHint;
+
+  /// No description provided for @requestSupervisorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Bhavesh Shah (Supervisor)'**
+  String get requestSupervisorName;
+
+  /// No description provided for @requestOpenDescriptionOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Ramp B weighing scale is showing zero error and flickering constantly during calibration...'**
+  String get requestOpenDescriptionOne;
+
+  /// No description provided for @requestOpenDescriptionTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibrate bin weighing scale at main Surat collection center.'**
+  String get requestOpenDescriptionTwo;
+
+  /// No description provided for @requestOpenDescriptionThree.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and verify the latest collection entry submitted by the agent.'**
+  String get requestOpenDescriptionThree;
+
+  /// No description provided for @requestClosedDescriptionOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Technician sent, scale repaired.'**
+  String get requestClosedDescriptionOne;
+
+  /// No description provided for @requestClosedDescriptionTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and verify the latest collection entry submitted by the agent.'**
+  String get requestClosedDescriptionTwo;
+
+  /// No description provided for @requestPhotoAttached.
+  ///
+  /// In en, this message translates to:
+  /// **'1 Photo attached'**
+  String get requestPhotoAttached;
+
+  /// No description provided for @requestAwaitingResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting Response'**
+  String get requestAwaitingResponse;
+
+  /// No description provided for @requestClosedBySupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed by Supervisor'**
+  String get requestClosedBySupervisor;
+
+  /// No description provided for @requestTodayTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, {time}'**
+  String requestTodayTime(String time);
+
+  /// No description provided for @requestEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No Requests for now'**
+  String get requestEmptyMessage;
+
+  /// No description provided for @requestRaiseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise Request'**
+  String get requestRaiseButton;
+
+  /// No description provided for @requestRaiseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Raise Request'**
+  String get requestRaiseTitle;
+
+  /// No description provided for @requestAddPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Photo *'**
+  String get requestAddPhoto;
+
+  /// No description provided for @requestCapturePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Photo'**
+  String get requestCapturePhoto;
+
+  /// No description provided for @requestPhotoSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported: JPG, PNG (Max 5MB).'**
+  String get requestPhotoSupport;
+
+  /// No description provided for @requestDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description *'**
+  String get requestDescriptionLabel;
+
+  /// No description provided for @requestDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Description'**
+  String get requestDescriptionHint;
+
+  /// No description provided for @requestDescriptionCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 150 Characters'**
+  String get requestDescriptionCounter;
+
+  /// No description provided for @requestSubmitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Request'**
+  String get requestSubmitButton;
+
+  /// No description provided for @requestFilledDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight scale calibrated using 10kg standard test weight. Zero-error verified.'**
+  String get requestFilledDescription;
+
+  /// No description provided for @requestSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Sent!'**
+  String get requestSentTitle;
+
+  /// No description provided for @requestSentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request has been forwarded to your supervisor.'**
+  String get requestSentMessage;
+
+  /// No description provided for @requestBackToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to List'**
+  String get requestBackToList;
+
+  /// No description provided for @requestDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Details'**
+  String get requestDetailsTitle;
+
+  /// No description provided for @requestCompletedDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Detail'**
+  String get requestCompletedDetailsTitle;
+
+  /// No description provided for @requestAssignTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign To'**
+  String get requestAssignTo;
+
+  /// No description provided for @requestVerifyCollectionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Collection Details'**
+  String get requestVerifyCollectionDetails;
+
+  /// No description provided for @requestAttachmentByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment By you'**
+  String get requestAttachmentByYou;
+
+  /// No description provided for @requestResolveDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve Request Details'**
+  String get requestResolveDetails;
+
+  /// No description provided for @requestCompletionProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Completion Proof'**
+  String get requestCompletionProof;
+
+  /// No description provided for @requestCollectionAgentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection agent Details'**
+  String get requestCollectionAgentDetails;
+
+  /// No description provided for @requestAttachmentFromSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment from Supervisor'**
+  String get requestAttachmentFromSupervisor;
+
+  /// No description provided for @requestDescriptionPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get requestDescriptionPlain;
+
+  /// No description provided for @requestAgentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Rahul Patel'**
+  String get requestAgentName;
+
+  /// No description provided for @requestCompletedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed: Today, 11:30 AM'**
+  String get requestCompletedStatus;
+
+  /// No description provided for @requestDetailDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight, inspect all uploaded item photos (before and after verification), and ensure customer details and material categories match the system records before final approval.'**
+  String get requestDetailDescription;
+
+  /// No description provided for @transferDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Request Details'**
+  String get transferDetailTitle;
+
+  /// No description provided for @transferDetailRequestId.
+  ///
+  /// In en, this message translates to:
+  /// **'#TRF-2026-089'**
+  String get transferDetailRequestId;
+
+  /// No description provided for @transferRejectReasonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for Reject'**
+  String get transferRejectReasonTitle;
+
+  /// No description provided for @transferRejectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason : No Vehicle Available'**
+  String get transferRejectReason;
+
+  /// No description provided for @transferRejectRemarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Remarks : All yard trucks are currently out. Try after 2 PM.'**
+  String get transferRejectRemarks;
+
+  /// No description provided for @transferRequestInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Information'**
+  String get transferRequestInformation;
+
+  /// No description provided for @transferDetailVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get transferDetailVehicle;
+
+  /// No description provided for @transferDetailVehicleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-05-BX-1234'**
+  String get transferDetailVehicleNumber;
+
+  /// No description provided for @transferDetailVehicleUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Not Available (Agent)'**
+  String get transferDetailVehicleUnavailable;
+
+  /// No description provided for @transferDetailVehicleCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Truck (Capacity 3000 KG)'**
+  String get transferDetailVehicleCapacity;
+
+  /// No description provided for @transferDetailFromLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'From Location'**
+  String get transferDetailFromLocation;
+
+  /// No description provided for @transferDetailFromLocationValue.
+  ///
+  /// In en, this message translates to:
+  /// **'National Highway 8, 24 KM away'**
+  String get transferDetailFromLocationValue;
+
+  /// No description provided for @transferDetailToLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'To Location'**
+  String get transferDetailToLocation;
+
+  /// No description provided for @transferDetailToLocationValue.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat Main Warehouse'**
+  String get transferDetailToLocationValue;
+
+  /// No description provided for @transferDetailAvailableStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Stock'**
+  String get transferDetailAvailableStock;
+
+  /// No description provided for @transferDetailAvailableStockValue.
+  ///
+  /// In en, this message translates to:
+  /// **'1200.60 KG'**
+  String get transferDetailAvailableStockValue;
+
+  /// No description provided for @transferDetailDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Date & Time'**
+  String get transferDetailDateTime;
+
+  /// No description provided for @transferDetailDateTimeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'06 Aug 2026, 10:45 AM'**
+  String get transferDetailDateTimeValue;
+
+  /// No description provided for @transferDetailRequestedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested By'**
+  String get transferDetailRequestedBy;
+
+  /// No description provided for @transferDetailRequestedByValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Rahul Patel'**
+  String get transferDetailRequestedByValue;
+
+  /// No description provided for @transferDetailRequestStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Status'**
+  String get transferDetailRequestStatus;
+
+  /// No description provided for @transferDetailWaitingManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Collection Manager'**
+  String get transferDetailWaitingManager;
+
+  /// No description provided for @transferDetailWaitingLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for loading'**
+  String get transferDetailWaitingLoading;
+
+  /// No description provided for @transferDetailRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected By Collection Manager'**
+  String get transferDetailRejected;
+
+  /// No description provided for @transferDetailCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Completed'**
+  String get transferDetailCompleted;
+
+  /// No description provided for @transferItemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Items to Transfer'**
+  String get transferItemsTitle;
+
+  /// No description provided for @transferItemName.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Name'**
+  String get transferItemName;
+
+  /// No description provided for @transferItemQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get transferItemQuantity;
+
+  /// No description provided for @transferDetailPetBottles.
+  ///
+  /// In en, this message translates to:
+  /// **'PET Bottles'**
+  String get transferDetailPetBottles;
+
+  /// No description provided for @transferDetailQuantityValue.
+  ///
+  /// In en, this message translates to:
+  /// **'270.00 KG'**
+  String get transferDetailQuantityValue;
+
+  /// No description provided for @transferStatusTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Status Timeline'**
+  String get transferStatusTimeline;
+
+  /// No description provided for @transferTimelineCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Created'**
+  String get transferTimelineCreated;
+
+  /// No description provided for @transferTimelinePendingVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Verification'**
+  String get transferTimelinePendingVerification;
+
+  /// No description provided for @transferTimelineWaitingVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Supervisor verification'**
+  String get transferTimelineWaitingVerification;
+
+  /// No description provided for @transferTimelineVerificationCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor verification completed'**
+  String get transferTimelineVerificationCompleted;
+
+  /// No description provided for @transferTimelineRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Verification'**
+  String get transferTimelineRejected;
+
+  /// No description provided for @transferTimelineRejectedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle unavailable or rejected'**
+  String get transferTimelineRejectedSubtitle;
+
+  /// No description provided for @transferTimelinePendingLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending loading'**
+  String get transferTimelinePendingLoading;
+
+  /// No description provided for @transferTimelineWaitingLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for loading'**
+  String get transferTimelineWaitingLoading;
+
+  /// No description provided for @transferTimelineLoadingCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle loaded successfully'**
+  String get transferTimelineLoadingCompleted;
+
+  /// No description provided for @transferTimelineVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get transferTimelineVerified;
+
+  /// No description provided for @transferTimelineVerifiedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Will be updated after verification'**
+  String get transferTimelineVerifiedSubtitle;
+
+  /// No description provided for @transferTimelineCompletedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer completed successfully'**
+  String get transferTimelineCompletedSubtitle;
 }
 
 class _AppLocalizationsDelegate

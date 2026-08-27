@@ -19,6 +19,7 @@ class HomeDrawer extends StatefulWidget {
     this.onConfigureMaterialTap,
     this.onTasksTap,
     this.onRequestsTap,
+    this.onTransferRequestsTap,
   });
 
   final VoidCallback? onWalletTap;
@@ -26,6 +27,7 @@ class HomeDrawer extends StatefulWidget {
   final VoidCallback? onConfigureMaterialTap;
   final VoidCallback? onTasksTap;
   final VoidCallback? onRequestsTap;
+  final VoidCallback? onTransferRequestsTap;
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -59,9 +61,13 @@ class _HomeDrawerState extends State<HomeDrawer> {
                             onTap: () => _close(context),
                           ),
                           _DrawerItem(
+                            key: const Key('drawer-transfer-requests'),
                             label: context.l10n.transferRequests,
                             icon: '$_iconPath/drawer_transfer_requests.svg',
-                            onTap: () => _close(context),
+                            onTap: () {
+                              _close(context);
+                              widget.onTransferRequestsTap?.call();
+                            },
                           ),
                           _DrawerItem(
                             label: context.l10n.drawerReceipts,

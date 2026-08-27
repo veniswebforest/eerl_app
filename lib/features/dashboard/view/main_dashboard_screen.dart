@@ -12,9 +12,18 @@ import 'package:eerl_app/features/profile/view/profile_screen.dart';
 import 'package:eerl_app/features/records/model/collection_detail_status.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
+import 'package:eerl_app/features/requests/view/raise_request_screen.dart';
+import 'package:eerl_app/features/requests/model/request_list_item.dart';
+import 'package:eerl_app/features/requests/view/request_detail_screen.dart';
+import 'package:eerl_app/features/requests/view/requests_screen.dart';
 import 'package:eerl_app/features/tasks/view/my_tasks_screen.dart';
 import 'package:eerl_app/features/tasks/view/task_detail_screen.dart';
 import 'package:eerl_app/features/tasks/model/task_list_item.dart';
+import 'package:eerl_app/features/transfer_requests/view/create_transfer_request_screen.dart';
+import 'package:eerl_app/features/transfer_requests/view/transfer_requests_screen.dart';
+import 'package:eerl_app/features/transfer_requests/model/transfer_request_detail_state.dart';
+import 'package:eerl_app/features/transfer_requests/model/transfer_request_item.dart';
+import 'package:eerl_app/features/transfer_requests/view/transfer_request_detail_screen.dart';
 import 'package:eerl_app/features/wallet/model/expense_claim_detail_status.dart';
 import 'package:eerl_app/features/wallet/view/expense_claim_detail_screen.dart';
 import 'package:eerl_app/features/wallet/view/log_expense_screen.dart';
@@ -53,6 +62,12 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   bool _isAddCollectionOpen = false;
   bool _isConfigureMaterialOpen = false;
   bool _isTasksOpen = false;
+  bool _isRequestsOpen = false;
+  bool _isTransferRequestsOpen = false;
+  bool _isCreateTransferOpen = false;
+  TransferRequestDetailState? _transferRequestDetailState;
+  bool _isRaiseRequestOpen = false;
+  RequestListItem? _selectedRequest;
   bool _isNotificationsOpen = false;
   bool _isEndMyDayOpen = false;
   TaskListItem? _selectedTask;
@@ -106,6 +121,50 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               onBack: () => setState(() => _isEndMyDayOpen = false),
               onEndDay: () => setState(() => _isEndMyDayOpen = false),
             )
+          : _isRaiseRequestOpen
+          ? RaiseRequestScreen(
+              onBack: () => setState(() => _isRaiseRequestOpen = false),
+              onBackToList: () => setState(() => _isRaiseRequestOpen = false),
+            )
+          : _isCreateTransferOpen
+          ? CreateTransferRequestScreen(
+              onBack: () => setState(() => _isCreateTransferOpen = false),
+              onBackToList: () => setState(() => _isCreateTransferOpen = false),
+            )
+          : _transferRequestDetailState != null
+          ? TransferRequestDetailScreen(
+              state: _transferRequestDetailState!,
+              onBack: () => setState(() => _transferRequestDetailState = null),
+            )
+          : _isTransferRequestsOpen
+          ? TransferRequestsScreen(
+              onBack: () => setState(() => _isTransferRequestsOpen = false),
+              onAddTap: () => setState(() => _isCreateTransferOpen = true),
+              onRequestTap: (request) => setState(() {
+                _transferRequestDetailState = switch (request.status) {
+                  TransferRequestStatus.pending =>
+                    TransferRequestDetailState.pendingVerification,
+                  TransferRequestStatus.approved =>
+                    TransferRequestDetailState.completed,
+                  TransferRequestStatus.dispatch =>
+                    TransferRequestDetailState.waitingForLoading,
+                  TransferRequestStatus.rejected =>
+                    TransferRequestDetailState.rejected,
+                };
+              }),
+            )
+          : _selectedRequest != null
+          ? RequestDetailScreen(
+              status: _selectedRequest!.status,
+              onBack: () => setState(() => _selectedRequest = null),
+            )
+          : _isRequestsOpen
+          ? RequestsScreen(
+              onBack: () => setState(() => _isRequestsOpen = false),
+              onRaiseRequest: () => setState(() => _isRaiseRequestOpen = true),
+              onRequestTap: (request) =>
+                  setState(() => _selectedRequest = request),
+            )
           : _selectedTask != null
           ? TaskDetailScreen(
               task: _selectedTask!,
@@ -155,6 +214,12 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               _isConfigureMaterialOpen ||
               _isNotificationsOpen ||
               _isEndMyDayOpen ||
+              _isRequestsOpen ||
+              _isTransferRequestsOpen ||
+              _isCreateTransferOpen ||
+              _transferRequestDetailState != null ||
+              _isRaiseRequestOpen ||
+              _selectedRequest != null ||
               _isTasksOpen ||
               _selectedTask != null ||
               _claimDetailStatus != null ||
@@ -196,6 +261,9 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           onConfigureMaterialTap: () =>
               setState(() => _isConfigureMaterialOpen = true),
           onTasksTap: () => setState(() => _isTasksOpen = true),
+          onRequestsTap: () => setState(() => _isRequestsOpen = true),
+          onTransferRequestsTap: () =>
+              setState(() => _isTransferRequestsOpen = true),
           onNotificationTap: () => setState(() => _isNotificationsOpen = true),
           onEndMyDayTap: () => setState(() => _isEndMyDayOpen = true),
           onDrawerChanged: (isOpen) {

@@ -301,6 +301,189 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transferRequests => 'Transfer Requests';
 
   @override
+  String get transferSearchHint => 'Search Here...';
+
+  @override
+  String get transferFilterAll => 'All';
+
+  @override
+  String get transferFilterPending => 'Pending';
+
+  @override
+  String get transferFilterDispatch => 'Dispatch';
+
+  @override
+  String get transferFilterClosed => 'Closed';
+
+  @override
+  String get transferDestination => 'To: City Processing Hub - Sector 4';
+
+  @override
+  String get transferFromCurrentLocation => '(From Current Location)';
+
+  @override
+  String get transferEmptyMessage => 'No Transfer Request Found';
+
+  @override
+  String get transferStatusPending => 'Pending';
+
+  @override
+  String get transferStatusApproved => 'Approved';
+
+  @override
+  String get transferStatusDispatch => 'Dispatch';
+
+  @override
+  String get transferStatusRejected => 'Rejected';
+
+  @override
+  String transferTotalWeight(String weight) {
+    return 'Total : $weight';
+  }
+
+  @override
+  String transferDateTime(String date, String time) {
+    return '$date • $time';
+  }
+
+  @override
+  String get transferSelectItemsTitle => 'Select Items to Transfer';
+
+  @override
+  String get transferSelectItemsSubtitle =>
+      'Choose items and enter the quantity you want to transfer.';
+
+  @override
+  String get transferPlasticWaste => 'Plastic Waste';
+
+  @override
+  String get transferToyWaste => 'Toy Waste';
+
+  @override
+  String transferCapacity(String weight) {
+    return 'Capacity $weight';
+  }
+
+  @override
+  String get transferTotalKgLabel => 'Total KG *';
+
+  @override
+  String get transferTotalKgHint => 'Enter total KG';
+
+  @override
+  String get transferKgPrefix => 'KG  ';
+
+  @override
+  String get transferStockValidation =>
+      'Cannot enter more than available stock';
+
+  @override
+  String get transferVehiclePlateLabel => 'Vehicle Number Plate *';
+
+  @override
+  String get transferVehiclePlateHint => 'Enter Vehicle Number Plate';
+
+  @override
+  String get transferVehicleTypeLabel => 'Vehicle type';
+
+  @override
+  String get transferVehicleTypeHint => 'Select vehicle type';
+
+  @override
+  String get transferVehicleCapacityLabel => 'Vehicle Capacity';
+
+  @override
+  String get transferVehicleCapacityHint => 'Enter Vehicle Capacity';
+
+  @override
+  String get transferManagerArrangeVehicle =>
+      'I will let my Manager arrange the vehicle';
+
+  @override
+  String get transferVehicleTruck => 'Truck';
+
+  @override
+  String get transferVehicleMiniTruck => 'Mini Truck';
+
+  @override
+  String get transferVehiclePickupTruck => 'Pickup Truck';
+
+  @override
+  String get transferVehicleTempo => 'Tempo / Light Commercial Vehicle';
+
+  @override
+  String get transferVehicleTrailer => 'Trailer / Heavy Truck';
+
+  @override
+  String get transferVehicleOther => 'Other';
+
+  @override
+  String get transferSelectedSummary =>
+      '✓  540.00 KG                                  ₹1960';
+
+  @override
+  String get transferSelectedWeight => '540.00 KG';
+
+  @override
+  String get transferSelectedPrice => '₹1960';
+
+  @override
+  String get transferContinue => 'Continue  →';
+
+  @override
+  String get transferSelectDestination => 'Select Destination';
+
+  @override
+  String get transferCurrentFacility => 'Central MRF Yard';
+
+  @override
+  String get transferDestinationQuestion =>
+      'Where should this stock be transferred?';
+
+  @override
+  String get transferDestinationCityHub => 'City Processing Hub - Sector 4';
+
+  @override
+  String get transferDestinationCityAddress => 'Industrial Zone, 12 KM away';
+
+  @override
+  String get transferDestinationHighway => 'Highway Yard Warehouse';
+
+  @override
+  String get transferDestinationHighwayAddress =>
+      'National Highway 8, 24 KM away';
+
+  @override
+  String get transferDestinationApex => 'Apex Recycling Hub';
+
+  @override
+  String get transferDestinationApexAddress =>
+      'GIDC Industrial Estate, 35 KM away';
+
+  @override
+  String get transferDestinationSouthside => 'Southside Sorting Point';
+
+  @override
+  String get transferDestinationSouthsideAddress => 'Green Valley, 48 KM away';
+
+  @override
+  String get transferManagerApprovalNote =>
+      'Note: This request will be sent to Manager for vehicle dispatch approval.';
+
+  @override
+  String get transferSubmitRequest => 'Submit Request  →';
+
+  @override
+  String get transferSuccessTitle => 'Your request submitted Successfully!';
+
+  @override
+  String get transferSuccessSubtitle =>
+      'We will notify you once a vehicle is assigned by the Admin team.';
+
+  @override
+  String get transferBackToList => 'Back to Transfer List';
+
+  @override
   String get walletBalance => 'Wallet Balance';
 
   @override
@@ -768,7 +951,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionRejectedSupervisor => 'Rejected by Supervisor';
 
   @override
-  String get recordsCollectionsTitle => 'Collections';
+  String get recordsCollectionsTitle => 'Collections Records';
 
   @override
   String get recordsCollectionsSubtitle => 'Manage all your collections';
@@ -869,6 +1052,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileLogoutSubtitle => 'Sign out from your account';
+
+  @override
+  String get profileDeleteAccount => 'Delete Account';
+
+  @override
+  String get profileDeleteAccountSubtitle => 'Permanently delete your account';
+
+  @override
+  String get profileLanguageEnglishShort => 'ENG';
+
+  @override
+  String get profileLanguageGujaratiShort => 'GUJ';
+
+  @override
+  String get profileLanguageHindiShort => 'HIN';
 
   @override
   String get collectionDetailPending => 'Pending Supervisor Verification';
@@ -1424,4 +1622,277 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get endDaySuccessMessage =>
       'Your day has been closed successfully. All data has been synced.';
+
+  @override
+  String get requestTitle => 'Requests';
+
+  @override
+  String requestOpenCount(int count) {
+    return 'Open ($count)';
+  }
+
+  @override
+  String requestClosedCount(int count) {
+    return 'Closed ($count)';
+  }
+
+  @override
+  String get requestSearchHint => 'Search Here...';
+
+  @override
+  String get requestSupervisorName => 'Bhavesh Shah (Supervisor)';
+
+  @override
+  String get requestOpenDescriptionOne =>
+      'Ramp B weighing scale is showing zero error and flickering constantly during calibration...';
+
+  @override
+  String get requestOpenDescriptionTwo =>
+      'Calibrate bin weighing scale at main Surat collection center.';
+
+  @override
+  String get requestOpenDescriptionThree =>
+      'Review and verify the latest collection entry submitted by the agent.';
+
+  @override
+  String get requestClosedDescriptionOne => 'Technician sent, scale repaired.';
+
+  @override
+  String get requestClosedDescriptionTwo =>
+      'Review and verify the latest collection entry submitted by the agent.';
+
+  @override
+  String get requestPhotoAttached => '1 Photo attached';
+
+  @override
+  String get requestAwaitingResponse => 'Awaiting Response';
+
+  @override
+  String get requestClosedBySupervisor => 'Closed by Supervisor';
+
+  @override
+  String requestTodayTime(String time) {
+    return 'Today, $time';
+  }
+
+  @override
+  String get requestEmptyMessage => 'No Requests for now';
+
+  @override
+  String get requestRaiseButton => 'Raise Request';
+
+  @override
+  String get requestRaiseTitle => 'Raise Request';
+
+  @override
+  String get requestAddPhoto => 'Add Photo *';
+
+  @override
+  String get requestCapturePhoto => 'Capture Photo';
+
+  @override
+  String get requestPhotoSupport => 'Supported: JPG, PNG (Max 5MB).';
+
+  @override
+  String get requestDescriptionLabel => 'Description *';
+
+  @override
+  String get requestDescriptionHint => 'Add Description';
+
+  @override
+  String get requestDescriptionCounter => 'Max 150 Characters';
+
+  @override
+  String get requestSubmitButton => 'Submit Request';
+
+  @override
+  String get requestFilledDescription =>
+      'Weight scale calibrated using 10kg standard test weight. Zero-error verified.';
+
+  @override
+  String get requestSentTitle => 'Request Sent!';
+
+  @override
+  String get requestSentMessage =>
+      'Your request has been forwarded to your supervisor.';
+
+  @override
+  String get requestBackToList => 'Back to List';
+
+  @override
+  String get requestDetailsTitle => 'Request Details';
+
+  @override
+  String get requestCompletedDetailsTitle => 'Task Detail';
+
+  @override
+  String get requestAssignTo => 'Assign To';
+
+  @override
+  String get requestVerifyCollectionDetails => 'Verify Collection Details';
+
+  @override
+  String get requestAttachmentByYou => 'Attachment By you';
+
+  @override
+  String get requestResolveDetails => 'Resolve Request Details';
+
+  @override
+  String get requestCompletionProof => 'Task Completion Proof';
+
+  @override
+  String get requestCollectionAgentDetails => 'Collection agent Details';
+
+  @override
+  String get requestAttachmentFromSupervisor => 'Attachment from Supervisor';
+
+  @override
+  String get requestDescriptionPlain => 'Description';
+
+  @override
+  String get requestAgentName => 'Rahul Patel';
+
+  @override
+  String get requestCompletedStatus => 'Completed: Today, 11:30 AM';
+
+  @override
+  String get requestDetailDescription =>
+      'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight, inspect all uploaded item photos (before and after verification), and ensure customer details and material categories match the system records before final approval.';
+
+  @override
+  String get transferDetailTitle => 'Transfer Request Details';
+
+  @override
+  String get transferDetailRequestId => '#TRF-2026-089';
+
+  @override
+  String get transferRejectReasonTitle => 'Reason for Reject';
+
+  @override
+  String get transferRejectReason => 'Reason : No Vehicle Available';
+
+  @override
+  String get transferRejectRemarks =>
+      'Remarks : All yard trucks are currently out. Try after 2 PM.';
+
+  @override
+  String get transferRequestInformation => 'Request Information';
+
+  @override
+  String get transferDetailVehicle => 'Vehicle';
+
+  @override
+  String get transferDetailVehicleNumber => 'GJ-05-BX-1234';
+
+  @override
+  String get transferDetailVehicleUnavailable =>
+      'Vehicle Not Available (Agent)';
+
+  @override
+  String get transferDetailVehicleCapacity => 'Truck (Capacity 3000 KG)';
+
+  @override
+  String get transferDetailFromLocation => 'From Location';
+
+  @override
+  String get transferDetailFromLocationValue =>
+      'National Highway 8, 24 KM away';
+
+  @override
+  String get transferDetailToLocation => 'To Location';
+
+  @override
+  String get transferDetailToLocationValue => 'EERL - Surat Main Warehouse';
+
+  @override
+  String get transferDetailAvailableStock => 'Available Stock';
+
+  @override
+  String get transferDetailAvailableStockValue => '1200.60 KG';
+
+  @override
+  String get transferDetailDateTime => 'Request Date & Time';
+
+  @override
+  String get transferDetailDateTimeValue => '06 Aug 2026, 10:45 AM';
+
+  @override
+  String get transferDetailRequestedBy => 'Requested By';
+
+  @override
+  String get transferDetailRequestedByValue => 'Rahul Patel';
+
+  @override
+  String get transferDetailRequestStatus => 'Request Status';
+
+  @override
+  String get transferDetailWaitingManager => 'Waiting for Collection Manager';
+
+  @override
+  String get transferDetailWaitingLoading => 'Waiting for loading';
+
+  @override
+  String get transferDetailRejected => 'Rejected By Collection Manager';
+
+  @override
+  String get transferDetailCompleted => 'Transfer Completed';
+
+  @override
+  String get transferItemsTitle => 'Items to Transfer';
+
+  @override
+  String get transferItemName => 'Item Name';
+
+  @override
+  String get transferItemQuantity => 'Quantity';
+
+  @override
+  String get transferDetailPetBottles => 'PET Bottles';
+
+  @override
+  String get transferDetailQuantityValue => '270.00 KG';
+
+  @override
+  String get transferStatusTimeline => 'Status Timeline';
+
+  @override
+  String get transferTimelineCreated => 'Request Created';
+
+  @override
+  String get transferTimelinePendingVerification => 'Pending Verification';
+
+  @override
+  String get transferTimelineWaitingVerification =>
+      'Waiting for Supervisor verification';
+
+  @override
+  String get transferTimelineVerificationCompleted =>
+      'Supervisor verification completed';
+
+  @override
+  String get transferTimelineRejected => 'Pending Verification';
+
+  @override
+  String get transferTimelineRejectedSubtitle =>
+      'Vehicle unavailable or rejected';
+
+  @override
+  String get transferTimelinePendingLoading => 'Pending loading';
+
+  @override
+  String get transferTimelineWaitingLoading => 'Waiting for loading';
+
+  @override
+  String get transferTimelineLoadingCompleted => 'Vehicle loaded successfully';
+
+  @override
+  String get transferTimelineVerified => 'Verified';
+
+  @override
+  String get transferTimelineVerifiedSubtitle =>
+      'Will be updated after verification';
+
+  @override
+  String get transferTimelineCompletedSubtitle =>
+      'Transfer completed successfully';
 }

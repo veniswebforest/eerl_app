@@ -531,7 +531,7 @@ void main() {
       ..addFont(rootBundle.load('assets/font/Manrope-SemiBold.ttf'))
       ..addFont(rootBundle.load('assets/font/Manrope-Bold.ttf'));
     await fontLoader.load();
-    tester.view.physicalSize = const Size(375, 812);
+    tester.view.physicalSize = const Size(375, 1093);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -832,9 +832,9 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byKey(const Key('profile-notification-button')));
+    await tester.tap(find.byKey(const Key('profile-language-selector')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('ગુજરાતી'));
+    await tester.tap(find.byKey(const Key('profile-language-gu')));
     await tester.pumpAndSettle();
 
     expect(provider.locale, const Locale('gu'));

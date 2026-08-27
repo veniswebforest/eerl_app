@@ -10,6 +10,7 @@ class ProfileAssets {
   static const syncData = 'assets/icons/profile/sync_data.svg';
   static const arrowRight = 'assets/icons/profile/arrow_right.svg';
   static const logout = 'assets/icons/profile/logout.svg';
+  static const deleteAccount = 'assets/icons/profile/delete_account.svg';
   static const logoutArrowRight = 'assets/icons/profile/logout_arrow_right.svg';
   static const syncCloud = 'assets/icons/profile/sync_cloud.svg';
   static const syncPendingCollection =

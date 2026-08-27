@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -7,6 +8,7 @@ import 'package:eerl_app/core/providers/locale_provider.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import '../../home/widgets/home_assets.dart';
 import '../widgets/profile_action_card.dart';
 import '../widgets/profile_assets.dart';
 import '../widgets/profile_info_card.dart';
@@ -50,9 +52,8 @@ class ProfileScreen extends StatelessWidget {
             ),
             children: [
               _ProfileHeader(
-                onNotificationTap:
-                    onNotificationTap ??
-                    () => _showLanguagePicker(context, localeProvider),
+                localeProvider: localeProvider,
+                onNotificationTap: onNotificationTap ?? () {},
               ),
               const SizedBox(height: 28),
               Padding(
@@ -120,6 +121,16 @@ class ProfileScreen extends StatelessWidget {
                             builder: (_) => const LogoutConfirmationDialog(),
                           ),
                         ),
+                        const SizedBox(height: 12),
+                        ProfileActionCard(
+                          key: const Key('profile-delete-account'),
+                          icon: ProfileAssets.deleteAccount,
+                          arrowIcon: ProfileAssets.logoutArrowRight,
+                          title: l10n.profileDeleteAccount,
+                          subtitle: l10n.profileDeleteAccountSubtitle,
+                          destructive: true,
+                          onTap: () {},
+                        ),
                       ],
                     ),
                   ),
@@ -131,61 +142,15 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-
-  void _showLanguagePicker(BuildContext context, LocaleProvider provider) {
-    final l10n = context.l10n;
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.selectLanguage, style: AppTextStyles.semiboldH6_20),
-              const SizedBox(height: 12),
-              _LanguageOption(
-                label: l10n.english,
-                selected:
-                    provider.locale == null ||
-                    provider.locale?.languageCode == 'en',
-                onTap: () =>
-                    _selectLocale(sheetContext, provider, const Locale('en')),
-              ),
-              _LanguageOption(
-                label: l10n.gujarati,
-                selected: provider.locale?.languageCode == 'gu',
-                onTap: () =>
-                    _selectLocale(sheetContext, provider, const Locale('gu')),
-              ),
-              _LanguageOption(
-                label: l10n.hindi,
-                selected: provider.locale?.languageCode == 'hi',
-                onTap: () =>
-                    _selectLocale(sheetContext, provider, const Locale('hi')),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _selectLocale(
-    BuildContext sheetContext,
-    LocaleProvider provider,
-    Locale locale,
-  ) {
-    provider.setLocale(locale);
-    Navigator.pop(sheetContext);
-  }
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.onNotificationTap});
+  const _ProfileHeader({
+    required this.localeProvider,
+    required this.onNotificationTap,
+  });
 
+  final LocaleProvider localeProvider;
   final VoidCallback onNotificationTap;
 
   @override
@@ -201,6 +166,7 @@ class _ProfileHeader extends StatelessWidget {
                 title: context.l10n.profileUserProfile,
                 subtitle: context.l10n.profileSubtitle,
                 actions: [
+                  _ProfileLanguageSelector(provider: localeProvider),
                   InkWell(
                     key: const Key('profile-notification-button'),
                     onTap: onNotificationTap,
@@ -289,6 +255,133 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
+class _ProfileLanguageSelector extends StatelessWidget {
+  const _ProfileLanguageSelector({required this.provider});
+
+  final LocaleProvider provider;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedCode = provider.locale?.languageCode ?? 'en';
+    final shortLabels = {
+      'en': context.l10n.profileLanguageEnglishShort,
+      'gu': context.l10n.profileLanguageGujaratiShort,
+      'hi': context.l10n.profileLanguageHindiShort,
+    };
+    final menuLabels = shortLabels;
+
+    return InkWell(
+      key: const Key('profile-language-selector'),
+      borderRadius: BorderRadius.circular(20),
+      onTap: () => _showLanguagePopover(
+        context,
+        selectedCode: selectedCode,
+        labels: menuLabels,
+      ),
+      child: Container(
+        width: 70,
+        height: 30,
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.cool400),
+          color: AppColors.neutral50,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              shortLabels[selectedCode]!.substring(0,2),
+              style: AppTextStyles.semiboldH9_14.copyWith(
+                color: AppColors.neutral950,
+              ),
+            ),
+            const SizedBox(width: 4),
+            SvgPicture.asset(
+              HomeAssets.chevronDown,
+              width: 24,
+              height: 24,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showLanguagePopover(
+    BuildContext context, {
+    required String selectedCode,
+    required Map<String, String> labels,
+  }) async {
+    await showPopover<void>(
+      context: context,
+      direction: PopoverDirection.bottom,
+      backgroundColor: AppColors.neutral50,
+      barrierColor: Colors.transparent,
+      radius: 12,
+      width: 70,
+      height: 110,
+      arrowWidth: 0,
+      arrowHeight: 0,
+      contentDxOffset: 0,
+      contentDyOffset: 2,
+      shadow: const [
+        BoxShadow(
+          color: Color(0x24000000),
+          blurRadius: 12,
+          offset: Offset(0, 4),
+        ),
+      ],
+      bodyBuilder: (popoverContext) => Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.cool400),
+          color: AppColors.neutral50,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: ListView.separated(
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(vertical: 0),
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: labels.length,
+          separatorBuilder: (_, _) => const Divider(
+            height: 0,
+            indent: 0,
+            endIndent: 0,
+            color: AppColors.neutral200,
+          ),
+          itemBuilder: (_, index) {
+            final entry = labels.entries.elementAt(index);
+            final selected = entry.key == selectedCode;
+            return InkWell(
+              key: Key('profile-language-${entry.key}'),
+              onTap: () {
+                provider.setLocale(Locale(entry.key));
+                Navigator.of(popoverContext).pop();
+              },
+              child: SizedBox(
+                height: 35,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Center(
+                    child: Text(
+                      entry.value,
+                      style: AppTextStyles.mediumSH8_14.copyWith(
+                        color: selected
+                            ? AppColors.primary500
+                            : AppColors.neutral950,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
 class _DecorationMark extends StatelessWidget {
   const _DecorationMark();
 
@@ -336,27 +429,5 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) => Text(
     label,
     style: AppTextStyles.semiboldH9_14.copyWith(color: AppColors.neutral950),
-  );
-}
-
-class _LanguageOption extends StatelessWidget {
-  const _LanguageOption({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => ListTile(
-    contentPadding: EdgeInsets.zero,
-    title: Text(label, style: AppTextStyles.mediumSH7_16),
-    trailing: selected
-        ? const Icon(Icons.check_circle, color: AppColors.primary500)
-        : null,
-    onTap: onTap,
   );
 }

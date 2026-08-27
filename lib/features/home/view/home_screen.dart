@@ -24,6 +24,7 @@ class HomeScreen extends StatelessWidget {
     this.onConfigureMaterialTap,
     this.onTasksTap,
     this.onRequestsTap,
+    this.onTransferRequestsTap,
     this.onNotificationTap,
     this.onEndMyDayTap,
     this.onDrawerChanged,
@@ -35,6 +36,7 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback? onConfigureMaterialTap;
   final VoidCallback? onTasksTap;
   final VoidCallback? onRequestsTap;
+  final VoidCallback? onTransferRequestsTap;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onEndMyDayTap;
   final ValueChanged<bool>? onDrawerChanged;
@@ -54,6 +56,7 @@ class HomeScreen extends StatelessWidget {
             onConfigureMaterialTap: onConfigureMaterialTap,
             onTasksTap: onTasksTap,
             onRequestsTap: onRequestsTap,
+            onTransferRequestsTap: onTransferRequestsTap,
           ),
           onDrawerChanged: onDrawerChanged,
           drawerScrimColor: Colors.black.withValues(alpha: 0.6),

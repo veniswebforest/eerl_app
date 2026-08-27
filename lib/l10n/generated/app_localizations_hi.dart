@@ -300,6 +300,188 @@ class AppLocalizationsHi extends AppLocalizations {
   String get transferRequests => 'स्थानांतरण अनुरोध';
 
   @override
+  String get transferSearchHint => 'यहाँ खोजें...';
+
+  @override
+  String get transferFilterAll => 'सभी';
+
+  @override
+  String get transferFilterPending => 'लंबित';
+
+  @override
+  String get transferFilterDispatch => 'डिस्पैच';
+
+  @override
+  String get transferFilterClosed => 'बंद';
+
+  @override
+  String get transferDestination => 'प्रति: सिटी प्रोसेसिंग हब - सेक्टर 4';
+
+  @override
+  String get transferFromCurrentLocation => '(वर्तमान स्थान से)';
+
+  @override
+  String get transferEmptyMessage => 'कोई स्थानांतरण अनुरोध नहीं मिला';
+
+  @override
+  String get transferStatusPending => 'लंबित';
+
+  @override
+  String get transferStatusApproved => 'स्वीकृत';
+
+  @override
+  String get transferStatusDispatch => 'डिस्पैच';
+
+  @override
+  String get transferStatusRejected => 'अस्वीकृत';
+
+  @override
+  String transferTotalWeight(String weight) {
+    return 'कुल : $weight';
+  }
+
+  @override
+  String transferDateTime(String date, String time) {
+    return '$date • $time';
+  }
+
+  @override
+  String get transferSelectItemsTitle => 'स्थानांतरण के लिए वस्तुएँ चुनें';
+
+  @override
+  String get transferSelectItemsSubtitle =>
+      'वस्तुएँ चुनें और स्थानांतरित की जाने वाली मात्रा दर्ज करें।';
+
+  @override
+  String get transferPlasticWaste => 'प्लास्टिक कचरा';
+
+  @override
+  String get transferToyWaste => 'खिलौना कचरा';
+
+  @override
+  String transferCapacity(String weight) {
+    return 'क्षमता $weight';
+  }
+
+  @override
+  String get transferTotalKgLabel => 'कुल KG *';
+
+  @override
+  String get transferTotalKgHint => 'कुल KG दर्ज करें';
+
+  @override
+  String get transferKgPrefix => 'KG  ';
+
+  @override
+  String get transferStockValidation =>
+      'उपलब्ध स्टॉक से अधिक दर्ज नहीं कर सकते';
+
+  @override
+  String get transferVehiclePlateLabel => 'वाहन नंबर प्लेट *';
+
+  @override
+  String get transferVehiclePlateHint => 'वाहन नंबर प्लेट दर्ज करें';
+
+  @override
+  String get transferVehicleTypeLabel => 'वाहन का प्रकार';
+
+  @override
+  String get transferVehicleTypeHint => 'वाहन का प्रकार चुनें';
+
+  @override
+  String get transferVehicleCapacityLabel => 'वाहन क्षमता';
+
+  @override
+  String get transferVehicleCapacityHint => 'वाहन क्षमता दर्ज करें';
+
+  @override
+  String get transferManagerArrangeVehicle =>
+      'मैं अपने मैनेजर को वाहन की व्यवस्था करने दूँगा';
+
+  @override
+  String get transferVehicleTruck => 'ट्रक';
+
+  @override
+  String get transferVehicleMiniTruck => 'मिनी ट्रक';
+
+  @override
+  String get transferVehiclePickupTruck => 'पिकअप ट्रक';
+
+  @override
+  String get transferVehicleTempo => 'टेम्पो / हल्का वाणिज्यिक वाहन';
+
+  @override
+  String get transferVehicleTrailer => 'ट्रेलर / भारी ट्रक';
+
+  @override
+  String get transferVehicleOther => 'अन्य';
+
+  @override
+  String get transferSelectedSummary =>
+      '✓  540.00 KG                                  ₹1960';
+
+  @override
+  String get transferSelectedWeight => '540.00 KG';
+
+  @override
+  String get transferSelectedPrice => '₹1960';
+
+  @override
+  String get transferContinue => 'जारी रखें  →';
+
+  @override
+  String get transferSelectDestination => 'गंतव्य चुनें';
+
+  @override
+  String get transferCurrentFacility => 'सेंट्रल MRF यार्ड';
+
+  @override
+  String get transferDestinationQuestion =>
+      'इस स्टॉक को कहाँ स्थानांतरित किया जाना चाहिए?';
+
+  @override
+  String get transferDestinationCityHub => 'सिटी प्रोसेसिंग हब - सेक्टर 4';
+
+  @override
+  String get transferDestinationCityAddress => 'इंडस्ट्रियल ज़ोन, 12 KM दूर';
+
+  @override
+  String get transferDestinationHighway => 'हाईवे यार्ड वेयरहाउस';
+
+  @override
+  String get transferDestinationHighwayAddress => 'नेशनल हाईवे 8, 24 KM दूर';
+
+  @override
+  String get transferDestinationApex => 'एपेक्स रीसाइक्लिंग हब';
+
+  @override
+  String get transferDestinationApexAddress =>
+      'GIDC इंडस्ट्रियल एस्टेट, 35 KM दूर';
+
+  @override
+  String get transferDestinationSouthside => 'साउथसाइड सॉर्टिंग पॉइंट';
+
+  @override
+  String get transferDestinationSouthsideAddress => 'ग्रीन वैली, 48 KM दूर';
+
+  @override
+  String get transferManagerApprovalNote =>
+      'नोट: वाहन डिस्पैच अनुमोदन के लिए यह अनुरोध मैनेजर को भेजा जाएगा।';
+
+  @override
+  String get transferSubmitRequest => 'अनुरोध भेजें  →';
+
+  @override
+  String get transferSuccessTitle => 'आपका अनुरोध सफलतापूर्वक भेजा गया!';
+
+  @override
+  String get transferSuccessSubtitle =>
+      'एडमिन टीम द्वारा वाहन सौंपे जाने पर हम आपको सूचित करेंगे।';
+
+  @override
+  String get transferBackToList => 'स्थानांतरण सूची पर वापस जाएँ';
+
+  @override
   String get walletBalance => 'वॉलेट शेष';
 
   @override
@@ -769,7 +951,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get collectionRejectedSupervisor => 'पर्यवेक्षक द्वारा अस्वीकृत';
 
   @override
-  String get recordsCollectionsTitle => 'संग्रह';
+  String get recordsCollectionsTitle => 'संग्रह रिकॉर्ड्स';
 
   @override
   String get recordsCollectionsSubtitle => 'अपने सभी संग्रह प्रबंधित करें';
@@ -870,6 +1052,21 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get profileLogoutSubtitle => 'अपने खाते से साइन आउट करें';
+
+  @override
+  String get profileDeleteAccount => 'खाता हटाएँ';
+
+  @override
+  String get profileDeleteAccountSubtitle => 'अपना खाता स्थायी रूप से हटाएँ';
+
+  @override
+  String get profileLanguageEnglishShort => 'ENG';
+
+  @override
+  String get profileLanguageGujaratiShort => 'GUJ';
+
+  @override
+  String get profileLanguageHindiShort => 'HIN';
 
   @override
   String get collectionDetailPending => 'पर्यवेक्षक सत्यापन लंबित';
@@ -1423,4 +1620,275 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get endDaySuccessMessage =>
       'आपका दिन सफलतापूर्वक बंद हो गया। सभी डेटा सिंक हो गया।';
+
+  @override
+  String get requestTitle => 'अनुरोध';
+
+  @override
+  String requestOpenCount(int count) {
+    return 'खुले ($count)';
+  }
+
+  @override
+  String requestClosedCount(int count) {
+    return 'बंद ($count)';
+  }
+
+  @override
+  String get requestSearchHint => 'यहाँ खोजें...';
+
+  @override
+  String get requestSupervisorName => 'भावेश शाह (सुपरवाइज़र)';
+
+  @override
+  String get requestOpenDescriptionOne =>
+      'कैलिब्रेशन के दौरान रैम्प B का वज़न मापने वाला स्केल शून्य त्रुटि और लगातार झिलमिलाहट दिखा रहा है...';
+
+  @override
+  String get requestOpenDescriptionTwo =>
+      'मुख्य सूरत कलेक्शन सेंटर पर बिन वज़न स्केल कैलिब्रेट करें।';
+
+  @override
+  String get requestOpenDescriptionThree =>
+      'एजेंट द्वारा जमा की गई नवीनतम कलेक्शन एंट्री की समीक्षा और सत्यापन करें।';
+
+  @override
+  String get requestClosedDescriptionOne =>
+      'तकनीशियन भेजा गया, स्केल ठीक किया गया।';
+
+  @override
+  String get requestClosedDescriptionTwo =>
+      'एजेंट द्वारा जमा की गई नवीनतम कलेक्शन एंट्री की समीक्षा और सत्यापन करें।';
+
+  @override
+  String get requestPhotoAttached => '1 फ़ोटो संलग्न';
+
+  @override
+  String get requestAwaitingResponse => 'उत्तर की प्रतीक्षा';
+
+  @override
+  String get requestClosedBySupervisor => 'सुपरवाइज़र द्वारा बंद';
+
+  @override
+  String requestTodayTime(String time) {
+    return 'आज, $time';
+  }
+
+  @override
+  String get requestEmptyMessage => 'अभी कोई अनुरोध नहीं';
+
+  @override
+  String get requestRaiseButton => 'अनुरोध करें';
+
+  @override
+  String get requestRaiseTitle => 'अनुरोध करें';
+
+  @override
+  String get requestAddPhoto => 'फ़ोटो जोड़ें *';
+
+  @override
+  String get requestCapturePhoto => 'फ़ोटो लें';
+
+  @override
+  String get requestPhotoSupport => 'समर्थित: JPG, PNG (अधिकतम 5MB)।';
+
+  @override
+  String get requestDescriptionLabel => 'विवरण *';
+
+  @override
+  String get requestDescriptionHint => 'विवरण जोड़ें';
+
+  @override
+  String get requestDescriptionCounter => 'अधिकतम 150 अक्षर';
+
+  @override
+  String get requestSubmitButton => 'अनुरोध जमा करें';
+
+  @override
+  String get requestFilledDescription =>
+      '10 किलो मानक परीक्षण वज़न से स्केल कैलिब्रेट किया गया। शून्य त्रुटि सत्यापित की गई।';
+
+  @override
+  String get requestSentTitle => 'अनुरोध भेजा गया!';
+
+  @override
+  String get requestSentMessage =>
+      'आपका अनुरोध आपके सुपरवाइज़र को भेज दिया गया है।';
+
+  @override
+  String get requestBackToList => 'सूची पर वापस जाएँ';
+
+  @override
+  String get requestDetailsTitle => 'अनुरोध विवरण';
+
+  @override
+  String get requestCompletedDetailsTitle => 'कार्य विवरण';
+
+  @override
+  String get requestAssignTo => 'सौंपा गया';
+
+  @override
+  String get requestVerifyCollectionDetails => 'कलेक्शन विवरण सत्यापित करें';
+
+  @override
+  String get requestAttachmentByYou => 'आपका संलग्नक';
+
+  @override
+  String get requestResolveDetails => 'अनुरोध समाधान विवरण';
+
+  @override
+  String get requestCompletionProof => 'कार्य पूर्णता प्रमाण';
+
+  @override
+  String get requestCollectionAgentDetails => 'कलेक्शन एजेंट विवरण';
+
+  @override
+  String get requestAttachmentFromSupervisor => 'सुपरवाइज़र का संलग्नक';
+
+  @override
+  String get requestDescriptionPlain => 'विवरण';
+
+  @override
+  String get requestAgentName => 'राहुल पटेल';
+
+  @override
+  String get requestCompletedStatus => 'पूर्ण: आज, 11:30 AM';
+
+  @override
+  String get requestDetailDescription =>
+      'फील्ड एजेंट द्वारा जमा की गई नवीनतम कलेक्शन एंट्री की समीक्षा और सत्यापन करें। दर्ज कलेक्शन वज़न को सत्यापित वज़न से मिलाएँ, अपलोड किए गए सभी फ़ोटो जाँचें और अंतिम स्वीकृति से पहले ग्राहक तथा सामग्री विवरण का सिस्टम रिकॉर्ड से मिलान सुनिश्चित करें।';
+
+  @override
+  String get transferDetailTitle => 'ट्रांसफर अनुरोध विवरण';
+
+  @override
+  String get transferDetailRequestId => '#TRF-2026-089';
+
+  @override
+  String get transferRejectReasonTitle => 'अस्वीकृति का कारण';
+
+  @override
+  String get transferRejectReason => 'कारण : वाहन उपलब्ध नहीं है';
+
+  @override
+  String get transferRejectRemarks =>
+      'टिप्पणी : सभी यार्ड ट्रक अभी बाहर हैं। दोपहर 2 बजे के बाद प्रयास करें।';
+
+  @override
+  String get transferRequestInformation => 'अनुरोध की जानकारी';
+
+  @override
+  String get transferDetailVehicle => 'वाहन';
+
+  @override
+  String get transferDetailVehicleNumber => 'GJ-05-BX-1234';
+
+  @override
+  String get transferDetailVehicleUnavailable => 'वाहन उपलब्ध नहीं (एजेंट)';
+
+  @override
+  String get transferDetailVehicleCapacity => 'ट्रक (क्षमता 3000 किग्रा)';
+
+  @override
+  String get transferDetailFromLocation => 'प्रस्थान स्थान';
+
+  @override
+  String get transferDetailFromLocationValue => 'नेशनल हाईवे 8, 24 किमी दूर';
+
+  @override
+  String get transferDetailToLocation => 'गंतव्य स्थान';
+
+  @override
+  String get transferDetailToLocationValue => 'EERL - सूरत मुख्य वेयरहाउस';
+
+  @override
+  String get transferDetailAvailableStock => 'उपलब्ध स्टॉक';
+
+  @override
+  String get transferDetailAvailableStockValue => '1200.60 किग्रा';
+
+  @override
+  String get transferDetailDateTime => 'अनुरोध दिनांक और समय';
+
+  @override
+  String get transferDetailDateTimeValue => '06 अगस्त 2026, 10:45 AM';
+
+  @override
+  String get transferDetailRequestedBy => 'अनुरोधकर्ता';
+
+  @override
+  String get transferDetailRequestedByValue => 'राहुल पटेल';
+
+  @override
+  String get transferDetailRequestStatus => 'अनुरोध स्थिति';
+
+  @override
+  String get transferDetailWaitingManager => 'कलेक्शन मैनेजर की प्रतीक्षा';
+
+  @override
+  String get transferDetailWaitingLoading => 'लोडिंग की प्रतीक्षा';
+
+  @override
+  String get transferDetailRejected => 'कलेक्शन मैनेजर द्वारा अस्वीकृत';
+
+  @override
+  String get transferDetailCompleted => 'ट्रांसफर पूर्ण';
+
+  @override
+  String get transferItemsTitle => 'ट्रांसफर की वस्तुएँ';
+
+  @override
+  String get transferItemName => 'वस्तु का नाम';
+
+  @override
+  String get transferItemQuantity => 'मात्रा';
+
+  @override
+  String get transferDetailPetBottles => 'PET बोतलें';
+
+  @override
+  String get transferDetailQuantityValue => '270.00 किग्रा';
+
+  @override
+  String get transferStatusTimeline => 'स्थिति समयरेखा';
+
+  @override
+  String get transferTimelineCreated => 'अनुरोध बनाया गया';
+
+  @override
+  String get transferTimelinePendingVerification => 'सत्यापन लंबित';
+
+  @override
+  String get transferTimelineWaitingVerification =>
+      'सुपरवाइज़र सत्यापन की प्रतीक्षा';
+
+  @override
+  String get transferTimelineVerificationCompleted =>
+      'सुपरवाइज़र सत्यापन पूर्ण';
+
+  @override
+  String get transferTimelineRejected => 'सत्यापन लंबित';
+
+  @override
+  String get transferTimelineRejectedSubtitle =>
+      'वाहन अनुपलब्ध या अनुरोध अस्वीकृत';
+
+  @override
+  String get transferTimelinePendingLoading => 'लोडिंग लंबित';
+
+  @override
+  String get transferTimelineWaitingLoading => 'लोडिंग की प्रतीक्षा';
+
+  @override
+  String get transferTimelineLoadingCompleted => 'वाहन सफलतापूर्वक लोड हुआ';
+
+  @override
+  String get transferTimelineVerified => 'सत्यापित';
+
+  @override
+  String get transferTimelineVerifiedSubtitle => 'सत्यापन के बाद अपडेट होगा';
+
+  @override
+  String get transferTimelineCompletedSubtitle =>
+      'ट्रांसफर सफलतापूर्वक पूर्ण हुआ';
 }

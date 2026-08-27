@@ -55,6 +55,7 @@ class AppScreenHeader extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.semiboldH6_20.copyWith(
                         color: AppColors.neutral950,
+                        height: 1.1,
                       ),
                     ),
                   if (title != null && subtitle != null)
@@ -66,6 +67,7 @@ class AppScreenHeader extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.mediumSH8_14.copyWith(
                         color: AppColors.neutral600,
+                        height: 1.1,
                       ),
                     ),
                 ],
@@ -79,9 +81,12 @@ class AppScreenHeader extends StatelessWidget {
               children: [
                 for (var index = 0; index < actions.length; index++) ...[
                   if (index > 0) const SizedBox(width: 8),
-                  SizedBox(
-                    width: AppScreenHeaderMetrics.actionSize,
-                    height: AppScreenHeaderMetrics.actionSize,
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minWidth: AppScreenHeaderMetrics.actionSize,
+                      minHeight: AppScreenHeaderMetrics.actionSize,
+                      maxHeight: AppScreenHeaderMetrics.actionSize,
+                    ),
                     child: Center(child: actions[index]),
                   ),
                 ],
