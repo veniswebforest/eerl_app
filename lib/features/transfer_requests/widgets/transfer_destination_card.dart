@@ -42,7 +42,7 @@ class TransferDestinationCard extends StatelessWidget {
                 children: [
                   Text(
                     destination.name,
-                    style: AppTextStyles.semiboldH9_14.copyWith(
+                    style: AppTextStyles.semiboldH8_16.copyWith(
                       color: AppColors.neutral950,
                     ),
                   ),
@@ -62,8 +62,8 @@ class TransferDestinationCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           destination.address,
-                          style: AppTextStyles.regularB8_12.copyWith(
-                            color: AppColors.neutral600,
+                          style: AppTextStyles.regularB7_14.copyWith(
+                            color: AppColors.neutral950,
                           ),
                         ),
                       ),

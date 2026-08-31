@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import '../model/collection_detail_status.dart';
 import '../model/collection_record_model.dart';
@@ -18,9 +19,11 @@ class RecordsTabScreen extends StatefulWidget {
     super.key,
     this.initialView = RecordsViewFlag.history,
     this.onRecordTap,
+    this.onDraftContinue,
   });
   final RecordsViewFlag initialView;
   final ValueChanged<CollectionDetailStatus>? onRecordTap;
+  final ValueChanged<CollectionDraftModel>? onDraftContinue;
   @override
   State<RecordsTabScreen> createState() => _RecordsTabScreenState();
 }
@@ -44,7 +47,8 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
                 AppScreenHeaderMetrics.topInset,
                 20,
                 112,
-              ),              child: Center(
+              ),
+              child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 600),
                   child: Column(
@@ -179,18 +183,25 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
         date: context.l10n.recordsTodayTime,
         weight: '240.20 KG',
         itemCount: context.l10n.recordsFiveItemsSelected,
+        type: CollectionType.d2d,
+        resumeStep: CollectionEntryStep.photos,
+        selectedItems: const <int>{0, 1, 2, 3, 4},
       ),
       CollectionDraftModel(
         name: 'MRF Station',
         date: context.l10n.recordsOctober22Time,
         weight: '240.20 KG',
         itemCount: '....',
+        type: CollectionType.mrfStation,
+        resumeStep: CollectionEntryStep.items,
       ),
       CollectionDraftModel(
         name: 'MRF Station',
         date: context.l10n.recordsOctober21Time,
         weight: '....',
         itemCount: '....',
+        type: CollectionType.mrfStation,
+        resumeStep: CollectionEntryStep.items,
       ),
     ].take(_draftCount).toList();
     return Column(
@@ -234,6 +245,7 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
               continueLabel: context.l10n.recordsContinue,
               onDiscard: () =>
                   setState(() => _view = RecordsViewFlag.discardConfirmation),
+              onContinue: () => widget.onDraftContinue?.call(item),
             ),
             const SizedBox(height: 14),
           ],

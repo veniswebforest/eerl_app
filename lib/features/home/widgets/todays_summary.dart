@@ -9,7 +9,9 @@ import 'home_styles.dart';
 
 /// 2×2 grid summary section showing today's collection stats.
 class TodaysSummary extends StatelessWidget {
-  const TodaysSummary({super.key});
+  const TodaysSummary({super.key, this.onWalletTap});
+
+  final VoidCallback? onWalletTap;
 
   @override
   Widget build(BuildContext context) {
@@ -53,12 +55,14 @@ class TodaysSummary extends StatelessWidget {
                   valueColor: AppColors.purple,
                 ),
                 SummaryCard(
+                  key: const Key('home-wallet-summary-card'),
                   iconAsset: HomeAssets.wallet,
                   iconColor: AppColors.secondary500,
                   iconBg: AppColors.secondary100,
                   label: context.l10n.walletBalance,
                   value: context.l10n.walletAmount('50,000'),
                   valueColor: AppColors.secondary500,
+                  // onTap: onWalletTap,
                 ),
               ].map((card) => SizedBox(width: cardWidth, child: card)).toList(),
             );
@@ -79,6 +83,7 @@ class SummaryCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.valueColor,
+    this.onTap,
   });
 
   final String iconAsset;
@@ -87,6 +92,7 @@ class SummaryCard extends StatelessWidget {
   final String label;
   final String value;
   final Color valueColor;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +107,6 @@ class SummaryCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          // Icon bubble
           Container(
             width: 40,
             height: 40,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -225,7 +224,9 @@ class _InformationCard extends StatelessWidget {
           ),
           Text(
             context.l10n.transferDetailRequestStatus,
-            style: AppTextStyles.semiboldH9_14.copyWith(color: AppColors.neutral950),
+            style: AppTextStyles.semiboldH9_14.copyWith(
+              color: AppColors.neutral950,
+            ),
           ),
           const SizedBox(height: 8),
           TransferStatusChip(
@@ -250,7 +251,9 @@ class _ItemsCard extends StatelessWidget {
       children: [
         Text(
           context.l10n.transferItemsTitle,
-          style: AppTextStyles.semiboldH8_16.copyWith(color: AppColors.neutral950),
+          style: AppTextStyles.semiboldH8_16.copyWith(
+            color: AppColors.neutral950,
+          ),
         ),
         const SizedBox(height: 14),
         Row(
@@ -258,12 +261,16 @@ class _ItemsCard extends StatelessWidget {
             Expanded(
               child: Text(
                 context.l10n.transferItemName,
-                style: AppTextStyles.semiboldH9_14.copyWith(color: AppColors.neutral950),
+                style: AppTextStyles.semiboldH9_14.copyWith(
+                  color: AppColors.neutral950,
+                ),
               ),
             ),
             Text(
               context.l10n.transferItemQuantity,
-              style: AppTextStyles.semiboldH9_14.copyWith(color: AppColors.neutral950),
+              style: AppTextStyles.semiboldH9_14.copyWith(
+                color: AppColors.neutral950,
+              ),
             ),
           ],
         ),

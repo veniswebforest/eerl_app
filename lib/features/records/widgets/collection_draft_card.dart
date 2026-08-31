@@ -14,6 +14,7 @@ class CollectionDraftCard extends StatelessWidget {
     required this.discardLabel,
     required this.continueLabel,
     required this.onDiscard,
+    required this.onContinue,
   });
 
   final CollectionDraftModel item;
@@ -21,6 +22,7 @@ class CollectionDraftCard extends StatelessWidget {
   final String discardLabel;
   final String continueLabel;
   final VoidCallback onDiscard;
+  final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +98,7 @@ class CollectionDraftCard extends StatelessWidget {
                 child: _Button(
                   label: continueLabel,
                   color: AppColors.primary500,
-                  onTap: () {},
+                  onTap: onContinue,
                 ),
               ),
             ],

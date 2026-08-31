@@ -317,7 +317,7 @@ class _CreateTransferRequestScreenState
                 const SizedBox(height: 22),
                 Text(
                   context.l10n.transferDestinationQuestion,
-                  style: AppTextStyles.semiboldH9_14.copyWith(
+                  style: AppTextStyles.semiboldH8_16.copyWith(
                     color: AppColors.neutral950,
                   ),
                 ),
@@ -333,12 +333,6 @@ class _CreateTransferRequestScreenState
                     const SizedBox(height: 12),
                 ],
                 const SizedBox(height: 14),
-                Text(
-                  context.l10n.transferManagerApprovalNote,
-                  style: AppTextStyles.regularB8_12.copyWith(
-                    color: AppColors.neutral600,
-                  ),
-                ),
               ],
             ),
           ),
@@ -435,7 +429,15 @@ class _TransferField extends StatelessWidget {
         style: AppTextStyles.regularB7_14,
         decoration: InputDecoration(
           hintText: hint,
-          prefixText: prefix,
+          prefixIcon: prefix != null
+              ? Center(
+                  child: Text(prefix ?? '', style: AppTextStyles.semiboldH8_16),
+                )
+              : null,
+          prefixIconConstraints: const BoxConstraints(
+            minWidth: 42,
+            maxWidth: 42,
+          ),
           errorText: errorText,
           errorStyle: AppTextStyles.regularB8_12.copyWith(
             color: AppColors.red600,
@@ -704,11 +706,16 @@ class _CurrentLocationCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(name, style: AppTextStyles.semiboldH9_14),
+              Text(
+                name,
+                style: AppTextStyles.semiboldH8_16.copyWith(
+                  color: AppColors.neutral950,
+                ),
+              ),
               const SizedBox(height: 3),
               Text(
                 subtitle,
-                style: AppTextStyles.regularB8_12.copyWith(
+                style: AppTextStyles.mediumSH8_14.copyWith(
                   color: AppColors.neutral600,
                 ),
               ),
@@ -758,40 +765,46 @@ class _BottomAction extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             color: AppColors.primary100,
+            border: Border.all(color: AppColors.primary400),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
               SvgPicture.asset(
-                'assets/icons/wallet/status_verified.svg',
+                'assets/icons/records/ic_true_underline.svg',
                 width: 18,
                 height: 18,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.primary700,
-                  BlendMode.srcIn,
-                ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  weight,
+                  "Total KG",
                   style: AppTextStyles.semiboldH9_14.copyWith(
-                    color: AppColors.primary700,
+                    color: AppColors.neutral950,
                   ),
                 ),
               ),
-              Container(width: 1, height: 22, color: AppColors.primary400),
-              const SizedBox(width: 14),
-              Text(
-                price,
-                style: AppTextStyles.semiboldH9_14.copyWith(
-                  color: AppColors.primary700,
+              Container(width: 1, height: 22, color: AppColors.neutral950),
+              Expanded(
+                child: Text(
+                  textAlign: TextAlign.end,
+                  "0.00 KG",
+                  style: AppTextStyles.boldH7_16.copyWith(
+                    color: AppColors.primary500,
+                  ),
                 ),
               ),
             ],
           ),
         ),
         const SizedBox(height: 10),
+        Text(
+          context.l10n.transferManagerApprovalNote,
+          style: AppTextStyles.mediumSH9_12.copyWith(
+            color: AppColors.neutral600,
+          ),
+        ),
+        const SizedBox(height: 20),
         SizedBox(
           width: double.infinity,
           height: 50,

@@ -77,7 +77,7 @@ class TransferRequestCard extends StatelessWidget {
             children: [
               Expanded(
                 child: _DetailRow(
-                  icon: 'assets/icons/wallet/status_verified.svg',
+                  icon: 'assets/icons/records/clock.svg',
                   label: context.l10n.transferDateTime(item.date, item.time),
                   compact: true,
                 ),

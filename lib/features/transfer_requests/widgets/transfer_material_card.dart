@@ -71,14 +71,14 @@ class TransferMaterialCard extends StatelessWidget {
             const SizedBox(height: 10),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
                 color: AppColors.cool200,
                 borderRadius: BorderRadius.circular(5),
               ),
               child: Text(
                 capacity,
-                style: AppTextStyles.mediumSH9_12.copyWith(
+                style: AppTextStyles.semiboldH9_14.copyWith(
                   color: AppColors.neutral900,
                 ),
               ),

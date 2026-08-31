@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
-import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'home_assets.dart';
@@ -14,6 +12,11 @@ const _iconPath = 'assets/icons/home';
 class HomeDrawer extends StatefulWidget {
   const HomeDrawer({
     super.key,
+    this.onCollectionTap,
+    this.onReceiptsTap,
+    this.onSyncStatusTap,
+    this.onNotificationTap,
+    this.onLogoutTap,
     this.onWalletTap,
     this.onHelpSupportTap,
     this.onConfigureMaterialTap,
@@ -22,6 +25,11 @@ class HomeDrawer extends StatefulWidget {
     this.onTransferRequestsTap,
   });
 
+  final VoidCallback? onCollectionTap;
+  final VoidCallback? onReceiptsTap;
+  final VoidCallback? onSyncStatusTap;
+  final VoidCallback? onNotificationTap;
+  final VoidCallback? onLogoutTap;
   final VoidCallback? onWalletTap;
   final VoidCallback? onHelpSupportTap;
   final VoidCallback? onConfigureMaterialTap;
@@ -56,9 +64,13 @@ class _HomeDrawerState extends State<HomeDrawer> {
                       child: Column(
                         children: [
                           _DrawerItem(
+                            key: const Key('drawer-collection'),
                             label: context.l10n.drawerCollection,
                             icon: '$_iconPath/drawer_collection.svg',
-                            onTap: () => _close(context),
+                            onTap: () {
+                              _close(context);
+                              widget.onCollectionTap?.call();
+                            },
                           ),
                           _DrawerItem(
                             key: const Key('drawer-transfer-requests'),
@@ -70,9 +82,13 @@ class _HomeDrawerState extends State<HomeDrawer> {
                             },
                           ),
                           _DrawerItem(
+                            key: const Key('drawer-receipts'),
                             label: context.l10n.drawerReceipts,
                             icon: '$_iconPath/drawer_receipts.svg',
-                            onTap: () => _close(context),
+                            onTap: () {
+                              _close(context);
+                              widget.onReceiptsTap?.call();
+                            },
                           ),
                           _DrawerItem(
                             label: context.l10n.walletLogExpense,
@@ -118,14 +134,22 @@ class _HomeDrawerState extends State<HomeDrawer> {
                             ],
                           ),
                           _DrawerItem(
+                            key: const Key('drawer-sync-status'),
                             label: context.l10n.drawerSyncStatus,
                             icon: '$_iconPath/drawer_sync_status.svg',
-                            onTap: () => _close(context),
+                            onTap: () {
+                              _close(context);
+                              widget.onSyncStatusTap?.call();
+                            },
                           ),
                           _DrawerItem(
+                            key: const Key('drawer-notifications'),
                             label: context.l10n.notifications,
                             icon: '$_iconPath/drawer_notifications.svg',
-                            onTap: () => _close(context),
+                            onTap: () {
+                              _close(context);
+                              widget.onNotificationTap?.call();
+                            },
                           ),
                           _DrawerItem(
                             key: const Key('drawer-help-support'),
@@ -137,10 +161,14 @@ class _HomeDrawerState extends State<HomeDrawer> {
                             },
                           ),
                           _DrawerItem(
+                            key: const Key('drawer-logout'),
                             label: context.l10n.drawerLogout,
                             icon: '$_iconPath/drawer_logout.svg',
                             textColor: const Color(0xFFE22424),
-                            onTap: () => context.go(AppRoutes.login),
+                            onTap: () {
+                              _close(context);
+                              widget.onLogoutTap?.call();
+                            },
                           ),
                         ],
                       ),

@@ -216,29 +216,38 @@ class _TransferAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 68,
-    height: 68,
+    width: 72,
+    height: 72,
     padding: const EdgeInsets.all(5),
     decoration: const BoxDecoration(
       color: AppColors.primary200,
       shape: BoxShape.circle,
     ),
-    child: Material(
-      color: AppColors.primary500,
-      shape: const CircleBorder(),
-      elevation: 4,
-      child: InkWell(
-        key: const Key('transfer-request-add'),
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: Center(
-          child: SvgPicture.asset(
-            'assets/icons/help_support/add.svg',
-            width: 34,
-            height: 34,
-            colorFilter: const ColorFilter.mode(
-              AppColors.neutral50,
-              BlendMode.srcIn,
+    child: Container(
+      width: 68,
+      height: 68,
+      padding: const EdgeInsets.all(5),
+      decoration: const BoxDecoration(
+        color: AppColors.primary300,
+        shape: BoxShape.circle,
+      ),
+      child: Material(
+        color: AppColors.primary500,
+        shape: const CircleBorder(),
+        elevation: 4,
+        child: InkWell(
+          key: const Key('transfer-request-add'),
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Center(
+            child: SvgPicture.asset(
+              'assets/icons/help_support/add.svg',
+              width: 34,
+              height: 34,
+              colorFilter: const ColorFilter.mode(
+                AppColors.neutral50,
+                BlendMode.srcIn,
+              ),
             ),
           ),
         ),

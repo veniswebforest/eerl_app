@@ -8,7 +8,14 @@ import 'home_styles.dart';
 
 /// Pending collection drafts section with a "View All" link and draft card.
 class CollectionDrafts extends StatelessWidget {
-  const CollectionDrafts({super.key});
+  const CollectionDrafts({
+    super.key,
+    this.onViewAllTap,
+    this.onContinueCollectionTap,
+  });
+
+  final VoidCallback? onViewAllTap;
+  final VoidCallback? onContinueCollectionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +34,8 @@ class CollectionDrafts extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             TextButton(
-              onPressed: () {},
+              key: const Key('collection-drafts-view-all'),
+              onPressed: onViewAllTap,
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primary500,
                 padding: EdgeInsets.zero,
@@ -126,7 +134,8 @@ class CollectionDrafts extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  key: const Key('continue-draft-collection'),
+                  onPressed: onContinueCollectionTap,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary500,
                     foregroundColor: AppColors.neutral50,

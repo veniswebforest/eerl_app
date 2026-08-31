@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import '../widgets/collection_drafts.dart';
 import '../widgets/collection_types.dart';
@@ -18,26 +19,38 @@ import '../widgets/zone_selector.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
     super.key,
+    this.onCollectionTap,
+    this.onReceiptsTap,
+    this.onContinueDraftTap,
+    this.onSyncStatusTap,
     this.onWalletTap,
     this.onAddCollectionTap,
+    this.onCollectionTypeTap,
     this.onHelpSupportTap,
     this.onConfigureMaterialTap,
     this.onTasksTap,
     this.onRequestsTap,
     this.onTransferRequestsTap,
     this.onNotificationTap,
+    this.onLogoutTap,
     this.onEndMyDayTap,
     this.onDrawerChanged,
   });
 
+  final VoidCallback? onCollectionTap;
+  final VoidCallback? onReceiptsTap;
+  final VoidCallback? onContinueDraftTap;
+  final VoidCallback? onSyncStatusTap;
   final VoidCallback? onWalletTap;
   final VoidCallback? onAddCollectionTap;
+  final ValueChanged<CollectionType>? onCollectionTypeTap;
   final VoidCallback? onHelpSupportTap;
   final VoidCallback? onConfigureMaterialTap;
   final VoidCallback? onTasksTap;
   final VoidCallback? onRequestsTap;
   final VoidCallback? onTransferRequestsTap;
   final VoidCallback? onNotificationTap;
+  final VoidCallback? onLogoutTap;
   final VoidCallback? onEndMyDayTap;
   final ValueChanged<bool>? onDrawerChanged;
 
@@ -51,6 +64,11 @@ class HomeScreen extends StatelessWidget {
           backgroundColor: AppColors.backgroundColor,
           extendBody: true,
           drawer: HomeDrawer(
+            onCollectionTap: onCollectionTap,
+            onReceiptsTap: onReceiptsTap,
+            onSyncStatusTap: onSyncStatusTap,
+            onNotificationTap: onNotificationTap,
+            onLogoutTap: onLogoutTap,
             onWalletTap: onWalletTap,
             onHelpSupportTap: onHelpSupportTap,
             onConfigureMaterialTap: onConfigureMaterialTap,
@@ -90,7 +108,10 @@ class HomeScreen extends StatelessWidget {
                     ),
                     sliver: SliverToBoxAdapter(
                       child: _CenteredHomeContent(
-                        child: HomeAppBar(onNotificationTap: onNotificationTap),
+                        child: HomeAppBar(
+                          onNotificationTap: onNotificationTap,
+                          onWalletTap: onWalletTap,
+                        ),
                       ),
                     ),
                   ),
@@ -112,7 +133,9 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         const _CenteredHomeContent(child: OnlineStatusBanner()),
                         const SizedBox(height: 24),
-                        const _CenteredHomeContent(child: TodaysSummary()),
+                        _CenteredHomeContent(
+                          child: TodaysSummary(onWalletTap: onWalletTap),
+                        ),
                         const SizedBox(height: 24),
                         _CenteredHomeContent(
                           child: QuickActions(
@@ -122,9 +145,18 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        const _CenteredHomeContent(child: CollectionTypes()),
+                        _CenteredHomeContent(
+                          child: CollectionTypes(
+                            onTypeTap: onCollectionTypeTap,
+                          ),
+                        ),
                         const SizedBox(height: 24),
-                        const _CenteredHomeContent(child: CollectionDrafts()),
+                        _CenteredHomeContent(
+                          child: CollectionDrafts(
+                            onViewAllTap: onReceiptsTap,
+                            onContinueCollectionTap: onContinueDraftTap,
+                          ),
+                        ),
                         const SizedBox(height: 24),
                         _CenteredHomeContent(
                           child: DayClosure(onEndMyDayTap: onEndMyDayTap),

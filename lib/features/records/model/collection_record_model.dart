@@ -1,3 +1,5 @@
+import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
+
 enum CollectionRecordStatus { pending, verified, rejected }
 
 class CollectionRecordModel {
@@ -20,10 +22,16 @@ class CollectionDraftModel {
     required this.date,
     required this.weight,
     required this.itemCount,
+    required this.type,
+    required this.resumeStep,
+    this.selectedItems = const <int>{},
   });
 
   final String name;
   final String date;
   final String weight;
   final String itemCount;
+  final CollectionType type;
+  final CollectionEntryStep resumeStep;
+  final Set<int> selectedItems;
 }

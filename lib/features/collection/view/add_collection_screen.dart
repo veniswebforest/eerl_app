@@ -13,16 +13,25 @@ import '../widgets/collection_success_dialog.dart';
 import 'collection_image_preview_screen.dart';
 
 class AddCollectionScreen extends StatefulWidget {
-  const AddCollectionScreen({super.key, required this.onBack});
+  const AddCollectionScreen({
+    super.key,
+    required this.onBack,
+    this.initialStep = CollectionEntryStep.items,
+    this.initialType,
+    this.initialSelectedItems = const <int>{},
+  });
 
   final VoidCallback onBack;
+  final CollectionEntryStep initialStep;
+  final CollectionType? initialType;
+  final Set<int> initialSelectedItems;
 
   @override
   State<AddCollectionScreen> createState() => _AddCollectionScreenState();
 }
 
 class _AddCollectionScreenState extends State<AddCollectionScreen> {
-  CollectionEntryStep _step = CollectionEntryStep.items;
+  late CollectionEntryStep _step;
   CollectionType? _type;
   bool _typeOpen = false, _itemsOpen = false, _receipt = false;
   bool _conditionalFieldOpen = false;
@@ -49,6 +58,14 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     'assets/images/collection_detail/hdpe_collection.png',
     'assets/images/collection_detail/pp_collection.png',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _step = widget.initialStep;
+    _type = widget.initialType;
+    _selected.addAll(widget.initialSelectedItems);
+  }
 
   List<String> _itemNames(BuildContext c) => [
     c.l10n.collectionDetailPetBottles,

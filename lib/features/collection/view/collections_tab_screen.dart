@@ -14,9 +14,13 @@ class CollectionsTabScreen extends StatelessWidget {
   const CollectionsTabScreen({
     super.key,
     this.onAddCollection,
+    this.onCollectionTap,
+    this.onViewAllTap,
     this.onNotificationTap,
   });
   final VoidCallback? onAddCollection;
+  final ValueChanged<RecentCollectionStatus>? onCollectionTap;
+  final VoidCallback? onViewAllTap;
   final VoidCallback? onNotificationTap;
 
   @override
@@ -88,11 +92,35 @@ class CollectionsTabScreen extends StatelessWidget {
                       onPressed: onAddCollection ?? () {},
                     ),
                     const SizedBox(height: 28),
-                    Text(
-                      l10n.recentCollections,
-                      style: AppTextStyles.semiboldH7_18.copyWith(
-                        color: AppColors.neutral950,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.recentCollections,
+                            style: AppTextStyles.semiboldH7_18.copyWith(
+                              color: AppColors.neutral950,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        TextButton(
+                          key: const Key('recent-collections-view-all'),
+                          onPressed: onViewAllTap,
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.primary500,
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: Text(
+                            l10n.viewAll,
+                            style: AppTextStyles.boldH7_16.copyWith(
+                              color: AppColors.primary500,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     ...List.generate(recentCollections.length, (index) {
@@ -103,8 +131,11 @@ class CollectionsTabScreen extends StatelessWidget {
                               : 16,
                         ),
                         child: RecentCollectionCard(
+                          key: Key('recent-collection-$index'),
                           item: recentCollections[index],
-                          onTap: () {},
+                          onTap: () => onCollectionTap?.call(
+                            recentCollections[index].status,
+                          ),
                         ),
                       );
                     }),

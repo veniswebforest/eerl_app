@@ -4,12 +4,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
 import 'home_assets.dart';
 import 'home_styles.dart';
 
 /// List of available collection types: D2D, MRF Station, Ramp.
 class CollectionTypes extends StatelessWidget {
-  const CollectionTypes({super.key});
+  const CollectionTypes({super.key, this.onTypeTap});
+
+  final ValueChanged<CollectionType>? onTypeTap;
 
   @override
   Widget build(BuildContext context) {
@@ -19,30 +22,33 @@ class CollectionTypes extends StatelessWidget {
         Text(context.l10n.collectionTypes, style: HomeStyles.sectionTitle),
         const SizedBox(height: 16),
         CollectionTypeItem(
+          key: const Key('home-collection-type-d2d'),
           iconAsset: HomeAssets.collectionD2d,
           iconColor: AppColors.secondary500,
           iconBg: AppColors.primary100,
           title: context.l10n.d2d,
           subtitle: context.l10n.smcVehicle,
-          onTap: () {},
+          onTap: () => onTypeTap?.call(CollectionType.d2d),
         ),
         const SizedBox(height: 12),
         CollectionTypeItem(
+          key: const Key('home-collection-type-mrf'),
           iconAsset: HomeAssets.collectionMrf,
           iconColor: AppColors.orchid,
           iconBg: AppColors.orchidLight,
           title: context.l10n.mrfStation,
           subtitle: context.l10n.materialRecoveryFacility,
-          onTap: () {},
+          onTap: () => onTypeTap?.call(CollectionType.mrfStation),
         ),
         const SizedBox(height: 12),
         CollectionTypeItem(
+          key: const Key('home-collection-type-ramp'),
           iconAsset: HomeAssets.collectionRamp,
           iconColor: AppColors.purple,
           iconBg: AppColors.purpleLight,
           title: context.l10n.ramp,
           subtitle: context.l10n.retailDealer,
-          onTap: () {},
+          onTap: () => onTypeTap?.call(CollectionType.ramp),
         ),
       ],
     );

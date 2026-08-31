@@ -9,9 +9,10 @@ import 'home_assets.dart';
 /// Top app bar for the home screen.
 /// Shows welcome text, date/zone, calendar, and notification icons.
 class HomeAppBar extends StatelessWidget {
-  const HomeAppBar({super.key, this.onNotificationTap});
+  const HomeAppBar({super.key, this.onNotificationTap, this.onWalletTap});
 
   final VoidCallback? onNotificationTap;
+  final VoidCallback? onWalletTap;
 
   @override
   Widget build(BuildContext context) {
@@ -27,15 +28,18 @@ class HomeAppBar extends StatelessWidget {
         ),
       ),
       actions: [
-        Container(
-          width: 45,
-          height: 45,
-          decoration: BoxDecoration(
-            color: AppColors.cool50,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: SvgPicture.asset(HomeAssets.calendar, width: 24, height: 24),
+        InkWell(
+          onTap: onWalletTap,
+          child: Container(
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              color: AppColors.cool50,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: SvgPicture.asset(HomeAssets.calendar, width: 24, height: 24),
+            ),
           ),
         ),
         InkWell(

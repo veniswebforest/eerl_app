@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
+import 'package:eerl_app/features/collection/model/recent_collection_item_model.dart';
 import 'package:eerl_app/features/collection/view/collections_tab_screen.dart';
 import 'package:eerl_app/features/collection/view/add_collection_screen.dart';
 import 'package:eerl_app/features/configure_material/view/configure_material_screen.dart';
@@ -9,6 +11,7 @@ import 'package:eerl_app/features/home/view/home_screen.dart';
 import 'package:eerl_app/features/help_support/view/help_support_screen.dart';
 import 'package:eerl_app/features/notifications/view/notifications_screen.dart';
 import 'package:eerl_app/features/profile/view/profile_screen.dart';
+import 'package:eerl_app/features/profile/widgets/logout_confirmation_dialog.dart';
 import 'package:eerl_app/features/records/model/collection_detail_status.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
@@ -60,6 +63,9 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   bool _isLogExpenseOpen = false;
   bool _isHelpSupportOpen = false;
   bool _isAddCollectionOpen = false;
+  CollectionEntryStep _addCollectionInitialStep = CollectionEntryStep.items;
+  CollectionType? _addCollectionInitialType;
+  Set<int> _addCollectionInitialSelectedItems = const <int>{};
   bool _isConfigureMaterialOpen = false;
   bool _isTasksOpen = false;
   bool _isRequestsOpen = false;
@@ -107,6 +113,9 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       body: _isAddCollectionOpen
           ? AddCollectionScreen(
               onBack: () => setState(() => _isAddCollectionOpen = false),
+              initialStep: _addCollectionInitialStep,
+              initialType: _addCollectionInitialType,
+              initialSelectedItems: _addCollectionInitialSelectedItems,
             )
           : _isConfigureMaterialOpen
           ? ConfigureMaterialScreen(
@@ -255,8 +264,29 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         selectedIcon: '$_navIconPath/nav_home.svg',
         unselectedIcon: '$_navIconPath/nav_home.svg',
         page: HomeScreen(
+          onCollectionTap: () =>
+              setState(() => _selectedPageKey = 'collections'),
+          onReceiptsTap: () => setState(() => _selectedPageKey = 'records'),
+          onSyncStatusTap: () => setState(() => _selectedPageKey = 'profile'),
           onWalletTap: () => setState(() => _isWalletOpen = true),
-          onAddCollectionTap: () => setState(() => _isAddCollectionOpen = true),
+          onAddCollectionTap: () => setState(() {
+            _addCollectionInitialStep = CollectionEntryStep.items;
+            _addCollectionInitialType = null;
+            _addCollectionInitialSelectedItems = const <int>{};
+            _isAddCollectionOpen = true;
+          }),
+          onCollectionTypeTap: (type) => setState(() {
+            _addCollectionInitialStep = CollectionEntryStep.items;
+            _addCollectionInitialType = type;
+            _addCollectionInitialSelectedItems = const <int>{};
+            _isAddCollectionOpen = true;
+          }),
+          onContinueDraftTap: () => setState(() {
+            _addCollectionInitialStep = CollectionEntryStep.photos;
+            _addCollectionInitialType = CollectionType.mrfStation;
+            _addCollectionInitialSelectedItems = const <int>{0, 1, 3};
+            _isAddCollectionOpen = true;
+          }),
           onHelpSupportTap: () => setState(() => _isHelpSupportOpen = true),
           onConfigureMaterialTap: () =>
               setState(() => _isConfigureMaterialOpen = true),
@@ -265,6 +295,11 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           onTransferRequestsTap: () =>
               setState(() => _isTransferRequestsOpen = true),
           onNotificationTap: () => setState(() => _isNotificationsOpen = true),
+          onLogoutTap: () => showDialog<void>(
+            context: context,
+            barrierColor: Colors.black.withValues(alpha: 0.56),
+            builder: (_) => const LogoutConfirmationDialog(),
+          ),
           onEndMyDayTap: () => setState(() => _isEndMyDayOpen = true),
           onDrawerChanged: (isOpen) {
             if (_isDrawerOpen == isOpen) return;
@@ -280,7 +315,22 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         selectedIcon: '$_navIconPath/nav_collections.svg',
         unselectedIcon: '$_navIconPath/nav_collections.svg',
         page: CollectionsTabScreen(
-          onAddCollection: () => setState(() => _isAddCollectionOpen = true),
+          onAddCollection: () => setState(() {
+            _addCollectionInitialStep = CollectionEntryStep.items;
+            _addCollectionInitialType = null;
+            _addCollectionInitialSelectedItems = const <int>{};
+            _isAddCollectionOpen = true;
+          }),
+          onCollectionTap: (status) => setState(() {
+            _collectionDetailStatus = switch (status) {
+              RecentCollectionStatus.pending => CollectionDetailStatus.pending,
+              RecentCollectionStatus.verified =>
+                CollectionDetailStatus.approved,
+              RecentCollectionStatus.rejected =>
+                CollectionDetailStatus.rejected,
+            };
+          }),
+          onViewAllTap: () => setState(() => _selectedPageKey = 'records'),
           onNotificationTap: () => setState(() => _isNotificationsOpen = true),
         ),
         pageKey: 'collections',
@@ -294,6 +344,12 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         page: RecordsTabScreen(
           onRecordTap: (status) =>
               setState(() => _collectionDetailStatus = status),
+          onDraftContinue: (draft) => setState(() {
+            _addCollectionInitialStep = draft.resumeStep;
+            _addCollectionInitialType = draft.type;
+            _addCollectionInitialSelectedItems = draft.selectedItems;
+            _isAddCollectionOpen = true;
+          }),
         ),
         pageKey: 'records',
         roles: allRoles,

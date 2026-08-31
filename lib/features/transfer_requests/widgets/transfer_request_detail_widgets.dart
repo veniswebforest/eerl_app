@@ -144,22 +144,21 @@ class TransferTimelineStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IntrinsicHeight(
     child: Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         SizedBox(
-          width: 26,
+          width: 40,
           child: Column(
             children: [
               Container(
-                width: 22,
-                height: 22,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: .12),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: color),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(8),
                   child: SvgPicture.asset(
                     iconAsset,
                     colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
@@ -167,7 +166,13 @@ class TransferTimelineStep extends StatelessWidget {
                 ),
               ),
               if (showLine)
-                Expanded(child: Container(width: 1, color: AppColors.cool300)),
+                Expanded(
+                  child: Container(
+                    width: 1.5,
+                    height: 30,
+                    color: color,
+                  ),
+                ),
             ],
           ),
         ),
@@ -178,12 +183,16 @@ class TransferTimelineStep extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyles.mediumSH9_12),
+                Text(
+                  title,
+                  style: AppTextStyles.semiboldH9_14.copyWith(
+                    color: AppColors.neutral950,
+                  ),
+                ),
                 const SizedBox(height: 3),
                 Text(
                   subtitle,
                   style: AppTextStyles.regularB8_12.copyWith(
-                    fontSize: 10,
                     color: AppColors.neutral600,
                   ),
                 ),
