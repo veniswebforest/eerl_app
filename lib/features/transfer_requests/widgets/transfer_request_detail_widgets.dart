@@ -167,11 +167,7 @@ class TransferTimelineStep extends StatelessWidget {
               ),
               if (showLine)
                 Expanded(
-                  child: Container(
-                    width: 1.5,
-                    height: 30,
-                    color: color,
-                  ),
+                  child: Container(width: 1.5, height: 30, color: color),
                 ),
             ],
           ),

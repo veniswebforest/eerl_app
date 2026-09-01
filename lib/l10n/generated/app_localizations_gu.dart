@@ -469,7 +469,7 @@ class AppLocalizationsGu extends AppLocalizations {
       'નોંધ: વાહન ડિસ્પેચ મંજૂરી માટે આ વિનંતી મેનેજરને મોકલવામાં આવશે.';
 
   @override
-  String get transferSubmitRequest => 'વિનંતી મોકલો  →';
+  String get transferSubmitRequest => 'વિનંતી મોકલો';
 
   @override
   String get transferSuccessTitle => 'તમારી વિનંતી સફળતાપૂર્વક મોકલાઈ!';
@@ -836,6 +836,19 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get submitExpenseClaim => 'ખર્ચનો દાવો સબમિટ કરો';
+
+  @override
+  String get expenseSubmittedTitle => 'ખર્ચ સબમિટ થયો!';
+
+  @override
+  String get expenseSubmittedDeduction =>
+      'તમારા વૉલેટ બેલેન્સમાંથી ₹350 કપાયા.';
+
+  @override
+  String get expenseSubmittedBalance => 'બાકી બેલેન્સ: ₹4,850';
+
+  @override
+  String get expenseBackToWallet => 'વૉલેટ પર પાછા જાઓ';
 
   @override
   String get expensePendingPrefix => 'આ એન્ટ્રી ';

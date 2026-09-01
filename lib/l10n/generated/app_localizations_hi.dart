@@ -469,7 +469,7 @@ class AppLocalizationsHi extends AppLocalizations {
       'नोट: वाहन डिस्पैच अनुमोदन के लिए यह अनुरोध मैनेजर को भेजा जाएगा।';
 
   @override
-  String get transferSubmitRequest => 'अनुरोध भेजें  →';
+  String get transferSubmitRequest => 'अनुरोध भेजें';
 
   @override
   String get transferSuccessTitle => 'आपका अनुरोध सफलतापूर्वक भेजा गया!';
@@ -837,6 +837,18 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get submitExpenseClaim => 'व्यय दावा जमा करें';
+
+  @override
+  String get expenseSubmittedTitle => 'व्यय जमा हो गया!';
+
+  @override
+  String get expenseSubmittedDeduction => 'आपके वॉलेट बैलेंस से ₹350 काटे गए।';
+
+  @override
+  String get expenseSubmittedBalance => 'शेष राशि: ₹4,850';
+
+  @override
+  String get expenseBackToWallet => 'वॉलेट पर वापस जाएँ';
 
   @override
   String get expensePendingPrefix => 'यह प्रविष्टि ';

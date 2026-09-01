@@ -108,6 +108,8 @@ class _HomeDrawerState extends State<HomeDrawer> {
                             },
                           ),
                           _DrawerExpandableItem(
+                            icon: '$_iconPath/pending_task.svg',
+
                             key: const Key('drawer-tasks-requests'),
                             label: context.l10n.drawerTasksRequests,
                             expanded: _tasksExpanded,
@@ -118,6 +120,9 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               _DrawerChildItem(
                                 key: const Key('drawer-tasks'),
                                 label: context.l10n.drawerTasks,
+                                style: AppTextStyles.semiboldH9_14.copyWith(
+                                  color: AppColors.neutral950,
+                                ),
                                 onTap: () {
                                   _close(context);
                                   widget.onTasksTap?.call();
@@ -126,6 +131,9 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               _DrawerChildItem(
                                 key: const Key('drawer-requests'),
                                 label: context.l10n.drawerRequests,
+                                style: AppTextStyles.semiboldH9_14.copyWith(
+                                  color: AppColors.neutral950,
+                                ),
                                 onTap: () {
                                   _close(context);
                                   widget.onRequestsTap?.call();
@@ -192,12 +200,16 @@ class _DrawerExpandableItem extends StatelessWidget {
     super.key,
     required this.label,
     required this.expanded,
+
     required this.onTap,
     required this.children,
+    required this.icon,
   });
 
   final String label;
   final bool expanded;
+  final String icon;
+
   final VoidCallback onTap;
   final List<Widget> children;
 
@@ -206,35 +218,44 @@ class _DrawerExpandableItem extends StatelessWidget {
     final color = expanded ? AppColors.primary500 : AppColors.neutral600;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
-      decoration: BoxDecoration(
-        color: expanded ? AppColors.primary200 : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-      ),
+
       child: Column(
         children: [
           InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(8),
-            child: Padding(
+            child: Container(
+              decoration: BoxDecoration(
+                color: expanded ? AppColors.primary200 : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
                   SizedBox(
                     width: 24,
                     height: 24,
-                    child: Icon(
-                      Icons.pending_actions_outlined,
-                      size: 24,
-                      color: color,
+                    child: SvgPicture.asset(
+                      icon,
+                      colorFilter: ColorFilter.mode(
+                        expanded ? AppColors.primary400 : AppColors.neutral600,
+                        BlendMode.srcIn,
+                      ),
                     ),
                   ),
+
+                  // pending_task.svg
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       label,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.semiboldH8_16.copyWith(color: color),
+                      style: AppTextStyles.semiboldH8_16.copyWith(
+                        color: expanded
+                            ? AppColors.neutral950
+                            : AppColors.neutral600,
+                      ),
                     ),
                   ),
                   AnimatedRotation(
@@ -257,7 +278,7 @@ class _DrawerExpandableItem extends StatelessWidget {
             child: expanded
                 ? Container(
                     decoration: const BoxDecoration(
-                      color: AppColors.primary50,
+                      color: Colors.white,
                       borderRadius: BorderRadius.vertical(
                         bottom: Radius.circular(8),
                       ),
@@ -273,10 +294,16 @@ class _DrawerExpandableItem extends StatelessWidget {
 }
 
 class _DrawerChildItem extends StatelessWidget {
-  const _DrawerChildItem({super.key, required this.label, required this.onTap});
+  const _DrawerChildItem({
+    super.key,
+    required this.label,
+    required this.onTap,
+    this.style,
+  });
 
   final String label;
   final VoidCallback onTap;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -288,9 +315,11 @@ class _DrawerChildItem extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: AppTextStyles.mediumSH8_14.copyWith(
-                color: AppColors.neutral900,
-              ),
+              style:
+                  style ??
+                  AppTextStyles.mediumSH8_14.copyWith(
+                    color: AppColors.neutral900,
+                  ),
             ),
           ),
           SvgPicture.asset(
@@ -377,7 +406,7 @@ class _DrawerItem extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.onTap,
-    this.textColor = const Color(0xFF5D5D5D),
+    this.textColor = AppColors.neutral600,
   });
 
   final String label;

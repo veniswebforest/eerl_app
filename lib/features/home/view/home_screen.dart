@@ -23,6 +23,7 @@ class HomeScreen extends StatelessWidget {
     this.onReceiptsTap,
     this.onContinueDraftTap,
     this.onSyncStatusTap,
+    this.onSyncNowTap,
     this.onWalletTap,
     this.onAddCollectionTap,
     this.onCollectionTypeTap,
@@ -41,6 +42,7 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback? onReceiptsTap;
   final VoidCallback? onContinueDraftTap;
   final VoidCallback? onSyncStatusTap;
+  final VoidCallback? onSyncNowTap;
   final VoidCallback? onWalletTap;
   final VoidCallback? onAddCollectionTap;
   final ValueChanged<CollectionType>? onCollectionTypeTap;
@@ -131,7 +133,9 @@ class HomeScreen extends StatelessWidget {
                     ),
                     sliver: SliverList.list(
                       children: [
-                        const _CenteredHomeContent(child: OnlineStatusBanner()),
+                        _CenteredHomeContent(
+                          child: OnlineStatusBanner(onSyncNowTap: onSyncNowTap),
+                        ),
                         const SizedBox(height: 24),
                         _CenteredHomeContent(
                           child: TodaysSummary(onWalletTap: onWalletTap),

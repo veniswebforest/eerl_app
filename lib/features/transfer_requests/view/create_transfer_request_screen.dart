@@ -6,8 +6,6 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/create_transfer_request_view.dart';
-import '../model/transfer_destination.dart';
-import '../widgets/transfer_destination_card.dart';
 import '../widgets/transfer_material_card.dart';
 import '../widgets/transfer_request_success_dialog.dart';
 
@@ -30,12 +28,10 @@ class CreateTransferRequestScreen extends StatefulWidget {
 
 class _CreateTransferRequestScreenState
     extends State<CreateTransferRequestScreen> {
-  late CreateTransferRequestView _view = widget.initialView;
   late final TextEditingController _totalController;
   late final TextEditingController _plateController;
   late final TextEditingController _capacityController;
   int _selectedMaterial = 0;
-  int _selectedDestination = 0;
   String? _vehicleType;
   bool _vehicleTypeOpen = false;
   bool _managerArrangesVehicle = false;
@@ -55,18 +51,12 @@ class _CreateTransferRequestScreenState
     _vehicleType = errorState ? 'truck' : null;
     _showStockError = errorState;
     _managerArrangesVehicle = errorState;
-    if (_view == CreateTransferRequestView.error) {
-      _view = CreateTransferRequestView.items;
-    }
   }
 
   @override
   void didUpdateWidget(covariant CreateTransferRequestScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialView != widget.initialView) {
-      _view = widget.initialView == CreateTransferRequestView.error
-          ? CreateTransferRequestView.items
-          : widget.initialView;
       _showStockError = widget.initialView == CreateTransferRequestView.error;
     }
   }
@@ -80,23 +70,17 @@ class _CreateTransferRequestScreenState
   }
 
   void _handleBack() {
-    if (_view == CreateTransferRequestView.destination) {
-      setState(() => _view = CreateTransferRequestView.items);
-      return;
-    }
     widget.onBack();
   }
 
-  void _continue() {
+  Future<void> _continue() async {
     final total = double.tryParse(_totalController.text.trim()) ?? 0;
     if (total > 1200.60) {
       setState(() => _showStockError = true);
       return;
     }
-    setState(() {
-      _showStockError = false;
-      _view = CreateTransferRequestView.destination;
-    });
+    setState(() => _showStockError = false);
+    await _submit();
   }
 
   Future<void> _submit() async {
@@ -116,9 +100,7 @@ class _CreateTransferRequestScreenState
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.backgroundColor,
     appBar: CustomAppBar(
-      title: _view == CreateTransferRequestView.destination
-          ? context.l10n.transferSelectDestination
-          : null,
+      title: null,
       onBackTap: _handleBack,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
@@ -127,9 +109,7 @@ class _CreateTransferRequestScreenState
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
-          child: _view == CreateTransferRequestView.destination
-              ? _destinationStep(context)
-              : _itemsStep(context),
+          child: _itemsStep(context),
         ),
       ),
     ),
@@ -206,7 +186,7 @@ class _CreateTransferRequestScreenState
         _BottomAction(
           weight: context.l10n.transferSelectedWeight,
           price: context.l10n.transferSelectedPrice,
-          buttonLabel: context.l10n.transferContinue,
+          buttonLabel: context.l10n.transferSubmitRequest,
           enabled: !_showStockError,
           buttonKey: const Key('transfer-continue'),
           onPressed: _continue,
@@ -274,79 +254,6 @@ class _CreateTransferRequestScreenState
       ),
     ],
   );
-
-  Widget _destinationStep(BuildContext context) {
-    final destinations = [
-      TransferDestination(
-        name: context.l10n.transferDestinationCityHub,
-        address: context.l10n.transferDestinationCityAddress,
-      ),
-      TransferDestination(
-        name: context.l10n.transferDestinationHighway,
-        address: context.l10n.transferDestinationHighwayAddress,
-      ),
-      TransferDestination(
-        name: context.l10n.transferDestinationApex,
-        address: context.l10n.transferDestinationApexAddress,
-      ),
-      TransferDestination(
-        name: context.l10n.transferDestinationSouthside,
-        address: context.l10n.transferDestinationSouthsideAddress,
-      ),
-    ];
-
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.transferSelectDestination,
-                  style: AppTextStyles.semiboldH7_18.copyWith(
-                    color: AppColors.neutral950,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                _CurrentLocationCard(
-                  name: context.l10n.transferCurrentFacility,
-                  subtitle: context.l10n.transferFromCurrentLocation,
-                ),
-                const SizedBox(height: 22),
-                Text(
-                  context.l10n.transferDestinationQuestion,
-                  style: AppTextStyles.semiboldH8_16.copyWith(
-                    color: AppColors.neutral950,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                for (var index = 0; index < destinations.length; index++) ...[
-                  TransferDestinationCard(
-                    key: Key('transfer-destination-$index'),
-                    destination: destinations[index],
-                    selected: _selectedDestination == index,
-                    onTap: () => setState(() => _selectedDestination = index),
-                  ),
-                  if (index != destinations.length - 1)
-                    const SizedBox(height: 12),
-                ],
-                const SizedBox(height: 14),
-              ],
-            ),
-          ),
-        ),
-        _BottomAction(
-          weight: context.l10n.transferSelectedWeight,
-          price: context.l10n.transferSelectedPrice,
-          buttonLabel: context.l10n.transferSubmitRequest,
-          buttonKey: const Key('transfer-submit-request'),
-          onPressed: _submit,
-        ),
-      ],
-    );
-  }
 
   String _vehicleTypeLabel(BuildContext context, String value) =>
       switch (value) {
@@ -665,64 +572,6 @@ class _ManagerArrangeOption extends StatelessWidget {
           ],
         ),
       ),
-    ),
-  );
-}
-
-class _CurrentLocationCard extends StatelessWidget {
-  const _CurrentLocationCard({required this.name, required this.subtitle});
-
-  final String name;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: AppColors.neutral50,
-      borderRadius: BorderRadius.circular(10),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x16000000),
-          blurRadius: 5,
-          offset: Offset(0, 2),
-        ),
-      ],
-    ),
-    child: Row(
-      children: [
-        Container(
-          width: 38,
-          height: 38,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.primary100,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: SvgPicture.asset('assets/icons/profile/facility.svg'),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: AppTextStyles.semiboldH8_16.copyWith(
-                  color: AppColors.neutral950,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                subtitle,
-                style: AppTextStyles.mediumSH8_14.copyWith(
-                  color: AppColors.neutral600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     ),
   );
 }

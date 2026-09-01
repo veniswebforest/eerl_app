@@ -11,6 +11,7 @@ import '../model/collection_entry_state.dart';
 import '../widgets/collection_step_indicator.dart';
 import '../widgets/collection_success_dialog.dart';
 import 'collection_image_preview_screen.dart';
+import 'collection_receipt_screen.dart';
 
 class AddCollectionScreen extends StatefulWidget {
   const AddCollectionScreen({
@@ -19,12 +20,14 @@ class AddCollectionScreen extends StatefulWidget {
     this.initialStep = CollectionEntryStep.items,
     this.initialType,
     this.initialSelectedItems = const <int>{},
+    this.onSaveDraft,
   });
 
   final VoidCallback onBack;
   final CollectionEntryStep initialStep;
   final CollectionType? initialType;
   final Set<int> initialSelectedItems;
+  final VoidCallback? onSaveDraft;
 
   @override
   State<AddCollectionScreen> createState() => _AddCollectionScreenState();
@@ -51,7 +54,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     'GJ-01-AB-4421',
   ];
   static const _personNames = ['Ramesh Shah', 'Mahesh Patel', 'Jignesh Parmar'];
-  static const _mrfAgentNames = ['Hardik Pandya', 'Amit Shah', 'Neha Patel'];
+  static const _fixedMrfAgentName = 'Hardik Pandya';
 
   final _images = const [
     'assets/images/collection_detail/pet_collection.png',
@@ -64,6 +67,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     super.initState();
     _step = widget.initialStep;
     _type = widget.initialType;
+    if (_type == CollectionType.mrfStation) {
+      _mrfAgentName = _fixedMrfAgentName;
+    }
     _selected.addAll(widget.initialSelectedItems);
   }
 
@@ -81,7 +87,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   @override
   Widget build(BuildContext context) {
     if (_receipt) {
-      return _ReceiptView(onBack: () => setState(() => _receipt = false));
+      return CollectionReceiptScreen(
+        onBack: () => setState(() => _receipt = false),
+      );
     }
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -167,6 +175,31 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   );
 
   List<Widget> _conditionalField(BuildContext context) {
+    if (_type == CollectionType.mrfStation) {
+      return [
+        _label(context.l10n.collectionMrfAgentName),
+        const SizedBox(height: 8),
+        Container(
+          key: const Key('collection-mrf-agent-fixed-field'),
+          width: double.infinity,
+          height: 55,
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppColors.neutral50,
+            border: Border.all(color: AppColors.cool400),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            _fixedMrfAgentName,
+            style: AppTextStyles.mediumSH8_14.copyWith(
+              color: AppColors.cool950,
+            ),
+          ),
+        ),
+      ];
+    }
+
     final (label, placeholder, value, options) = switch (_type!) {
       CollectionType.d2d => (
         context.l10n.collectionVehicleNumber,
@@ -174,12 +207,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         _vehicleNumber,
         _vehicleNumbers,
       ),
-      CollectionType.mrfStation => (
-        context.l10n.collectionMrfAgentName,
-        context.l10n.collectionSelectMrfAgent,
-        _mrfAgentName,
-        _mrfAgentNames,
-      ),
+      CollectionType.mrfStation => throw StateError('Handled above'),
       CollectionType.ramp => (
         context.l10n.collectionPersonName,
         context.l10n.collectionSelectPerson,
@@ -252,6 +280,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       return InkWell(
         onTap: () => setState(() {
           _type = type;
+          if (type == CollectionType.mrfStation) {
+            _mrfAgentName = _fixedMrfAgentName;
+          }
           _typeOpen = false;
           _conditionalFieldOpen = false;
         }),
@@ -479,7 +510,8 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         children: [
           Expanded(
             child: OutlinedButton(
-              onPressed: () {},
+              key: const Key('collection-save-draft'),
+              onPressed: widget.onSaveDraft ?? widget.onBack,
               child: Text(context.l10n.collectionSaveDraft),
             ),
           ),
@@ -1456,242 +1488,6 @@ class _ReviewTotalsCard extends StatelessWidget {
     children: [
       Text(label, style: AppTextStyles.semiboldH9_14),
       Text(value, style: AppTextStyles.boldH7_16),
-    ],
-  );
-}
-
-class _ReceiptView extends StatelessWidget {
-  const _ReceiptView({required this.onBack});
-
-  final VoidCallback onBack;
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.backgroundColor,
-    body: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: _BackButton(onTap: onBack),
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: const [
-                    BoxShadow(color: Color(0x18000000), blurRadius: 8),
-                  ],
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'assets/images/collection_detail/eer_logo.png',
-                        width: 141,
-                        height: 50,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'RCP-2026-000245',
-                        style: AppTextStyles.boldH8_14.copyWith(
-                          color: AppColors.primary500,
-                        ),
-                      ),
-                      const Divider(height: 32),
-                      _receiptRow(
-                        context.l10n.collectionDetailId,
-                        '#COL-2026-089',
-                      ),
-                      _receiptRow(
-                        context.l10n.collectionReceiptDate,
-                        '24 Oct 2026',
-                      ),
-                      _receiptRow(
-                        context.l10n.collectionReceiptTime,
-                        '03:45 PM',
-                      ),
-                      _receiptRow(context.l10n.collectionDetailType, 'D2D'),
-                      const Divider(height: 32),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          context.l10n.collectionCollectedItems,
-                          style: AppTextStyles.boldH8_14.copyWith(
-                            color: AppColors.cool950,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _receiptItem(
-                        context.l10n.collectionDetailPetBottles,
-                        context.l10n.collectionPetReceiptDetail,
-                        '₹1,440.00',
-                      ),
-                      const SizedBox(height: 16),
-                      _receiptItem(
-                        context.l10n.collectionDetailHdpeRigid,
-                        context.l10n.collectionHdpeReceiptDetail,
-                        '₹726.75',
-                      ),
-                      const SizedBox(height: 16),
-                      _receiptItem(
-                        context.l10n.collectionDetailPpHardPlastics,
-                        context.l10n.collectionPpReceiptDetail,
-                        '₹540.00',
-                      ),
-                      const Divider(height: 32),
-                      _receiptRow(
-                        context.l10n.collectionTotalWeight,
-                        '217.5 KG',
-                      ),
-                      const Divider(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            context.l10n.collectionReceiptTotal,
-                            style: AppTextStyles.mediumSH6_18,
-                          ),
-                          Text(
-                            '₹2,706.75',
-                            style: AppTextStyles.mediumSH6_18.copyWith(
-                              color: AppColors.primary500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 32),
-                      Text(
-                        context.l10n.collectionReceiptAgent,
-                        style: AppTextStyles.mediumSH9_12.copyWith(
-                          color: AppColors.neutral500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text('Rahul Patel', style: AppTextStyles.mediumSH8_14),
-                      const SizedBox(height: 16),
-                      Text(
-                        context.l10n.collectionThankYou,
-                        style: AppTextStyles.boldH8_14.copyWith(
-                          color: AppColors.primary500,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n.collectionSystemGeneratedSlip,
-                        style: AppTextStyles.mediumSH9_12.copyWith(
-                          color: AppColors.neutral500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SvgPicture.asset(
-                        'assets/icons/collection/receipt_dots.svg',
-                        width: 116,
-                        height: 8,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              context.l10n.collectionPrinterHint,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.mediumSH9_12.copyWith(
-                color: AppColors.cool600,
-              ),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/collection/share_slip.svg',
-                          width: 24,
-                          height: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(context.l10n.collectionShareSlip),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/icons/collection/print_slip.svg',
-                          width: 24,
-                          height: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(context.l10n.collectionPrintSlip),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-
-  Widget _receiptRow(String a, String b) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(
-      children: [
-        Expanded(
-          child: Text(
-            a,
-            style: AppTextStyles.mediumSH8_14.copyWith(
-              color: AppColors.neutral600,
-            ),
-          ),
-        ),
-        Text(b, style: AppTextStyles.mediumSH8_14),
-      ],
-    ),
-  );
-
-  Widget _receiptItem(String name, String detail, String price) => Row(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(name, style: AppTextStyles.mediumSH8_14),
-            const SizedBox(height: 4),
-            Text(
-              detail,
-              style: AppTextStyles.mediumSH9_12.copyWith(
-                color: AppColors.neutral500,
-              ),
-            ),
-          ],
-        ),
-      ),
-      Text(price, style: AppTextStyles.mediumSH8_14),
     ],
   );
 }

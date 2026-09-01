@@ -471,7 +471,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Note: This request will be sent to Manager for vehicle dispatch approval.';
 
   @override
-  String get transferSubmitRequest => 'Submit Request  →';
+  String get transferSubmitRequest => 'Submit Request';
 
   @override
   String get transferSuccessTitle => 'Your request submitted Successfully!';
@@ -838,6 +838,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get submitExpenseClaim => 'Submit Expense Claim';
+
+  @override
+  String get expenseSubmittedTitle => 'Expense Submitted!';
+
+  @override
+  String get expenseSubmittedDeduction =>
+      '₹350 deducted from your wallet balance.';
+
+  @override
+  String get expenseSubmittedBalance => 'Remaining Balance: ₹4,850';
+
+  @override
+  String get expenseBackToWallet => 'Back to Wallet';
 
   @override
   String get expensePendingPrefix => 'This entry will be marked as ';

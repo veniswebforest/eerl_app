@@ -973,7 +973,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferSubmitRequest.
   ///
   /// In en, this message translates to:
-  /// **'Submit Request  →'**
+  /// **'Submit Request'**
   String get transferSubmitRequest;
 
   /// No description provided for @transferSuccessTitle.
@@ -1665,6 +1665,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submit Expense Claim'**
   String get submitExpenseClaim;
+
+  /// No description provided for @expenseSubmittedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Submitted!'**
+  String get expenseSubmittedTitle;
+
+  /// No description provided for @expenseSubmittedDeduction.
+  ///
+  /// In en, this message translates to:
+  /// **'₹350 deducted from your wallet balance.'**
+  String get expenseSubmittedDeduction;
+
+  /// No description provided for @expenseSubmittedBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining Balance: ₹4,850'**
+  String get expenseSubmittedBalance;
+
+  /// No description provided for @expenseBackToWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Wallet'**
+  String get expenseBackToWallet;
 
   /// No description provided for @expensePendingPrefix.
   ///

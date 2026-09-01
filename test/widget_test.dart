@@ -15,6 +15,7 @@ import 'package:eerl_app/features/collection/view/collections_tab_screen.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
 import 'package:eerl_app/features/dashboard/view/main_dashboard_screen.dart';
 import 'package:eerl_app/features/wallet/view/log_expense_screen.dart';
+import 'package:eerl_app/features/wallet/view/expense_submitted_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
 import 'package:eerl_app/features/wallet/view/wallet_tab_screen.dart';
 import 'package:eerl_app/features/wallet/widgets/expense_claim_card.dart';
@@ -213,6 +214,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(Image), findsNWidgets(2));
+    await tester.drag(find.byType(ListView), const Offset(0, -900));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('submit-expense-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ExpenseSubmittedScreen), findsOneWidget);
+    expect(find.text('Expense Submitted!'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('expense-back-to-wallet')));
+    await tester.pumpAndSettle();
+    expect(find.byType(WalletTabScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

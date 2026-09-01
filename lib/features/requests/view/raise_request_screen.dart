@@ -27,7 +27,9 @@ class RaiseRequestScreen extends StatefulWidget {
 
 class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
   late final TextEditingController _descriptionController;
+  late final FocusNode _descriptionFocusNode;
   late int _photoCount;
+  bool _descriptionHasFocus = false;
 
   bool get _canSubmit =>
       _photoCount > 0 && _descriptionController.text.trim().isNotEmpty;
@@ -37,6 +39,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
     super.initState();
     _photoCount = widget.viewMode == RaiseRequestViewMode.filled ? 2 : 0;
     _descriptionController = TextEditingController();
+    _descriptionFocusNode = FocusNode()..addListener(_handleDescriptionFocus);
   }
 
   @override
@@ -50,8 +53,16 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
 
   @override
   void dispose() {
+    _descriptionFocusNode
+      ..removeListener(_handleDescriptionFocus)
+      ..dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  void _handleDescriptionFocus() {
+    if (!mounted) return;
+    setState(() => _descriptionHasFocus = _descriptionFocusNode.hasFocus);
   }
 
   @override
@@ -150,19 +161,40 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                       style: AppTextStyles.mediumSH8_14,
                     ),
                     const SizedBox(height: 8),
-                    TextField(
-                      key: const Key('request-description-field'),
-                      controller: _descriptionController,
-                      maxLength: 150,
-                      maxLines: 5,
-                      minLines: 5,
-                      onChanged: (_) => setState(() {}),
-                      style: AppTextStyles.regularB7_14,
-                      decoration: InputDecoration(
-                        hintText: context.l10n.requestDescriptionHint,
-                        counterText: context.l10n.requestDescriptionCounter,
-                        alignLabelWithHint: true,
-                        contentPadding: const EdgeInsets.all(16),
+                    AnimatedContainer(
+                      key: const Key('request-description-container'),
+                      duration: const Duration(milliseconds: 160),
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: _descriptionHasFocus
+                              ? AppColors.primary400
+                              : AppColors.cool400,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: TextField(
+                          key: const Key('request-description-field'),
+                          controller: _descriptionController,
+                          focusNode: _descriptionFocusNode,
+                          maxLength: 150,
+                          maxLines: 5,
+                          minLines: 5,
+                          onChanged: (_) => setState(() {}),
+                          style: AppTextStyles.regularB7_14,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            errorBorder: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            hintText: context.l10n.requestDescriptionHint,
+                            counterText: context.l10n.requestDescriptionCounter,
+                            alignLabelWithHint: true,
+                            contentPadding: const EdgeInsets.all(4),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -199,13 +231,24 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 68),
-            Text(context.l10n.requestSentTitle, style: AppTextStyles.boldH7_16),
+            Image.asset(
+              'assets/images/expense_submitted_success.png',
+              width: 122,
+              height: 122,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              context.l10n.requestSentTitle,
+              style: AppTextStyles.boldH5_24.copyWith(
+                color: AppColors.neutral950,
+              ),
+            ),
             const SizedBox(height: 8),
             Text(
               context.l10n.requestSentMessage,
               textAlign: TextAlign.center,
-              style: AppTextStyles.regularB8_12.copyWith(
+              style: AppTextStyles.mediumSH8_14.copyWith(
                 color: AppColors.neutral600,
               ),
             ),
@@ -223,7 +266,12 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                   backgroundColor: AppColors.cool100,
                   foregroundColor: AppColors.neutral950,
                 ),
-                child: Text(context.l10n.requestBackToList),
+                child: Text(
+                  context.l10n.requestBackToList,
+                  style: AppTextStyles.semiboldH8_16.copyWith(
+                    color: AppColors.neutral950,
+                  ),
+                ),
               ),
             ),
           ],

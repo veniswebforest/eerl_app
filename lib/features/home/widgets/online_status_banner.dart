@@ -9,7 +9,9 @@ import 'home_styles.dart';
 
 /// Green banner showing connectivity status and pending sync count.
 class OnlineStatusBanner extends StatelessWidget {
-  const OnlineStatusBanner({super.key});
+  const OnlineStatusBanner({super.key, this.onSyncNowTap});
+
+  final VoidCallback? onSyncNowTap;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +61,8 @@ class OnlineStatusBanner extends StatelessWidget {
 
             // Sync Now button
             ElevatedButton(
-              onPressed: () {},
+              key: const Key('home-sync-now-button'),
+              onPressed: onSyncNowTap,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary500,
                 foregroundColor: AppColors.neutral50,

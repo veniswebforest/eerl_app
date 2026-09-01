@@ -10,6 +10,7 @@ import '../widgets/collection_detail_assets.dart';
 import '../widgets/collection_detail_cards.dart';
 import '../widgets/collection_material_card.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:eerl_app/features/collection/view/collection_receipt_screen.dart';
 
 class CollectionDetailScreen extends StatelessWidget {
   const CollectionDetailScreen({
@@ -180,7 +181,10 @@ class CollectionDetailScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton.icon(
-                      onPressed: () {},
+                      key: const Key('collection-detail-preview-slip'),
+                      onPressed: () => Navigator.of(
+                        context,
+                      ).push<void>(CollectionReceiptScreen.route()),
                       icon: SvgPicture.asset(
                         CollectionDetailAssets.preview,
                         width: 24,

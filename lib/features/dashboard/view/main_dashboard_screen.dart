@@ -12,7 +12,9 @@ import 'package:eerl_app/features/help_support/view/help_support_screen.dart';
 import 'package:eerl_app/features/notifications/view/notifications_screen.dart';
 import 'package:eerl_app/features/profile/view/profile_screen.dart';
 import 'package:eerl_app/features/profile/widgets/logout_confirmation_dialog.dart';
+import 'package:eerl_app/features/profile/widgets/sync_data_dialog.dart';
 import 'package:eerl_app/features/records/model/collection_detail_status.dart';
+import 'package:eerl_app/features/records/model/records_view_flag.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
 import 'package:eerl_app/features/requests/view/raise_request_screen.dart';
@@ -79,6 +81,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   TaskListItem? _selectedTask;
   ExpenseClaimDetailStatus? _claimDetailStatus;
   CollectionDetailStatus? _collectionDetailStatus;
+  RecordsViewFlag _recordsInitialView = RecordsViewFlag.history;
+  int _recordsPageVersion = 0;
   bool _isDrawerOpen = false;
 
   List<BottomNavItemModel> get _visibleItems => _createItems()
@@ -116,6 +120,15 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               initialStep: _addCollectionInitialStep,
               initialType: _addCollectionInitialType,
               initialSelectedItems: _addCollectionInitialSelectedItems,
+              onSaveDraft: () => setState(() {
+                _isAddCollectionOpen = false;
+                _selectedPageKey = 'records';
+                _recordsInitialView = RecordsViewFlag.drafts;
+                _recordsPageVersion++;
+                _addCollectionInitialStep = CollectionEntryStep.items;
+                _addCollectionInitialType = null;
+                _addCollectionInitialSelectedItems = const <int>{};
+              }),
             )
           : _isConfigureMaterialOpen
           ? ConfigureMaterialScreen(
@@ -202,6 +215,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           : _isLogExpenseOpen
           ? LogExpenseScreen(
               onBack: () => setState(() => _isLogExpenseOpen = false),
+              onSubmitted: () => setState(() => _isLogExpenseOpen = false),
             )
           : _isWalletOpen
           ? WalletTabScreen(
@@ -268,6 +282,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               setState(() => _selectedPageKey = 'collections'),
           onReceiptsTap: () => setState(() => _selectedPageKey = 'records'),
           onSyncStatusTap: () => setState(() => _selectedPageKey = 'profile'),
+          onSyncNowTap: () => showSyncDataDialog(context),
           onWalletTap: () => setState(() => _isWalletOpen = true),
           onAddCollectionTap: () => setState(() {
             _addCollectionInitialStep = CollectionEntryStep.items;
@@ -342,6 +357,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         selectedIcon: '$_navIconPath/nav_wallet.svg',
         unselectedIcon: '$_navIconPath/nav_wallet.svg',
         page: RecordsTabScreen(
+          key: ValueKey('records-page-$_recordsPageVersion'),
+          initialView: _recordsInitialView,
           onRecordTap: (status) =>
               setState(() => _collectionDetailStatus = status),
           onDraftContinue: (draft) => setState(() {

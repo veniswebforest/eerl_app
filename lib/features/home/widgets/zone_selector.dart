@@ -111,6 +111,9 @@ class _ZoneSelectorState extends State<ZoneSelector> {
                       _selectedIndex == 0 && !_isExpanded
                           ? context.l10n.zoneName
                           : zones[_selectedIndex],
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.semiboldH9_14.copyWith(
                         color: AppColors.neutral950,
                       ),

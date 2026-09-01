@@ -1,1 +1,1 @@
-enum CreateTransferRequestView { items, error, destination }
+enum CreateTransferRequestView { items, error }

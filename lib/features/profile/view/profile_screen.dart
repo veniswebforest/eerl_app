@@ -99,11 +99,7 @@ class ProfileScreen extends StatelessWidget {
                           arrowIcon: ProfileAssets.arrowRight,
                           title: l10n.profileSyncData,
                           subtitle: l10n.profileSyncSubtitle,
-                          onTap: () => showDialog<void>(
-                            context: context,
-                            barrierColor: Colors.black.withValues(alpha: 0.56),
-                            builder: (_) => const SyncDataDialog(),
-                          ),
+                          onTap: () => showSyncDataDialog(context),
                         ),
                         const SizedBox(height: 18),
                         _SectionTitle(l10n.profileAccount),
@@ -291,17 +287,13 @@ class _ProfileLanguageSelector extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              shortLabels[selectedCode]!.substring(0,2),
+              shortLabels[selectedCode]!.substring(0, 2),
               style: AppTextStyles.semiboldH9_14.copyWith(
                 color: AppColors.neutral950,
               ),
             ),
             const SizedBox(width: 4),
-            SvgPicture.asset(
-              HomeAssets.chevronDown,
-              width: 24,
-              height: 24,
-            ),
+            SvgPicture.asset(HomeAssets.chevronDown, width: 24, height: 24),
           ],
         ),
       ),

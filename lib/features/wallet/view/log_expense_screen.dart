@@ -8,11 +8,13 @@ import '../widgets/log_expense_field.dart';
 import '../widgets/receipt_upload_section.dart';
 import '../widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'expense_submitted_screen.dart';
 
 class LogExpenseScreen extends StatefulWidget {
-  const LogExpenseScreen({super.key, required this.onBack});
+  const LogExpenseScreen({super.key, required this.onBack, this.onSubmitted});
 
   final VoidCallback onBack;
+  final VoidCallback? onSubmitted;
 
   @override
   State<LogExpenseScreen> createState() => _LogExpenseScreenState();
@@ -46,6 +48,27 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
   }
 
   void _refresh() => setState(() {});
+
+  Future<void> _submitExpense() async {
+    await Navigator.of(context).push<void>(
+      PageRouteBuilder<void>(
+        opaque: false,
+        barrierColor: Colors.transparent,
+        pageBuilder: (routeContext, _, _) => ExpenseSubmittedScreen(
+          onBackToWallet: () {
+            Navigator.of(routeContext).pop();
+            (widget.onSubmitted ?? widget.onBack).call();
+          },
+        ),
+        transitionsBuilder: (_, animation, _, child) => FadeTransition(
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+          child: child,
+        ),
+        transitionDuration: const Duration(milliseconds: 180),
+        reverseTransitionDuration: const Duration(milliseconds: 140),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +163,7 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
                       height: 52,
                       child: ElevatedButton(
                         key: const Key('submit-expense-button'),
-                        onPressed: _canSubmit ? () {} : null,
+                        onPressed: _canSubmit ? _submitExpense : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary500,
                           disabledBackgroundColor: AppColors.neutral400,

@@ -8,6 +8,12 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../model/sync_data_status.dart';
 import 'profile_assets.dart';
 
+Future<void> showSyncDataDialog(BuildContext context) => showDialog<void>(
+  context: context,
+  barrierColor: Colors.black.withValues(alpha: 0.56),
+  builder: (_) => const SyncDataDialog(),
+);
+
 class SyncDataDialog extends StatefulWidget {
   const SyncDataDialog({
     super.key,

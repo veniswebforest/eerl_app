@@ -19,6 +19,12 @@ class TransferRequestSuccessDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Image.asset(
+            'assets/images/expense_submitted_success.png',
+            width: 122,
+            height: 122,
+            fit: BoxFit.contain,
+          ),
           Text(
             context.l10n.transferSuccessTitle,
             textAlign: TextAlign.center,
