@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import '../../../core/extensions/context_extensions.dart';
 import 'wallet_assets.dart';
 
 class WalletBalanceCard extends StatelessWidget {
@@ -12,12 +13,14 @@ class WalletBalanceCard extends StatelessWidget {
     required this.balance,
     required this.spentLabel,
     required this.spent,
+    this.onRequestCash,
   });
 
   final String balanceLabel;
   final String balance;
   final String spentLabel;
   final String spent;
+  final VoidCallback? onRequestCash;
 
   @override
   Widget build(BuildContext context) {
@@ -51,23 +54,47 @@ class WalletBalanceCard extends StatelessWidget {
               height: 90,
             ),
           ),
-          Row(
+          Column(
             children: [
-              Expanded(
-                flex: 3,
-                child: _BalanceValue(label: balanceLabel, value: balance),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: _BalanceValue(label: balanceLabel, value: balance),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    child: SvgPicture.asset(
+                      WalletAssets.balanceDivider,
+                      width: 1,
+                      height: 59,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: _BalanceValue(label: spentLabel, value: spent),
+                  ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: SvgPicture.asset(
-                  WalletAssets.balanceDivider,
-                  width: 1,
-                  height: 59,
+              const SizedBox(height: 16),
+
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  key: const Key('wallet-request-cash-button'),
+                  onPressed: onRequestCash,
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: AppColors.primary500,
+                    backgroundColor: Colors.white,
+                    minimumSize: const Size(0, 52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    textStyle: AppTextStyles.boldH7_16,
+                  ),
+                  child: Text(context.l10n.walletRequestCash),
                 ),
-              ),
-              Expanded(
-                flex: 2,
-                child: _BalanceValue(label: spentLabel, value: spent),
               ),
             ],
           ),

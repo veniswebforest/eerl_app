@@ -77,7 +77,7 @@ class ExpenseClaimCard extends StatelessWidget {
                         Text(
                           amount,
                           style: AppTextStyles.semiboldH7_18.copyWith(
-                            color: AppColors.yellow600,
+                            color: style.foreground,
                           ),
                         ),
                         Container(

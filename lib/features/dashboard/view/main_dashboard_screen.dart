@@ -30,8 +30,11 @@ import 'package:eerl_app/features/transfer_requests/model/transfer_request_detai
 import 'package:eerl_app/features/transfer_requests/model/transfer_request_item.dart';
 import 'package:eerl_app/features/transfer_requests/view/transfer_request_detail_screen.dart';
 import 'package:eerl_app/features/wallet/model/expense_claim_detail_status.dart';
+import 'package:eerl_app/features/wallet/model/cash_request_detail_status.dart';
+import 'package:eerl_app/features/wallet/view/cash_request_detail_screen.dart';
 import 'package:eerl_app/features/wallet/view/expense_claim_detail_screen.dart';
 import 'package:eerl_app/features/wallet/view/log_expense_screen.dart';
+import 'package:eerl_app/features/wallet/view/request_cash_screen.dart';
 import 'package:eerl_app/features/wallet/view/wallet_tab_screen.dart';
 import '../model/bottom_nav_item_model.dart';
 import '../widgets/dynamic_bottom_nav_bar.dart';
@@ -63,6 +66,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       : widget.initialPageKey;
   late bool _isWalletOpen = widget.initialPageKey == 'wallet';
   bool _isLogExpenseOpen = false;
+  bool _isRequestCashOpen = false;
   bool _isHelpSupportOpen = false;
   bool _isAddCollectionOpen = false;
   CollectionEntryStep _addCollectionInitialStep = CollectionEntryStep.items;
@@ -80,6 +84,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   bool _isEndMyDayOpen = false;
   TaskListItem? _selectedTask;
   ExpenseClaimDetailStatus? _claimDetailStatus;
+  CashRequestDetailStatus? _cashRequestDetailStatus;
   CollectionDetailStatus? _collectionDetailStatus;
   RecordsViewFlag _recordsInitialView = RecordsViewFlag.history;
   int _recordsPageVersion = 0;
@@ -212,6 +217,16 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               status: _claimDetailStatus!,
               onBack: () => setState(() => _claimDetailStatus = null),
             )
+          : _cashRequestDetailStatus != null
+          ? CashRequestDetailScreen(
+              status: _cashRequestDetailStatus!,
+              onBack: () => setState(() => _cashRequestDetailStatus = null),
+            )
+          : _isRequestCashOpen
+          ? RequestCashScreen(
+              onBack: () => setState(() => _isRequestCashOpen = false),
+              onBackToWallet: () => setState(() => _isRequestCashOpen = false),
+            )
           : _isLogExpenseOpen
           ? LogExpenseScreen(
               onBack: () => setState(() => _isLogExpenseOpen = false),
@@ -221,8 +236,12 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           ? WalletTabScreen(
               onBack: () => setState(() => _isWalletOpen = false),
               onLogExpense: () => setState(() => _isLogExpenseOpen = true),
+              onRequestCash: () => setState(() => _isRequestCashOpen = true),
               onClaimTap: (status) {
                 setState(() => _claimDetailStatus = status);
+              },
+              onCashRequestTap: (status) {
+                setState(() => _cashRequestDetailStatus = status);
               },
             )
           : IndexedStack(
@@ -233,6 +252,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           _isWalletOpen ||
               _isAddCollectionOpen ||
               _isLogExpenseOpen ||
+              _isRequestCashOpen ||
               _isHelpSupportOpen ||
               _isConfigureMaterialOpen ||
               _isNotificationsOpen ||
@@ -246,6 +266,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               _isTasksOpen ||
               _selectedTask != null ||
               _claimDetailStatus != null ||
+              _cashRequestDetailStatus != null ||
               _collectionDetailStatus != null ||
               _isDrawerOpen
           ? null

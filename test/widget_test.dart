@@ -99,6 +99,7 @@ void main() {
     expect(find.text('Rahul Patel'), findsOneWidget);
     expect(find.text('Collection Agent'), findsOneWidget);
     expect(find.text('Transfer Requests'), findsWidgets);
+    expect(find.text('Ragpicker Directory'), findsOneWidget);
     expect(find.text('Tasks & Requests'), findsOneWidget);
     expect(find.byKey(const Key('drawer-tasks')), findsNothing);
 

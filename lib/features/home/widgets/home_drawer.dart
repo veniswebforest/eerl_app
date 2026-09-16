@@ -8,7 +8,7 @@ import 'home_assets.dart';
 
 const _iconPath = 'assets/icons/home';
 
-/// Navigation drawer implemented from Figma node 2004:1841.
+/// Navigation drawer implemented from Figma node 5014:2668.
 class HomeDrawer extends StatefulWidget {
   const HomeDrawer({
     super.key,
@@ -106,6 +106,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               _close(context);
                               widget.onConfigureMaterialTap?.call();
                             },
+                          ),
+                          _DrawerItem(
+                            key: const Key('drawer-ragpicker-directory'),
+                            label: context.l10n.drawerRagpickerDirectory,
+                            icon: 'assets/icons/profile/role.svg',
+                            onTap: () => _close(context),
                           ),
                           _DrawerExpandableItem(
                             icon: '$_iconPath/pending_task.svg',
@@ -423,7 +429,14 @@ class _DrawerItem extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            SizedBox(width: 24, height: 24, child: SvgPicture.asset(icon)),
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: SvgPicture.asset(
+                icon,
+                colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn),
+              ),
+            ),
             const SizedBox(width: 6),
             Expanded(
               child: Text(

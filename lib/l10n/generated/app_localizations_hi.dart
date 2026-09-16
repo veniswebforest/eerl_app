@@ -286,6 +286,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get todaysSummary => 'आज का सारांश';
 
   @override
+  String get hideTodaysSummary => 'आज का सारांश छिपाएँ';
+
+  @override
+  String get showTodaysSummary => 'आज का सारांश दिखाएँ';
+
+  @override
   String get collectedToday => 'आज का संग्रह';
 
   @override
@@ -616,6 +622,75 @@ class AppLocalizationsHi extends AppLocalizations {
   String get filterAll => 'सभी';
 
   @override
+  String get filterToday => 'आज';
+
+  @override
+  String get filterYesterday => 'कल';
+
+  @override
+  String get filterLastWeek => 'पिछला सप्ताह';
+
+  @override
+  String get expenseTypeExpense => 'खर्च';
+
+  @override
+  String get expenseTypeCashRequest => 'नकद अनुरोध';
+
+  @override
+  String get walletRequestCash => 'नकद का अनुरोध करें';
+
+  @override
+  String get cashRequestTitle => 'नकद अनुरोध';
+
+  @override
+  String get cashRequestedAmount => 'अनुरोधित राशि (₹)';
+
+  @override
+  String get cashAmountHint => 'खर्च राशि दर्ज करें';
+
+  @override
+  String get cashReasonPurpose => 'कारण / उद्देश्य';
+
+  @override
+  String get cashReasonHint => 'अनुरोध श्रेणी चुनें';
+
+  @override
+  String get cashReasonEmergencyFuel => 'आपातकालीन ईंधन';
+
+  @override
+  String get cashReasonDailyAdvance => 'दैनिक परिचालन अग्रिम';
+
+  @override
+  String get cashReasonBulkPurchase => 'थोक सामग्री / स्थानीय खरीद';
+
+  @override
+  String get cashCreditsAfterApproval =>
+      'सुपरवाइज़र की मंज़ूरी के बाद जमा होगा।';
+
+  @override
+  String get cashSubmitRequest => 'नकद अनुरोध जमा करें';
+
+  @override
+  String get cashPendingPrefix => 'सुपरवाइज़र की समीक्षा तक यह प्रविष्टि ';
+
+  @override
+  String get cashPendingStatus => 'लंबित';
+
+  @override
+  String get cashPendingSuffix => ' चिह्नित रहेगी।';
+
+  @override
+  String get cashRequestSubmittedTitle => 'अनुरोध जमा हुआ!';
+
+  @override
+  String cashRequestSubmittedMessage(String amount) {
+    return '₹ $amount का आपका नकद अनुरोध सफलतापूर्वक जमा हो गया है।';
+  }
+
+  @override
+  String get cashRequestBackToWallet => 'वॉलेट पर वापस जाएँ';
+
+  @override
   String get filterPending => 'लंबित';
 
   @override
@@ -658,6 +733,33 @@ class AppLocalizationsHi extends AppLocalizations {
   String get expenseFlagged => 'चिह्नित';
 
   @override
+  String get expenseRejectedSupervisor => 'पर्यवेक्षक द्वारा अस्वीकृत';
+
+  @override
+  String get cashRequestEmergencyFuel => 'आपातकालीन ईंधन';
+
+  @override
+  String get cashRequestEmergencyFuelDate => '12 मई 2026 • 02:30 PM';
+
+  @override
+  String get cashRequestEmergencyFuelAmount => '+₹4,000';
+
+  @override
+  String get cashRequestDailyAdvance => 'दैनिक परिचालन अग्रिम';
+
+  @override
+  String get cashRequestCreditedDate => '08 मई 2026 • 04:30 PM';
+
+  @override
+  String get cashRequestRejectedDate => '02 मई 2026 • 11:30 AM';
+
+  @override
+  String get cashRequestAdvanceAmount => '+₹5,000';
+
+  @override
+  String get cashRequestCreditedWallet => 'वॉलेट में जमा';
+
+  @override
   String get drawerUserName => 'राहुल पटेल';
 
   @override
@@ -671,6 +773,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get drawerConfigureMaterials => 'सामग्री सूची कॉन्फ़िगर करें';
+
+  @override
+  String get drawerRagpickerDirectory => 'रैगपिकर निर्देशिका';
 
   @override
   String get drawerTasksRequests => 'कार्य और अनुरोध';
@@ -808,6 +913,21 @@ class AppLocalizationsHi extends AppLocalizations {
   String get expenseCategoryLabel => 'व्यय श्रेणी';
 
   @override
+  String get expenseReasonLabel => 'व्यय का कारण';
+
+  @override
+  String get requestNewExpenseCategory => 'नई श्रेणी का अनुरोध करें';
+
+  @override
+  String get expenseCategoryName => 'श्रेणी का नाम';
+
+  @override
+  String get expenseCategoryNameHint => 'उदा. टायर बदलना';
+
+  @override
+  String get expenseReasonDescription => 'कारण/विवरण';
+
+  @override
   String get selectExpenseCategory => 'व्यय श्रेणी चुनें';
 
   @override
@@ -909,9 +1029,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get expenseVerifiedSupervisor => 'पर्यवेक्षक द्वारा सत्यापित';
 
   @override
-  String get expenseRejectedSupervisor => 'पर्यवेक्षक द्वारा अस्वीकृत';
-
-  @override
   String get expenseUploadedPhoto => 'अपलोड की गई फोटो';
 
   @override
@@ -934,6 +1051,42 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get expenseRejectRemarksValue =>
       'डुप्लिकेट रसीद जमा होने के कारण यह अनुरोध कंपनी नीति का उल्लंघन करता है। व्यय अस्वीकृत किया गया।';
+
+  @override
+  String get cashDetailPendingReference => '#REQ-2026-088';
+
+  @override
+  String get cashDetailApprovedReference => '#REQ-2026-087';
+
+  @override
+  String get cashDetailRejectedReference => '#REQ-2026-086';
+
+  @override
+  String get cashDetailRequestReason => 'अनुरोध का कारण';
+
+  @override
+  String get cashDetailAmountValue => '₹1000';
+
+  @override
+  String get cashDetailDateTimeValue => 'आज • 08:15 AM';
+
+  @override
+  String get cashDetailWaitingApproval =>
+      'सुपरवाइज़र की मंज़ूरी की प्रतीक्षा में';
+
+  @override
+  String get cashDetailApprovedSupervisor => 'सुपरवाइज़र द्वारा स्वीकृत';
+
+  @override
+  String get cashDetailApprovedNote =>
+      'नोट: ₹1,000 आपके सक्रिय नकद वॉलेट बैलेंस में जमा किए गए।';
+
+  @override
+  String get cashDetailRejectReason => 'अमान्य / अधूरा अनुरोध';
+
+  @override
+  String get cashDetailRejectRemarks =>
+      'आज के मार्ग के लिए आपका मौजूदा वॉलेट बैलेंस पर्याप्त है। कृपया पहले लंबित खर्च दर्ज करें।';
 
   @override
   String get startYourCollections => 'अपना संग्रह शुरू करें';

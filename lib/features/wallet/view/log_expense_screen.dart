@@ -6,6 +6,7 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../widgets/expense_category_selector.dart';
 import '../widgets/log_expense_field.dart';
 import '../widgets/receipt_upload_section.dart';
+import '../widgets/request_new_expense_category_dialog.dart';
 import '../widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'expense_submitted_screen.dart';
@@ -106,7 +107,7 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
                     ),
                     const SizedBox(height: 24),
                     LogExpenseField(
-                      label: l10n.expenseCategoryLabel,
+                      label: l10n.expenseReasonLabel,
                       requiredField: true,
                       child: ExpenseCategorySelector(
                         placeholder: l10n.selectExpenseCategory,
@@ -121,6 +122,15 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
                             _selectedCategory = index;
                             _categoryOpen = false;
                           });
+                        },
+                        requestNewCategoryLabel: l10n.requestNewExpenseCategory,
+                        onRequestNewCategory: () {
+                          setState(() => _categoryOpen = false);
+                          showDialog<void>(
+                            context: context,
+                            builder: (_) =>
+                                const RequestNewExpenseCategoryDialog(),
+                          );
                         },
                       ),
                     ),

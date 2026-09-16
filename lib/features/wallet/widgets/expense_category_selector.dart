@@ -13,6 +13,8 @@ class ExpenseCategorySelector extends StatelessWidget {
     required this.isOpen,
     required this.onToggle,
     required this.onSelected,
+    required this.requestNewCategoryLabel,
+    required this.onRequestNewCategory,
     this.selectedIndex,
   });
 
@@ -21,22 +23,35 @@ class ExpenseCategorySelector extends StatelessWidget {
   final bool isOpen;
   final VoidCallback onToggle;
   final ValueChanged<int> onSelected;
+  final String requestNewCategoryLabel;
+  final VoidCallback onRequestNewCategory;
   final int? selectedIndex;
 
   @override
   Widget build(BuildContext context) {
+    final panelHeight = (MediaQuery.sizeOf(context).height * .34).clamp(
+      220.0,
+      280.0,
+    );
+
     return Column(
       children: [
         InkWell(
           key: const Key('expense-category-selector'),
           onTap: onToggle,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.vertical(
+            top: const Radius.circular(10),
+            bottom: Radius.circular(isOpen ? 0 : 10),
+          ),
           child: Container(
             height: 55,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.vertical(
+                top: const Radius.circular(10),
+                bottom: Radius.circular(isOpen ? 0 : 10),
+              ),
               border: Border.all(color: AppColors.cool400),
             ),
             child: Row(
@@ -65,61 +80,107 @@ class ExpenseCategorySelector extends StatelessWidget {
             ),
           ),
         ),
-        if (isOpen) ...[
-          const SizedBox(height: 4),
+        if (isOpen)
           Container(
+            height: panelHeight,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(10),
+              ),
               border: Border.all(color: AppColors.cool400),
             ),
             child: Column(
-              children: List.generate(items.length, (index) {
-                final selected = selectedIndex == index;
-                return InkWell(
-                  onTap: () => onSelected(index),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          padding: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            border: Border.all(color: AppColors.neutral400),
-                          ),
-                          child: selected
-                              ? const DecoratedBox(
+              children: [
+                Expanded(
+                  child: Scrollbar(
+                    thumbVisibility: items.length > 5,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        final selected = selectedIndex == index;
+                        return InkWell(
+                          key: ValueKey('expense-category-$index'),
+                          onTap: () => onSelected(index),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  padding: const EdgeInsets.all(3),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: AppColors.primary500,
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: selected
+                                          ? AppColors.primary500
+                                          : AppColors.neutral400,
+                                    ),
                                   ),
-                                )
-                              : null,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            items[index],
-                            style: AppTextStyles.regularB7_14.copyWith(
-                              color: AppColors.neutral950,
+                                  child: selected
+                                      ? const DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: AppColors.primary500,
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    items[index],
+                                    style: AppTextStyles.regularB7_14.copyWith(
+                                      color: AppColors.neutral950,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
-                );
-              }),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    key: const Key('request-new-expense-category'),
+                    onPressed: onRequestNewCategory,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.primary500,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(9),
+                        ),
+                      ),
+                      textStyle: AppTextStyles.semiboldH9_14,
+                    ),
+                    icon: SvgPicture.asset(
+                      'assets/icons/help_support/add.svg',
+                      width: 20,
+                      height: 20,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                    label: Text(requestNewCategoryLabel),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
       ],
     );
   }

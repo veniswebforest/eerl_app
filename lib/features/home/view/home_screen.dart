@@ -117,17 +117,19 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 12)),
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _StickyZoneHeaderDelegate(
-                      horizontalPadding: horizontalPadding,
+                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
+                    ),
+                    sliver: const SliverToBoxAdapter(
+                      child: _CenteredHomeContent(child: ZoneSelector()),
                     ),
                   ),
                   SliverPadding(
                     padding: EdgeInsets.fromLTRB(
                       horizontalPadding,
-                      8,
+                      12,
                       horizontalPadding,
                       148,
                     ),
@@ -141,6 +143,20 @@ class HomeScreen extends StatelessWidget {
                           child: TodaysSummary(onWalletTap: onWalletTap),
                         ),
                         const SizedBox(height: 24),
+
+                        _CenteredHomeContent(
+                          child: CollectionDrafts(
+                            onViewAllTap: onReceiptsTap,
+                            onContinueCollectionTap: onContinueDraftTap,
+                          ),
+                        ),
+                        const SizedBox(height: 24),_CenteredHomeContent(
+                          child: CollectionTypes(
+                            onTypeTap: onCollectionTypeTap,
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
                         _CenteredHomeContent(
                           child: QuickActions(
                             onAddCollectionTap: onAddCollectionTap,
@@ -148,19 +164,7 @@ class HomeScreen extends StatelessWidget {
                             onLogExpenseTap: onWalletTap,
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        _CenteredHomeContent(
-                          child: CollectionTypes(
-                            onTypeTap: onCollectionTypeTap,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        _CenteredHomeContent(
-                          child: CollectionDrafts(
-                            onViewAllTap: onReceiptsTap,
-                            onContinueCollectionTap: onContinueDraftTap,
-                          ),
-                        ),
+
                         const SizedBox(height: 24),
                         _CenteredHomeContent(
                           child: DayClosure(onEndMyDayTap: onEndMyDayTap),
@@ -190,44 +194,4 @@ class _CenteredHomeContent extends StatelessWidget {
       child: child,
     ),
   );
-}
-
-class _StickyZoneHeaderDelegate extends SliverPersistentHeaderDelegate {
-  const _StickyZoneHeaderDelegate({required this.horizontalPadding});
-
-  final double horizontalPadding;
-
-  @override
-  double get minExtent => 76;
-
-  @override
-  double get maxExtent => 76;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: overlapsContent ? const Color(0xFFF0FAF2) : Colors.transparent,
-      boxShadow: overlapsContent
-          ? const [
-              BoxShadow(
-                color: Color(0x12000000),
-                blurRadius: 5,
-                offset: Offset(0, 2),
-              ),
-            ]
-          : null,
-    ),
-    child: Padding(
-      padding: EdgeInsets.fromLTRB(horizontalPadding, 8, horizontalPadding, 8),
-      child: const _CenteredHomeContent(child: ZoneSelector()),
-    ),
-  );
-
-  @override
-  bool shouldRebuild(covariant _StickyZoneHeaderDelegate oldDelegate) =>
-      horizontalPadding != oldDelegate.horizontalPadding;
 }

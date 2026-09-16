@@ -287,6 +287,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todaysSummary => 'Today\'s Summary';
 
   @override
+  String get hideTodaysSummary => 'Hide today\'s summary';
+
+  @override
+  String get showTodaysSummary => 'Show today\'s summary';
+
+  @override
   String get collectedToday => 'Collected Today';
 
   @override
@@ -618,6 +624,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String get filterAll => 'All';
 
   @override
+  String get filterToday => 'Today';
+
+  @override
+  String get filterYesterday => 'Yesterday';
+
+  @override
+  String get filterLastWeek => 'Last Week';
+
+  @override
+  String get expenseTypeExpense => 'Expense';
+
+  @override
+  String get expenseTypeCashRequest => 'Cash Request';
+
+  @override
+  String get walletRequestCash => 'Request Cash';
+
+  @override
+  String get cashRequestTitle => 'Request Cash';
+
+  @override
+  String get cashRequestedAmount => 'Requested Amount (₹)';
+
+  @override
+  String get cashAmountHint => 'Enter Expense Amount';
+
+  @override
+  String get cashReasonPurpose => 'Reason / Purpose';
+
+  @override
+  String get cashReasonHint => 'Select Request Category';
+
+  @override
+  String get cashReasonEmergencyFuel => 'Emergency Fuel';
+
+  @override
+  String get cashReasonDailyAdvance => 'Daily Operational Advance';
+
+  @override
+  String get cashReasonBulkPurchase => 'Bulk Material / Local Purchase';
+
+  @override
+  String get cashCreditsAfterApproval => 'Credits once supervisor approves.';
+
+  @override
+  String get cashSubmitRequest => 'Submit Cash Request';
+
+  @override
+  String get cashPendingPrefix => 'This entry will be marked as ';
+
+  @override
+  String get cashPendingStatus => 'PENDING';
+
+  @override
+  String get cashPendingSuffix => ' until reviewed by a supervisor.';
+
+  @override
+  String get cashRequestSubmittedTitle => 'Request Submitted!';
+
+  @override
+  String cashRequestSubmittedMessage(String amount) {
+    return 'Your cash request of ₹ $amount has been submitted successfully.';
+  }
+
+  @override
+  String get cashRequestBackToWallet => 'Back to Wallet';
+
+  @override
   String get filterPending => 'Pending';
 
   @override
@@ -660,6 +734,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseFlagged => 'Flagged';
 
   @override
+  String get expenseRejectedSupervisor => 'Rejected by Supervisor';
+
+  @override
+  String get cashRequestEmergencyFuel => 'Emergency Fuel';
+
+  @override
+  String get cashRequestEmergencyFuelDate => '12 May 2026 • 02:30 PM';
+
+  @override
+  String get cashRequestEmergencyFuelAmount => '+₹4,000';
+
+  @override
+  String get cashRequestDailyAdvance => 'Daily Operational Advance';
+
+  @override
+  String get cashRequestCreditedDate => '08 May 2026 • 04:30 PM';
+
+  @override
+  String get cashRequestRejectedDate => '02 May 2026 • 11:30 AM';
+
+  @override
+  String get cashRequestAdvanceAmount => '+₹5,000';
+
+  @override
+  String get cashRequestCreditedWallet => 'Credited to Wallet';
+
+  @override
   String get drawerUserName => 'Rahul Patel';
 
   @override
@@ -673,6 +774,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get drawerConfigureMaterials => 'Configure Material List';
+
+  @override
+  String get drawerRagpickerDirectory => 'Ragpicker Directory';
 
   @override
   String get drawerTasksRequests => 'Tasks & Requests';
@@ -809,6 +913,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseCategoryLabel => 'Expense Category';
 
   @override
+  String get expenseReasonLabel => 'Expense Reason';
+
+  @override
+  String get requestNewExpenseCategory => 'Request New Category';
+
+  @override
+  String get expenseCategoryName => 'Category Name';
+
+  @override
+  String get expenseCategoryNameHint => 'e.g. Tyre Replacement';
+
+  @override
+  String get expenseReasonDescription => 'Reason/Description';
+
+  @override
   String get selectExpenseCategory => 'Select Expense Category';
 
   @override
@@ -910,9 +1029,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseVerifiedSupervisor => 'Verified by Supervisor';
 
   @override
-  String get expenseRejectedSupervisor => 'Rejected by Supervisor';
-
-  @override
   String get expenseUploadedPhoto => 'Uploaded Photo';
 
   @override
@@ -935,6 +1051,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get expenseRejectRemarksValue =>
       'This request violates company policy as a duplicate receipt was submitted. Expense rejected.';
+
+  @override
+  String get cashDetailPendingReference => '#REQ-2026-088';
+
+  @override
+  String get cashDetailApprovedReference => '#REQ-2026-087';
+
+  @override
+  String get cashDetailRejectedReference => '#REQ-2026-086';
+
+  @override
+  String get cashDetailRequestReason => 'Request Reason';
+
+  @override
+  String get cashDetailAmountValue => '₹1000';
+
+  @override
+  String get cashDetailDateTimeValue => 'Today • 08:15 AM';
+
+  @override
+  String get cashDetailWaitingApproval => 'Waiting for Supervisor Approval';
+
+  @override
+  String get cashDetailApprovedSupervisor => 'Approved by Supervisor';
+
+  @override
+  String get cashDetailApprovedNote =>
+      'Note: ₹1,000 credited to your active cash wallet balance.';
+
+  @override
+  String get cashDetailRejectReason => 'Invalid / Incomplete Request';
+
+  @override
+  String get cashDetailRejectRemarks =>
+      'Your existing wallet balance is sufficient for today\'s route. Please log pending expenses first.';
 
   @override
   String get startYourCollections => 'Start your collections';

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
-import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'home_assets.dart';
 
 /// Top app bar for the home screen.
@@ -16,43 +16,77 @@ class HomeAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppScreenHeader(
-      title: context.l10n.welcomeBack,
-      subtitle: context.l10n.homeDateZone,
-      leading: Builder(
-        builder: (context) => InkWell(
-          key: const Key('home-menu-button'),
-          onTap: () => Scaffold.of(context).openDrawer(),
-          borderRadius: BorderRadius.circular(8),
-          child: SvgPicture.asset(HomeAssets.menu, width: 28, height: 28),
-        ),
+    return SizedBox(
+      height: 45,
+      child: Row(
+        children: [
+          Builder(
+            builder: (context) => InkWell(
+              key: const Key('home-menu-button'),
+              onTap: () => Scaffold.of(context).openDrawer(),
+              borderRadius: BorderRadius.circular(8),
+              child: SvgPicture.asset(HomeAssets.menu, width: 28, height: 28),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.welcomeBack,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.semiboldH6_20.copyWith(
+                    color: AppColors.primary950,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  context.l10n.homeDateZone,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.mediumSH9_12.copyWith(
+                    color: AppColors.neutral600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          InkWell(
+            onTap: onWalletTap,
+            borderRadius: BorderRadius.circular(25),
+            child: Container(
+              width: 45,
+              height: 45,
+              decoration: const BoxDecoration(
+                color: AppColors.cool50,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  HomeAssets.calendar,
+                  width: 24,
+                  height: 24,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          InkWell(
+            key: const Key('home-notification-button'),
+            onTap: onNotificationTap,
+            borderRadius: BorderRadius.circular(24),
+            child: SvgPicture.asset(
+              HomeAssets.notification,
+              width: 45,
+              height: 45,
+            ),
+          ),
+        ],
       ),
-      actions: [
-        InkWell(
-          onTap: onWalletTap,
-          child: Container(
-            width: 45,
-            height: 45,
-            decoration: BoxDecoration(
-              color: AppColors.cool50,
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: SvgPicture.asset(HomeAssets.calendar, width: 24, height: 24),
-            ),
-          ),
-        ),
-        InkWell(
-          key: const Key('home-notification-button'),
-          onTap: onNotificationTap,
-          borderRadius: BorderRadius.circular(24),
-          child: SvgPicture.asset(
-            HomeAssets.notification,
-            width: 45,
-            height: 45,
-          ),
-        ),
-      ],
     );
   }
 }

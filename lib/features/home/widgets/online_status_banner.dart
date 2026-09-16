@@ -28,9 +28,11 @@ class OnlineStatusBanner extends StatelessWidget {
           children: [
             // Wifi icon
             Container(
-              padding: const EdgeInsets.all(7),
-              decoration: BoxDecoration(
-                // color: AppColors.primary50,
+              width: 40,
+              height: 40,
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: AppColors.primary50,
                 shape: BoxShape.circle,
               ),
               child: SvgPicture.asset(HomeAssets.online, width: 24, height: 24),
@@ -48,7 +50,7 @@ class OnlineStatusBanner extends StatelessWidget {
                       color: AppColors.primary500,
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
                     context.l10n.pendingCollections(3),
                     style: AppTextStyles.mediumSH8_14.copyWith(

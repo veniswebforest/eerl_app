@@ -8,65 +8,129 @@ import 'home_assets.dart';
 import 'home_styles.dart';
 
 /// 2×2 grid summary section showing today's collection stats.
-class TodaysSummary extends StatelessWidget {
+class TodaysSummary extends StatefulWidget {
   const TodaysSummary({super.key, this.onWalletTap});
 
   final VoidCallback? onWalletTap;
+
+  @override
+  State<TodaysSummary> createState() => _TodaysSummaryState();
+}
+
+class _TodaysSummaryState extends State<TodaysSummary> {
+  bool _isSummaryVisible = true;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(context.l10n.todaysSummary, style: HomeStyles.sectionTitle),
-        const SizedBox(height: 16),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final columns = constraints.maxWidth < 320 ? 1 : 2;
-            final cardWidth =
-                (constraints.maxWidth - (columns - 1) * 8) / columns;
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                context.l10n.todaysSummary,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: HomeStyles.sectionTitle,
+              ),
+            ),
+            Semantics(
+              button: true,
+              toggled: _isSummaryVisible,
+              label: _isSummaryVisible
+                  ? context.l10n.hideTodaysSummary
+                  : context.l10n.showTodaysSummary,
+              child: Tooltip(
+                message: _isSummaryVisible
+                    ? context.l10n.hideTodaysSummary
+                    : context.l10n.showTodaysSummary,
+                child: InkWell(
+                  key: const Key('home-toggle-todays-summary'),
+                  onTap: () =>
+                      setState(() => _isSummaryVisible = !_isSummaryVisible),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: SvgPicture.asset(
+                      _isSummaryVisible
+                          ? HomeAssets.summaryHide
+                          : HomeAssets.summaryView,
+                      width: 28,
+                      height: 28,
+                      colorFilter: ColorFilter.mode(
+                        AppColors.primary500,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeInOut,
+          alignment: Alignment.topCenter,
+          child: _isSummaryVisible
+              ? Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final columns = constraints.maxWidth < 320 ? 1 : 2;
+                      final cardWidth =
+                          (constraints.maxWidth - (columns - 1) * 8) / columns;
 
-            return Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                SummaryCard(
-                  iconAsset: HomeAssets.collected,
-                  iconColor: AppColors.orchid,
-                  iconBg: AppColors.orchidLight,
-                  label: context.l10n.collectedToday,
-                  value: context.l10n.weightKg(320),
-                  valueColor: AppColors.orchid,
-                ),
-                SummaryCard(
-                  iconAsset: HomeAssets.verified,
-                  iconColor: AppColors.primary500,
-                  iconBg: AppColors.primary100,
-                  label: context.l10n.verifiedEntries,
-                  value: '18',
-                  valueColor: AppColors.primary500,
-                ),
-                SummaryCard(
-                  iconAsset: HomeAssets.transfer,
-                  iconColor: AppColors.purple,
-                  iconBg: AppColors.purpleLight,
-                  label: context.l10n.transferRequests,
-                  value: '04',
-                  valueColor: AppColors.purple,
-                ),
-                SummaryCard(
-                  key: const Key('home-wallet-summary-card'),
-                  iconAsset: HomeAssets.wallet,
-                  iconColor: AppColors.secondary500,
-                  iconBg: AppColors.secondary100,
-                  label: context.l10n.walletBalance,
-                  value: context.l10n.walletAmount('50,000'),
-                  valueColor: AppColors.secondary500,
-                  // onTap: onWalletTap,
-                ),
-              ].map((card) => SizedBox(width: cardWidth, child: card)).toList(),
-            );
-          },
+                      return Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children:
+                            [
+                                  SummaryCard(
+                                    iconAsset: HomeAssets.collected,
+                                    iconColor: AppColors.orchid,
+                                    iconBg: AppColors.orchidLight,
+                                    label: context.l10n.collectedToday,
+                                    value: context.l10n.weightKg(320),
+                                    valueColor: AppColors.orchid,
+                                  ),
+                                  SummaryCard(
+                                    iconAsset: HomeAssets.verified,
+                                    iconColor: AppColors.primary500,
+                                    iconBg: AppColors.primary100,
+                                    label: context.l10n.verifiedEntries,
+                                    value: '18',
+                                    valueColor: AppColors.primary500,
+                                  ),
+                                  SummaryCard(
+                                    iconAsset: HomeAssets.transfer,
+                                    iconColor: AppColors.purple,
+                                    iconBg: AppColors.purpleLight,
+                                    label: context.l10n.transferRequests,
+                                    value: '04',
+                                    valueColor: AppColors.purple,
+                                  ),
+                                  SummaryCard(
+                                    key: const Key('home-wallet-summary-card'),
+                                    iconAsset: HomeAssets.wallet,
+                                    iconColor: AppColors.secondary500,
+                                    iconBg: AppColors.secondary100,
+                                    label: context.l10n.walletBalance,
+                                    value: context.l10n.walletAmount('50,000'),
+                                    valueColor: AppColors.secondary500,
+                                  ),
+                                ]
+                                .map(
+                                  (card) =>
+                                      SizedBox(width: cardWidth, child: card),
+                                )
+                                .toList(),
+                      );
+                    },
+                  ),
+                )
+              : const SizedBox(width: double.infinity),
         ),
       ],
     );
@@ -97,7 +161,8 @@ class SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      constraints: const BoxConstraints(minHeight: 122),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.neutral50,
         borderRadius: BorderRadius.circular(16),
@@ -110,7 +175,7 @@ class SummaryCard extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: iconBg,
               borderRadius: BorderRadius.circular(8),

@@ -634,6 +634,18 @@ abstract class AppLocalizations {
   /// **'Today\'s Summary'**
   String get todaysSummary;
 
+  /// No description provided for @hideTodaysSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide today\'s summary'**
+  String get hideTodaysSummary;
+
+  /// No description provided for @showTodaysSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Show today\'s summary'**
+  String get showTodaysSummary;
+
   /// No description provided for @collectedToday.
   ///
   /// In en, this message translates to:
@@ -1246,6 +1258,138 @@ abstract class AppLocalizations {
   /// **'All'**
   String get filterAll;
 
+  /// No description provided for @filterToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get filterToday;
+
+  /// No description provided for @filterYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get filterYesterday;
+
+  /// No description provided for @filterLastWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Week'**
+  String get filterLastWeek;
+
+  /// No description provided for @expenseTypeExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get expenseTypeExpense;
+
+  /// No description provided for @expenseTypeCashRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Request'**
+  String get expenseTypeCashRequest;
+
+  /// No description provided for @walletRequestCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Cash'**
+  String get walletRequestCash;
+
+  /// No description provided for @cashRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Cash'**
+  String get cashRequestTitle;
+
+  /// No description provided for @cashRequestedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested Amount (₹)'**
+  String get cashRequestedAmount;
+
+  /// No description provided for @cashAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Expense Amount'**
+  String get cashAmountHint;
+
+  /// No description provided for @cashReasonPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason / Purpose'**
+  String get cashReasonPurpose;
+
+  /// No description provided for @cashReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Request Category'**
+  String get cashReasonHint;
+
+  /// No description provided for @cashReasonEmergencyFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency Fuel'**
+  String get cashReasonEmergencyFuel;
+
+  /// No description provided for @cashReasonDailyAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Operational Advance'**
+  String get cashReasonDailyAdvance;
+
+  /// No description provided for @cashReasonBulkPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Bulk Material / Local Purchase'**
+  String get cashReasonBulkPurchase;
+
+  /// No description provided for @cashCreditsAfterApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Credits once supervisor approves.'**
+  String get cashCreditsAfterApproval;
+
+  /// No description provided for @cashSubmitRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Cash Request'**
+  String get cashSubmitRequest;
+
+  /// No description provided for @cashPendingPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'This entry will be marked as '**
+  String get cashPendingPrefix;
+
+  /// No description provided for @cashPendingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'PENDING'**
+  String get cashPendingStatus;
+
+  /// No description provided for @cashPendingSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' until reviewed by a supervisor.'**
+  String get cashPendingSuffix;
+
+  /// No description provided for @cashRequestSubmittedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Submitted!'**
+  String get cashRequestSubmittedTitle;
+
+  /// No description provided for @cashRequestSubmittedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your cash request of ₹ {amount} has been submitted successfully.'**
+  String cashRequestSubmittedMessage(String amount);
+
+  /// No description provided for @cashRequestBackToWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Wallet'**
+  String get cashRequestBackToWallet;
+
   /// No description provided for @filterPending.
   ///
   /// In en, this message translates to:
@@ -1330,6 +1474,60 @@ abstract class AppLocalizations {
   /// **'Flagged'**
   String get expenseFlagged;
 
+  /// No description provided for @expenseRejectedSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by Supervisor'**
+  String get expenseRejectedSupervisor;
+
+  /// No description provided for @cashRequestEmergencyFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency Fuel'**
+  String get cashRequestEmergencyFuel;
+
+  /// No description provided for @cashRequestEmergencyFuelDate.
+  ///
+  /// In en, this message translates to:
+  /// **'12 May 2026 • 02:30 PM'**
+  String get cashRequestEmergencyFuelDate;
+
+  /// No description provided for @cashRequestEmergencyFuelAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'+₹4,000'**
+  String get cashRequestEmergencyFuelAmount;
+
+  /// No description provided for @cashRequestDailyAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Operational Advance'**
+  String get cashRequestDailyAdvance;
+
+  /// No description provided for @cashRequestCreditedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'08 May 2026 • 04:30 PM'**
+  String get cashRequestCreditedDate;
+
+  /// No description provided for @cashRequestRejectedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'02 May 2026 • 11:30 AM'**
+  String get cashRequestRejectedDate;
+
+  /// No description provided for @cashRequestAdvanceAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'+₹5,000'**
+  String get cashRequestAdvanceAmount;
+
+  /// No description provided for @cashRequestCreditedWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Credited to Wallet'**
+  String get cashRequestCreditedWallet;
+
   /// No description provided for @drawerUserName.
   ///
   /// In en, this message translates to:
@@ -1359,6 +1557,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Configure Material List'**
   String get drawerConfigureMaterials;
+
+  /// No description provided for @drawerRagpickerDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Ragpicker Directory'**
+  String get drawerRagpickerDirectory;
 
   /// No description provided for @drawerTasksRequests.
   ///
@@ -1606,6 +1810,36 @@ abstract class AppLocalizations {
   /// **'Expense Category'**
   String get expenseCategoryLabel;
 
+  /// No description provided for @expenseReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Reason'**
+  String get expenseReasonLabel;
+
+  /// No description provided for @requestNewExpenseCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Request New Category'**
+  String get requestNewExpenseCategory;
+
+  /// No description provided for @expenseCategoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Name'**
+  String get expenseCategoryName;
+
+  /// No description provided for @expenseCategoryNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Tyre Replacement'**
+  String get expenseCategoryNameHint;
+
+  /// No description provided for @expenseReasonDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason/Description'**
+  String get expenseReasonDescription;
+
   /// No description provided for @selectExpenseCategory.
   ///
   /// In en, this message translates to:
@@ -1804,12 +2038,6 @@ abstract class AppLocalizations {
   /// **'Verified by Supervisor'**
   String get expenseVerifiedSupervisor;
 
-  /// No description provided for @expenseRejectedSupervisor.
-  ///
-  /// In en, this message translates to:
-  /// **'Rejected by Supervisor'**
-  String get expenseRejectedSupervisor;
-
   /// No description provided for @expenseUploadedPhoto.
   ///
   /// In en, this message translates to:
@@ -1851,6 +2079,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This request violates company policy as a duplicate receipt was submitted. Expense rejected.'**
   String get expenseRejectRemarksValue;
+
+  /// No description provided for @cashDetailPendingReference.
+  ///
+  /// In en, this message translates to:
+  /// **'#REQ-2026-088'**
+  String get cashDetailPendingReference;
+
+  /// No description provided for @cashDetailApprovedReference.
+  ///
+  /// In en, this message translates to:
+  /// **'#REQ-2026-087'**
+  String get cashDetailApprovedReference;
+
+  /// No description provided for @cashDetailRejectedReference.
+  ///
+  /// In en, this message translates to:
+  /// **'#REQ-2026-086'**
+  String get cashDetailRejectedReference;
+
+  /// No description provided for @cashDetailRequestReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Reason'**
+  String get cashDetailRequestReason;
+
+  /// No description provided for @cashDetailAmountValue.
+  ///
+  /// In en, this message translates to:
+  /// **'₹1000'**
+  String get cashDetailAmountValue;
+
+  /// No description provided for @cashDetailDateTimeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Today • 08:15 AM'**
+  String get cashDetailDateTimeValue;
+
+  /// No description provided for @cashDetailWaitingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Supervisor Approval'**
+  String get cashDetailWaitingApproval;
+
+  /// No description provided for @cashDetailApprovedSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by Supervisor'**
+  String get cashDetailApprovedSupervisor;
+
+  /// No description provided for @cashDetailApprovedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: ₹1,000 credited to your active cash wallet balance.'**
+  String get cashDetailApprovedNote;
+
+  /// No description provided for @cashDetailRejectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid / Incomplete Request'**
+  String get cashDetailRejectReason;
+
+  /// No description provided for @cashDetailRejectRemarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Your existing wallet balance is sufficient for today\'s route. Please log pending expenses first.'**
+  String get cashDetailRejectRemarks;
 
   /// No description provided for @startYourCollections.
   ///
