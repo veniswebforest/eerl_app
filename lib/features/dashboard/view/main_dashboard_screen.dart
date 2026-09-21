@@ -17,6 +17,7 @@ import 'package:eerl_app/features/records/model/collection_detail_status.dart';
 import 'package:eerl_app/features/records/model/records_view_flag.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
+import 'package:eerl_app/features/ragpicker_directory/view/ragpicker_directory_screen.dart';
 import 'package:eerl_app/features/requests/view/raise_request_screen.dart';
 import 'package:eerl_app/features/requests/model/request_list_item.dart';
 import 'package:eerl_app/features/requests/view/request_detail_screen.dart';
@@ -76,6 +77,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   bool _isTasksOpen = false;
   bool _isRequestsOpen = false;
   bool _isTransferRequestsOpen = false;
+  bool _isRagpickerDirectoryOpen = false;
   bool _isCreateTransferOpen = false;
   TransferRequestDetailState? _transferRequestDetailState;
   bool _isRaiseRequestOpen = false;
@@ -138,6 +140,10 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           : _isConfigureMaterialOpen
           ? ConfigureMaterialScreen(
               onBack: () => setState(() => _isConfigureMaterialOpen = false),
+            )
+          : _isRagpickerDirectoryOpen
+          ? RagpickerDirectoryScreen(
+              onBack: () => setState(() => _isRagpickerDirectoryOpen = false),
             )
           : _isNotificationsOpen
           ? NotificationsScreen(
@@ -255,6 +261,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               _isRequestCashOpen ||
               _isHelpSupportOpen ||
               _isConfigureMaterialOpen ||
+              _isRagpickerDirectoryOpen ||
               _isNotificationsOpen ||
               _isEndMyDayOpen ||
               _isRequestsOpen ||
@@ -330,6 +337,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           onRequestsTap: () => setState(() => _isRequestsOpen = true),
           onTransferRequestsTap: () =>
               setState(() => _isTransferRequestsOpen = true),
+          onRagpickerDirectoryTap: () =>
+              setState(() => _isRagpickerDirectoryOpen = true),
           onNotificationTap: () => setState(() => _isNotificationsOpen = true),
           onLogoutTap: () => showDialog<void>(
             context: context,
@@ -368,6 +377,12 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           }),
           onViewAllTap: () => setState(() => _selectedPageKey = 'records'),
           onNotificationTap: () => setState(() => _isNotificationsOpen = true),
+          onCollectionTypeTap: (type) => setState(() {
+            _addCollectionInitialStep = CollectionEntryStep.items;
+            _addCollectionInitialType = type;
+            _addCollectionInitialSelectedItems = const <int>{};
+            _isAddCollectionOpen = true;
+          }),
         ),
         pageKey: 'collections',
         roles: allRoles,

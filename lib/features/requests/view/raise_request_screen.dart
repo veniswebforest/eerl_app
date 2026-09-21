@@ -9,6 +9,8 @@ import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 
 enum RaiseRequestViewMode { empty, filled }
 
+enum _RequestPriority { low, normal, high }
+
 class RaiseRequestScreen extends StatefulWidget {
   const RaiseRequestScreen({
     super.key,
@@ -29,10 +31,14 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
   late final TextEditingController _descriptionController;
   late final FocusNode _descriptionFocusNode;
   late int _photoCount;
+  _RequestPriority _priority = _RequestPriority.low;
+  String? _followupDate;
   bool _descriptionHasFocus = false;
 
   bool get _canSubmit =>
-      _photoCount > 0 && _descriptionController.text.trim().isNotEmpty;
+      _photoCount > 0 &&
+      _followupDate != null &&
+      _descriptionController.text.trim().isNotEmpty;
 
   @override
   void initState() {
@@ -48,6 +54,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
     if (widget.viewMode == RaiseRequestViewMode.filled &&
         _descriptionController.text.isEmpty) {
       _descriptionController.text = context.l10n.requestFilledDescription;
+      _followupDate = context.l10n.requestFilledFollowupDate;
     }
   }
 
@@ -87,6 +94,122 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                     const _SupervisorCard(),
                     const SizedBox(height: 24),
                     Text(
+                      context.l10n.requestPriorityLevel,
+                      style: AppTextStyles.mediumSH8_14,
+                    ),
+                    const SizedBox(height: 8),
+                    _PrioritySelector(
+                      selected: _priority,
+                      onChanged: (value) => setState(() => _priority = value),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      context.l10n.requestFollowupDateTime,
+                      style: AppTextStyles.mediumSH8_14,
+                    ),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      key: const Key('request-followup-date'),
+                      onTap: () => setState(
+                        () => _followupDate =
+                            context.l10n.requestFilledFollowupDate,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        height: 55,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                          color: AppColors.neutral50,
+                          border: Border.all(
+                            color: AppColors.cool400,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _followupDate ??
+                                    context.l10n.requestSelectDateTime,
+                                style: AppTextStyles.regularB7_14.copyWith(
+                                  color: _followupDate == null
+                                      ? AppColors.cool500
+                                      : AppColors.neutral950,
+                                ),
+                              ),
+                            ),
+                            SvgPicture.asset(
+                              'assets/icons/home/calendar.svg',
+                              width: 20,
+                              height: 20,
+                              colorFilter: const ColorFilter.mode(
+                                AppColors.primary500,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      context.l10n.requestDescriptionLabel,
+                      style: AppTextStyles.mediumSH8_14,
+                    ),
+                    const SizedBox(height: 8),
+                    AnimatedContainer(
+                      key: const Key('request-description-container'),
+                      duration: const Duration(milliseconds: 160),
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: AppColors.neutral50,
+                        border: Border.all(
+                          color: _descriptionHasFocus
+                              ? AppColors.primary400
+                              : AppColors.cool400,
+                          width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextField(
+                        key: const Key('request-description-field'),
+                        controller: _descriptionController,
+                        focusNode: _descriptionFocusNode,
+                        maxLength: 150,
+                        maxLines: null,
+                        expands: true,
+                        textAlignVertical: TextAlignVertical.top,
+                        onChanged: (_) => setState(() {}),
+                        style: AppTextStyles.regularB7_14,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          focusedErrorBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          filled: true,
+                          fillColor: AppColors.neutral50,
+                          hintText: context.l10n.requestDescriptionHint,
+                          hintStyle: AppTextStyles.regularB7_14.copyWith(
+                            color: AppColors.cool500,
+                          ),
+                          counterText: context.l10n.requestDescriptionCounter,
+                          counterStyle: AppTextStyles.regularB8_12.copyWith(
+                            color: AppColors.neutral600,
+                          ),
+                          contentPadding: const EdgeInsets.fromLTRB(
+                            12,
+                            12,
+                            12,
+                            8,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
                       context.l10n.requestAddPhoto,
                       style: AppTextStyles.mediumSH8_14,
                     ),
@@ -94,11 +217,15 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                     DottedBorder(
                       options: RoundedRectDottedBorderOptions(
                         radius: const Radius.circular(8),
-                        color: AppColors.cool400,
+                        color: _photoCount == 0
+                            ? AppColors.primary500
+                            : AppColors.cool300,
                         dashPattern: const [5, 4],
                       ),
                       child: Material(
-                        color: AppColors.cool100,
+                        color: _photoCount == 0
+                            ? AppColors.primary50
+                            : AppColors.cool100,
                         borderRadius: BorderRadius.circular(8),
                         child: InkWell(
                           key: const Key('request-capture-photo'),
@@ -116,12 +243,20 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                                   'assets/icons/wallet/expense_camera.svg',
                                   width: 24,
                                   height: 24,
+                                  colorFilter: ColorFilter.mode(
+                                    _photoCount == 0
+                                        ? AppColors.primary500
+                                        : AppColors.cool400,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   context.l10n.requestCapturePhoto,
                                   style: AppTextStyles.mediumSH8_14.copyWith(
-                                    color: AppColors.neutral400,
+                                    color: _photoCount == 0
+                                        ? AppColors.neutral900
+                                        : AppColors.neutral400,
                                   ),
                                 ),
                               ],
@@ -153,48 +288,6 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                       context.l10n.requestPhotoSupport,
                       style: AppTextStyles.regularB8_12.copyWith(
                         color: AppColors.neutral600,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      context.l10n.requestDescriptionLabel,
-                      style: AppTextStyles.mediumSH8_14,
-                    ),
-                    const SizedBox(height: 8),
-                    AnimatedContainer(
-                      key: const Key('request-description-container'),
-                      duration: const Duration(milliseconds: 160),
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: _descriptionHasFocus
-                              ? AppColors.primary400
-                              : AppColors.cool400,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: TextField(
-                          key: const Key('request-description-field'),
-                          controller: _descriptionController,
-                          focusNode: _descriptionFocusNode,
-                          maxLength: 150,
-                          maxLines: 5,
-                          minLines: 5,
-                          onChanged: (_) => setState(() {}),
-                          style: AppTextStyles.regularB7_14,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            hintText: context.l10n.requestDescriptionHint,
-                            counterText: context.l10n.requestDescriptionCounter,
-                            alignLabelWithHint: true,
-                            contentPadding: const EdgeInsets.all(4),
-                          ),
-                        ),
                       ),
                     ),
                   ],
@@ -231,16 +324,9 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'assets/images/expense_submitted_success.png',
-              width: 122,
-              height: 122,
-              fit: BoxFit.contain,
-            ),
-            const SizedBox(height: 20),
             Text(
               context.l10n.requestSentTitle,
-              style: AppTextStyles.boldH5_24.copyWith(
+              style: AppTextStyles.semiboldH7_18.copyWith(
                 color: AppColors.neutral950,
               ),
             ),
@@ -286,8 +372,8 @@ class _SupervisorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    height: 64,
-    padding: const EdgeInsets.all(12),
+    height: 56,
+    padding: const EdgeInsets.symmetric(horizontal: 16),
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
@@ -299,27 +385,62 @@ class _SupervisorCard extends StatelessWidget {
         ),
       ],
     ),
-    child: Row(
-      children: [
-        ClipOval(
-          child: Image.asset(
-            'assets/images/request_supervisor.png',
-            width: 40,
-            height: 40,
-            fit: BoxFit.cover,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            context.l10n.requestSupervisorName,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.boldH8_14,
-          ),
-        ),
-      ],
+    child: Center(
+      child: Text(
+        context.l10n.requestToSupervisor,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppTextStyles.semiboldH9_14,
+      ),
     ),
+  );
+}
+
+class _PrioritySelector extends StatelessWidget {
+  const _PrioritySelector({required this.selected, required this.onChanged});
+
+  final _RequestPriority selected;
+  final ValueChanged<_RequestPriority> onChanged;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: _RequestPriority.values
+        .map(
+          (priority) => Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: InkWell(
+              key: Key('request-priority-${priority.name}'),
+              onTap: () => onChanged(priority),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                height: 40,
+                constraints: const BoxConstraints(minWidth: 58),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                decoration: BoxDecoration(
+                  color: selected == priority
+                      ? AppColors.primary500
+                      : AppColors.cool200,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  switch (priority) {
+                    _RequestPriority.low => context.l10n.requestPriorityLow,
+                    _RequestPriority.normal =>
+                      context.l10n.requestPriorityNormal,
+                    _RequestPriority.high => context.l10n.requestPriorityHigh,
+                  },
+                  style: AppTextStyles.regularB8_12.copyWith(
+                    color: selected == priority
+                        ? AppColors.neutral50
+                        : AppColors.neutral950,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+        .toList(growable: false),
   );
 }
 

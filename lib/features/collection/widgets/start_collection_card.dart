@@ -9,19 +9,15 @@ class StartCollectionCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.description,
-    required this.buttonLabel,
-    required this.onPressed,
   });
 
   final String title;
   final String description;
-  final String buttonLabel;
-  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 176,
+      height: 132,
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -46,7 +42,7 @@ class StartCollectionCard extends StatelessWidget {
             left: 0,
             right: 0,
             bottom: 0,
-            height: 76,
+            height: 68,
             child: Opacity(
               opacity: .75,
               child: Image.asset(
@@ -56,46 +52,24 @@ class StartCollectionCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 28, 16, 0),
-            child: Column(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+            child: Column(mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.boldH6_20.copyWith(
-                    color: AppColors.neutral950,
+                  style: AppTextStyles.boldH5_24.copyWith(
+                    color: AppColors.primary800,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   description,
                   textAlign: TextAlign.center,
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.mediumSH8_14.copyWith(
                     color: AppColors.neutral900,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: 160,
-                  height: 44,
-                  child: ElevatedButton(
-                    onPressed: onPressed,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary500,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      textStyle: AppTextStyles.boldH8_14,
-                    ),
-                    child: Text(
-                      buttonLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
                   ),
                 ),
               ],

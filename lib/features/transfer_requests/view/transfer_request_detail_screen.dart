@@ -6,8 +6,9 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/transfer_request_detail_state.dart';
 import '../widgets/transfer_request_detail_widgets.dart';
+import 'transfer_dispatch_flow_screen.dart';
 
-class TransferRequestDetailScreen extends StatelessWidget {
+class TransferRequestDetailScreen extends StatefulWidget {
   const TransferRequestDetailScreen({
     super.key,
     required this.state,
@@ -16,6 +17,39 @@ class TransferRequestDetailScreen extends StatelessWidget {
 
   final TransferRequestDetailState state;
   final VoidCallback onBack;
+
+  @override
+  State<TransferRequestDetailScreen> createState() =>
+      _TransferRequestDetailScreenState();
+}
+
+class _TransferRequestDetailScreenState
+    extends State<TransferRequestDetailScreen> {
+  bool _dispatchFlowOpen = false;
+
+  @override
+  Widget build(BuildContext context) => _dispatchFlowOpen
+      ? TransferDispatchFlowScreen(
+          onBack: () => setState(() => _dispatchFlowOpen = false),
+          onComplete: () => setState(() => _dispatchFlowOpen = false),
+        )
+      : _TransferRequestDetailContent(
+          state: widget.state,
+          onBack: widget.onBack,
+          onVehicleArrived: () => setState(() => _dispatchFlowOpen = true),
+        );
+}
+
+class _TransferRequestDetailContent extends StatelessWidget {
+  const _TransferRequestDetailContent({
+    required this.state,
+    required this.onBack,
+    required this.onVehicleArrived,
+  });
+
+  final TransferRequestDetailState state;
+  final VoidCallback onBack;
+  final VoidCallback onVehicleArrived;
 
   bool get _isRejected => state == TransferRequestDetailState.rejected;
 
@@ -34,6 +68,32 @@ class TransferRequestDetailScreen extends StatelessWidget {
       onBackTap: onBack,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
+    bottomNavigationBar: _isRejected || _isCompleted
+        ? null
+        : SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+              child: SizedBox(
+                height: 52,
+                child: ElevatedButton(
+                  key: const Key('transfer-vehicle-arrived'),
+                  onPressed: onVehicleArrived,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary500,
+                    foregroundColor: AppColors.neutral50,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    context.l10n.transferVehicleArrived,
+                    style: AppTextStyles.semiboldH9_14,
+                  ),
+                ),
+              ),
+            ),
+          ),
     body: SafeArea(
       top: false,
       child: Center(
@@ -51,12 +111,15 @@ class TransferRequestDetailScreen extends StatelessWidget {
               const SizedBox(height: 12),
               _InformationCard(
                 state: state,
-                hasVehicle: _hasVehicle,
                 isRejected: _isRejected,
                 isCompleted: _isCompleted,
                 isLoading: _isLoading,
               ),
               const SizedBox(height: 12),
+              if (_hasVehicle) ...[
+                const _CollectionManagerCard(),
+                const SizedBox(height: 12),
+              ],
               const _ItemsCard(),
               const SizedBox(height: 12),
               _TimelineCard(state: state),
@@ -75,12 +138,12 @@ class _RequestIdCard extends StatelessWidget {
     child: Row(
       children: [
         Container(
-          width: 30,
-          height: 30,
-          padding: const EdgeInsets.all(6),
-          decoration: const BoxDecoration(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
             color: AppColors.primary50,
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(10),
           ),
           child: SvgPicture.asset(
             'assets/icons/home/transfer.svg',
@@ -90,7 +153,7 @@ class _RequestIdCard extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 9),
+        const SizedBox(width: 10),
         Text(
           context.l10n.transferDetailRequestId,
           style: AppTextStyles.semiboldH8_16.copyWith(
@@ -137,14 +200,12 @@ class _RejectReasonCard extends StatelessWidget {
 class _InformationCard extends StatelessWidget {
   const _InformationCard({
     required this.state,
-    required this.hasVehicle,
     required this.isRejected,
     required this.isCompleted,
     required this.isLoading,
   });
 
   final TransferRequestDetailState state;
-  final bool hasVehicle;
   final bool isRejected;
   final bool isCompleted;
   final bool isLoading;
@@ -173,10 +234,10 @@ class _InformationCard extends StatelessWidget {
             'assets/icons/home/transfer.svg',
           )
         : (
-            context.l10n.transferDetailWaitingManager,
-            AppColors.yellow600,
-            AppColors.yellow50,
-            'assets/icons/records/status_pending.svg',
+            context.l10n.transferDetailVehicleDispatched,
+            AppColors.secondary600,
+            AppColors.secondary50,
+            'assets/icons/home/transfer.svg',
           );
 
     return TransferDetailCard(
@@ -192,16 +253,6 @@ class _InformationCard extends StatelessWidget {
           const SizedBox(height: 8),
           const Divider(height: 1, color: AppColors.cool300),
           const SizedBox(height: 12),
-          TransferDetailRow(
-            label: context.l10n.transferDetailVehicle,
-            values: [
-              hasVehicle
-                  ? context.l10n.transferDetailVehicleNumber
-                  : context.l10n.transferDetailVehicleUnavailable,
-              context.l10n.transferDetailVehicleCapacity,
-            ],
-            valueColor: hasVehicle ? null : AppColors.yellow600,
-          ),
           TransferDetailRow(
             label: context.l10n.transferDetailFromLocation,
             values: [context.l10n.transferDetailFromLocationValue],
@@ -239,6 +290,37 @@ class _InformationCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _CollectionManagerCard extends StatelessWidget {
+  const _CollectionManagerCard();
+
+  @override
+  Widget build(BuildContext context) => TransferDetailCard(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.l10n.transferFromCollectionManager,
+          style: AppTextStyles.semiboldH7_18.copyWith(
+            color: AppColors.neutral950,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Divider(height: 1, color: AppColors.cool300),
+        const SizedBox(height: 12),
+        TransferDetailRow(
+          label: context.l10n.transferDetailVehicle,
+          values: [context.l10n.transferDetailVehicleNumber],
+        ),
+        TransferDetailRow(
+          label: context.l10n.transferEstimateTimeToReach,
+          values: [context.l10n.transferEstimateTimeValue],
+          showDivider: false,
+        ),
+      ],
+    ),
+  );
 }
 
 class _ItemsCard extends StatelessWidget {
@@ -323,7 +405,7 @@ class _TimelineCard extends StatelessWidget {
           const SizedBox(height: 14),
           TransferTimelineStep(
             title: context.l10n.transferTimelineCreated,
-            subtitle: context.l10n.transferDetailDateTimeValue,
+            subtitle: context.l10n.transferTimelineCreatedDate,
             color: AppColors.primary500,
             iconAsset: 'assets/icons/wallet/status_verified.svg',
           ),

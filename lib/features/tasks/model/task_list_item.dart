@@ -8,10 +8,12 @@ class TaskListItem {
     required this.status,
     required this.priority,
     required this.scheduleKey,
+    required this.timeKey,
   });
 
   final String id;
   final TaskListStatus status;
   final TaskPriority priority;
   final String scheduleKey;
+  final String timeKey;
 }

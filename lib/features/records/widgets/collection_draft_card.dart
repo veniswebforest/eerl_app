@@ -27,10 +27,10 @@ class CollectionDraftCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.neutral50,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(
             color: Color(0x18000000),
@@ -59,12 +59,12 @@ class CollectionDraftCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              // color: AppColors.cool100,
+              color: AppColors.cool100,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -83,7 +83,7 @@ class CollectionDraftCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
@@ -93,7 +93,7 @@ class CollectionDraftCard extends StatelessWidget {
                   onTap: onDiscard,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: _Button(
                   label: continueLabel,
@@ -150,14 +150,14 @@ class _Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 48,
+    height: 52,
     child: ElevatedButton(
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         foregroundColor: Colors.white,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       child: Text(label, style: AppTextStyles.semiboldH8_16),
     ),

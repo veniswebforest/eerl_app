@@ -370,6 +370,32 @@ class AppLocalizationsGu extends AppLocalizations {
   }
 
   @override
+  String transferAvailableStock(String weight) {
+    return 'ઉપલબ્ધ સ્ટોક $weight';
+  }
+
+  @override
+  String get transferCardboard => 'કાર્ડબોર્ડ';
+
+  @override
+  String get transferPaperWaste => 'કાગળનો કચરો';
+
+  @override
+  String get transferEstimatedExpenseLabel => 'અંદાજિત ખર્ચ *';
+
+  @override
+  String get transferEstimatedExpenseHint => 'અંદાજિત ખર્ચ દાખલ કરો';
+
+  @override
+  String get transferTotalKg => 'કુલ KG';
+
+  @override
+  String get transferTotalKgValue => '0.00 KG';
+
+  @override
+  String get transferContinuePlain => 'આગળ વધો';
+
+  @override
   String get transferTotalKgLabel => 'કુલ KG *';
 
   @override
@@ -823,6 +849,21 @@ class AppLocalizationsGu extends AppLocalizations {
   String get taskCompletedTime => 'પૂર્ણ: આજે, સવારે 11:30 વાગ્યે';
 
   @override
+  String get taskListTime0900 => 'આજે, 09:00 AM';
+
+  @override
+  String get taskListTime1000 => 'આજે, 10:00 AM';
+
+  @override
+  String get taskListTime1145 => 'આજે, 11:45 AM';
+
+  @override
+  String get taskListTime1210 => 'આજે, 12:10 PM';
+
+  @override
+  String get taskListTime0600 => 'આજે, 06:00 PM';
+
+  @override
   String get taskPriorityHigh => 'ઉચ્ચ';
 
   @override
@@ -1129,6 +1170,24 @@ class AppLocalizationsGu extends AppLocalizations {
   String get recordsSearchHint => 'અહીં શોધો...';
 
   @override
+  String get recordsAll => 'બધા';
+
+  @override
+  String get recordsAllCollections => 'બધા કલેક્શન';
+
+  @override
+  String get recordsFilterByDate => 'તારીખ પ્રમાણે ફિલ્ટર કરો';
+
+  @override
+  String get recordsFilterToday => 'આજે';
+
+  @override
+  String get recordsFilterYesterday => 'ગઈકાલે';
+
+  @override
+  String get recordsFilterLastSevenDays => 'છેલ્લા 7 દિવસ';
+
+  @override
   String get recordsTodayCollections => 'આજના કલેક્શન';
 
   @override
@@ -1402,6 +1461,13 @@ class AppLocalizationsGu extends AppLocalizations {
       'આ કલેક્શન પ્રકારમાંથી મળેલી વસ્તુઓ પસંદ કરો અને જથ્થો દાખલ કરો.';
 
   @override
+  String get collectionSelectWasteItemsTitle => 'કચરાની વસ્તુઓ પસંદ કરો';
+
+  @override
+  String get collectionSelectWasteItemsSubtitle =>
+      'આગળ વધવા માટે સ્થળ પરથી એકત્રિત કરેલી સામગ્રી પસંદ કરો.';
+
+  @override
   String get collectionTypeLabel => 'કલેક્શન પ્રકાર';
 
   @override
@@ -1422,10 +1488,64 @@ class AppLocalizationsGu extends AppLocalizations {
   String get collectionVehicleNumber => 'વાહન નંબર પ્લેટ';
 
   @override
+  String get collectionD2dVehicleNumber => 'વાહન નંબર';
+
+  @override
+  String get collectionGivenBy => 'આપનાર';
+
+  @override
+  String get collectionDriverNameHint => 'ડ્રાઇવરનું નામ દાખલ કરો';
+
+  @override
+  String get collectionCaptureVehiclePhoto => 'વાહનનો ફોટો લો';
+
+  @override
+  String get collectionVehiclePhotoHint =>
+      'વિગતો નોંધવા અને ચકાસવા માટે ફોટો અપલોડ કરો.';
+
+  @override
+  String get collectionNoVehicleFound => 'વાહન મળ્યું નથી';
+
+  @override
+  String get collectionContactSupervisorUpdateFleet =>
+      'ફ્લીટ સૂચિ અપડેટ કરવા સુપરવાઇઝરનો સંપર્ક કરો.';
+
+  @override
+  String get collectionContactSupervisor => 'સુપરવાઇઝરનો સંપર્ક કરો';
+
+  @override
+  String get collectionContactSupervisorIfNotFound =>
+      'ન મળે તો સુપરવાઇઝરનો સંપર્ક કરો';
+
+  @override
   String get collectionMrfAgentName => 'MRF એજન્ટનું નામ';
 
   @override
+  String get collectionMrfShort => 'MRF';
+
+  @override
+  String get collectionMrfDetails => 'MRF વિગતો';
+
+  @override
+  String get collectionFullName => 'પૂરું નામ';
+
+  @override
+  String get collectionMobileNumber => 'મોબાઇલ નંબર';
+
+  @override
+  String get collectionTeamVerifiedBy => 'ટીમની વિગતોની ચકાસણી કરી: ';
+
+  @override
+  String get collectionSupervisor => 'સુપરવાઇઝર';
+
+  @override
+  String get collectionLaborOne => 'મજૂર 1';
+
+  @override
   String get collectionPersonName => 'વ્યક્તિનું નામ પસંદ કરો';
+
+  @override
+  String get collectionRagpickerPerson => 'રેગપીકર વ્યક્તિ';
 
   @override
   String get collectionPlasticCount => 'પ્લાસ્ટિક (12)';
@@ -1447,10 +1567,40 @@ class AppLocalizationsGu extends AppLocalizations {
       'સમીક્ષા માટે બધા કલેક્શન ફોટા કેપ્ચર કરો (JPG/PNG, 5MBથી ઓછા).';
 
   @override
+  String get collectionCaptureInstructionShort =>
+      'સમીક્ષા માટે બધા કલેક્શન ફોટા કેપ્ચર કરો';
+
+  @override
+  String get collectionUnitKg => 'કિગ્રા';
+
+  @override
+  String get collectionUnitPcs => 'નંગ';
+
+  @override
+  String collectionRatePerUnit(String unit) {
+    return 'દર: ₹45.00/$unit';
+  }
+
+  @override
+  String get collectionPaymentCash => 'રોકડ';
+
+  @override
+  String get collectionPaymentUpi => 'UPI';
+
+  @override
+  String get collectionPaymentType => 'ચુકવણીનો પ્રકાર';
+
+  @override
   String get collectionWeight => 'કલેક્શન વજન';
 
   @override
   String get collectionVerifiedWeight => 'ચકાસાયેલ વજન';
+
+  @override
+  String get collectionPieces => 'કલેક્શન નંગ';
+
+  @override
+  String get collectionVerifiedPieces => 'ચકાસાયેલ નંગ';
 
   @override
   String get collectionCapturePhoto => 'ફોટો કેપ્ચર કરો';
@@ -1849,6 +1999,30 @@ class AppLocalizationsGu extends AppLocalizations {
   String get requestRaiseTitle => 'વિનંતી કરો';
 
   @override
+  String get requestToSupervisor => 'પ્રતિ : ભાવેશ શાહ (સુપરવાઇઝર)';
+
+  @override
+  String get requestPriorityLevel => 'પ્રાથમિકતા સ્તર *';
+
+  @override
+  String get requestPriorityLow => 'નીચું';
+
+  @override
+  String get requestPriorityNormal => 'સામાન્ય';
+
+  @override
+  String get requestPriorityHigh => 'ઉચ્ચ';
+
+  @override
+  String get requestFollowupDateTime => 'આગામી ફોલો-અપ તારીખ અને સમય *';
+
+  @override
+  String get requestSelectDateTime => 'તારીખ અને સમય પસંદ કરો';
+
+  @override
+  String get requestFilledFollowupDate => '16 ઑગસ્ટ 2026, 05:00 PM';
+
+  @override
   String get requestAddPhoto => 'ફોટો ઉમેરો *';
 
   @override
@@ -1946,7 +2120,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get transferDetailVehicle => 'વાહન';
 
   @override
-  String get transferDetailVehicleNumber => 'GJ-05-BX-1234';
+  String get transferDetailVehicleNumber => 'GJ-05-AB-1234';
 
   @override
   String get transferDetailVehicleUnavailable => 'વાહન ઉપલબ્ધ નથી (એજન્ટ)';
@@ -1958,13 +2132,13 @@ class AppLocalizationsGu extends AppLocalizations {
   String get transferDetailFromLocation => 'મૂળ સ્થાન';
 
   @override
-  String get transferDetailFromLocationValue => 'નેશનલ હાઇવે 8, 24 કિમી દૂર';
+  String get transferDetailFromLocationValue => 'EERL - સેક્ટર 4';
 
   @override
   String get transferDetailToLocation => 'ગંતવ્ય સ્થાન';
 
   @override
-  String get transferDetailToLocationValue => 'EERL - સુરત મુખ્ય વેરહાઉસ';
+  String get transferDetailToLocationValue => 'સિટી પ્રોસેસિંગ હબ - સેક્ટર 6';
 
   @override
   String get transferDetailAvailableStock => 'ઉપલબ્ધ સ્ટોક';
@@ -1976,7 +2150,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get transferDetailDateTime => 'વિનંતીની તારીખ અને સમય';
 
   @override
-  String get transferDetailDateTimeValue => '06 ઑગસ્ટ 2026, 10:45 AM';
+  String get transferDetailDateTimeValue => '22 ઑક્ટોબર • 11:15 AM';
 
   @override
   String get transferDetailRequestedBy => 'વિનંતી કરનાર';
@@ -1989,6 +2163,82 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get transferDetailWaitingManager => 'કલેક્શન મેનેજરની રાહમાં';
+
+  @override
+  String get transferDetailVehicleDispatched =>
+      'કલેક્શન મેનેજર દ્વારા વાહન મોકલાયું';
+
+  @override
+  String get transferFromCollectionManager => 'કલેક્શન મેનેજર તરફથી';
+
+  @override
+  String get transferEstimateTimeToReach => 'પહોંચવાનો અંદાજિત સમય';
+
+  @override
+  String get transferEstimateTimeValue => '4 કલાક';
+
+  @override
+  String get transferVehicleArrived => 'વાહન આવી ગયું, ડિસ્પેચ શરૂ કરો';
+
+  @override
+  String get transferVehicleDetailsTitle => 'વાહનની વિગતો';
+
+  @override
+  String get transferVehicleNumberRequired => 'વાહન નંબર *';
+
+  @override
+  String get transferVehicleNumberPlateHint => 'વાહનની નંબર પ્લેટ';
+
+  @override
+  String get transferDriverDetailRequired => 'ડ્રાઇવરની વિગતો *';
+
+  @override
+  String get transferSelectDriverName => 'ડ્રાઇવરનું નામ પસંદ કરો';
+
+  @override
+  String get transferDriverMockName => 'પંકજ ત્રિપાઠી';
+
+  @override
+  String get transferVehiclePhotoRequired => 'વાહનનો ફોટો *';
+
+  @override
+  String get transferStartLoading => 'લોડિંગ શરૂ કરો';
+
+  @override
+  String get transferWeighbridgeTitle => 'વેઇબ્રિજ';
+
+  @override
+  String get transferDetails => 'ટ્રાન્સફરની વિગતો';
+
+  @override
+  String get transferId => 'ટ્રાન્સફર ID';
+
+  @override
+  String get transferItem => 'વસ્તુ';
+
+  @override
+  String get transferLoadedWeight => 'લોડ કરેલું વજન';
+
+  @override
+  String get transferLoadedWeightHint => 'દા.ત. 1250';
+
+  @override
+  String get transferNumberOfBales => 'ગાંસડી / બોરીની સંખ્યા';
+
+  @override
+  String get transferNumberOfBalesHint => 'દા.ત. 10';
+
+  @override
+  String get transferWeighbridgeSlip => 'વેઇબ્રિજ સ્લિપ';
+
+  @override
+  String get transferSubmitTransfer => 'ટ્રાન્સફર સબમિટ કરો';
+
+  @override
+  String get transferCompletedTitle => 'ટ્રાન્સફર પૂર્ણ!';
+
+  @override
+  String get transferCompletedMessage => '#TRF-2026-089 પૂર્ણ થયું છે.';
 
   @override
   String get transferDetailWaitingLoading => 'લોડિંગની રાહમાં';
@@ -2019,6 +2269,9 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get transferTimelineCreated => 'વિનંતી બનાવાઈ';
+
+  @override
+  String get transferTimelineCreatedDate => '06 ઑગસ્ટ 2026, 10:45 AM';
 
   @override
   String get transferTimelinePendingVerification => 'ચકાસણી બાકી';
@@ -2056,4 +2309,166 @@ class AppLocalizationsGu extends AppLocalizations {
   @override
   String get transferTimelineCompletedSubtitle =>
       'ટ્રાન્સફર સફળતાપૂર્વક પૂર્ણ થયું';
+
+  @override
+  String get noVehicleFound => 'કોઈ વાહન મળ્યું નથી';
+
+  @override
+  String get contactAdminToUpdateFleet =>
+      'ફ્લીટ લિસ્ટ અપડેટ કરવા એડમિનનો સંપર્ક કરો.';
+
+  @override
+  String get contactAdmin => 'એડમિનનો સંપર્ક કરો';
+
+  @override
+  String get personNotFound => 'વ્યક્તિ મળી નથી';
+
+  @override
+  String get contactAdminToAssignStaff =>
+      'વાહન સ્ટાફ અસાઇન કરવા એડમિનનો સંપર્ક કરો.';
+
+  @override
+  String get add => '+ ઉમેરો';
+
+  @override
+  String get addNewRagpicker => 'નવો રેગપીકર ઉમેરો';
+
+  @override
+  String get deactivate => 'નિષ્ક્રિય કરો';
+
+  @override
+  String get fullNameRequired => 'પૂરું નામ *';
+
+  @override
+  String get enterFullName => 'પૂરું નામ દાખલ કરો';
+
+  @override
+  String get mobileNumberRequired => 'મોબાઇલ નંબર *';
+
+  @override
+  String get enterMobileNumber => 'મોબાઇલ નંબર દાખલ કરો';
+
+  @override
+  String get aadharCardNumber => 'આધાર કાર્ડ નંબર';
+
+  @override
+  String get aadhaarVoterIdPlaceholder => 'આધાર / મતદાર ID';
+
+  @override
+  String get profilePhotoIdProof => 'પ્રોફાઇલ ફોટો / ID પ્રૂફ';
+
+  @override
+  String get captureVehiclePhoto => 'વાહનોનો ફોટો લો *';
+
+  @override
+  String get capturePersonPhoto => 'વ્યક્તિનો ફોટો લો *';
+
+  @override
+  String get saveAndSelect => 'સેવ કરો અને પસંદ કરો';
+
+  @override
+  String get ragpickerDirectoryTitle => 'રેગપિકર ડિરેક્ટરી';
+
+  @override
+  String ragpickerActiveCount(int count) {
+    return 'સક્રિય ($count)';
+  }
+
+  @override
+  String ragpickerDeactivatedCount(int count) {
+    return 'નિષ્ક્રિય ($count)';
+  }
+
+  @override
+  String get ragpickerSearchHint => 'અહીં શોધો...';
+
+  @override
+  String get ragpickerAddButton => 'રેગપિકર ઉમેરો';
+
+  @override
+  String get ragpickerDetailsTitle => 'રેગપિકરની વિગતો';
+
+  @override
+  String get ragpickerStatusLabel => 'સ્થિતિ';
+
+  @override
+  String get ragpickerActive => 'સક્રિય';
+
+  @override
+  String get ragpickerDeactivated => 'નિષ્ક્રિય';
+
+  @override
+  String get ragpickerDeactivateButton => 'રેગપિકરને નિષ્ક્રિય કરો';
+
+  @override
+  String get ragpickerActivateButton => 'રેગપિકરને સક્રિય કરો';
+
+  @override
+  String get ragpickerAddTitle => 'રેગપિકર ઉમેરો';
+
+  @override
+  String get ragpickerNameLabel => 'પૂરું નામ *';
+
+  @override
+  String get ragpickerNameHint => 'પૂરું નામ દાખલ કરો';
+
+  @override
+  String get ragpickerPhoneLabel => 'મોબાઇલ નંબર *';
+
+  @override
+  String get ragpickerPhoneHint => 'મોબાઇલ નંબર દાખલ કરો';
+
+  @override
+  String get ragpickerAddressLabel => 'સરનામું';
+
+  @override
+  String get ragpickerAddressHint => 'સરનામું દાખલ કરો';
+
+  @override
+  String get ragpickerSaveButton => 'રેગપિકર સેવ કરો';
+
+  @override
+  String get ragpickerAddNewTitle => 'નવો રેગપિકર ઉમેરો';
+
+  @override
+  String get ragpickerEditTitle => 'રેગપિકર સંપાદિત કરો';
+
+  @override
+  String get ragpickerFullNameLabel => 'પૂરું નામ';
+
+  @override
+  String get ragpickerMobileLabel => 'મોબાઇલ નંબર';
+
+  @override
+  String get ragpickerIdentityLabel => 'ID / કાર્ડ નંબર';
+
+  @override
+  String get ragpickerDateTimeLabel => 'તારીખ અને સમય';
+
+  @override
+  String get ragpickerProofLabel => 'પ્રોફાઇલ ફોટો / ID પ્રૂફ';
+
+  @override
+  String get ragpickerCapturePhoto => 'ફોટો લો';
+
+  @override
+  String get ragpickerPhotoHelper => 'વિગતો નોંધવા અને ચકાસવા ફોટો અપલોડ કરો.';
+
+  @override
+  String get ragpickerAadhaarLabel => 'આધાર કાર્ડ નંબર';
+
+  @override
+  String get ragpickerAadhaarHint => 'આધાર / મતદાર ID';
+
+  @override
+  String get ragpickerReactiveButton => 'ફરી સક્રિય કરો';
+
+  @override
+  String get ragpickerDeactivatedSuccess => 'સફળતાપૂર્વક નિષ્ક્રિય કર્યું!';
+
+  @override
+  String get ragpickerDeactivatedSubtitle => 'રેગપિકર પ્રોફાઇલ નિષ્ક્રિય થઈ.';
+
+  @override
+  String get edit => 'સંપાદિત કરો';
 }

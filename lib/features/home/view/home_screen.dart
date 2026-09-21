@@ -32,6 +32,7 @@ class HomeScreen extends StatelessWidget {
     this.onTasksTap,
     this.onRequestsTap,
     this.onTransferRequestsTap,
+    this.onRagpickerDirectoryTap,
     this.onNotificationTap,
     this.onLogoutTap,
     this.onEndMyDayTap,
@@ -51,6 +52,7 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback? onTasksTap;
   final VoidCallback? onRequestsTap;
   final VoidCallback? onTransferRequestsTap;
+  final VoidCallback? onRagpickerDirectoryTap;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onLogoutTap;
   final VoidCallback? onEndMyDayTap;
@@ -77,6 +79,7 @@ class HomeScreen extends StatelessWidget {
             onTasksTap: onTasksTap,
             onRequestsTap: onRequestsTap,
             onTransferRequestsTap: onTransferRequestsTap,
+            onRagpickerDirectoryTap: onRagpickerDirectoryTap,
           ),
           onDrawerChanged: onDrawerChanged,
           drawerScrimColor: Colors.black.withValues(alpha: 0.6),
@@ -88,12 +91,11 @@ class HomeScreen extends StatelessWidget {
                 colors: [
                   AppColors.primary200,
                   AppColors.primary100,
-                  AppColors.cool50,
-                  AppColors.cool50,
+                  Colors.white,
                   AppColors.primary100,
                   AppColors.primary200,
                 ],
-                stops: [0, .16, .34, .76, .92, 1],
+                stops: [0, .16, .76, .92, 1],
               ),
             ),
             child: SafeArea(
@@ -150,7 +152,8 @@ class HomeScreen extends StatelessWidget {
                             onContinueCollectionTap: onContinueDraftTap,
                           ),
                         ),
-                        const SizedBox(height: 24),_CenteredHomeContent(
+                        const SizedBox(height: 24),
+                        _CenteredHomeContent(
                           child: CollectionTypes(
                             onTypeTap: onCollectionTypeTap,
                           ),

@@ -28,62 +28,26 @@ class CreateTransferRequestScreen extends StatefulWidget {
 
 class _CreateTransferRequestScreenState
     extends State<CreateTransferRequestScreen> {
-  late final TextEditingController _totalController;
-  late final TextEditingController _plateController;
-  late final TextEditingController _capacityController;
+  late final TextEditingController _quantityController;
   int _selectedMaterial = 0;
-  String? _vehicleType;
-  bool _vehicleTypeOpen = false;
-  bool _managerArrangesVehicle = false;
-  bool _showStockError = false;
 
   @override
   void initState() {
     super.initState();
-    final errorState = widget.initialView == CreateTransferRequestView.error;
-    _totalController = TextEditingController(
-      text: errorState ? '27000.00' : '',
+    _quantityController = TextEditingController(
+      text: widget.initialView == CreateTransferRequestView.error
+          ? '27000.00'
+          : '',
     );
-    _plateController = TextEditingController(
-      text: errorState ? 'GJ-05-BX-1234' : '',
-    );
-    _capacityController = TextEditingController(text: errorState ? '3000' : '');
-    _vehicleType = errorState ? 'truck' : null;
-    _showStockError = errorState;
-    _managerArrangesVehicle = errorState;
-  }
-
-  @override
-  void didUpdateWidget(covariant CreateTransferRequestScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialView != widget.initialView) {
-      _showStockError = widget.initialView == CreateTransferRequestView.error;
-    }
   }
 
   @override
   void dispose() {
-    _totalController.dispose();
-    _plateController.dispose();
-    _capacityController.dispose();
+    _quantityController.dispose();
     super.dispose();
   }
 
-  void _handleBack() {
-    widget.onBack();
-  }
-
   Future<void> _continue() async {
-    final total = double.tryParse(_totalController.text.trim()) ?? 0;
-    if (total > 1200.60) {
-      setState(() => _showStockError = true);
-      return;
-    }
-    setState(() => _showStockError = false);
-    await _submit();
-  }
-
-  Future<void> _submit() async {
     await showDialog<void>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: .58),
@@ -101,7 +65,7 @@ class _CreateTransferRequestScreenState
     backgroundColor: AppColors.backgroundColor,
     appBar: CustomAppBar(
       title: null,
-      onBackTap: _handleBack,
+      onBackTap: widget.onBack,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
     body: SafeArea(
@@ -109,17 +73,22 @@ class _CreateTransferRequestScreenState
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
-          child: _itemsStep(context),
+          child: Column(
+            children: [
+              Expanded(child: _content(context)),
+              _BottomAction(onPressed: _continue),
+            ],
+          ),
         ),
       ),
     ),
   );
 
-  Widget _itemsStep(BuildContext context) {
+  Widget _content(BuildContext context) {
     final materials = [
       (
         context.l10n.configurePetBottles,
-        context.l10n.transferCapacity('1200.60 KG'),
+        context.l10n.transferAvailableStock('1200.60 KG'),
       ),
       (
         context.l10n.transferPlasticWaste,
@@ -130,150 +99,61 @@ class _CreateTransferRequestScreenState
         context.l10n.transferCapacity('800.60 KG'),
       ),
       (
-        context.l10n.configurePaperCardboard,
-        context.l10n.transferCapacity('1200.60 KG'),
+        context.l10n.transferCardboard,
+        context.l10n.transferCapacity('1000.60 KG'),
       ),
       (
-        context.l10n.transferToyWaste,
-        context.l10n.transferCapacity('650.00 KG'),
-      ),
-      (
-        context.l10n.configureMetals,
-        context.l10n.transferCapacity('480.00 KG'),
+        context.l10n.transferPaperWaste,
+        context.l10n.transferCapacity('1300.60 KG'),
       ),
     ];
 
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            key: const Key('create-transfer-scroll'),
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.transferSelectItemsTitle,
-                  style: AppTextStyles.semiboldH7_18.copyWith(
-                    color: AppColors.neutral950,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  context.l10n.transferSelectItemsSubtitle,
-                  style: AppTextStyles.regularB8_12.copyWith(
-                    color: AppColors.neutral600,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                _SearchField(hint: context.l10n.transferSearchHint),
-                const SizedBox(height: 16),
-                for (var index = 0; index < materials.length; index++) ...[
-                  TransferMaterialCard(
-                    key: Key('transfer-material-$index'),
-                    name: materials[index].$1,
-                    capacity: materials[index].$2,
-                    selected: _selectedMaterial == index,
-                    onTap: () => setState(() => _selectedMaterial = index),
-                    child: _materialForm(context),
-                  ),
-                  if (index != materials.length - 1) const SizedBox(height: 14),
-                ],
-              ],
+    return SingleChildScrollView(
+      key: const Key('create-transfer-scroll'),
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.transferSelectItemsTitle,
+            style: AppTextStyles.semiboldH7_18.copyWith(
+              color: AppColors.neutral950,
             ),
           ),
-        ),
-        _BottomAction(
-          weight: context.l10n.transferSelectedWeight,
-          price: context.l10n.transferSelectedPrice,
-          buttonLabel: context.l10n.transferSubmitRequest,
-          enabled: !_showStockError,
-          buttonKey: const Key('transfer-continue'),
-          onPressed: _continue,
-        ),
-      ],
+          const SizedBox(height: 6),
+          Text(
+            context.l10n.transferSelectItemsSubtitle,
+            style: AppTextStyles.mediumSH8_14.copyWith(
+              color: AppColors.neutral600,
+            ),
+          ),
+          const SizedBox(height: 24),
+          _SearchField(hint: context.l10n.transferSearchHint),
+          const SizedBox(height: 16),
+          for (var index = 0; index < materials.length; index++) ...[
+            TransferMaterialCard(
+              key: Key('transfer-material-$index'),
+              name: materials[index].$1,
+              capacity: materials[index].$2,
+              selected: _selectedMaterial == index,
+              onTap: () => setState(() => _selectedMaterial = index),
+              child: _QuantityField(controller: _quantityController),
+            ),
+            if (index != materials.length - 1) const SizedBox(height: 12),
+          ],
+        ],
+      ),
     );
   }
-
-  Widget _materialForm(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      _TransferField(
-        key: const Key('transfer-total-kg'),
-        label: context.l10n.transferTotalKgLabel,
-        hint: context.l10n.transferTotalKgHint,
-        controller: _totalController,
-        prefix: context.l10n.transferKgPrefix,
-        errorText: _showStockError
-            ? context.l10n.transferStockValidation
-            : null,
-        keyboardType: TextInputType.number,
-        onChanged: (_) {
-          if (_showStockError) setState(() => _showStockError = false);
-        },
-      ),
-      const SizedBox(height: 14),
-      _TransferField(
-        label: context.l10n.transferVehiclePlateLabel,
-        hint: context.l10n.transferVehiclePlateHint,
-        controller: _plateController,
-      ),
-      const SizedBox(height: 14),
-      Text(
-        context.l10n.transferVehicleTypeLabel,
-        style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
-      ),
-      const SizedBox(height: 8),
-      _VehicleTypeSelector(
-        selectedValue: _vehicleType,
-        open: _vehicleTypeOpen,
-        labelFor: (value) => _vehicleTypeLabel(context, value),
-        hint: context.l10n.transferVehicleTypeHint,
-        onToggle: () => setState(() => _vehicleTypeOpen = !_vehicleTypeOpen),
-        onSelected: (value) => setState(() {
-          _vehicleType = value;
-          _vehicleTypeOpen = false;
-        }),
-      ),
-      const SizedBox(height: 14),
-      _TransferField(
-        label: context.l10n.transferVehicleCapacityLabel,
-        hint: context.l10n.transferVehicleCapacityHint,
-        controller: _capacityController,
-        prefix: _capacityController.text.isEmpty
-            ? null
-            : context.l10n.transferKgPrefix,
-        keyboardType: TextInputType.number,
-      ),
-      const SizedBox(height: 12),
-      _ManagerArrangeOption(
-        selected: _managerArrangesVehicle,
-        label: context.l10n.transferManagerArrangeVehicle,
-        onTap: () =>
-            setState(() => _managerArrangesVehicle = !_managerArrangesVehicle),
-      ),
-    ],
-  );
-
-  String _vehicleTypeLabel(BuildContext context, String value) =>
-      switch (value) {
-        'truck' => context.l10n.transferVehicleTruck,
-        'miniTruck' => context.l10n.transferVehicleMiniTruck,
-        'pickupTruck' => context.l10n.transferVehiclePickupTruck,
-        'tempo' => context.l10n.transferVehicleTempo,
-        'trailer' => context.l10n.transferVehicleTrailer,
-        _ => context.l10n.transferVehicleOther,
-      };
 }
 
 class _SearchField extends StatelessWidget {
   const _SearchField({required this.hint});
-
   final String hint;
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 50,
+    height: 55,
     child: TextField(
       decoration: InputDecoration(
         hintText: hint,
@@ -281,7 +161,7 @@ class _SearchField extends StatelessWidget {
           color: AppColors.neutral400,
         ),
         prefixIcon: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(15),
           child: SvgPicture.asset('assets/icons/wallet/search.svg'),
         ),
         filled: true,
@@ -289,329 +169,74 @@ class _SearchField extends StatelessWidget {
         contentPadding: EdgeInsets.zero,
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: AppColors.cool400),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
         ),
         focusedBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: AppColors.primary500),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     ),
   );
 }
 
-class _TransferField extends StatelessWidget {
-  const _TransferField({
-    super.key,
-    required this.label,
-    required this.hint,
-    required this.controller,
-    this.prefix,
-    this.errorText,
-    this.keyboardType,
-    this.onChanged,
-  });
-
-  final String label;
-  final String hint;
+class _QuantityField extends StatelessWidget {
+  const _QuantityField({required this.controller});
   final TextEditingController controller;
-  final String? prefix;
-  final String? errorText;
-  final TextInputType? keyboardType;
-  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        label,
+        context.l10n.transferEstimatedExpenseLabel,
         style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
       ),
       const SizedBox(height: 8),
-      TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        onChanged: onChanged,
-        style: AppTextStyles.regularB7_14,
-        decoration: InputDecoration(
-          hintText: hint,
-          prefixIcon: prefix != null
-              ? Center(
-                  child: Text(prefix ?? '', style: AppTextStyles.semiboldH8_16),
-                )
-              : null,
-          prefixIconConstraints: const BoxConstraints(
-            minWidth: 42,
-            maxWidth: 42,
-          ),
-          errorText: errorText,
-          errorStyle: AppTextStyles.regularB8_12.copyWith(
-            color: AppColors.red600,
-          ),
-          filled: true,
-          fillColor: AppColors.neutral50,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 14,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: errorText == null ? AppColors.cool400 : AppColors.red500,
+      SizedBox(
+        height: 55,
+        child: TextField(
+          key: const Key('transfer-total-kg'),
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          style: AppTextStyles.regularB7_14,
+          decoration: InputDecoration(
+            hintText: context.l10n.transferEstimatedExpenseHint,
+            hintStyle: AppTextStyles.regularB7_14.copyWith(
+              color: AppColors.neutral400,
             ),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: errorText == null
-                  ? AppColors.primary500
-                  : AppColors.red500,
+            filled: true,
+            fillColor: AppColors.neutral50,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+            enabledBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: AppColors.cool400),
+              borderRadius: BorderRadius.circular(10),
             ),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: AppColors.red500),
-            borderRadius: BorderRadius.circular(10),
+            focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: AppColors.primary500),
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         ),
       ),
     ],
-  );
-}
-
-class _VehicleTypeSelector extends StatelessWidget {
-  const _VehicleTypeSelector({
-    required this.selectedValue,
-    required this.open,
-    required this.labelFor,
-    required this.hint,
-    required this.onToggle,
-    required this.onSelected,
-  });
-
-  final String? selectedValue;
-  final bool open;
-  final String Function(String) labelFor;
-  final String hint;
-  final VoidCallback onToggle;
-  final ValueChanged<String> onSelected;
-
-  static const _values = [
-    'truck',
-    'miniTruck',
-    'pickupTruck',
-    'tempo',
-    'trailer',
-    'other',
-  ];
-
-  @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      InkWell(
-        key: const Key('transfer-vehicle-type'),
-        onTap: onToggle,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: AppColors.neutral50,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.cool400),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  selectedValue == null ? hint : labelFor(selectedValue!),
-                  style: AppTextStyles.regularB7_14.copyWith(
-                    color: selectedValue == null
-                        ? AppColors.neutral400
-                        : AppColors.neutral950,
-                  ),
-                ),
-              ),
-              AnimatedRotation(
-                turns: open ? .5 : 0,
-                duration: const Duration(milliseconds: 160),
-                child: SvgPicture.asset(
-                  'assets/icons/home/chevron_down.svg',
-                  width: 20,
-                  height: 20,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      if (open)
-        Container(
-          margin: const EdgeInsets.only(top: 8),
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.neutral50,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AppColors.cool400),
-          ),
-          child: Column(
-            children: _values
-                .map(
-                  (value) => InkWell(
-                    key: Key('transfer-vehicle-$value'),
-                    onTap: () => onSelected(value),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 9,
-                      ),
-                      child: Row(
-                        children: [
-                          _RadioCircle(selected: selectedValue == value),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              labelFor(value),
-                              style: AppTextStyles.regularB7_14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-                .toList(growable: false),
-          ),
-        ),
-    ],
-  );
-}
-
-class _RadioCircle extends StatelessWidget {
-  const _RadioCircle({required this.selected});
-
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 20,
-    height: 20,
-    padding: const EdgeInsets.all(3),
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      border: Border.all(
-        color: selected ? AppColors.primary500 : AppColors.neutral500,
-      ),
-    ),
-    child: selected
-        ? const DecoratedBox(
-            decoration: BoxDecoration(
-              color: AppColors.primary500,
-              shape: BoxShape.circle,
-            ),
-          )
-        : null,
-  );
-}
-
-class _ManagerArrangeOption extends StatelessWidget {
-  const _ManagerArrangeOption({
-    required this.selected,
-    required this.label,
-    required this.onTap,
-  });
-
-  final bool selected;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    color: AppColors.primary100,
-    borderRadius: BorderRadius.circular(8),
-    child: InkWell(
-      key: const Key('transfer-manager-arrange'),
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            Container(
-              width: 22,
-              height: 22,
-              decoration: BoxDecoration(
-                color: AppColors.neutral50,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: AppColors.cool600),
-              ),
-              child: selected
-                  ? Padding(
-                      padding: const EdgeInsets.all(2),
-                      child: SvgPicture.asset(
-                        'assets/icons/wallet/status_verified.svg',
-                        width: 16,
-                        height: 16,
-                        colorFilter: const ColorFilter.mode(
-                          AppColors.primary500,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                label,
-                style: AppTextStyles.mediumSH8_14.copyWith(
-                  color: AppColors.neutral900,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
   );
 }
 
 class _BottomAction extends StatelessWidget {
-  const _BottomAction({
-    required this.weight,
-    required this.price,
-    required this.buttonLabel,
-    required this.buttonKey,
-    required this.onPressed,
-    this.enabled = true,
-  });
-
-  final String weight;
-  final String price;
-  final String buttonLabel;
-  final Key buttonKey;
+  const _BottomAction({required this.onPressed});
   final VoidCallback onPressed;
-  final bool enabled;
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
-    decoration: const BoxDecoration(
-      color: AppColors.backgroundColor,
-      boxShadow: [
-        BoxShadow(
-          color: Color(0x12000000),
-          blurRadius: 8,
-          offset: Offset(0, -2),
-        ),
-      ],
-    ),
+    color: AppColors.backgroundColor,
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
             color: AppColors.primary100,
             border: Border.all(color: AppColors.primary400),
@@ -621,23 +246,21 @@ class _BottomAction extends StatelessWidget {
             children: [
               SvgPicture.asset(
                 'assets/icons/records/ic_true_underline.svg',
-                width: 18,
-                height: 18,
+                width: 24,
+                height: 24,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  "Total KG",
-                  style: AppTextStyles.semiboldH9_14.copyWith(
-                    color: AppColors.neutral950,
-                  ),
+                  context.l10n.transferTotalKg,
+                  style: AppTextStyles.semiboldH9_14,
                 ),
               ),
-              Container(width: 1, height: 22, color: AppColors.neutral950),
+              Container(width: 1, height: 24, color: AppColors.neutral950),
               Expanded(
                 child: Text(
+                  context.l10n.transferTotalKgValue,
                   textAlign: TextAlign.end,
-                  "0.00 KG",
                   style: AppTextStyles.boldH7_16.copyWith(
                     color: AppColors.primary500,
                   ),
@@ -646,26 +269,39 @@ class _BottomAction extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 10),
-        Text(
-          context.l10n.transferManagerApprovalNote,
-          style: AppTextStyles.mediumSH9_12.copyWith(
-            color: AppColors.neutral600,
-          ),
-        ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
-          height: 50,
+          height: 52,
           child: ElevatedButton(
-            key: buttonKey,
-            onPressed: enabled ? onPressed : null,
+            key: const Key('transfer-continue'),
+            onPressed: onPressed,
             style: ElevatedButton.styleFrom(
-              textStyle: AppTextStyles.semiboldH9_14,
-              disabledBackgroundColor: AppColors.neutral200,
-              disabledForegroundColor: AppColors.neutral600,
+              backgroundColor: AppColors.primary500,
+              foregroundColor: AppColors.neutral50,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: Text(buttonLabel, style: AppTextStyles.semiboldH9_14),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  context.l10n.transferContinuePlain,
+                  style: AppTextStyles.semiboldH9_14,
+                ),
+                const SizedBox(width: 8),
+                SvgPicture.asset(
+                  'assets/icons/profile/arrow_right.svg',
+                  width: 20,
+                  height: 20,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.neutral50,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],

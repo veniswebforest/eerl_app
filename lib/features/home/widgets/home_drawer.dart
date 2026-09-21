@@ -23,6 +23,7 @@ class HomeDrawer extends StatefulWidget {
     this.onTasksTap,
     this.onRequestsTap,
     this.onTransferRequestsTap,
+    this.onRagpickerDirectoryTap,
   });
 
   final VoidCallback? onCollectionTap;
@@ -36,6 +37,7 @@ class HomeDrawer extends StatefulWidget {
   final VoidCallback? onTasksTap;
   final VoidCallback? onRequestsTap;
   final VoidCallback? onTransferRequestsTap;
+  final VoidCallback? onRagpickerDirectoryTap;
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -111,7 +113,10 @@ class _HomeDrawerState extends State<HomeDrawer> {
                             key: const Key('drawer-ragpicker-directory'),
                             label: context.l10n.drawerRagpickerDirectory,
                             icon: 'assets/icons/profile/role.svg',
-                            onTap: () => _close(context),
+                            onTap: () {
+                              _close(context);
+                              widget.onRagpickerDirectoryTap?.call();
+                            },
                           ),
                           _DrawerExpandableItem(
                             icon: '$_iconPath/pending_task.svg',

@@ -5,7 +5,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/home/widgets/home_assets.dart';
 
-class ExpenseCategorySelector extends StatelessWidget {
+class ExpenseCategorySelector extends StatefulWidget {
   const ExpenseCategorySelector({
     super.key,
     required this.placeholder,
@@ -28,6 +28,20 @@ class ExpenseCategorySelector extends StatelessWidget {
   final int? selectedIndex;
 
   @override
+  State<ExpenseCategorySelector> createState() =>
+      _ExpenseCategorySelectorState();
+}
+
+class _ExpenseCategorySelectorState extends State<ExpenseCategorySelector> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final panelHeight = (MediaQuery.sizeOf(context).height * .34).clamp(
       220.0,
@@ -38,10 +52,10 @@ class ExpenseCategorySelector extends StatelessWidget {
       children: [
         InkWell(
           key: const Key('expense-category-selector'),
-          onTap: onToggle,
+          onTap: widget.onToggle,
           borderRadius: BorderRadius.vertical(
             top: const Radius.circular(10),
-            bottom: Radius.circular(isOpen ? 0 : 10),
+            bottom: Radius.circular(widget.isOpen ? 0 : 10),
           ),
           child: Container(
             height: 55,
@@ -50,7 +64,7 @@ class ExpenseCategorySelector extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.vertical(
                 top: const Radius.circular(10),
-                bottom: Radius.circular(isOpen ? 0 : 10),
+                bottom: Radius.circular(widget.isOpen ? 0 : 10),
               ),
               border: Border.all(color: AppColors.cool400),
             ),
@@ -58,17 +72,19 @@ class ExpenseCategorySelector extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    selectedIndex == null ? placeholder : items[selectedIndex!],
+                    widget.selectedIndex == null
+                        ? widget.placeholder
+                        : widget.items[widget.selectedIndex!],
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.regularB7_14.copyWith(
-                      color: selectedIndex == null
+                      color: widget.selectedIndex == null
                           ? AppColors.cool500
                           : AppColors.neutral950,
                     ),
                   ),
                 ),
                 AnimatedRotation(
-                  turns: isOpen ? .5 : 0,
+                  turns: widget.isOpen ? .5 : 0,
                   duration: const Duration(milliseconds: 180),
                   child: SvgPicture.asset(
                     HomeAssets.chevronDown,
@@ -80,7 +96,7 @@ class ExpenseCategorySelector extends StatelessWidget {
             ),
           ),
         ),
-        if (isOpen)
+        if (widget.isOpen)
           Container(
             height: panelHeight,
             decoration: BoxDecoration(
@@ -94,15 +110,17 @@ class ExpenseCategorySelector extends StatelessWidget {
               children: [
                 Expanded(
                   child: Scrollbar(
-                    thumbVisibility: items.length > 5,
+                    controller: _scrollController,
+                    thumbVisibility: widget.items.length > 5,
                     child: ListView.builder(
+                      controller: _scrollController,
                       padding: const EdgeInsets.symmetric(vertical: 4),
-                      itemCount: items.length,
+                      itemCount: widget.items.length,
                       itemBuilder: (context, index) {
-                        final selected = selectedIndex == index;
+                        final selected = widget.selectedIndex == index;
                         return InkWell(
                           key: ValueKey('expense-category-$index'),
-                          onTap: () => onSelected(index),
+                          onTap: () => widget.onSelected(index),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -135,7 +153,7 @@ class ExpenseCategorySelector extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    items[index],
+                                    widget.items[index],
                                     style: AppTextStyles.regularB7_14.copyWith(
                                       color: AppColors.neutral950,
                                     ),
@@ -154,7 +172,7 @@ class ExpenseCategorySelector extends StatelessWidget {
                   height: 48,
                   child: ElevatedButton.icon(
                     key: const Key('request-new-expense-category'),
-                    onPressed: onRequestNewCategory,
+                    onPressed: widget.onRequestNewCategory,
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       foregroundColor: Colors.white,
@@ -175,7 +193,7 @@ class ExpenseCategorySelector extends StatelessWidget {
                         BlendMode.srcIn,
                       ),
                     ),
-                    label: Text(requestNewCategoryLabel),
+                    label: Text(widget.requestNewCategoryLabel),
                   ),
                 ),
               ],

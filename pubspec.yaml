@@ -51,6 +51,8 @@ flutter:
     - assets/icons/records/
     - assets/icons/help_support/
     - assets/icons/collection/
+    - assets/icons/
+    - assets/images/ragpicker_directory/
     - assets/lottie/
 
   fonts:

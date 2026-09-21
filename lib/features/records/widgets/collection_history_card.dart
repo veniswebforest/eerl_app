@@ -33,7 +33,7 @@ class CollectionHistoryCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.neutral50,
           borderRadius: BorderRadius.circular(12),
@@ -56,8 +56,8 @@ class CollectionHistoryCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     item.name,
-                    style: AppTextStyles.mediumSH7_16.copyWith(
-                      color: AppColors.neutral950,
+                    style: AppTextStyles.semiboldH7_18.copyWith(
+                      color: AppColors.neutral900,
                     ),
                   ),
                 ),
@@ -76,10 +76,10 @@ class CollectionHistoryCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                // color: AppColors.cool100,
-                borderRadius: BorderRadius.circular(9),
+                color: AppColors.cool100,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [

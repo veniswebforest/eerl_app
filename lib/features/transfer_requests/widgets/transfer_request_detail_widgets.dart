@@ -13,14 +13,14 @@ class TransferDetailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: padding ?? const EdgeInsets.all(14),
+    padding: padding ?? const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: AppColors.neutral50,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(12),
       boxShadow: const [
         BoxShadow(
           color: Color(0x14000000),
-          blurRadius: 7,
+          blurRadius: 8,
           offset: Offset(0, 2),
         ),
       ],

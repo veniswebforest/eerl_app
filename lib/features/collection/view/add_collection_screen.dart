@@ -10,6 +10,11 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../model/collection_entry_state.dart';
 import '../widgets/collection_step_indicator.dart';
 import '../widgets/collection_success_dialog.dart';
+import '../widgets/d2d_collection_photos_step.dart';
+import '../widgets/d2d_vehicle_details_form.dart';
+import '../widgets/d2d_waste_items_step.dart';
+import '../widgets/mrf_details_form.dart';
+import '../widgets/ramp_details_form.dart';
 import 'collection_image_preview_screen.dart';
 import 'collection_receipt_screen.dart';
 
@@ -20,6 +25,7 @@ class AddCollectionScreen extends StatefulWidget {
     this.initialStep = CollectionEntryStep.items,
     this.initialType,
     this.initialSelectedItems = const <int>{},
+    this.initialD2dReview = false,
     this.onSaveDraft,
   });
 
@@ -27,6 +33,7 @@ class AddCollectionScreen extends StatefulWidget {
   final CollectionEntryStep initialStep;
   final CollectionType? initialType;
   final Set<int> initialSelectedItems;
+  final bool initialD2dReview;
   final VoidCallback? onSaveDraft;
 
   @override
@@ -39,21 +46,33 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   bool _typeOpen = false, _itemsOpen = false, _receipt = false;
   bool _conditionalFieldOpen = false;
   bool _showPlasticItems = true;
+  late bool _d2dReview;
   final Set<int> _selected = {};
   final Map<int, List<XFile>> _photos = {};
   final Map<int, String> _collectionWeights = {};
   final Map<int, String> _verifiedWeights = {};
+  final Map<int, D2dMeasureUnit> _d2dUnits = {};
   final ImagePicker _imagePicker = ImagePicker();
   String? _vehicleNumber;
+  String _givenBy = '';
   String? _personName;
   String? _mrfAgentName;
+  D2dPaymentMode _d2dPaymentMode = D2dPaymentMode.cash;
 
   static const _vehicleNumbers = [
-    'GJ-05-BX-1234',
-    'GJ-05-RT-9087',
-    'GJ-01-AB-4421',
+    'GJ-05-AB-1234',
+    'GJ-05-BC-5678',
+    'GJ-05-MC-9012',
+    'GJ-05-MC-3040',
   ];
   static const _personNames = ['Ramesh Shah', 'Mahesh Patel', 'Jignesh Parmar'];
+  final List<String> _personNamesList = [
+    'Vikram Singh (••• 4321)',
+    'Suresh Kumar (••• 5847)',
+    'Mahesh Parmar (••• 2282)',
+    'Rakesh Sharma (••• 2458)',
+    'Amit Patel (••• 9510)',
+  ];
   static const _fixedMrfAgentName = 'Hardik Pandya';
 
   final _images = const [
@@ -66,6 +85,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   void initState() {
     super.initState();
     _step = widget.initialStep;
+    _d2dReview = widget.initialD2dReview;
     _type = widget.initialType;
     if (_type == CollectionType.mrfStation) {
       _mrfAgentName = _fixedMrfAgentName;
@@ -107,13 +127,25 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _BackButton(onTap: _goBack),
-                        const SizedBox(height: 24),
-                        CollectionStepIndicator(currentStep: _stepNumber),
-                        const SizedBox(height: 24),
-                        if (_step == CollectionEntryStep.items)
+                        if (!_d2dReview) ...[
+                          const SizedBox(height: 24),
+                          CollectionStepIndicator(currentStep: _stepNumber),
+                          const SizedBox(height: 24),
+                        ] else
+                          const SizedBox(height: 20),
+                        if (_d2dReview)
+                          _reviewStep(context)
+                        else if (_step == CollectionEntryStep.items)
                           _itemsStep(context)
                         else if (_step == CollectionEntryStep.photos)
-                          _photosStep(context)
+                          _type == CollectionType.d2d ||
+                                  _type == CollectionType.mrfStation ||
+                                  _type == CollectionType.ramp
+                              ? _d2dWasteItemsStep(context)
+                              : _photosStep(context)
+                        else if (_type == CollectionType.d2d ||
+                            _type == CollectionType.ramp)
+                          _d2dCollectionPhotosStep(context)
                         else
                           _reviewStep(context),
                       ],
@@ -132,47 +164,145 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     );
   }
 
-  Widget _itemsStep(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        context.l10n.collectionItemsReceived,
-        style: AppTextStyles.semiboldH7_18,
-      ),
-      const SizedBox(height: 6),
-      Text(
-        context.l10n.collectionItemsReceivedSubtitle,
-        style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral600),
-      ),
-      const SizedBox(height: 24),
-      _label(context.l10n.collectionTypeLabel),
-      const SizedBox(height: 8),
-      _Selector(
-        key: const Key('collection-type-selector'),
-        text: _typeLabel(context),
-        open: _typeOpen,
-        leadingIcon: _type == null ? null : _typeIcon,
-        onTap: () => setState(() => _typeOpen = !_typeOpen),
-      ),
-      if (_typeOpen) _typeDropdown(context),
-      if (_type != null) ...[
+  Widget _itemsStep(BuildContext context) {
+    if (_type == CollectionType.d2d) {
+      return D2dVehicleDetailsForm(
+        vehicleNumbers: _vehicleNumbers,
+        selectedVehicle: _vehicleNumber,
+        givenBy: _givenBy,
+        vehiclePhoto: (_photos[-1]?.isNotEmpty ?? false)
+            ? _photos[-1]!.first
+            : null,
+        onVehicleSelected: (vehicle) => setState(() {
+          _vehicleNumber = vehicle;
+        }),
+        onGivenByChanged: (value) => setState(() => _givenBy = value),
+        onCapturePhoto: _pickVehicleImage,
+        onRemovePhoto: () => setState(() => _photos.remove(-1)),
+        onPreviewPhoto: () {
+          final image = (_photos[-1]?.isNotEmpty ?? false)
+              ? _photos[-1]!.first
+              : null;
+          if (image != null) _showImagePreview(image);
+        },
+      );
+    }
+    if (_type == CollectionType.mrfStation) {
+      return const MrfDetailsForm();
+    }
+    if (_type == CollectionType.ramp) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _label(context.l10n.collectionTypeLabel),
+          const SizedBox(height: 8),
+          Container(
+            key: const Key('ramp-collection-type'),
+            height: 55,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.cool200,
+              border: Border.all(color: AppColors.cool400),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                SvgPicture.asset(
+                  _typeIcon,
+                  width: 20,
+                  height: 20,
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.neutral900,
+                    BlendMode.srcIn,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(_typeLabel(context), style: AppTextStyles.regularB7_14),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          RampDetailsForm(
+            personNames: _personNamesList,
+            selectedPerson: _personName,
+            photo: (_photos[99]?.isNotEmpty ?? false)
+                ? _photos[99]!.first
+                : null,
+            onPersonSelected: (person) => setState(() {
+              _personName = person;
+            }),
+            onAddNewPerson: (newPerson) => setState(() {
+              if (!_personNamesList.contains(newPerson)) {
+                _personNamesList.add(newPerson);
+              }
+              _personName = newPerson;
+            }),
+            onCapturePhoto: () async {
+              try {
+                final image = await _imagePicker.pickImage(
+                  source: ImageSource.camera,
+                );
+                if (image != null) {
+                  setState(() => _photos[99] = [image]);
+                }
+              } catch (_) {}
+            },
+            onRemovePhoto: () => setState(() => _photos.remove(99)),
+            onPreviewPhoto: () {
+              final image = (_photos[99]?.isNotEmpty ?? false)
+                  ? _photos[99]!.first
+                  : null;
+              if (image != null) _showImagePreview(image);
+            },
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.l10n.collectionItemsReceived,
+          style: AppTextStyles.semiboldH7_18,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          context.l10n.collectionItemsReceivedSubtitle,
+          style: AppTextStyles.mediumSH8_14.copyWith(
+            color: AppColors.neutral600,
+          ),
+        ),
         const SizedBox(height: 24),
-        ..._conditionalField(context),
+        _label(context.l10n.collectionTypeLabel),
+        const SizedBox(height: 8),
+        _Selector(
+          key: const Key('collection-type-selector'),
+          text: _typeLabel(context),
+          open: _typeOpen,
+          leadingIcon: _type == null ? null : _typeIcon,
+          onTap: () => setState(() => _typeOpen = !_typeOpen),
+        ),
+        if (_typeOpen) _typeDropdown(context),
+        if (_type != null) ...[
+          const SizedBox(height: 24),
+          ..._conditionalField(context),
+        ],
+        const SizedBox(height: 24),
+        _label(context.l10n.collectionAddItemLabel),
+        const SizedBox(height: 8),
+        _Selector(
+          key: const Key('collection-item-selector'),
+          text: _selected.isEmpty
+              ? context.l10n.collectionSelectWasteItem
+              : context.l10n.collectionItemsSelected(_selected.length),
+          open: _itemsOpen,
+          onTap: () => setState(() => _itemsOpen = !_itemsOpen),
+        ),
+        if (_itemsOpen) _itemDropdown(context),
       ],
-      const SizedBox(height: 24),
-      _label(context.l10n.collectionAddItemLabel),
-      const SizedBox(height: 8),
-      _Selector(
-        key: const Key('collection-item-selector'),
-        text: _selected.isEmpty
-            ? context.l10n.collectionSelectWasteItem
-            : context.l10n.collectionItemsSelected(_selected.length),
-        open: _itemsOpen,
-        onTap: () => setState(() => _itemsOpen = !_itemsOpen),
-      ),
-      if (_itemsOpen) _itemDropdown(context),
-    ],
-  );
+    );
+  }
 
   List<Widget> _conditionalField(BuildContext context) {
     if (_type == CollectionType.mrfStation) {
@@ -440,6 +570,50 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     );
   }
 
+  Widget _d2dWasteItemsStep(BuildContext context) => D2dWasteItemsStep(
+    items: _itemNames(context),
+    selectedItems: _selected,
+    isOpen: _itemsOpen,
+    showPlasticItems: _showPlasticItems,
+    onSelectorTap: () => setState(() => _itemsOpen = !_itemsOpen),
+    onCategoryChanged: (showPlastic) => setState(() {
+      _showPlasticItems = showPlastic;
+    }),
+    onItemChanged: (item) => setState(() {
+      if (!_selected.add(item)) _selected.remove(item);
+    }),
+    onDone: () => setState(() => _itemsOpen = false),
+  );
+
+  Widget _d2dCollectionPhotosStep(BuildContext context) =>
+      D2dCollectionPhotosStep(
+        selectedItems: _selected.toList(),
+        itemNames: _itemNames(context),
+        materialImages: _images,
+        photos: _photos,
+        collectionWeights: _collectionWeights,
+        verifiedWeights: _verifiedWeights,
+        units: _d2dUnits,
+        paymentMode: _d2dPaymentMode,
+        onUnitChanged: (item, unit) => setState(() {
+          _d2dUnits[item] = unit;
+        }),
+        onCollectionWeightChanged: (item, value) {
+          _collectionWeights[item] = value;
+        },
+        onVerifiedWeightChanged: (item, value) {
+          _verifiedWeights[item] = value;
+        },
+        onCapture: _pickD2dCollectionImage,
+        onRemove: (item, index) => setState(() {
+          _photos[item]?.removeAt(index);
+        }),
+        onPreview: _showImagePreview,
+        onPaymentModeChanged: (mode) => setState(() {
+          _d2dPaymentMode = mode;
+        }),
+      );
+
   Widget _reviewStep(BuildContext context) => Column(
     children: [
       _ReviewDetailCard(
@@ -457,11 +631,37 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         value: _typeLabel(context),
         icon: _typeIcon,
       ),
+      if (_type == CollectionType.d2d) ...[
+        const SizedBox(height: 12),
+        _ReviewDetailCard(
+          label: context.l10n.collectionGivenBy,
+          value: _givenBy.isEmpty ? 'Ramesh' : _givenBy,
+        ),
+        const SizedBox(height: 12),
+        _ReviewDetailCard(
+          label: context.l10n.collectionD2dVehicleNumber,
+          value: _vehicleNumber ?? 'GJ-05-AB-1234',
+        ),
+      ],
       const SizedBox(height: 12),
       _ReviewDetailCard(
         label: context.l10n.collectionDetailAgent,
         value: 'Rahul Patel',
       ),
+      if (_type == CollectionType.d2d || _type == CollectionType.ramp) ...[
+        const SizedBox(height: 12),
+        _ReviewDetailCard(
+          label: context.l10n.collectionPaymentType,
+          value: _d2dPaymentMode == D2dPaymentMode.cash
+              ? context.l10n.collectionPaymentCash
+              : context.l10n.collectionPaymentUpi,
+        ),
+        const SizedBox(height: 12),
+        _ReviewVehiclePhotoCard(
+          images: _photos[_type == CollectionType.ramp ? 99 : -1] ?? const [],
+          onPreview: _showImagePreview,
+        ),
+      ],
       const SizedBox(height: 12),
       _ReviewItemsCard(
         title: context.l10n.collectionDetailReceivedItems,
@@ -476,24 +676,13 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                   verifiedWeight: _verifiedWeights[entry.$2] ?? '',
                   pickedImages: _photos[entry.$2] ?? const [],
                   onPreview: _showImagePreview,
+                  unit: _d2dUnits[entry.$2] ?? D2dMeasureUnit.kg,
                 ),
                 if (entry.$1 < _selected.length - 1)
                   const Divider(height: 49, color: AppColors.cool400),
               ],
             ),
           ),
-          if (_type == CollectionType.ramp) ...[
-            const Divider(height: 25, color: AppColors.cool400),
-            Text(
-              context.l10n.collectionDetailRampPersonPhoto,
-              style: AppTextStyles.semiboldH9_14,
-            ),
-            const SizedBox(height: 16),
-            _ReviewPhotos(
-              images: _photos[99] ?? const [],
-              onPreview: _showImagePreview,
-            ),
-          ],
         ],
       ),
       const SizedBox(height: 12),
@@ -505,7 +694,57 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   );
 
   Widget _bottomButtons(BuildContext context) {
+    if (_d2dReview) {
+      return Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              key: const Key('d2d-review-save-draft'),
+              onPressed: widget.onSaveDraft ?? widget.onBack,
+              child: Text(context.l10n.collectionSaveDraft),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              key: const Key('d2d-review-submit'),
+              onPressed: _submit,
+              child: Text(context.l10n.collectionSubmit),
+            ),
+          ),
+        ],
+      );
+    }
     if (_step == CollectionEntryStep.review) {
+      if (_type == CollectionType.d2d || _type == CollectionType.ramp) {
+        return SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: ElevatedButton(
+            key: const Key('d2d-step-three-continue'),
+            onPressed: _photosComplete
+                ? () => setState(() => _d2dReview = true)
+                : null,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(context.l10n.recordsContinue),
+                const SizedBox(width: 8),
+                SvgPicture.asset(
+                  'assets/icons/profile/arrow_right.svg',
+                  width: 20,
+                  height: 20,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
       return Row(
         children: [
           Expanded(
@@ -526,7 +765,19 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       );
     }
     final enabled = _step == CollectionEntryStep.photos
-        ? _photosComplete
+        ? _type == CollectionType.d2d ||
+                  _type == CollectionType.mrfStation ||
+                  _type == CollectionType.ramp
+              ? _selected.isNotEmpty
+              : _photosComplete
+        : _type == CollectionType.d2d
+        ? _vehicleNumber != null &&
+              _givenBy.trim().isNotEmpty &&
+              (_photos[-1]?.isNotEmpty ?? false)
+        : _type == CollectionType.mrfStation
+        ? _mrfAgentName != null
+        : _type == CollectionType.ramp
+        ? _personName != null && (_photos[99]?.isNotEmpty ?? false)
         : (_type != null && _hasConditionalSelection && _selected.isNotEmpty);
     return SizedBox(
       width: double.infinity,
@@ -541,10 +792,20 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                   }
                 } else if (_step == CollectionEntryStep.photos) {
                   for (final item in _selected) {
-                    _verifiedWeights.putIfAbsent(
-                      item,
-                      () => item == 1 ? '250.00' : '270.00',
-                    );
+                    if (_type == CollectionType.d2d ||
+                        _type == CollectionType.ramp) {
+                      _collectionWeights.putIfAbsent(item, () => '270.00');
+                      _d2dUnits.putIfAbsent(
+                        item,
+                        () =>
+                            item == 3 ? D2dMeasureUnit.pcs : D2dMeasureUnit.kg,
+                      );
+                    } else {
+                      _verifiedWeights.putIfAbsent(
+                        item,
+                        () => item == 1 ? '250.00' : '270.00',
+                      );
+                    }
                   }
                 }
                 _step = CollectionEntryStep.values[_step.index + 1];
@@ -634,6 +895,27 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     setState(() => (_photos[itemId] ??= []).add(image));
   }
 
+  Future<void> _pickVehicleImage() async {
+    final image = await _imagePicker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
+    if (image == null || !mounted) return;
+    setState(() => _photos[-1] = [image]);
+  }
+
+  Future<void> _pickD2dCollectionImage(int itemId) async {
+    if ((_photos[itemId]?.length ?? 0) >= 2) return;
+    final image = await _imagePicker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
+      maxWidth: 1600,
+    );
+    if (image == null || !mounted) return;
+    setState(() => (_photos[itemId] ??= []).add(image));
+  }
+
   void _showImagePreview(XFile image) {
     Navigator.of(
       context,
@@ -641,6 +923,10 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   }
 
   void _goBack() {
+    if (_d2dReview) {
+      setState(() => _d2dReview = false);
+      return;
+    }
     if (_step == CollectionEntryStep.items) {
       widget.onBack();
     } else {
@@ -1197,7 +1483,14 @@ class _ReviewDetailCard extends StatelessWidget {
               SvgPicture.asset(icon!, width: 20, height: 20),
               const SizedBox(width: 6),
             ],
-            Text(value, style: AppTextStyles.semiboldH9_14),
+            Expanded(
+              child: Text(
+                value,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.semiboldH9_14,
+              ),
+            ),
           ],
         ),
       ],
@@ -1242,6 +1535,49 @@ class _ReviewItemsCard extends StatelessWidget {
   );
 }
 
+class _ReviewVehiclePhotoCard extends StatelessWidget {
+  const _ReviewVehiclePhotoCard({
+    required this.images,
+    required this.onPreview,
+  });
+
+  final List<XFile> images;
+  final ValueChanged<XFile> onPreview;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const Key('d2d-review-vehicle-photo'),
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x1F000000),
+          blurRadius: 4,
+          offset: Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.l10n.collectionCaptureVehiclePhoto,
+          style: AppTextStyles.semiboldH8_16.copyWith(
+            color: AppColors.neutral600,
+          ),
+        ),
+        if (images.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _ReviewPhotos(images: images, onPreview: onPreview),
+        ],
+      ],
+    ),
+  );
+}
+
 class _ReviewMaterial extends StatelessWidget {
   const _ReviewMaterial({
     required this.name,
@@ -1250,73 +1586,106 @@ class _ReviewMaterial extends StatelessWidget {
     required this.verifiedWeight,
     required this.pickedImages,
     required this.onPreview,
+    this.unit = D2dMeasureUnit.kg,
   });
 
   final String name, image;
   final String collectionWeight, verifiedWeight;
   final List<XFile> pickedImages;
   final ValueChanged<XFile> onPreview;
+  final D2dMeasureUnit unit;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: Image.asset(image, width: 40, height: 40, fit: BoxFit.cover),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            name,
-            style: AppTextStyles.boldH8_14.copyWith(color: AppColors.cool950),
-          ),
-        ],
-      ),
-      const SizedBox(height: 16),
-      Row(
-        children: [
-          Expanded(
-            child: _ReviewWeightBox(
-              label: context.l10n.collectionWeight,
-              value: collectionWeight,
-              color: AppColors.cool200,
-              required: true,
+  Widget build(BuildContext context) {
+    final isKg = unit == D2dMeasureUnit.kg;
+    final unitLabel = isKg
+        ? context.l10n.collectionUnitKg
+        : context.l10n.collectionUnitPcs;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: Image.asset(
+                image,
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _ReviewWeightBox(
-              label: context.l10n.collectionVerifiedWeight,
-              value: verifiedWeight,
-              color: AppColors.primary100,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.boldH8_14.copyWith(
+                  color: AppColors.cool950,
+                ),
+              ),
             ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 16),
-      const Divider(height: 1, color: AppColors.cool400),
-      const SizedBox(height: 16),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            context.l10n.collectionDetailRate,
-            style: AppTextStyles.mediumSH8_14,
-          ),
-          Text(
-            context.l10n.collectionDetailMaterialTotal,
-            style: AppTextStyles.semiboldH9_14.copyWith(
-              color: AppColors.primary500,
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _ReviewWeightBox(
+                label: isKg
+                    ? context.l10n.collectionWeight
+                    : context.l10n.collectionPieces,
+                value: collectionWeight,
+                color: AppColors.cool200,
+                required: true,
+                unit: unitLabel,
+              ),
             ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 16),
-      _ReviewPhotos(images: pickedImages, onPreview: onPreview),
-    ],
-  );
+            const SizedBox(width: 16),
+            Expanded(
+              child: _ReviewWeightBox(
+                label: isKg
+                    ? context.l10n.collectionVerifiedWeight
+                    : context.l10n.collectionVerifiedPieces,
+                value: verifiedWeight,
+                color: AppColors.primary100,
+                unit: unitLabel,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        const Divider(height: 1, color: AppColors.cool400),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                context.l10n.collectionRatePerUnit(unitLabel),
+                maxLines: 2,
+                style: AppTextStyles.mediumSH8_14,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                context.l10n.collectionDetailMaterialTotal,
+                maxLines: 2,
+                textAlign: TextAlign.end,
+                style: AppTextStyles.semiboldH9_14.copyWith(
+                  color: AppColors.primary500,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _ReviewPhotos(images: pickedImages, onPreview: onPreview),
+      ],
+    );
+  }
 }
 
 class _ReviewWeightBox extends StatelessWidget {
@@ -1324,11 +1693,13 @@ class _ReviewWeightBox extends StatelessWidget {
     required this.label,
     required this.value,
     required this.color,
+    required this.unit,
     this.required = false,
   });
 
   final String label, value;
   final Color color;
+  final String unit;
   final bool required;
 
   @override
@@ -1352,16 +1723,32 @@ class _ReviewWeightBox extends StatelessWidget {
       const SizedBox(height: 8),
       Container(
         height: 44,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
-            Text('KG', style: AppTextStyles.semiboldH8_16),
-            const SizedBox(width: 10),
-            Text(value, style: AppTextStyles.regularB7_14),
+            Flexible(
+              flex: 2,
+              child: Text(
+                unit,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.semiboldH9_14,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Expanded(
+              flex: 3,
+              child: Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.regularB7_14,
+              ),
+            ),
           ],
         ),
       ),
@@ -1454,9 +1841,13 @@ class _ReviewTotalsCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Text(
-                '${difference.toStringAsFixed(2)} KG',
-                style: AppTextStyles.boldH7_16,
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  '${difference.toStringAsFixed(2)} KG',
+                  textAlign: TextAlign.end,
+                  style: AppTextStyles.boldH7_16,
+                ),
               ),
             ],
           ),
@@ -1464,16 +1855,23 @@ class _ReviewTotalsCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                context.l10n.collectionDetailTotalPrice,
-                style: AppTextStyles.boldH6_20.copyWith(
-                  color: AppColors.primary500,
+              Expanded(
+                child: Text(
+                  context.l10n.collectionDetailTotalPrice,
+                  maxLines: 2,
+                  style: AppTextStyles.boldH6_20.copyWith(
+                    color: AppColors.primary500,
+                  ),
                 ),
               ),
-              Text(
-                '₹35,550.00',
-                style: AppTextStyles.boldH6_20.copyWith(
-                  color: AppColors.primary500,
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  '₹35,550.00',
+                  textAlign: TextAlign.end,
+                  style: AppTextStyles.boldH6_20.copyWith(
+                    color: AppColors.primary500,
+                  ),
                 ),
               ),
             ],
@@ -1486,8 +1884,17 @@ class _ReviewTotalsCard extends StatelessWidget {
   Widget _totalRow(String label, String value) => Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Text(label, style: AppTextStyles.semiboldH9_14),
-      Text(value, style: AppTextStyles.boldH7_16),
+      Expanded(
+        child: Text(label, maxLines: 2, style: AppTextStyles.semiboldH9_14),
+      ),
+      const SizedBox(width: 8),
+      Flexible(
+        child: Text(
+          value,
+          textAlign: TextAlign.end,
+          style: AppTextStyles.boldH7_16,
+        ),
+      ),
     ],
   );
 }

@@ -11,7 +11,7 @@ abstract final class HomeStyles {
 
   static BoxShadow get cardShadow => BoxShadow(
     color: AppColors.neutral950.withValues(alpha: 0.12),
-    blurRadius: 5,
-    offset: const Offset(0, 2),
+    blurRadius: 2,
+    offset: const Offset(0, 5),
   );
 }

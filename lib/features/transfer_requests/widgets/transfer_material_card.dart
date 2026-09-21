@@ -49,18 +49,18 @@ class TransferMaterialCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(7),
                   child: Image.asset(
                     'assets/images/collection_detail/pet_thumbnail.png',
-                    width: 42,
-                    height: 42,
+                    width: 40,
+                    height: 40,
                     fit: BoxFit.cover,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.semiboldH9_14.copyWith(
+                    style: AppTextStyles.mediumSH8_14.copyWith(
                       color: AppColors.neutral950,
                     ),
                   ),
@@ -68,13 +68,13 @@ class TransferMaterialCard extends StatelessWidget {
                 _SelectionCircle(selected: selected),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
                 color: AppColors.cool200,
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 capacity,
@@ -84,7 +84,7 @@ class TransferMaterialCard extends StatelessWidget {
               ),
             ),
             if (selected && child != null) ...[
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               child!,
             ],
           ],

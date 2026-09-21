@@ -784,6 +784,54 @@ abstract class AppLocalizations {
   /// **'Capacity {weight}'**
   String transferCapacity(String weight);
 
+  /// No description provided for @transferAvailableStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Stock {weight}'**
+  String transferAvailableStock(String weight);
+
+  /// No description provided for @transferCardboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardboard'**
+  String get transferCardboard;
+
+  /// No description provided for @transferPaperWaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper Waste'**
+  String get transferPaperWaste;
+
+  /// No description provided for @transferEstimatedExpenseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Expense *'**
+  String get transferEstimatedExpenseLabel;
+
+  /// No description provided for @transferEstimatedExpenseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter estimated expense'**
+  String get transferEstimatedExpenseHint;
+
+  /// No description provided for @transferTotalKg.
+  ///
+  /// In en, this message translates to:
+  /// **'Total KG'**
+  String get transferTotalKg;
+
+  /// No description provided for @transferTotalKgValue.
+  ///
+  /// In en, this message translates to:
+  /// **'0.00 KG'**
+  String get transferTotalKgValue;
+
+  /// No description provided for @transferContinuePlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get transferContinuePlain;
+
   /// No description provided for @transferTotalKgLabel.
   ///
   /// In en, this message translates to:
@@ -1642,6 +1690,36 @@ abstract class AppLocalizations {
   /// **'Completed: Today, 11:30 AM'**
   String get taskCompletedTime;
 
+  /// No description provided for @taskListTime0900.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 09:00 AM'**
+  String get taskListTime0900;
+
+  /// No description provided for @taskListTime1000.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 10:00 AM'**
+  String get taskListTime1000;
+
+  /// No description provided for @taskListTime1145.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 11:45 AM'**
+  String get taskListTime1145;
+
+  /// No description provided for @taskListTime1210.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 12:10 PM'**
+  String get taskListTime1210;
+
+  /// No description provided for @taskListTime0600.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 06:00 PM'**
+  String get taskListTime0600;
+
   /// No description provided for @taskPriorityHigh.
   ///
   /// In en, this message translates to:
@@ -2230,6 +2308,42 @@ abstract class AppLocalizations {
   /// **'Search Here...'**
   String get recordsSearchHint;
 
+  /// No description provided for @recordsAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get recordsAll;
+
+  /// No description provided for @recordsAllCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'All Collections'**
+  String get recordsAllCollections;
+
+  /// No description provided for @recordsFilterByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter By Date'**
+  String get recordsFilterByDate;
+
+  /// No description provided for @recordsFilterToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get recordsFilterToday;
+
+  /// No description provided for @recordsFilterYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get recordsFilterYesterday;
+
+  /// No description provided for @recordsFilterLastSevenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get recordsFilterLastSevenDays;
+
   /// No description provided for @recordsTodayCollections.
   ///
   /// In en, this message translates to:
@@ -2752,6 +2866,18 @@ abstract class AppLocalizations {
   /// **'Select the items received from this Collection types and enter the quantity.'**
   String get collectionItemsReceivedSubtitle;
 
+  /// No description provided for @collectionSelectWasteItemsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Waste Items'**
+  String get collectionSelectWasteItemsTitle;
+
+  /// No description provided for @collectionSelectWasteItemsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose materials collected from the location to proceed.'**
+  String get collectionSelectWasteItemsSubtitle;
+
   /// No description provided for @collectionTypeLabel.
   ///
   /// In en, this message translates to:
@@ -2788,17 +2914,119 @@ abstract class AppLocalizations {
   /// **'Vehicle Number Plate'**
   String get collectionVehicleNumber;
 
+  /// No description provided for @collectionD2dVehicleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Number'**
+  String get collectionD2dVehicleNumber;
+
+  /// No description provided for @collectionGivenBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Given By'**
+  String get collectionGivenBy;
+
+  /// No description provided for @collectionDriverNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Driver Name'**
+  String get collectionDriverNameHint;
+
+  /// No description provided for @collectionCaptureVehiclePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Vehicle Photo'**
+  String get collectionCaptureVehiclePhoto;
+
+  /// No description provided for @collectionVehiclePhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a photo to record and verify details.'**
+  String get collectionVehiclePhotoHint;
+
+  /// No description provided for @collectionNoVehicleFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Vehicle Found'**
+  String get collectionNoVehicleFound;
+
+  /// No description provided for @collectionContactSupervisorUpdateFleet.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Supervisor to update fleet list.'**
+  String get collectionContactSupervisorUpdateFleet;
+
+  /// No description provided for @collectionContactSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Supervisor'**
+  String get collectionContactSupervisor;
+
+  /// No description provided for @collectionContactSupervisorIfNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Supervisor If not Found'**
+  String get collectionContactSupervisorIfNotFound;
+
   /// No description provided for @collectionMrfAgentName.
   ///
   /// In en, this message translates to:
   /// **'MRF Agent Name'**
   String get collectionMrfAgentName;
 
+  /// No description provided for @collectionMrfShort.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF'**
+  String get collectionMrfShort;
+
+  /// No description provided for @collectionMrfDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF Details'**
+  String get collectionMrfDetails;
+
+  /// No description provided for @collectionFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get collectionFullName;
+
+  /// No description provided for @collectionMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get collectionMobileNumber;
+
+  /// No description provided for @collectionTeamVerifiedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Team details verified by '**
+  String get collectionTeamVerifiedBy;
+
+  /// No description provided for @collectionSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor'**
+  String get collectionSupervisor;
+
+  /// No description provided for @collectionLaborOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Labor 1'**
+  String get collectionLaborOne;
+
   /// No description provided for @collectionPersonName.
   ///
   /// In en, this message translates to:
   /// **'Select Person Name'**
   String get collectionPersonName;
+
+  /// No description provided for @collectionRagpickerPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Ragpicker Person'**
+  String get collectionRagpickerPerson;
 
   /// No description provided for @collectionPlasticCount.
   ///
@@ -2836,6 +3064,48 @@ abstract class AppLocalizations {
   /// **'Capture all collection photos for review (JPG/PNG, under 5MB).'**
   String get collectionCaptureInstruction;
 
+  /// No description provided for @collectionCaptureInstructionShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture all collection photos for review'**
+  String get collectionCaptureInstructionShort;
+
+  /// No description provided for @collectionUnitKg.
+  ///
+  /// In en, this message translates to:
+  /// **'KG'**
+  String get collectionUnitKg;
+
+  /// No description provided for @collectionUnitPcs.
+  ///
+  /// In en, this message translates to:
+  /// **'PCS'**
+  String get collectionUnitPcs;
+
+  /// No description provided for @collectionRatePerUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate: ₹45.00/{unit}'**
+  String collectionRatePerUnit(String unit);
+
+  /// No description provided for @collectionPaymentCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get collectionPaymentCash;
+
+  /// No description provided for @collectionPaymentUpi.
+  ///
+  /// In en, this message translates to:
+  /// **'UPI'**
+  String get collectionPaymentUpi;
+
+  /// No description provided for @collectionPaymentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Type'**
+  String get collectionPaymentType;
+
   /// No description provided for @collectionWeight.
   ///
   /// In en, this message translates to:
@@ -2847,6 +3117,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verified Weight'**
   String get collectionVerifiedWeight;
+
+  /// No description provided for @collectionPieces.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Pieces'**
+  String get collectionPieces;
+
+  /// No description provided for @collectionVerifiedPieces.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Pieces'**
+  String get collectionVerifiedPieces;
 
   /// No description provided for @collectionCapturePhoto.
   ///
@@ -3586,6 +3868,54 @@ abstract class AppLocalizations {
   /// **'Raise Request'**
   String get requestRaiseTitle;
 
+  /// No description provided for @requestToSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'TO : Bhavesh Shah (Supervisor)'**
+  String get requestToSupervisor;
+
+  /// No description provided for @requestPriorityLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority Level *'**
+  String get requestPriorityLevel;
+
+  /// No description provided for @requestPriorityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get requestPriorityLow;
+
+  /// No description provided for @requestPriorityNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get requestPriorityNormal;
+
+  /// No description provided for @requestPriorityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get requestPriorityHigh;
+
+  /// No description provided for @requestFollowupDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Follow-up Date & Time *'**
+  String get requestFollowupDateTime;
+
+  /// No description provided for @requestSelectDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date & Time'**
+  String get requestSelectDateTime;
+
+  /// No description provided for @requestFilledFollowupDate.
+  ///
+  /// In en, this message translates to:
+  /// **'16 Aug 2026, 05:00 PM'**
+  String get requestFilledFollowupDate;
+
   /// No description provided for @requestAddPhoto.
   ///
   /// In en, this message translates to:
@@ -3775,7 +4105,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferDetailVehicleNumber.
   ///
   /// In en, this message translates to:
-  /// **'GJ-05-BX-1234'**
+  /// **'GJ-05-AB-1234'**
   String get transferDetailVehicleNumber;
 
   /// No description provided for @transferDetailVehicleUnavailable.
@@ -3799,7 +4129,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferDetailFromLocationValue.
   ///
   /// In en, this message translates to:
-  /// **'National Highway 8, 24 KM away'**
+  /// **'EERL - Sector 4'**
   String get transferDetailFromLocationValue;
 
   /// No description provided for @transferDetailToLocation.
@@ -3811,7 +4141,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferDetailToLocationValue.
   ///
   /// In en, this message translates to:
-  /// **'EERL - Surat Main Warehouse'**
+  /// **'City Processing Hub - Sector 6'**
   String get transferDetailToLocationValue;
 
   /// No description provided for @transferDetailAvailableStock.
@@ -3835,7 +4165,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferDetailDateTimeValue.
   ///
   /// In en, this message translates to:
-  /// **'06 Aug 2026, 10:45 AM'**
+  /// **'22 October • 11:15 AM'**
   String get transferDetailDateTimeValue;
 
   /// No description provided for @transferDetailRequestedBy.
@@ -3861,6 +4191,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Waiting for Collection Manager'**
   String get transferDetailWaitingManager;
+
+  /// No description provided for @transferDetailVehicleDispatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Dispatched by Collection Manager'**
+  String get transferDetailVehicleDispatched;
+
+  /// No description provided for @transferFromCollectionManager.
+  ///
+  /// In en, this message translates to:
+  /// **'From Collection Manager'**
+  String get transferFromCollectionManager;
+
+  /// No description provided for @transferEstimateTimeToReach.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate Time to Reach'**
+  String get transferEstimateTimeToReach;
+
+  /// No description provided for @transferEstimateTimeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'4 Hours'**
+  String get transferEstimateTimeValue;
+
+  /// No description provided for @transferVehicleArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Arrived Start Dispatch'**
+  String get transferVehicleArrived;
+
+  /// No description provided for @transferVehicleDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Details'**
+  String get transferVehicleDetailsTitle;
+
+  /// No description provided for @transferVehicleNumberRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle number *'**
+  String get transferVehicleNumberRequired;
+
+  /// No description provided for @transferVehicleNumberPlateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle number plate'**
+  String get transferVehicleNumberPlateHint;
+
+  /// No description provided for @transferDriverDetailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Detail *'**
+  String get transferDriverDetailRequired;
+
+  /// No description provided for @transferSelectDriverName.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Driver Name'**
+  String get transferSelectDriverName;
+
+  /// No description provided for @transferDriverMockName.
+  ///
+  /// In en, this message translates to:
+  /// **'Pankaj Tripathi'**
+  String get transferDriverMockName;
+
+  /// No description provided for @transferVehiclePhotoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Photo *'**
+  String get transferVehiclePhotoRequired;
+
+  /// No description provided for @transferStartLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Loading'**
+  String get transferStartLoading;
+
+  /// No description provided for @transferWeighbridgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighbridge'**
+  String get transferWeighbridgeTitle;
+
+  /// No description provided for @transferDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Details'**
+  String get transferDetails;
+
+  /// No description provided for @transferId.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer ID'**
+  String get transferId;
+
+  /// No description provided for @transferItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get transferItem;
+
+  /// No description provided for @transferLoadedWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded Weight'**
+  String get transferLoadedWeight;
+
+  /// No description provided for @transferLoadedWeightHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 1250'**
+  String get transferLoadedWeightHint;
+
+  /// No description provided for @transferNumberOfBales.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Bales / Boris'**
+  String get transferNumberOfBales;
+
+  /// No description provided for @transferNumberOfBalesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 10'**
+  String get transferNumberOfBalesHint;
+
+  /// No description provided for @transferWeighbridgeSlip.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighbridge Slip'**
+  String get transferWeighbridgeSlip;
+
+  /// No description provided for @transferSubmitTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Transfer'**
+  String get transferSubmitTransfer;
+
+  /// No description provided for @transferCompletedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer Completed!'**
+  String get transferCompletedTitle;
+
+  /// No description provided for @transferCompletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'#TRF-2026-089 has been completed.'**
+  String get transferCompletedMessage;
 
   /// No description provided for @transferDetailWaitingLoading.
   ///
@@ -3921,6 +4401,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request Created'**
   String get transferTimelineCreated;
+
+  /// No description provided for @transferTimelineCreatedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'06 Aug 2026, 10:45 AM'**
+  String get transferTimelineCreatedDate;
 
   /// No description provided for @transferTimelinePendingVerification.
   ///
@@ -3987,6 +4473,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Transfer completed successfully'**
   String get transferTimelineCompletedSubtitle;
+
+  /// No description provided for @noVehicleFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Vehicle Found'**
+  String get noVehicleFound;
+
+  /// No description provided for @contactAdminToUpdateFleet.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Admin to update fleet list.'**
+  String get contactAdminToUpdateFleet;
+
+  /// No description provided for @contactAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Admin'**
+  String get contactAdmin;
+
+  /// No description provided for @personNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Person Not Found'**
+  String get personNotFound;
+
+  /// No description provided for @contactAdminToAssignStaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Admin to assign vehicle staff.'**
+  String get contactAdminToAssignStaff;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add'**
+  String get add;
+
+  /// No description provided for @addNewRagpicker.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Ragpicker'**
+  String get addNewRagpicker;
+
+  /// No description provided for @deactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get deactivate;
+
+  /// No description provided for @fullNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name *'**
+  String get fullNameRequired;
+
+  /// No description provided for @enterFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Full Name'**
+  String get enterFullName;
+
+  /// No description provided for @mobileNumberRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number *'**
+  String get mobileNumberRequired;
+
+  /// No description provided for @enterMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Mobile number'**
+  String get enterMobileNumber;
+
+  /// No description provided for @aadharCardNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhar card Number'**
+  String get aadharCardNumber;
+
+  /// No description provided for @aadhaarVoterIdPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhaar / Voter ID'**
+  String get aadhaarVoterIdPlaceholder;
+
+  /// No description provided for @profilePhotoIdProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Photo / ID Proof'**
+  String get profilePhotoIdProof;
+
+  /// No description provided for @captureVehiclePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Vehicle Photo *'**
+  String get captureVehiclePhoto;
+
+  /// No description provided for @capturePersonPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Person Photo *'**
+  String get capturePersonPhoto;
+
+  /// No description provided for @saveAndSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Select'**
+  String get saveAndSelect;
+
+  /// No description provided for @ragpickerDirectoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ragpicker Directory'**
+  String get ragpickerDirectoryTitle;
+
+  /// No description provided for @ragpickerActiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Active ({count})'**
+  String ragpickerActiveCount(int count);
+
+  /// No description provided for @ragpickerDeactivatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated ({count})'**
+  String ragpickerDeactivatedCount(int count);
+
+  /// No description provided for @ragpickerSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Here...'**
+  String get ragpickerSearchHint;
+
+  /// No description provided for @ragpickerAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Ragpicker'**
+  String get ragpickerAddButton;
+
+  /// No description provided for @ragpickerDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ragpicker Details'**
+  String get ragpickerDetailsTitle;
+
+  /// No description provided for @ragpickerStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get ragpickerStatusLabel;
+
+  /// No description provided for @ragpickerActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get ragpickerActive;
+
+  /// No description provided for @ragpickerDeactivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated'**
+  String get ragpickerDeactivated;
+
+  /// No description provided for @ragpickerDeactivateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate Ragpicker'**
+  String get ragpickerDeactivateButton;
+
+  /// No description provided for @ragpickerActivateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate Ragpicker'**
+  String get ragpickerActivateButton;
+
+  /// No description provided for @ragpickerAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Ragpicker'**
+  String get ragpickerAddTitle;
+
+  /// No description provided for @ragpickerNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name *'**
+  String get ragpickerNameLabel;
+
+  /// No description provided for @ragpickerNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Full Name'**
+  String get ragpickerNameHint;
+
+  /// No description provided for @ragpickerPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number *'**
+  String get ragpickerPhoneLabel;
+
+  /// No description provided for @ragpickerPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Mobile Number'**
+  String get ragpickerPhoneHint;
+
+  /// No description provided for @ragpickerAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get ragpickerAddressLabel;
+
+  /// No description provided for @ragpickerAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Address'**
+  String get ragpickerAddressHint;
+
+  /// No description provided for @ragpickerSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Ragpicker'**
+  String get ragpickerSaveButton;
+
+  /// No description provided for @ragpickerAddNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Ragpicker'**
+  String get ragpickerAddNewTitle;
+
+  /// No description provided for @ragpickerEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Ragpicker'**
+  String get ragpickerEditTitle;
+
+  /// No description provided for @ragpickerFullNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get ragpickerFullNameLabel;
+
+  /// No description provided for @ragpickerMobileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get ragpickerMobileLabel;
+
+  /// No description provided for @ragpickerIdentityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ID / Card Number'**
+  String get ragpickerIdentityLabel;
+
+  /// No description provided for @ragpickerDateTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & Time'**
+  String get ragpickerDateTimeLabel;
+
+  /// No description provided for @ragpickerProofLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Photo / ID Proof'**
+  String get ragpickerProofLabel;
+
+  /// No description provided for @ragpickerCapturePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Photo'**
+  String get ragpickerCapturePhoto;
+
+  /// No description provided for @ragpickerPhotoHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a photo to record and verify details.'**
+  String get ragpickerPhotoHelper;
+
+  /// No description provided for @ragpickerAadhaarLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhar card Number'**
+  String get ragpickerAadhaarLabel;
+
+  /// No description provided for @ragpickerAadhaarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhaar / Voter ID'**
+  String get ragpickerAadhaarHint;
+
+  /// No description provided for @ragpickerReactiveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactive'**
+  String get ragpickerReactiveButton;
+
+  /// No description provided for @ragpickerDeactivatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated Successfully!'**
+  String get ragpickerDeactivatedSuccess;
+
+  /// No description provided for @ragpickerDeactivatedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ragpicker profile deactivated.'**
+  String get ragpickerDeactivatedSubtitle;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
 }
 
 class _AppLocalizationsDelegate

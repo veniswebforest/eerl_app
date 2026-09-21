@@ -29,36 +29,42 @@ class _MyTasksScreenState extends State<MyTasksScreen> {
       status: TaskListStatus.open,
       priority: TaskPriority.high,
       scheduleKey: 'today',
+      timeKey: '0900',
     ),
     TaskListItem(
       id: 'task-2',
       status: TaskListStatus.open,
       priority: TaskPriority.normal,
       scheduleKey: 'tomorrow',
+      timeKey: '1145',
     ),
     TaskListItem(
       id: 'task-3',
       status: TaskListStatus.open,
       priority: TaskPriority.low,
       scheduleKey: 'date',
+      timeKey: '0900',
     ),
     TaskListItem(
       id: 'task-4',
       status: TaskListStatus.closed,
       priority: TaskPriority.high,
       scheduleKey: 'completed',
+      timeKey: '1000',
     ),
     TaskListItem(
       id: 'task-5',
       status: TaskListStatus.closed,
       priority: TaskPriority.normal,
       scheduleKey: 'completed',
+      timeKey: '1210',
     ),
     TaskListItem(
       id: 'task-6',
       status: TaskListStatus.closed,
       priority: TaskPriority.low,
       scheduleKey: 'completed',
+      timeKey: '0600',
     ),
   ];
 

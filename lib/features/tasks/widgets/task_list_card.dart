@@ -99,27 +99,47 @@ class TaskListCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            if (item.status == TaskListStatus.closed)
-              _StatusChip(
-                icon: Icons.check_circle_outline_rounded,
-                label: _scheduleLabel(context),
-                foreground: AppColors.primary500,
-                background: AppColors.primary50,
-              )
-            else
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _StatusChip(
-                    icon: Icons.calendar_today_outlined,
-                    label: _scheduleLabel(context),
-                    foreground: const Color(0xFF6644DD),
-                    background: const Color(0xFFF1EDFF),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: item.status == TaskListStatus.closed
+                      ? Align(
+                          alignment: Alignment.centerLeft,
+                          child: _StatusChip(
+                            icon: Icons.check_circle_outline_rounded,
+                            label: _scheduleLabel(context),
+                            foreground: AppColors.primary500,
+                            background: AppColors.primary50,
+                          ),
+                        )
+                      : Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _StatusChip(
+                              icon: Icons.calendar_today_outlined,
+                              label: _scheduleLabel(context),
+                              foreground: const Color(0xFF6644DD),
+                              background: const Color(0xFFF1EDFF),
+                            ),
+                            _priorityChip(context),
+                          ],
+                        ),
+                ),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    _timeLabel(context),
+                    key: Key('task-time-${item.id}'),
+                    style: AppTextStyles.regularB8_12.copyWith(
+                      color: AppColors.neutral600,
+                    ),
                   ),
-                  _priorityChip(context),
-                ],
-              ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -153,6 +173,15 @@ class TaskListCard extends StatelessWidget {
     'date' => context.l10n.taskDueDate,
     'completed' => context.l10n.taskCompletedTime,
     _ => item.scheduleKey,
+  };
+
+  String _timeLabel(BuildContext context) => switch (item.timeKey) {
+    '0900' => context.l10n.taskListTime0900,
+    '1000' => context.l10n.taskListTime1000,
+    '1145' => context.l10n.taskListTime1145,
+    '1210' => context.l10n.taskListTime1210,
+    '0600' => context.l10n.taskListTime0600,
+    _ => item.timeKey,
   };
 }
 
