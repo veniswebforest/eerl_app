@@ -1539,6 +1539,9 @@ class AppLocalizationsGu extends AppLocalizations {
   String get collectionSupervisor => 'સુપરવાઇઝર';
 
   @override
+  String get collectionMrfLabor => 'MRF મજૂર';
+
+  @override
   String get collectionLaborOne => 'મજૂર 1';
 
   @override
@@ -1589,6 +1592,9 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get collectionPaymentType => 'ચુકવણીનો પ્રકાર';
+
+  @override
+  String get collectionCollected => 'એકત્રિત';
 
   @override
   String get collectionWeight => 'કલેક્શન વજન';
@@ -1671,6 +1677,36 @@ class AppLocalizationsGu extends AppLocalizations {
   @override
   String get collectionRampPhotoHint =>
       'વ્યક્તિની વિગતો નોંધવા અને ચકાસવા માટે ફોટો અપલોડ કરો.';
+
+  @override
+  String get collectionReceiptId => 'રસીદ ID:';
+
+  @override
+  String get collectionReceiptCenter => 'સંગ્રહ કેન્દ્ર:';
+
+  @override
+  String get collectionReceiptSupervisor => 'MRF સુપરવાઇઝર:';
+
+  @override
+  String get collectionReceiptLabor => 'મજૂર:';
+
+  @override
+  String get collectionReceiptHdpePieces => '80 નંગ × ₹8.50/નંગ';
+
+  @override
+  String get collectionReceiptKgBlock => 'કિગ્રા વિગતો';
+
+  @override
+  String get collectionReceiptPcsBlock => 'નંગ વિગતો';
+
+  @override
+  String get collectionReceiptCollectedTotal => 'કુલ એકત્રિત';
+
+  @override
+  String get collectionReceiptVerifiedTotal => 'કુલ ચકાસાયેલ';
+
+  @override
+  String get collectionReceiptDifference => 'તફાવત';
 
   @override
   String get collectionReceiptDate => 'તારીખ:';

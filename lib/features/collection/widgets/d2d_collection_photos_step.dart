@@ -4,6 +4,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import '../view/collection_image_preview_screen.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -12,6 +13,9 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 enum D2dMeasureUnit { kg, pcs }
 
 enum D2dPaymentMode { cash, upi }
+
+D2dMeasureUnit defaultCollectionUnit(int item) =>
+    item == 1 || item == 3 ? D2dMeasureUnit.pcs : D2dMeasureUnit.kg;
 
 class D2dCollectionPhotosStep extends StatelessWidget {
   const D2dCollectionPhotosStep({
@@ -24,7 +28,7 @@ class D2dCollectionPhotosStep extends StatelessWidget {
     required this.verifiedWeights,
     required this.units,
     required this.paymentMode,
-    required this.onUnitChanged,
+    this.showPaymentMode = true,
     required this.onCollectionWeightChanged,
     required this.onVerifiedWeightChanged,
     required this.onCapture,
@@ -41,7 +45,7 @@ class D2dCollectionPhotosStep extends StatelessWidget {
   final Map<int, String> verifiedWeights;
   final Map<int, D2dMeasureUnit> units;
   final D2dPaymentMode paymentMode;
-  final void Function(int item, D2dMeasureUnit unit) onUnitChanged;
+  final bool showPaymentMode;
   final void Function(int item, String value) onCollectionWeightChanged;
   final void Function(int item, String value) onVerifiedWeightChanged;
   final ValueChanged<int> onCapture;
@@ -64,12 +68,12 @@ class D2dCollectionPhotosStep extends StatelessWidget {
           child: _D2dMaterialCard(
             item: item,
             name: itemNames[item],
-            materialImage: materialImages[item % materialImages.length],
+            materialImage:
+                materialImages[(item == 3 ? 2 : item) % materialImages.length],
             photos: photos[item] ?? const [],
             collectionWeight: collectionWeights[item] ?? '',
             verifiedWeight: verifiedWeights[item] ?? '',
-            unit: units[item] ?? D2dMeasureUnit.kg,
-            onUnitChanged: (unit) => onUnitChanged(item, unit),
+            unit: units[item] ?? defaultCollectionUnit(item),
             onCollectionWeightChanged: (value) =>
                 onCollectionWeightChanged(item, value),
             onVerifiedWeightChanged: (value) =>
@@ -80,45 +84,46 @@ class D2dCollectionPhotosStep extends StatelessWidget {
           ),
         ),
       ),
-      Container(
-        key: const Key('d2d-payment-mode'),
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x14000000),
-              blurRadius: 12,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: _PaymentChoice(
-                choiceKey: const Key('d2d-payment-cash'),
-                label: context.l10n.collectionPaymentCash,
-                icon: 'assets/icons/home/wallet.svg',
-                selected: paymentMode == D2dPaymentMode.cash,
-                onTap: () => onPaymentModeChanged(D2dPaymentMode.cash),
+      if (showPaymentMode)
+        Container(
+          key: const Key('d2d-payment-mode'),
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x14000000),
+                blurRadius: 12,
+                offset: Offset(0, 3),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _PaymentChoice(
-                choiceKey: const Key('d2d-payment-upi'),
-                label: context.l10n.collectionPaymentUpi,
-                icon: 'assets/icons/wallet/expense_claim_currency.svg',
-                selected: paymentMode == D2dPaymentMode.upi,
-                onTap: () => onPaymentModeChanged(D2dPaymentMode.upi),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _PaymentChoice(
+                  choiceKey: const Key('d2d-payment-cash'),
+                  label: context.l10n.collectionPaymentCash,
+                  icon: 'assets/icons/home/wallet.svg',
+                  selected: paymentMode == D2dPaymentMode.cash,
+                  onTap: () => onPaymentModeChanged(D2dPaymentMode.cash),
+                ),
               ),
-            ),
-          ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: _PaymentChoice(
+                  choiceKey: const Key('d2d-payment-upi'),
+                  label: context.l10n.collectionPaymentUpi,
+                  icon: 'assets/icons/wallet/expense_claim_currency.svg',
+                  selected: paymentMode == D2dPaymentMode.upi,
+                  onTap: () => onPaymentModeChanged(D2dPaymentMode.upi),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
     ],
   );
 }
@@ -132,7 +137,6 @@ class _D2dMaterialCard extends StatelessWidget {
     required this.collectionWeight,
     required this.verifiedWeight,
     required this.unit,
-    required this.onUnitChanged,
     required this.onCollectionWeightChanged,
     required this.onVerifiedWeightChanged,
     required this.onCapture,
@@ -147,7 +151,6 @@ class _D2dMaterialCard extends StatelessWidget {
   final String collectionWeight;
   final String verifiedWeight;
   final D2dMeasureUnit unit;
-  final ValueChanged<D2dMeasureUnit> onUnitChanged;
   final ValueChanged<String> onCollectionWeightChanged;
   final ValueChanged<String> onVerifiedWeightChanged;
   final VoidCallback onCapture;
@@ -159,12 +162,6 @@ class _D2dMaterialCard extends StatelessWidget {
     final unitLabel = unit == D2dMeasureUnit.kg
         ? context.l10n.collectionUnitKg
         : context.l10n.collectionUnitPcs;
-    final collectionFieldLabel = unit == D2dMeasureUnit.kg
-        ? context.l10n.collectionWeight
-        : context.l10n.collectionPieces;
-    final verifiedFieldLabel = unit == D2dMeasureUnit.kg
-        ? context.l10n.collectionVerifiedWeight
-        : context.l10n.collectionVerifiedPieces;
     return Container(
       key: Key('d2d-material-card-$item'),
       clipBehavior: Clip.antiAlias,
@@ -185,15 +182,31 @@ class _D2dMaterialCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: Image.asset(
-                    materialImage,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
+                  child: InkWell(
+                    key: Key('collection-product-image-$item'),
+                    onTap: () => Navigator.of(context).push(
+                      CollectionImagePreviewScreen.route(
+                        AssetImage(materialImage),
+                      ),
+                    ),
+                    child: Image.asset(
+                      materialImage,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(child: Text(name, style: AppTextStyles.semiboldH9_14)),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      text: name,
+                      children: [TextSpan(text: '  •  $unitLabel')],
+                    ),
+                    style: AppTextStyles.regularB7_14,
+                  ),
+                ),
               ],
             ),
           ),
@@ -201,15 +214,6 @@ class _D2dMaterialCard extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             child: Column(
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: _UnitSwitch(
-                    item: item,
-                    unit: unit,
-                    onChanged: onUnitChanged,
-                  ),
-                ),
-                const SizedBox(height: 14),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -217,7 +221,7 @@ class _D2dMaterialCard extends StatelessWidget {
                       child: _MeasureField(
                         fieldKey: Key('d2d-collection-weight-$item'),
                         labelKey: Key('d2d-collection-label-$item'),
-                        label: collectionFieldLabel,
+                        label: context.l10n.collectionCollected,
                         value: collectionWeight,
                         unit: unitLabel,
                         required: true,
@@ -229,7 +233,8 @@ class _D2dMaterialCard extends StatelessWidget {
                       child: _MeasureField(
                         fieldKey: Key('d2d-verified-weight-$item'),
                         labelKey: Key('d2d-verified-label-$item'),
-                        label: verifiedFieldLabel,
+                        label: context.l10n.expenseVerified,
+                        required: true,
                         value: verifiedWeight,
                         unit: unitLabel,
                         onChanged: onVerifiedWeightChanged,
@@ -237,20 +242,29 @@ class _D2dMaterialCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 16),
+                DottedBorder(
+                  options: const RectDottedBorderOptions(
+                    color: AppColors.cool400,
+                    dashPattern: [6, 5],
+                    padding: EdgeInsets.zero,
+                  ),
+                  child: const SizedBox(width: double.infinity, height: 0),
+                ),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(
                       child: Text(
                         context.l10n.collectionRatePerUnit(unitLabel),
-                        style: AppTextStyles.mediumSH8_14,
+                        style: AppTextStyles.regularB8_12,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       context.l10n.collectionDetailMaterialTotal,
-                      style: AppTextStyles.semiboldH9_14.copyWith(
+                      style: AppTextStyles.regularB8_12.copyWith(
                         color: AppColors.primary500,
                       ),
                     ),
@@ -319,8 +333,8 @@ class _D2dMaterialCard extends StatelessWidget {
                                     onTap: () => onPreview(entry.$2),
                                     child: Image.file(
                                       File(entry.$2.path),
-                                      width: 92,
-                                      height: 60,
+                                      width: 108,
+                                      height: 70,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -351,62 +365,6 @@ class _D2dMaterialCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _UnitSwitch extends StatelessWidget {
-  const _UnitSwitch({
-    required this.item,
-    required this.unit,
-    required this.onChanged,
-  });
-
-  final int item;
-  final D2dMeasureUnit unit;
-  final ValueChanged<D2dMeasureUnit> onChanged;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    key: Key('d2d-unit-control-$item'),
-    width: 164,
-    height: 32,
-    decoration: BoxDecoration(
-      color: AppColors.cool200,
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-      children: D2dMeasureUnit.values
-          .map(
-            (value) => Expanded(
-              child: InkWell(
-                key: Key('d2d-unit-${value.name}-$item'),
-                onTap: () => onChanged(value),
-                borderRadius: BorderRadius.circular(12),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: value == unit
-                        ? AppColors.primary500
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    value == D2dMeasureUnit.kg
-                        ? context.l10n.collectionUnitKg
-                        : context.l10n.collectionUnitPcs,
-                    style: AppTextStyles.regularB7_14.copyWith(
-                      color: value == unit
-                          ? Colors.white
-                          : AppColors.neutral700,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          )
-          .toList(),
-    ),
-  );
 }
 
 class _MeasureField extends StatelessWidget {
@@ -458,7 +416,7 @@ class _MeasureField extends StatelessWidget {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           style: AppTextStyles.regularB7_14,
           decoration: InputDecoration(
-            hintText: '---',
+            hintText: required && value.isEmpty ? '123.00' : '---',
             prefixIcon: Center(
               child: Text(unit, style: AppTextStyles.semiboldH9_14),
             ),
@@ -469,7 +427,7 @@ class _MeasureField extends StatelessWidget {
             contentPadding: const EdgeInsets.only(right: 8),
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
           ),
         ),
       ),

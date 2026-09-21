@@ -83,7 +83,7 @@ class D2dWasteItemsStep extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    selectedItems.isEmpty
+                    (isOpen || selectedItems.isEmpty)
                         ? l10n.collectionSelectWasteItem
                         : l10n.collectionItemsSelected(selectedItems.length),
                     style: AppTextStyles.regularB7_14,
@@ -131,42 +131,62 @@ class D2dWasteItemsStep extends StatelessWidget {
                     ),
                   ],
                 ),
-                ...List.generate(
-                  items.length,
-                  (index) => InkWell(
-                    key: Key('d2d-waste-item-$index'),
-                    onTap: () => onItemChanged(index),
-                    child: Container(
-                      constraints: const BoxConstraints(minHeight: 38),
-                      margin: const EdgeInsets.symmetric(vertical: 2),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 9,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.white, _rowColors[index]],
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          _SelectionCheck(
-                            selected: selectedItems.contains(index),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              items[index],
-                              style: AppTextStyles.regularB7_14,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 230),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: List.generate(
+                        items.length,
+                        (index) => InkWell(
+                          key: Key('d2d-waste-item-$index'),
+                          onTap: () => onItemChanged(index),
+                          child: Container(
+                            constraints: const BoxConstraints(minHeight: 38),
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 9,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.white,
+                                  _rowColors[index % _rowColors.length],
+                                ],
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                _SelectionCheck(
+                                  selected: selectedItems.contains(index),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    items[index],
+                                    style: AppTextStyles.regularB7_14,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  index == 1 || index == 3
+                                      ? l10n.collectionUnitPcs
+                                      : l10n.collectionUnitKg,
+                                  style: AppTextStyles.regularB7_14,
+                                ),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   color: AppColors.cool50,
                   child: Row(
                     children: [
@@ -221,7 +241,7 @@ class _CategoryTab extends StatelessWidget {
       color: active ? AppColors.primary500 : AppColors.cool50,
       child: Text(
         text,
-        style: AppTextStyles.boldH8_14.copyWith(
+        style: AppTextStyles.regularB7_14.copyWith(
           color: active ? Colors.white : AppColors.neutral900,
         ),
       ),

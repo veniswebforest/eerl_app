@@ -3010,6 +3010,12 @@ abstract class AppLocalizations {
   /// **'Supervisor'**
   String get collectionSupervisor;
 
+  /// No description provided for @collectionMrfLabor.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF labor'**
+  String get collectionMrfLabor;
+
   /// No description provided for @collectionLaborOne.
   ///
   /// In en, this message translates to:
@@ -3105,6 +3111,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Payment Type'**
   String get collectionPaymentType;
+
+  /// No description provided for @collectionCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get collectionCollected;
 
   /// No description provided for @collectionWeight.
   ///
@@ -3267,6 +3279,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload a photo to record and verify person details.'**
   String get collectionRampPhotoHint;
+
+  /// No description provided for @collectionReceiptId.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt ID:'**
+  String get collectionReceiptId;
+
+  /// No description provided for @collectionReceiptCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'collection center:'**
+  String get collectionReceiptCenter;
+
+  /// No description provided for @collectionReceiptSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF Supervisor:'**
+  String get collectionReceiptSupervisor;
+
+  /// No description provided for @collectionReceiptLabor.
+  ///
+  /// In en, this message translates to:
+  /// **'Labor:'**
+  String get collectionReceiptLabor;
+
+  /// No description provided for @collectionReceiptHdpePieces.
+  ///
+  /// In en, this message translates to:
+  /// **'80 PCS × ₹8.50/Piece'**
+  String get collectionReceiptHdpePieces;
+
+  /// No description provided for @collectionReceiptKgBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'KG Block'**
+  String get collectionReceiptKgBlock;
+
+  /// No description provided for @collectionReceiptPcsBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'PCS Block'**
+  String get collectionReceiptPcsBlock;
+
+  /// No description provided for @collectionReceiptCollectedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Collected'**
+  String get collectionReceiptCollectedTotal;
+
+  /// No description provided for @collectionReceiptVerifiedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Verified'**
+  String get collectionReceiptVerifiedTotal;
+
+  /// No description provided for @collectionReceiptDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference'**
+  String get collectionReceiptDifference;
 
   /// No description provided for @collectionReceiptDate.
   ///

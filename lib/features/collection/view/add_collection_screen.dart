@@ -57,6 +57,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   String _givenBy = '';
   String? _personName;
   String? _mrfAgentName;
+  String? _mrfLabor;
   D2dPaymentMode _d2dPaymentMode = D2dPaymentMode.cash;
 
   static const _vehicleNumbers = [
@@ -144,6 +145,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                               ? _d2dWasteItemsStep(context)
                               : _photosStep(context)
                         else if (_type == CollectionType.d2d ||
+                            _type == CollectionType.mrfStation ||
                             _type == CollectionType.ramp)
                           _d2dCollectionPhotosStep(context)
                         else
@@ -188,7 +190,11 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       );
     }
     if (_type == CollectionType.mrfStation) {
-      return const MrfDetailsForm();
+      return MrfDetailsForm(
+        people: _personNamesList,
+        selectedLabor: _mrfLabor,
+        onLaborSelected: (person) => setState(() => _mrfLabor = person),
+      );
     }
     if (_type == CollectionType.ramp) {
       return Column(
@@ -595,12 +601,10 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         verifiedWeights: _verifiedWeights,
         units: _d2dUnits,
         paymentMode: _d2dPaymentMode,
-        onUnitChanged: (item, unit) => setState(() {
-          _d2dUnits[item] = unit;
-        }),
-        onCollectionWeightChanged: (item, value) {
+        showPaymentMode: _type != CollectionType.mrfStation,
+        onCollectionWeightChanged: (item, value) => setState(() {
           _collectionWeights[item] = value;
-        },
+        }),
         onVerifiedWeightChanged: (item, value) {
           _verifiedWeights[item] = value;
         },
@@ -631,6 +635,18 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         value: _typeLabel(context),
         icon: _typeIcon,
       ),
+      if (_type == CollectionType.mrfStation) ...[
+        const SizedBox(height: 12),
+        _ReviewDetailCard(
+          label: context.l10n.collectionGivenBy,
+          value: 'Chunilal Yadav',
+        ),
+        const SizedBox(height: 12),
+        _ReviewDetailCard(
+          label: context.l10n.collectionMrfLabor,
+          value: _mrfLabor ?? '',
+        ),
+      ],
       if (_type == CollectionType.d2d) ...[
         const SizedBox(height: 12),
         _ReviewDetailCard(
@@ -676,7 +692,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                   verifiedWeight: _verifiedWeights[entry.$2] ?? '',
                   pickedImages: _photos[entry.$2] ?? const [],
                   onPreview: _showImagePreview,
-                  unit: _d2dUnits[entry.$2] ?? D2dMeasureUnit.kg,
+                  unit: _d2dUnits[entry.$2] ?? defaultCollectionUnit(entry.$2),
                 ),
                 if (entry.$1 < _selected.length - 1)
                   const Divider(height: 49, color: AppColors.cool400),
@@ -716,7 +732,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       );
     }
     if (_step == CollectionEntryStep.review) {
-      if (_type == CollectionType.d2d || _type == CollectionType.ramp) {
+      if (_type == CollectionType.d2d ||
+          _type == CollectionType.mrfStation ||
+          _type == CollectionType.ramp) {
         return SizedBox(
           width: double.infinity,
           height: 52,
@@ -775,7 +793,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
               _givenBy.trim().isNotEmpty &&
               (_photos[-1]?.isNotEmpty ?? false)
         : _type == CollectionType.mrfStation
-        ? _mrfAgentName != null
+        ? _mrfLabor != null
         : _type == CollectionType.ramp
         ? _personName != null && (_photos[99]?.isNotEmpty ?? false)
         : (_type != null && _hasConditionalSelection && _selected.isNotEmpty);
@@ -793,12 +811,14 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                 } else if (_step == CollectionEntryStep.photos) {
                   for (final item in _selected) {
                     if (_type == CollectionType.d2d ||
+                        _type == CollectionType.mrfStation ||
                         _type == CollectionType.ramp) {
-                      _collectionWeights.putIfAbsent(item, () => '270.00');
+                      if (_type != CollectionType.mrfStation) {
+                        _collectionWeights.putIfAbsent(item, () => '270.00');
+                      }
                       _d2dUnits.putIfAbsent(
                         item,
-                        () =>
-                            item == 3 ? D2dMeasureUnit.pcs : D2dMeasureUnit.kg,
+                        () => defaultCollectionUnit(item),
                       );
                     } else {
                       _verifiedWeights.putIfAbsent(
@@ -1608,11 +1628,17 @@ class _ReviewMaterial extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: Image.asset(
-                image,
-                width: 40,
-                height: 40,
-                fit: BoxFit.cover,
+              child: InkWell(
+                key: ValueKey('review-material-image-$name'),
+                onTap: () => Navigator.of(
+                  context,
+                ).push(CollectionImagePreviewScreen.route(AssetImage(image))),
+                child: Image.asset(
+                  image,
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const SizedBox(width: 12),
