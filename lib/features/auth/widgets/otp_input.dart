@@ -2,14 +2,14 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Five-digit OTP input with auto-focus and auto-next behavior.
+/// Six-digit OTP input with auto-focus and auto-next behavior.
 class OtpInput extends StatefulWidget {
   const OtpInput({
     super.key,
     required this.onCompleted,
     this.hasError = false,
     this.isVerified = false,
-    this.length = 5,
+    this.length = 6,
     this.onChanged,
     this.initialOtp,
   });
@@ -39,18 +39,34 @@ class _OtpInputState extends State<OtpInput> {
     }
 
     final initialOtp = widget.initialOtp;
-    if (initialOtp != null &&
-        initialOtp.length == widget.length &&
-        RegExp(r'^\d+$').hasMatch(initialOtp)) {
-      for (var i = 0; i < widget.length; i++) {
-        _controllers[i].text = initialOtp[i];
-      }
+    if (_isValidOtp(initialOtp)) {
+      _populateControllers(initialOtp!);
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         widget.onChanged?.call(initialOtp);
         widget.onCompleted(initialOtp);
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant OtpInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialOtp != oldWidget.initialOtp &&
+        _isValidOtp(widget.initialOtp)) {
+      _populateControllers(widget.initialOtp!);
+    }
+  }
+
+  bool _isValidOtp(String? value) =>
+      value != null &&
+      value.length == widget.length &&
+      RegExp(r'^\d+$').hasMatch(value);
+
+  void _populateControllers(String otp) {
+    for (var i = 0; i < widget.length; i++) {
+      _controllers[i].text = otp[i];
     }
   }
 

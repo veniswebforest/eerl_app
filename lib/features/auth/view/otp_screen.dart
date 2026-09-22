@@ -1,6 +1,7 @@
 import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen>
     with SingleTickerProviderStateMixin {
-  static const String _debugDummyOtp = '12345';
+  static const String _debugDummyOtp = '123456';
   late AnimationController _animController;
   late Animation<double> _fadeIn;
   late Animation<Offset> _slideUp;
@@ -45,9 +46,13 @@ class _OtpScreenState extends State<OtpScreen>
     _animController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !kDebugMode) return;
+      if (!mounted) return;
       final authProvider = context.read<AuthProvider>();
-      if (authProvider.otp.isEmpty) {
+      if (widget.phoneNumber.isNotEmpty &&
+          authProvider.phoneNumber != widget.phoneNumber) {
+        authProvider.setPhoneNumber(widget.phoneNumber);
+      }
+      if (kDebugMode && authProvider.otp.isEmpty) {
         authProvider.setOtp(_debugDummyOtp);
       }
     });
@@ -77,10 +82,21 @@ class _OtpScreenState extends State<OtpScreen>
   }
 
   void _onVerify() async {
+    debugPrint('[OtpScreen] Verify button tap trigger');
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.verifyOtp();
-    if (success && mounted) {
+    if (!mounted) return;
+
+    if (success) {
+      debugPrint('[OtpScreen] OTP verification success; navigating home');
       context.go(AppRoutes.home);
+      return;
+    }
+
+    final errorMessage = authProvider.errorMessage;
+    if (errorMessage != null && errorMessage.isNotEmpty) {
+      debugPrint('[OtpScreen] Displaying OTP verification error');
+      AppSnackbar.error(context, message: errorMessage);
     }
   }
 

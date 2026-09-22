@@ -1,6 +1,7 @@
 import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/loader_widget.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -78,10 +79,21 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   void _onContinue() async {
+    debugPrint('[LoginScreen] Continue button tap trigger');
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.sendOtp();
-    if (success && mounted) {
+    if (!mounted) return;
+
+    if (success) {
+      debugPrint('[LoginScreen] Send OTP success; navigating to OTP screen');
       context.push('${AppRoutes.otp}?phone=${authProvider.phoneNumber}');
+      return;
+    }
+
+    final errorMessage = authProvider.errorMessage;
+    if (errorMessage != null && errorMessage.isNotEmpty) {
+      debugPrint('[LoginScreen] Displaying send OTP error');
+      AppSnackbar.error(context, message: errorMessage);
     }
   }
 
