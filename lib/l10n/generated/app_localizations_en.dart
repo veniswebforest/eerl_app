@@ -1885,6 +1885,84 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeSuratSouthZone => 'EERL - Surat South Zone';
 
   @override
+  String get roleSwitchTitle => 'EERL Role Switch';
+
+  @override
+  String get roleSwitchSubtitle => 'Select to anchor provided role';
+
+  @override
+  String get roleSwitchAction => 'Switch Role';
+
+  @override
+  String get roleSelectTitle => 'Select Role';
+
+  @override
+  String get roleCollectionSupervisor => 'Collection Supervisor';
+
+  @override
+  String get supervisorLastSynced => 'Last synced 2 min ago';
+
+  @override
+  String get supervisorActiveAgents => 'Active Agents';
+
+  @override
+  String get supervisorTransportsDone => 'Transports Done';
+
+  @override
+  String get supervisorTotalStocks => 'Total Stocks';
+
+  @override
+  String get supervisorPendingExpenses => 'Pending Expenses';
+
+  @override
+  String get supervisorAssignedTasks => 'Assigned Tasks Summary';
+
+  @override
+  String get supervisorPending => 'Pending';
+
+  @override
+  String get supervisorCompleted => 'Completed';
+
+  @override
+  String get supervisorAssignNewTask => 'Assign New Task';
+
+  @override
+  String get supervisorAgentsStatus => 'Agents Status';
+
+  @override
+  String get supervisorAgentsStatusSubtitle =>
+      'Check Stock and inventory status';
+
+  @override
+  String get supervisorViewStatus => 'View Status';
+
+  @override
+  String get supervisorCheckStock => 'Check Stock';
+
+  @override
+  String get supervisorCheckStockSubtitle =>
+      'Track live stock across facilities';
+
+  @override
+  String get supervisorViewStock => 'View Stock';
+
+  @override
+  String get supervisorApprovalsClaims => 'Approvals & Claims';
+
+  @override
+  String get supervisorApprovalsSubtitle =>
+      'Review and approve agent requests claims';
+
+  @override
+  String get supervisorManageApprovals => 'Manage Approvals';
+
+  @override
+  String get supervisorTasksNav => 'Tasks';
+
+  @override
+  String get supervisorStockNav => 'Stock';
+
+  @override
   String get viewTask => 'View Task';
 
   @override

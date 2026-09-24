@@ -46,11 +46,13 @@ flutter:
     - assets/images/
     - assets/images/collection_detail/
     - assets/icons/home/
+    - assets/icons/home/supervisor/
     - assets/icons/wallet/
     - assets/icons/profile/
     - assets/icons/records/
     - assets/icons/help_support/
     - assets/icons/collection/
+    - assets/icons/role_switcher/
     - assets/icons/
     - assets/images/ragpicker_directory/
     - assets/lottie/

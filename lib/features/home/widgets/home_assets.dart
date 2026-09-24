@@ -28,4 +28,21 @@ abstract final class HomeAssets {
   static const navCollections = '$_root/nav_collections.svg';
   static const navWallet = '$_root/nav_wallet.svg';
   static const navProfile = '$_root/nav_profile.svg';
+
+  static const supervisorSummaryEye = '$_root/supervisor/summary_eye.svg';
+  static const supervisorActiveAgents = '$_root/supervisor/active_agents.svg';
+  static const supervisorTransportsDone =
+      '$_root/supervisor/transports_done.svg';
+  static const supervisorTotalStocks = '$_root/supervisor/total_stocks.svg';
+  static const supervisorPendingExpenses =
+      '$_root/supervisor/pending_expenses.svg';
+  static const supervisorAssignedTasks = '$_root/supervisor/assigned_tasks.svg';
+  static const supervisorAgentsStatus = '$_root/supervisor/agents_status.svg';
+  static const supervisorCheckStock = '$_root/supervisor/check_stock.svg';
+  static const supervisorApprovalsClaims =
+      '$_root/supervisor/approvals_claims.svg';
+  static const supervisorNavHome = '$_root/supervisor/nav_home.svg';
+  static const supervisorNavTasks = '$_root/supervisor/nav_tasks.svg';
+  static const supervisorNavStock = '$_root/supervisor/nav_agents.svg';
+  static const supervisorNavProfile = '$_root/supervisor/nav_profile.svg';
 }

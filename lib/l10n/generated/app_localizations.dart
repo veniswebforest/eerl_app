@@ -3670,6 +3670,156 @@ abstract class AppLocalizations {
   /// **'EERL - Surat South Zone'**
   String get homeSuratSouthZone;
 
+  /// No description provided for @roleSwitchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL Role Switch'**
+  String get roleSwitchTitle;
+
+  /// No description provided for @roleSwitchSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select to anchor provided role'**
+  String get roleSwitchSubtitle;
+
+  /// No description provided for @roleSwitchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch Role'**
+  String get roleSwitchAction;
+
+  /// No description provided for @roleSelectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Role'**
+  String get roleSelectTitle;
+
+  /// No description provided for @roleCollectionSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Supervisor'**
+  String get roleCollectionSupervisor;
+
+  /// No description provided for @supervisorLastSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced 2 min ago'**
+  String get supervisorLastSynced;
+
+  /// No description provided for @supervisorActiveAgents.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Agents'**
+  String get supervisorActiveAgents;
+
+  /// No description provided for @supervisorTransportsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Transports Done'**
+  String get supervisorTransportsDone;
+
+  /// No description provided for @supervisorTotalStocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Stocks'**
+  String get supervisorTotalStocks;
+
+  /// No description provided for @supervisorPendingExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Expenses'**
+  String get supervisorPendingExpenses;
+
+  /// No description provided for @supervisorAssignedTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Tasks Summary'**
+  String get supervisorAssignedTasks;
+
+  /// No description provided for @supervisorPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get supervisorPending;
+
+  /// No description provided for @supervisorCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get supervisorCompleted;
+
+  /// No description provided for @supervisorAssignNewTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign New Task'**
+  String get supervisorAssignNewTask;
+
+  /// No description provided for @supervisorAgentsStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Agents Status'**
+  String get supervisorAgentsStatus;
+
+  /// No description provided for @supervisorAgentsStatusSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Stock and inventory status'**
+  String get supervisorAgentsStatusSubtitle;
+
+  /// No description provided for @supervisorViewStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'View Status'**
+  String get supervisorViewStatus;
+
+  /// No description provided for @supervisorCheckStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Stock'**
+  String get supervisorCheckStock;
+
+  /// No description provided for @supervisorCheckStockSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Track live stock across facilities'**
+  String get supervisorCheckStockSubtitle;
+
+  /// No description provided for @supervisorViewStock.
+  ///
+  /// In en, this message translates to:
+  /// **'View Stock'**
+  String get supervisorViewStock;
+
+  /// No description provided for @supervisorApprovalsClaims.
+  ///
+  /// In en, this message translates to:
+  /// **'Approvals & Claims'**
+  String get supervisorApprovalsClaims;
+
+  /// No description provided for @supervisorApprovalsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and approve agent requests claims'**
+  String get supervisorApprovalsSubtitle;
+
+  /// No description provided for @supervisorManageApprovals.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Approvals'**
+  String get supervisorManageApprovals;
+
+  /// No description provided for @supervisorTasksNav.
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks'**
+  String get supervisorTasksNav;
+
+  /// No description provided for @supervisorStockNav.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock'**
+  String get supervisorStockNav;
+
   /// Button label to view pending tasks
   ///
   /// In en, this message translates to:

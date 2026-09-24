@@ -9,10 +9,16 @@ import 'home_assets.dart';
 /// Top app bar for the home screen.
 /// Shows welcome text, date/zone, calendar, and notification icons.
 class HomeAppBar extends StatelessWidget {
-  const HomeAppBar({super.key, this.onNotificationTap, this.onWalletTap});
+  const HomeAppBar({
+    super.key,
+    this.onNotificationTap,
+    this.onWalletTap,
+    this.showWalletAction = true,
+  });
 
   final VoidCallback? onNotificationTap;
   final VoidCallback? onWalletTap;
+  final bool showWalletAction;
 
   @override
   Widget build(BuildContext context) {
@@ -54,26 +60,28 @@ class HomeAppBar extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 8),
-          InkWell(
-            onTap: onWalletTap,
-            borderRadius: BorderRadius.circular(25),
-            child: Container(
-              width: 45,
-              height: 45,
-              decoration: const BoxDecoration(
-                color: AppColors.cool50,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  HomeAssets.calendar,
-                  width: 24,
-                  height: 24,
+          if (showWalletAction) ...[
+            const SizedBox(width: 8),
+            InkWell(
+              onTap: onWalletTap,
+              borderRadius: BorderRadius.circular(25),
+              child: Container(
+                width: 45,
+                height: 45,
+                decoration: const BoxDecoration(
+                  color: AppColors.cool50,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    HomeAssets.calendar,
+                    width: 24,
+                    height: 24,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
           const SizedBox(width: 8),
           InkWell(
             key: const Key('home-notification-button'),

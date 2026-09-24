@@ -24,6 +24,7 @@ class HomeDrawer extends StatefulWidget {
     this.onRequestsTap,
     this.onTransferRequestsTap,
     this.onRagpickerDirectoryTap,
+    this.roleTitle,
   });
 
   final VoidCallback? onCollectionTap;
@@ -38,6 +39,7 @@ class HomeDrawer extends StatefulWidget {
   final VoidCallback? onRequestsTap;
   final VoidCallback? onTransferRequestsTap;
   final VoidCallback? onRagpickerDirectoryTap;
+  final String? roleTitle;
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -55,7 +57,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
       backgroundColor: Colors.white,
       child: Column(
         children: [
-          const _ProfileHeader(),
+          _ProfileHeader(roleTitle: widget.roleTitle),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -349,7 +351,9 @@ class _DrawerChildItem extends StatelessWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader();
+  const _ProfileHeader({this.roleTitle});
+
+  final String? roleTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -392,7 +396,7 @@ class _ProfileHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      context.l10n.drawerUserRole,
+                      roleTitle ?? context.l10n.drawerUserRole,
                       style: TextStyle(
                         color: Color(0xFF5FC974),
                         fontSize: 12,

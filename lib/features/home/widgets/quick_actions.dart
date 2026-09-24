@@ -78,6 +78,11 @@ class QuickActionCard extends StatelessWidget {
     required this.buttonLabel,
     required this.onTap,
     this.badge,
+    this.titleStyle,
+    this.subtitleStyle,
+    this.iconWidth = 24,
+    this.iconHeight = 24,
+    this.height,
   });
 
   final String? iconAsset;
@@ -89,94 +94,115 @@ class QuickActionCard extends StatelessWidget {
   final String buttonLabel;
   final VoidCallback onTap;
   final String? badge;
+  final TextStyle? titleStyle;
+  final TextStyle? subtitleStyle;
+  final double iconWidth;
+  final double iconHeight;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: height,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.neutral50,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [HomeStyles.cardShadow],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Icon + title row
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: iconAsset != null
-                    ? SvgPicture.asset(iconAsset!, width: 24, height: 24)
-                    : Icon(iconData, size: 24, color: iconColor),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.semiboldH8_16.copyWith(
-                    color: AppColors.neutral950,
-                  ),
-                ),
-              ),
-              if (badge != null) ...[
-                const SizedBox(width: 8),
-                Container(
-                  width: 28,
-                  height: 28,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: AppColors.yellow600,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    badge!,
-                    style: AppTextStyles.semiboldH10_12.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+      child: height == null
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _titleRow(),
+                const SizedBox(height: 6),
+                _subtitle(),
+                const SizedBox(height: 16),
+                _button(),
               ],
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            subtitle,
-            style: AppTextStyles.regularB8_12.copyWith(
-              color: AppColors.neutral600,
+            )
+          : Stack(
+              children: [
+                Positioned(left: 0, right: 0, top: 0, child: _titleRow()),
+                Positioned(left: 0, right: 0, top: 48, child: _subtitle()),
+                Positioned(left: 0, right: 0, bottom: 0, child: _button()),
+              ],
             ),
-          ),
-          const SizedBox(height: 16),
-
-          // Action button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary500,
-                foregroundColor: AppColors.neutral50,
-                minimumSize: const Size.fromHeight(52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-                textStyle: AppTextStyles.boldH7_16,
-              ),
-              child: Text(buttonLabel),
-            ),
-          ),
-        ],
-      ),
     );
   }
+
+  Widget _titleRow() => Row(
+    children: [
+      Container(
+        width: 40,
+        height: 40,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: iconBg,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: iconAsset != null
+            ? Center(
+                child: SvgPicture.asset(
+                  iconAsset!,
+                  width: iconWidth,
+                  height: iconHeight,
+                ),
+              )
+            : Icon(iconData, size: 24, color: iconColor),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: Text(
+          title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style:
+              titleStyle ??
+              AppTextStyles.semiboldH8_16.copyWith(color: AppColors.neutral950),
+        ),
+      ),
+      if (badge != null) ...[
+        const SizedBox(width: 8),
+        Container(
+          width: 28,
+          height: 28,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+            color: AppColors.yellow600,
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            badge!,
+            style: AppTextStyles.semiboldH10_12.copyWith(color: Colors.white),
+          ),
+        ),
+      ],
+    ],
+  );
+
+  Widget _subtitle() => Text(
+    subtitle,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style:
+        subtitleStyle ??
+        AppTextStyles.regularB8_12.copyWith(color: AppColors.neutral600),
+  );
+
+  Widget _button() => SizedBox(
+    width: double.infinity,
+    height: 52,
+    child: ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary500,
+        foregroundColor: AppColors.neutral50,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 0,
+        textStyle: AppTextStyles.boldH7_16,
+      ),
+      child: Text(buttonLabel),
+    ),
+  );
 }

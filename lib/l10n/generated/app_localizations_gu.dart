@@ -1885,6 +1885,83 @@ class AppLocalizationsGu extends AppLocalizations {
   String get homeSuratSouthZone => 'EERL - સુરત દક્ષિણ ઝોન';
 
   @override
+  String get roleSwitchTitle => 'EERL ભૂમિકા બદલો';
+
+  @override
+  String get roleSwitchSubtitle => 'આપેલી ભૂમિકા સક્રિય કરવા માટે પસંદ કરો';
+
+  @override
+  String get roleSwitchAction => 'ભૂમિકા બદલો';
+
+  @override
+  String get roleSelectTitle => 'ભૂમિકા પસંદ કરો';
+
+  @override
+  String get roleCollectionSupervisor => 'કલેક્શન સુપરવાઇઝર';
+
+  @override
+  String get supervisorLastSynced => '2 મિનિટ પહેલાં છેલ્લું સિંક થયું';
+
+  @override
+  String get supervisorActiveAgents => 'સક્રિય એજન્ટો';
+
+  @override
+  String get supervisorTransportsDone => 'પૂર્ણ ટ્રાન્સપોર્ટ';
+
+  @override
+  String get supervisorTotalStocks => 'કુલ સ્ટોક';
+
+  @override
+  String get supervisorPendingExpenses => 'બાકી ખર્ચ';
+
+  @override
+  String get supervisorAssignedTasks => 'સોંપેલ કાર્યોનો સારાંશ';
+
+  @override
+  String get supervisorPending => 'બાકી';
+
+  @override
+  String get supervisorCompleted => 'પૂર્ણ';
+
+  @override
+  String get supervisorAssignNewTask => 'નવું કાર્ય સોંપો';
+
+  @override
+  String get supervisorAgentsStatus => 'એજન્ટોની સ્થિતિ';
+
+  @override
+  String get supervisorAgentsStatusSubtitle =>
+      'સ્ટોક અને ઇન્વેન્ટરીની સ્થિતિ તપાસો';
+
+  @override
+  String get supervisorViewStatus => 'સ્થિતિ જુઓ';
+
+  @override
+  String get supervisorCheckStock => 'સ્ટોક તપાસો';
+
+  @override
+  String get supervisorCheckStockSubtitle => 'સુવિધાઓમાં લાઇવ સ્ટોક ટ્રૅક કરો';
+
+  @override
+  String get supervisorViewStock => 'સ્ટોક જુઓ';
+
+  @override
+  String get supervisorApprovalsClaims => 'મંજૂરીઓ અને દાવાઓ';
+
+  @override
+  String get supervisorApprovalsSubtitle =>
+      'એજન્ટની વિનંતીઓ અને દાવાઓની સમીક્ષા કરો';
+
+  @override
+  String get supervisorManageApprovals => 'મંજૂરીઓ સંચાલિત કરો';
+
+  @override
+  String get supervisorTasksNav => 'કાર્યો';
+
+  @override
+  String get supervisorStockNav => 'સ્ટોક';
+
+  @override
   String get viewTask => 'ટાસ્ક જુઓ';
 
   @override

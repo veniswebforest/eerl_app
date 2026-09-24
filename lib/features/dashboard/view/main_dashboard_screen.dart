@@ -8,6 +8,7 @@ import 'package:eerl_app/features/collection/view/add_collection_screen.dart';
 import 'package:eerl_app/features/configure_material/view/configure_material_screen.dart';
 import 'package:eerl_app/features/end_my_day/view/end_my_day_screen.dart';
 import 'package:eerl_app/features/home/view/home_screen.dart';
+import 'package:eerl_app/features/home/widgets/home_assets.dart';
 import 'package:eerl_app/features/help_support/view/help_support_screen.dart';
 import 'package:eerl_app/features/notifications/view/notifications_screen.dart';
 import 'package:eerl_app/features/profile/view/profile_screen.dart';
@@ -17,6 +18,7 @@ import 'package:eerl_app/features/records/model/collection_detail_status.dart';
 import 'package:eerl_app/features/records/model/records_view_flag.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
+import 'package:eerl_app/features/role_switcher/view/role_switcher_screen.dart';
 import 'package:eerl_app/features/ragpicker_directory/view/ragpicker_directory_screen.dart';
 import 'package:eerl_app/features/requests/view/raise_request_screen.dart';
 import 'package:eerl_app/features/requests/model/request_list_item.dart';
@@ -62,6 +64,7 @@ class MainDashboardScreen extends StatefulWidget {
 }
 
 class _MainDashboardScreenState extends State<MainDashboardScreen> {
+  late DashboardUserRole _activeRole = widget.userRole;
   late String _selectedPageKey = widget.initialPageKey == 'wallet'
       ? 'home'
       : widget.initialPageKey;
@@ -84,6 +87,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   RequestListItem? _selectedRequest;
   bool _isNotificationsOpen = false;
   bool _isEndMyDayOpen = false;
+  bool _isRoleSwitcherOpen = false;
   TaskListItem? _selectedTask;
   ExpenseClaimDetailStatus? _claimDetailStatus;
   CashRequestDetailStatus? _cashRequestDetailStatus;
@@ -93,12 +97,15 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   bool _isDrawerOpen = false;
 
   List<BottomNavItemModel> get _visibleItems => _createItems()
-      .where((item) => item.isVisibleFor(widget.userRole, widget.permissions))
+      .where((item) => item.isVisibleFor(_activeRole, widget.permissions))
       .toList(growable: false);
 
   @override
   void didUpdateWidget(covariant MainDashboardScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.userRole != widget.userRole) {
+      _activeRole = widget.userRole;
+    }
     final items = _visibleItems;
     if (items.isNotEmpty &&
         !items.any((item) => item.pageKey == _selectedPageKey)) {
@@ -121,7 +128,17 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
 
     return Scaffold(
       extendBody: true,
-      body: _isAddCollectionOpen
+      body: _isRoleSwitcherOpen
+          ? RoleSwitcherScreen(
+              initialRole: _activeRole,
+              onBack: () => setState(() => _isRoleSwitcherOpen = false),
+              onRoleSelected: (role) => setState(() {
+                _activeRole = role;
+                _isRoleSwitcherOpen = false;
+                _selectedPageKey = 'home';
+              }),
+            )
+          : _isAddCollectionOpen
           ? AddCollectionScreen(
               onBack: () => setState(() => _isAddCollectionOpen = false),
               initialStep: _addCollectionInitialStep,
@@ -256,6 +273,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
             ),
       bottomNavigationBar:
           _isWalletOpen ||
+              _isRoleSwitcherOpen ||
               _isAddCollectionOpen ||
               _isLogExpenseOpen ||
               _isRequestCashOpen ||
@@ -297,15 +315,32 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       DashboardUserRole.supervisor,
       DashboardUserRole.admin,
     };
+    const agentRoles = <DashboardUserRole>{
+      DashboardUserRole.collectionAgent,
+      DashboardUserRole.admin,
+    };
+    const supervisorRoles = <DashboardUserRole>{DashboardUserRole.supervisor};
 
     final l10n = context.l10n;
 
     return [
       BottomNavItemModel(
         title: l10n.home,
-        selectedIcon: '$_navIconPath/nav_home.svg',
-        unselectedIcon: '$_navIconPath/nav_home.svg',
+        selectedIcon: _activeRole == DashboardUserRole.supervisor
+            ? HomeAssets.supervisorNavHome
+            : '$_navIconPath/nav_home.svg',
+        unselectedIcon: _activeRole == DashboardUserRole.supervisor
+            ? HomeAssets.supervisorNavHome
+            : '$_navIconPath/nav_home.svg',
         page: HomeScreen(
+          isSupervisor: _activeRole == DashboardUserRole.supervisor,
+          roleTitle: _activeRole == DashboardUserRole.supervisor
+              ? l10n.roleCollectionSupervisor
+              : l10n.drawerUserRole,
+          roleZone: _activeRole == DashboardUserRole.supervisor
+              ? l10n.homeSuratNorthZone
+              : l10n.homeSuratSouthZone,
+          onRoleSwitchTap: () => setState(() => _isRoleSwitcherOpen = true),
           onCollectionTap: () =>
               setState(() => _selectedPageKey = 'collections'),
           onReceiptsTap: () => setState(() => _selectedPageKey = 'records'),
@@ -385,7 +420,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           }),
         ),
         pageKey: 'collections',
-        roles: allRoles,
+        roles: agentRoles,
         permission: 'collections.view',
       ),
       BottomNavItemModel(
@@ -405,13 +440,38 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           }),
         ),
         pageKey: 'records',
-        roles: allRoles,
+        roles: agentRoles,
         permission: 'records.view',
       ),
       BottomNavItemModel(
+        title: l10n.supervisorTasksNav,
+        selectedIcon: HomeAssets.supervisorNavTasks,
+        unselectedIcon: HomeAssets.supervisorNavTasks,
+        page: MyTasksScreen(
+          onBack: () => setState(() => _selectedPageKey = 'home'),
+          onTaskTap: (task) => setState(() => _selectedTask = task),
+        ),
+        pageKey: 'supervisor-tasks',
+        roles: supervisorRoles,
+      ),
+      BottomNavItemModel(
+        title: l10n.supervisorStockNav,
+        selectedIcon: HomeAssets.supervisorNavStock,
+        unselectedIcon: HomeAssets.supervisorNavStock,
+        page: ConfigureMaterialScreen(
+          onBack: () => setState(() => _selectedPageKey = 'home'),
+        ),
+        pageKey: 'supervisor-stock',
+        roles: supervisorRoles,
+      ),
+      BottomNavItemModel(
         title: l10n.profile,
-        selectedIcon: '$_navIconPath/nav_profile.svg',
-        unselectedIcon: '$_navIconPath/nav_profile.svg',
+        selectedIcon: _activeRole == DashboardUserRole.supervisor
+            ? HomeAssets.supervisorNavProfile
+            : '$_navIconPath/nav_profile.svg',
+        unselectedIcon: _activeRole == DashboardUserRole.supervisor
+            ? HomeAssets.supervisorNavProfile
+            : '$_navIconPath/nav_profile.svg',
         page: ProfileScreen(
           onNotificationTap: () => setState(() => _isNotificationsOpen = true),
         ),

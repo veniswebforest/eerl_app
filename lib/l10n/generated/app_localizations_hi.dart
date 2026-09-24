@@ -1885,6 +1885,84 @@ class AppLocalizationsHi extends AppLocalizations {
   String get homeSuratSouthZone => 'EERL - सूरत दक्षिण ज़ोन';
 
   @override
+  String get roleSwitchTitle => 'EERL भूमिका बदलें';
+
+  @override
+  String get roleSwitchSubtitle => 'दी गई भूमिका सक्रिय करने के लिए चुनें';
+
+  @override
+  String get roleSwitchAction => 'भूमिका बदलें';
+
+  @override
+  String get roleSelectTitle => 'भूमिका चुनें';
+
+  @override
+  String get roleCollectionSupervisor => 'कलेक्शन सुपरवाइज़र';
+
+  @override
+  String get supervisorLastSynced => 'अंतिम सिंक 2 मिनट पहले हुआ';
+
+  @override
+  String get supervisorActiveAgents => 'सक्रिय एजेंट';
+
+  @override
+  String get supervisorTransportsDone => 'पूर्ण ट्रांसपोर्ट';
+
+  @override
+  String get supervisorTotalStocks => 'कुल स्टॉक';
+
+  @override
+  String get supervisorPendingExpenses => 'लंबित खर्च';
+
+  @override
+  String get supervisorAssignedTasks => 'सौंपे गए कार्यों का सारांश';
+
+  @override
+  String get supervisorPending => 'लंबित';
+
+  @override
+  String get supervisorCompleted => 'पूर्ण';
+
+  @override
+  String get supervisorAssignNewTask => 'नया कार्य सौंपें';
+
+  @override
+  String get supervisorAgentsStatus => 'एजेंट स्थिति';
+
+  @override
+  String get supervisorAgentsStatusSubtitle =>
+      'स्टॉक और इन्वेंट्री स्थिति जांचें';
+
+  @override
+  String get supervisorViewStatus => 'स्थिति देखें';
+
+  @override
+  String get supervisorCheckStock => 'स्टॉक जांचें';
+
+  @override
+  String get supervisorCheckStockSubtitle =>
+      'सुविधाओं में लाइव स्टॉक ट्रैक करें';
+
+  @override
+  String get supervisorViewStock => 'स्टॉक देखें';
+
+  @override
+  String get supervisorApprovalsClaims => 'अनुमोदन और दावे';
+
+  @override
+  String get supervisorApprovalsSubtitle =>
+      'एजेंट अनुरोधों और दावों की समीक्षा करें';
+
+  @override
+  String get supervisorManageApprovals => 'अनुमोदन प्रबंधित करें';
+
+  @override
+  String get supervisorTasksNav => 'कार्य';
+
+  @override
+  String get supervisorStockNav => 'स्टॉक';
+
+  @override
   String get viewTask => 'टास्क देखें';
 
   @override
