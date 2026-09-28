@@ -19,6 +19,7 @@ import 'package:eerl_app/features/wallet/view/expense_submitted_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
 import 'package:eerl_app/features/wallet/view/wallet_tab_screen.dart';
 import 'package:eerl_app/features/wallet/widgets/expense_claim_card.dart';
+import 'package:eerl_app/features/supervisor_expense/view/supervisor_expense_module_screen.dart';
 import 'package:eerl_app/features/profile/view/profile_screen.dart';
 import 'package:eerl_app/features/profile/model/logout_data_status.dart';
 import 'package:eerl_app/features/profile/widgets/logout_confirmation_dialog.dart';
@@ -35,6 +36,119 @@ void main() {
     // The full app requires localization delegates and providers,
     // so a proper test harness will be set up when features expand.
     expect(true, isTrue);
+  });
+
+  testWidgets('Supervisor expense supports reject flow and result banner', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: SupervisorExpenseModuleScreen(onBack: () {}),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Approvals & Claims'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byKey(const ValueKey('supervisor-expense-pending')));
+    await tester.pumpAndSettle();
+    expect(find.text('Waiting for Supervisor'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byKey(const Key('supervisor-expense-reject')));
+    await tester.pumpAndSettle();
+    expect(find.text('Reject Expenses'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.ensureVisible(
+      find.byKey(const Key('supervisor-expense-confirm-rejection')),
+    );
+    await tester.tap(
+      find.byKey(const Key('supervisor-expense-confirm-rejection')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Expense Rejected!'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Supervisor expense approve resolves the pending request', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: SupervisorExpenseModuleScreen(onBack: () {}),
+      ),
+    );
+    await tester.tap(find.byKey(const ValueKey('supervisor-expense-pending')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('supervisor-expense-approve')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Successfully Approved!'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('supervisor-expense-pending')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('supervisor-expense-approved')),
+      findsWidgets,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Supervisor approvals quick action opens expense module', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => LocaleProvider(),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MainDashboardScreen(userRole: DashboardUserRole.supervisor),
+        ),
+      ),
+    );
+    await tester.drag(
+      find.byKey(const Key('home-dashboard-scroll')),
+      const Offset(0, -1600),
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const Key('supervisor-approvals-card')),
+    );
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('supervisor-approvals-card')),
+        matching: find.byType(ElevatedButton),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('supervisor-expense-list-screen')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
   });
 
   for (final size in <Size>[
@@ -69,7 +183,10 @@ void main() {
         final initialException = tester.takeException();
         expect(initialException, isNull);
 
-        await tester.drag(find.byType(ListView), const Offset(0, -1200));
+        await tester.drag(
+          find.byKey(const Key('home-dashboard-scroll')),
+          const Offset(0, -1200),
+        );
         await tester.pumpAndSettle();
 
         expect(tester.takeException(), isNull);
@@ -97,7 +214,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Rahul Patel'), findsOneWidget);
-    expect(find.text('Collection Agent'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(Drawer),
+        matching: find.text('Collection Agent'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Transfer Requests'), findsWidgets);
     expect(find.text('Ragpicker Directory'), findsOneWidget);
     expect(find.text('Tasks & Requests'), findsOneWidget);
@@ -108,6 +231,75 @@ void main() {
 
     expect(find.byKey(const Key('drawer-tasks')), findsOneWidget);
     expect(find.byKey(const Key('drawer-requests')), findsOneWidget);
+    expect(find.text('Powered by Eco Vision'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Supervisor home uses the supervisor Figma drawer', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 950);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: HomeScreen(
+          isSupervisor: true,
+          roleTitle: 'Collection Supervisor',
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('home-menu-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bhavesh Shah'), findsOneWidget);
+    expect(find.text('Collection Supervisor'), findsWidgets);
+    expect(find.byKey(const Key('drawer-supervisor-stock')), findsOneWidget);
+    expect(
+      find.byKey(const Key('drawer-supervisor-verification')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('drawer-supervisor-mrf-person-list')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('drawer-supervisor-d2d-vehicle-list')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('drawer-supervisor-agent-status')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('drawer-supervisor-pending-verification')),
+      findsNothing,
+    );
+    expect(find.byKey(const Key('drawer-supervisor-tasks')), findsNothing);
+
+    tester.view.physicalSize = const Size(375, 1122);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('drawer-supervisor-verification')));
+    await tester.tap(find.byKey(const Key('drawer-supervisor-tasks-requests')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('drawer-supervisor-pending-verification')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('drawer-supervisor-verified-entries')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('drawer-supervisor-tasks')), findsOneWidget);
+    expect(find.byKey(const Key('drawer-supervisor-requests')), findsOneWidget);
+    expect(find.byKey(const Key('drawer-collection')), findsNothing);
     expect(find.text('Powered by Eco Vision'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -133,17 +325,135 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('bottom-nav-wallet')), findsNothing);
-    expect(find.byKey(const ValueKey('bottom-nav-records')), findsOneWidget);
+    expect(find.byKey(const ValueKey('bottom-nav-records')), findsNothing);
+    expect(find.byKey(const ValueKey('bottom-nav-collections')), findsNothing);
     expect(
-      find.byKey(const ValueKey('bottom-nav-collections')),
+      find.byKey(const ValueKey('bottom-nav-supervisor-verify')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('bottom-nav-supervisor-stock')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('supervisor-summary-visible-icon')),
       findsOneWidget,
     );
 
-    await tester.tap(find.byKey(const ValueKey('bottom-nav-collections')));
+    await tester.tap(find.byKey(const Key('supervisor-toggle-todays-summary')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Collections'), findsWidgets);
+    expect(find.text('Active Agents'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('supervisor-summary-hidden-icon')),
+      findsOneWidget,
+    );
+
+    await tester.tap(
+      find.byKey(const ValueKey('bottom-nav-supervisor-verify')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Collection History'), findsOneWidget);
+    expect(find.text('Pending Your Approval'), findsWidgets);
+
+    await tester.tap(find.text('Rahul Patel • D2D').first);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('verification-detail-back')), findsOneWidget);
+    expect(
+      find.byKey(const Key('verification-approve-button')),
+      findsOneWidget,
+    );
+
+    await tester.ensureVisible(
+      find.byKey(const Key('verification-reject-button')),
+    );
+    await tester.tap(find.byKey(const Key('verification-reject-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reject Collection'), findsOneWidget);
+    expect(
+      find.byKey(const Key('verification-confirm-rejection')),
+      findsOneWidget,
+    );
+
+    await tester.ensureVisible(
+      find.byKey(const Key('verification-cancel-rejection')),
+    );
+    await tester.tap(find.byKey(const Key('verification-cancel-rejection')));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(
+      find.byKey(const Key('verification-approve-button')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('verification-approve-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Verified & Approved'), findsOneWidget);
+    expect(find.byKey(const Key('verification-approve-button')), findsNothing);
+
+    await tester.ensureVisible(
+      find.byKey(const Key('verification-detail-back')),
+    );
+    await tester.tap(find.byKey(const Key('verification-detail-back')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('bottom-nav-supervisor-stock')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Stock by Stage Overview'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byKey(const Key('stock-stage-rm')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('RM Detail'), findsOneWidget);
+    expect(find.text('Bin: RM-01'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Supervisor drawer routes Stock and verification tabs', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => LocaleProvider(),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MainDashboardScreen(userRole: DashboardUserRole.supervisor),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('home-menu-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('drawer-supervisor-stock')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Stock by Stage Overview'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('bottom-nav-home')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('home-menu-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('drawer-supervisor-verification')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const Key('drawer-supervisor-verified-entries')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('verification-status-processed')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 

@@ -88,8 +88,24 @@ class _OtpScreenState extends State<OtpScreen>
     if (!mounted) return;
 
     if (success) {
-      debugPrint('[OtpScreen] OTP verification success; navigating home');
-      context.go(AppRoutes.home);
+      final isValidSession = await authProvider.checkSessionValidity();
+      if (!mounted) return;
+
+      if (isValidSession) {
+        debugPrint(
+          '[OtpScreen] OTP verification success & session valid; navigating home',
+        );
+        context.go(AppRoutes.home);
+      } else {
+        debugPrint(
+          '[OtpScreen] Access token null or session expired; redirecting to login',
+        );
+        AppSnackbar.error(
+          context,
+          message: 'Session expired or token invalid. Please log in again.',
+        );
+        context.go(AppRoutes.login);
+      }
       return;
     }
 

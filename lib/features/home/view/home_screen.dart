@@ -38,6 +38,13 @@ class HomeScreen extends StatelessWidget {
     this.onRequestsTap,
     this.onTransferRequestsTap,
     this.onRagpickerDirectoryTap,
+    this.onSupervisorStockTap,
+    this.onSupervisorExpenseTap,
+    this.onSupervisorPendingVerificationTap,
+    this.onSupervisorVerifiedEntriesTap,
+    this.onMrfPersonListTap,
+    this.onD2dVehicleListTap,
+    this.onAgentStatusTap,
     this.onNotificationTap,
     this.onLogoutTap,
     this.onEndMyDayTap,
@@ -62,6 +69,13 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback? onRequestsTap;
   final VoidCallback? onTransferRequestsTap;
   final VoidCallback? onRagpickerDirectoryTap;
+  final VoidCallback? onSupervisorStockTap;
+  final VoidCallback? onSupervisorExpenseTap;
+  final VoidCallback? onSupervisorPendingVerificationTap;
+  final VoidCallback? onSupervisorVerifiedEntriesTap;
+  final VoidCallback? onMrfPersonListTap;
+  final VoidCallback? onD2dVehicleListTap;
+  final VoidCallback? onAgentStatusTap;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onLogoutTap;
   final VoidCallback? onEndMyDayTap;
@@ -93,7 +107,18 @@ class HomeScreen extends StatelessWidget {
             onRequestsTap: onRequestsTap,
             onTransferRequestsTap: onTransferRequestsTap,
             onRagpickerDirectoryTap: onRagpickerDirectoryTap,
+            onSupervisorStockTap: onSupervisorStockTap,
+            onSupervisorExpenseTap: onSupervisorExpenseTap,
+            onSupervisorPendingVerificationTap:
+                onSupervisorPendingVerificationTap,
+            onSupervisorVerifiedEntriesTap: onSupervisorVerifiedEntriesTap,
+            onMrfPersonListTap: onMrfPersonListTap,
+            onD2dVehicleListTap: onD2dVehicleListTap,
+            onAgentStatusTap: onAgentStatusTap,
             roleTitle: roleTitle,
+            role: isSupervisor
+                ? HomeDrawerRole.supervisor
+                : HomeDrawerRole.collectionAgent,
           ),
           onDrawerChanged: onDrawerChanged,
           drawerScrimColor: Colors.black.withValues(alpha: 0.6),
@@ -198,7 +223,7 @@ class HomeScreen extends StatelessWidget {
                                   onAssignTaskTap: onTasksTap,
                                   onAgentsStatusTap: onRagpickerDirectoryTap,
                                   onCheckStockTap: onConfigureMaterialTap,
-                                  onApprovalsTap: onRequestsTap,
+                                  onApprovalsTap: onSupervisorExpenseTap,
                                 )
                               : QuickActions(
                                   onAddCollectionTap: onAddCollectionTap,

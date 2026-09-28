@@ -206,6 +206,22 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Checks if stored session has non-null/non-empty access token and unexpired sessionExpiresAt.
+  /// If invalid or expired (out of current time), clears session storage and returns false.
+  Future<bool> checkSessionValidity() async {
+    final isValid = await _repository.isSessionValid();
+    if (!isValid) {
+      debugPrint('$_tag Session invalid or expired. Clearing storage.');
+      await _repository.clearSession();
+    }
+    return isValid;
+  }
+
+  Future<void> logout() async {
+    await _repository.clearSession();
+    reset();
+  }
+
   void reset() {
     _phoneNumber = '';
     _otp = '';

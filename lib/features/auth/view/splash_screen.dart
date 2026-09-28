@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
 import 'package:eerl_app/shared/widgets/loader_widget.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -26,9 +28,28 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        context.go(AppRoutes.login);
+        _checkAuthAndNavigate();
       }
     });
+  }
+
+  Future<void> _checkAuthAndNavigate() async {
+    if (!mounted) return;
+    final authProvider = context.read<AuthProvider>();
+    final isValidSession = await authProvider.checkSessionValidity();
+    if (!mounted) return;
+
+    if (isValidSession) {
+      debugPrint(
+        '[SplashScreen] Valid active session found -> redirecting to Home Screen',
+      );
+      context.go(AppRoutes.home);
+    } else {
+      debugPrint(
+        '[SplashScreen] Access token null or session expired -> redirecting to Login Screen',
+      );
+      context.go(AppRoutes.login);
+    }
   }
 
   @override

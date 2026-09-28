@@ -7,9 +7,11 @@ import 'package:provider/provider.dart';
 
 import 'features/auth/presentation/auth_provider.dart';
 import 'core/providers/locale_provider.dart';
+import 'core/providers/network_provider.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'shared/widgets/network_status_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +20,8 @@ void main() async {
   final themeProvider = ThemeProvider();
   final localeProvider = LocaleProvider();
   final authProvider = AuthProvider();
+  final networkProvider = NetworkProvider();
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -30,6 +34,7 @@ void main() async {
         ChangeNotifierProvider.value(value: themeProvider),
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: authProvider),
+        ChangeNotifierProvider.value(value: networkProvider),
       ],
       child: const EerlApp(),
     ),
@@ -47,7 +52,9 @@ class EerlApp extends StatelessWidget {
 
     return MaterialApp.router(
       builder: (context, child) {
-        return SafeAreaWrapper(child: child!);
+        return NetworkStatusOverlay(
+          child: SafeAreaWrapper(child: child!),
+        );
       },
       // ── App Info ─────────────────────────────────────────────────
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,

@@ -791,6 +791,27 @@ class AppLocalizationsGu extends AppLocalizations {
   String get drawerUserRole => 'સંગ્રહ એજન્ટ';
 
   @override
+  String get drawerSupervisorUserName => 'ભાવેશ શાહ';
+
+  @override
+  String get drawerSupervisorStock => 'સ્ટોક';
+
+  @override
+  String get drawerSupervisorVerification => 'ચકાસણી';
+
+  @override
+  String get drawerSupervisorExpense => 'ખર્ચ';
+
+  @override
+  String get drawerSupervisorMrfPersonList => 'MRF વ્યક્તિ યાદી';
+
+  @override
+  String get drawerSupervisorD2dVehicleList => 'D2D વાહન યાદી';
+
+  @override
+  String get drawerSupervisorAgentStatus => 'એજન્ટ સ્થિતિ';
+
+  @override
   String get drawerCollection => 'સંગ્રહ';
 
   @override
@@ -2584,4 +2605,380 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get edit => 'સંપાદિત કરો';
+
+  @override
+  String get verificationNav => 'ચકાસો';
+
+  @override
+  String get verificationCollectionHistory => 'કલેક્શન ઇતિહાસ';
+
+  @override
+  String get verificationSubtitle => 'સ્ટોકનું વજન કરો, ચકાસો અને મંજૂર કરો';
+
+  @override
+  String get verificationSearchHint => 'અહીં શોધો...';
+
+  @override
+  String get verificationPending => 'બાકી';
+
+  @override
+  String get verificationProcessed => 'ચકાસેલ / પ્રક્રિયા કરેલ';
+
+  @override
+  String get verificationFilterAll => 'બધું';
+
+  @override
+  String get verificationFilterD2d => 'D2D';
+
+  @override
+  String get verificationFilterMrf => 'MRF';
+
+  @override
+  String get verificationFilterRamp => 'રેમ્પ';
+
+  @override
+  String get verificationMrfStation => 'MRF સ્ટેશન';
+
+  @override
+  String get verificationPendingApproval => 'તમારી મંજૂરી બાકી';
+
+  @override
+  String get verificationVerified => 'ચકાસેલ';
+
+  @override
+  String get verificationRejected => 'નામંજૂર';
+
+  @override
+  String get verificationEmpty => 'કોઈ કલેક્શન એન્ટ્રી મળી નથી';
+
+  @override
+  String get verificationRahulPatel => 'રાહુલ પટેલ';
+
+  @override
+  String get verificationAmitShah => 'અમિત શાહ';
+
+  @override
+  String get verificationNareshModi => 'નરેશ મોદી';
+
+  @override
+  String get verificationWeightAmount => '213.50 KG • ₹2,706.75';
+
+  @override
+  String get verificationIdTime0925 => 'ID : #COL-2026-089 • 09:25 AM';
+
+  @override
+  String get verificationIdTime1125 => 'ID : #COL-2026-089 • 11:25 AM';
+
+  @override
+  String get verificationIdTime1225 => 'ID : #COL-2026-089 • 12:25 PM';
+
+  @override
+  String get verificationIdTime0225 => 'ID : #COL-2026-089 • 02:25 PM';
+
+  @override
+  String get verificationSuratSouth => 'EERL – સુરત દક્ષિણ';
+
+  @override
+  String get verificationSuratNorth => 'EERL – સુરત ઉત્તર';
+
+  @override
+  String get verificationSuratWest => 'EERL – સુરત પશ્ચિમ';
+
+  @override
+  String get verificationDetailCollectionIdValue => '#COL-2026-089';
+
+  @override
+  String get verificationDetailCollectionCenter => 'કલેક્શન કેન્દ્ર:';
+
+  @override
+  String get verificationDetailGivenBy => 'આપનાર';
+
+  @override
+  String get verificationDetailGivenByValue => 'વિક્રમ સિંહ (••• 4321)';
+
+  @override
+  String get verificationDetailVehicleNumber => 'વાહન નંબર';
+
+  @override
+  String get verificationDetailVehicleValue => 'GJ-05-ZZ-0000';
+
+  @override
+  String get verificationDetailPaymentType => 'ચુકવણીનો પ્રકાર';
+
+  @override
+  String get verificationDetailCash => 'રોકડ';
+
+  @override
+  String get verificationDetailVehiclePhoto => 'વાહનનો ફોટો';
+
+  @override
+  String get verificationDetailCollected => 'એકત્રિત *';
+
+  @override
+  String get verificationDetailVerified => 'ચકાસેલ';
+
+  @override
+  String get verificationDetailCollectedWeight => 'એકત્રિત વજન *';
+
+  @override
+  String get verificationDetailVerifiedWeight => 'ચકાસેલ વજન';
+
+  @override
+  String get verificationDetailTotalCollected => 'કુલ એકત્રિત';
+
+  @override
+  String get verificationDetailTotalVerified => 'કુલ ચકાસેલ';
+
+  @override
+  String get verificationDetailDifference => 'તફાવત';
+
+  @override
+  String get verificationDetailReject => 'નામંજૂર';
+
+  @override
+  String get verificationDetailApprove => 'મંજૂર';
+
+  @override
+  String get verificationDetailWeightValue => 'KG   270.00';
+
+  @override
+  String get verificationDetailCollectedTotalValue => '810.00 KG';
+
+  @override
+  String get verificationDetailVerifiedTotalValue => '790.00 KG';
+
+  @override
+  String get verificationDetailDifferenceValue => '-20.00 KG';
+
+  @override
+  String get verificationDetailTotalPriceValue => '₹35,550.00';
+
+  @override
+  String get stockTitle => 'સ્ટોક';
+
+  @override
+  String get stockLastUpdated => 'છેલ્લે અપડેટ:';
+
+  @override
+  String get stockLastUpdatedValue => 'આજે, 11:20 AM';
+
+  @override
+  String get stockStageOverview => 'તબક્કા પ્રમાણે સ્ટોક';
+
+  @override
+  String get stockRmCode => 'RM';
+
+  @override
+  String get stockSrmCode => 'SRM';
+
+  @override
+  String get stockWipCode => 'WIP';
+
+  @override
+  String get stockFgCode => 'FG';
+
+  @override
+  String get stockRawMaterial => '(કાચો માલ)';
+
+  @override
+  String get stockSortedRawMaterial => '(વર્ગીકૃત કાચો માલ)';
+
+  @override
+  String get stockWorkInProgress => '(પ્રક્રિયામાં)';
+
+  @override
+  String get stockFinishedGoods => '(તૈયાર માલ)';
+
+  @override
+  String get stockStageWeight => '12,450 KG';
+
+  @override
+  String get stockRmItems => '(18 વસ્તુઓ)';
+
+  @override
+  String get stockSrmItems => '(14 વસ્તુઓ)';
+
+  @override
+  String get stockWipItems => '(11 વસ્તુઓ)';
+
+  @override
+  String get stockFgItems => '(16 વસ્તુઓ)';
+
+  @override
+  String get stockRmDetail => 'RM વિગતો';
+
+  @override
+  String get stockSrmDetail => 'SRM વિગતો';
+
+  @override
+  String get stockCenterValue => 'સ્ટોક કેન્દ્ર : EERL – સુરત દક્ષિણ';
+
+  @override
+  String get stockUpdatedAgo => '10 મિનિટ પહેલાં';
+
+  @override
+  String get stockRawBinPrefix => 'RM';
+
+  @override
+  String get stockSortedBinPrefix => 'A';
+
+  @override
+  String get stockSortedBinA => 'A';
+
+  @override
+  String get stockSortedBinB => 'B';
+
+  @override
+  String get stockSortedBinC => 'C';
+
+  @override
+  String get stockSortedBinD => 'D';
+
+  @override
+  String get stockSortedBinE => 'E';
+
+  @override
+  String stockBinValue(String prefix, String number) {
+    return 'બિન: $prefix-$number';
+  }
+
+  @override
+  String get stockWeight980 => '980.00 KG';
+
+  @override
+  String get stockWeight720 => '720.00 KG';
+
+  @override
+  String get stockWeight2100 => '2,100.00 KG';
+
+  @override
+  String get stockWeight450 => '450.00 KG';
+
+  @override
+  String get stockWeight98050 => '980.50 KG';
+
+  @override
+  String get stockWeight72050 => '720.50 KG';
+
+  @override
+  String get stockWeight210050 => '2,100.50 KG';
+
+  @override
+  String get stockWeight45050 => '450.50 KG';
+
+  @override
+  String get verificationRejectTitle => 'કલેક્શન નામંજૂર કરો';
+
+  @override
+  String get verificationRejectReason => 'ફ્લેગ કરવાનું કારણ ';
+
+  @override
+  String get verificationRequiredIndicator => '*';
+
+  @override
+  String get verificationRejectWeightMismatch => 'વજનમાં તફાવત';
+
+  @override
+  String get verificationRejectInvalidPhoto => 'અમાન્ય ફોટો પુરાવો';
+
+  @override
+  String get verificationRejectIncorrectCategory => 'ખોટી સામગ્રી શ્રેણી';
+
+  @override
+  String get verificationRejectOther => 'અન્ય';
+
+  @override
+  String get verificationRejectRemarksLabel => 'વધારાની ટિપ્પણી (વૈકલ્પિક)';
+
+  @override
+  String get verificationRejectRemarksValue =>
+      'સ્કેલ ડિસ્પ્લે 200kg બતાવે છે પરંતુ દાખલ કરેલું વજન 410.00kg છે અને અપલોડ કરેલો ટ્રકનો ફોટો સ્પષ્ટ નથી';
+
+  @override
+  String get verificationRejectMinimum => 'ઓછામાં ઓછા 150 અક્ષરો';
+
+  @override
+  String get verificationRejectConfirm => 'નામંજૂરીની પુષ્ટિ કરો';
+
+  @override
+  String get verificationRejectCancel => 'રદ કરો';
+
+  @override
+  String get supervisorExpenseRahul => 'રાહુલ પટેલ';
+
+  @override
+  String get supervisorExpenseDarshan => 'દર્શન ચૌહાણ';
+
+  @override
+  String get supervisorExpenseAgentRole => 'કલેક્શન એજન્ટ';
+
+  @override
+  String get supervisorExpenseLaborCost => 'મજૂરી ખર્ચ';
+
+  @override
+  String get supervisorExpenseYesterdayMorning => 'ગઈકાલે • 08:15 AM';
+
+  @override
+  String get supervisorExpenseYesterdayLate => 'ગઈકાલે • 10:15 AM';
+
+  @override
+  String get supervisorExpenseMayDate => '08 મે 2026 • 08:15 AM';
+
+  @override
+  String get supervisorExpenseAmount4000 => '-₹4,000';
+
+  @override
+  String get supervisorExpenseAmount1500 => '-₹1,500';
+
+  @override
+  String get supervisorExpenseAmount720 => '-₹720';
+
+  @override
+  String get supervisorExpenseDetailAmount4000 => '₹4,000';
+
+  @override
+  String get supervisorExpensePendingReview => 'સમીક્ષા બાકી';
+
+  @override
+  String get supervisorExpenseNewCategories => 'નવી કેટેગરી વિનંતીઓ';
+
+  @override
+  String get supervisorExpenseReviewCategories =>
+      'સબમિટ કરેલી ખર્ચ કેટેગરી તપાસો';
+
+  @override
+  String get supervisorExpenseViewRequests => 'વિનંતીઓ જુઓ';
+
+  @override
+  String get supervisorExpenseNoCashRequests => 'કોઈ રોકડ વિનંતી ઉપલબ્ધ નથી';
+
+  @override
+  String get supervisorExpenseApprovedTitle => 'સફળતાપૂર્વક મંજૂર!';
+
+  @override
+  String get supervisorExpenseApprovedMessage => 'વિનંતી સફળતાપૂર્વક મંજૂર થઈ';
+
+  @override
+  String get supervisorExpenseRejectedTitle => 'ખર્ચ નકાર્યો!';
+
+  @override
+  String get supervisorExpenseRejectedMessage => 'વિનંતી સફળતાપૂર્વક નકારાઈ';
+
+  @override
+  String get supervisorExpenseRejectScreenTitle => 'ખર્ચ નકારો';
+
+  @override
+  String get supervisorExpenseReasonForRejection => 'નકારવાનું કારણ';
+
+  @override
+  String get supervisorExpenseInvalidBill => 'અમાન્ય / સ્પષ્ટ બિલ ગાયબ';
+
+  @override
+  String get supervisorExpenseDuplicateClaim => 'ડુપ્લિકેટ ખર્ચ દાવો';
+
+  @override
+  String get supervisorExpensePolicyViolation => 'નીતિ ભંગ / વ્યક્તિગત ખર્ચ';
+
+  @override
+  String get supervisorExpenseRejectReasonValue => 'વાહન ઉપલબ્ધ નથી';
 }

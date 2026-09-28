@@ -32,6 +32,22 @@ class AuthRepository {
     return response;
   }
 
+  Future<bool> isSessionValid() {
+    return _sessionStorage.isSessionValid();
+  }
+
+  Future<String?> getAccessToken() {
+    return _sessionStorage.getAccessToken();
+  }
+
+  Future<DateTime?> getSessionExpiresAt() {
+    return _sessionStorage.getSessionExpiresAt();
+  }
+
+  Future<void> clearSession() {
+    return _sessionStorage.clearSession();
+  }
+
   void close() {
     if (_ownsRemoteService) _remoteService.close();
   }

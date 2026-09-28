@@ -26,6 +26,34 @@ class AuthSessionStorage {
     );
   }
 
+  Future<String?> getAccessToken() async {
+    final preferences = await SharedPreferences.getInstance();
+    return preferences.getString(AppConstants.accessTokenKey);
+  }
+
+  Future<DateTime?> getSessionExpiresAt() async {
+    final preferences = await SharedPreferences.getInstance();
+    final rawExpiry = preferences.getString(AppConstants.sessionExpiresAtKey);
+    return rawExpiry != null ? DateTime.tryParse(rawExpiry) : null;
+  }
+
+  /// Checks if access token is not null/empty and sessionExpiresAt is in the future relative to current time.
+  Future<bool> isSessionValid() async {
+    final token = await getAccessToken();
+    final expiresAt = await getSessionExpiresAt();
+    if (token == null || token.trim().isEmpty || expiresAt == null) {
+      debugPrint('$_tag Session invalid: token is null/empty or expiresAt missing');
+      return false;
+    }
+    final now = DateTime.now().toUtc();
+    final expiryUtc = expiresAt.toUtc();
+    final isValid = now.isBefore(expiryUtc);
+    debugPrint(
+      '$_tag Session check: tokenPresent=true, currentUtc=$now, expiresAtUtc=$expiryUtc, isValid=$isValid',
+    );
+    return isValid;
+  }
+
   Future<void> clearSession() async {
     final preferences = await SharedPreferences.getInstance();
     await Future.wait([

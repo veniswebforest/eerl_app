@@ -1588,6 +1588,48 @@ abstract class AppLocalizations {
   /// **'Collection Agent'**
   String get drawerUserRole;
 
+  /// No description provided for @drawerSupervisorUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'Bhavesh Shah'**
+  String get drawerSupervisorUserName;
+
+  /// No description provided for @drawerSupervisorStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock'**
+  String get drawerSupervisorStock;
+
+  /// No description provided for @drawerSupervisorVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification'**
+  String get drawerSupervisorVerification;
+
+  /// No description provided for @drawerSupervisorExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense'**
+  String get drawerSupervisorExpense;
+
+  /// No description provided for @drawerSupervisorMrfPersonList.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF Person List'**
+  String get drawerSupervisorMrfPersonList;
+
+  /// No description provided for @drawerSupervisorD2dVehicleList.
+  ///
+  /// In en, this message translates to:
+  /// **'D2D Vehicle List'**
+  String get drawerSupervisorD2dVehicleList;
+
+  /// No description provided for @drawerSupervisorAgentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent Status'**
+  String get drawerSupervisorAgentStatus;
+
   /// No description provided for @drawerCollection.
   ///
   /// In en, this message translates to:
@@ -5007,6 +5049,750 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit'**
   String get edit;
+
+  /// No description provided for @verificationNav.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verificationNav;
+
+  /// No description provided for @verificationCollectionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection History'**
+  String get verificationCollectionHistory;
+
+  /// No description provided for @verificationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Weigh, verify & approve stock'**
+  String get verificationSubtitle;
+
+  /// No description provided for @verificationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Here...'**
+  String get verificationSearchHint;
+
+  /// No description provided for @verificationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get verificationPending;
+
+  /// No description provided for @verificationProcessed.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified / Processed'**
+  String get verificationProcessed;
+
+  /// No description provided for @verificationFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get verificationFilterAll;
+
+  /// No description provided for @verificationFilterD2d.
+  ///
+  /// In en, this message translates to:
+  /// **'D2D'**
+  String get verificationFilterD2d;
+
+  /// No description provided for @verificationFilterMrf.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF'**
+  String get verificationFilterMrf;
+
+  /// No description provided for @verificationFilterRamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Ramp'**
+  String get verificationFilterRamp;
+
+  /// No description provided for @verificationMrfStation.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF Station'**
+  String get verificationMrfStation;
+
+  /// No description provided for @verificationPendingApproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Your Approval'**
+  String get verificationPendingApproval;
+
+  /// No description provided for @verificationVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verificationVerified;
+
+  /// No description provided for @verificationRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get verificationRejected;
+
+  /// No description provided for @verificationEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No collection entries found'**
+  String get verificationEmpty;
+
+  /// No description provided for @verificationRahulPatel.
+  ///
+  /// In en, this message translates to:
+  /// **'Rahul Patel'**
+  String get verificationRahulPatel;
+
+  /// No description provided for @verificationAmitShah.
+  ///
+  /// In en, this message translates to:
+  /// **'Amit Shah'**
+  String get verificationAmitShah;
+
+  /// No description provided for @verificationNareshModi.
+  ///
+  /// In en, this message translates to:
+  /// **'Naresh Modi'**
+  String get verificationNareshModi;
+
+  /// No description provided for @verificationWeightAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'213.50 KG • ₹2,706.75'**
+  String get verificationWeightAmount;
+
+  /// No description provided for @verificationIdTime0925.
+  ///
+  /// In en, this message translates to:
+  /// **'ID : #COL-2026-089 • 09:25 AM'**
+  String get verificationIdTime0925;
+
+  /// No description provided for @verificationIdTime1125.
+  ///
+  /// In en, this message translates to:
+  /// **'ID : #COL-2026-089 • 11:25 AM'**
+  String get verificationIdTime1125;
+
+  /// No description provided for @verificationIdTime1225.
+  ///
+  /// In en, this message translates to:
+  /// **'ID : #COL-2026-089 • 12:25 PM'**
+  String get verificationIdTime1225;
+
+  /// No description provided for @verificationIdTime0225.
+  ///
+  /// In en, this message translates to:
+  /// **'ID : #COL-2026-089 • 02:25 PM'**
+  String get verificationIdTime0225;
+
+  /// No description provided for @verificationSuratSouth.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL – Surat South'**
+  String get verificationSuratSouth;
+
+  /// No description provided for @verificationSuratNorth.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL – Surat North'**
+  String get verificationSuratNorth;
+
+  /// No description provided for @verificationSuratWest.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL – Surat West'**
+  String get verificationSuratWest;
+
+  /// No description provided for @verificationDetailCollectionIdValue.
+  ///
+  /// In en, this message translates to:
+  /// **'#COL-2026-089'**
+  String get verificationDetailCollectionIdValue;
+
+  /// No description provided for @verificationDetailCollectionCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Center:'**
+  String get verificationDetailCollectionCenter;
+
+  /// No description provided for @verificationDetailGivenBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Given By'**
+  String get verificationDetailGivenBy;
+
+  /// No description provided for @verificationDetailGivenByValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Vikram Singh (••• 4321)'**
+  String get verificationDetailGivenByValue;
+
+  /// No description provided for @verificationDetailVehicleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Number'**
+  String get verificationDetailVehicleNumber;
+
+  /// No description provided for @verificationDetailVehicleValue.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-05-ZZ-0000'**
+  String get verificationDetailVehicleValue;
+
+  /// No description provided for @verificationDetailPaymentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Type'**
+  String get verificationDetailPaymentType;
+
+  /// No description provided for @verificationDetailCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get verificationDetailCash;
+
+  /// No description provided for @verificationDetailVehiclePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Vehicle Photo'**
+  String get verificationDetailVehiclePhoto;
+
+  /// No description provided for @verificationDetailCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected *'**
+  String get verificationDetailCollected;
+
+  /// No description provided for @verificationDetailVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verificationDetailVerified;
+
+  /// No description provided for @verificationDetailCollectedWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected Weight *'**
+  String get verificationDetailCollectedWeight;
+
+  /// No description provided for @verificationDetailVerifiedWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified Weight'**
+  String get verificationDetailVerifiedWeight;
+
+  /// No description provided for @verificationDetailTotalCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Collected'**
+  String get verificationDetailTotalCollected;
+
+  /// No description provided for @verificationDetailTotalVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Verified'**
+  String get verificationDetailTotalVerified;
+
+  /// No description provided for @verificationDetailDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference'**
+  String get verificationDetailDifference;
+
+  /// No description provided for @verificationDetailReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get verificationDetailReject;
+
+  /// No description provided for @verificationDetailApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get verificationDetailApprove;
+
+  /// No description provided for @verificationDetailWeightValue.
+  ///
+  /// In en, this message translates to:
+  /// **'KG   270.00'**
+  String get verificationDetailWeightValue;
+
+  /// No description provided for @verificationDetailCollectedTotalValue.
+  ///
+  /// In en, this message translates to:
+  /// **'810.00 KG'**
+  String get verificationDetailCollectedTotalValue;
+
+  /// No description provided for @verificationDetailVerifiedTotalValue.
+  ///
+  /// In en, this message translates to:
+  /// **'790.00 KG'**
+  String get verificationDetailVerifiedTotalValue;
+
+  /// No description provided for @verificationDetailDifferenceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'-20.00 KG'**
+  String get verificationDetailDifferenceValue;
+
+  /// No description provided for @verificationDetailTotalPriceValue.
+  ///
+  /// In en, this message translates to:
+  /// **'₹35,550.00'**
+  String get verificationDetailTotalPriceValue;
+
+  /// No description provided for @stockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock'**
+  String get stockTitle;
+
+  /// No description provided for @stockLastUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Updated:'**
+  String get stockLastUpdated;
+
+  /// No description provided for @stockLastUpdatedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 11:20 AM'**
+  String get stockLastUpdatedValue;
+
+  /// No description provided for @stockStageOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock by Stage Overview'**
+  String get stockStageOverview;
+
+  /// No description provided for @stockRmCode.
+  ///
+  /// In en, this message translates to:
+  /// **'RM'**
+  String get stockRmCode;
+
+  /// No description provided for @stockSrmCode.
+  ///
+  /// In en, this message translates to:
+  /// **'SRM'**
+  String get stockSrmCode;
+
+  /// No description provided for @stockWipCode.
+  ///
+  /// In en, this message translates to:
+  /// **'WIP'**
+  String get stockWipCode;
+
+  /// No description provided for @stockFgCode.
+  ///
+  /// In en, this message translates to:
+  /// **'FG'**
+  String get stockFgCode;
+
+  /// No description provided for @stockRawMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'(Raw Material)'**
+  String get stockRawMaterial;
+
+  /// No description provided for @stockSortedRawMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'(Sorted Raw Material)'**
+  String get stockSortedRawMaterial;
+
+  /// No description provided for @stockWorkInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'(Work In Progress)'**
+  String get stockWorkInProgress;
+
+  /// No description provided for @stockFinishedGoods.
+  ///
+  /// In en, this message translates to:
+  /// **'(Finished Goods)'**
+  String get stockFinishedGoods;
+
+  /// No description provided for @stockStageWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'12,450 KG'**
+  String get stockStageWeight;
+
+  /// No description provided for @stockRmItems.
+  ///
+  /// In en, this message translates to:
+  /// **'(18 Items)'**
+  String get stockRmItems;
+
+  /// No description provided for @stockSrmItems.
+  ///
+  /// In en, this message translates to:
+  /// **'(14 Items)'**
+  String get stockSrmItems;
+
+  /// No description provided for @stockWipItems.
+  ///
+  /// In en, this message translates to:
+  /// **'(11 Items)'**
+  String get stockWipItems;
+
+  /// No description provided for @stockFgItems.
+  ///
+  /// In en, this message translates to:
+  /// **'(16 Items)'**
+  String get stockFgItems;
+
+  /// No description provided for @stockRmDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'RM Detail'**
+  String get stockRmDetail;
+
+  /// No description provided for @stockSrmDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'SRM Detail'**
+  String get stockSrmDetail;
+
+  /// No description provided for @stockCenterValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Center : EERL – Surat South'**
+  String get stockCenterValue;
+
+  /// No description provided for @stockUpdatedAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'10m ago'**
+  String get stockUpdatedAgo;
+
+  /// No description provided for @stockRawBinPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'RM'**
+  String get stockRawBinPrefix;
+
+  /// No description provided for @stockSortedBinPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'A'**
+  String get stockSortedBinPrefix;
+
+  /// No description provided for @stockSortedBinA.
+  ///
+  /// In en, this message translates to:
+  /// **'A'**
+  String get stockSortedBinA;
+
+  /// No description provided for @stockSortedBinB.
+  ///
+  /// In en, this message translates to:
+  /// **'B'**
+  String get stockSortedBinB;
+
+  /// No description provided for @stockSortedBinC.
+  ///
+  /// In en, this message translates to:
+  /// **'C'**
+  String get stockSortedBinC;
+
+  /// No description provided for @stockSortedBinD.
+  ///
+  /// In en, this message translates to:
+  /// **'D'**
+  String get stockSortedBinD;
+
+  /// No description provided for @stockSortedBinE.
+  ///
+  /// In en, this message translates to:
+  /// **'E'**
+  String get stockSortedBinE;
+
+  /// No description provided for @stockBinValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Bin: {prefix}-{number}'**
+  String stockBinValue(String prefix, String number);
+
+  /// No description provided for @stockWeight980.
+  ///
+  /// In en, this message translates to:
+  /// **'980.00 KG'**
+  String get stockWeight980;
+
+  /// No description provided for @stockWeight720.
+  ///
+  /// In en, this message translates to:
+  /// **'720.00 KG'**
+  String get stockWeight720;
+
+  /// No description provided for @stockWeight2100.
+  ///
+  /// In en, this message translates to:
+  /// **'2,100.00 KG'**
+  String get stockWeight2100;
+
+  /// No description provided for @stockWeight450.
+  ///
+  /// In en, this message translates to:
+  /// **'450.00 KG'**
+  String get stockWeight450;
+
+  /// No description provided for @stockWeight98050.
+  ///
+  /// In en, this message translates to:
+  /// **'980.50 KG'**
+  String get stockWeight98050;
+
+  /// No description provided for @stockWeight72050.
+  ///
+  /// In en, this message translates to:
+  /// **'720.50 KG'**
+  String get stockWeight72050;
+
+  /// No description provided for @stockWeight210050.
+  ///
+  /// In en, this message translates to:
+  /// **'2,100.50 KG'**
+  String get stockWeight210050;
+
+  /// No description provided for @stockWeight45050.
+  ///
+  /// In en, this message translates to:
+  /// **'450.50 KG'**
+  String get stockWeight45050;
+
+  /// No description provided for @verificationRejectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Collection'**
+  String get verificationRejectTitle;
+
+  /// No description provided for @verificationRejectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for Flagging '**
+  String get verificationRejectReason;
+
+  /// No description provided for @verificationRequiredIndicator.
+  ///
+  /// In en, this message translates to:
+  /// **'*'**
+  String get verificationRequiredIndicator;
+
+  /// No description provided for @verificationRejectWeightMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight Mismatch'**
+  String get verificationRejectWeightMismatch;
+
+  /// No description provided for @verificationRejectInvalidPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid Photo Evidence'**
+  String get verificationRejectInvalidPhoto;
+
+  /// No description provided for @verificationRejectIncorrectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect Material Category'**
+  String get verificationRejectIncorrectCategory;
+
+  /// No description provided for @verificationRejectOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get verificationRejectOther;
+
+  /// No description provided for @verificationRejectRemarksLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional Remarks (Optional)'**
+  String get verificationRejectRemarksLabel;
+
+  /// No description provided for @verificationRejectRemarksValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Scale display shows 200kg but entered weight is 410.00kg & Truck Photo is not clear uploaded'**
+  String get verificationRejectRemarksValue;
+
+  /// No description provided for @verificationRejectMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Min 150 Characters'**
+  String get verificationRejectMinimum;
+
+  /// No description provided for @verificationRejectConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Rejection'**
+  String get verificationRejectConfirm;
+
+  /// No description provided for @verificationRejectCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get verificationRejectCancel;
+
+  /// No description provided for @supervisorExpenseRahul.
+  ///
+  /// In en, this message translates to:
+  /// **'Rahul Patel'**
+  String get supervisorExpenseRahul;
+
+  /// No description provided for @supervisorExpenseDarshan.
+  ///
+  /// In en, this message translates to:
+  /// **'Darshan Chauhan'**
+  String get supervisorExpenseDarshan;
+
+  /// No description provided for @supervisorExpenseAgentRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Agent'**
+  String get supervisorExpenseAgentRole;
+
+  /// No description provided for @supervisorExpenseLaborCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Labor cost'**
+  String get supervisorExpenseLaborCost;
+
+  /// No description provided for @supervisorExpenseYesterdayMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday • 08:15 AM'**
+  String get supervisorExpenseYesterdayMorning;
+
+  /// No description provided for @supervisorExpenseYesterdayLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday • 10:15 AM'**
+  String get supervisorExpenseYesterdayLate;
+
+  /// No description provided for @supervisorExpenseMayDate.
+  ///
+  /// In en, this message translates to:
+  /// **'08 May 2026 • 08:15 AM'**
+  String get supervisorExpenseMayDate;
+
+  /// No description provided for @supervisorExpenseAmount4000.
+  ///
+  /// In en, this message translates to:
+  /// **'-₹4,000'**
+  String get supervisorExpenseAmount4000;
+
+  /// No description provided for @supervisorExpenseAmount1500.
+  ///
+  /// In en, this message translates to:
+  /// **'-₹1,500'**
+  String get supervisorExpenseAmount1500;
+
+  /// No description provided for @supervisorExpenseAmount720.
+  ///
+  /// In en, this message translates to:
+  /// **'-₹720'**
+  String get supervisorExpenseAmount720;
+
+  /// No description provided for @supervisorExpenseDetailAmount4000.
+  ///
+  /// In en, this message translates to:
+  /// **'₹4,000'**
+  String get supervisorExpenseDetailAmount4000;
+
+  /// No description provided for @supervisorExpensePendingReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Review'**
+  String get supervisorExpensePendingReview;
+
+  /// No description provided for @supervisorExpenseNewCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'New Category Requests'**
+  String get supervisorExpenseNewCategories;
+
+  /// No description provided for @supervisorExpenseReviewCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Review submitted expense categories'**
+  String get supervisorExpenseReviewCategories;
+
+  /// No description provided for @supervisorExpenseViewRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'View Requests'**
+  String get supervisorExpenseViewRequests;
+
+  /// No description provided for @supervisorExpenseNoCashRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No cash requests available'**
+  String get supervisorExpenseNoCashRequests;
+
+  /// No description provided for @supervisorExpenseApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully Approved!'**
+  String get supervisorExpenseApprovedTitle;
+
+  /// No description provided for @supervisorExpenseApprovedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Approved Successfully'**
+  String get supervisorExpenseApprovedMessage;
+
+  /// No description provided for @supervisorExpenseRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Rejected!'**
+  String get supervisorExpenseRejectedTitle;
+
+  /// No description provided for @supervisorExpenseRejectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Rejected Successfully'**
+  String get supervisorExpenseRejectedMessage;
+
+  /// No description provided for @supervisorExpenseRejectScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Expenses'**
+  String get supervisorExpenseRejectScreenTitle;
+
+  /// No description provided for @supervisorExpenseReasonForRejection.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for Rejection'**
+  String get supervisorExpenseReasonForRejection;
+
+  /// No description provided for @supervisorExpenseInvalidBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid / Clear Bill Missing'**
+  String get supervisorExpenseInvalidBill;
+
+  /// No description provided for @supervisorExpenseDuplicateClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate Expense Claim'**
+  String get supervisorExpenseDuplicateClaim;
+
+  /// No description provided for @supervisorExpensePolicyViolation.
+  ///
+  /// In en, this message translates to:
+  /// **'Policy Violation / Personal Expense'**
+  String get supervisorExpensePolicyViolation;
+
+  /// No description provided for @supervisorExpenseRejectReasonValue.
+  ///
+  /// In en, this message translates to:
+  /// **'No Vehicle Available'**
+  String get supervisorExpenseRejectReasonValue;
 }
 
 class _AppLocalizationsDelegate

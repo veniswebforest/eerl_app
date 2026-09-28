@@ -12,6 +12,7 @@ class CollectionMaterialCard extends StatelessWidget {
     required this.verifiedWeightLabel,
     required this.rateLabel,
     required this.totalLabel,
+    required this.weightValue,
   });
 
   final CollectionMaterialModel item;
@@ -19,6 +20,7 @@ class CollectionMaterialCard extends StatelessWidget {
   final String verifiedWeightLabel;
   final String rateLabel;
   final String totalLabel;
+  final String weightValue;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +56,7 @@ class CollectionMaterialCard extends StatelessWidget {
               child: _WeightBox(
                 label: collectionWeightLabel,
                 color: AppColors.cool200,
+                value: weightValue,
               ),
             ),
             const SizedBox(width: 14),
@@ -61,6 +64,7 @@ class CollectionMaterialCard extends StatelessWidget {
               child: _WeightBox(
                 label: verifiedWeightLabel,
                 color: AppColors.primary100,
+                value: weightValue,
               ),
             ),
           ],
@@ -105,9 +109,14 @@ class CollectionMaterialCard extends StatelessWidget {
 }
 
 class _WeightBox extends StatelessWidget {
-  const _WeightBox({required this.label, required this.color});
+  const _WeightBox({
+    required this.label,
+    required this.color,
+    required this.value,
+  });
   final String label;
   final Color color;
+  final String value;
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +137,7 @@ class _WeightBox extends StatelessWidget {
           borderRadius: BorderRadius.circular(7),
         ),
         child: Text(
-          'KG   270.00',
+          value,
           style: AppTextStyles.mediumSH9_12.copyWith(
             color: AppColors.neutral900,
           ),

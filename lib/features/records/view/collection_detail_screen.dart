@@ -141,6 +141,8 @@ class CollectionDetailScreen extends StatelessWidget {
                             rateLabel: context.l10n.collectionDetailRate,
                             totalLabel:
                                 context.l10n.collectionDetailMaterialTotal,
+                            weightValue:
+                                context.l10n.verificationDetailWeightValue,
                           ),
                           if (i != materials.length - 1)
                             const Divider(height: 26, color: AppColors.cool400),
@@ -175,6 +177,14 @@ class CollectionDetailScreen extends StatelessWidget {
                         context.l10n.collectionDetailWeightComparison,
                     comparisonHint: context.l10n.collectionDetailComparisonHint,
                     totalPriceLabel: context.l10n.collectionDetailTotalPrice,
+                    collectionValue:
+                        context.l10n.verificationDetailCollectedTotalValue,
+                    verifiedValue:
+                        context.l10n.verificationDetailVerifiedTotalValue,
+                    comparisonValue:
+                        context.l10n.verificationDetailDifferenceValue,
+                    totalPriceValue:
+                        context.l10n.verificationDetailTotalPriceValue,
                   ),
                   const SizedBox(height: 16),
                   SizedBox(

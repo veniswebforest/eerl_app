@@ -35,7 +35,7 @@ class CollectionHistoryCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.neutral50,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: item.status == CollectionRecordStatus.pending
               ? Border.all(color: AppColors.primary400)

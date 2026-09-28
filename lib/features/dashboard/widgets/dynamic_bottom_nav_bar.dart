@@ -25,12 +25,12 @@ class DynamicBottomNavBar extends StatelessWidget {
       child: Center(
         heightFactor: 1,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
+          constraints: const BoxConstraints(maxWidth: 335),
           child: Container(
             height: 70,
             decoration: BoxDecoration(
               color: AppColors.primary900,
-              borderRadius: BorderRadius.circular(36),
+              borderRadius: BorderRadius.circular(32),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.neutral950.withValues(alpha: 0.08),
@@ -99,12 +99,12 @@ class _NavigationItem extends StatelessWidget {
                 duration: const Duration(milliseconds: 180),
                 child: isSelected
                     ? Padding(
-                        padding: const EdgeInsets.only(top: 4),
+                        padding: const EdgeInsets.only(top: 6),
                         child: Text(
                           item.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.semiboldH10_12.copyWith(
+                          style: AppTextStyles.semiboldH9_14.copyWith(
                             color: AppColors.primary400,
                           ),
                         ),

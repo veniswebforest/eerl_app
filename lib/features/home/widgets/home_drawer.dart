@@ -7,8 +7,11 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'home_assets.dart';
 
 const _iconPath = 'assets/icons/home';
+const _supervisorDrawerIconPath = 'assets/icons/home/supervisor/drawer';
 
-/// Navigation drawer implemented from Figma node 5014:2668.
+enum HomeDrawerRole { collectionAgent, supervisor }
+
+/// Role-aware navigation drawer based on Figma nodes 5114:3146 and 5114:3594.
 class HomeDrawer extends StatefulWidget {
   const HomeDrawer({
     super.key,
@@ -24,7 +27,15 @@ class HomeDrawer extends StatefulWidget {
     this.onRequestsTap,
     this.onTransferRequestsTap,
     this.onRagpickerDirectoryTap,
+    this.onSupervisorStockTap,
+    this.onSupervisorExpenseTap,
+    this.onSupervisorPendingVerificationTap,
+    this.onSupervisorVerifiedEntriesTap,
+    this.onMrfPersonListTap,
+    this.onD2dVehicleListTap,
+    this.onAgentStatusTap,
     this.roleTitle,
+    this.role = HomeDrawerRole.collectionAgent,
   });
 
   final VoidCallback? onCollectionTap;
@@ -39,7 +50,15 @@ class HomeDrawer extends StatefulWidget {
   final VoidCallback? onRequestsTap;
   final VoidCallback? onTransferRequestsTap;
   final VoidCallback? onRagpickerDirectoryTap;
+  final VoidCallback? onSupervisorStockTap;
+  final VoidCallback? onSupervisorExpenseTap;
+  final VoidCallback? onSupervisorPendingVerificationTap;
+  final VoidCallback? onSupervisorVerifiedEntriesTap;
+  final VoidCallback? onMrfPersonListTap;
+  final VoidCallback? onD2dVehicleListTap;
+  final VoidCallback? onAgentStatusTap;
   final String? roleTitle;
+  final HomeDrawerRole role;
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -47,6 +66,8 @@ class HomeDrawer extends StatefulWidget {
 
 class _HomeDrawerState extends State<HomeDrawer> {
   bool _tasksExpanded = false;
+  bool _supervisorVerificationExpanded = false;
+  bool _supervisorTasksExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +78,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
       backgroundColor: Colors.white,
       child: Column(
         children: [
-          _ProfileHeader(roleTitle: widget.roleTitle),
+          _ProfileHeader(roleTitle: widget.roleTitle, role: widget.role),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -67,130 +88,134 @@ class _HomeDrawerState extends State<HomeDrawer> {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          _DrawerItem(
-                            key: const Key('drawer-collection'),
-                            label: context.l10n.drawerCollection,
-                            icon: '$_iconPath/drawer_collection.svg',
-                            onTap: () {
-                              _close(context);
-                              widget.onCollectionTap?.call();
-                            },
-                          ),
-                          _DrawerItem(
-                            key: const Key('drawer-transfer-requests'),
-                            label: context.l10n.transferRequests,
-                            icon: '$_iconPath/drawer_transfer_requests.svg',
-                            onTap: () {
-                              _close(context);
-                              widget.onTransferRequestsTap?.call();
-                            },
-                          ),
-                          _DrawerItem(
-                            key: const Key('drawer-receipts'),
-                            label: context.l10n.drawerReceipts,
-                            icon: '$_iconPath/drawer_receipts.svg',
-                            onTap: () {
-                              _close(context);
-                              widget.onReceiptsTap?.call();
-                            },
-                          ),
-                          _DrawerItem(
-                            label: context.l10n.walletLogExpense,
-                            icon: '$_iconPath/drawer_wallet.svg',
-                            onTap: () {
-                              _close(context);
-                              widget.onWalletTap?.call();
-                            },
-                          ),
-                          _DrawerItem(
-                            key: const Key('drawer-configure-material'),
-                            label: context.l10n.drawerConfigureMaterials,
-                            icon: '$_iconPath/drawer_material_list.svg',
-                            onTap: () {
-                              _close(context);
-                              widget.onConfigureMaterialTap?.call();
-                            },
-                          ),
-                          _DrawerItem(
-                            key: const Key('drawer-ragpicker-directory'),
-                            label: context.l10n.drawerRagpickerDirectory,
-                            icon: 'assets/icons/profile/role.svg',
-                            onTap: () {
-                              _close(context);
-                              widget.onRagpickerDirectoryTap?.call();
-                            },
-                          ),
-                          _DrawerExpandableItem(
-                            icon: '$_iconPath/pending_task.svg',
-
-                            key: const Key('drawer-tasks-requests'),
-                            label: context.l10n.drawerTasksRequests,
-                            expanded: _tasksExpanded,
-                            onTap: () => setState(
-                              () => _tasksExpanded = !_tasksExpanded,
+                          if (widget.role == HomeDrawerRole.supervisor)
+                            ..._buildSupervisorItems(context)
+                          else ...[
+                            _DrawerItem(
+                              key: const Key('drawer-collection'),
+                              label: context.l10n.drawerCollection,
+                              icon: '$_iconPath/drawer_collection.svg',
+                              onTap: () {
+                                _close(context);
+                                widget.onCollectionTap?.call();
+                              },
                             ),
-                            children: [
-                              _DrawerChildItem(
-                                key: const Key('drawer-tasks'),
-                                label: context.l10n.drawerTasks,
-                                style: AppTextStyles.semiboldH9_14.copyWith(
-                                  color: AppColors.neutral950,
-                                ),
-                                onTap: () {
-                                  _close(context);
-                                  widget.onTasksTap?.call();
-                                },
+                            _DrawerItem(
+                              key: const Key('drawer-transfer-requests'),
+                              label: context.l10n.transferRequests,
+                              icon: '$_iconPath/drawer_transfer_requests.svg',
+                              onTap: () {
+                                _close(context);
+                                widget.onTransferRequestsTap?.call();
+                              },
+                            ),
+                            _DrawerItem(
+                              key: const Key('drawer-receipts'),
+                              label: context.l10n.drawerReceipts,
+                              icon: '$_iconPath/drawer_receipts.svg',
+                              onTap: () {
+                                _close(context);
+                                widget.onReceiptsTap?.call();
+                              },
+                            ),
+                            _DrawerItem(
+                              label: context.l10n.walletLogExpense,
+                              icon: '$_iconPath/drawer_wallet.svg',
+                              onTap: () {
+                                _close(context);
+                                widget.onWalletTap?.call();
+                              },
+                            ),
+                            _DrawerItem(
+                              key: const Key('drawer-configure-material'),
+                              label: context.l10n.drawerConfigureMaterials,
+                              icon: '$_iconPath/drawer_material_list.svg',
+                              onTap: () {
+                                _close(context);
+                                widget.onConfigureMaterialTap?.call();
+                              },
+                            ),
+                            _DrawerItem(
+                              key: const Key('drawer-ragpicker-directory'),
+                              label: context.l10n.drawerRagpickerDirectory,
+                              icon: 'assets/icons/profile/role.svg',
+                              onTap: () {
+                                _close(context);
+                                widget.onRagpickerDirectoryTap?.call();
+                              },
+                            ),
+                            _DrawerExpandableItem(
+                              icon: '$_iconPath/pending_task.svg',
+
+                              key: const Key('drawer-tasks-requests'),
+                              label: context.l10n.drawerTasksRequests,
+                              expanded: _tasksExpanded,
+                              onTap: () => setState(
+                                () => _tasksExpanded = !_tasksExpanded,
                               ),
-                              _DrawerChildItem(
-                                key: const Key('drawer-requests'),
-                                label: context.l10n.drawerRequests,
-                                style: AppTextStyles.semiboldH9_14.copyWith(
-                                  color: AppColors.neutral950,
+                              children: [
+                                _DrawerChildItem(
+                                  key: const Key('drawer-tasks'),
+                                  label: context.l10n.drawerTasks,
+                                  style: AppTextStyles.semiboldH9_14.copyWith(
+                                    color: AppColors.neutral950,
+                                  ),
+                                  onTap: () {
+                                    _close(context);
+                                    widget.onTasksTap?.call();
+                                  },
                                 ),
-                                onTap: () {
-                                  _close(context);
-                                  widget.onRequestsTap?.call();
-                                },
-                              ),
-                            ],
-                          ),
-                          _DrawerItem(
-                            key: const Key('drawer-sync-status'),
-                            label: context.l10n.drawerSyncStatus,
-                            icon: '$_iconPath/drawer_sync_status.svg',
-                            onTap: () {
-                              _close(context);
-                              widget.onSyncStatusTap?.call();
-                            },
-                          ),
-                          _DrawerItem(
-                            key: const Key('drawer-notifications'),
-                            label: context.l10n.notifications,
-                            icon: '$_iconPath/drawer_notifications.svg',
-                            onTap: () {
-                              _close(context);
-                              widget.onNotificationTap?.call();
-                            },
-                          ),
-                          _DrawerItem(
-                            key: const Key('drawer-help-support'),
-                            label: context.l10n.drawerHelpSupport,
-                            icon: '$_iconPath/drawer_help_support.svg',
-                            onTap: () {
-                              _close(context);
-                              widget.onHelpSupportTap?.call();
-                            },
-                          ),
-                          _DrawerItem(
-                            key: const Key('drawer-logout'),
-                            label: context.l10n.drawerLogout,
-                            icon: '$_iconPath/drawer_logout.svg',
-                            textColor: const Color(0xFFE22424),
-                            onTap: () {
-                              _close(context);
-                              widget.onLogoutTap?.call();
-                            },
-                          ),
+                                _DrawerChildItem(
+                                  key: const Key('drawer-requests'),
+                                  label: context.l10n.drawerRequests,
+                                  style: AppTextStyles.semiboldH9_14.copyWith(
+                                    color: AppColors.neutral950,
+                                  ),
+                                  onTap: () {
+                                    _close(context);
+                                    widget.onRequestsTap?.call();
+                                  },
+                                ),
+                              ],
+                            ),
+                            _DrawerItem(
+                              key: const Key('drawer-sync-status'),
+                              label: context.l10n.drawerSyncStatus,
+                              icon: '$_iconPath/drawer_sync_status.svg',
+                              onTap: () {
+                                _close(context);
+                                widget.onSyncStatusTap?.call();
+                              },
+                            ),
+                            _DrawerItem(
+                              key: const Key('drawer-notifications'),
+                              label: context.l10n.notifications,
+                              icon: '$_iconPath/drawer_notifications.svg',
+                              onTap: () {
+                                _close(context);
+                                widget.onNotificationTap?.call();
+                              },
+                            ),
+                            _DrawerItem(
+                              key: const Key('drawer-help-support'),
+                              label: context.l10n.drawerHelpSupport,
+                              icon: '$_iconPath/drawer_help_support.svg',
+                              onTap: () {
+                                _close(context);
+                                widget.onHelpSupportTap?.call();
+                              },
+                            ),
+                            _DrawerItem(
+                              key: const Key('drawer-logout'),
+                              label: context.l10n.drawerLogout,
+                              icon: '$_iconPath/drawer_logout.svg',
+                              textColor: const Color(0xFFE22424),
+                              onTap: () {
+                                _close(context);
+                                widget.onLogoutTap?.call();
+                              },
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -206,6 +231,325 @@ class _HomeDrawerState extends State<HomeDrawer> {
   }
 
   static void _close(BuildContext context) => Navigator.of(context).pop();
+
+  List<Widget> _buildSupervisorItems(BuildContext context) {
+    final items = <Widget>[
+      _DrawerItem(
+        key: const Key('drawer-supervisor-stock'),
+        label: context.l10n.drawerSupervisorStock,
+        icon: '$_supervisorDrawerIconPath/stock.svg',
+        onTap: () {
+          _close(context);
+          widget.onSupervisorStockTap?.call();
+        },
+      ),
+      _SupervisorExpandableItem(
+        key: const Key('drawer-supervisor-verification'),
+        label: context.l10n.drawerSupervisorVerification,
+        collapsedIcon: '$_supervisorDrawerIconPath/verification.svg',
+        expandedIcon: '$_supervisorDrawerIconPath/verification_active.svg',
+        expanded: _supervisorVerificationExpanded,
+        childGap: 4,
+        onTap: () => setState(
+          () => _supervisorVerificationExpanded =
+              !_supervisorVerificationExpanded,
+        ),
+        children: [
+          _SupervisorChildItem(
+            key: const Key('drawer-supervisor-pending-verification'),
+            label: context.l10n.transferTimelinePendingVerification,
+            onTap: () {
+              _close(context);
+              widget.onSupervisorPendingVerificationTap?.call();
+            },
+          ),
+          _SupervisorChildItem(
+            key: const Key('drawer-supervisor-verified-entries'),
+            label: context.l10n.verifiedEntries,
+            onTap: () {
+              _close(context);
+              widget.onSupervisorVerifiedEntriesTap?.call();
+            },
+          ),
+        ],
+      ),
+      _SupervisorExpandableItem(
+        key: const Key('drawer-supervisor-tasks-requests'),
+        label: context.l10n.drawerTasksRequests,
+        collapsedIcon: '$_supervisorDrawerIconPath/tasks_requests.svg',
+        expandedIcon: '$_supervisorDrawerIconPath/tasks_requests_active.svg',
+        expanded: _supervisorTasksExpanded,
+        onTap: () => setState(
+          () => _supervisorTasksExpanded = !_supervisorTasksExpanded,
+        ),
+        children: [
+          _SupervisorChildItem(
+            key: const Key('drawer-supervisor-tasks'),
+            label: context.l10n.drawerTasks,
+            onTap: () {
+              _close(context);
+              widget.onTasksTap?.call();
+            },
+          ),
+          _SupervisorChildItem(
+            key: const Key('drawer-supervisor-requests'),
+            label: context.l10n.drawerRequests,
+            onTap: () {
+              _close(context);
+              widget.onRequestsTap?.call();
+            },
+          ),
+        ],
+      ),
+      _DrawerItem(
+        key: const Key('drawer-supervisor-expense'),
+        label: context.l10n.drawerSupervisorExpense,
+        icon: '$_supervisorDrawerIconPath/expense.svg',
+        showBadge: true,
+        onTap: () {
+          _close(context);
+          widget.onSupervisorExpenseTap?.call();
+        },
+      ),
+      _DrawerItem(
+        key: const Key('drawer-supervisor-mrf-person-list'),
+        label: context.l10n.drawerSupervisorMrfPersonList,
+        icon: '$_supervisorDrawerIconPath/mrf_person.svg',
+        onTap: () {
+          _close(context);
+          widget.onMrfPersonListTap?.call();
+        },
+      ),
+      _DrawerItem(
+        key: const Key('drawer-supervisor-d2d-vehicle-list'),
+        label: context.l10n.drawerSupervisorD2dVehicleList,
+        icon: '$_supervisorDrawerIconPath/d2d_vehicle.svg',
+        onTap: () {
+          _close(context);
+          widget.onD2dVehicleListTap?.call();
+        },
+      ),
+      _DrawerItem(
+        key: const Key('drawer-supervisor-ragpicker-directory'),
+        label: context.l10n.drawerRagpickerDirectory,
+        icon: '$_supervisorDrawerIconPath/ragpicker.svg',
+        onTap: () {
+          _close(context);
+          widget.onRagpickerDirectoryTap?.call();
+        },
+      ),
+      _DrawerItem(
+        key: const Key('drawer-supervisor-agent-status'),
+        label: context.l10n.drawerSupervisorAgentStatus,
+        icon: '$_supervisorDrawerIconPath/agent_status.svg',
+        onTap: () {
+          _close(context);
+          widget.onAgentStatusTap?.call();
+        },
+      ),
+      _DrawerItem(
+        key: const Key('drawer-sync-status'),
+        label: context.l10n.drawerSyncStatus,
+        icon: '$_supervisorDrawerIconPath/sync_status.svg',
+        onTap: () {
+          _close(context);
+          widget.onSyncStatusTap?.call();
+        },
+      ),
+      _DrawerItem(
+        key: const Key('drawer-notifications'),
+        label: context.l10n.notifications,
+        icon: '$_supervisorDrawerIconPath/notifications.svg',
+        onTap: () {
+          _close(context);
+          widget.onNotificationTap?.call();
+        },
+      ),
+      _DrawerItem(
+        key: const Key('drawer-help-support'),
+        label: context.l10n.drawerHelpSupport,
+        icon: '$_supervisorDrawerIconPath/help_support.svg',
+        onTap: () {
+          _close(context);
+          widget.onHelpSupportTap?.call();
+        },
+      ),
+      _DrawerItem(
+        key: const Key('drawer-logout'),
+        label: context.l10n.drawerLogout,
+        icon: '$_supervisorDrawerIconPath/logout.svg',
+        chevronColor: const Color(0xFFE22424),
+        textColor: const Color(0xFFE22424),
+        onTap: () {
+          _close(context);
+          widget.onLogoutTap?.call();
+        },
+      ),
+    ];
+
+    return [
+      for (var index = 0; index < items.length; index++) ...[
+        items[index],
+        if (index != items.length - 1) const SizedBox(height: 12),
+      ],
+    ];
+  }
+}
+
+class _SupervisorExpandableItem extends StatelessWidget {
+  const _SupervisorExpandableItem({
+    super.key,
+    required this.label,
+    required this.collapsedIcon,
+    required this.expandedIcon,
+    required this.expanded,
+    required this.onTap,
+    required this.children,
+    this.childGap = 0,
+  });
+
+  final String label;
+  final String collapsedIcon;
+  final String expandedIcon;
+  final bool expanded;
+  final VoidCallback onTap;
+  final List<Widget> children;
+  final double childGap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      decoration: BoxDecoration(
+        color: expanded ? const Color(0xFFF2FBF3) : Colors.transparent,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(8),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: expanded ? const Color(0xFFC3EFCB) : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: SvgPicture.asset(
+                      expanded ? expandedIcon : collapsedIcon,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: expanded
+                            ? AppColors.neutral950
+                            : AppColors.neutral600,
+                        fontSize: 16,
+                        height: 20 / 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: SvgPicture.asset(
+                      expanded
+                          ? '$_supervisorDrawerIconPath/expanded_chevron.svg'
+                          : HomeAssets.drawerChevronRight,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            alignment: Alignment.topCenter,
+            child: expanded
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Column(
+                      children: [
+                        for (
+                          var index = 0;
+                          index < children.length;
+                          index++
+                        ) ...[
+                          children[index],
+                          if (index != children.length - 1 && childGap > 0)
+                            SizedBox(height: childGap),
+                        ],
+                      ],
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SupervisorChildItem extends StatelessWidget {
+  const _SupervisorChildItem({
+    super.key,
+    required this.label,
+    required this.onTap,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: AppColors.neutral950,
+                  fontSize: 14,
+                  height: 18 / 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: SvgPicture.asset(
+                HomeAssets.drawerChevronRight,
+                colorFilter: const ColorFilter.mode(
+                  AppColors.neutral950,
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _DrawerExpandableItem extends StatelessWidget {
@@ -351,9 +695,10 @@ class _DrawerChildItem extends StatelessWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({this.roleTitle});
+  const _ProfileHeader({this.roleTitle, required this.role});
 
   final String? roleTitle;
+  final HomeDrawerRole role;
 
   @override
   Widget build(BuildContext context) {
@@ -364,7 +709,9 @@ class _ProfileHeader extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           SvgPicture.asset(
-            '$_iconPath/drawer_header_background.svg',
+            role == HomeDrawerRole.supervisor
+                ? '$_supervisorDrawerIconPath/header_background.svg'
+                : '$_iconPath/drawer_header_background.svg',
             fit: BoxFit.fill,
           ),
           Positioned(
@@ -372,21 +719,46 @@ class _ProfileHeader extends StatelessWidget {
             top: 62,
             child: Row(
               children: [
-                ClipOval(
-                  child: Image.asset(
-                    'assets/images/home_drawer_rahul_patel.png',
-                    width: 48,
-                    height: 48,
-                    fit: BoxFit.cover,
+                if (role == HomeDrawerRole.supervisor)
+                  ClipOval(
+                    child: SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: Stack(
+                        clipBehavior: Clip.hardEdge,
+                        children: [
+                          Positioned(
+                            left: -5.78,
+                            top: -5.13,
+                            width: 59.57,
+                            height: 63.20,
+                            child: Image.asset(
+                              'assets/images/home_drawer_bhavesh_shah.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  ClipOval(
+                    child: Image.asset(
+                      'assets/images/home_drawer_rahul_patel.png',
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
                 const SizedBox(width: 12),
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.l10n.drawerUserName,
+                      role == HomeDrawerRole.supervisor
+                          ? context.l10n.drawerSupervisorUserName
+                          : context.l10n.drawerUserName,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -422,11 +794,15 @@ class _DrawerItem extends StatelessWidget {
     required this.icon,
     required this.onTap,
     this.textColor = AppColors.neutral600,
+    this.chevronColor,
+    this.showBadge = false,
   });
 
   final String label;
   final String icon;
   final Color textColor;
+  final Color? chevronColor;
+  final bool showBadge;
   final VoidCallback onTap;
 
   @override
@@ -438,13 +814,21 @@ class _DrawerItem extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: SvgPicture.asset(
-                icon,
-                colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn),
-              ),
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                SizedBox(width: 24, height: 24, child: SvgPicture.asset(icon)),
+                if (showBadge)
+                  Positioned(
+                    left: 16,
+                    top: -12,
+                    child: SvgPicture.asset(
+                      '$_supervisorDrawerIconPath/expense_badge.svg',
+                      width: 10,
+                      height: 10,
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 6),
             Expanded(
@@ -465,7 +849,9 @@ class _DrawerItem extends StatelessWidget {
               height: 24,
               child: SvgPicture.asset(
                 HomeAssets.drawerChevronRight,
-                colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn),
+                colorFilter: chevronColor == null
+                    ? null
+                    : ColorFilter.mode(chevronColor!, BlendMode.srcIn),
               ),
             ),
           ],

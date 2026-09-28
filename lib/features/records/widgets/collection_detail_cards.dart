@@ -63,12 +63,20 @@ class CollectionSummaryCard extends StatelessWidget {
     required this.comparisonLabel,
     required this.comparisonHint,
     required this.totalPriceLabel,
+    required this.collectionValue,
+    required this.verifiedValue,
+    required this.comparisonValue,
+    required this.totalPriceValue,
   });
   final String collectionLabel;
   final String verifiedLabel;
   final String comparisonLabel;
   final String comparisonHint;
   final String totalPriceLabel;
+  final String collectionValue;
+  final String verifiedValue;
+  final String comparisonValue;
+  final String totalPriceValue;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -86,13 +94,13 @@ class CollectionSummaryCard extends StatelessWidget {
     ),
     child: Column(
       children: [
-        _SummaryRow(collectionLabel, '810.00 KG'),
+        _SummaryRow(collectionLabel, collectionValue),
         const SizedBox(height: 10),
-        _SummaryRow(verifiedLabel, '790.00 KG'),
+        _SummaryRow(verifiedLabel, verifiedValue),
         const Divider(height: 18, color: AppColors.primary800),
-        _SummaryRow(comparisonLabel, '-20.00 KG', hint: comparisonHint),
+        _SummaryRow(comparisonLabel, comparisonValue, hint: comparisonHint),
         const Divider(height: 18, color: AppColors.primary800),
-        _SummaryRow(totalPriceLabel, '₹35,550.00', highlight: true),
+        _SummaryRow(totalPriceLabel, totalPriceValue, highlight: true),
       ],
     ),
   );

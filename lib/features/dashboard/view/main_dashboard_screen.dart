@@ -19,6 +19,10 @@ import 'package:eerl_app/features/records/model/records_view_flag.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
 import 'package:eerl_app/features/role_switcher/view/role_switcher_screen.dart';
+import 'package:eerl_app/features/stock/model/stock_item.dart';
+import 'package:eerl_app/features/stock/view/facility_stock_screen.dart';
+import 'package:eerl_app/features/stock/view/stock_detail_screen.dart';
+import 'package:eerl_app/features/supervisor_expense/view/supervisor_expense_module_screen.dart';
 import 'package:eerl_app/features/ragpicker_directory/view/ragpicker_directory_screen.dart';
 import 'package:eerl_app/features/requests/view/raise_request_screen.dart';
 import 'package:eerl_app/features/requests/model/request_list_item.dart';
@@ -32,6 +36,10 @@ import 'package:eerl_app/features/transfer_requests/view/transfer_requests_scree
 import 'package:eerl_app/features/transfer_requests/model/transfer_request_detail_state.dart';
 import 'package:eerl_app/features/transfer_requests/model/transfer_request_item.dart';
 import 'package:eerl_app/features/transfer_requests/view/transfer_request_detail_screen.dart';
+import 'package:eerl_app/features/verification/view/supervisor_verification_screen.dart';
+import 'package:eerl_app/features/verification/view/verification_detail_screen.dart';
+import 'package:eerl_app/features/verification/view/reject_collection_screen.dart';
+import 'package:eerl_app/features/verification/model/verification_entry.dart';
 import 'package:eerl_app/features/wallet/model/expense_claim_detail_status.dart';
 import 'package:eerl_app/features/wallet/model/cash_request_detail_status.dart';
 import 'package:eerl_app/features/wallet/view/cash_request_detail_screen.dart';
@@ -92,6 +100,12 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   ExpenseClaimDetailStatus? _claimDetailStatus;
   CashRequestDetailStatus? _cashRequestDetailStatus;
   CollectionDetailStatus? _collectionDetailStatus;
+  VerificationDetailStatus? _verificationDetailStatus;
+  StockStage? _selectedStockStage;
+  bool _isVerificationRejectOpen = false;
+  bool _isSupervisorExpenseOpen = false;
+  VerificationListStatus _verificationInitialStatus =
+      VerificationListStatus.pending;
   RecordsViewFlag _recordsInitialView = RecordsViewFlag.history;
   int _recordsPageVersion = 0;
   bool _isDrawerOpen = false;
@@ -128,7 +142,11 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
 
     return Scaffold(
       extendBody: true,
-      body: _isRoleSwitcherOpen
+      body: _isSupervisorExpenseOpen
+          ? SupervisorExpenseModuleScreen(
+              onBack: () => setState(() => _isSupervisorExpenseOpen = false),
+            )
+          : _isRoleSwitcherOpen
           ? RoleSwitcherScreen(
               initialRole: _activeRole,
               onBack: () => setState(() => _isRoleSwitcherOpen = false),
@@ -203,6 +221,30 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
                 };
               }),
             )
+          : _isVerificationRejectOpen
+          ? RejectCollectionScreen(
+              onBack: () => setState(() => _isVerificationRejectOpen = false),
+              onCancel: () => setState(() => _isVerificationRejectOpen = false),
+              onConfirm: () => setState(() {
+                _isVerificationRejectOpen = false;
+                _verificationDetailStatus = VerificationDetailStatus.rejected;
+              }),
+            )
+          : _selectedStockStage != null
+          ? StockDetailScreen(
+              stage: _selectedStockStage!,
+              onBack: () => setState(() => _selectedStockStage = null),
+            )
+          : _verificationDetailStatus != null
+          ? VerificationDetailScreen(
+              status: _verificationDetailStatus!,
+              onBack: () => setState(() => _verificationDetailStatus = null),
+              onApprove: () => setState(
+                () => _verificationDetailStatus =
+                    VerificationDetailStatus.approved,
+              ),
+              onReject: () => setState(() => _isVerificationRejectOpen = true),
+            )
           : _selectedRequest != null
           ? RequestDetailScreen(
               status: _selectedRequest!.status,
@@ -272,7 +314,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               children: items.map((item) => item.page).toList(growable: false),
             ),
       bottomNavigationBar:
-          _isWalletOpen ||
+          _isSupervisorExpenseOpen ||
+              _isWalletOpen ||
               _isRoleSwitcherOpen ||
               _isAddCollectionOpen ||
               _isLogExpenseOpen ||
@@ -286,6 +329,9 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               _isTransferRequestsOpen ||
               _isCreateTransferOpen ||
               _transferRequestDetailState != null ||
+              _verificationDetailStatus != null ||
+              _selectedStockStage != null ||
+              _isVerificationRejectOpen ||
               _isRaiseRequestOpen ||
               _selectedRequest != null ||
               _isTasksOpen ||
@@ -369,6 +415,18 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
           onConfigureMaterialTap: () =>
               setState(() => _isConfigureMaterialOpen = true),
           onTasksTap: () => setState(() => _isTasksOpen = true),
+          onSupervisorStockTap: () =>
+              setState(() => _selectedPageKey = 'supervisor-stock'),
+          onSupervisorExpenseTap: () =>
+              setState(() => _isSupervisorExpenseOpen = true),
+          onSupervisorPendingVerificationTap: () => setState(() {
+            _verificationInitialStatus = VerificationListStatus.pending;
+            _selectedPageKey = 'supervisor-verify';
+          }),
+          onSupervisorVerifiedEntriesTap: () => setState(() {
+            _verificationInitialStatus = VerificationListStatus.processed;
+            _selectedPageKey = 'supervisor-verify';
+          }),
           onRequestsTap: () => setState(() => _isRequestsOpen = true),
           onTransferRequestsTap: () =>
               setState(() => _isTransferRequestsOpen = true),
@@ -423,6 +481,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         roles: agentRoles,
         permission: 'collections.view',
       ),
+
       BottomNavItemModel(
         title: l10n.records,
         selectedIcon: '$_navIconPath/nav_wallet.svg',
@@ -444,22 +503,28 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         permission: 'records.view',
       ),
       BottomNavItemModel(
-        title: l10n.supervisorTasksNav,
+        title: l10n.verificationNav,
         selectedIcon: HomeAssets.supervisorNavTasks,
         unselectedIcon: HomeAssets.supervisorNavTasks,
-        page: MyTasksScreen(
-          onBack: () => setState(() => _selectedPageKey = 'home'),
-          onTaskTap: (task) => setState(() => _selectedTask = task),
+        page: SupervisorVerificationScreen(
+          initialStatus: _verificationInitialStatus,
+          onEntryTap: (status) =>
+              setState(() => _verificationDetailStatus = status),
         ),
-        pageKey: 'supervisor-tasks',
+        pageKey: 'supervisor-verify',
         roles: supervisorRoles,
       ),
       BottomNavItemModel(
         title: l10n.supervisorStockNav,
         selectedIcon: HomeAssets.supervisorNavStock,
         unselectedIcon: HomeAssets.supervisorNavStock,
-        page: ConfigureMaterialScreen(
-          onBack: () => setState(() => _selectedPageKey = 'home'),
+        page: FacilityStockScreen(
+          onStageTap: (stage) {
+            if (stage == StockStage.rawMaterial ||
+                stage == StockStage.sortedRawMaterial) {
+              setState(() => _selectedStockStage = stage);
+            }
+          },
         ),
         pageKey: 'supervisor-stock',
         roles: supervisorRoles,

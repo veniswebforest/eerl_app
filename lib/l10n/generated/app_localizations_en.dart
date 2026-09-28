@@ -793,6 +793,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drawerUserRole => 'Collection Agent';
 
   @override
+  String get drawerSupervisorUserName => 'Bhavesh Shah';
+
+  @override
+  String get drawerSupervisorStock => 'Stock';
+
+  @override
+  String get drawerSupervisorVerification => 'Verification';
+
+  @override
+  String get drawerSupervisorExpense => 'Expense';
+
+  @override
+  String get drawerSupervisorMrfPersonList => 'MRF Person List';
+
+  @override
+  String get drawerSupervisorD2dVehicleList => 'D2D Vehicle List';
+
+  @override
+  String get drawerSupervisorAgentStatus => 'Agent Status';
+
+  @override
   String get drawerCollection => 'Collection';
 
   @override
@@ -2587,4 +2608,384 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get edit => 'Edit';
+
+  @override
+  String get verificationNav => 'Verify';
+
+  @override
+  String get verificationCollectionHistory => 'Collection History';
+
+  @override
+  String get verificationSubtitle => 'Weigh, verify & approve stock';
+
+  @override
+  String get verificationSearchHint => 'Search Here...';
+
+  @override
+  String get verificationPending => 'Pending';
+
+  @override
+  String get verificationProcessed => 'Verified / Processed';
+
+  @override
+  String get verificationFilterAll => 'All';
+
+  @override
+  String get verificationFilterD2d => 'D2D';
+
+  @override
+  String get verificationFilterMrf => 'MRF';
+
+  @override
+  String get verificationFilterRamp => 'Ramp';
+
+  @override
+  String get verificationMrfStation => 'MRF Station';
+
+  @override
+  String get verificationPendingApproval => 'Pending Your Approval';
+
+  @override
+  String get verificationVerified => 'Verified';
+
+  @override
+  String get verificationRejected => 'Rejected';
+
+  @override
+  String get verificationEmpty => 'No collection entries found';
+
+  @override
+  String get verificationRahulPatel => 'Rahul Patel';
+
+  @override
+  String get verificationAmitShah => 'Amit Shah';
+
+  @override
+  String get verificationNareshModi => 'Naresh Modi';
+
+  @override
+  String get verificationWeightAmount => '213.50 KG • ₹2,706.75';
+
+  @override
+  String get verificationIdTime0925 => 'ID : #COL-2026-089 • 09:25 AM';
+
+  @override
+  String get verificationIdTime1125 => 'ID : #COL-2026-089 • 11:25 AM';
+
+  @override
+  String get verificationIdTime1225 => 'ID : #COL-2026-089 • 12:25 PM';
+
+  @override
+  String get verificationIdTime0225 => 'ID : #COL-2026-089 • 02:25 PM';
+
+  @override
+  String get verificationSuratSouth => 'EERL – Surat South';
+
+  @override
+  String get verificationSuratNorth => 'EERL – Surat North';
+
+  @override
+  String get verificationSuratWest => 'EERL – Surat West';
+
+  @override
+  String get verificationDetailCollectionIdValue => '#COL-2026-089';
+
+  @override
+  String get verificationDetailCollectionCenter => 'Collection Center:';
+
+  @override
+  String get verificationDetailGivenBy => 'Given By';
+
+  @override
+  String get verificationDetailGivenByValue => 'Vikram Singh (••• 4321)';
+
+  @override
+  String get verificationDetailVehicleNumber => 'Vehicle Number';
+
+  @override
+  String get verificationDetailVehicleValue => 'GJ-05-ZZ-0000';
+
+  @override
+  String get verificationDetailPaymentType => 'Payment Type';
+
+  @override
+  String get verificationDetailCash => 'Cash';
+
+  @override
+  String get verificationDetailVehiclePhoto => 'Capture Vehicle Photo';
+
+  @override
+  String get verificationDetailCollected => 'Collected *';
+
+  @override
+  String get verificationDetailVerified => 'Verified';
+
+  @override
+  String get verificationDetailCollectedWeight => 'Collected Weight *';
+
+  @override
+  String get verificationDetailVerifiedWeight => 'Verified Weight';
+
+  @override
+  String get verificationDetailTotalCollected => 'Total Collected';
+
+  @override
+  String get verificationDetailTotalVerified => 'Total Verified';
+
+  @override
+  String get verificationDetailDifference => 'Difference';
+
+  @override
+  String get verificationDetailReject => 'Reject';
+
+  @override
+  String get verificationDetailApprove => 'Approve';
+
+  @override
+  String get verificationDetailWeightValue => 'KG   270.00';
+
+  @override
+  String get verificationDetailCollectedTotalValue => '810.00 KG';
+
+  @override
+  String get verificationDetailVerifiedTotalValue => '790.00 KG';
+
+  @override
+  String get verificationDetailDifferenceValue => '-20.00 KG';
+
+  @override
+  String get verificationDetailTotalPriceValue => '₹35,550.00';
+
+  @override
+  String get stockTitle => 'Stock';
+
+  @override
+  String get stockLastUpdated => 'Last Updated:';
+
+  @override
+  String get stockLastUpdatedValue => 'Today, 11:20 AM';
+
+  @override
+  String get stockStageOverview => 'Stock by Stage Overview';
+
+  @override
+  String get stockRmCode => 'RM';
+
+  @override
+  String get stockSrmCode => 'SRM';
+
+  @override
+  String get stockWipCode => 'WIP';
+
+  @override
+  String get stockFgCode => 'FG';
+
+  @override
+  String get stockRawMaterial => '(Raw Material)';
+
+  @override
+  String get stockSortedRawMaterial => '(Sorted Raw Material)';
+
+  @override
+  String get stockWorkInProgress => '(Work In Progress)';
+
+  @override
+  String get stockFinishedGoods => '(Finished Goods)';
+
+  @override
+  String get stockStageWeight => '12,450 KG';
+
+  @override
+  String get stockRmItems => '(18 Items)';
+
+  @override
+  String get stockSrmItems => '(14 Items)';
+
+  @override
+  String get stockWipItems => '(11 Items)';
+
+  @override
+  String get stockFgItems => '(16 Items)';
+
+  @override
+  String get stockRmDetail => 'RM Detail';
+
+  @override
+  String get stockSrmDetail => 'SRM Detail';
+
+  @override
+  String get stockCenterValue => 'Stock Center : EERL – Surat South';
+
+  @override
+  String get stockUpdatedAgo => '10m ago';
+
+  @override
+  String get stockRawBinPrefix => 'RM';
+
+  @override
+  String get stockSortedBinPrefix => 'A';
+
+  @override
+  String get stockSortedBinA => 'A';
+
+  @override
+  String get stockSortedBinB => 'B';
+
+  @override
+  String get stockSortedBinC => 'C';
+
+  @override
+  String get stockSortedBinD => 'D';
+
+  @override
+  String get stockSortedBinE => 'E';
+
+  @override
+  String stockBinValue(String prefix, String number) {
+    return 'Bin: $prefix-$number';
+  }
+
+  @override
+  String get stockWeight980 => '980.00 KG';
+
+  @override
+  String get stockWeight720 => '720.00 KG';
+
+  @override
+  String get stockWeight2100 => '2,100.00 KG';
+
+  @override
+  String get stockWeight450 => '450.00 KG';
+
+  @override
+  String get stockWeight98050 => '980.50 KG';
+
+  @override
+  String get stockWeight72050 => '720.50 KG';
+
+  @override
+  String get stockWeight210050 => '2,100.50 KG';
+
+  @override
+  String get stockWeight45050 => '450.50 KG';
+
+  @override
+  String get verificationRejectTitle => 'Reject Collection';
+
+  @override
+  String get verificationRejectReason => 'Reason for Flagging ';
+
+  @override
+  String get verificationRequiredIndicator => '*';
+
+  @override
+  String get verificationRejectWeightMismatch => 'Weight Mismatch';
+
+  @override
+  String get verificationRejectInvalidPhoto => 'Invalid Photo Evidence';
+
+  @override
+  String get verificationRejectIncorrectCategory =>
+      'Incorrect Material Category';
+
+  @override
+  String get verificationRejectOther => 'Other';
+
+  @override
+  String get verificationRejectRemarksLabel => 'Additional Remarks (Optional)';
+
+  @override
+  String get verificationRejectRemarksValue =>
+      'Scale display shows 200kg but entered weight is 410.00kg & Truck Photo is not clear uploaded';
+
+  @override
+  String get verificationRejectMinimum => 'Min 150 Characters';
+
+  @override
+  String get verificationRejectConfirm => 'Confirm Rejection';
+
+  @override
+  String get verificationRejectCancel => 'Cancel';
+
+  @override
+  String get supervisorExpenseRahul => 'Rahul Patel';
+
+  @override
+  String get supervisorExpenseDarshan => 'Darshan Chauhan';
+
+  @override
+  String get supervisorExpenseAgentRole => 'Collection Agent';
+
+  @override
+  String get supervisorExpenseLaborCost => 'Labor cost';
+
+  @override
+  String get supervisorExpenseYesterdayMorning => 'Yesterday • 08:15 AM';
+
+  @override
+  String get supervisorExpenseYesterdayLate => 'Yesterday • 10:15 AM';
+
+  @override
+  String get supervisorExpenseMayDate => '08 May 2026 • 08:15 AM';
+
+  @override
+  String get supervisorExpenseAmount4000 => '-₹4,000';
+
+  @override
+  String get supervisorExpenseAmount1500 => '-₹1,500';
+
+  @override
+  String get supervisorExpenseAmount720 => '-₹720';
+
+  @override
+  String get supervisorExpenseDetailAmount4000 => '₹4,000';
+
+  @override
+  String get supervisorExpensePendingReview => 'Pending Review';
+
+  @override
+  String get supervisorExpenseNewCategories => 'New Category Requests';
+
+  @override
+  String get supervisorExpenseReviewCategories =>
+      'Review submitted expense categories';
+
+  @override
+  String get supervisorExpenseViewRequests => 'View Requests';
+
+  @override
+  String get supervisorExpenseNoCashRequests => 'No cash requests available';
+
+  @override
+  String get supervisorExpenseApprovedTitle => 'Successfully Approved!';
+
+  @override
+  String get supervisorExpenseApprovedMessage =>
+      'Request Approved Successfully';
+
+  @override
+  String get supervisorExpenseRejectedTitle => 'Expense Rejected!';
+
+  @override
+  String get supervisorExpenseRejectedMessage =>
+      'Request Rejected Successfully';
+
+  @override
+  String get supervisorExpenseRejectScreenTitle => 'Reject Expenses';
+
+  @override
+  String get supervisorExpenseReasonForRejection => 'Reason for Rejection';
+
+  @override
+  String get supervisorExpenseInvalidBill => 'Invalid / Clear Bill Missing';
+
+  @override
+  String get supervisorExpenseDuplicateClaim => 'Duplicate Expense Claim';
+
+  @override
+  String get supervisorExpensePolicyViolation =>
+      'Policy Violation / Personal Expense';
+
+  @override
+  String get supervisorExpenseRejectReasonValue => 'No Vehicle Available';
 }
