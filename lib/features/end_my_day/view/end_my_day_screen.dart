@@ -9,10 +9,7 @@ import '../widgets/end_day_balance_field.dart';
 import '../widgets/end_day_confirm_dialog.dart';
 
 class EndMyDayScreen extends StatelessWidget {
-  const EndMyDayScreen({super.key, required this.onBack, this.onEndDay});
-
-  final VoidCallback onBack;
-  final VoidCallback? onEndDay;
+  const EndMyDayScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +47,6 @@ class EndMyDayScreen extends StatelessWidget {
       backgroundColor: AppColors.backgroundColor,
       appBar: CustomAppBar(
         title: l10n.endMyDay,
-        onBackTap: onBack,
         backIconAsset: 'assets/icons/records/back.svg',
       ),
       body: SafeArea(
@@ -106,10 +102,14 @@ class EndMyDayScreen extends StatelessWidget {
                         height: 52,
                         child: ElevatedButton(
                           key: const Key('confirm-end-my-day-button'),
-                          onPressed: () => EndDayConfirmDialog.show(
-                            context,
-                            onConfirmed: onEndDay,
-                          ),
+                          onPressed: () async {
+                            final confirmed = await EndDayConfirmDialog.show(
+                              context,
+                            );
+                            if (context.mounted && confirmed == true) {
+                              Navigator.of(context).pop();
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             elevation: 0,
                             backgroundColor: AppColors.primary500,

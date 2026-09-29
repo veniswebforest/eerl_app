@@ -7,14 +7,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 
 class CollectionReceiptScreen extends StatelessWidget {
-  const CollectionReceiptScreen({super.key, required this.onBack});
-
-  final VoidCallback onBack;
-
-  static Route<void> route() => MaterialPageRoute<void>(
-    builder: (routeContext) =>
-        CollectionReceiptScreen(onBack: () => Navigator.of(routeContext).pop()),
-  );
+  const CollectionReceiptScreen({super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -34,7 +27,7 @@ class CollectionReceiptScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     child: InkWell(
                       key: const Key('collection-receipt-back'),
-                      onTap: onBack,
+                      onTap: () => Navigator.of(context).maybePop(),
                       borderRadius: BorderRadius.circular(10),
                       child: Padding(
                         padding: const EdgeInsets.all(10),

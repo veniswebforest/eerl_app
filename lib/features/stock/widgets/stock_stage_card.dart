@@ -37,10 +37,10 @@ class StockStageCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: Colors.white,
+        decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [HomeStyles.cardShadow],
-
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../model/collection_entry_state.dart';
@@ -15,26 +16,21 @@ import '../widgets/d2d_vehicle_details_form.dart';
 import '../widgets/d2d_waste_items_step.dart';
 import '../widgets/mrf_details_form.dart';
 import '../widgets/ramp_details_form.dart';
-import 'collection_image_preview_screen.dart';
-import 'collection_receipt_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class AddCollectionScreen extends StatefulWidget {
   const AddCollectionScreen({
     super.key,
-    required this.onBack,
     this.initialStep = CollectionEntryStep.items,
     this.initialType,
     this.initialSelectedItems = const <int>{},
     this.initialD2dReview = false,
-    this.onSaveDraft,
   });
 
-  final VoidCallback onBack;
   final CollectionEntryStep initialStep;
   final CollectionType? initialType;
   final Set<int> initialSelectedItems;
   final bool initialD2dReview;
-  final VoidCallback? onSaveDraft;
 
   @override
   State<AddCollectionScreen> createState() => _AddCollectionScreenState();
@@ -43,7 +39,7 @@ class AddCollectionScreen extends StatefulWidget {
 class _AddCollectionScreenState extends State<AddCollectionScreen> {
   late CollectionEntryStep _step;
   CollectionType? _type;
-  bool _typeOpen = false, _itemsOpen = false, _receipt = false;
+  bool _typeOpen = false, _itemsOpen = false;
   bool _conditionalFieldOpen = false;
   bool _showPlasticItems = true;
   late bool _d2dReview;
@@ -106,65 +102,66 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   int get _stepNumber => _step.index + 1;
 
   @override
-  Widget build(BuildContext context) {
-    if (_receipt) {
-      return CollectionReceiptScreen(
-        onBack: () => setState(() => _receipt = false),
-      );
-    }
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _BackButton(onTap: _goBack),
-                        if (!_d2dReview) ...[
-                          const SizedBox(height: 24),
-                          CollectionStepIndicator(currentStep: _stepNumber),
-                          const SizedBox(height: 24),
-                        ] else
-                          const SizedBox(height: 20),
-                        if (_d2dReview)
-                          _reviewStep(context)
-                        else if (_step == CollectionEntryStep.items)
-                          _itemsStep(context)
-                        else if (_step == CollectionEntryStep.photos)
-                          _type == CollectionType.d2d ||
-                                  _type == CollectionType.mrfStation ||
-                                  _type == CollectionType.ramp
-                              ? _d2dWasteItemsStep(context)
-                              : _photosStep(context)
-                        else if (_type == CollectionType.d2d ||
-                            _type == CollectionType.mrfStation ||
-                            _type == CollectionType.ramp)
-                          _d2dCollectionPhotosStep(context)
-                        else
-                          _reviewStep(context),
-                      ],
-                    ),
+  Widget build(BuildContext context) => PopScope(
+    canPop: _step == CollectionEntryStep.items && !_d2dReview,
+    onPopInvokedWithResult: (didPop, _) {
+      if (!didPop) _goBack();
+    },
+    child: _buildContent(context),
+  );
+
+  Widget _buildContent(BuildContext context) => Scaffold(
+    backgroundColor: AppColors.backgroundColor,
+    body: SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _BackButton(onTap: _goBack),
+                      if (!_d2dReview) ...[
+                        const SizedBox(height: 24),
+                        CollectionStepIndicator(currentStep: _stepNumber),
+                        const SizedBox(height: 24),
+                      ] else
+                        const SizedBox(height: 20),
+                      if (_d2dReview)
+                        _reviewStep(context)
+                      else if (_step == CollectionEntryStep.items)
+                        _itemsStep(context)
+                      else if (_step == CollectionEntryStep.photos)
+                        _type == CollectionType.d2d ||
+                                _type == CollectionType.mrfStation ||
+                                _type == CollectionType.ramp
+                            ? _d2dWasteItemsStep(context)
+                            : _photosStep(context)
+                      else if (_type == CollectionType.d2d ||
+                          _type == CollectionType.mrfStation ||
+                          _type == CollectionType.ramp)
+                        _d2dCollectionPhotosStep(context)
+                      else
+                        _reviewStep(context),
+                    ],
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
-              child: _bottomButtons(context),
-            ),
-          ],
-        ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
+            child: _bottomButtons(context),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 
   Widget _itemsStep(BuildContext context) {
     if (_type == CollectionType.d2d) {
@@ -716,7 +713,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
           Expanded(
             child: OutlinedButton(
               key: const Key('d2d-review-save-draft'),
-              onPressed: widget.onSaveDraft ?? widget.onBack,
+              onPressed: () => Navigator.of(context).pop(true),
               child: Text(context.l10n.collectionSaveDraft),
             ),
           ),
@@ -768,7 +765,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
           Expanded(
             child: OutlinedButton(
               key: const Key('collection-save-draft'),
-              onPressed: widget.onSaveDraft ?? widget.onBack,
+              onPressed: () => Navigator.of(context).pop(true),
               child: Text(context.l10n.collectionSaveDraft),
             ),
           ),
@@ -858,7 +855,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     builder: (_) => CollectionSuccessDialog(
       onPreview: () {
         Navigator.of(context, rootNavigator: true).pop();
-        setState(() => _receipt = true);
+        context.push<void>(AppRoutes.collectionReceipt);
       },
       onAddNew: () {
         Navigator.of(context, rootNavigator: true).pop();
@@ -937,9 +934,10 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   }
 
   void _showImagePreview(XFile image) {
-    Navigator.of(
-      context,
-    ).push(CollectionImagePreviewScreen.route(FileImage(File(image.path))));
+    context.push<void>(
+      AppRoutes.collectionImagePreview,
+      extra: FileImage(File(image.path)),
+    );
   }
 
   void _goBack() {
@@ -948,7 +946,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       return;
     }
     if (_step == CollectionEntryStep.items) {
-      widget.onBack();
+      Navigator.of(context).maybePop();
     } else {
       setState(() => _step = CollectionEntryStep.values[_step.index - 1]);
     }
@@ -1630,9 +1628,10 @@ class _ReviewMaterial extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
               child: InkWell(
                 key: ValueKey('review-material-image-$name'),
-                onTap: () => Navigator.of(
-                  context,
-                ).push(CollectionImagePreviewScreen.route(AssetImage(image))),
+                onTap: () => context.push<void>(
+                  AppRoutes.collectionImagePreview,
+                  extra: AssetImage(image),
+                ),
                 child: Image.asset(
                   image,
                   width: 40,

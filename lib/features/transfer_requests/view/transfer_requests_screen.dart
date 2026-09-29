@@ -2,28 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/transfer_request_item.dart';
+import '../model/transfer_request_detail_state.dart';
 import '../widgets/transfer_request_card.dart';
 import '../widgets/transfer_request_filter_bar.dart';
+import 'package:go_router/go_router.dart';
 
 class TransferRequestsScreen extends StatefulWidget {
   const TransferRequestsScreen({
     super.key,
-    required this.onBack,
     this.viewMode = TransferRequestsViewMode.populated,
     this.initialFilter = TransferRequestFilter.all,
-    this.onAddTap,
-    this.onRequestTap,
   });
 
-  final VoidCallback onBack;
   final TransferRequestsViewMode viewMode;
   final TransferRequestFilter initialFilter;
-  final VoidCallback? onAddTap;
-  final ValueChanged<TransferRequestItem>? onRequestTap;
 
   @override
   State<TransferRequestsScreen> createState() => _TransferRequestsScreenState();
@@ -123,10 +120,11 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
       backgroundColor: AppColors.backgroundColor,
       appBar: CustomAppBar(
         title: context.l10n.transferRequests,
-        onBackTap: widget.onBack,
         backIconAsset: 'assets/icons/records/back.svg',
       ),
-      floatingActionButton: _TransferAddButton(onTap: widget.onAddTap ?? () {}),
+      floatingActionButton: _TransferAddButton(
+        onTap: () => context.push<void>(AppRoutes.createTransferRequest),
+      ),
       body: SafeArea(
         top: false,
         child: Center(
@@ -167,8 +165,7 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
                             key: ValueKey('${items[index].status.name}-$index'),
                             item: items[index],
                             highlighted: index == 0,
-                            onTap: () =>
-                                widget.onRequestTap?.call(items[index]),
+                            onTap: () => _openRequest(items[index]),
                           ),
                         ),
                 ),
@@ -177,6 +174,20 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _openRequest(TransferRequestItem request) {
+    context.push<void>(
+      AppRoutes.transferRequestDetail,
+      extra: switch (request.status) {
+        TransferRequestStatus.pending =>
+          TransferRequestDetailState.pendingVerification,
+        TransferRequestStatus.approved => TransferRequestDetailState.completed,
+        TransferRequestStatus.dispatch =>
+          TransferRequestDetailState.waitingForLoading,
+        TransferRequestStatus.rejected => TransferRequestDetailState.rejected,
+      },
     );
   }
 }

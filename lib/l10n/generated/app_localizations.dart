@@ -5701,7 +5701,7 @@ abstract class AppLocalizations {
   /// No description provided for @supervisorExpenseDetailAmount4000.
   ///
   /// In en, this message translates to:
-  /// **'₹4,000'**
+  /// **'-₹4000'**
   String get supervisorExpenseDetailAmount4000;
 
   /// No description provided for @supervisorExpensePendingReview.
@@ -5767,8 +5767,32 @@ abstract class AppLocalizations {
   /// No description provided for @supervisorExpenseReasonForRejection.
   ///
   /// In en, this message translates to:
-  /// **'Reason for Rejection'**
+  /// **'Reason for Reject'**
   String get supervisorExpenseReasonForRejection;
+
+  /// No description provided for @supervisorExpenseSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Here...'**
+  String get supervisorExpenseSearchHint;
+
+  /// No description provided for @supervisorExpenseReasonFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for '**
+  String get supervisorExpenseReasonFor;
+
+  /// No description provided for @supervisorExpenseRejectWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get supervisorExpenseRejectWord;
+
+  /// No description provided for @supervisorExpenseRejectedRemarksValue.
+  ///
+  /// In en, this message translates to:
+  /// **'All yard trucks are currently out. Try after 2 PM.'**
+  String get supervisorExpenseRejectedRemarksValue;
 
   /// No description provided for @supervisorExpenseInvalidBill.
   ///
@@ -5793,6 +5817,960 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No Vehicle Available'**
   String get supervisorExpenseRejectReasonValue;
+
+  /// No description provided for @supervisorCashTodayMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Today • 08:15 AM'**
+  String get supervisorCashTodayMorning;
+
+  /// No description provided for @supervisorCashDarshan.
+  ///
+  /// In en, this message translates to:
+  /// **'Darshan Chaudhary'**
+  String get supervisorCashDarshan;
+
+  /// No description provided for @supervisorCashDarshanFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Darshan Chaudhary'**
+  String get supervisorCashDarshanFull;
+
+  /// No description provided for @supervisorCashAmount350.
+  ///
+  /// In en, this message translates to:
+  /// **'+₹350'**
+  String get supervisorCashAmount350;
+
+  /// No description provided for @supervisorCashAmount2400.
+  ///
+  /// In en, this message translates to:
+  /// **'+₹2400'**
+  String get supervisorCashAmount2400;
+
+  /// No description provided for @supervisorCashAmount3250.
+  ///
+  /// In en, this message translates to:
+  /// **'+₹3250'**
+  String get supervisorCashAmount3250;
+
+  /// No description provided for @supervisorCashApprovedCredited.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved & Credited'**
+  String get supervisorCashApprovedCredited;
+
+  /// No description provided for @supervisorCashPendingReference.
+  ///
+  /// In en, this message translates to:
+  /// **'#REQ-2026-089'**
+  String get supervisorCashPendingReference;
+
+  /// No description provided for @supervisorCashApprovedReference.
+  ///
+  /// In en, this message translates to:
+  /// **'#REQ-2026-086'**
+  String get supervisorCashApprovedReference;
+
+  /// No description provided for @supervisorCashRejectedReference.
+  ///
+  /// In en, this message translates to:
+  /// **'#REQ-2026-085'**
+  String get supervisorCashRejectedReference;
+
+  /// No description provided for @supervisorCashDetailAmount350.
+  ///
+  /// In en, this message translates to:
+  /// **'₹350'**
+  String get supervisorCashDetailAmount350;
+
+  /// No description provided for @supervisorCashDetailAmount2400.
+  ///
+  /// In en, this message translates to:
+  /// **'₹2400'**
+  String get supervisorCashDetailAmount2400;
+
+  /// No description provided for @supervisorCashRejectScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Cash Request'**
+  String get supervisorCashRejectScreenTitle;
+
+  /// No description provided for @supervisorCashSufficientBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Sufficient Existing Balance'**
+  String get supervisorCashSufficientBalance;
+
+  /// No description provided for @supervisorCashInvalidPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid / Unclear Request Purpose'**
+  String get supervisorCashInvalidPurpose;
+
+  /// No description provided for @supervisorCashExceedsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exceeds Advance Limit'**
+  String get supervisorCashExceedsLimit;
+
+  /// No description provided for @supervisorCashRemarksHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type additional remarks for agent...'**
+  String get supervisorCashRemarksHint;
+
+  /// No description provided for @supervisorCategoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Category Request'**
+  String get supervisorCategoryTitle;
+
+  /// No description provided for @supervisorCategoryPendingTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending (2)'**
+  String get supervisorCategoryPendingTab;
+
+  /// No description provided for @supervisorCategoryClosedTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed (4)'**
+  String get supervisorCategoryClosedTab;
+
+  /// No description provided for @supervisorCategoryAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Rahul Patel'**
+  String get supervisorCategoryAgent;
+
+  /// No description provided for @supervisorCategoryFacility.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL South'**
+  String get supervisorCategoryFacility;
+
+  /// No description provided for @supervisorCategoryTyreReplacement.
+  ///
+  /// In en, this message translates to:
+  /// **'Tyre Replacement'**
+  String get supervisorCategoryTyreReplacement;
+
+  /// No description provided for @supervisorCategoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Tyre damaged and needs Some time replacement for safe transport.'**
+  String get supervisorCategoryDescription;
+
+  /// No description provided for @supervisorCategoryTodayTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 08:00 AM'**
+  String get supervisorCategoryTodayTime;
+
+  /// No description provided for @supervisorCategoryRequestPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Pending'**
+  String get supervisorCategoryRequestPending;
+
+  /// No description provided for @supervisorCategoryRequestResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Resolved'**
+  String get supervisorCategoryRequestResolved;
+
+  /// No description provided for @supervisorCategoryRequestRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Reject'**
+  String get supervisorCategoryRequestRejected;
+
+  /// No description provided for @supervisorCategoryCollectionAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection Agent'**
+  String get supervisorCategoryCollectionAgent;
+
+  /// No description provided for @supervisorCategoryRejectedBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Request Rejected'**
+  String get supervisorCategoryRejectedBannerTitle;
+
+  /// No description provided for @supervisorCategoryRejectedBannerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense request rejected successfully'**
+  String get supervisorCategoryRejectedBannerMessage;
+
+  /// No description provided for @supervisorCategoryRejectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid / Unclear Request Purpose'**
+  String get supervisorCategoryRejectReason;
+
+  /// No description provided for @supervisorCategoryRejectRemarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request is wrong there is wrong purpose of cash request'**
+  String get supervisorCategoryRejectRemarks;
+
+  /// No description provided for @supervisorCategoryApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense Request\nApproved!'**
+  String get supervisorCategoryApprovedTitle;
+
+  /// No description provided for @supervisorCategoryBackToList.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to List'**
+  String get supervisorCategoryBackToList;
+
+  /// No description provided for @supervisorCategoryAreYouSure.
+  ///
+  /// In en, this message translates to:
+  /// **'Are You Sure'**
+  String get supervisorCategoryAreYouSure;
+
+  /// No description provided for @supervisorCategoryRejectConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reject this expense This action cannot be undone'**
+  String get supervisorCategoryRejectConfirmation;
+
+  /// No description provided for @supervisorCategoryYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get supervisorCategoryYes;
+
+  /// No description provided for @supervisorTaskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Task'**
+  String get supervisorTaskTitle;
+
+  /// No description provided for @supervisorTaskAgentRahul.
+  ///
+  /// In en, this message translates to:
+  /// **'Rahul Patel (EERL South)'**
+  String get supervisorTaskAgentRahul;
+
+  /// No description provided for @supervisorTaskAgentAmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Amit Verma (EERL North)'**
+  String get supervisorTaskAgentAmit;
+
+  /// No description provided for @supervisorTaskAgentSuresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Suresh Kumar (EERL Central)'**
+  String get supervisorTaskAgentSuresh;
+
+  /// No description provided for @supervisorTaskAgentMayur.
+  ///
+  /// In en, this message translates to:
+  /// **'Mayur Patel (EERL East)'**
+  String get supervisorTaskAgentMayur;
+
+  /// No description provided for @supervisorTaskPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Pending'**
+  String get supervisorTaskPending;
+
+  /// No description provided for @supervisorTaskResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Resolved'**
+  String get supervisorTaskResolved;
+
+  /// No description provided for @supervisorTaskCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Cancelled'**
+  String get supervisorTaskCancelled;
+
+  /// No description provided for @supervisorTaskTodayTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 08:00 AM'**
+  String get supervisorTaskTodayTime;
+
+  /// No description provided for @supervisorTaskYesterdayTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday, 08:00 AM'**
+  String get supervisorTaskYesterdayTime;
+
+  /// No description provided for @supervisorTaskOctoberTime.
+  ///
+  /// In en, this message translates to:
+  /// **'24 Oct, 08:00 AM'**
+  String get supervisorTaskOctoberTime;
+
+  /// No description provided for @supervisorTaskAssignTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign To Agent / Zone'**
+  String get supervisorTaskAssignTo;
+
+  /// No description provided for @supervisorTaskSelectAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Select final outcome'**
+  String get supervisorTaskSelectAgent;
+
+  /// No description provided for @supervisorTaskPriorityLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority Level'**
+  String get supervisorTaskPriorityLevel;
+
+  /// No description provided for @supervisorTaskTaskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Title'**
+  String get supervisorTaskTaskTitle;
+
+  /// No description provided for @supervisorTaskTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Calibrate Bin Weighing Scale'**
+  String get supervisorTaskTitleHint;
+
+  /// No description provided for @supervisorTaskDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get supervisorTaskDescriptionLabel;
+
+  /// No description provided for @supervisorTaskDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide details for the field agent...'**
+  String get supervisorTaskDescriptionHint;
+
+  /// No description provided for @supervisorTaskMaxCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 150 Characters'**
+  String get supervisorTaskMaxCharacters;
+
+  /// No description provided for @supervisorTaskFollowupDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Follow-up Date & Time'**
+  String get supervisorTaskFollowupDateTime;
+
+  /// No description provided for @supervisorTaskSelectDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date & Time'**
+  String get supervisorTaskSelectDateTime;
+
+  /// No description provided for @supervisorTaskFilledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibrate Bin Weighing Scale'**
+  String get supervisorTaskFilledTitle;
+
+  /// No description provided for @supervisorTaskFilledDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight.'**
+  String get supervisorTaskFilledDescription;
+
+  /// No description provided for @supervisorTaskFilledDate.
+  ///
+  /// In en, this message translates to:
+  /// **'16 Aug 2026, 03:00 PM'**
+  String get supervisorTaskFilledDate;
+
+  /// No description provided for @supervisorTaskAttachPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach Reference Photo'**
+  String get supervisorTaskAttachPhoto;
+
+  /// No description provided for @supervisorTaskCapturePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Photo'**
+  String get supervisorTaskCapturePhoto;
+
+  /// No description provided for @supervisorTaskPhotoSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported: JPG, PNG (Max 5MB).'**
+  String get supervisorTaskPhotoSupport;
+
+  /// No description provided for @supervisorTaskPhotoSupportDetailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Supported: JPG, PNG (Max 5MB). Receipt must be clearly visible for supervisor review.'**
+  String get supervisorTaskPhotoSupportDetailed;
+
+  /// No description provided for @supervisorTaskSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Task'**
+  String get supervisorTaskSend;
+
+  /// No description provided for @supervisorTaskSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Sent!'**
+  String get supervisorTaskSentTitle;
+
+  /// No description provided for @supervisorTaskSentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The task assigned by supervisor has been completed.'**
+  String get supervisorTaskSentMessage;
+
+  /// No description provided for @supervisorTaskCalendarMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'August 2026'**
+  String get supervisorTaskCalendarMonth;
+
+  /// No description provided for @supervisorTaskSunday.
+  ///
+  /// In en, this message translates to:
+  /// **'SUN'**
+  String get supervisorTaskSunday;
+
+  /// No description provided for @supervisorTaskMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'MON'**
+  String get supervisorTaskMonday;
+
+  /// No description provided for @supervisorTaskTuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'TUE'**
+  String get supervisorTaskTuesday;
+
+  /// No description provided for @supervisorTaskWednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'WED'**
+  String get supervisorTaskWednesday;
+
+  /// No description provided for @supervisorTaskThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'THU'**
+  String get supervisorTaskThursday;
+
+  /// No description provided for @supervisorTaskFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'FRI'**
+  String get supervisorTaskFriday;
+
+  /// No description provided for @supervisorTaskSaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'SAT'**
+  String get supervisorTaskSaturday;
+
+  /// No description provided for @supervisorTaskTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get supervisorTaskTime;
+
+  /// No description provided for @supervisorTaskTimeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'09 : 32'**
+  String get supervisorTaskTimeValue;
+
+  /// No description provided for @supervisorTaskAm.
+  ///
+  /// In en, this message translates to:
+  /// **'AM'**
+  String get supervisorTaskAm;
+
+  /// No description provided for @supervisorTaskPm.
+  ///
+  /// In en, this message translates to:
+  /// **'PM'**
+  String get supervisorTaskPm;
+
+  /// No description provided for @supervisorTaskCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get supervisorTaskCancel;
+
+  /// No description provided for @supervisorTaskConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get supervisorTaskConfirm;
+
+  /// No description provided for @supervisorTaskDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Details'**
+  String get supervisorTaskDetailsTitle;
+
+  /// No description provided for @supervisorTaskInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Task in Progress'**
+  String get supervisorTaskInProgress;
+
+  /// No description provided for @supervisorTaskCompletedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed: Today, 11:30 AM'**
+  String get supervisorTaskCompletedAt;
+
+  /// No description provided for @supervisorTaskCompletionProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Task Completion Proof'**
+  String get supervisorTaskCompletionProof;
+
+  /// No description provided for @supervisorTaskCompletionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight scale calibrated using 10kg standard test weight. Zero-error verified.'**
+  String get supervisorTaskCompletionDescription;
+
+  /// No description provided for @supervisorTaskAgentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Rahul Patel'**
+  String get supervisorTaskAgentName;
+
+  /// No description provided for @supervisorTaskSentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Your sent task details'**
+  String get supervisorTaskSentDetails;
+
+  /// No description provided for @supervisorTaskAssignToLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign To'**
+  String get supervisorTaskAssignToLabel;
+
+  /// No description provided for @supervisorTaskDetailDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight, inspect all uploaded item photos (before and after verification), and ensure customer details and material categories match the system records before final approval'**
+  String get supervisorTaskDetailDescription;
+
+  /// No description provided for @supervisorTaskPriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Priority'**
+  String get supervisorTaskPriority;
+
+  /// No description provided for @supervisorTaskPriorityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get supervisorTaskPriorityLow;
+
+  /// No description provided for @supervisorTaskAttachmentByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment By you'**
+  String get supervisorTaskAttachmentByYou;
+
+  /// No description provided for @supervisorTaskAttachmentOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Bhavesh Shah'**
+  String get supervisorTaskAttachmentOwner;
+
+  /// No description provided for @supervisorTaskCancelButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Task'**
+  String get supervisorTaskCancelButton;
+
+  /// No description provided for @supervisorTaskCancelDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get supervisorTaskCancelDialogTitle;
+
+  /// No description provided for @supervisorTaskCancelDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this task right now?'**
+  String get supervisorTaskCancelDialogMessage;
+
+  /// No description provided for @supervisorTaskNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get supervisorTaskNo;
+
+  /// No description provided for @supervisorTaskYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get supervisorTaskYes;
+
+  /// No description provided for @supervisorTaskCancelledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Task has been cancelled successfully'**
+  String get supervisorTaskCancelledSuccess;
+
+  /// No description provided for @supervisorAgentRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent Requests'**
+  String get supervisorAgentRequestsTitle;
+
+  /// No description provided for @supervisorAgentRequestPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Rahul Patel (EERL South)'**
+  String get supervisorAgentRequestPerson;
+
+  /// No description provided for @supervisorAgentRequestCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Collection Details'**
+  String get supervisorAgentRequestCardTitle;
+
+  /// No description provided for @supervisorAgentRequestCardDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and verify the latest collection entry submitted by the field agent...'**
+  String get supervisorAgentRequestCardDescription;
+
+  /// No description provided for @supervisorAgentRequestPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Request'**
+  String get supervisorAgentRequestPending;
+
+  /// No description provided for @supervisorAgentRequestResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved Request'**
+  String get supervisorAgentRequestResolved;
+
+  /// No description provided for @supervisorAgentRequestTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 08:00 AM'**
+  String get supervisorAgentRequestTime;
+
+  /// No description provided for @supervisorAgentRequestResolveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve Request'**
+  String get supervisorAgentRequestResolveTitle;
+
+  /// No description provided for @supervisorAgentRequestAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment from Collection Agent'**
+  String get supervisorAgentRequestAttachment;
+
+  /// No description provided for @supervisorAgentRequestProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve Request Proof'**
+  String get supervisorAgentRequestProof;
+
+  /// No description provided for @supervisorAgentRequestResolveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved Request'**
+  String get supervisorAgentRequestResolveButton;
+
+  /// No description provided for @supervisorAgentRequestSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved Successfully!'**
+  String get supervisorAgentRequestSuccessTitle;
+
+  /// No description provided for @supervisorAgentRequestSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue closed. Notification sent to the agent.'**
+  String get supervisorAgentRequestSuccessMessage;
+
+  /// No description provided for @supervisorAgentRequestResolveDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve Request Details'**
+  String get supervisorAgentRequestResolveDetails;
+
+  /// No description provided for @supervisorAgentRequestCollectionAgentDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection agent Details'**
+  String get supervisorAgentRequestCollectionAgentDetails;
+
+  /// No description provided for @supervisorAgentRequestAttachmentFromSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment from Supervisor'**
+  String get supervisorAgentRequestAttachmentFromSupervisor;
+
+  /// No description provided for @supervisorAgentRequestLongDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight, inspect all uploaded item photos (before and after verification), and ensure customer details and material categories match the system records before final approval'**
+  String get supervisorAgentRequestLongDescription;
+
+  /// No description provided for @supervisorMrfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Register SMC MRF Team'**
+  String get supervisorMrfTitle;
+
+  /// No description provided for @supervisorMrfSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Here...'**
+  String get supervisorMrfSearch;
+
+  /// No description provided for @supervisorMrfAddNewPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Person'**
+  String get supervisorMrfAddNewPerson;
+
+  /// No description provided for @supervisorMrfFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get supervisorMrfFullName;
+
+  /// No description provided for @supervisorMrfEnterFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Full Name'**
+  String get supervisorMrfEnterFullName;
+
+  /// No description provided for @supervisorMrfMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get supervisorMrfMobileNumber;
+
+  /// No description provided for @supervisorMrfEnterMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Mobile number'**
+  String get supervisorMrfEnterMobile;
+
+  /// No description provided for @supervisorMrfAssignCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Target Center'**
+  String get supervisorMrfAssignCenter;
+
+  /// No description provided for @supervisorMrfSelectCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Center'**
+  String get supervisorMrfSelectCenter;
+
+  /// No description provided for @supervisorMrfCenterHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the selected Agent will be able to view and verify this MRF entry.'**
+  String get supervisorMrfCenterHelper;
+
+  /// No description provided for @supervisorMrfAddLabor.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add Labor'**
+  String get supervisorMrfAddLabor;
+
+  /// No description provided for @supervisorMrfSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get supervisorMrfSave;
+
+  /// No description provided for @supervisorMrfLaborNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Labor {number}'**
+  String supervisorMrfLaborNumber(int number);
+
+  /// No description provided for @supervisorMrfLaborAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Labors assigned'**
+  String supervisorMrfLaborAssigned(int count);
+
+  /// No description provided for @supervisorMrfFullNamePlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get supervisorMrfFullNamePlain;
+
+  /// No description provided for @supervisorMrfMobileNumberPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get supervisorMrfMobileNumberPlain;
+
+  /// No description provided for @supervisorMrfAssignedCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Target Agent / Center'**
+  String get supervisorMrfAssignedCenter;
+
+  /// No description provided for @supervisorMrfRegistrationId.
+  ///
+  /// In en, this message translates to:
+  /// **'#MRF-2026-089'**
+  String get supervisorMrfRegistrationId;
+
+  /// No description provided for @supervisorMrfRemovePerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Person'**
+  String get supervisorMrfRemovePerson;
+
+  /// No description provided for @supervisorMrfRemoveDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Are You Sure'**
+  String get supervisorMrfRemoveDialogTitle;
+
+  /// No description provided for @supervisorMrfRemoveDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove this person This action cannot be undone'**
+  String get supervisorMrfRemoveDialogMessage;
+
+  /// No description provided for @supervisorMrfYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get supervisorMrfYes;
+
+  /// No description provided for @supervisorMrfRemovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF Person Removed'**
+  String get supervisorMrfRemovedTitle;
+
+  /// No description provided for @supervisorMrfRemovedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Access revoked for MRF-2026-089'**
+  String get supervisorMrfRemovedSubtitle;
+
+  /// No description provided for @supervisorMrfAddedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'MRF Person Added'**
+  String get supervisorMrfAddedTitle;
+
+  /// No description provided for @supervisorMrfAddedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'assigned to MRF-2026-089'**
+  String get supervisorMrfAddedSubtitle;
+
+  /// No description provided for @supervisorMrfPersonChunilal.
+  ///
+  /// In en, this message translates to:
+  /// **'Chunilal Yadav'**
+  String get supervisorMrfPersonChunilal;
+
+  /// No description provided for @supervisorMrfPersonRamesh.
+  ///
+  /// In en, this message translates to:
+  /// **'Ramesh Kumar'**
+  String get supervisorMrfPersonRamesh;
+
+  /// No description provided for @supervisorMrfPersonSuresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Suresh Kumar'**
+  String get supervisorMrfPersonSuresh;
+
+  /// No description provided for @supervisorMrfPersonManohar.
+  ///
+  /// In en, this message translates to:
+  /// **'Manohar Lal'**
+  String get supervisorMrfPersonManohar;
+
+  /// No description provided for @supervisorMrfPersonSureshSharma.
+  ///
+  /// In en, this message translates to:
+  /// **'Suresh Sharma'**
+  String get supervisorMrfPersonSureshSharma;
+
+  /// No description provided for @supervisorMrfLaborHaresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Haresh Matiya'**
+  String get supervisorMrfLaborHaresh;
+
+  /// No description provided for @supervisorMrfCenterSurat.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat Zone'**
+  String get supervisorMrfCenterSurat;
+
+  /// No description provided for @supervisorMrfCenterSuratEast.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat East Zone'**
+  String get supervisorMrfCenterSuratEast;
+
+  /// No description provided for @supervisorMrfCenterSuratWest.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat West Zone'**
+  String get supervisorMrfCenterSuratWest;
+
+  /// No description provided for @supervisorMrfCenterSuratSouth.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat South Zone'**
+  String get supervisorMrfCenterSuratSouth;
+
+  /// No description provided for @supervisorMrfLocationKargil.
+  ///
+  /// In en, this message translates to:
+  /// **'Kargil Chowk, Varacha'**
+  String get supervisorMrfLocationKargil;
+
+  /// No description provided for @supervisorMrfLocationMagdalla.
+  ///
+  /// In en, this message translates to:
+  /// **'Magdalla, Vesu'**
+  String get supervisorMrfLocationMagdalla;
+
+  /// No description provided for @supervisorMrfLocationSilver.
+  ///
+  /// In en, this message translates to:
+  /// **'Silver Chowk, Punagam'**
+  String get supervisorMrfLocationSilver;
+
+  /// No description provided for @supervisorMrfLocationSardar.
+  ///
+  /// In en, this message translates to:
+  /// **'Sardar Market, Udhana'**
+  String get supervisorMrfLocationSardar;
 }
 
 class _AppLocalizationsDelegate

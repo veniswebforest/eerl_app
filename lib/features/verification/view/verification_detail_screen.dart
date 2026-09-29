@@ -1,29 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/features/records/model/collection_material_model.dart';
 import 'package:eerl_app/features/records/widgets/collection_detail_assets.dart';
 import 'package:eerl_app/features/records/widgets/collection_detail_cards.dart';
 import 'package:eerl_app/features/records/widgets/collection_material_card.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import '../model/verification_entry.dart';
 
-class VerificationDetailScreen extends StatelessWidget {
-  const VerificationDetailScreen({
-    super.key,
-    required this.status,
-    required this.onBack,
-    required this.onApprove,
-    required this.onReject,
-  });
+class VerificationDetailScreen extends StatefulWidget {
+  const VerificationDetailScreen({super.key, required this.status});
 
   final VerificationDetailStatus status;
-  final VoidCallback onBack;
-  final VoidCallback onApprove;
-  final VoidCallback onReject;
+
+  @override
+  State<VerificationDetailScreen> createState() =>
+      _VerificationDetailScreenState();
+}
+
+class _VerificationDetailScreenState extends State<VerificationDetailScreen> {
+  late VerificationDetailStatus _status = widget.status;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +50,7 @@ class VerificationDetailScreen extends StatelessWidget {
         verifiedPhoto: CollectionDetailAssets.ppVerified,
       ),
     ];
-    final approved = status == VerificationDetailStatus.approved;
+    final approved = _status == VerificationDetailStatus.approved;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -66,11 +68,15 @@ class VerificationDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AppScreenHeader(leading: _BackButton(onTap: onBack)),
-                  if (status != VerificationDetailStatus.pending) ...[
+                  AppScreenHeader(
+                    leading: _BackButton(
+                      onTap: () => Navigator.of(context).maybePop(),
+                    ),
+                  ),
+                  if (_status != VerificationDetailStatus.pending) ...[
                     const SizedBox(height: 24),
-                    _VerificationResultBanner(status: status),
-                    if (status == VerificationDetailStatus.rejected) ...[
+                    _VerificationResultBanner(status: _status),
+                    if (_status == VerificationDetailStatus.rejected) ...[
                       const SizedBox(height: 12),
                       const _RejectReasonCard(),
                     ],
@@ -80,7 +86,7 @@ class VerificationDetailScreen extends StatelessWidget {
                     label: l10n.collectionDetailId,
                     value: l10n.verificationDetailCollectionIdValue,
                   ),
-                  if (status != VerificationDetailStatus.rejected) ...[
+                  if (_status != VerificationDetailStatus.rejected) ...[
                     const SizedBox(height: 12),
                     CollectionDetailInfoCard(
                       label: l10n.verificationDetailCollectionCenter,
@@ -150,13 +156,15 @@ class VerificationDetailScreen extends StatelessWidget {
                     comparisonValue: l10n.verificationDetailDifferenceValue,
                     totalPriceValue: l10n.verificationDetailTotalPriceValue,
                   ),
-                  if (status == VerificationDetailStatus.pending) ...[
+                  if (_status == VerificationDetailStatus.pending) ...[
                     const SizedBox(height: 32),
                     _DecisionButtons(
                       rejectLabel: l10n.verificationDetailReject,
                       approveLabel: l10n.verificationDetailApprove,
-                      onReject: onReject,
-                      onApprove: onApprove,
+                      onReject: _reject,
+                      onApprove: () => setState(
+                        () => _status = VerificationDetailStatus.approved,
+                      ),
                     ),
                   ],
                 ],
@@ -166,6 +174,13 @@ class VerificationDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _reject() async {
+    final rejected = await context.push<bool>(AppRoutes.rejectCollection);
+    if (mounted && rejected == true) {
+      setState(() => _status = VerificationDetailStatus.rejected);
+    }
   }
 }
 
@@ -201,33 +216,22 @@ class _VerificationResultBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final approved = status == VerificationDetailStatus.approved;
     final color = approved ? AppColors.primary500 : AppColors.red600;
-    return Container(
+    return AppMessageBanner(
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: approved ? AppColors.primary50 : AppColors.red50,
-        border: Border.all(color: color),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-            approved
-                ? 'assets/icons/wallet/status_verified.svg'
-                : 'assets/icons/wallet/status_flagged.svg',
-            width: 20,
-            height: 20,
-          ),
-          const SizedBox(width: 7),
-          Expanded(
-            child: Text(
-              approved
-                  ? context.l10n.collectionDetailApproved
-                  : context.l10n.verificationRejected,
-              style: AppTextStyles.semiboldH9_14.copyWith(color: color),
-            ),
-          ),
-        ],
+      borderRadius: 10,
+      title: approved
+          ? context.l10n.collectionDetailApproved
+          : context.l10n.verificationRejected,
+      color: color,
+      backgroundColor: approved ? AppColors.primary50 : AppColors.red50,
+      titleStyle: AppTextStyles.semiboldH9_14.copyWith(color: color),
+      icon: SvgPicture.asset(
+        approved
+            ? 'assets/icons/wallet/status_verified.svg'
+            : 'assets/icons/wallet/status_flagged.svg',
+        width: 20,
+        height: 20,
       ),
     );
   }

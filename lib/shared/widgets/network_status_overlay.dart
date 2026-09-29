@@ -1,5 +1,6 @@
 import 'package:eerl_app/core/providers/network_provider.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -62,106 +63,57 @@ class NetworkStatusOverlay extends StatelessWidget {
         ? const [AppColors.primary600, AppColors.primary800]
         : const [AppColors.red600, Color(0xFF991B1B)];
 
-    final iconData = isRestored
-        ? Icons.wifi_rounded
-        : Icons.wifi_off_rounded;
+    final iconData = isRestored ? Icons.wifi_rounded : Icons.wifi_off_rounded;
 
-    final titleText = isRestored
-        ? 'Back Online'
-        : 'No Internet Connection';
+    final titleText = isRestored ? 'Back Online' : 'No Internet Connection';
 
     final subtitleText = isRestored
         ? 'Internet connection restored.'
         : 'Please check your Wi-Fi or mobile data network.';
 
-    return Container(
+    return AppMessageBanner(
       key: ValueKey(isRestored ? 'online_banner' : 'offline_banner'),
+      title: titleText,
+      subtitle: subtitleText,
+      color: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: gradientColors,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 1,
-        ),
+      borderRadius: 16,
+      gradient: LinearGradient(
+        colors: gradientColors,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
       ),
-      child: Row(
-        children: [
-          // Icon Container
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              iconData,
-              color: Colors.white,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Message Text
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  titleText,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitleText,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-
-          // Dismiss Action
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: onDismiss,
-            behavior: HitTestBehavior.opaque,
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.close_rounded,
-                color: Colors.white,
-                size: 16,
-              ),
-            ),
-          ),
-        ],
+      borderColor: Colors.white.withValues(alpha: 0.2),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.25),
+          blurRadius: 16,
+          offset: const Offset(0, 6),
+        ),
+      ],
+      titleStyle: const TextStyle(
+        color: Colors.white,
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
       ),
+      subtitleStyle: TextStyle(
+        color: Colors.white.withValues(alpha: 0.9),
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+      ),
+      subtitleMaxLines: 2,
+      iconBackgroundColor: Colors.white.withValues(alpha: 0.18),
+      iconPadding: const EdgeInsets.all(8),
+      icon: Icon(iconData, color: Colors.white, size: 22),
+      closeIcon: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.close_rounded, color: Colors.white, size: 16),
+      ),
+      onClose: onDismiss,
     );
   }
 }

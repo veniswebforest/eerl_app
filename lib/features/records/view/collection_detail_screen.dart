@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../model/collection_detail_status.dart';
@@ -10,16 +11,12 @@ import '../widgets/collection_detail_assets.dart';
 import '../widgets/collection_detail_cards.dart';
 import '../widgets/collection_material_card.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
-import 'package:eerl_app/features/collection/view/collection_receipt_screen.dart';
+import 'package:eerl_app/shared/widgets/app_message_banner.dart';
+import 'package:go_router/go_router.dart';
 
 class CollectionDetailScreen extends StatelessWidget {
-  const CollectionDetailScreen({
-    super.key,
-    required this.status,
-    required this.onBack,
-  });
+  const CollectionDetailScreen({super.key, required this.status});
   final CollectionDetailStatus status;
-  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +59,7 @@ class CollectionDetailScreen extends StatelessWidget {
                   AppScreenHeader(
                     leading: InkWell(
                       key: const Key('collection-detail-back'),
-                      onTap: onBack,
+                      onTap: () => Navigator.of(context).maybePop(),
                       borderRadius: BorderRadius.circular(8),
                       child: Container(
                         width: 40,
@@ -192,9 +189,8 @@ class CollectionDetailScreen extends StatelessWidget {
                     height: 56,
                     child: ElevatedButton.icon(
                       key: const Key('collection-detail-preview-slip'),
-                      onPressed: () => Navigator.of(
-                        context,
-                      ).push<void>(CollectionReceiptScreen.route()),
+                      onPressed: () =>
+                          context.push<void>(AppRoutes.collectionReceipt),
                       icon: SvgPicture.asset(
                         CollectionDetailAssets.preview,
                         width: 24,
@@ -242,32 +238,19 @@ class _StatusBanner extends StatelessWidget {
       CollectionDetailStatus.rejected =>
         context.l10n.collectionRejectedSupervisor,
     };
-    return Container(
+    return AppMessageBanner(
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color),
-      ),
-      child: Row(
-        children: [
-          SvgPicture.asset(
-            CollectionDetailAssets.statusPending,
-            width: 20,
-            height: 20,
-            colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-          ),
-          const SizedBox(width: 7),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.semiboldH9_14.copyWith(color: color),
-            ),
-          ),
-        ],
+      borderRadius: 10,
+      title: label,
+      color: color,
+      backgroundColor: background,
+      titleStyle: AppTextStyles.semiboldH9_14.copyWith(color: color),
+      icon: SvgPicture.asset(
+        CollectionDetailAssets.statusPending,
+        width: 20,
+        height: 20,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
       ),
     );
   }

@@ -2934,7 +2934,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get supervisorExpenseAmount720 => '-₹720';
 
   @override
-  String get supervisorExpenseDetailAmount4000 => '₹4,000';
+  String get supervisorExpenseDetailAmount4000 => '-₹4000';
 
   @override
   String get supervisorExpensePendingReview => 'સમીક્ષા બાકી';
@@ -2971,6 +2971,19 @@ class AppLocalizationsGu extends AppLocalizations {
   String get supervisorExpenseReasonForRejection => 'નકારવાનું કારણ';
 
   @override
+  String get supervisorExpenseSearchHint => 'અહીં શોધો...';
+
+  @override
+  String get supervisorExpenseReasonFor => 'કારણ: ';
+
+  @override
+  String get supervisorExpenseRejectWord => 'નકાર';
+
+  @override
+  String get supervisorExpenseRejectedRemarksValue =>
+      'યાર્ડના બધા ટ્રક હાલમાં બહાર છે. બપોરે 2 વાગ્યા પછી ફરી પ્રયાસ કરો.';
+
+  @override
   String get supervisorExpenseInvalidBill => 'અમાન્ય / સ્પષ્ટ બિલ ગાયબ';
 
   @override
@@ -2981,4 +2994,502 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get supervisorExpenseRejectReasonValue => 'વાહન ઉપલબ્ધ નથી';
+
+  @override
+  String get supervisorCashTodayMorning => 'આજે • 08:15 AM';
+
+  @override
+  String get supervisorCashDarshan => 'દર્શન ચૌધરી';
+
+  @override
+  String get supervisorCashDarshanFull => 'દર્શન ચૌધરી';
+
+  @override
+  String get supervisorCashAmount350 => '+₹350';
+
+  @override
+  String get supervisorCashAmount2400 => '+₹2400';
+
+  @override
+  String get supervisorCashAmount3250 => '+₹3250';
+
+  @override
+  String get supervisorCashApprovedCredited => 'મંજૂર અને જમા';
+
+  @override
+  String get supervisorCashPendingReference => '#REQ-2026-089';
+
+  @override
+  String get supervisorCashApprovedReference => '#REQ-2026-086';
+
+  @override
+  String get supervisorCashRejectedReference => '#REQ-2026-085';
+
+  @override
+  String get supervisorCashDetailAmount350 => '₹350';
+
+  @override
+  String get supervisorCashDetailAmount2400 => '₹2400';
+
+  @override
+  String get supervisorCashRejectScreenTitle => 'રોકડ વિનંતી નકારો';
+
+  @override
+  String get supervisorCashSufficientBalance => 'હાલનું બેલેન્સ પૂરતું છે';
+
+  @override
+  String get supervisorCashInvalidPurpose => 'અમાન્ય / અસ્પષ્ટ વિનંતી હેતુ';
+
+  @override
+  String get supervisorCashExceedsLimit => 'એડવાન્સ મર્યાદાથી વધુ';
+
+  @override
+  String get supervisorCashRemarksHint => 'એજન્ટ માટે વધારાની ટિપ્પણી લખો...';
+
+  @override
+  String get supervisorCategoryTitle => 'ખર્ચ કેટેગરી વિનંતી';
+
+  @override
+  String get supervisorCategoryPendingTab => 'બાકી (2)';
+
+  @override
+  String get supervisorCategoryClosedTab => 'બંધ (4)';
+
+  @override
+  String get supervisorCategoryAgent => 'રાહુલ પટેલ';
+
+  @override
+  String get supervisorCategoryFacility => 'EERL દક્ષિણ';
+
+  @override
+  String get supervisorCategoryTyreReplacement => 'ટાયર બદલવું';
+
+  @override
+  String get supervisorCategoryDescription =>
+      'ટાયર ખરાબ થયો છે અને સુરક્ષિત પરિવહન માટે થોડા સમયમાં બદલવાની જરૂર છે.';
+
+  @override
+  String get supervisorCategoryTodayTime => 'આજે, 08:00 AM';
+
+  @override
+  String get supervisorCategoryRequestPending => 'વિનંતી બાકી';
+
+  @override
+  String get supervisorCategoryRequestResolved => 'વિનંતી ઉકેલાઈ';
+
+  @override
+  String get supervisorCategoryRequestRejected => 'વિનંતી નકારાઈ';
+
+  @override
+  String get supervisorCategoryCollectionAgent => 'કલેક્શન એજન્ટ';
+
+  @override
+  String get supervisorCategoryRejectedBannerTitle => 'ખર્ચ વિનંતી નકારાઈ';
+
+  @override
+  String get supervisorCategoryRejectedBannerMessage =>
+      'ખર્ચ વિનંતી સફળતાપૂર્વક નકારાઈ';
+
+  @override
+  String get supervisorCategoryRejectReason => 'અમાન્ય / અસ્પષ્ટ વિનંતી હેતુ';
+
+  @override
+  String get supervisorCategoryRejectRemarks =>
+      'તમારી વિનંતીમાં રોકડ વિનંતીનો હેતુ ખોટો છે';
+
+  @override
+  String get supervisorCategoryApprovedTitle => 'ખર્ચ વિનંતી\nમંજૂર થઈ!';
+
+  @override
+  String get supervisorCategoryBackToList => 'યાદી પર પાછા જાઓ';
+
+  @override
+  String get supervisorCategoryAreYouSure => 'શું તમને ખાતરી છે';
+
+  @override
+  String get supervisorCategoryRejectConfirmation =>
+      'શું તમે ખરેખર આ ખર્ચ નકારવા માંગો છો? આ ક્રિયા પાછી લઈ શકાતી નથી';
+
+  @override
+  String get supervisorCategoryYes => 'હા';
+
+  @override
+  String get supervisorTaskTitle => 'કાર્ય સોંપો';
+
+  @override
+  String get supervisorTaskAgentRahul => 'રાહુલ પટેલ (EERL દક્ષિણ)';
+
+  @override
+  String get supervisorTaskAgentAmit => 'અમિત વર્મા (EERL ઉત્તર)';
+
+  @override
+  String get supervisorTaskAgentSuresh => 'સુરેશ કુમાર (EERL મધ્ય)';
+
+  @override
+  String get supervisorTaskAgentMayur => 'મયુર પટેલ (EERL પૂર્વ)';
+
+  @override
+  String get supervisorTaskPending => 'કાર્ય બાકી';
+
+  @override
+  String get supervisorTaskResolved => 'કાર્ય ઉકેલાયું';
+
+  @override
+  String get supervisorTaskCancelled => 'કાર્ય રદ થયું';
+
+  @override
+  String get supervisorTaskTodayTime => 'આજે, 08:00 AM';
+
+  @override
+  String get supervisorTaskYesterdayTime => 'ગઈકાલે, 08:00 AM';
+
+  @override
+  String get supervisorTaskOctoberTime => '24 ઑક્ટો, 08:00 AM';
+
+  @override
+  String get supervisorTaskAssignTo => 'એજન્ટ / ઝોનને સોંપો';
+
+  @override
+  String get supervisorTaskSelectAgent => 'અંતિમ વિકલ્પ પસંદ કરો';
+
+  @override
+  String get supervisorTaskPriorityLevel => 'પ્રાથમિકતા સ્તર';
+
+  @override
+  String get supervisorTaskTaskTitle => 'કાર્યનું શીર્ષક';
+
+  @override
+  String get supervisorTaskTitleHint => 'દા.ત., બિન વજન માપક કેલિબ્રેટ કરો';
+
+  @override
+  String get supervisorTaskDescriptionLabel => 'વર્ણન';
+
+  @override
+  String get supervisorTaskDescriptionHint => 'ફીલ્ડ એજન્ટ માટે વિગતો આપો...';
+
+  @override
+  String get supervisorTaskMaxCharacters => 'મહત્તમ 150 અક્ષરો';
+
+  @override
+  String get supervisorTaskFollowupDateTime => 'આગામી ફોલો-અપ તારીખ અને સમય';
+
+  @override
+  String get supervisorTaskSelectDateTime => 'તારીખ અને સમય પસંદ કરો';
+
+  @override
+  String get supervisorTaskFilledTitle => 'બિન વજન માપક કેલિબ્રેટ કરો';
+
+  @override
+  String get supervisorTaskFilledDescription =>
+      'ફીલ્ડ એજન્ટ દ્વારા સબમિટ કરેલી નવીનતમ કલેક્શન એન્ટ્રીની સમીક્ષા અને ચકાસણી કરો. નોંધાયેલા કલેક્શન વજનને ચકાસાયેલા વજન સાથે સરખાવો.';
+
+  @override
+  String get supervisorTaskFilledDate => '16 ઑગસ્ટ 2026, 03:00 PM';
+
+  @override
+  String get supervisorTaskAttachPhoto => 'સંદર્ભ ફોટો જોડો';
+
+  @override
+  String get supervisorTaskCapturePhoto => 'ફોટો લો';
+
+  @override
+  String get supervisorTaskPhotoSupport => 'સમર્થિત: JPG, PNG (મહત્તમ 5MB).';
+
+  @override
+  String get supervisorTaskPhotoSupportDetailed =>
+      'સમર્થિત: JPG, PNG (મહત્તમ 5MB). સુપરવાઇઝરની સમીક્ષા માટે રસીદ સ્પષ્ટ દેખાવી જોઈએ.';
+
+  @override
+  String get supervisorTaskSend => 'કાર્ય મોકલો';
+
+  @override
+  String get supervisorTaskSentTitle => 'કાર્ય મોકલાયું!';
+
+  @override
+  String get supervisorTaskSentMessage =>
+      'સુપરવાઇઝર દ્વારા સોંપાયેલ કાર્ય પૂર્ણ થયું છે.';
+
+  @override
+  String get supervisorTaskCalendarMonth => 'ઑગસ્ટ 2026';
+
+  @override
+  String get supervisorTaskSunday => 'રવિ';
+
+  @override
+  String get supervisorTaskMonday => 'સોમ';
+
+  @override
+  String get supervisorTaskTuesday => 'મંગળ';
+
+  @override
+  String get supervisorTaskWednesday => 'બુધ';
+
+  @override
+  String get supervisorTaskThursday => 'ગુરુ';
+
+  @override
+  String get supervisorTaskFriday => 'શુક્ર';
+
+  @override
+  String get supervisorTaskSaturday => 'શનિ';
+
+  @override
+  String get supervisorTaskTime => 'સમય';
+
+  @override
+  String get supervisorTaskTimeValue => '09 : 32';
+
+  @override
+  String get supervisorTaskAm => 'AM';
+
+  @override
+  String get supervisorTaskPm => 'PM';
+
+  @override
+  String get supervisorTaskCancel => 'રદ કરો';
+
+  @override
+  String get supervisorTaskConfirm => 'પુષ્ટિ કરો';
+
+  @override
+  String get supervisorTaskDetailsTitle => 'કાર્યની વિગતો';
+
+  @override
+  String get supervisorTaskInProgress => 'કાર્ય પ્રગતિમાં છે';
+
+  @override
+  String get supervisorTaskCompletedAt => 'પૂર્ણ: આજે, 11:30 AM';
+
+  @override
+  String get supervisorTaskCompletionProof => 'કાર્ય પૂર્ણ થયાનો પુરાવો';
+
+  @override
+  String get supervisorTaskCompletionDescription =>
+      '10 કિગ્રા પ્રમાણભૂત ટેસ્ટ વજનથી વજન માપક કેલિબ્રેટ કર્યું. શૂન્ય-ભૂલ ચકાસી.';
+
+  @override
+  String get supervisorTaskAgentName => 'રાહુલ પટેલ';
+
+  @override
+  String get supervisorTaskSentDetails => 'તમે મોકલેલી કાર્ય વિગતો';
+
+  @override
+  String get supervisorTaskAssignToLabel => 'સોંપ્યું';
+
+  @override
+  String get supervisorTaskDetailDescription =>
+      'ફીલ્ડ એજન્ટ દ્વારા સબમિટ કરેલી નવીનતમ કલેક્શન એન્ટ્રીની સમીક્ષા અને ચકાસણી કરો. નોંધાયેલા કલેક્શન વજનને ચકાસાયેલા વજન સાથે સરખાવો, અપલોડ કરેલા તમામ ફોટા તપાસો અને અંતિમ મંજૂરી પહેલાં ગ્રાહકની વિગતો તથા સામગ્રીની શ્રેણીઓ સિસ્ટમ રેકોર્ડ સાથે મેળ ખાતી હોવાની ખાતરી કરો';
+
+  @override
+  String get supervisorTaskPriority => 'પ્રાથમિકતા';
+
+  @override
+  String get supervisorTaskPriorityLow => 'ઓછી';
+
+  @override
+  String get supervisorTaskAttachmentByYou => 'તમારા દ્વારા જોડાણ';
+
+  @override
+  String get supervisorTaskAttachmentOwner => 'ભાવેશ શાહ';
+
+  @override
+  String get supervisorTaskCancelButton => 'કાર્ય રદ કરો';
+
+  @override
+  String get supervisorTaskCancelDialogTitle => 'શું તમને ખાતરી છે?';
+
+  @override
+  String get supervisorTaskCancelDialogMessage =>
+      'શું તમે ખરેખર આ કાર્ય હમણાં જ રદ કરવા માંગો છો?';
+
+  @override
+  String get supervisorTaskNo => 'ના';
+
+  @override
+  String get supervisorTaskYes => 'હા';
+
+  @override
+  String get supervisorTaskCancelledSuccess => 'કાર્ય સફળતાપૂર્વક રદ થયું છે';
+
+  @override
+  String get supervisorAgentRequestsTitle => 'એજન્ટની વિનંતીઓ';
+
+  @override
+  String get supervisorAgentRequestPerson => 'રાહુલ પટેલ (EERL દક્ષિણ)';
+
+  @override
+  String get supervisorAgentRequestCardTitle => 'કલેક્શનની વિગતો ચકાસો';
+
+  @override
+  String get supervisorAgentRequestCardDescription =>
+      'ફીલ્ડ એજન્ટ દ્વારા સબમિટ કરેલી નવીનતમ કલેક્શન એન્ટ્રીની સમીક્ષા અને ચકાસણી કરો...';
+
+  @override
+  String get supervisorAgentRequestPending => 'વિનંતી બાકી';
+
+  @override
+  String get supervisorAgentRequestResolved => 'વિનંતી ઉકેલાઈ';
+
+  @override
+  String get supervisorAgentRequestTime => 'આજે, 08:00 AM';
+
+  @override
+  String get supervisorAgentRequestResolveTitle => 'વિનંતી ઉકેલો';
+
+  @override
+  String get supervisorAgentRequestAttachment => 'કલેક્શન એજન્ટનું જોડાણ';
+
+  @override
+  String get supervisorAgentRequestProof => 'વિનંતી ઉકેલ્યાનો પુરાવો';
+
+  @override
+  String get supervisorAgentRequestResolveButton => 'વિનંતી ઉકેલાઈ';
+
+  @override
+  String get supervisorAgentRequestSuccessTitle => 'સફળતાપૂર્વક ઉકેલાઈ!';
+
+  @override
+  String get supervisorAgentRequestSuccessMessage =>
+      'સમસ્યા બંધ થઈ. એજન્ટને સૂચના મોકલવામાં આવી.';
+
+  @override
+  String get supervisorAgentRequestResolveDetails => 'વિનંતી ઉકેલવાની વિગતો';
+
+  @override
+  String get supervisorAgentRequestCollectionAgentDetails =>
+      'કલેક્શન એજન્ટની વિગતો';
+
+  @override
+  String get supervisorAgentRequestAttachmentFromSupervisor =>
+      'સુપરવાઇઝરનું જોડાણ';
+
+  @override
+  String get supervisorAgentRequestLongDescription =>
+      'ફીલ્ડ એજન્ટ દ્વારા સબમિટ કરેલી નવીનતમ કલેક્શન એન્ટ્રીની સમીક્ષા અને ચકાસણી કરો. નોંધાયેલા કલેક્શન વજનને ચકાસાયેલા વજન સાથે સરખાવો, અપલોડ કરેલા તમામ ફોટા તપાસો અને અંતિમ મંજૂરી પહેલાં ગ્રાહકની વિગતો તથા સામગ્રીની શ્રેણીઓ સિસ્ટમ રેકોર્ડ સાથે મેળ ખાતી હોવાની ખાતરી કરો';
+
+  @override
+  String get supervisorMrfTitle => 'SMC MRF ટીમ નોંધણી';
+
+  @override
+  String get supervisorMrfSearch => 'અહીં શોધો...';
+
+  @override
+  String get supervisorMrfAddNewPerson => 'નવી વ્યક્તિ ઉમેરો';
+
+  @override
+  String get supervisorMrfFullName => 'પૂરું નામ';
+
+  @override
+  String get supervisorMrfEnterFullName => 'પૂરું નામ દાખલ કરો';
+
+  @override
+  String get supervisorMrfMobileNumber => 'મોબાઇલ નંબર';
+
+  @override
+  String get supervisorMrfEnterMobile => 'મોબાઇલ નંબર દાખલ કરો';
+
+  @override
+  String get supervisorMrfAssignCenter => 'લક્ષ્ય કેન્દ્ર સોંપો';
+
+  @override
+  String get supervisorMrfSelectCenter => 'કેન્દ્ર પસંદ કરો';
+
+  @override
+  String get supervisorMrfCenterHelper =>
+      'ફક્ત પસંદ કરેલ એજન્ટ આ MRF એન્ટ્રી જોઈ અને ચકાસી શકશે.';
+
+  @override
+  String get supervisorMrfAddLabor => '+ મજૂર ઉમેરો';
+
+  @override
+  String get supervisorMrfSave => 'સેવ કરો';
+
+  @override
+  String supervisorMrfLaborNumber(int number) {
+    return 'મજૂર $number';
+  }
+
+  @override
+  String supervisorMrfLaborAssigned(int count) {
+    return '$count મજૂરો સોંપ્યા';
+  }
+
+  @override
+  String get supervisorMrfFullNamePlain => 'પૂરું નામ';
+
+  @override
+  String get supervisorMrfMobileNumberPlain => 'મોબાઇલ નંબર';
+
+  @override
+  String get supervisorMrfAssignedCenter => 'લક્ષ્ય એજન્ટ / કેન્દ્ર સોંપો';
+
+  @override
+  String get supervisorMrfRegistrationId => '#MRF-2026-089';
+
+  @override
+  String get supervisorMrfRemovePerson => 'વ્યક્તિ દૂર કરો';
+
+  @override
+  String get supervisorMrfRemoveDialogTitle => 'શું તમને ખાતરી છે';
+
+  @override
+  String get supervisorMrfRemoveDialogMessage =>
+      'શું તમે આ વ્યક્તિને દૂર કરવા માંગો છો? આ ક્રિયા પાછી ફેરવી શકાતી નથી';
+
+  @override
+  String get supervisorMrfYes => 'હા';
+
+  @override
+  String get supervisorMrfRemovedTitle => 'MRF વ્યક્તિ દૂર થઈ';
+
+  @override
+  String get supervisorMrfRemovedSubtitle => 'MRF-2026-089 માટે પ્રવેશ રદ થયો';
+
+  @override
+  String get supervisorMrfAddedTitle => 'MRF વ્યક્તિ ઉમેરાઈ';
+
+  @override
+  String get supervisorMrfAddedSubtitle => 'MRF-2026-089 ને સોંપાઈ';
+
+  @override
+  String get supervisorMrfPersonChunilal => 'ચુનીલાલ યાદવ';
+
+  @override
+  String get supervisorMrfPersonRamesh => 'રમેશ કુમાર';
+
+  @override
+  String get supervisorMrfPersonSuresh => 'સુરેશ કુમાર';
+
+  @override
+  String get supervisorMrfPersonManohar => 'મનોહર લાલ';
+
+  @override
+  String get supervisorMrfPersonSureshSharma => 'સુરેશ શર્મા';
+
+  @override
+  String get supervisorMrfLaborHaresh => 'હરેશ મટિયા';
+
+  @override
+  String get supervisorMrfCenterSurat => 'EERL - સુરત ઝોન';
+
+  @override
+  String get supervisorMrfCenterSuratEast => 'EERL - સુરત પૂર્વ ઝોન';
+
+  @override
+  String get supervisorMrfCenterSuratWest => 'EERL - સુરત પશ્ચિમ ઝોન';
+
+  @override
+  String get supervisorMrfCenterSuratSouth => 'EERL - સુરત દક્ષિણ ઝોન';
+
+  @override
+  String get supervisorMrfLocationKargil => 'કારગિલ ચોક, વરાછા';
+
+  @override
+  String get supervisorMrfLocationMagdalla => 'મગદલ્લા, વેસુ';
+
+  @override
+  String get supervisorMrfLocationSilver => 'સિલ્વર ચોક, પુણાગામ';
+
+  @override
+  String get supervisorMrfLocationSardar => 'સરદાર માર્કેટ, ઉધના';
 }

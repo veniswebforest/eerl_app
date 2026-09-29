@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../model/expense_claim_detail_status.dart';
@@ -11,22 +12,10 @@ import '../widgets/wallet_action_card.dart';
 import '../widgets/wallet_balance_card.dart';
 import '../widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:go_router/go_router.dart';
 
 class WalletTabScreen extends StatefulWidget {
-  const WalletTabScreen({
-    super.key,
-    this.onBack,
-    this.onLogExpense,
-    this.onRequestCash,
-    this.onClaimTap,
-    this.onCashRequestTap,
-  });
-
-  final VoidCallback? onBack;
-  final VoidCallback? onLogExpense;
-  final VoidCallback? onRequestCash;
-  final ValueChanged<ExpenseClaimDetailStatus>? onClaimTap;
-  final ValueChanged<CashRequestDetailStatus>? onCashRequestTap;
+  const WalletTabScreen({super.key});
 
   @override
   State<WalletTabScreen> createState() => _WalletTabScreenState();
@@ -58,24 +47,22 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    WalletScreenHeader(
-                      title: l10n.walletFieldExpenses,
-                      onBack: widget.onBack ?? () {},
-                    ),
+                    WalletScreenHeader(title: l10n.walletFieldExpenses),
                     const SizedBox(height: 24),
                     WalletBalanceCard(
                       balanceLabel: l10n.availableCashBalance,
                       balance: l10n.availableCashBalanceValue,
                       spentLabel: l10n.todaysSpent,
                       spent: l10n.todaysSpentValue,
-                      onRequestCash: widget.onRequestCash,
+                      onRequestCash: () =>
+                          context.push<void>(AppRoutes.requestCash),
                     ),
                     const SizedBox(height: 24),
                     WalletActionCard(
                       title: l10n.fieldSpendingPrompt,
                       description: l10n.fieldSpendingDescription,
                       buttonLabel: l10n.logExpense,
-                      onPressed: widget.onLogExpense ?? () {},
+                      onPressed: () => context.push<void>(AppRoutes.logExpense),
                     ),
                     const SizedBox(height: 32),
                     Text(
@@ -121,7 +108,7 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
                                   amount: l10n.expenseFuelAmount,
                                   statusLabel: l10n.expensePendingSupervisor,
                                   status: ExpenseClaimStatus.pending,
-                                  onTap: () => widget.onClaimTap?.call(
+                                  onTap: () => _openExpenseClaim(
                                     ExpenseClaimDetailStatus.pending,
                                   ),
                                 ),
@@ -132,7 +119,7 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
                                   amount: l10n.expenseScaleAmount,
                                   statusLabel: l10n.expenseVerified,
                                   status: ExpenseClaimStatus.verified,
-                                  onTap: () => widget.onClaimTap?.call(
+                                  onTap: () => _openExpenseClaim(
                                     ExpenseClaimDetailStatus.verified,
                                   ),
                                 ),
@@ -143,7 +130,7 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
                                   amount: l10n.expenseVehicleAmount,
                                   statusLabel: l10n.expenseRejectedSupervisor,
                                   status: ExpenseClaimStatus.flagged,
-                                  onTap: () => widget.onClaimTap?.call(
+                                  onTap: () => _openExpenseClaim(
                                     ExpenseClaimDetailStatus.rejected,
                                   ),
                                 ),
@@ -158,7 +145,7 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
                                   amount: l10n.cashRequestEmergencyFuelAmount,
                                   statusLabel: l10n.expensePendingSupervisor,
                                   status: ExpenseClaimStatus.pending,
-                                  onTap: () => widget.onCashRequestTap?.call(
+                                  onTap: () => _openCashRequest(
                                     CashRequestDetailStatus.pending,
                                   ),
                                 ),
@@ -169,7 +156,7 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
                                   amount: l10n.cashRequestAdvanceAmount,
                                   statusLabel: l10n.cashRequestCreditedWallet,
                                   status: ExpenseClaimStatus.verified,
-                                  onTap: () => widget.onCashRequestTap?.call(
+                                  onTap: () => _openCashRequest(
                                     CashRequestDetailStatus.approved,
                                   ),
                                 ),
@@ -180,7 +167,7 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
                                   amount: l10n.cashRequestAdvanceAmount,
                                   statusLabel: l10n.expenseRejectedSupervisor,
                                   status: ExpenseClaimStatus.flagged,
-                                  onTap: () => widget.onCashRequestTap?.call(
+                                  onTap: () => _openCashRequest(
                                     CashRequestDetailStatus.rejected,
                                   ),
                                 ),
@@ -195,5 +182,13 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
         ),
       ),
     );
+  }
+
+  void _openExpenseClaim(ExpenseClaimDetailStatus status) {
+    context.push<void>(AppRoutes.expenseClaimDetail, extra: status);
+  }
+
+  void _openCashRequest(CashRequestDetailStatus status) {
+    context.push<void>(AppRoutes.cashRequestDetail, extra: status);
   }
 }

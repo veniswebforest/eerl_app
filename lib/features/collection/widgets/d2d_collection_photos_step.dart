@@ -4,7 +4,8 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
-import '../view/collection_image_preview_screen.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -184,10 +185,9 @@ class _D2dMaterialCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                   child: InkWell(
                     key: Key('collection-product-image-$item'),
-                    onTap: () => Navigator.of(context).push(
-                      CollectionImagePreviewScreen.route(
-                        AssetImage(materialImage),
-                      ),
+                    onTap: () => context.push<void>(
+                      AppRoutes.collectionImagePreview,
+                      extra: AssetImage(materialImage),
                     ),
                     child: Image.asset(
                       materialImage,

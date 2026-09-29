@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../widgets/expense_category_selector.dart';
@@ -9,13 +10,10 @@ import '../widgets/receipt_upload_section.dart';
 import '../widgets/request_new_expense_category_dialog.dart';
 import '../widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
-import 'expense_submitted_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class LogExpenseScreen extends StatefulWidget {
-  const LogExpenseScreen({super.key, required this.onBack, this.onSubmitted});
-
-  final VoidCallback onBack;
-  final VoidCallback? onSubmitted;
+  const LogExpenseScreen({super.key});
 
   @override
   State<LogExpenseScreen> createState() => _LogExpenseScreenState();
@@ -51,24 +49,8 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
   void _refresh() => setState(() {});
 
   Future<void> _submitExpense() async {
-    await Navigator.of(context).push<void>(
-      PageRouteBuilder<void>(
-        opaque: false,
-        barrierColor: Colors.transparent,
-        pageBuilder: (routeContext, _, _) => ExpenseSubmittedScreen(
-          onBackToWallet: () {
-            Navigator.of(routeContext).pop();
-            (widget.onSubmitted ?? widget.onBack).call();
-          },
-        ),
-        transitionsBuilder: (_, animation, _, child) => FadeTransition(
-          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-          child: child,
-        ),
-        transitionDuration: const Duration(milliseconds: 180),
-        reverseTransitionDuration: const Duration(milliseconds: 140),
-      ),
-    );
+    final submitted = await context.push<bool>(AppRoutes.expenseSubmitted);
+    if (submitted == true && mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -101,10 +83,7 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    WalletScreenHeader(
-                      title: l10n.logExpense,
-                      onBack: widget.onBack,
-                    ),
+                    WalletScreenHeader(title: l10n.logExpense),
                     const SizedBox(height: 24),
                     LogExpenseField(
                       label: l10n.expenseReasonLabel,

@@ -83,21 +83,27 @@ class _TransferDispatchFlowScreenState
   @override
   Widget build(BuildContext context) {
     final vehicleStep = _step == _DispatchStep.vehicle;
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
-      appBar: CustomAppBar(
-        title: vehicleStep
-            ? context.l10n.transferVehicleDetailsTitle
-            : context.l10n.transferWeighbridgeTitle,
-        onBackTap: _handleBack,
-        backIconAsset: 'assets/icons/records/back.svg',
-      ),
-      body: SafeArea(
-        top: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: vehicleStep ? _vehicleForm() : _weighbridgeForm(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _handleBack();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.backgroundColor,
+        appBar: CustomAppBar(
+          title: vehicleStep
+              ? context.l10n.transferVehicleDetailsTitle
+              : context.l10n.transferWeighbridgeTitle,
+          onBackTap: _handleBack,
+          backIconAsset: 'assets/icons/records/back.svg',
+        ),
+        body: SafeArea(
+          top: false,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: vehicleStep ? _vehicleForm() : _weighbridgeForm(),
+            ),
           ),
         ),
       ),

@@ -4,10 +4,13 @@ import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/providers/app_lock_provider.dart';
 import 'package:eerl_app/core/providers/locale_provider.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:go_router/go_router.dart';
 import '../../home/widgets/home_assets.dart';
 import '../widgets/profile_action_card.dart';
 import '../widgets/profile_assets.dart';
@@ -16,9 +19,7 @@ import '../widgets/logout_confirmation_dialog.dart';
 import '../widgets/sync_data_dialog.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key, this.onNotificationTap});
-
-  final VoidCallback? onNotificationTap;
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +52,7 @@ class ProfileScreen extends StatelessWidget {
               bottom: 112,
             ),
             children: [
-              _ProfileHeader(
-                localeProvider: localeProvider,
-                onNotificationTap: onNotificationTap ?? () {},
-              ),
+              _ProfileHeader(localeProvider: localeProvider),
               const SizedBox(height: 28),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -101,6 +99,8 @@ class ProfileScreen extends StatelessWidget {
                           subtitle: l10n.profileSyncSubtitle,
                           onTap: () => showSyncDataDialog(context),
                         ),
+                        const SizedBox(height: 12),
+                        const _AppLockToggleCard(),
                         const SizedBox(height: 18),
                         _SectionTitle(l10n.profileAccount),
                         const SizedBox(height: 12),
@@ -141,13 +141,9 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({
-    required this.localeProvider,
-    required this.onNotificationTap,
-  });
+  const _ProfileHeader({required this.localeProvider});
 
   final LocaleProvider localeProvider;
-  final VoidCallback onNotificationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +161,7 @@ class _ProfileHeader extends StatelessWidget {
                   _ProfileLanguageSelector(provider: localeProvider),
                   InkWell(
                     key: const Key('profile-notification-button'),
-                    onTap: onNotificationTap,
+                    onTap: () => context.push(AppRoutes.notifications),
                     borderRadius: BorderRadius.circular(24),
                     child: SvgPicture.asset(
                       ProfileAssets.notification,
@@ -422,4 +418,85 @@ class _SectionTitle extends StatelessWidget {
     label,
     style: AppTextStyles.semiboldH9_14.copyWith(color: AppColors.neutral950),
   );
+}
+
+class _AppLockToggleCard extends StatelessWidget {
+  const _AppLockToggleCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final appLockProvider = context.watch<AppLockProvider?>();
+    final isLocked = appLockProvider?.isLockEnabled ?? false;
+
+    return Material(
+      color: AppColors.neutral50,
+      borderRadius: BorderRadius.circular(12),
+      elevation: 2,
+      shadowColor: const Color(0x26000000),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.primary50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.lock_outline_rounded,
+                size: 22,
+                color: AppColors.primary500,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'App Lock',
+                    style: AppTextStyles.semiboldH8_16.copyWith(
+                      color: AppColors.neutral950,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isLocked
+                        ? 'Device lock enabled on open'
+                        : 'Unlock without device lock',
+                    style: AppTextStyles.mediumSH8_14.copyWith(
+                      color: AppColors.neutral600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Switch.adaptive(
+              key: const Key('profile-app-lock-switch'),
+              value: isLocked,
+              activeThumbColor: AppColors.primary500,
+              activeTrackColor: AppColors.primary500.withValues(alpha: 0.8),
+              onChanged: (value) async {
+                if (appLockProvider == null) return;
+                final success = await appLockProvider.setLockEnabled(value);
+                if (!context.mounted) return;
+                if (!success && value) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Authentication failed. App lock not enabled.',
+                      ),
+                      backgroundColor: AppColors.red600,
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

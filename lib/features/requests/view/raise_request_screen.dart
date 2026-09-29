@@ -14,13 +14,9 @@ enum _RequestPriority { low, normal, high }
 class RaiseRequestScreen extends StatefulWidget {
   const RaiseRequestScreen({
     super.key,
-    required this.onBack,
-    this.onBackToList,
     this.viewMode = RaiseRequestViewMode.empty,
   });
 
-  final VoidCallback onBack;
-  final VoidCallback? onBackToList;
   final RaiseRequestViewMode viewMode;
 
   @override
@@ -77,7 +73,6 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
     backgroundColor: AppColors.backgroundColor,
     appBar: CustomAppBar(
       title: context.l10n.requestRaiseTitle,
-      onBackTap: widget.onBack,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
     body: SafeArea(
@@ -346,7 +341,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                 key: const Key('request-back-to-list-button'),
                 onPressed: () {
                   Navigator.of(dialogContext).pop();
-                  widget.onBackToList?.call();
+                  Navigator.of(context).pop();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.cool100,

@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'features/auth/presentation/auth_provider.dart';
+import 'core/providers/app_lock_provider.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/network_provider.dart';
 import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/auth/presentation/auth_provider.dart';
 import 'shared/widgets/network_status_overlay.dart';
 
 void main() async {
@@ -21,12 +22,17 @@ void main() async {
   final localeProvider = LocaleProvider();
   final authProvider = AuthProvider();
   final networkProvider = NetworkProvider();
+  final appLockProvider = AppLockProvider();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  await Future.wait([themeProvider.loadTheme(), localeProvider.loadLocale()]);
+  await Future.wait([
+    themeProvider.loadTheme(),
+    localeProvider.loadLocale(),
+    appLockProvider.loadLockSetting(),
+  ]);
 
   runApp(
     MultiProvider(
@@ -35,6 +41,7 @@ void main() async {
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider.value(value: networkProvider),
+        ChangeNotifierProvider.value(value: appLockProvider),
       ],
       child: const EerlApp(),
     ),

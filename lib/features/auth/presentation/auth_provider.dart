@@ -48,6 +48,9 @@ class AuthProvider extends ChangeNotifier {
   bool get isOtpComplete => RegExp(r'^\d{6}$').hasMatch(_otp);
 
   void setPhoneNumber(String phone) {
+    if (_phoneNumber == phone && !_hasLoginError && _errorMessage == null) {
+      return;
+    }
     _phoneNumber = phone;
     _hasLoginError = false;
     _errorMessage = null;
@@ -55,6 +58,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void setOtp(String otp) {
+    if (_otp == otp && !_hasOtpError && _errorMessage == null) return;
     _otp = otp;
     _hasOtpError = false;
     _errorMessage = null;
@@ -62,6 +66,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void setLoginAttempted(bool attempted) {
+    if (_loginAttempted == attempted) return;
     _loginAttempted = attempted;
     notifyListeners();
   }
@@ -83,9 +88,11 @@ class AuthProvider extends ChangeNotifier {
 
   void cancelTimer() {
     _resendTimer?.cancel();
+    _resendTimer = null;
   }
 
   Future<bool> sendOtp() async {
+    if (_isLoading) return false;
     debugPrint('$_tag Send OTP event start');
     _loginAttempted = true;
     if (!isPhoneValid) {
@@ -140,6 +147,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> verifyOtp() async {
+    if (_isLoading) return false;
     debugPrint('$_tag Verify OTP event start');
     if (!isPhoneValid) {
       _hasOtpError = true;
@@ -203,7 +211,6 @@ class AuthProvider extends ChangeNotifier {
     if (_resendSeconds > 0) return;
     _hasOtpError = false;
     startResendTimer();
-    notifyListeners();
   }
 
   /// Checks if stored session has non-null/non-empty access token and unexpired sessionExpiresAt.
@@ -223,6 +230,18 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void reset() {
+    final hadState =
+        _phoneNumber.isNotEmpty ||
+        _otp.isNotEmpty ||
+        _isLoading ||
+        _hasLoginError ||
+        _hasOtpError ||
+        _isVerified ||
+        _loginAttempted ||
+        _errorMessage != null ||
+        _sendOtpResponse != null ||
+        _verifyOtpResponse != null ||
+        _resendSeconds != 30;
     _phoneNumber = '';
     _otp = '';
     _isLoading = false;
@@ -235,6 +254,7 @@ class AuthProvider extends ChangeNotifier {
     _verifyOtpResponse = null;
     _resendTimer?.cancel();
     _resendSeconds = 30;
+    if (hadState) notifyListeners();
   }
 
   @override

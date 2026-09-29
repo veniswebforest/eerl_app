@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../model/verification_entry.dart';
 import '../widgets/verification_entry_card.dart';
 import '../widgets/verification_filter_chips.dart';
 import '../widgets/verification_segmented_control.dart';
+import 'package:go_router/go_router.dart';
 
 class SupervisorVerificationScreen extends StatefulWidget {
   const SupervisorVerificationScreen({
     super.key,
     this.initialStatus = VerificationListStatus.pending,
-    this.onEntryTap,
   });
 
   final VerificationListStatus initialStatus;
-  final ValueChanged<VerificationDetailStatus>? onEntryTap;
 
   @override
   State<SupervisorVerificationScreen> createState() =>
@@ -119,8 +119,9 @@ class _SupervisorVerificationScreenState
                           '${_status.name}-${entries[index].person}-$index',
                         ),
                         entry: entries[index],
-                        onTap: () => widget.onEntryTap?.call(
-                          switch (entries[index].result) {
+                        onTap: () => context.push<void>(
+                          AppRoutes.verificationDetail,
+                          extra: switch (entries[index].result) {
                             VerificationResult.pending =>
                               VerificationDetailStatus.pending,
                             VerificationResult.verified =>

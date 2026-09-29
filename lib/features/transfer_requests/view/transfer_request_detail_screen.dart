@@ -9,14 +9,9 @@ import '../widgets/transfer_request_detail_widgets.dart';
 import 'transfer_dispatch_flow_screen.dart';
 
 class TransferRequestDetailScreen extends StatefulWidget {
-  const TransferRequestDetailScreen({
-    super.key,
-    required this.state,
-    required this.onBack,
-  });
+  const TransferRequestDetailScreen({super.key, required this.state});
 
   final TransferRequestDetailState state;
-  final VoidCallback onBack;
 
   @override
   State<TransferRequestDetailScreen> createState() =>
@@ -28,27 +23,27 @@ class _TransferRequestDetailScreenState
   bool _dispatchFlowOpen = false;
 
   @override
-  Widget build(BuildContext context) => _dispatchFlowOpen
-      ? TransferDispatchFlowScreen(
-          onBack: () => setState(() => _dispatchFlowOpen = false),
-          onComplete: () => setState(() => _dispatchFlowOpen = false),
-        )
-      : _TransferRequestDetailContent(
-          state: widget.state,
-          onBack: widget.onBack,
-          onVehicleArrived: () => setState(() => _dispatchFlowOpen = true),
-        );
+  Widget build(BuildContext context) => PopScope(
+    canPop: !_dispatchFlowOpen,
+    child: _dispatchFlowOpen
+        ? TransferDispatchFlowScreen(
+            onBack: () => setState(() => _dispatchFlowOpen = false),
+            onComplete: () => setState(() => _dispatchFlowOpen = false),
+          )
+        : _TransferRequestDetailContent(
+            state: widget.state,
+            onVehicleArrived: () => setState(() => _dispatchFlowOpen = true),
+          ),
+  );
 }
 
 class _TransferRequestDetailContent extends StatelessWidget {
   const _TransferRequestDetailContent({
     required this.state,
-    required this.onBack,
     required this.onVehicleArrived,
   });
 
   final TransferRequestDetailState state;
-  final VoidCallback onBack;
   final VoidCallback onVehicleArrived;
 
   bool get _isRejected => state == TransferRequestDetailState.rejected;
@@ -65,7 +60,6 @@ class _TransferRequestDetailContent extends StatelessWidget {
     backgroundColor: AppColors.backgroundColor,
     appBar: CustomAppBar(
       title: context.l10n.transferDetailTitle,
-      onBackTap: onBack,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
     bottomNavigationBar: _isRejected || _isCompleted

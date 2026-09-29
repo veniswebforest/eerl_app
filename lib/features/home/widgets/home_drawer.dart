@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
+import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
+import 'package:eerl_app/features/profile/widgets/logout_confirmation_dialog.dart';
+import 'package:eerl_app/features/verification/model/verification_entry.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'home_assets.dart';
 
 const _iconPath = 'assets/icons/home';
@@ -13,52 +20,7 @@ enum HomeDrawerRole { collectionAgent, supervisor }
 
 /// Role-aware navigation drawer based on Figma nodes 5114:3146 and 5114:3594.
 class HomeDrawer extends StatefulWidget {
-  const HomeDrawer({
-    super.key,
-    this.onCollectionTap,
-    this.onReceiptsTap,
-    this.onSyncStatusTap,
-    this.onNotificationTap,
-    this.onLogoutTap,
-    this.onWalletTap,
-    this.onHelpSupportTap,
-    this.onConfigureMaterialTap,
-    this.onTasksTap,
-    this.onRequestsTap,
-    this.onTransferRequestsTap,
-    this.onRagpickerDirectoryTap,
-    this.onSupervisorStockTap,
-    this.onSupervisorExpenseTap,
-    this.onSupervisorPendingVerificationTap,
-    this.onSupervisorVerifiedEntriesTap,
-    this.onMrfPersonListTap,
-    this.onD2dVehicleListTap,
-    this.onAgentStatusTap,
-    this.roleTitle,
-    this.role = HomeDrawerRole.collectionAgent,
-  });
-
-  final VoidCallback? onCollectionTap;
-  final VoidCallback? onReceiptsTap;
-  final VoidCallback? onSyncStatusTap;
-  final VoidCallback? onNotificationTap;
-  final VoidCallback? onLogoutTap;
-  final VoidCallback? onWalletTap;
-  final VoidCallback? onHelpSupportTap;
-  final VoidCallback? onConfigureMaterialTap;
-  final VoidCallback? onTasksTap;
-  final VoidCallback? onRequestsTap;
-  final VoidCallback? onTransferRequestsTap;
-  final VoidCallback? onRagpickerDirectoryTap;
-  final VoidCallback? onSupervisorStockTap;
-  final VoidCallback? onSupervisorExpenseTap;
-  final VoidCallback? onSupervisorPendingVerificationTap;
-  final VoidCallback? onSupervisorVerifiedEntriesTap;
-  final VoidCallback? onMrfPersonListTap;
-  final VoidCallback? onD2dVehicleListTap;
-  final VoidCallback? onAgentStatusTap;
-  final String? roleTitle;
-  final HomeDrawerRole role;
+  const HomeDrawer({super.key});
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -71,6 +33,14 @@ class _HomeDrawerState extends State<HomeDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final navigation = context.watch<DashboardNavigationProvider>();
+    final role = navigation.activeRole == DashboardUserRole.supervisor
+        ? HomeDrawerRole.supervisor
+        : HomeDrawerRole.collectionAgent;
+    final roleTitle = role == HomeDrawerRole.supervisor
+        ? context.l10n.roleCollectionSupervisor
+        : context.l10n.drawerUserRole;
+
     return Drawer(
       width: 310,
       elevation: 0,
@@ -78,7 +48,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
       backgroundColor: Colors.white,
       child: Column(
         children: [
-          _ProfileHeader(roleTitle: widget.roleTitle, role: widget.role),
+          _ProfileHeader(roleTitle: roleTitle, role: role),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -88,7 +58,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          if (widget.role == HomeDrawerRole.supervisor)
+                          if (role == HomeDrawerRole.supervisor)
                             ..._buildSupervisorItems(context)
                           else ...[
                             _DrawerItem(
@@ -97,7 +67,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               icon: '$_iconPath/drawer_collection.svg',
                               onTap: () {
                                 _close(context);
-                                widget.onCollectionTap?.call();
+                                navigation.selectPage('collections');
                               },
                             ),
                             _DrawerItem(
@@ -106,7 +76,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               icon: '$_iconPath/drawer_transfer_requests.svg',
                               onTap: () {
                                 _close(context);
-                                widget.onTransferRequestsTap?.call();
+                                context.push(AppRoutes.transferRequests);
                               },
                             ),
                             _DrawerItem(
@@ -115,7 +85,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               icon: '$_iconPath/drawer_receipts.svg',
                               onTap: () {
                                 _close(context);
-                                widget.onReceiptsTap?.call();
+                                navigation.selectPage('records');
                               },
                             ),
                             _DrawerItem(
@@ -123,7 +93,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               icon: '$_iconPath/drawer_wallet.svg',
                               onTap: () {
                                 _close(context);
-                                widget.onWalletTap?.call();
+                                context.push(AppRoutes.wallet);
                               },
                             ),
                             _DrawerItem(
@@ -132,7 +102,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               icon: '$_iconPath/drawer_material_list.svg',
                               onTap: () {
                                 _close(context);
-                                widget.onConfigureMaterialTap?.call();
+                                context.push(AppRoutes.configureMaterials);
                               },
                             ),
                             _DrawerItem(
@@ -141,7 +111,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               icon: 'assets/icons/profile/role.svg',
                               onTap: () {
                                 _close(context);
-                                widget.onRagpickerDirectoryTap?.call();
+                                context.push(AppRoutes.ragpickerDirectory);
                               },
                             ),
                             _DrawerExpandableItem(
@@ -162,7 +132,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                                   ),
                                   onTap: () {
                                     _close(context);
-                                    widget.onTasksTap?.call();
+                                    context.push(AppRoutes.tasks);
                                   },
                                 ),
                                 _DrawerChildItem(
@@ -173,7 +143,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                                   ),
                                   onTap: () {
                                     _close(context);
-                                    widget.onRequestsTap?.call();
+                                    context.push(AppRoutes.requests);
                                   },
                                 ),
                               ],
@@ -184,7 +154,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               icon: '$_iconPath/drawer_sync_status.svg',
                               onTap: () {
                                 _close(context);
-                                widget.onSyncStatusTap?.call();
+                                navigation.selectPage('profile');
                               },
                             ),
                             _DrawerItem(
@@ -193,7 +163,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               icon: '$_iconPath/drawer_notifications.svg',
                               onTap: () {
                                 _close(context);
-                                widget.onNotificationTap?.call();
+                                context.push(AppRoutes.notifications);
                               },
                             ),
                             _DrawerItem(
@@ -202,7 +172,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               icon: '$_iconPath/drawer_help_support.svg',
                               onTap: () {
                                 _close(context);
-                                widget.onHelpSupportTap?.call();
+                                context.push(AppRoutes.helpSupport);
                               },
                             ),
                             _DrawerItem(
@@ -212,7 +182,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                               textColor: const Color(0xFFE22424),
                               onTap: () {
                                 _close(context);
-                                widget.onLogoutTap?.call();
+                                _showLogoutDialog(context);
                               },
                             ),
                           ],
@@ -240,7 +210,9 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/stock.svg',
         onTap: () {
           _close(context);
-          widget.onSupervisorStockTap?.call();
+          context.read<DashboardNavigationProvider>().selectPage(
+            'supervisor-stock',
+          );
         },
       ),
       _SupervisorExpandableItem(
@@ -260,7 +232,9 @@ class _HomeDrawerState extends State<HomeDrawer> {
             label: context.l10n.transferTimelinePendingVerification,
             onTap: () {
               _close(context);
-              widget.onSupervisorPendingVerificationTap?.call();
+              context.read<DashboardNavigationProvider>().showVerification(
+                VerificationListStatus.pending,
+              );
             },
           ),
           _SupervisorChildItem(
@@ -268,7 +242,9 @@ class _HomeDrawerState extends State<HomeDrawer> {
             label: context.l10n.verifiedEntries,
             onTap: () {
               _close(context);
-              widget.onSupervisorVerifiedEntriesTap?.call();
+              context.read<DashboardNavigationProvider>().showVerification(
+                VerificationListStatus.processed,
+              );
             },
           ),
         ],
@@ -288,7 +264,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
             label: context.l10n.drawerTasks,
             onTap: () {
               _close(context);
-              widget.onTasksTap?.call();
+              context.push(AppRoutes.supervisorTasks);
             },
           ),
           _SupervisorChildItem(
@@ -296,7 +272,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
             label: context.l10n.drawerRequests,
             onTap: () {
               _close(context);
-              widget.onRequestsTap?.call();
+              context.push(AppRoutes.supervisorRequests);
             },
           ),
         ],
@@ -308,7 +284,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
         showBadge: true,
         onTap: () {
           _close(context);
-          widget.onSupervisorExpenseTap?.call();
+          context.push(AppRoutes.supervisorExpense);
         },
       ),
       _DrawerItem(
@@ -317,7 +293,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/mrf_person.svg',
         onTap: () {
           _close(context);
-          widget.onMrfPersonListTap?.call();
+          context.push(AppRoutes.supervisorMrfPeople);
         },
       ),
       _DrawerItem(
@@ -326,7 +302,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/d2d_vehicle.svg',
         onTap: () {
           _close(context);
-          widget.onD2dVehicleListTap?.call();
         },
       ),
       _DrawerItem(
@@ -335,7 +310,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/ragpicker.svg',
         onTap: () {
           _close(context);
-          widget.onRagpickerDirectoryTap?.call();
+          context.push(AppRoutes.ragpickerDirectory);
         },
       ),
       _DrawerItem(
@@ -344,7 +319,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/agent_status.svg',
         onTap: () {
           _close(context);
-          widget.onAgentStatusTap?.call();
         },
       ),
       _DrawerItem(
@@ -353,7 +327,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/sync_status.svg',
         onTap: () {
           _close(context);
-          widget.onSyncStatusTap?.call();
+          context.read<DashboardNavigationProvider>().selectPage('profile');
         },
       ),
       _DrawerItem(
@@ -362,7 +336,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/notifications.svg',
         onTap: () {
           _close(context);
-          widget.onNotificationTap?.call();
+          context.push(AppRoutes.notifications);
         },
       ),
       _DrawerItem(
@@ -371,7 +345,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/help_support.svg',
         onTap: () {
           _close(context);
-          widget.onHelpSupportTap?.call();
+          context.push(AppRoutes.helpSupport);
         },
       ),
       _DrawerItem(
@@ -382,7 +356,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
         textColor: const Color(0xFFE22424),
         onTap: () {
           _close(context);
-          widget.onLogoutTap?.call();
+          _showLogoutDialog(context);
         },
       ),
     ];
@@ -394,6 +368,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
       ],
     ];
   }
+
+  void _showLogoutDialog(BuildContext context) => showDialog<void>(
+    context: context,
+    barrierColor: Colors.black.withValues(alpha: 0.56),
+    builder: (_) => const LogoutConfirmationDialog(),
+  );
 }
 
 class _SupervisorExpandableItem extends StatelessWidget {

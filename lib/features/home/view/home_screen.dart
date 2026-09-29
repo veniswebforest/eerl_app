@@ -2,9 +2,16 @@ import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_route_data.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
+import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
+import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
+import 'package:eerl_app/features/profile/widgets/sync_data_dialog.dart';
 import 'package:eerl_app/features/role_switcher/widgets/role_switcher_assets.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../widgets/collection_drafts.dart';
 import '../widgets/collection_types.dart';
 import '../widgets/day_closure.dart';
@@ -22,71 +29,19 @@ import '../widgets/zone_selector.dart';
 ///
 /// Each section is a separate, focused widget for maintainability.
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({
-    super.key,
-    this.onCollectionTap,
-    this.onReceiptsTap,
-    this.onContinueDraftTap,
-    this.onSyncStatusTap,
-    this.onSyncNowTap,
-    this.onWalletTap,
-    this.onAddCollectionTap,
-    this.onCollectionTypeTap,
-    this.onHelpSupportTap,
-    this.onConfigureMaterialTap,
-    this.onTasksTap,
-    this.onRequestsTap,
-    this.onTransferRequestsTap,
-    this.onRagpickerDirectoryTap,
-    this.onSupervisorStockTap,
-    this.onSupervisorExpenseTap,
-    this.onSupervisorPendingVerificationTap,
-    this.onSupervisorVerifiedEntriesTap,
-    this.onMrfPersonListTap,
-    this.onD2dVehicleListTap,
-    this.onAgentStatusTap,
-    this.onNotificationTap,
-    this.onLogoutTap,
-    this.onEndMyDayTap,
-    this.onDrawerChanged,
-    this.onRoleSwitchTap,
-    this.roleTitle = 'Collection Agent',
-    this.roleZone = 'EERL - Surat South Zone',
-    this.isSupervisor = false,
-  });
-
-  final VoidCallback? onCollectionTap;
-  final VoidCallback? onReceiptsTap;
-  final VoidCallback? onContinueDraftTap;
-  final VoidCallback? onSyncStatusTap;
-  final VoidCallback? onSyncNowTap;
-  final VoidCallback? onWalletTap;
-  final VoidCallback? onAddCollectionTap;
-  final ValueChanged<CollectionType>? onCollectionTypeTap;
-  final VoidCallback? onHelpSupportTap;
-  final VoidCallback? onConfigureMaterialTap;
-  final VoidCallback? onTasksTap;
-  final VoidCallback? onRequestsTap;
-  final VoidCallback? onTransferRequestsTap;
-  final VoidCallback? onRagpickerDirectoryTap;
-  final VoidCallback? onSupervisorStockTap;
-  final VoidCallback? onSupervisorExpenseTap;
-  final VoidCallback? onSupervisorPendingVerificationTap;
-  final VoidCallback? onSupervisorVerifiedEntriesTap;
-  final VoidCallback? onMrfPersonListTap;
-  final VoidCallback? onD2dVehicleListTap;
-  final VoidCallback? onAgentStatusTap;
-  final VoidCallback? onNotificationTap;
-  final VoidCallback? onLogoutTap;
-  final VoidCallback? onEndMyDayTap;
-  final ValueChanged<bool>? onDrawerChanged;
-  final VoidCallback? onRoleSwitchTap;
-  final String roleTitle;
-  final String roleZone;
-  final bool isSupervisor;
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final navigation = context.watch<DashboardNavigationProvider>();
+    final isSupervisor = navigation.activeRole == DashboardUserRole.supervisor;
+    final roleTitle = isSupervisor
+        ? context.l10n.roleCollectionSupervisor
+        : context.l10n.drawerUserRole;
+    final roleZone = isSupervisor
+        ? context.l10n.homeSuratNorthZone
+        : context.l10n.homeSuratSouthZone;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final horizontalPadding = constraints.maxWidth < 360 ? 16.0 : 20.0;
@@ -94,33 +49,8 @@ class HomeScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: AppColors.backgroundColor,
           extendBody: true,
-          drawer: HomeDrawer(
-            onCollectionTap: onCollectionTap,
-            onReceiptsTap: onReceiptsTap,
-            onSyncStatusTap: onSyncStatusTap,
-            onNotificationTap: onNotificationTap,
-            onLogoutTap: onLogoutTap,
-            onWalletTap: onWalletTap,
-            onHelpSupportTap: onHelpSupportTap,
-            onConfigureMaterialTap: onConfigureMaterialTap,
-            onTasksTap: onTasksTap,
-            onRequestsTap: onRequestsTap,
-            onTransferRequestsTap: onTransferRequestsTap,
-            onRagpickerDirectoryTap: onRagpickerDirectoryTap,
-            onSupervisorStockTap: onSupervisorStockTap,
-            onSupervisorExpenseTap: onSupervisorExpenseTap,
-            onSupervisorPendingVerificationTap:
-                onSupervisorPendingVerificationTap,
-            onSupervisorVerifiedEntriesTap: onSupervisorVerifiedEntriesTap,
-            onMrfPersonListTap: onMrfPersonListTap,
-            onD2dVehicleListTap: onD2dVehicleListTap,
-            onAgentStatusTap: onAgentStatusTap,
-            roleTitle: roleTitle,
-            role: isSupervisor
-                ? HomeDrawerRole.supervisor
-                : HomeDrawerRole.collectionAgent,
-          ),
-          onDrawerChanged: onDrawerChanged,
+          drawer: const HomeDrawer(),
+          onDrawerChanged: navigation.setDrawerOpen,
           drawerScrimColor: Colors.black.withValues(alpha: 0.6),
           body: Container(
             decoration: const BoxDecoration(
@@ -152,8 +82,9 @@ class HomeScreen extends StatelessWidget {
                     sliver: SliverToBoxAdapter(
                       child: _CenteredHomeContent(
                         child: HomeAppBar(
-                          onNotificationTap: onNotificationTap,
-                          onWalletTap: onWalletTap,
+                          onNotificationTap: () =>
+                              context.push(AppRoutes.notifications),
+                          onWalletTap: () => context.push(AppRoutes.wallet),
                           showWalletAction: !isSupervisor,
                         ),
                       ),
@@ -179,7 +110,7 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         _CenteredHomeContent(
                           child: OnlineStatusBanner(
-                            onSyncNowTap: onSyncNowTap,
+                            onSyncNowTap: () => showSyncDataDialog(context),
                             subtitle: isSupervisor
                                 ? context.l10n.supervisorLastSynced
                                 : null,
@@ -187,7 +118,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         RoleSwitchCard(
-                          onSwitchRoleTap: onRoleSwitchTap,
+                          onSwitchRoleTap: () =>
+                              _switchRole(context, navigation),
                           roleTitle: roleTitle,
                           zoneName: roleZone,
                           roleIcon: isSupervisor
@@ -198,20 +130,34 @@ class HomeScreen extends StatelessWidget {
                         _CenteredHomeContent(
                           child: isSupervisor
                               ? const SupervisorTodaysSummary()
-                              : TodaysSummary(onWalletTap: onWalletTap),
+                              : TodaysSummary(
+                                  onWalletTap: () =>
+                                      context.push(AppRoutes.wallet),
+                                ),
                         ),
                         if (!isSupervisor) ...[
                           const SizedBox(height: 24),
                           _CenteredHomeContent(
                             child: CollectionDrafts(
-                              onViewAllTap: onReceiptsTap,
-                              onContinueCollectionTap: onContinueDraftTap,
+                              onViewAllTap: () =>
+                                  navigation.selectPage('records'),
+                              onContinueCollectionTap: () => _openCollection(
+                                context,
+                                navigation,
+                                step: CollectionEntryStep.photos,
+                                type: CollectionType.mrfStation,
+                                selectedItems: const <int>{0, 1, 3},
+                              ),
                             ),
                           ),
                           const SizedBox(height: 24),
                           _CenteredHomeContent(
                             child: CollectionTypes(
-                              onTypeTap: onCollectionTypeTap,
+                              onTypeTap: (type) => _openCollection(
+                                context,
+                                navigation,
+                                type: type,
+                              ),
                             ),
                           ),
                         ],
@@ -220,21 +166,33 @@ class HomeScreen extends StatelessWidget {
                         _CenteredHomeContent(
                           child: isSupervisor
                               ? SupervisorQuickActions(
-                                  onAssignTaskTap: onTasksTap,
-                                  onAgentsStatusTap: onRagpickerDirectoryTap,
-                                  onCheckStockTap: onConfigureMaterialTap,
-                                  onApprovalsTap: onSupervisorExpenseTap,
+                                  onAssignTaskTap: () =>
+                                      context.push(AppRoutes.supervisorTasks),
+                                  onAgentsStatusTap: () => context.push(
+                                    AppRoutes.ragpickerDirectory,
+                                  ),
+                                  onCheckStockTap: () => context.push(
+                                    AppRoutes.configureMaterials,
+                                  ),
+                                  onApprovalsTap: () =>
+                                      context.push(AppRoutes.supervisorExpense),
                                 )
                               : QuickActions(
-                                  onAddCollectionTap: onAddCollectionTap,
-                                  onTasksTap: onTasksTap,
-                                  onLogExpenseTap: onWalletTap,
+                                  onAddCollectionTap: () =>
+                                      _openCollection(context, navigation),
+                                  onTasksTap: () =>
+                                      context.push(AppRoutes.tasks),
+                                  onLogExpenseTap: () =>
+                                      context.push(AppRoutes.wallet),
                                 ),
                         ),
 
                         const SizedBox(height: 24),
                         _CenteredHomeContent(
-                          child: DayClosure(onEndMyDayTap: onEndMyDayTap),
+                          child: DayClosure(
+                            onEndMyDayTap: () =>
+                                context.push(AppRoutes.endMyDay),
+                          ),
                         ),
                       ],
                     ),
@@ -246,6 +204,39 @@ class HomeScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _switchRole(
+    BuildContext context,
+    DashboardNavigationProvider navigation,
+  ) async {
+    final role = await context.push<DashboardUserRole>(
+      AppRoutes.roleSwitcher,
+      extra: navigation.activeRole,
+    );
+    if (context.mounted && role != null && role != navigation.activeRole) {
+      navigation.changeRole(role);
+    }
+  }
+
+  Future<void> _openCollection(
+    BuildContext context,
+    DashboardNavigationProvider navigation, {
+    CollectionEntryStep step = CollectionEntryStep.items,
+    CollectionType? type,
+    Set<int> selectedItems = const <int>{},
+  }) async {
+    final saved = await context.push<bool>(
+      AppRoutes.addCollection,
+      extra: AddCollectionRouteData(
+        initialStep: step,
+        initialType: type,
+        initialSelectedItems: selectedItems,
+      ),
+    );
+    if (context.mounted && saved == true) {
+      navigation.showSavedCollections();
+    }
   }
 }
 

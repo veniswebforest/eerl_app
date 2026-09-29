@@ -8,16 +8,9 @@ import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import '../widgets/role_switcher_assets.dart';
 
 class RoleSwitcherScreen extends StatefulWidget {
-  const RoleSwitcherScreen({
-    super.key,
-    required this.initialRole,
-    required this.onBack,
-    required this.onRoleSelected,
-  });
+  const RoleSwitcherScreen({super.key, required this.initialRole});
 
   final DashboardUserRole initialRole;
-  final VoidCallback onBack;
-  final ValueChanged<DashboardUserRole> onRoleSelected;
 
   @override
   State<RoleSwitcherScreen> createState() => _RoleSwitcherScreenState();
@@ -39,7 +32,7 @@ class _RoleSwitcherScreenState extends State<RoleSwitcherScreen> {
                 children: [
                   InkWell(
                     key: const Key('role-switcher-back'),
-                    onTap: widget.onBack,
+                    onTap: () => Navigator.of(context).maybePop(),
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       width: 40,
@@ -93,7 +86,7 @@ class _RoleSwitcherScreenState extends State<RoleSwitcherScreen> {
                 height: 52,
                 child: FilledButton(
                   key: const Key('role-switcher-submit'),
-                  onPressed: () => widget.onRoleSelected(_selectedRole),
+                  onPressed: () => Navigator.of(context).pop(_selectedRole),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary500,
                     foregroundColor: Colors.white,

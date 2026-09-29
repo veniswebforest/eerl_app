@@ -9,14 +9,9 @@ import '../widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 
 class ExpenseClaimDetailScreen extends StatelessWidget {
-  const ExpenseClaimDetailScreen({
-    super.key,
-    required this.status,
-    required this.onBack,
-  });
+  const ExpenseClaimDetailScreen({super.key, required this.status});
 
   final ExpenseClaimDetailStatus status;
-  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +41,9 @@ class ExpenseClaimDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppScreenHeader(
-                      leading: WalletBackButton(onPressed: onBack),
+                      leading: WalletBackButton(
+                        onPressed: () => Navigator.of(context).maybePop(),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     ExpenseReferenceCard(reference: l10n.expenseClaimReference),

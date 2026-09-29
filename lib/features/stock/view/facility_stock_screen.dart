@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/home/widgets/home_assets.dart';
 import '../model/stock_item.dart';
 import '../widgets/stock_stage_card.dart';
+import 'package:go_router/go_router.dart';
 
 class FacilityStockScreen extends StatelessWidget {
-  const FacilityStockScreen({super.key, required this.onStageTap});
-
-  final ValueChanged<StockStage> onStageTap;
+  const FacilityStockScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,10 @@ class FacilityStockScreen extends StatelessWidget {
                   icon: 'assets/icons/stock_stage_rm.svg',
                   foreground: AppColors.purple,
                   iconBackground: AppColors.purpleLight,
-                  onTap: () => onStageTap(StockStage.rawMaterial),
+                  onTap: () => context.push<void>(
+                    AppRoutes.stockDetail,
+                    extra: StockStage.rawMaterial,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 StockStageCard(
@@ -92,7 +95,10 @@ class FacilityStockScreen extends StatelessWidget {
                   icon: 'assets/icons/stock_stage_srm.svg',
                   foreground: AppColors.secondary500,
                   iconBackground: AppColors.secondary100,
-                  onTap: () => onStageTap(StockStage.sortedRawMaterial),
+                  onTap: () => context.push<void>(
+                    AppRoutes.stockDetail,
+                    extra: StockStage.sortedRawMaterial,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 StockStageCard(
@@ -104,7 +110,7 @@ class FacilityStockScreen extends StatelessWidget {
                   icon: 'assets/icons/stock_stage_wip.svg',
                   foreground: AppColors.orchid,
                   iconBackground: AppColors.orchidLight,
-                  onTap: () => onStageTap(StockStage.workInProgress),
+                  onTap: () {},
                 ),
                 const SizedBox(height: 16),
                 StockStageCard(
@@ -116,7 +122,7 @@ class FacilityStockScreen extends StatelessWidget {
                   icon: 'assets/icons/stock_stage_fg.svg',
                   foreground: AppColors.orange,
                   iconBackground: AppColors.orangeLight,
-                  onTap: () => onStageTap(StockStage.finishedGoods),
+                  onTap: () {},
                 ),
               ],
             ),

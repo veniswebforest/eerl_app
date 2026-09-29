@@ -10,18 +10,15 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 ///  - [_ConfirmState] — asks the user to confirm they want to end the day.
 ///  - [_SuccessState] — shows a success message after confirmation.
 class EndDayConfirmDialog extends StatefulWidget {
-  const EndDayConfirmDialog({super.key, this.onConfirmed});
+  const EndDayConfirmDialog({super.key});
 
-  /// Called after the user confirms and the success animation completes.
-  final VoidCallback? onConfirmed;
-
-  static Future<void> show(BuildContext context, {VoidCallback? onConfirmed}) {
-    return showModalBottomSheet<void>(
+  static Future<bool?> show(BuildContext context) {
+    return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.6),
-      builder: (_) => EndDayConfirmDialog(onConfirmed: onConfirmed),
+      builder: (_) => const EndDayConfirmDialog(),
     );
   }
 
@@ -42,7 +39,10 @@ class _EndDayConfirmDialogState extends State<EndDayConfirmDialog>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _scale = CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut);
+    _scale = CurvedAnimation(
+      parent: _scaleController,
+      curve: Curves.elasticOut,
+    );
   }
 
   @override
@@ -57,8 +57,7 @@ class _EndDayConfirmDialogState extends State<EndDayConfirmDialog>
     // Auto-dismiss after success banner is shown
     Future.delayed(const Duration(milliseconds: 1800), () {
       if (mounted) {
-        Navigator.of(context).pop();
-        widget.onConfirmed?.call();
+        Navigator.of(context).pop(true);
       }
     });
   }

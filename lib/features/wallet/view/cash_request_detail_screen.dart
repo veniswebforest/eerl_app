@@ -10,14 +10,9 @@ import 'package:eerl_app/features/wallet/widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 
 class CashRequestDetailScreen extends StatelessWidget {
-  const CashRequestDetailScreen({
-    super.key,
-    required this.status,
-    required this.onBack,
-  });
+  const CashRequestDetailScreen({super.key, required this.status});
 
   final CashRequestDetailStatus status;
-  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +50,9 @@ class CashRequestDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AppScreenHeader(
-                      leading: WalletBackButton(onPressed: onBack),
+                      leading: WalletBackButton(
+                        onPressed: () => Navigator.of(context).maybePop(),
+                      ),
                     ),
                     const SizedBox(height: 24),
                     ExpenseReferenceCard(reference: reference),

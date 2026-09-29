@@ -9,13 +9,8 @@ import '../widgets/empty_notifications_view.dart';
 import '../widgets/notification_list_card.dart';
 
 class NotificationsScreen extends StatelessWidget {
-  const NotificationsScreen({
-    super.key,
-    required this.onBack,
-    this.hasNotifications = true,
-  });
+  const NotificationsScreen({super.key, this.hasNotifications = true});
 
-  final VoidCallback onBack;
   final bool hasNotifications;
 
   static const _items = [
@@ -56,7 +51,6 @@ class NotificationsScreen extends StatelessWidget {
     backgroundColor: AppColors.backgroundColor,
     appBar: CustomAppBar(
       title: context.l10n.notificationTitle,
-      onBackTap: onBack,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
     body: SafeArea(

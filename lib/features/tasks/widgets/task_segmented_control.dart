@@ -1,3 +1,4 @@
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -25,13 +26,7 @@ class TaskSegmentedControl extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x18000000),
-          blurRadius: 4,
-          offset: Offset(0, 2),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Row(
       children: [

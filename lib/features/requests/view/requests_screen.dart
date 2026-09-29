@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/request_list_item.dart';
 import '../widgets/request_list_card.dart';
@@ -12,17 +14,8 @@ import '../widgets/request_segmented_control.dart';
 enum RequestsViewMode { populated, empty }
 
 class RequestsScreen extends StatefulWidget {
-  const RequestsScreen({
-    super.key,
-    required this.onBack,
-    this.onRaiseRequest,
-    this.onRequestTap,
-    this.viewMode = RequestsViewMode.populated,
-  });
+  const RequestsScreen({super.key, this.viewMode = RequestsViewMode.populated});
 
-  final VoidCallback onBack;
-  final VoidCallback? onRaiseRequest;
-  final ValueChanged<RequestListItem>? onRequestTap;
   final RequestsViewMode viewMode;
 
   @override
@@ -96,7 +89,6 @@ class _RequestsScreenState extends State<RequestsScreen> {
       backgroundColor: AppColors.backgroundColor,
       appBar: CustomAppBar(
         title: context.l10n.requestTitle,
-        onBackTap: widget.onBack,
         backIconAsset: 'assets/icons/records/back.svg',
       ),
       body: SafeArea(
@@ -174,8 +166,10 @@ class _RequestsScreenState extends State<RequestsScreen> {
                             key: ValueKey(items[index].id),
                             item: items[index],
                             description: _description(items[index]),
-                            onTap: () =>
-                                widget.onRequestTap?.call(items[index]),
+                            onTap: () => context.push(
+                              AppRoutes.requestDetail,
+                              extra: items[index].status,
+                            ),
                           ),
                         ),
                 ),
@@ -186,7 +180,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
                     height: 52,
                     child: ElevatedButton(
                       key: const Key('raise-request-button'),
-                      onPressed: widget.onRaiseRequest ?? () {},
+                      onPressed: () => context.push(AppRoutes.raiseRequest),
                       child: Text(context.l10n.requestRaiseButton),
                     ),
                   ),

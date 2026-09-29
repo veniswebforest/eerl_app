@@ -34,6 +34,7 @@ dependencies:
   dotted_border: ^3.1.0
   popover: ^0.4.0
   connectivity_plus: ^6.1.4
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -57,8 +58,13 @@ flutter:
     - assets/icons/help_support/
     - assets/icons/collection/
     - assets/icons/role_switcher/
+    - assets/icons/tasks/
+    - assets/icons/supervisor_requests/
+    - assets/icons/mrf_person/
     - assets/icons/
     - assets/images/ragpicker_directory/
+    - assets/images/tasks/
+    - assets/images/supervisor_requests/
     - assets/lottie/
 
   fonts:

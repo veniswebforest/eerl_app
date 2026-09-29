@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -8,24 +7,6 @@ class CollectionImagePreviewScreen extends StatelessWidget {
   const CollectionImagePreviewScreen({super.key, required this.imageProvider});
 
   final ImageProvider imageProvider;
-
-  static Route<void> route(ImageProvider imageProvider) =>
-      PageRouteBuilder<void>(
-        opaque: false,
-        barrierColor: AppColors.neutral950.withValues(alpha: 0.9),
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            CollectionImagePreviewScreen(imageProvider: imageProvider),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            FadeTransition(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOut,
-              ),
-              child: child,
-            ),
-        transitionDuration: const Duration(milliseconds: 180),
-        reverseTransitionDuration: const Duration(milliseconds: 140),
-      );
 
   @override
   Widget build(BuildContext context) => Scaffold(

@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import '../../home/widgets/home_styles.dart';
 import '../model/task_list_item.dart';
 
 class TaskListCard extends StatelessWidget {
@@ -25,13 +26,7 @@ class TaskListCard extends StatelessWidget {
           color: Colors.white,
           border: Border.all(color: AppColors.cool100),
           borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x14000000),
-              blurRadius: 5,
-              offset: Offset(0, 2),
-            ),
-          ],
+          boxShadow: [HomeStyles.cardShadow],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

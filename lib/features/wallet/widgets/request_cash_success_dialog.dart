@@ -5,14 +5,9 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 
 class RequestCashSuccessDialog extends StatelessWidget {
-  const RequestCashSuccessDialog({
-    super.key,
-    required this.amount,
-    required this.onBackToWallet,
-  });
+  const RequestCashSuccessDialog({super.key, required this.amount});
 
   final String amount;
-  final VoidCallback onBackToWallet;
 
   @override
   Widget build(BuildContext context) => Dialog(
@@ -46,7 +41,7 @@ class RequestCashSuccessDialog extends StatelessWidget {
             height: 52,
             child: ElevatedButton(
               key: const Key('cash-request-back-to-wallet'),
-              onPressed: onBackToWallet,
+              onPressed: () => Navigator.of(context).pop(true),
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor: AppColors.cool200,

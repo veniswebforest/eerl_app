@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import '../model/configurable_material_item.dart';
 import '../widgets/configurable_material_tile.dart';
 import '../widgets/material_segmented_control.dart';
@@ -11,9 +12,7 @@ import '../widgets/material_segmented_control.dart';
 enum _MaterialCollectionType { d2d, mrfStation, ramp }
 
 class ConfigureMaterialScreen extends StatefulWidget {
-  const ConfigureMaterialScreen({super.key, required this.onBack});
-
-  final VoidCallback onBack;
+  const ConfigureMaterialScreen({super.key});
 
   @override
   State<ConfigureMaterialScreen> createState() =>
@@ -110,7 +109,9 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
                         ),
                         const SizedBox(height: 16),
                       ] else ...[
-                        _BackButton(onTap: widget.onBack),
+                        _BackButton(
+                          onTap: () => Navigator.of(context).maybePop(),
+                        ),
                         const SizedBox(height: 24),
                       ],
                       Text(
@@ -315,36 +316,24 @@ class _SuccessBanner extends StatelessWidget {
   final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => AppMessageBanner(
     height: 45,
     padding: const EdgeInsets.symmetric(horizontal: 12),
-    decoration: BoxDecoration(
-      color: AppColors.primary50,
-      border: Border.all(color: AppColors.primary200),
-      borderRadius: BorderRadius.circular(10),
+    borderRadius: 10,
+    title: context.l10n.configureSequenceSaved,
+    color: AppColors.primary500,
+    backgroundColor: AppColors.primary50,
+    borderColor: AppColors.primary200,
+    titleStyle: AppTextStyles.mediumSH9_12.copyWith(
+      color: AppColors.primary500,
     ),
-    child: Row(
-      children: [
-        const Icon(Icons.check_circle, size: 20, color: AppColors.primary500),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            context.l10n.configureSequenceSaved,
-            style: AppTextStyles.mediumSH9_12.copyWith(
-              color: AppColors.primary500,
-            ),
-          ),
-        ),
-        InkWell(
-          onTap: onClose,
-          child: SvgPicture.asset(
-            'assets/icons/profile/sync_close.svg',
-            width: 20,
-            height: 20,
-          ),
-        ),
-      ],
+    icon: const Icon(Icons.check_circle, size: 20, color: AppColors.primary500),
+    closeIcon: SvgPicture.asset(
+      'assets/icons/profile/sync_close.svg',
+      width: 20,
+      height: 20,
     ),
+    onClose: onClose,
   );
 }
 

@@ -5,6 +5,9 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/supervisor_expense/model/supervisor_expense_item.dart';
 import 'package:eerl_app/features/wallet/widgets/wallet_assets.dart';
+import 'package:eerl_app/shared/widgets/app_message_banner.dart';
+
+import '../../home/widgets/home_styles.dart';
 
 class SupervisorExpenseCard extends StatelessWidget {
   const SupervisorExpenseCard({
@@ -12,11 +15,13 @@ class SupervisorExpenseCard extends StatelessWidget {
     required this.item,
     required this.statusLabel,
     required this.onTap,
+    this.cardKey,
   });
 
   final SupervisorExpenseItem item;
   final String statusLabel;
   final VoidCallback onTap;
+  final Key? cardKey;
 
   @override
   Widget build(BuildContext context) {
@@ -37,114 +42,109 @@ class SupervisorExpenseCard extends StatelessWidget {
         WalletAssets.statusFlagged,
       ),
     };
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        key: ValueKey('supervisor-expense-${item.status.name}'),
-        onTap: onTap,
+    final amountColor = switch (item.status) {
+      SupervisorExpenseStatus.pending => AppColors.yellow600,
+      SupervisorExpenseStatus.approved => AppColors.primary500,
+      SupervisorExpenseStatus.rejected => AppColors.neutral600,
+    };
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x1A000000),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
-            color: Colors.white,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.agentName,
-                          style: AppTextStyles.semiboldH8_16.copyWith(
-                            color: AppColors.neutral950,
-                          ),
+        boxShadow: [HomeStyles.cardShadow],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          key: cardKey ?? ValueKey('supervisor-expense-${item.status.name}'),
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: item.agentName,
+                              style: AppTextStyles.semiboldH8_16,
+                            ),
+                            TextSpan(
+                              text: ' (${item.role})',
+                              style: AppTextStyles.mediumSH9_12,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 3),
-                        Text(
-                          item.role,
-                          style: AppTextStyles.regularB8_12.copyWith(
-                            color: AppColors.neutral500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SvgPicture.asset(
-                    WalletAssets.openDetails,
-                    width: 24,
-                    height: 24,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Divider(height: 1, color: AppColors.cool200),
-              const SizedBox(height: 12),
-              Text(
-                item.category,
-                style: AppTextStyles.semiboldH9_14.copyWith(
-                  color: AppColors.neutral950,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                item.date,
-                style: AppTextStyles.mediumSH9_12.copyWith(
-                  color: AppColors.neutral600,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      item.amount,
-                      style: AppTextStyles.semiboldH7_18.copyWith(
-                        color: item.status == SupervisorExpenseStatus.rejected
-                            ? AppColors.red600
-                            : AppColors.neutral950,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    SvgPicture.asset(
+                      WalletAssets.openDetails,
+                      width: 24,
+                      height: 24,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  item.category,
+                  style: AppTextStyles.semiboldH9_14.copyWith(
+                    color: AppColors.neutral950,
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: background,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SvgPicture.asset(icon, width: 18, height: 18),
-                        const SizedBox(width: 5),
-                        Text(
-                          statusLabel,
-                          style: AppTextStyles.semiboldH10_12.copyWith(
-                            color: foreground,
-                          ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.date,
+                  style: AppTextStyles.mediumSH9_12.copyWith(
+                    color: AppColors.neutral600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.amount,
+                        style: AppTextStyles.semiboldH7_18.copyWith(
+                          color: amountColor,
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: background,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.asset(icon, width: 20, height: 20),
+                          const SizedBox(width: 6),
+                          Text(
+                            statusLabel,
+                            style: AppTextStyles.semiboldH10_12.copyWith(
+                              color: foreground,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -158,51 +158,28 @@ class SupervisorExpenseToast extends StatelessWidget {
     required this.approved,
     required this.title,
     required this.message,
+    required this.onClose,
   });
   final bool approved;
   final String title;
   final String message;
+  final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => AppMessageBanner(
     key: const Key('supervisor-expense-toast'),
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: approved ? AppColors.primary100 : AppColors.red50,
-      border: Border.all(
-        color: approved ? AppColors.primary500 : AppColors.red500,
-      ),
-      borderRadius: BorderRadius.circular(12),
+    title: title,
+    subtitle: message,
+    color: approved ? AppColors.primary500 : AppColors.red500,
+    backgroundColor: approved ? AppColors.primary50 : AppColors.red50,
+    borderColor: AppColors.cool400,
+    iconBackgroundColor: approved ? AppColors.primary500 : AppColors.red500,
+    iconPadding: const EdgeInsets.all(5),
+    icon: Icon(
+      approved ? Icons.check_rounded : Icons.block_rounded,
+      color: Colors.white,
+      size: 20,
     ),
-    child: Row(
-      children: [
-        Icon(
-          approved ? Icons.check_circle : Icons.cancel,
-          color: approved ? AppColors.primary500 : AppColors.red500,
-          size: 28,
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.semiboldH9_14.copyWith(
-                  color: AppColors.neutral950,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                message,
-                style: AppTextStyles.regularB8_12.copyWith(
-                  color: AppColors.neutral700,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
+    onClose: onClose,
   );
 }

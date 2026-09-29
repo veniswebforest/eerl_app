@@ -6,20 +6,17 @@ import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'wallet_assets.dart';
 
 class WalletScreenHeader extends StatelessWidget {
-  const WalletScreenHeader({
-    super.key,
-    required this.title,
-    required this.onBack,
-  });
+  const WalletScreenHeader({super.key, required this.title});
 
   final String title;
-  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
     return AppScreenHeader(
       title: title,
-      leading: WalletBackButton(onPressed: onBack),
+      leading: WalletBackButton(
+        onPressed: () => Navigator.of(context).maybePop(),
+      ),
     );
   }
 }

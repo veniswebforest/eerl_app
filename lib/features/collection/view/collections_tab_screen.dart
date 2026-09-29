@@ -2,28 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_route_data.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
-import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
 import 'package:eerl_app/features/home/widgets/collection_types.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
-import '../model/recent_collection_item_model.dart';
 import '../widgets/collection_assets.dart';
 import '../widgets/start_collection_card.dart';
+import 'package:go_router/go_router.dart';
 
 class CollectionsTabScreen extends StatelessWidget {
-  const CollectionsTabScreen({
-    super.key,
-    this.onAddCollection,
-    this.onCollectionTap,
-    this.onViewAllTap,
-    this.onNotificationTap,
-    this.onCollectionTypeTap,
-  });
-  final VoidCallback? onAddCollection;
-  final ValueChanged<RecentCollectionStatus>? onCollectionTap;
-  final VoidCallback? onViewAllTap;
-  final VoidCallback? onNotificationTap;
-  final ValueChanged<CollectionType>? onCollectionTypeTap;
+  const CollectionsTabScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +41,7 @@ class CollectionsTabScreen extends StatelessWidget {
                       actions: [
                         InkWell(
                           key: const Key('collections-notification-button'),
-                          onTap: onNotificationTap,
+                          onTap: () => context.push(AppRoutes.notifications),
                           borderRadius: BorderRadius.circular(24),
                           child: SvgPicture.asset(
                             CollectionAssets.notification,
@@ -68,7 +57,12 @@ class CollectionsTabScreen extends StatelessWidget {
                       description: l10n.recordWeightProof,
                     ),
                     const SizedBox(height: 24),
-                    CollectionTypes(onTypeTap: onCollectionTypeTap),
+                    CollectionTypes(
+                      onTypeTap: (type) => context.push<void>(
+                        AppRoutes.addCollection,
+                        extra: AddCollectionRouteData(initialType: type),
+                      ),
+                    ),
                     const SizedBox(height: 16),
                   ],
                 ),

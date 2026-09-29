@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_route_data.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
@@ -13,17 +15,14 @@ import '../widgets/collection_draft_card.dart';
 import '../widgets/collection_history_card.dart';
 import '../widgets/records_assets.dart';
 import '../widgets/records_segmented_control.dart';
+import 'package:go_router/go_router.dart';
 
 class RecordsTabScreen extends StatefulWidget {
   const RecordsTabScreen({
     super.key,
     this.initialView = RecordsViewFlag.history,
-    this.onRecordTap,
-    this.onDraftContinue,
   });
   final RecordsViewFlag initialView;
-  final ValueChanged<CollectionDetailStatus>? onRecordTap;
-  final ValueChanged<CollectionDraftModel>? onDraftContinue;
   @override
   State<RecordsTabScreen> createState() => _RecordsTabScreenState();
 }
@@ -193,7 +192,10 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
             CollectionHistoryCard(
               item: item,
               statusLabel: _statusLabel(item.status),
-              onTap: () => widget.onRecordTap?.call(_detailStatus(item.status)),
+              onTap: () => context.push<void>(
+                AppRoutes.collectionDetail,
+                extra: _detailStatus(item.status),
+              ),
             ),
             const SizedBox(height: 10),
           ],
@@ -272,7 +274,7 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
               continueLabel: context.l10n.recordsContinue,
               onDiscard: () =>
                   setState(() => _view = RecordsViewFlag.discardConfirmation),
-              onContinue: () => widget.onDraftContinue?.call(item),
+              onContinue: () => _continueDraft(item),
             ),
             const SizedBox(height: 14),
           ],
@@ -293,6 +295,20 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
         CollectionRecordStatus.verified => CollectionDetailStatus.approved,
         CollectionRecordStatus.rejected => CollectionDetailStatus.rejected,
       };
+
+  Future<void> _continueDraft(CollectionDraftModel draft) async {
+    final saved = await context.push<bool>(
+      AppRoutes.addCollection,
+      extra: AddCollectionRouteData(
+        initialStep: draft.resumeStep,
+        initialType: draft.type,
+        initialSelectedItems: draft.selectedItems,
+      ),
+    );
+    if (mounted && saved == true) {
+      setState(() => _view = RecordsViewFlag.drafts);
+    }
+  }
 
   bool _matchesType(String name) => switch (_typeFilter) {
     _RecordsTypeFilter.all => true,

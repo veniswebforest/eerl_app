@@ -14,14 +14,10 @@ class TaskDetailScreen extends StatefulWidget {
   const TaskDetailScreen({
     super.key,
     required this.task,
-    required this.onBack,
-    this.onCompleted,
     this.initiallyFilled = false,
   });
 
   final TaskListItem task;
-  final VoidCallback onBack;
-  final VoidCallback? onCompleted;
   final bool initiallyFilled;
 
   @override
@@ -78,16 +74,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   bool get _isClosed => widget.task.status == TaskListStatus.closed;
 
-  Future<void> _showCompletedDialog() => showDialog<void>(
-    context: context,
-    barrierDismissible: false,
-    builder: (dialogContext) => _TaskCompletedDialog(
-      onBackToList: () {
-        Navigator.of(dialogContext).pop();
-        widget.onCompleted?.call();
-      },
-    ),
-  );
+  Future<void> _showCompletedDialog() async {
+    final completed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _TaskCompletedDialog(),
+    );
+    if (completed == true && mounted) Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -96,7 +90,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       title: _isClosed
           ? context.l10n.taskDetailsTitle
           : context.l10n.taskResolveTitle,
-      onBackTap: widget.onBack,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
     body: SafeArea(
@@ -393,9 +386,7 @@ class _ReadOnlyDescription extends StatelessWidget {
 }
 
 class _TaskCompletedDialog extends StatelessWidget {
-  const _TaskCompletedDialog({required this.onBackToList});
-
-  final VoidCallback onBackToList;
+  const _TaskCompletedDialog();
 
   @override
   Widget build(BuildContext context) => Dialog(
@@ -427,7 +418,7 @@ class _TaskCompletedDialog extends StatelessWidget {
             height: 50,
             child: ElevatedButton(
               key: const Key('task-back-to-list-button'),
-              onPressed: onBackToList,
+              onPressed: () => Navigator.of(context).pop(true),
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor: AppColors.cool200,

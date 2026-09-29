@@ -4,9 +4,12 @@
 // are built out. This placeholder verifies the app boots.
 
 import 'package:eerl_app/core/providers/locale_provider.dart';
+import 'package:eerl_app/core/router/app_router.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/features/home/view/home_screen.dart';
 import 'package:eerl_app/features/help_support/view/help_support_screen.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
+import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
 import 'package:eerl_app/features/records/model/collection_detail_status.dart';
 import 'package:eerl_app/features/wallet/model/expense_claim_detail_status.dart';
 import 'package:eerl_app/features/records/model/records_view_flag.dart';
@@ -14,6 +17,7 @@ import 'package:eerl_app/features/wallet/view/expense_claim_detail_screen.dart';
 import 'package:eerl_app/features/collection/view/collections_tab_screen.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
 import 'package:eerl_app/features/dashboard/view/main_dashboard_screen.dart';
+import 'package:eerl_app/features/dashboard/widgets/dynamic_bottom_nav_bar.dart';
 import 'package:eerl_app/features/wallet/view/log_expense_screen.dart';
 import 'package:eerl_app/features/wallet/view/expense_submitted_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
@@ -50,7 +54,7 @@ void main() {
       MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: SupervisorExpenseModuleScreen(onBack: () {}),
+        home: SupervisorExpenseModuleScreen(),
       ),
     );
     await tester.pumpAndSettle();
@@ -62,6 +66,11 @@ void main() {
     expect(find.text('Waiting for Supervisor'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
+    await tester.drag(find.byType(ListView), const Offset(0, -160));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const Key('supervisor-expense-reject')),
+    );
     await tester.tap(find.byKey(const Key('supervisor-expense-reject')));
     await tester.pumpAndSettle();
     expect(find.text('Reject Expenses'), findsOneWidget);
@@ -78,7 +87,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Supervisor expense approve resolves the pending request', (
+  testWidgets('Supervisor expense approve shows the static success state', (
     WidgetTester tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -90,18 +99,23 @@ void main() {
       MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: SupervisorExpenseModuleScreen(onBack: () {}),
+        home: SupervisorExpenseModuleScreen(),
       ),
     );
     await tester.tap(find.byKey(const ValueKey('supervisor-expense-pending')));
     await tester.pumpAndSettle();
+    await tester.drag(find.byType(ListView), const Offset(0, -160));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const Key('supervisor-expense-approve')),
+    );
     await tester.tap(find.byKey(const Key('supervisor-expense-approve')));
     await tester.pumpAndSettle();
 
     expect(find.text('Successfully Approved!'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('supervisor-expense-pending')),
-      findsNothing,
+      findsOneWidget,
     );
     expect(
       find.byKey(const ValueKey('supervisor-expense-approved')),
@@ -109,6 +123,165 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Supervisor cash request supports approve and closed details', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: SupervisorExpenseModuleScreen(),
+      ),
+    );
+    await tester.tap(find.text('Cash Request'));
+    await tester.pumpAndSettle();
+    expect(find.text('Approved & Credited'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('supervisor-cash-pending-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('#REQ-2026-089'), findsOneWidget);
+    expect(find.text('Waiting for Supervisor'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('supervisor-cash-approve')));
+    await tester.pumpAndSettle();
+    expect(find.text('#REQ-2026-086'), findsOneWidget);
+    expect(find.text('Verified by Supervisor'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Supervisor cash request supports rejection flow', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: SupervisorExpenseModuleScreen(),
+      ),
+    );
+    await tester.tap(find.text('Cash Request'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('supervisor-cash-pending-0')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('supervisor-cash-reject')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reject Cash Request'), findsOneWidget);
+    expect(find.text('Sufficient Existing Balance'), findsOneWidget);
+    await tester.tap(
+      find.byKey(const Key('supervisor-cash-confirm-rejection')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('#REQ-2026-085'), findsOneWidget);
+    expect(find.text('Rejected by Supervisor'), findsOneWidget);
+    expect(
+      find.textContaining('All yard trucks are currently out.'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Supervisor category requests show pending and closed details', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: SupervisorExpenseModuleScreen(),
+      ),
+    );
+    await tester.ensureVisible(find.text('View Requests'));
+    await tester.tap(find.text('View Requests'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Expense Category Request'), findsOneWidget);
+    expect(find.text('Request Pending'), findsWidgets);
+    await tester.tap(find.text('Closed (4)'));
+    await tester.pumpAndSettle();
+    expect(find.text('Request Resolved'), findsWidgets);
+
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('category-request-rejected-2')),
+    );
+    await tester.tap(find.byKey(const ValueKey('category-request-rejected-2')));
+    await tester.pumpAndSettle();
+    expect(find.text('Request Reject'), findsOneWidget);
+    expect(
+      find.textContaining('Invalid / Unclear Request Purpose'),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'Supervisor category request supports approve and reject dialogs',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SupervisorExpenseModuleScreen(),
+        ),
+      );
+      await tester.ensureVisible(find.text('View Requests'));
+      await tester.tap(find.text('View Requests'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('category-request-pending-0')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('category-request-approve')));
+      await tester.pumpAndSettle();
+      expect(find.text('Expense Request\nApproved!'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('category-request-back-to-list')));
+      await tester.pumpAndSettle();
+      expect(find.text('Closed (4)'), findsOneWidget);
+
+      await tester.tap(find.text('Pending (2)'));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const ValueKey('category-request-pending-0')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('category-request-reject')));
+      await tester.pumpAndSettle();
+      expect(find.text('Are You Sure'), findsOneWidget);
+      await tester.tap(
+        find.byKey(const Key('category-request-confirm-reject')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Expense Request Rejected'), findsOneWidget);
+      expect(
+        find.text('Expense request rejected successfully'),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('Supervisor approvals quick action opens expense module', (
     WidgetTester tester,
@@ -121,9 +294,7 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider(
         create: (_) => LocaleProvider(),
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        child: const _RouterTestApp(
           home: MainDashboardScreen(userRole: DashboardUserRole.supervisor),
         ),
       ),
@@ -170,14 +341,7 @@ void main() {
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
 
-        await tester.pumpWidget(
-          MaterialApp(
-            locale: locale,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const HomeScreen(),
-          ),
-        );
+        await tester.pumpWidget(_homeTestApp(locale: locale));
         await tester.pumpAndSettle();
 
         final initialException = tester.takeException();
@@ -202,13 +366,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: HomeScreen(),
-      ),
-    );
+    await tester.pumpWidget(_homeTestApp());
 
     await tester.tap(find.byKey(const Key('home-menu-button')));
     await tester.pumpAndSettle();
@@ -243,16 +401,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: HomeScreen(
-          isSupervisor: true,
-          roleTitle: 'Collection Supervisor',
-        ),
-      ),
-    );
+    await tester.pumpWidget(_homeTestApp(role: DashboardUserRole.supervisor));
 
     await tester.tap(find.byKey(const Key('home-menu-button')));
     await tester.pumpAndSettle();
@@ -315,10 +464,7 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider(
         create: (_) => LocaleProvider(),
-        child: const MaterialApp(
-          debugShowCheckedModeBanner: false,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        child: const _RouterTestApp(
           home: MainDashboardScreen(userRole: DashboardUserRole.supervisor),
         ),
       ),
@@ -468,11 +614,7 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider(
         create: (_) => LocaleProvider(),
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: MainDashboardScreen(),
-        ),
+        child: const _RouterTestApp(home: MainDashboardScreen()),
       ),
     );
 
@@ -493,6 +635,61 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('System back closes a pushed feature screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => LocaleProvider(),
+        child: const _RouterTestApp(
+          home: MainDashboardScreen(initialPageKey: 'wallet'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(WalletTabScreen), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(WalletTabScreen), findsNothing);
+    expect(find.byType(MainDashboardScreen), findsOneWidget);
+  });
+
+  testWidgets('System back returns a bottom tab to Home before exiting', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => LocaleProvider(),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MainDashboardScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('bottom-nav-records')));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<DynamicBottomNavBar>(find.byType(DynamicBottomNavBar))
+          .selectedIndex,
+      2,
+    );
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<DynamicBottomNavBar>(find.byType(DynamicBottomNavBar))
+          .selectedIndex,
+      0,
+    );
+  });
+
   testWidgets('Log Expense opens from wallet and supports both Figma states', (
     WidgetTester tester,
   ) async {
@@ -504,13 +701,12 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider(
         create: (_) => LocaleProvider(),
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        child: const _RouterTestApp(
           home: MainDashboardScreen(initialPageKey: 'wallet'),
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(ElevatedButton, 'Log Expense'));
     await tester.pumpAndSettle();
@@ -552,7 +748,7 @@ void main() {
         locale: Locale('gu'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: LogExpenseScreen(onBack: _noop),
+        home: LogExpenseScreen(),
       ),
     );
     await tester.pumpAndSettle();
@@ -573,13 +769,12 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider(
         create: (_) => LocaleProvider(),
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+        child: const _RouterTestApp(
           home: MainDashboardScreen(initialPageKey: 'wallet'),
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final pendingCard = find.byType(ExpenseClaimCard).first;
     await tester.ensureVisible(pendingCard);
@@ -621,7 +816,7 @@ void main() {
             locale: variant.$2,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: ExpenseClaimDetailScreen(status: variant.$1, onBack: _noop),
+            home: ExpenseClaimDetailScreen(status: variant.$1),
           ),
         );
         await tester.pumpAndSettle();
@@ -649,10 +844,8 @@ void main() {
       await tester.pumpWidget(
         ChangeNotifierProvider(
           create: (_) => LocaleProvider(),
-          child: MaterialApp(
+          child: _RouterTestApp(
             locale: localeAndSize.$1,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
             home: const MainDashboardScreen(initialPageKey: 'wallet'),
           ),
         ),
@@ -746,10 +939,7 @@ void main() {
             locale: detailVariant.$2,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: CollectionDetailScreen(
-              status: detailVariant.$1,
-              onBack: _noop,
-            ),
+            home: CollectionDetailScreen(status: detailVariant.$1),
           ),
         );
         await tester.pumpAndSettle();
@@ -768,9 +958,7 @@ void main() {
       await tester.pumpWidget(
         ChangeNotifierProvider(
           create: (_) => LocaleProvider(),
-          child: const MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
+          child: const _RouterTestApp(
             home: MainDashboardScreen(initialPageKey: 'records'),
           ),
         ),
@@ -801,10 +989,7 @@ void main() {
       const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: CollectionDetailScreen(
-          status: CollectionDetailStatus.rejected,
-          onBack: _noop,
-        ),
+        home: CollectionDetailScreen(status: CollectionDetailStatus.rejected),
       ),
     );
     await tester.pumpAndSettle();
@@ -1038,11 +1223,7 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider(
         create: (_) => LocaleProvider(),
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: MainDashboardScreen(),
-        ),
+        child: const _RouterTestApp(home: MainDashboardScreen()),
       ),
     );
 
@@ -1084,7 +1265,7 @@ void main() {
           locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: HelpSupportScreen(onBack: _noop),
+          home: HelpSupportScreen(),
         ),
       );
       await tester.pumpAndSettle();
@@ -1111,7 +1292,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: HelpSupportScreen(onBack: _noop),
+        home: HelpSupportScreen(),
       ),
     );
     await tester.pumpAndSettle();
@@ -1169,4 +1350,48 @@ void main() {
   });
 }
 
-void _noop() {}
+class _RouterTestApp extends StatefulWidget {
+  const _RouterTestApp({required this.home, this.locale});
+
+  final Widget home;
+  final Locale? locale;
+
+  @override
+  State<_RouterTestApp> createState() => _RouterTestAppState();
+}
+
+class _RouterTestAppState extends State<_RouterTestApp> {
+  late final _router = AppRouter.createRouter(
+    initialLocation: AppRoutes.home,
+    homeBuilder: (_) => widget.home,
+  );
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => MaterialApp.router(
+    debugShowCheckedModeBanner: false,
+    locale: widget.locale,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    routerConfig: _router,
+  );
+}
+
+Widget _homeTestApp({
+  Locale? locale,
+  DashboardUserRole role = DashboardUserRole.collectionAgent,
+}) => ChangeNotifierProvider(
+  create: (_) =>
+      DashboardNavigationProvider(initialRole: role, initialPageKey: 'home'),
+  child: MaterialApp(
+    locale: locale,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: const HomeScreen(),
+  ),
+);

@@ -12,13 +12,9 @@ import '../widgets/transfer_request_success_dialog.dart';
 class CreateTransferRequestScreen extends StatefulWidget {
   const CreateTransferRequestScreen({
     super.key,
-    required this.onBack,
-    required this.onBackToList,
     this.initialView = CreateTransferRequestView.items,
   });
 
-  final VoidCallback onBack;
-  final VoidCallback onBackToList;
   final CreateTransferRequestView initialView;
 
   @override
@@ -48,16 +44,12 @@ class _CreateTransferRequestScreenState
   }
 
   Future<void> _continue() async {
-    await showDialog<void>(
+    final submitted = await showDialog<bool>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: .58),
-      builder: (dialogContext) => TransferRequestSuccessDialog(
-        onBackToList: () {
-          Navigator.of(dialogContext).pop();
-          widget.onBackToList();
-        },
-      ),
+      builder: (_) => const TransferRequestSuccessDialog(),
     );
+    if (submitted == true && mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -65,7 +57,6 @@ class _CreateTransferRequestScreenState
     backgroundColor: AppColors.backgroundColor,
     appBar: CustomAppBar(
       title: null,
-      onBackTap: widget.onBack,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
     body: SafeArea(

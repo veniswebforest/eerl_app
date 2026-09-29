@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/providers/app_lock_provider.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
@@ -40,13 +41,21 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     if (isValidSession) {
-      debugPrint(
-        '[SplashScreen] Valid active session found -> redirecting to Home Screen',
-      );
-      context.go(AppRoutes.home);
+      final appLockProvider = context.read<AppLockProvider>();
+      if (appLockProvider.isLockEnabled) {
+        debugPrint(
+          '[SplashScreen] Valid session & App Lock is enabled -> redirecting to App Lock Screen',
+        );
+        context.go(AppRoutes.appLock);
+      } else {
+        debugPrint(
+          '[SplashScreen] Valid active session found -> redirecting to Home Screen',
+        );
+        context.go(AppRoutes.home);
+      }
     } else {
       debugPrint(
-        '[SplashScreen] Access token null or session expired -> redirecting to Login Screen',
+        '[SplashScreen] Access token null or session expired -> redirecting to Login Screen (Lock Screen is not displayed)',
       );
       context.go(AppRoutes.login);
     }

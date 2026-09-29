@@ -7,9 +7,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 
 class ExpenseSubmittedScreen extends StatelessWidget {
-  const ExpenseSubmittedScreen({super.key, required this.onBackToWallet});
-
-  final VoidCallback onBackToWallet;
+  const ExpenseSubmittedScreen({super.key});
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -73,7 +71,7 @@ class ExpenseSubmittedScreen extends StatelessWidget {
                         height: 52,
                         child: ElevatedButton(
                           key: const Key('expense-back-to-wallet'),
-                          onPressed: onBackToWallet,
+                          onPressed: () => Navigator.of(context).pop(true),
                           style: ElevatedButton.styleFrom(
                             elevation: 0,
                             backgroundColor: AppColors.cool200,

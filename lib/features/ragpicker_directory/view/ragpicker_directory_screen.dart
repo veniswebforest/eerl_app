@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import '../model/ragpicker_directory_item.dart';
 import '../model/ragpicker_directory_view.dart';
 import '../widgets/ragpicker_details_cards.dart';
@@ -15,11 +16,9 @@ import '../widgets/ragpicker_segmented_control.dart';
 class RagpickerDirectoryScreen extends StatefulWidget {
   const RagpickerDirectoryScreen({
     super.key,
-    required this.onBack,
     this.initialView = RagpickerDirectoryView.activeList,
   });
 
-  final VoidCallback onBack;
   final RagpickerDirectoryView initialView;
 
   @override
@@ -132,14 +131,26 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (_selectedItem != null) return _buildDetails();
-    if (_view == RagpickerDirectoryView.addEmpty ||
-        _view == RagpickerDirectoryView.addFilled) {
-      return _buildForm();
-    }
-    return _buildDirectory();
-  }
+  Widget build(BuildContext context) => PopScope(
+    canPop:
+        _selectedItem == null &&
+        _view != RagpickerDirectoryView.addEmpty &&
+        _view != RagpickerDirectoryView.addFilled,
+    onPopInvokedWithResult: (didPop, _) {
+      if (didPop) return;
+      setState(() {
+        _selectedItem = null;
+        _showDeactivatedSuccess = false;
+        _view = RagpickerDirectoryView.activeList;
+      });
+    },
+    child: _selectedItem != null
+        ? _buildDetails()
+        : _view == RagpickerDirectoryView.addEmpty ||
+              _view == RagpickerDirectoryView.addFilled
+        ? _buildForm()
+        : _buildDirectory(),
+  );
 
   Widget _buildDirectory() => Scaffold(
     backgroundColor: AppColors.backgroundColor,
@@ -159,7 +170,9 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                         children: [
                           Align(
                             alignment: Alignment.centerLeft,
-                            child: _FigmaBackButton(onTap: widget.onBack),
+                            child: _FigmaBackButton(
+                              onTap: () => Navigator.of(context).maybePop(),
+                            ),
                           ),
                           const SizedBox(height: 24),
                           Text(
@@ -709,50 +722,24 @@ class _SuccessBanner extends StatelessWidget {
   final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => AppMessageBanner(
     padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: AppColors.red50,
-      border: Border.all(color: AppColors.cool400),
-      borderRadius: BorderRadius.circular(12),
+    title: context.l10n.ragpickerDeactivatedSuccess,
+    subtitle: context.l10n.ragpickerDeactivatedSubtitle,
+    color: AppColors.red500,
+    backgroundColor: AppColors.red50,
+    borderColor: AppColors.cool400,
+    subtitleStyle: AppTextStyles.regularB7_14.copyWith(
+      color: AppColors.neutral500,
     ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          padding: const EdgeInsets.all(5),
-          decoration: const BoxDecoration(
-            color: AppColors.red500,
-            shape: BoxShape.circle,
-          ),
-          child: SvgPicture.asset(
-            'assets/icons/ragpicker_deactivated.svg',
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.ragpickerDeactivatedSuccess,
-                style: AppTextStyles.semiboldH8_16,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                context.l10n.ragpickerDeactivatedSubtitle,
-                style: AppTextStyles.regularB7_14.copyWith(
-                  color: AppColors.neutral500,
-                ),
-              ),
-            ],
-          ),
-        ),
-        InkWell(onTap: onClose, child: const Icon(Icons.close, size: 20)),
-      ],
+    iconBackgroundColor: AppColors.red500,
+    iconPadding: const EdgeInsets.all(5),
+    icon: SvgPicture.asset(
+      'assets/icons/ragpicker_deactivated.svg',
+      width: 22,
+      height: 22,
+      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
     ),
+    onClose: onClose,
   );
 }

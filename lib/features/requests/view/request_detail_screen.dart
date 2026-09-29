@@ -10,14 +10,9 @@ import '../model/request_list_item.dart';
 import '../widgets/request_detail_section_card.dart';
 
 class RequestDetailScreen extends StatelessWidget {
-  const RequestDetailScreen({
-    super.key,
-    required this.status,
-    required this.onBack,
-  });
+  const RequestDetailScreen({super.key, required this.status});
 
   final RequestListStatus status;
-  final VoidCallback onBack;
 
   bool get _isClosed => status == RequestListStatus.closed;
 
@@ -28,7 +23,6 @@ class RequestDetailScreen extends StatelessWidget {
       title: _isClosed
           ? context.l10n.requestCompletedDetailsTitle
           : context.l10n.requestDetailsTitle,
-      onBackTap: onBack,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
     body: SafeArea(
@@ -174,7 +168,8 @@ class _ClosedRequestDetails extends StatelessWidget {
           border: Border.all(color: AppColors.cool400),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.end,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

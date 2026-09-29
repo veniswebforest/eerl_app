@@ -11,9 +11,7 @@ import '../widgets/help_support_assets.dart';
 import '../widgets/support_contact_card.dart';
 
 class HelpSupportScreen extends StatefulWidget {
-  const HelpSupportScreen({super.key, required this.onBack});
-
-  final VoidCallback onBack;
+  const HelpSupportScreen({super.key});
 
   @override
   State<HelpSupportScreen> createState() => _HelpSupportScreenState();
@@ -65,7 +63,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                         borderRadius: BorderRadius.circular(12),
                         child: InkWell(
                           key: const Key('help-support-back'),
-                          onTap: widget.onBack,
+                          onTap: () => Navigator.of(context).maybePop(),
                           borderRadius: BorderRadius.circular(12),
                           child: Padding(
                             padding: const EdgeInsets.all(10),

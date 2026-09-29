@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/task_list_item.dart';
 import '../widgets/task_list_card.dart';
 import '../widgets/task_segmented_control.dart';
 
 class MyTasksScreen extends StatefulWidget {
-  const MyTasksScreen({super.key, required this.onBack, this.onTaskTap});
-
-  final VoidCallback onBack;
-  final ValueChanged<TaskListItem>? onTaskTap;
+  const MyTasksScreen({super.key});
 
   @override
   State<MyTasksScreen> createState() => _MyTasksScreenState();
@@ -88,7 +87,6 @@ class _MyTasksScreenState extends State<MyTasksScreen> {
       backgroundColor: AppColors.backgroundColor,
       appBar: CustomAppBar(
         title: context.l10n.myTasks,
-        onBackTap: widget.onBack,
         backIconAsset: 'assets/icons/records/back.svg',
       ),
       body: SafeArea(
@@ -164,7 +162,10 @@ class _MyTasksScreenState extends State<MyTasksScreen> {
                           itemBuilder: (context, index) => TaskListCard(
                             key: ValueKey(items[index].id),
                             item: items[index],
-                            onTap: () => widget.onTaskTap?.call(items[index]),
+                            onTap: () => context.push(
+                              AppRoutes.taskDetail,
+                              extra: items[index],
+                            ),
                           ),
                         ),
                 ),

@@ -42,7 +42,9 @@ class AuthSessionStorage {
     final token = await getAccessToken();
     final expiresAt = await getSessionExpiresAt();
     if (token == null || token.trim().isEmpty || expiresAt == null) {
-      debugPrint('$_tag Session invalid: token is null/empty or expiresAt missing');
+      debugPrint(
+        '$_tag Session invalid: token is null/empty or expiresAt missing',
+      );
       return false;
     }
     final now = DateTime.now().toUtc();

@@ -2938,7 +2938,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supervisorExpenseAmount720 => '-₹720';
 
   @override
-  String get supervisorExpenseDetailAmount4000 => '₹4,000';
+  String get supervisorExpenseDetailAmount4000 => '-₹4000';
 
   @override
   String get supervisorExpensePendingReview => 'Pending Review';
@@ -2974,7 +2974,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supervisorExpenseRejectScreenTitle => 'Reject Expenses';
 
   @override
-  String get supervisorExpenseReasonForRejection => 'Reason for Rejection';
+  String get supervisorExpenseReasonForRejection => 'Reason for Reject';
+
+  @override
+  String get supervisorExpenseSearchHint => 'Search Here...';
+
+  @override
+  String get supervisorExpenseReasonFor => 'Reason for ';
+
+  @override
+  String get supervisorExpenseRejectWord => 'Reject';
+
+  @override
+  String get supervisorExpenseRejectedRemarksValue =>
+      'All yard trucks are currently out. Try after 2 PM.';
 
   @override
   String get supervisorExpenseInvalidBill => 'Invalid / Clear Bill Missing';
@@ -2988,4 +3001,509 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supervisorExpenseRejectReasonValue => 'No Vehicle Available';
+
+  @override
+  String get supervisorCashTodayMorning => 'Today • 08:15 AM';
+
+  @override
+  String get supervisorCashDarshan => 'Darshan Chaudhary';
+
+  @override
+  String get supervisorCashDarshanFull => 'Darshan Chaudhary';
+
+  @override
+  String get supervisorCashAmount350 => '+₹350';
+
+  @override
+  String get supervisorCashAmount2400 => '+₹2400';
+
+  @override
+  String get supervisorCashAmount3250 => '+₹3250';
+
+  @override
+  String get supervisorCashApprovedCredited => 'Approved & Credited';
+
+  @override
+  String get supervisorCashPendingReference => '#REQ-2026-089';
+
+  @override
+  String get supervisorCashApprovedReference => '#REQ-2026-086';
+
+  @override
+  String get supervisorCashRejectedReference => '#REQ-2026-085';
+
+  @override
+  String get supervisorCashDetailAmount350 => '₹350';
+
+  @override
+  String get supervisorCashDetailAmount2400 => '₹2400';
+
+  @override
+  String get supervisorCashRejectScreenTitle => 'Reject Cash Request';
+
+  @override
+  String get supervisorCashSufficientBalance => 'Sufficient Existing Balance';
+
+  @override
+  String get supervisorCashInvalidPurpose =>
+      'Invalid / Unclear Request Purpose';
+
+  @override
+  String get supervisorCashExceedsLimit => 'Exceeds Advance Limit';
+
+  @override
+  String get supervisorCashRemarksHint =>
+      'Type additional remarks for agent...';
+
+  @override
+  String get supervisorCategoryTitle => 'Expense Category Request';
+
+  @override
+  String get supervisorCategoryPendingTab => 'Pending (2)';
+
+  @override
+  String get supervisorCategoryClosedTab => 'Closed (4)';
+
+  @override
+  String get supervisorCategoryAgent => 'Rahul Patel';
+
+  @override
+  String get supervisorCategoryFacility => 'EERL South';
+
+  @override
+  String get supervisorCategoryTyreReplacement => 'Tyre Replacement';
+
+  @override
+  String get supervisorCategoryDescription =>
+      'Tyre damaged and needs Some time replacement for safe transport.';
+
+  @override
+  String get supervisorCategoryTodayTime => 'Today, 08:00 AM';
+
+  @override
+  String get supervisorCategoryRequestPending => 'Request Pending';
+
+  @override
+  String get supervisorCategoryRequestResolved => 'Request Resolved';
+
+  @override
+  String get supervisorCategoryRequestRejected => 'Request Reject';
+
+  @override
+  String get supervisorCategoryCollectionAgent => 'Collection Agent';
+
+  @override
+  String get supervisorCategoryRejectedBannerTitle =>
+      'Expense Request Rejected';
+
+  @override
+  String get supervisorCategoryRejectedBannerMessage =>
+      'Expense request rejected successfully';
+
+  @override
+  String get supervisorCategoryRejectReason =>
+      'Invalid / Unclear Request Purpose';
+
+  @override
+  String get supervisorCategoryRejectRemarks =>
+      'Your request is wrong there is wrong purpose of cash request';
+
+  @override
+  String get supervisorCategoryApprovedTitle => 'Expense Request\nApproved!';
+
+  @override
+  String get supervisorCategoryBackToList => 'Back to List';
+
+  @override
+  String get supervisorCategoryAreYouSure => 'Are You Sure';
+
+  @override
+  String get supervisorCategoryRejectConfirmation =>
+      'Are you sure you want to reject this expense This action cannot be undone';
+
+  @override
+  String get supervisorCategoryYes => 'Yes';
+
+  @override
+  String get supervisorTaskTitle => 'Assign Task';
+
+  @override
+  String get supervisorTaskAgentRahul => 'Rahul Patel (EERL South)';
+
+  @override
+  String get supervisorTaskAgentAmit => 'Amit Verma (EERL North)';
+
+  @override
+  String get supervisorTaskAgentSuresh => 'Suresh Kumar (EERL Central)';
+
+  @override
+  String get supervisorTaskAgentMayur => 'Mayur Patel (EERL East)';
+
+  @override
+  String get supervisorTaskPending => 'Task Pending';
+
+  @override
+  String get supervisorTaskResolved => 'Task Resolved';
+
+  @override
+  String get supervisorTaskCancelled => 'Task Cancelled';
+
+  @override
+  String get supervisorTaskTodayTime => 'Today, 08:00 AM';
+
+  @override
+  String get supervisorTaskYesterdayTime => 'Yesterday, 08:00 AM';
+
+  @override
+  String get supervisorTaskOctoberTime => '24 Oct, 08:00 AM';
+
+  @override
+  String get supervisorTaskAssignTo => 'Assign To Agent / Zone';
+
+  @override
+  String get supervisorTaskSelectAgent => 'Select final outcome';
+
+  @override
+  String get supervisorTaskPriorityLevel => 'Priority Level';
+
+  @override
+  String get supervisorTaskTaskTitle => 'Task Title';
+
+  @override
+  String get supervisorTaskTitleHint => 'e.g., Calibrate Bin Weighing Scale';
+
+  @override
+  String get supervisorTaskDescriptionLabel => 'Description';
+
+  @override
+  String get supervisorTaskDescriptionHint =>
+      'Provide details for the field agent...';
+
+  @override
+  String get supervisorTaskMaxCharacters => 'Max 150 Characters';
+
+  @override
+  String get supervisorTaskFollowupDateTime => 'Next Follow-up Date & Time';
+
+  @override
+  String get supervisorTaskSelectDateTime => 'Select Date & Time';
+
+  @override
+  String get supervisorTaskFilledTitle => 'Calibrate Bin Weighing Scale';
+
+  @override
+  String get supervisorTaskFilledDescription =>
+      'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight.';
+
+  @override
+  String get supervisorTaskFilledDate => '16 Aug 2026, 03:00 PM';
+
+  @override
+  String get supervisorTaskAttachPhoto => 'Attach Reference Photo';
+
+  @override
+  String get supervisorTaskCapturePhoto => 'Capture Photo';
+
+  @override
+  String get supervisorTaskPhotoSupport => 'Supported: JPG, PNG (Max 5MB).';
+
+  @override
+  String get supervisorTaskPhotoSupportDetailed =>
+      'Supported: JPG, PNG (Max 5MB). Receipt must be clearly visible for supervisor review.';
+
+  @override
+  String get supervisorTaskSend => 'Send Task';
+
+  @override
+  String get supervisorTaskSentTitle => 'Task Sent!';
+
+  @override
+  String get supervisorTaskSentMessage =>
+      'The task assigned by supervisor has been completed.';
+
+  @override
+  String get supervisorTaskCalendarMonth => 'August 2026';
+
+  @override
+  String get supervisorTaskSunday => 'SUN';
+
+  @override
+  String get supervisorTaskMonday => 'MON';
+
+  @override
+  String get supervisorTaskTuesday => 'TUE';
+
+  @override
+  String get supervisorTaskWednesday => 'WED';
+
+  @override
+  String get supervisorTaskThursday => 'THU';
+
+  @override
+  String get supervisorTaskFriday => 'FRI';
+
+  @override
+  String get supervisorTaskSaturday => 'SAT';
+
+  @override
+  String get supervisorTaskTime => 'Time';
+
+  @override
+  String get supervisorTaskTimeValue => '09 : 32';
+
+  @override
+  String get supervisorTaskAm => 'AM';
+
+  @override
+  String get supervisorTaskPm => 'PM';
+
+  @override
+  String get supervisorTaskCancel => 'Cancel';
+
+  @override
+  String get supervisorTaskConfirm => 'Confirm';
+
+  @override
+  String get supervisorTaskDetailsTitle => 'Task Details';
+
+  @override
+  String get supervisorTaskInProgress => 'Task in Progress';
+
+  @override
+  String get supervisorTaskCompletedAt => 'Completed: Today, 11:30 AM';
+
+  @override
+  String get supervisorTaskCompletionProof => 'Task Completion Proof';
+
+  @override
+  String get supervisorTaskCompletionDescription =>
+      'Weight scale calibrated using 10kg standard test weight. Zero-error verified.';
+
+  @override
+  String get supervisorTaskAgentName => 'Rahul Patel';
+
+  @override
+  String get supervisorTaskSentDetails => 'Your sent task details';
+
+  @override
+  String get supervisorTaskAssignToLabel => 'Assign To';
+
+  @override
+  String get supervisorTaskDetailDescription =>
+      'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight, inspect all uploaded item photos (before and after verification), and ensure customer details and material categories match the system records before final approval';
+
+  @override
+  String get supervisorTaskPriority => 'Priority';
+
+  @override
+  String get supervisorTaskPriorityLow => 'Low';
+
+  @override
+  String get supervisorTaskAttachmentByYou => 'Attachment By you';
+
+  @override
+  String get supervisorTaskAttachmentOwner => 'Bhavesh Shah';
+
+  @override
+  String get supervisorTaskCancelButton => 'Cancel Task';
+
+  @override
+  String get supervisorTaskCancelDialogTitle => 'Are you sure?';
+
+  @override
+  String get supervisorTaskCancelDialogMessage =>
+      'Are you sure you want to cancel this task right now?';
+
+  @override
+  String get supervisorTaskNo => 'No';
+
+  @override
+  String get supervisorTaskYes => 'Yes';
+
+  @override
+  String get supervisorTaskCancelledSuccess =>
+      'Task has been cancelled successfully';
+
+  @override
+  String get supervisorAgentRequestsTitle => 'Agent Requests';
+
+  @override
+  String get supervisorAgentRequestPerson => 'Rahul Patel (EERL South)';
+
+  @override
+  String get supervisorAgentRequestCardTitle => 'Verify Collection Details';
+
+  @override
+  String get supervisorAgentRequestCardDescription =>
+      'Review and verify the latest collection entry submitted by the field agent...';
+
+  @override
+  String get supervisorAgentRequestPending => 'Pending Request';
+
+  @override
+  String get supervisorAgentRequestResolved => 'Resolved Request';
+
+  @override
+  String get supervisorAgentRequestTime => 'Today, 08:00 AM';
+
+  @override
+  String get supervisorAgentRequestResolveTitle => 'Resolve Request';
+
+  @override
+  String get supervisorAgentRequestAttachment =>
+      'Attachment from Collection Agent';
+
+  @override
+  String get supervisorAgentRequestProof => 'Resolve Request Proof';
+
+  @override
+  String get supervisorAgentRequestResolveButton => 'Resolved Request';
+
+  @override
+  String get supervisorAgentRequestSuccessTitle => 'Resolved Successfully!';
+
+  @override
+  String get supervisorAgentRequestSuccessMessage =>
+      'Issue closed. Notification sent to the agent.';
+
+  @override
+  String get supervisorAgentRequestResolveDetails => 'Resolve Request Details';
+
+  @override
+  String get supervisorAgentRequestCollectionAgentDetails =>
+      'Collection agent Details';
+
+  @override
+  String get supervisorAgentRequestAttachmentFromSupervisor =>
+      'Attachment from Supervisor';
+
+  @override
+  String get supervisorAgentRequestLongDescription =>
+      'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight, inspect all uploaded item photos (before and after verification), and ensure customer details and material categories match the system records before final approval';
+
+  @override
+  String get supervisorMrfTitle => 'Register SMC MRF Team';
+
+  @override
+  String get supervisorMrfSearch => 'Search Here...';
+
+  @override
+  String get supervisorMrfAddNewPerson => 'Add New Person';
+
+  @override
+  String get supervisorMrfFullName => 'Full Name';
+
+  @override
+  String get supervisorMrfEnterFullName => 'Enter Full Name';
+
+  @override
+  String get supervisorMrfMobileNumber => 'Mobile Number';
+
+  @override
+  String get supervisorMrfEnterMobile => 'Enter Mobile number';
+
+  @override
+  String get supervisorMrfAssignCenter => 'Assign Target Center';
+
+  @override
+  String get supervisorMrfSelectCenter => 'Select Center';
+
+  @override
+  String get supervisorMrfCenterHelper =>
+      'Only the selected Agent will be able to view and verify this MRF entry.';
+
+  @override
+  String get supervisorMrfAddLabor => '+ Add Labor';
+
+  @override
+  String get supervisorMrfSave => 'Save';
+
+  @override
+  String supervisorMrfLaborNumber(int number) {
+    return 'Labor $number';
+  }
+
+  @override
+  String supervisorMrfLaborAssigned(int count) {
+    return '$count Labors assigned';
+  }
+
+  @override
+  String get supervisorMrfFullNamePlain => 'Full Name';
+
+  @override
+  String get supervisorMrfMobileNumberPlain => 'Mobile Number';
+
+  @override
+  String get supervisorMrfAssignedCenter => 'Assign Target Agent / Center';
+
+  @override
+  String get supervisorMrfRegistrationId => '#MRF-2026-089';
+
+  @override
+  String get supervisorMrfRemovePerson => 'Remove Person';
+
+  @override
+  String get supervisorMrfRemoveDialogTitle => 'Are You Sure';
+
+  @override
+  String get supervisorMrfRemoveDialogMessage =>
+      'Are you sure you want to remove this person This action cannot be undone';
+
+  @override
+  String get supervisorMrfYes => 'Yes';
+
+  @override
+  String get supervisorMrfRemovedTitle => 'MRF Person Removed';
+
+  @override
+  String get supervisorMrfRemovedSubtitle => 'Access revoked for MRF-2026-089';
+
+  @override
+  String get supervisorMrfAddedTitle => 'MRF Person Added';
+
+  @override
+  String get supervisorMrfAddedSubtitle => 'assigned to MRF-2026-089';
+
+  @override
+  String get supervisorMrfPersonChunilal => 'Chunilal Yadav';
+
+  @override
+  String get supervisorMrfPersonRamesh => 'Ramesh Kumar';
+
+  @override
+  String get supervisorMrfPersonSuresh => 'Suresh Kumar';
+
+  @override
+  String get supervisorMrfPersonManohar => 'Manohar Lal';
+
+  @override
+  String get supervisorMrfPersonSureshSharma => 'Suresh Sharma';
+
+  @override
+  String get supervisorMrfLaborHaresh => 'Haresh Matiya';
+
+  @override
+  String get supervisorMrfCenterSurat => 'EERL - Surat Zone';
+
+  @override
+  String get supervisorMrfCenterSuratEast => 'EERL - Surat East Zone';
+
+  @override
+  String get supervisorMrfCenterSuratWest => 'EERL - Surat West Zone';
+
+  @override
+  String get supervisorMrfCenterSuratSouth => 'EERL - Surat South Zone';
+
+  @override
+  String get supervisorMrfLocationKargil => 'Kargil Chowk, Varacha';
+
+  @override
+  String get supervisorMrfLocationMagdalla => 'Magdalla, Vesu';
+
+  @override
+  String get supervisorMrfLocationSilver => 'Silver Chowk, Punagam';
+
+  @override
+  String get supervisorMrfLocationSardar => 'Sardar Market, Udhana';
 }

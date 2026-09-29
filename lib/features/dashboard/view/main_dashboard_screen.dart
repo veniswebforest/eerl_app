@@ -1,52 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
-import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
-import 'package:eerl_app/features/collection/model/recent_collection_item_model.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/features/collection/view/collections_tab_screen.dart';
-import 'package:eerl_app/features/collection/view/add_collection_screen.dart';
-import 'package:eerl_app/features/configure_material/view/configure_material_screen.dart';
-import 'package:eerl_app/features/end_my_day/view/end_my_day_screen.dart';
+import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
 import 'package:eerl_app/features/home/view/home_screen.dart';
 import 'package:eerl_app/features/home/widgets/home_assets.dart';
-import 'package:eerl_app/features/help_support/view/help_support_screen.dart';
-import 'package:eerl_app/features/notifications/view/notifications_screen.dart';
 import 'package:eerl_app/features/profile/view/profile_screen.dart';
-import 'package:eerl_app/features/profile/widgets/logout_confirmation_dialog.dart';
-import 'package:eerl_app/features/profile/widgets/sync_data_dialog.dart';
-import 'package:eerl_app/features/records/model/collection_detail_status.dart';
-import 'package:eerl_app/features/records/model/records_view_flag.dart';
-import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
-import 'package:eerl_app/features/role_switcher/view/role_switcher_screen.dart';
-import 'package:eerl_app/features/stock/model/stock_item.dart';
 import 'package:eerl_app/features/stock/view/facility_stock_screen.dart';
-import 'package:eerl_app/features/stock/view/stock_detail_screen.dart';
-import 'package:eerl_app/features/supervisor_expense/view/supervisor_expense_module_screen.dart';
-import 'package:eerl_app/features/ragpicker_directory/view/ragpicker_directory_screen.dart';
-import 'package:eerl_app/features/requests/view/raise_request_screen.dart';
-import 'package:eerl_app/features/requests/model/request_list_item.dart';
-import 'package:eerl_app/features/requests/view/request_detail_screen.dart';
-import 'package:eerl_app/features/requests/view/requests_screen.dart';
-import 'package:eerl_app/features/tasks/view/my_tasks_screen.dart';
-import 'package:eerl_app/features/tasks/view/task_detail_screen.dart';
-import 'package:eerl_app/features/tasks/model/task_list_item.dart';
-import 'package:eerl_app/features/transfer_requests/view/create_transfer_request_screen.dart';
-import 'package:eerl_app/features/transfer_requests/view/transfer_requests_screen.dart';
-import 'package:eerl_app/features/transfer_requests/model/transfer_request_detail_state.dart';
-import 'package:eerl_app/features/transfer_requests/model/transfer_request_item.dart';
-import 'package:eerl_app/features/transfer_requests/view/transfer_request_detail_screen.dart';
 import 'package:eerl_app/features/verification/view/supervisor_verification_screen.dart';
-import 'package:eerl_app/features/verification/view/verification_detail_screen.dart';
-import 'package:eerl_app/features/verification/view/reject_collection_screen.dart';
-import 'package:eerl_app/features/verification/model/verification_entry.dart';
-import 'package:eerl_app/features/wallet/model/expense_claim_detail_status.dart';
-import 'package:eerl_app/features/wallet/model/cash_request_detail_status.dart';
-import 'package:eerl_app/features/wallet/view/cash_request_detail_screen.dart';
-import 'package:eerl_app/features/wallet/view/expense_claim_detail_screen.dart';
-import 'package:eerl_app/features/wallet/view/log_expense_screen.dart';
-import 'package:eerl_app/features/wallet/view/request_cash_screen.dart';
-import 'package:eerl_app/features/wallet/view/wallet_tab_screen.dart';
+import 'package:provider/provider.dart';
 import '../model/bottom_nav_item_model.dart';
 import '../widgets/dynamic_bottom_nav_bar.dart';
 
@@ -59,303 +24,104 @@ class MainDashboardScreen extends StatefulWidget {
     this.userRole = DashboardUserRole.collectionAgent,
     this.permissions = const <String>{},
     this.initialPageKey = 'home',
-    this.onTabChanged,
   });
 
   final DashboardUserRole userRole;
   final Set<String> permissions;
   final String initialPageKey;
-  final ValueChanged<BottomNavItemModel>? onTabChanged;
 
   @override
   State<MainDashboardScreen> createState() => _MainDashboardScreenState();
 }
 
 class _MainDashboardScreenState extends State<MainDashboardScreen> {
-  late DashboardUserRole _activeRole = widget.userRole;
-  late String _selectedPageKey = widget.initialPageKey == 'wallet'
-      ? 'home'
-      : widget.initialPageKey;
-  late bool _isWalletOpen = widget.initialPageKey == 'wallet';
-  bool _isLogExpenseOpen = false;
-  bool _isRequestCashOpen = false;
-  bool _isHelpSupportOpen = false;
-  bool _isAddCollectionOpen = false;
-  CollectionEntryStep _addCollectionInitialStep = CollectionEntryStep.items;
-  CollectionType? _addCollectionInitialType;
-  Set<int> _addCollectionInitialSelectedItems = const <int>{};
-  bool _isConfigureMaterialOpen = false;
-  bool _isTasksOpen = false;
-  bool _isRequestsOpen = false;
-  bool _isTransferRequestsOpen = false;
-  bool _isRagpickerDirectoryOpen = false;
-  bool _isCreateTransferOpen = false;
-  TransferRequestDetailState? _transferRequestDetailState;
-  bool _isRaiseRequestOpen = false;
-  RequestListItem? _selectedRequest;
-  bool _isNotificationsOpen = false;
-  bool _isEndMyDayOpen = false;
-  bool _isRoleSwitcherOpen = false;
-  TaskListItem? _selectedTask;
-  ExpenseClaimDetailStatus? _claimDetailStatus;
-  CashRequestDetailStatus? _cashRequestDetailStatus;
-  CollectionDetailStatus? _collectionDetailStatus;
-  VerificationDetailStatus? _verificationDetailStatus;
-  StockStage? _selectedStockStage;
-  bool _isVerificationRejectOpen = false;
-  bool _isSupervisorExpenseOpen = false;
-  VerificationListStatus _verificationInitialStatus =
-      VerificationListStatus.pending;
-  RecordsViewFlag _recordsInitialView = RecordsViewFlag.history;
-  int _recordsPageVersion = 0;
-  bool _isDrawerOpen = false;
-
-  List<BottomNavItemModel> get _visibleItems => _createItems()
-      .where((item) => item.isVisibleFor(_activeRole, widget.permissions))
-      .toList(growable: false);
+  late final DashboardNavigationProvider _navigation;
 
   @override
-  void didUpdateWidget(covariant MainDashboardScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.userRole != widget.userRole) {
-      _activeRole = widget.userRole;
-    }
-    final items = _visibleItems;
-    if (items.isNotEmpty &&
-        !items.any((item) => item.pageKey == _selectedPageKey)) {
-      _selectedPageKey = items.first.pageKey;
+  void initState() {
+    super.initState();
+    _navigation = DashboardNavigationProvider(
+      initialRole: widget.userRole,
+      initialPageKey: widget.initialPageKey,
+    );
+    if (widget.initialPageKey == 'wallet') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.push(AppRoutes.wallet);
+      });
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final items = _visibleItems;
+  void didUpdateWidget(covariant MainDashboardScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _navigation.updateRoleFromParent(widget.userRole);
+  }
+
+  @override
+  void dispose() {
+    _navigation.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => ChangeNotifierProvider.value(
+    value: _navigation,
+    child: Consumer<DashboardNavigationProvider>(
+      builder: (context, navigation, _) => _buildDashboard(context, navigation),
+    ),
+  );
+
+  Widget _buildDashboard(
+    BuildContext context,
+    DashboardNavigationProvider navigation,
+  ) {
+    final items = _createItems(context, navigation)
+        .where(
+          (item) =>
+              item.isVisibleFor(navigation.activeRole, widget.permissions),
+        )
+        .toList(growable: false);
     if (items.isEmpty) {
       return Scaffold(
         body: Center(child: Text(context.l10n.dashboardEmptyMessage)),
       );
     }
     final selectedIndex = items.indexWhere(
-      (item) => item.pageKey == _selectedPageKey,
+      (item) => item.pageKey == navigation.selectedPageKey,
     );
     final safeSelectedIndex = selectedIndex < 0 ? 0 : selectedIndex;
 
-    return Scaffold(
-      extendBody: true,
-      body: _isSupervisorExpenseOpen
-          ? SupervisorExpenseModuleScreen(
-              onBack: () => setState(() => _isSupervisorExpenseOpen = false),
-            )
-          : _isRoleSwitcherOpen
-          ? RoleSwitcherScreen(
-              initialRole: _activeRole,
-              onBack: () => setState(() => _isRoleSwitcherOpen = false),
-              onRoleSelected: (role) => setState(() {
-                _activeRole = role;
-                _isRoleSwitcherOpen = false;
-                _selectedPageKey = 'home';
-              }),
-            )
-          : _isAddCollectionOpen
-          ? AddCollectionScreen(
-              onBack: () => setState(() => _isAddCollectionOpen = false),
-              initialStep: _addCollectionInitialStep,
-              initialType: _addCollectionInitialType,
-              initialSelectedItems: _addCollectionInitialSelectedItems,
-              onSaveDraft: () => setState(() {
-                _isAddCollectionOpen = false;
-                _selectedPageKey = 'records';
-                _recordsInitialView = RecordsViewFlag.drafts;
-                _recordsPageVersion++;
-                _addCollectionInitialStep = CollectionEntryStep.items;
-                _addCollectionInitialType = null;
-                _addCollectionInitialSelectedItems = const <int>{};
-              }),
-            )
-          : _isConfigureMaterialOpen
-          ? ConfigureMaterialScreen(
-              onBack: () => setState(() => _isConfigureMaterialOpen = false),
-            )
-          : _isRagpickerDirectoryOpen
-          ? RagpickerDirectoryScreen(
-              onBack: () => setState(() => _isRagpickerDirectoryOpen = false),
-            )
-          : _isNotificationsOpen
-          ? NotificationsScreen(
-              onBack: () => setState(() => _isNotificationsOpen = false),
-            )
-          : _isEndMyDayOpen
-          ? EndMyDayScreen(
-              onBack: () => setState(() => _isEndMyDayOpen = false),
-              onEndDay: () => setState(() => _isEndMyDayOpen = false),
-            )
-          : _isRaiseRequestOpen
-          ? RaiseRequestScreen(
-              onBack: () => setState(() => _isRaiseRequestOpen = false),
-              onBackToList: () => setState(() => _isRaiseRequestOpen = false),
-            )
-          : _isCreateTransferOpen
-          ? CreateTransferRequestScreen(
-              onBack: () => setState(() => _isCreateTransferOpen = false),
-              onBackToList: () => setState(() => _isCreateTransferOpen = false),
-            )
-          : _transferRequestDetailState != null
-          ? TransferRequestDetailScreen(
-              state: _transferRequestDetailState!,
-              onBack: () => setState(() => _transferRequestDetailState = null),
-            )
-          : _isTransferRequestsOpen
-          ? TransferRequestsScreen(
-              onBack: () => setState(() => _isTransferRequestsOpen = false),
-              onAddTap: () => setState(() => _isCreateTransferOpen = true),
-              onRequestTap: (request) => setState(() {
-                _transferRequestDetailState = switch (request.status) {
-                  TransferRequestStatus.pending =>
-                    TransferRequestDetailState.pendingVerification,
-                  TransferRequestStatus.approved =>
-                    TransferRequestDetailState.completed,
-                  TransferRequestStatus.dispatch =>
-                    TransferRequestDetailState.waitingForLoading,
-                  TransferRequestStatus.rejected =>
-                    TransferRequestDetailState.rejected,
-                };
-              }),
-            )
-          : _isVerificationRejectOpen
-          ? RejectCollectionScreen(
-              onBack: () => setState(() => _isVerificationRejectOpen = false),
-              onCancel: () => setState(() => _isVerificationRejectOpen = false),
-              onConfirm: () => setState(() {
-                _isVerificationRejectOpen = false;
-                _verificationDetailStatus = VerificationDetailStatus.rejected;
-              }),
-            )
-          : _selectedStockStage != null
-          ? StockDetailScreen(
-              stage: _selectedStockStage!,
-              onBack: () => setState(() => _selectedStockStage = null),
-            )
-          : _verificationDetailStatus != null
-          ? VerificationDetailScreen(
-              status: _verificationDetailStatus!,
-              onBack: () => setState(() => _verificationDetailStatus = null),
-              onApprove: () => setState(
-                () => _verificationDetailStatus =
-                    VerificationDetailStatus.approved,
+    return PopScope(
+      canPop: navigation.selectedPageKey == 'home',
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && navigation.selectedPageKey != 'home') {
+          navigation.selectPage('home');
+        }
+      },
+      child: Scaffold(
+        extendBody: true,
+        body: IndexedStack(
+          index: safeSelectedIndex,
+          children: items.map((item) => item.page).toList(growable: false),
+        ),
+        bottomNavigationBar: navigation.isDrawerOpen
+            ? null
+            : DynamicBottomNavBar(
+                items: items,
+                selectedIndex: safeSelectedIndex,
+                onItemSelected: (index) {
+                  final selectedItem = items[index];
+                  navigation.selectPage(selectedItem.pageKey);
+                },
               ),
-              onReject: () => setState(() => _isVerificationRejectOpen = true),
-            )
-          : _selectedRequest != null
-          ? RequestDetailScreen(
-              status: _selectedRequest!.status,
-              onBack: () => setState(() => _selectedRequest = null),
-            )
-          : _isRequestsOpen
-          ? RequestsScreen(
-              onBack: () => setState(() => _isRequestsOpen = false),
-              onRaiseRequest: () => setState(() => _isRaiseRequestOpen = true),
-              onRequestTap: (request) =>
-                  setState(() => _selectedRequest = request),
-            )
-          : _selectedTask != null
-          ? TaskDetailScreen(
-              task: _selectedTask!,
-              onBack: () => setState(() => _selectedTask = null),
-              onCompleted: () => setState(() => _selectedTask = null),
-            )
-          : _isTasksOpen
-          ? MyTasksScreen(
-              onBack: () => setState(() => _isTasksOpen = false),
-              onTaskTap: (task) => setState(() => _selectedTask = task),
-            )
-          : _isHelpSupportOpen
-          ? HelpSupportScreen(
-              onBack: () => setState(() => _isHelpSupportOpen = false),
-            )
-          : _collectionDetailStatus != null
-          ? CollectionDetailScreen(
-              status: _collectionDetailStatus!,
-              onBack: () => setState(() => _collectionDetailStatus = null),
-            )
-          : _claimDetailStatus != null
-          ? ExpenseClaimDetailScreen(
-              status: _claimDetailStatus!,
-              onBack: () => setState(() => _claimDetailStatus = null),
-            )
-          : _cashRequestDetailStatus != null
-          ? CashRequestDetailScreen(
-              status: _cashRequestDetailStatus!,
-              onBack: () => setState(() => _cashRequestDetailStatus = null),
-            )
-          : _isRequestCashOpen
-          ? RequestCashScreen(
-              onBack: () => setState(() => _isRequestCashOpen = false),
-              onBackToWallet: () => setState(() => _isRequestCashOpen = false),
-            )
-          : _isLogExpenseOpen
-          ? LogExpenseScreen(
-              onBack: () => setState(() => _isLogExpenseOpen = false),
-              onSubmitted: () => setState(() => _isLogExpenseOpen = false),
-            )
-          : _isWalletOpen
-          ? WalletTabScreen(
-              onBack: () => setState(() => _isWalletOpen = false),
-              onLogExpense: () => setState(() => _isLogExpenseOpen = true),
-              onRequestCash: () => setState(() => _isRequestCashOpen = true),
-              onClaimTap: (status) {
-                setState(() => _claimDetailStatus = status);
-              },
-              onCashRequestTap: (status) {
-                setState(() => _cashRequestDetailStatus = status);
-              },
-            )
-          : IndexedStack(
-              index: safeSelectedIndex,
-              children: items.map((item) => item.page).toList(growable: false),
-            ),
-      bottomNavigationBar:
-          _isSupervisorExpenseOpen ||
-              _isWalletOpen ||
-              _isRoleSwitcherOpen ||
-              _isAddCollectionOpen ||
-              _isLogExpenseOpen ||
-              _isRequestCashOpen ||
-              _isHelpSupportOpen ||
-              _isConfigureMaterialOpen ||
-              _isRagpickerDirectoryOpen ||
-              _isNotificationsOpen ||
-              _isEndMyDayOpen ||
-              _isRequestsOpen ||
-              _isTransferRequestsOpen ||
-              _isCreateTransferOpen ||
-              _transferRequestDetailState != null ||
-              _verificationDetailStatus != null ||
-              _selectedStockStage != null ||
-              _isVerificationRejectOpen ||
-              _isRaiseRequestOpen ||
-              _selectedRequest != null ||
-              _isTasksOpen ||
-              _selectedTask != null ||
-              _claimDetailStatus != null ||
-              _cashRequestDetailStatus != null ||
-              _collectionDetailStatus != null ||
-              _isDrawerOpen
-          ? null
-          : DynamicBottomNavBar(
-              items: items,
-              selectedIndex: safeSelectedIndex,
-              onItemSelected: (index) {
-                final selectedItem = items[index];
-                if (selectedItem.pageKey == _selectedPageKey) return;
-
-                setState(() => _selectedPageKey = selectedItem.pageKey);
-                widget.onTabChanged?.call(selectedItem);
-              },
-            ),
+      ),
     );
   }
 
-  List<BottomNavItemModel> _createItems() {
+  List<BottomNavItemModel> _createItems(
+    BuildContext context,
+    DashboardNavigationProvider navigation,
+  ) {
     const allRoles = <DashboardUserRole>{
       DashboardUserRole.collectionAgent,
       DashboardUserRole.supervisor,
@@ -372,78 +138,13 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
     return [
       BottomNavItemModel(
         title: l10n.home,
-        selectedIcon: _activeRole == DashboardUserRole.supervisor
+        selectedIcon: navigation.activeRole == DashboardUserRole.supervisor
             ? HomeAssets.supervisorNavHome
             : '$_navIconPath/nav_home.svg',
-        unselectedIcon: _activeRole == DashboardUserRole.supervisor
+        unselectedIcon: navigation.activeRole == DashboardUserRole.supervisor
             ? HomeAssets.supervisorNavHome
             : '$_navIconPath/nav_home.svg',
-        page: HomeScreen(
-          isSupervisor: _activeRole == DashboardUserRole.supervisor,
-          roleTitle: _activeRole == DashboardUserRole.supervisor
-              ? l10n.roleCollectionSupervisor
-              : l10n.drawerUserRole,
-          roleZone: _activeRole == DashboardUserRole.supervisor
-              ? l10n.homeSuratNorthZone
-              : l10n.homeSuratSouthZone,
-          onRoleSwitchTap: () => setState(() => _isRoleSwitcherOpen = true),
-          onCollectionTap: () =>
-              setState(() => _selectedPageKey = 'collections'),
-          onReceiptsTap: () => setState(() => _selectedPageKey = 'records'),
-          onSyncStatusTap: () => setState(() => _selectedPageKey = 'profile'),
-          onSyncNowTap: () => showSyncDataDialog(context),
-          onWalletTap: () => setState(() => _isWalletOpen = true),
-          onAddCollectionTap: () => setState(() {
-            _addCollectionInitialStep = CollectionEntryStep.items;
-            _addCollectionInitialType = null;
-            _addCollectionInitialSelectedItems = const <int>{};
-            _isAddCollectionOpen = true;
-          }),
-          onCollectionTypeTap: (type) => setState(() {
-            _addCollectionInitialStep = CollectionEntryStep.items;
-            _addCollectionInitialType = type;
-            _addCollectionInitialSelectedItems = const <int>{};
-            _isAddCollectionOpen = true;
-          }),
-          onContinueDraftTap: () => setState(() {
-            _addCollectionInitialStep = CollectionEntryStep.photos;
-            _addCollectionInitialType = CollectionType.mrfStation;
-            _addCollectionInitialSelectedItems = const <int>{0, 1, 3};
-            _isAddCollectionOpen = true;
-          }),
-          onHelpSupportTap: () => setState(() => _isHelpSupportOpen = true),
-          onConfigureMaterialTap: () =>
-              setState(() => _isConfigureMaterialOpen = true),
-          onTasksTap: () => setState(() => _isTasksOpen = true),
-          onSupervisorStockTap: () =>
-              setState(() => _selectedPageKey = 'supervisor-stock'),
-          onSupervisorExpenseTap: () =>
-              setState(() => _isSupervisorExpenseOpen = true),
-          onSupervisorPendingVerificationTap: () => setState(() {
-            _verificationInitialStatus = VerificationListStatus.pending;
-            _selectedPageKey = 'supervisor-verify';
-          }),
-          onSupervisorVerifiedEntriesTap: () => setState(() {
-            _verificationInitialStatus = VerificationListStatus.processed;
-            _selectedPageKey = 'supervisor-verify';
-          }),
-          onRequestsTap: () => setState(() => _isRequestsOpen = true),
-          onTransferRequestsTap: () =>
-              setState(() => _isTransferRequestsOpen = true),
-          onRagpickerDirectoryTap: () =>
-              setState(() => _isRagpickerDirectoryOpen = true),
-          onNotificationTap: () => setState(() => _isNotificationsOpen = true),
-          onLogoutTap: () => showDialog<void>(
-            context: context,
-            barrierColor: Colors.black.withValues(alpha: 0.56),
-            builder: (_) => const LogoutConfirmationDialog(),
-          ),
-          onEndMyDayTap: () => setState(() => _isEndMyDayOpen = true),
-          onDrawerChanged: (isOpen) {
-            if (_isDrawerOpen == isOpen) return;
-            setState(() => _isDrawerOpen = isOpen);
-          },
-        ),
+        page: const HomeScreen(),
         pageKey: 'home',
         roles: allRoles,
         permission: 'dashboard.view',
@@ -452,31 +153,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         title: l10n.drawerCollection,
         selectedIcon: '$_navIconPath/nav_collections.svg',
         unselectedIcon: '$_navIconPath/nav_collections.svg',
-        page: CollectionsTabScreen(
-          onAddCollection: () => setState(() {
-            _addCollectionInitialStep = CollectionEntryStep.items;
-            _addCollectionInitialType = null;
-            _addCollectionInitialSelectedItems = const <int>{};
-            _isAddCollectionOpen = true;
-          }),
-          onCollectionTap: (status) => setState(() {
-            _collectionDetailStatus = switch (status) {
-              RecentCollectionStatus.pending => CollectionDetailStatus.pending,
-              RecentCollectionStatus.verified =>
-                CollectionDetailStatus.approved,
-              RecentCollectionStatus.rejected =>
-                CollectionDetailStatus.rejected,
-            };
-          }),
-          onViewAllTap: () => setState(() => _selectedPageKey = 'records'),
-          onNotificationTap: () => setState(() => _isNotificationsOpen = true),
-          onCollectionTypeTap: (type) => setState(() {
-            _addCollectionInitialStep = CollectionEntryStep.items;
-            _addCollectionInitialType = type;
-            _addCollectionInitialSelectedItems = const <int>{};
-            _isAddCollectionOpen = true;
-          }),
-        ),
+        page: const CollectionsTabScreen(),
         pageKey: 'collections',
         roles: agentRoles,
         permission: 'collections.view',
@@ -487,16 +164,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         selectedIcon: '$_navIconPath/nav_wallet.svg',
         unselectedIcon: '$_navIconPath/nav_wallet.svg',
         page: RecordsTabScreen(
-          key: ValueKey('records-page-$_recordsPageVersion'),
-          initialView: _recordsInitialView,
-          onRecordTap: (status) =>
-              setState(() => _collectionDetailStatus = status),
-          onDraftContinue: (draft) => setState(() {
-            _addCollectionInitialStep = draft.resumeStep;
-            _addCollectionInitialType = draft.type;
-            _addCollectionInitialSelectedItems = draft.selectedItems;
-            _isAddCollectionOpen = true;
-          }),
+          key: ValueKey('records-page-${navigation.recordsPageVersion}'),
+          initialView: navigation.recordsView,
         ),
         pageKey: 'records',
         roles: agentRoles,
@@ -507,9 +176,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         selectedIcon: HomeAssets.supervisorNavTasks,
         unselectedIcon: HomeAssets.supervisorNavTasks,
         page: SupervisorVerificationScreen(
-          initialStatus: _verificationInitialStatus,
-          onEntryTap: (status) =>
-              setState(() => _verificationDetailStatus = status),
+          initialStatus: navigation.verificationStatus,
         ),
         pageKey: 'supervisor-verify',
         roles: supervisorRoles,
@@ -518,28 +185,19 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         title: l10n.supervisorStockNav,
         selectedIcon: HomeAssets.supervisorNavStock,
         unselectedIcon: HomeAssets.supervisorNavStock,
-        page: FacilityStockScreen(
-          onStageTap: (stage) {
-            if (stage == StockStage.rawMaterial ||
-                stage == StockStage.sortedRawMaterial) {
-              setState(() => _selectedStockStage = stage);
-            }
-          },
-        ),
+        page: const FacilityStockScreen(),
         pageKey: 'supervisor-stock',
         roles: supervisorRoles,
       ),
       BottomNavItemModel(
         title: l10n.profile,
-        selectedIcon: _activeRole == DashboardUserRole.supervisor
+        selectedIcon: navigation.activeRole == DashboardUserRole.supervisor
             ? HomeAssets.supervisorNavProfile
             : '$_navIconPath/nav_profile.svg',
-        unselectedIcon: _activeRole == DashboardUserRole.supervisor
+        unselectedIcon: navigation.activeRole == DashboardUserRole.supervisor
             ? HomeAssets.supervisorNavProfile
             : '$_navIconPath/nav_profile.svg',
-        page: ProfileScreen(
-          onNotificationTap: () => setState(() => _isNotificationsOpen = true),
-        ),
+        page: const ProfileScreen(),
         pageKey: 'profile',
         roles: allRoles,
         permission: 'profile.view',

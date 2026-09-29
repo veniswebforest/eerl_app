@@ -39,6 +39,7 @@ class LocaleProvider extends ChangeNotifier {
 
   /// Clear the saved locale and fall back to system default.
   Future<void> clearLocale() async {
+    if (_locale == null) return;
     _locale = null;
     notifyListeners();
 

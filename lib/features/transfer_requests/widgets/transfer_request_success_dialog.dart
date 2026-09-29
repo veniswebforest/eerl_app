@@ -5,9 +5,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 
 class TransferRequestSuccessDialog extends StatelessWidget {
-  const TransferRequestSuccessDialog({super.key, required this.onBackToList});
-
-  final VoidCallback onBackToList;
+  const TransferRequestSuccessDialog({super.key});
 
   @override
   Widget build(BuildContext context) => Dialog(
@@ -46,7 +44,7 @@ class TransferRequestSuccessDialog extends StatelessWidget {
             height: 48,
             child: OutlinedButton(
               key: const Key('transfer-back-to-list'),
-              onPressed: onBackToList,
+              onPressed: () => Navigator.of(context).pop(true),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.primary500),
               ),

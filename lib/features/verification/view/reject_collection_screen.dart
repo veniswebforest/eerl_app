@@ -7,16 +7,7 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/records/widgets/collection_detail_assets.dart';
 
 class RejectCollectionScreen extends StatefulWidget {
-  const RejectCollectionScreen({
-    super.key,
-    required this.onBack,
-    required this.onCancel,
-    required this.onConfirm,
-  });
-
-  final VoidCallback onBack;
-  final VoidCallback onCancel;
-  final VoidCallback onConfirm;
+  const RejectCollectionScreen({super.key});
 
   @override
   State<RejectCollectionScreen> createState() => _RejectCollectionScreenState();
@@ -45,7 +36,7 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
               children: [
                 Row(
                   children: [
-                    _BackButton(onTap: widget.onBack),
+                    _BackButton(onTap: () => Navigator.of(context).maybePop()),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
@@ -136,7 +127,7 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                     key: const Key('verification-confirm-rejection'),
                     onPressed: _selectedReasons.isEmpty
                         ? null
-                        : widget.onConfirm,
+                        : () => Navigator.of(context).pop(true),
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: AppColors.red500,
@@ -156,7 +147,7 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                   height: 52,
                   child: OutlinedButton(
                     key: const Key('verification-cancel-rejection'),
-                    onPressed: widget.onCancel,
+                    onPressed: () => Navigator.of(context).maybePop(),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.neutral400,
                       side: const BorderSide(color: AppColors.neutral400),

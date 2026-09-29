@@ -30,6 +30,8 @@
 	<string>Camera access is used to capture collection photos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Photo library access is used to select collection photos.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Please authenticate to access the app.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -1,7 +1,6 @@
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'app_screen_header.dart';
 
@@ -44,7 +43,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: GestureDetector(
-                  onTap: onBackTap ?? () => context.pop(),
+                  onTap: onBackTap ?? () => Navigator.of(context).maybePop(),
                   child: Container(
                     height: 40,
                     width: 40,

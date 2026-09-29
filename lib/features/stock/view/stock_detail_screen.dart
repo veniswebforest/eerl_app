@@ -10,14 +10,9 @@ import '../model/stock_item.dart';
 import '../widgets/stock_material_card.dart';
 
 class StockDetailScreen extends StatelessWidget {
-  const StockDetailScreen({
-    super.key,
-    required this.stage,
-    required this.onBack,
-  });
+  const StockDetailScreen({super.key, required this.stage});
 
   final StockStage stage;
-  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +39,11 @@ class StockDetailScreen extends StatelessWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AppScreenHeader(leading: _BackButton(onTap: onBack)),
+                      AppScreenHeader(
+                        leading: _BackButton(
+                          onTap: () => Navigator.of(context).maybePop(),
+                        ),
+                      ),
                       const SizedBox(height: 24),
                       Text(
                         sorted

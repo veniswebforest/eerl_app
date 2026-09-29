@@ -10,14 +10,7 @@ import '../widgets/request_cash_success_dialog.dart';
 import '../widgets/wallet_screen_header.dart';
 
 class RequestCashScreen extends StatefulWidget {
-  const RequestCashScreen({
-    super.key,
-    required this.onBack,
-    required this.onBackToWallet,
-  });
-
-  final VoidCallback onBack;
-  final VoidCallback onBackToWallet;
+  const RequestCashScreen({super.key});
 
   @override
   State<RequestCashScreen> createState() => _RequestCashScreenState();
@@ -79,10 +72,7 @@ class _RequestCashScreenState extends State<RequestCashScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          WalletScreenHeader(
-                            title: l10n.cashRequestTitle,
-                            onBack: widget.onBack,
-                          ),
+                          WalletScreenHeader(title: l10n.cashRequestTitle),
                           const SizedBox(height: 24),
                           RequestCashField(
                             label: l10n.cashRequestedAmount,
@@ -175,17 +165,15 @@ class _RequestCashScreenState extends State<RequestCashScreen> {
     );
   }
 
-  Future<void> _showSuccessDialog() => showDialog<void>(
-    context: context,
-    barrierColor: AppColors.neutral950.withValues(alpha: 0.64),
-    builder: (dialogContext) => RequestCashSuccessDialog(
-      amount: _amountController.text.trim(),
-      onBackToWallet: () {
-        Navigator.of(dialogContext).pop();
-        widget.onBackToWallet();
-      },
-    ),
-  );
+  Future<void> _showSuccessDialog() async {
+    final submitted = await showDialog<bool>(
+      context: context,
+      barrierColor: AppColors.neutral950.withValues(alpha: 0.64),
+      builder: (_) =>
+          RequestCashSuccessDialog(amount: _amountController.text.trim()),
+    );
+    if (submitted == true && mounted) Navigator.of(context).pop();
+  }
 }
 
 class _SubmitArea extends StatelessWidget {

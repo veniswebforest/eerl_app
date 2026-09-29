@@ -13,4 +13,9 @@ abstract final class WalletAssets {
   static const expenseCamera = '$_root/expense_camera.svg';
   static const expenseRemove = '$_root/expense_remove.svg';
   static const expenseClaimCurrency = '$_root/expense_claim_currency.svg';
+  static const newCategoryRequest = '$_root/new_category_request.svg';
+  static const categoryRequestRejected = '$_root/category_request_rejected.svg';
+  static const categoryRequestRejectedBanner =
+      '$_root/category_request_rejected_banner.svg';
+  static const categoryRequestClose = '$_root/category_request_close.svg';
 }
