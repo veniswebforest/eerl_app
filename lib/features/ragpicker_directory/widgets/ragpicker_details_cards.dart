@@ -47,6 +47,8 @@ class RagpickerInformationCard extends StatelessWidget {
     required this.mobileLabel,
     required this.identityLabel,
     required this.dateLabel,
+    this.zoneLabel,
+    this.zoneValue,
   });
 
   final RagpickerDirectoryItem item;
@@ -54,14 +56,17 @@ class RagpickerInformationCard extends StatelessWidget {
   final String mobileLabel;
   final String identityLabel;
   final String dateLabel;
+  final String? zoneLabel;
+  final String? zoneValue;
 
   @override
   Widget build(BuildContext context) {
-    final rows = [
+    final rows = <(String, String)>[
       (fullNameLabel, item.name),
       (mobileLabel, item.phone),
       (identityLabel, item.identityNumber),
       (dateLabel, item.createdAt),
+      if (zoneLabel != null && zoneValue != null) (zoneLabel!, zoneValue!),
     ];
     return Container(
       width: double.infinity,

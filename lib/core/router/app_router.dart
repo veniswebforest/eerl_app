@@ -1,12 +1,14 @@
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:eerl_app/features/agent_status/view/agent_status_screen.dart';
 import 'package:eerl_app/features/auth/view/app_lock_screen.dart';
 import 'package:eerl_app/features/auth/view/login_screen.dart';
 import 'package:eerl_app/features/auth/view/otp_screen.dart';
 import 'package:eerl_app/features/auth/view/splash_screen.dart';
 import 'package:eerl_app/features/dashboard/view/main_dashboard_screen.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
+import 'package:eerl_app/features/d2d_vehicle_management/view/d2d_vehicle_management_screen.dart';
 import 'package:eerl_app/features/details/view/details_screen.dart';
 import 'package:eerl_app/features/settings/view/settings_screen.dart';
 import 'package:eerl_app/features/collection/view/add_collection_screen.dart';
@@ -209,7 +211,18 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.ragpickerDirectory,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, _) => const RagpickerDirectoryScreen(),
+      builder: (_, state) =>
+          RagpickerDirectoryScreen(isSupervisor: state.extra == true),
+    ),
+    GoRoute(
+      path: AppRoutes.d2dVehicleManagement,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (_, _) => const D2dVehicleManagementScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.agentStatus,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (_, _) => const AgentStatusScreen(),
     ),
     GoRoute(
       path: AppRoutes.notifications,
@@ -219,7 +232,7 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.endMyDay,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, _) => const EndMyDayScreen(),
+      builder: (_, state) => EndMyDayScreen(isSupervisor: state.extra == true),
     ),
     GoRoute(
       path: AppRoutes.helpSupport,

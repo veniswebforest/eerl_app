@@ -65,14 +65,14 @@ class RagpickerDirectoryCard extends StatelessWidget {
                       ),
                       child: SvgPicture.asset(
                         item.status == RagpickerStatus.active
-                            ? 'assets/icons/help_support/call.svg'
+                            ? 'assets/icons/ragpicker_call_supervisor.svg'
                             : 'assets/icons/ragpicker_deactivated.svg',
-                        colorFilter: ColorFilter.mode(
-                          item.status == RagpickerStatus.active
-                              ? AppColors.primary800
-                              : AppColors.red500,
-                          BlendMode.srcIn,
-                        ),
+                        colorFilter: item.status == RagpickerStatus.active
+                            ? null
+                            : const ColorFilter.mode(
+                                AppColors.red500,
+                                BlendMode.srcIn,
+                              ),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -92,13 +92,9 @@ class RagpickerDirectoryCard extends StatelessWidget {
               top: 0,
               right: 0,
               child: SvgPicture.asset(
-                'assets/icons/profile/arrow_right.svg',
+                'assets/icons/ragpicker_open_details.svg',
                 width: 14,
                 height: 14,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.cool400,
-                  BlendMode.srcIn,
-                ),
               ),
             ),
           ],

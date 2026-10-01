@@ -2,6 +2,7 @@ class ProfileAssets {
   ProfileAssets._();
 
   static const portrait = 'assets/images/profile_rahul_patel.png';
+  static const supervisorPortrait = 'assets/images/profile/bhavesh_shah.png';
   static const notification = 'assets/icons/profile/notification.svg';
   static const facility = 'assets/icons/profile/facility.svg';
   static const mobile = 'assets/icons/profile/mobile.svg';
@@ -19,4 +20,5 @@ class ProfileAssets {
   static const syncClose = 'assets/icons/profile/sync_close.svg';
   static const logoutDialog = 'assets/icons/profile/logout_dialog.svg';
   static const logoutWarning = 'assets/icons/profile/logout_warning.svg';
+  static const assignedCenters = 'assets/icons/profile/assigned_centers.svg';
 }

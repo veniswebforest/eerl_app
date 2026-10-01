@@ -9,11 +9,15 @@ class ProfileInfoItem {
     required this.icon,
     required this.label,
     required this.value,
+    this.trailingIcon,
+    this.onTap,
   });
 
   final String icon;
   final String label;
   final String value;
+  final String? trailingIcon;
+  final VoidCallback? onTap;
 }
 
 class ProfileInfoCard extends StatelessWidget {
@@ -58,41 +62,54 @@ class _ProfileInfoRow extends StatelessWidget {
   final ProfileInfoItem item;
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            // color: AppColors.primary50,
-            borderRadius: BorderRadius.circular(10),
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: item.onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary50,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: SvgPicture.asset(item.icon, width: 24, height: 24),
           ),
-          child: SvgPicture.asset(item.icon, width: 24, height: 24),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.label,
-                style: AppTextStyles.semiboldH9_14.copyWith(
-                  color: AppColors.neutral600,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.semiboldH9_14.copyWith(
+                    color: AppColors.neutral600,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                item.value,
-                style: AppTextStyles.mediumSH7_16.copyWith(
-                  color: AppColors.neutral950,
+                const SizedBox(height: 4),
+                Text(
+                  item.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.mediumSH7_16.copyWith(
+                    color: AppColors.neutral950,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    );
-  }
+          if (item.trailingIcon != null) ...[
+            const SizedBox(width: 8),
+            SvgPicture.asset(item.trailingIcon!, width: 24, height: 24),
+          ],
+        ],
+      ),
+    ),
+  );
 }

@@ -6,6 +6,7 @@ import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/home/widgets/home_assets.dart';
+import 'package:eerl_app/features/home/widgets/zone_selector.dart';
 import '../model/stock_item.dart';
 import '../widgets/stock_stage_card.dart';
 import 'package:go_router/go_router.dart';
@@ -57,7 +58,19 @@ class FacilityStockScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                _FacilitySelector(label: l10n.verificationSuratSouth),
+                ZoneSelector(
+                  initialLabel: l10n.verificationSuratSouth,
+                  initialSelectedIndex: 3,
+                  options: [
+                    l10n.ragpickerCenterSurat,
+                    l10n.ragpickerCenterSuratEast,
+                    l10n.ragpickerCenterSuratWest,
+                    l10n.ragpickerCenterSuratSouth,
+                  ],
+                  selectorKey: const Key('facility-center-selector'),
+                  optionsKey: const Key('facility-center-options'),
+                  optionKeyPrefix: 'facility-center-option',
+                ),
                 const SizedBox(height: 16),
                 _UpdatedBanner(
                   label: l10n.stockLastUpdated,
@@ -131,49 +144,6 @@ class FacilityStockScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-class _FacilitySelector extends StatelessWidget {
-  const _FacilitySelector({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 60,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-    decoration: BoxDecoration(
-      color: AppColors.neutral50,
-      border: Border.all(color: AppColors.primary500),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(
-            color: AppColors.primary50,
-            shape: BoxShape.circle,
-          ),
-          child: SvgPicture.asset('assets/icons/stock_facility.svg'),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.semiboldH9_14.copyWith(
-              color: AppColors.neutral950,
-            ),
-          ),
-        ),
-        SvgPicture.asset(HomeAssets.chevronDown, width: 24, height: 24),
-      ],
-    ),
-  );
 }
 
 class _UpdatedBanner extends StatelessWidget {

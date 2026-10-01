@@ -13,6 +13,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.onBackTap,
     this.backIconAsset,
+    this.titleStyle,
   });
 
   final String? title;
@@ -20,6 +21,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final VoidCallback? onBackTap;
   final String? backIconAsset;
+  final TextStyle? titleStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: title != null
           ? Text(
               title!,
-              style: AppTextStyles.semiboldH7_18.copyWith(
+              style: (titleStyle ?? AppTextStyles.semiboldH7_18).copyWith(
                 color: context.palette.textPrimary,
               ),
             )

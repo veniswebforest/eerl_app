@@ -810,7 +810,83 @@ class AppLocalizationsHi extends AppLocalizations {
   String get drawerSupervisorD2dVehicleList => 'D2D वाहन सूची';
 
   @override
+  String get d2dVehicleManagementTitle => 'D2D वाहन प्रबंधन';
+
+  @override
+  String get d2dSelectTargetCenter => 'लक्षित केंद्र चुनें';
+
+  @override
+  String get d2dSelectCenter => 'केंद्र चुनें';
+
+  @override
+  String d2dVehicleActiveCount(int count) {
+    return 'सक्रिय ($count)';
+  }
+
+  @override
+  String d2dVehicleDeactivatedCount(int count) {
+    return 'निष्क्रिय ($count)';
+  }
+
+  @override
+  String get d2dAddVehicle => 'वाहन जोड़ें';
+
+  @override
+  String get d2dActivatedVehicleTitle => 'वाहन सक्रिय है!';
+
+  @override
+  String get d2dDeactivatedVehicleTitle => 'वाहन निष्क्रिय है!';
+
+  @override
+  String get d2dCollectionCenter => 'संग्रह केंद्र';
+
+  @override
+  String get d2dVehicleNumber => 'वाहन नंबर';
+
+  @override
+  String get d2dAddNewVehicleTitle => 'नया D2D वाहन जोड़ें';
+
+  @override
+  String get d2dEditVehicleTitle => 'वाहन संपादित करें!';
+
+  @override
+  String get d2dSelectCollectionCenter => 'संग्रह केंद्र चुनें';
+
+  @override
+  String get d2dVehicleNumberHint => 'वाहन नंबर दर्ज करें';
+
+  @override
+  String get d2dVehicleNumberExample => 'उदा. GJ-05-BX-1234';
+
+  @override
+  String get d2dSave => 'सहेजें';
+
+  @override
+  String get d2dReactivateConfirmation =>
+      'क्या आप इस D2D SMC वाहन को फिर सक्रिय करना चाहते हैं?';
+
+  @override
+  String get d2dDeactivateConfirmation =>
+      'क्या आप इस D2D SMC वाहन को निष्क्रिय करना चाहते हैं?';
+
+  @override
+  String get d2dVehicleSaved => 'वाहन सहेजा गया!';
+
+  @override
+  String get d2dVehicleSavedSubtitle => 'SMC वाहन सफलतापूर्वक जोड़ा गया।';
+
+  @override
+  String get d2dVehicleDeactivatedSuccess => 'वाहन निष्क्रिय किया गया!';
+
+  @override
+  String get d2dVehicleDeactivatedSubtitle =>
+      'SMC वाहन सक्रिय सूची से हटा दिया गया।';
+
+  @override
   String get drawerSupervisorAgentStatus => 'एजेंट स्थिति';
+
+  @override
+  String get agentStatusOffline => 'ऑफलाइन';
 
   @override
   String get drawerCollection => 'संग्रह';
@@ -1267,6 +1343,27 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get profileFacilityValue => 'ईईआरएल – सूरत दक्षिण';
+
+  @override
+  String get profileSupervisorFacilityValue => '4 - सुविधाएं सौंपी गईं';
+
+  @override
+  String get profileSupervisorSessionExpiryValue => '6घं 24मि में समाप्त';
+
+  @override
+  String get profileAssignedCentersTitle => 'सौंपे गए केंद्र';
+
+  @override
+  String get profileCenterSouth => 'EERL – सूरत दक्षिण';
+
+  @override
+  String get profileCenterNorth => 'EERL – सूरत उत्तर';
+
+  @override
+  String get profileCenterWest => 'EERL – सूरत पश्चिम';
+
+  @override
+  String get profileCenterEast => 'EERL – सूरत पूर्व';
 
   @override
   String get profileMobileNumber => 'मोबाइल नंबर';
@@ -2039,6 +2136,44 @@ class AppLocalizationsHi extends AppLocalizations {
   String get endDayPendingStatus => 'लंबित';
 
   @override
+  String get supervisorEndDayOfflineAgents => 'ऑफलाइन एजेंट';
+
+  @override
+  String get supervisorEndDayPendingVerification => 'लंबित सत्यापन';
+
+  @override
+  String get supervisorEndDayApprovedCollections => 'स्वीकृत संग्रह';
+
+  @override
+  String get supervisorEndDayRejectedCollections => 'अस्वीकृत संग्रह';
+
+  @override
+  String get supervisorEndDayActiveAgentsValue => '03';
+
+  @override
+  String get supervisorEndDayOfflineAgentsValue => '01';
+
+  @override
+  String get supervisorEndDayPendingVerificationValue => '03';
+
+  @override
+  String get supervisorEndDayApprovedCollectionsValue => '20';
+
+  @override
+  String get supervisorEndDayRejectedCollectionsValue => '01';
+
+  @override
+  String get supervisorEndDayShareTitle =>
+      'सबमिट करें और Whatsapp पर साझा करें';
+
+  @override
+  String get supervisorEndDayShareMessage =>
+      'यह दिन को संपादन के लिए लॉक करेगा और आपके समूह के लिए WhatsApp संदेश पहले से भर देगा।';
+
+  @override
+  String get supervisorEndDayShare => 'साझा करें';
+
+  @override
   String get endDayCompletedValue => '07';
 
   @override
@@ -2605,6 +2740,82 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get ragpickerDeactivatedSubtitle =>
       'रैगपिकर प्रोफ़ाइल निष्क्रिय की गई।';
+
+  @override
+  String get ragpickerAssignTargetAgentCenter =>
+      'लक्षित एजेंट / केंद्र असाइन करें';
+
+  @override
+  String get ragpickerAssignTargetCenter => 'लक्षित केंद्र असाइन करें';
+
+  @override
+  String get ragpickerAllCenters => 'सभी केंद्र';
+
+  @override
+  String get ragpickerSelectCenter => 'केंद्र चुनें';
+
+  @override
+  String get ragpickerCenterSurat => 'EERL - सूरत ज़ोन';
+
+  @override
+  String get ragpickerCenterSuratEast => 'EERL - सूरत पूर्व ज़ोन';
+
+  @override
+  String get ragpickerCenterSuratWest => 'EERL - सूरत पश्चिम ज़ोन';
+
+  @override
+  String get ragpickerCenterSuratSouth => 'EERL - सूरत दक्षिण ज़ोन';
+
+  @override
+  String get ragpickerZoneLocationLabel => 'ज़ोन/स्थान';
+
+  @override
+  String get ragpickerPersonChunilal => 'चुनीलाल यादव';
+
+  @override
+  String get ragpickerPersonUmesh => 'उमेश यादव';
+
+  @override
+  String get ragpickerPersonManohar => 'मनोहर तिवारी';
+
+  @override
+  String get ragpickerPersonRamchand => 'रामचंद त्रिपाठी';
+
+  @override
+  String get ragpickerPersonKarshan => 'करशन यादव';
+
+  @override
+  String get ragpickerPersonVikas => 'विकास प्रजापति';
+
+  @override
+  String get ragpickerPersonSuresh => 'सुरेश मकवाना';
+
+  @override
+  String get ragpickerPersonMunna => 'मुन्ना त्रिपाठी';
+
+  @override
+  String get ragpickerSelectZone => 'ज़ोन चुनें';
+
+  @override
+  String get ragpickerConfirmationTitle => 'क्या आप सुनिश्चित हैं?';
+
+  @override
+  String get ragpickerDeactivateConfirmation =>
+      'क्या आप इस रैगपिकर व्यक्ति को निष्क्रिय करना चाहते हैं?';
+
+  @override
+  String get ragpickerReactivateConfirmation =>
+      'क्या आप इस रैगपिकर व्यक्ति को फिर से सक्रिय करना चाहते हैं?';
+
+  @override
+  String get ragpickerYes => 'हाँ';
+
+  @override
+  String get ragpickerReactivatedSuccess => 'सफलतापूर्वक फिर सक्रिय किया!';
+
+  @override
+  String get ragpickerReactivatedSubtitle =>
+      'रैगपिकर प्रोफ़ाइल फिर सक्रिय की गई।';
 
   @override
   String get edit => 'संपादित करें';

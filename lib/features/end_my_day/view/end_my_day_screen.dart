@@ -7,12 +7,17 @@ import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../widgets/end_day_activity_card.dart';
 import '../widgets/end_day_balance_field.dart';
 import '../widgets/end_day_confirm_dialog.dart';
+import 'supervisor_end_my_day_view.dart';
 
 class EndMyDayScreen extends StatelessWidget {
-  const EndMyDayScreen({super.key});
+  const EndMyDayScreen({super.key, this.isSupervisor = false});
+
+  final bool isSupervisor;
 
   @override
   Widget build(BuildContext context) {
+    if (isSupervisor) return const SupervisorEndMyDayView();
+
     final l10n = context.l10n;
     final activities = [
       EndDayActivityItem(

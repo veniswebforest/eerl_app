@@ -302,6 +302,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/d2d_vehicle.svg',
         onTap: () {
           _close(context);
+          context.push(AppRoutes.d2dVehicleManagement);
         },
       ),
       _DrawerItem(
@@ -310,7 +311,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/ragpicker.svg',
         onTap: () {
           _close(context);
-          context.push(AppRoutes.ragpickerDirectory);
+          context.push(AppRoutes.ragpickerDirectory, extra: true);
         },
       ),
       _DrawerItem(
@@ -319,6 +320,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
         icon: '$_supervisorDrawerIconPath/agent_status.svg',
         onTap: () {
           _close(context);
+          context.push(AppRoutes.agentStatus);
         },
       ),
       _DrawerItem(

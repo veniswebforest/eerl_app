@@ -1624,11 +1624,149 @@ abstract class AppLocalizations {
   /// **'D2D Vehicle List'**
   String get drawerSupervisorD2dVehicleList;
 
+  /// No description provided for @d2dVehicleManagementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'D2D Vehicle Management'**
+  String get d2dVehicleManagementTitle;
+
+  /// No description provided for @d2dSelectTargetCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Target Center'**
+  String get d2dSelectTargetCenter;
+
+  /// No description provided for @d2dSelectCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Center'**
+  String get d2dSelectCenter;
+
+  /// No description provided for @d2dVehicleActiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Active ({count})'**
+  String d2dVehicleActiveCount(int count);
+
+  /// No description provided for @d2dVehicleDeactivatedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated ({count})'**
+  String d2dVehicleDeactivatedCount(int count);
+
+  /// No description provided for @d2dAddVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Vehicle'**
+  String get d2dAddVehicle;
+
+  /// No description provided for @d2dActivatedVehicleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activated Vehicle!'**
+  String get d2dActivatedVehicleTitle;
+
+  /// No description provided for @d2dDeactivatedVehicleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Deactivated!'**
+  String get d2dDeactivatedVehicleTitle;
+
+  /// No description provided for @d2dCollectionCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection center'**
+  String get d2dCollectionCenter;
+
+  /// No description provided for @d2dVehicleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Number'**
+  String get d2dVehicleNumber;
+
+  /// No description provided for @d2dAddNewVehicleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New D2D Vehicle'**
+  String get d2dAddNewVehicleTitle;
+
+  /// No description provided for @d2dEditVehicleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Vehicle!'**
+  String get d2dEditVehicleTitle;
+
+  /// No description provided for @d2dSelectCollectionCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Collection center'**
+  String get d2dSelectCollectionCenter;
+
+  /// No description provided for @d2dVehicleNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Vehicle Number'**
+  String get d2dVehicleNumberHint;
+
+  /// No description provided for @d2dVehicleNumberExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. GJ-05-BX-1234'**
+  String get d2dVehicleNumberExample;
+
+  /// No description provided for @d2dSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get d2dSave;
+
+  /// No description provided for @d2dReactivateConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reactive this D2D SMC Vehicle'**
+  String get d2dReactivateConfirmation;
+
+  /// No description provided for @d2dDeactivateConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to deactivated this D2D SMC Vehicle'**
+  String get d2dDeactivateConfirmation;
+
+  /// No description provided for @d2dVehicleSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Saved!'**
+  String get d2dVehicleSaved;
+
+  /// No description provided for @d2dVehicleSavedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SMC vehicle added successfully.'**
+  String get d2dVehicleSavedSubtitle;
+
+  /// No description provided for @d2dVehicleDeactivatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Deactivated!'**
+  String get d2dVehicleDeactivatedSuccess;
+
+  /// No description provided for @d2dVehicleDeactivatedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SMC vehicle removed from active list.'**
+  String get d2dVehicleDeactivatedSubtitle;
+
   /// No description provided for @drawerSupervisorAgentStatus.
   ///
   /// In en, this message translates to:
   /// **'Agent Status'**
   String get drawerSupervisorAgentStatus;
+
+  /// No description provided for @agentStatusOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get agentStatusOffline;
 
   /// No description provided for @drawerCollection.
   ///
@@ -2499,6 +2637,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'EERL – Surat South'**
   String get profileFacilityValue;
+
+  /// No description provided for @profileSupervisorFacilityValue.
+  ///
+  /// In en, this message translates to:
+  /// **'4 - facilities assigned'**
+  String get profileSupervisorFacilityValue;
+
+  /// No description provided for @profileSupervisorSessionExpiryValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in 6h 24m'**
+  String get profileSupervisorSessionExpiryValue;
+
+  /// No description provided for @profileAssignedCentersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Centers'**
+  String get profileAssignedCentersTitle;
+
+  /// No description provided for @profileCenterSouth.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL – Surat South'**
+  String get profileCenterSouth;
+
+  /// No description provided for @profileCenterNorth.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL – Surat North'**
+  String get profileCenterNorth;
+
+  /// No description provided for @profileCenterWest.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL – Surat West'**
+  String get profileCenterWest;
+
+  /// No description provided for @profileCenterEast.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL – Surat East'**
+  String get profileCenterEast;
 
   /// No description provided for @profileMobileNumber.
   ///
@@ -3970,6 +4150,78 @@ abstract class AppLocalizations {
   /// **'Pending'**
   String get endDayPendingStatus;
 
+  /// No description provided for @supervisorEndDayOfflineAgents.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Agents'**
+  String get supervisorEndDayOfflineAgents;
+
+  /// No description provided for @supervisorEndDayPendingVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Verification'**
+  String get supervisorEndDayPendingVerification;
+
+  /// No description provided for @supervisorEndDayApprovedCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved Collections'**
+  String get supervisorEndDayApprovedCollections;
+
+  /// No description provided for @supervisorEndDayRejectedCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected Collections'**
+  String get supervisorEndDayRejectedCollections;
+
+  /// No description provided for @supervisorEndDayActiveAgentsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'03'**
+  String get supervisorEndDayActiveAgentsValue;
+
+  /// No description provided for @supervisorEndDayOfflineAgentsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'01'**
+  String get supervisorEndDayOfflineAgentsValue;
+
+  /// No description provided for @supervisorEndDayPendingVerificationValue.
+  ///
+  /// In en, this message translates to:
+  /// **'03'**
+  String get supervisorEndDayPendingVerificationValue;
+
+  /// No description provided for @supervisorEndDayApprovedCollectionsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'20'**
+  String get supervisorEndDayApprovedCollectionsValue;
+
+  /// No description provided for @supervisorEndDayRejectedCollectionsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'01'**
+  String get supervisorEndDayRejectedCollectionsValue;
+
+  /// No description provided for @supervisorEndDayShareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit & Share to Whatsapp'**
+  String get supervisorEndDayShareTitle;
+
+  /// No description provided for @supervisorEndDayShareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will lock the day for editing and pre-fill a WhatsApp message to your group.'**
+  String get supervisorEndDayShareMessage;
+
+  /// No description provided for @supervisorEndDayShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get supervisorEndDayShare;
+
   /// No description provided for @endDayCompletedValue.
   ///
   /// In en, this message translates to:
@@ -5043,6 +5295,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ragpicker profile deactivated.'**
   String get ragpickerDeactivatedSubtitle;
+
+  /// No description provided for @ragpickerAssignTargetAgentCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Target Agent / Center'**
+  String get ragpickerAssignTargetAgentCenter;
+
+  /// No description provided for @ragpickerAssignTargetCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Target Center'**
+  String get ragpickerAssignTargetCenter;
+
+  /// No description provided for @ragpickerAllCenters.
+  ///
+  /// In en, this message translates to:
+  /// **'All Centers'**
+  String get ragpickerAllCenters;
+
+  /// No description provided for @ragpickerSelectCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Center'**
+  String get ragpickerSelectCenter;
+
+  /// No description provided for @ragpickerCenterSurat.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat Zone'**
+  String get ragpickerCenterSurat;
+
+  /// No description provided for @ragpickerCenterSuratEast.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat East Zone'**
+  String get ragpickerCenterSuratEast;
+
+  /// No description provided for @ragpickerCenterSuratWest.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat West Zone'**
+  String get ragpickerCenterSuratWest;
+
+  /// No description provided for @ragpickerCenterSuratSouth.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL - Surat South Zone'**
+  String get ragpickerCenterSuratSouth;
+
+  /// No description provided for @ragpickerZoneLocationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone/Location'**
+  String get ragpickerZoneLocationLabel;
+
+  /// No description provided for @ragpickerPersonChunilal.
+  ///
+  /// In en, this message translates to:
+  /// **'Chunilal Yadav'**
+  String get ragpickerPersonChunilal;
+
+  /// No description provided for @ragpickerPersonUmesh.
+  ///
+  /// In en, this message translates to:
+  /// **'Umesh Yadav'**
+  String get ragpickerPersonUmesh;
+
+  /// No description provided for @ragpickerPersonManohar.
+  ///
+  /// In en, this message translates to:
+  /// **'Manohar Tiwari'**
+  String get ragpickerPersonManohar;
+
+  /// No description provided for @ragpickerPersonRamchand.
+  ///
+  /// In en, this message translates to:
+  /// **'Ramchand Tripathi'**
+  String get ragpickerPersonRamchand;
+
+  /// No description provided for @ragpickerPersonKarshan.
+  ///
+  /// In en, this message translates to:
+  /// **'Karshan Yadav'**
+  String get ragpickerPersonKarshan;
+
+  /// No description provided for @ragpickerPersonVikas.
+  ///
+  /// In en, this message translates to:
+  /// **'Vikas Prajapati'**
+  String get ragpickerPersonVikas;
+
+  /// No description provided for @ragpickerPersonSuresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Suresh Makwana'**
+  String get ragpickerPersonSuresh;
+
+  /// No description provided for @ragpickerPersonMunna.
+  ///
+  /// In en, this message translates to:
+  /// **'Munna Tripathi'**
+  String get ragpickerPersonMunna;
+
+  /// No description provided for @ragpickerSelectZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Select zone'**
+  String get ragpickerSelectZone;
+
+  /// No description provided for @ragpickerConfirmationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get ragpickerConfirmationTitle;
+
+  /// No description provided for @ragpickerDeactivateConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to deactivate this ragpicker person'**
+  String get ragpickerDeactivateConfirmation;
+
+  /// No description provided for @ragpickerReactivateConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reactivate this ragpicker person'**
+  String get ragpickerReactivateConfirmation;
+
+  /// No description provided for @ragpickerYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get ragpickerYes;
+
+  /// No description provided for @ragpickerReactivatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactive Successfully!'**
+  String get ragpickerReactivatedSuccess;
+
+  /// No description provided for @ragpickerReactivatedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ragpicker profile reactivated.'**
+  String get ragpickerReactivatedSubtitle;
 
   /// No description provided for @edit.
   ///

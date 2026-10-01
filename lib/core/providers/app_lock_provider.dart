@@ -11,9 +11,11 @@ class AppLockProvider extends ChangeNotifier {
   final AppLockService _lockService;
   bool _isLockEnabled = false;
   bool _isLoaded = false;
+  String? _lastErrorMessage;
 
   bool get isLockEnabled => _isLockEnabled;
   bool get isLoaded => _isLoaded;
+  String? get lastErrorMessage => _lastErrorMessage;
   AppLockService get lockService => _lockService;
 
   Future<void> loadLockSetting() async {
@@ -29,6 +31,7 @@ class AppLockProvider extends ChangeNotifier {
   }
 
   Future<bool> setLockEnabled(bool enabled) async {
+    _lastErrorMessage = null;
     if (_isLockEnabled == enabled) return true;
 
     if (enabled) {
@@ -37,11 +40,15 @@ class AppLockProvider extends ChangeNotifier {
         localizedReason: 'Please authenticate to enable App Lock',
       );
       if (!authenticated) {
+        _lastErrorMessage = _lockService.lastErrorMessage ??
+            'Authentication failed. App lock not enabled.';
+        notifyListeners();
         return false;
       }
     }
 
     _isLockEnabled = enabled;
+    _lastErrorMessage = null;
     notifyListeners();
 
     try {

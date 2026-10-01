@@ -166,14 +166,13 @@ class HomeScreen extends StatelessWidget {
                         _CenteredHomeContent(
                           child: isSupervisor
                               ? SupervisorQuickActions(
-                                  onAssignTaskTap: () =>
-                                      context.push(AppRoutes.supervisorTasks),
-                                  onAgentsStatusTap: () => context.push(
-                                    AppRoutes.ragpickerDirectory,
+                                  onAssignTaskTap: () => context.push(
+                                    AppRoutes.assignSupervisorTask,
                                   ),
-                                  onCheckStockTap: () => context.push(
-                                    AppRoutes.configureMaterials,
-                                  ),
+                                  onAgentsStatusTap: () =>
+                                      context.push(AppRoutes.agentStatus),
+                                  onCheckStockTap: () =>
+                                      navigation.selectPage('supervisor-stock'),
                                   onApprovalsTap: () =>
                                       context.push(AppRoutes.supervisorExpense),
                                 )
@@ -190,8 +189,10 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 24),
                         _CenteredHomeContent(
                           child: DayClosure(
-                            onEndMyDayTap: () =>
-                                context.push(AppRoutes.endMyDay),
+                            onEndMyDayTap: () => context.push(
+                              AppRoutes.endMyDay,
+                              extra: isSupervisor,
+                            ),
                           ),
                         ),
                       ],

@@ -197,7 +197,9 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         unselectedIcon: navigation.activeRole == DashboardUserRole.supervisor
             ? HomeAssets.supervisorNavProfile
             : '$_navIconPath/nav_profile.svg',
-        page: const ProfileScreen(),
+        page: ProfileScreen(
+          isSupervisor: navigation.activeRole == DashboardUserRole.supervisor,
+        ),
         pageKey: 'profile',
         roles: allRoles,
         permission: 'profile.view',

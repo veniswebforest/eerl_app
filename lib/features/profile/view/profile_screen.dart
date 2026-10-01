@@ -15,11 +15,14 @@ import '../../home/widgets/home_assets.dart';
 import '../widgets/profile_action_card.dart';
 import '../widgets/profile_assets.dart';
 import '../widgets/profile_info_card.dart';
+import '../widgets/assigned_centers_dialog.dart';
 import '../widgets/logout_confirmation_dialog.dart';
 import '../widgets/sync_data_dialog.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, this.isSupervisor = false});
+
+  final bool isSupervisor;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +55,10 @@ class ProfileScreen extends StatelessWidget {
               bottom: 112,
             ),
             children: [
-              _ProfileHeader(localeProvider: localeProvider),
+              _ProfileHeader(
+                localeProvider: localeProvider,
+                isSupervisor: isSupervisor,
+              ),
               const SizedBox(height: 28),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -69,7 +75,15 @@ class ProfileScreen extends StatelessWidget {
                             ProfileInfoItem(
                               icon: ProfileAssets.facility,
                               label: l10n.profileAssignedFacility,
-                              value: l10n.profileFacilityValue,
+                              value: isSupervisor
+                                  ? l10n.profileSupervisorFacilityValue
+                                  : l10n.profileFacilityValue,
+                              trailingIcon: isSupervisor
+                                  ? ProfileAssets.arrowRight
+                                  : null,
+                              onTap: isSupervisor
+                                  ? () => showAssignedCentersDialog(context)
+                                  : null,
                             ),
                             ProfileInfoItem(
                               icon: ProfileAssets.mobile,
@@ -79,12 +93,16 @@ class ProfileScreen extends StatelessWidget {
                             ProfileInfoItem(
                               icon: ProfileAssets.role,
                               label: l10n.profileRole,
-                              value: l10n.drawerUserRole,
+                              value: isSupervisor
+                                  ? l10n.roleCollectionSupervisor
+                                  : l10n.drawerUserRole,
                             ),
                             ProfileInfoItem(
                               icon: ProfileAssets.sessionExpiry,
                               label: l10n.profileSessionExpires,
-                              value: l10n.profileSessionExpiryValue,
+                              value: isSupervisor
+                                  ? l10n.profileSupervisorSessionExpiryValue
+                                  : l10n.profileSessionExpiryValue,
                             ),
                           ],
                         ),
@@ -99,8 +117,10 @@ class ProfileScreen extends StatelessWidget {
                           subtitle: l10n.profileSyncSubtitle,
                           onTap: () => showSyncDataDialog(context),
                         ),
-                        const SizedBox(height: 12),
-                        const _AppLockToggleCard(),
+                        if (!isSupervisor) ...[
+                          const SizedBox(height: 12),
+                          const _AppLockToggleCard(),
+                        ],
                         const SizedBox(height: 18),
                         _SectionTitle(l10n.profileAccount),
                         const SizedBox(height: 12),
@@ -141,9 +161,13 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.localeProvider});
+  const _ProfileHeader({
+    required this.localeProvider,
+    required this.isSupervisor,
+  });
 
   final LocaleProvider localeProvider;
+  final bool isSupervisor;
 
   @override
   Widget build(BuildContext context) {
@@ -171,9 +195,9 @@ class _ProfileHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 14),
+              const SizedBox(height: 20),
               Container(
-                height: 220,
+                height: 232,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: AppColors.neutral50,
@@ -204,15 +228,19 @@ class _ProfileHeader extends StatelessWidget {
                       children: [
                         ClipOval(
                           child: Image.asset(
-                            ProfileAssets.portrait,
-                            width: 112,
-                            height: 112,
+                            isSupervisor
+                                ? ProfileAssets.supervisorPortrait
+                                : ProfileAssets.portrait,
+                            width: 120,
+                            height: 120,
                             fit: BoxFit.cover,
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          context.l10n.drawerUserName,
+                          isSupervisor
+                              ? context.l10n.drawerSupervisorUserName
+                              : context.l10n.drawerUserName,
                           style: AppTextStyles.semiboldH6_20.copyWith(
                             color: AppColors.neutral950,
                           ),
@@ -228,7 +256,9 @@ class _ProfileHeader extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            context.l10n.drawerUserRole,
+                            isSupervisor
+                                ? context.l10n.roleCollectionSupervisor
+                                : context.l10n.drawerUserRole,
                             style: AppTextStyles.boldH8_14.copyWith(
                               color: AppColors.primary400,
                             ),
@@ -271,12 +301,12 @@ class _ProfileLanguageSelector extends StatelessWidget {
         labels: menuLabels,
       ),
       child: Container(
-        width: 70,
-        height: 30,
+        width: 60,
+        height: 40,
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.cool400),
           color: AppColors.neutral50,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -288,8 +318,8 @@ class _ProfileLanguageSelector extends StatelessWidget {
                 color: AppColors.neutral950,
               ),
             ),
-            const SizedBox(width: 4),
-            SvgPicture.asset(HomeAssets.chevronDown, width: 24, height: 24),
+            const SizedBox(width: 8),
+            SvgPicture.asset(HomeAssets.chevronDown, width: 18, height: 18),
           ],
         ),
       ),
@@ -307,7 +337,7 @@ class _ProfileLanguageSelector extends StatelessWidget {
       backgroundColor: AppColors.neutral50,
       barrierColor: Colors.transparent,
       radius: 12,
-      width: 70,
+      width: 60,
       height: 110,
       arrowWidth: 0,
       arrowHeight: 0,
@@ -482,13 +512,32 @@ class _AppLockToggleCard extends StatelessWidget {
                 if (appLockProvider == null) return;
                 final success = await appLockProvider.setLockEnabled(value);
                 if (!context.mounted) return;
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 if (!success && value) {
+                  final errorMsg =
+                      appLockProvider.lastErrorMessage ??
+                      'Authentication failed. App lock not enabled.';
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Authentication failed. App lock not enabled.',
-                      ),
+                    SnackBar(
+                      content: Text(errorMsg),
                       backgroundColor: AppColors.red600,
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 4),
+                    ),
+                  );
+                } else if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        value
+                            ? 'App lock enabled successfully'
+                            : 'App lock disabled',
+                      ),
+                      backgroundColor: value
+                          ? AppColors.primary600
+                          : AppColors.neutral700,
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 2),
                     ),
                   );
                 }

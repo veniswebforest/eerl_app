@@ -29,6 +29,8 @@ class AppRoutes {
   static const String collectionImagePreview = '/collections/image-preview';
   static const String configureMaterials = '/configure-materials';
   static const String ragpickerDirectory = '/ragpicker-directory';
+  static const String d2dVehicleManagement = '/supervisor/d2d-vehicles';
+  static const String agentStatus = '/supervisor/agent-status';
   static const String notifications = '/notifications';
   static const String endMyDay = '/end-my-day';
   static const String helpSupport = '/help-support';
