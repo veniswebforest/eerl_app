@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/features/collection/view/collections_tab_screen.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
 import 'package:eerl_app/features/home/view/home_screen.dart';
 import 'package:eerl_app/features/home/widgets/home_assets.dart';
@@ -75,6 +76,9 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
     BuildContext context,
     DashboardNavigationProvider navigation,
   ) {
+    // Rebuild SQLite-backed tabs after a completed Bootstrap run. Widgets must
+    // still query their repositories rather than consume the API response.
+    context.watch<BootstrapSyncService?>()?.revision;
     final items = _createItems(context, navigation)
         .where(
           (item) =>

@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import 'package:eerl_app/features/agent_status/model/agent_status_item.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/home/widgets/home_assets.dart';
 
 class AgentStatusCard extends StatelessWidget {
@@ -14,7 +14,7 @@ class AgentStatusCard extends StatelessWidget {
     required this.offlineLabel,
   });
 
-  final AgentStatusItem item;
+  final AgentStatusModel item;
   final String activeLabel;
   final String offlineLabel;
 
@@ -36,12 +36,14 @@ class AgentStatusCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            ClipOval(
-              child: Image.asset(
-                item.avatarAsset,
-                width: 40,
-                height: 40,
-                fit: BoxFit.cover,
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: AppColors.primary50,
+              child: Text(
+                item.name.isEmpty ? '?' : item.name[0].toUpperCase(),
+                style: AppTextStyles.semiboldH8_16.copyWith(
+                  color: AppColors.primary500,
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -57,8 +59,8 @@ class AgentStatusCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             _AgentStatusChip(
-              active: item.isActive,
-              label: item.isActive ? activeLabel : offlineLabel,
+              active: item.lastCollectionAt != null,
+              label: item.lastCollectionAt != null ? activeLabel : offlineLabel,
             ),
           ],
         ),
@@ -76,7 +78,7 @@ class AgentStatusCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  item.center,
+                  '${item.centerName} • ${item.collectionsToday} collections • ${item.waitingReview} waiting',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.semiboldH9_14.copyWith(

@@ -3,6 +3,8 @@ import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/supervisor_requests/model/supervisor_agent_request.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_agent_request_card.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_assets.dart';
@@ -31,44 +33,34 @@ class _SupervisorAgentRequestsScreenState
   late SupervisorAgentRequestStatus _status = widget.initialStatus;
   String _query = '';
 
-  static const _pendingItems = [
-    SupervisorAgentRequest(
-      id: 'open-1',
-      status: SupervisorAgentRequestStatus.pending,
-    ),
-    SupervisorAgentRequest(
-      id: 'open-2',
-      status: SupervisorAgentRequestStatus.pending,
-    ),
-    SupervisorAgentRequest(
-      id: 'open-3',
-      status: SupervisorAgentRequestStatus.pending,
-    ),
-  ];
+  List<RequestModel> _allItems = const [];
+  bool _loading = true;
 
-  static const _resolvedItems = [
-    SupervisorAgentRequest(
-      id: 'closed-1',
-      status: SupervisorAgentRequestStatus.resolved,
-    ),
-    SupervisorAgentRequest(
-      id: 'closed-2',
-      status: SupervisorAgentRequestStatus.resolved,
-    ),
-    SupervisorAgentRequest(
-      id: 'closed-3',
-      status: SupervisorAgentRequestStatus.resolved,
-    ),
-  ];
+  List<RequestModel> get _items => _allItems
+      .where((item) {
+        final pending = item.status.toUpperCase() == 'PENDING';
+        return _status == SupervisorAgentRequestStatus.pending
+            ? pending
+            : !pending;
+      })
+      .toList(growable: false);
 
-  List<SupervisorAgentRequest> get _items {
-    if (widget.viewMode == SupervisorAgentRequestsViewMode.empty ||
-        _query.trim().isNotEmpty) {
-      return const [];
-    }
-    return _status == SupervisorAgentRequestStatus.pending
-        ? _pendingItems
-        : _resolvedItems;
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final items = await EerlLocalRepository.instance.getRequests(
+      supervisor: true,
+      search: _query,
+    );
+    if (!mounted) return;
+    setState(() {
+      _allItems = items;
+      _loading = false;
+    });
   }
 
   @override
@@ -94,12 +86,22 @@ class _SupervisorAgentRequestsScreenState
                       openLabel: context.l10n.requestOpenCount(
                         widget.viewMode == SupervisorAgentRequestsViewMode.empty
                             ? 0
-                            : 3,
+                            : _allItems
+                                  .where(
+                                    (item) =>
+                                        item.status.toUpperCase() == 'PENDING',
+                                  )
+                                  .length,
                       ),
                       closedLabel: context.l10n.requestClosedCount(
                         widget.viewMode == SupervisorAgentRequestsViewMode.empty
                             ? 0
-                            : 3,
+                            : _allItems
+                                  .where(
+                                    (item) =>
+                                        item.status.toUpperCase() != 'PENDING',
+                                  )
+                                  .length,
                       ),
                       onChanged: (value) => setState(() => _status = value),
                     ),
@@ -108,7 +110,10 @@ class _SupervisorAgentRequestsScreenState
                       height: 55,
                       child: TextField(
                         key: const Key('supervisor-agent-request-search'),
-                        onChanged: (value) => setState(() => _query = value),
+                        onChanged: (value) {
+                          _query = value;
+                          _load();
+                        },
                         style: AppTextStyles.regularB7_14,
                         decoration: InputDecoration(
                           hintText: context.l10n.requestSearchHint,
@@ -148,7 +153,9 @@ class _SupervisorAgentRequestsScreenState
               ),
               const SizedBox(height: 24),
               Expanded(
-                child: _items.isEmpty
+                child: _loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _items.isEmpty
                     ? const _EmptyRequests()
                     : ListView.separated(
                         key: const Key('supervisor-agent-request-list'),
@@ -171,8 +178,8 @@ class _SupervisorAgentRequestsScreenState
     ),
   );
 
-  Future<void> _openRequest(SupervisorAgentRequest request) async {
-    if (request.status == SupervisorAgentRequestStatus.resolved) {
+  Future<void> _openRequest(RequestModel request) async {
+    if (request.status.toUpperCase() != 'PENDING') {
       await context.push<void>(AppRoutes.supervisorCompletedRequest);
       return;
     }

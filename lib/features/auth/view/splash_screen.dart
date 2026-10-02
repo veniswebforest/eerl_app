@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
@@ -8,6 +11,8 @@ import 'package:eerl_app/core/providers/app_lock_provider.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import 'package:eerl_app/shared/widgets/loader_widget.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -41,6 +46,11 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     if (isValidSession) {
+      unawaited(
+        BootstrapSyncService.instance.triggerBootstrap(
+          trigger: BootstrapTrigger.appOpen,
+        ),
+      );
       final appLockProvider = context.read<AppLockProvider>();
       if (appLockProvider.isLockEnabled) {
         debugPrint(
@@ -51,7 +61,8 @@ class _SplashScreenState extends State<SplashScreen>
         debugPrint(
           '[SplashScreen] Valid active session found -> redirecting to Home Screen',
         );
-        context.go(AppRoutes.home);
+        final role = await _storedDashboardRole();
+        if (mounted) context.go(AppRoutes.home, extra: role);
       }
     } else {
       debugPrint(
@@ -59,6 +70,19 @@ class _SplashScreenState extends State<SplashScreen>
       );
       context.go(AppRoutes.login);
     }
+  }
+
+  Future<DashboardUserRole> _storedDashboardRole() async {
+    final role = await AppDatabase.instance.getSyncMeta('active_role');
+    return role == 'SUPERVISOR'
+        ? DashboardUserRole.supervisor
+        : role == 'ADMIN'
+        ? DashboardUserRole.admin
+        : role == 'COLLECTION_MANAGER'
+        ? DashboardUserRole.collectionManager
+        : role == 'IEC_AGENT'
+        ? DashboardUserRole.iecAgent
+        : DashboardUserRole.collectionAgent;
   }
 
   @override

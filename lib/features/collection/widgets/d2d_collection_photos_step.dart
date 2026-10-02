@@ -4,8 +4,6 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:eerl_app/core/router/app_routes.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -23,7 +21,6 @@ class D2dCollectionPhotosStep extends StatelessWidget {
     super.key,
     required this.selectedItems,
     required this.itemNames,
-    required this.materialImages,
     required this.photos,
     required this.collectionWeights,
     required this.verifiedWeights,
@@ -40,7 +37,6 @@ class D2dCollectionPhotosStep extends StatelessWidget {
 
   final List<int> selectedItems;
   final List<String> itemNames;
-  final List<String> materialImages;
   final Map<int, List<XFile>> photos;
   final Map<int, String> collectionWeights;
   final Map<int, String> verifiedWeights;
@@ -69,8 +65,6 @@ class D2dCollectionPhotosStep extends StatelessWidget {
           child: _D2dMaterialCard(
             item: item,
             name: itemNames[item],
-            materialImage:
-                materialImages[(item == 3 ? 2 : item) % materialImages.length],
             photos: photos[item] ?? const [],
             collectionWeight: collectionWeights[item] ?? '',
             verifiedWeight: verifiedWeights[item] ?? '',
@@ -133,7 +127,6 @@ class _D2dMaterialCard extends StatelessWidget {
   const _D2dMaterialCard({
     required this.item,
     required this.name,
-    required this.materialImage,
     required this.photos,
     required this.collectionWeight,
     required this.verifiedWeight,
@@ -147,7 +140,6 @@ class _D2dMaterialCard extends StatelessWidget {
 
   final int item;
   final String name;
-  final String materialImage;
   final List<XFile> photos;
   final String collectionWeight;
   final String verifiedWeight;
@@ -181,21 +173,10 @@ class _D2dMaterialCard extends StatelessWidget {
             color: AppColors.cool200,
             child: Row(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: InkWell(
-                    key: Key('collection-product-image-$item'),
-                    onTap: () => context.push<void>(
-                      AppRoutes.collectionImagePreview,
-                      extra: AssetImage(materialImage),
-                    ),
-                    child: Image.asset(
-                      materialImage,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                const Icon(
+                  Icons.recycling,
+                  size: 40,
+                  color: AppColors.primary500,
                 ),
                 const SizedBox(width: 12),
                 Expanded(

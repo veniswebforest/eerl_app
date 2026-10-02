@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import '../model/ragpicker_directory_item.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class RagpickerDirectoryCard extends StatelessWidget {
   const RagpickerDirectoryCard({
@@ -12,7 +12,7 @@ class RagpickerDirectoryCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final RagpickerDirectoryItem item;
+  final RagpickerModel item;
   final VoidCallback onTap;
 
   @override
@@ -58,16 +58,16 @@ class RagpickerDirectoryCard extends StatelessWidget {
                       height: 32,
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: item.status == RagpickerStatus.active
+                        color: item.isActive
                             ? AppColors.primary100
                             : AppColors.red50,
                         shape: BoxShape.circle,
                       ),
                       child: SvgPicture.asset(
-                        item.status == RagpickerStatus.active
+                        item.isActive
                             ? 'assets/icons/ragpicker_call_supervisor.svg'
                             : 'assets/icons/ragpicker_deactivated.svg',
-                        colorFilter: item.status == RagpickerStatus.active
+                        colorFilter: item.isActive
                             ? null
                             : const ColorFilter.mode(
                                 AppColors.red500,
@@ -78,7 +78,7 @@ class RagpickerDirectoryCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
-                        item.phone,
+                        item.phone ?? '',
                         style: AppTextStyles.mediumSH8_14.copyWith(
                           color: AppColors.neutral700,
                         ),

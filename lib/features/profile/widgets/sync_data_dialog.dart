@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 
 import '../model/sync_data_status.dart';
 import 'profile_assets.dart';
@@ -100,8 +103,15 @@ class _SyncDataDialogState extends State<SyncDataDialog> {
                           _SyncButton(
                             label: context.l10n.syncNow,
                             icon: ProfileAssets.syncRefresh,
-                            onTap: () =>
-                                setState(() => _status = SyncDataStatus.synced),
+                            onTap: () async {
+                              await BootstrapSyncService.instance
+                                  .triggerBootstrap(
+                                    trigger: BootstrapTrigger.pullToRefresh,
+                                  );
+                              if (mounted) {
+                                setState(() => _status = SyncDataStatus.synced);
+                              }
+                            },
                           ),
                         ],
                       ),
@@ -141,7 +151,7 @@ class _SyncDataDialogState extends State<SyncDataDialog> {
 class _SyncButton extends StatelessWidget {
   const _SyncButton({required this.label, required this.onTap, this.icon});
   final String label;
-  final VoidCallback onTap;
+  final FutureOr<void> Function() onTap;
   final String? icon;
 
   @override

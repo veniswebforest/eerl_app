@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/router/app_route_data.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
 import 'package:eerl_app/features/profile/widgets/sync_data_dialog.dart';
@@ -38,9 +41,6 @@ class HomeScreen extends StatelessWidget {
     final roleTitle = isSupervisor
         ? context.l10n.roleCollectionSupervisor
         : context.l10n.drawerUserRole;
-    final roleZone = isSupervisor
-        ? context.l10n.homeSuratNorthZone
-        : context.l10n.homeSuratSouthZone;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -69,142 +69,162 @@ class HomeScreen extends StatelessWidget {
             ),
             child: SafeArea(
               bottom: false,
-              child: CustomScrollView(
-                key: const Key('home-dashboard-scroll'),
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      AppScreenHeaderMetrics.topInset + 18,
-                      horizontalPadding,
-                      0,
-                    ),
-                    sliver: SliverToBoxAdapter(
-                      child: _CenteredHomeContent(
-                        child: HomeAppBar(
-                          onNotificationTap: () =>
-                              context.push(AppRoutes.notifications),
-                          onWalletTap: () => context.push(AppRoutes.wallet),
-                          showWalletAction: !isSupervisor,
+              child: RefreshIndicator(
+                onRefresh: () => BootstrapSyncService.instance.triggerBootstrap(
+                  trigger: BootstrapTrigger.pullToRefresh,
+                ),
+                child: CustomScrollView(
+                  key: const Key('home-dashboard-scroll'),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        horizontalPadding,
+                        AppScreenHeaderMetrics.topInset + 18,
+                        horizontalPadding,
+                        0,
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: _CenteredHomeContent(
+                          child: HomeAppBar(
+                            onNotificationTap: () =>
+                                context.push(AppRoutes.notifications),
+                            onWalletTap: () => context.push(AppRoutes.wallet),
+                            showWalletAction: !isSupervisor,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 24)),
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: horizontalPadding,
+                    const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                    SliverPadding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
+                      ),
+                      sliver: const SliverToBoxAdapter(
+                        child: _CenteredHomeContent(child: ZoneSelector()),
+                      ),
                     ),
-                    sliver: const SliverToBoxAdapter(
-                      child: _CenteredHomeContent(child: ZoneSelector()),
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      12,
-                      horizontalPadding,
-                      148,
-                    ),
-                    sliver: SliverList.list(
-                      children: [
-                        _CenteredHomeContent(
-                          child: OnlineStatusBanner(
-                            onSyncNowTap: () => showSyncDataDialog(context),
-                            subtitle: isSupervisor
-                                ? context.l10n.supervisorLastSynced
-                                : null,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        RoleSwitchCard(
-                          onSwitchRoleTap: () =>
-                              _switchRole(context, navigation),
-                          roleTitle: roleTitle,
-                          zoneName: roleZone,
-                          roleIcon: isSupervisor
-                              ? RoleSwitcherAssets.supervisor
-                              : RoleSwitcherAssets.agent,
-                        ),
-                        const SizedBox(height: 24),
-                        _CenteredHomeContent(
-                          child: isSupervisor
-                              ? const SupervisorTodaysSummary()
-                              : TodaysSummary(
-                                  onWalletTap: () =>
-                                      context.push(AppRoutes.wallet),
-                                ),
-                        ),
-                        if (!isSupervisor) ...[
-                          const SizedBox(height: 24),
+                    SliverPadding(
+                      padding: EdgeInsets.fromLTRB(
+                        horizontalPadding,
+                        12,
+                        horizontalPadding,
+                        148,
+                      ),
+                      sliver: SliverList.list(
+                        children: [
                           _CenteredHomeContent(
-                            child: CollectionDrafts(
-                              onViewAllTap: () =>
-                                  navigation.selectPage('records'),
-                              onContinueCollectionTap: () => _openCollection(
-                                context,
-                                navigation,
-                                step: CollectionEntryStep.photos,
-                                type: CollectionType.mrfStation,
-                                selectedItems: const <int>{0, 1, 3},
-                              ),
+                            child: OnlineStatusBanner(
+                              onSyncNowTap: () => showSyncDataDialog(context),
+                              subtitle: isSupervisor
+                                  ? context.l10n.supervisorLastSynced
+                                  : null,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          FutureBuilder<String>(
+                            future: _activeCenterName(),
+                            builder: (context, snapshot) => RoleSwitchCard(
+                              onSwitchRoleTap: () =>
+                                  _switchRole(context, navigation),
+                              roleTitle: roleTitle,
+                              zoneName: snapshot.data ?? '',
+                              roleIcon: isSupervisor
+                                  ? RoleSwitcherAssets.supervisor
+                                  : RoleSwitcherAssets.agent,
                             ),
                           ),
                           const SizedBox(height: 24),
                           _CenteredHomeContent(
-                            child: CollectionTypes(
-                              onTypeTap: (type) => _openCollection(
-                                context,
-                                navigation,
-                                type: type,
+                            child: isSupervisor
+                                ? const SupervisorTodaysSummary()
+                                : TodaysSummary(
+                                    onWalletTap: () =>
+                                        context.push(AppRoutes.wallet),
+                                  ),
+                          ),
+                          if (!isSupervisor) ...[
+                            const SizedBox(height: 24),
+                            _CenteredHomeContent(
+                              child: CollectionDrafts(
+                                onViewAllTap: () =>
+                                    navigation.selectPage('records'),
+                                onContinueCollectionTap: () => _openCollection(
+                                  context,
+                                  navigation,
+                                  step: CollectionEntryStep.photos,
+                                  type: CollectionType.mrfStation,
+                                  selectedItems: const <int>{0, 1, 3},
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            _CenteredHomeContent(
+                              child: CollectionTypes(
+                                onTypeTap: (type) => _openCollection(
+                                  context,
+                                  navigation,
+                                  type: type,
+                                ),
+                              ),
+                            ),
+                          ],
+
+                          const SizedBox(height: 24),
+                          _CenteredHomeContent(
+                            child: isSupervisor
+                                ? SupervisorQuickActions(
+                                    onAssignTaskTap: () => context.push(
+                                      AppRoutes.assignSupervisorTask,
+                                    ),
+                                    onAgentsStatusTap: () =>
+                                        context.push(AppRoutes.agentStatus),
+                                    onCheckStockTap: () => navigation
+                                        .selectPage('supervisor-stock'),
+                                    onApprovalsTap: () => context.push(
+                                      AppRoutes.supervisorExpense,
+                                    ),
+                                  )
+                                : QuickActions(
+                                    onAddCollectionTap: () =>
+                                        _openCollection(context, navigation),
+                                    onTasksTap: () =>
+                                        context.push(AppRoutes.tasks),
+                                    onLogExpenseTap: () =>
+                                        context.push(AppRoutes.wallet),
+                                  ),
+                          ),
+
+                          const SizedBox(height: 24),
+                          _CenteredHomeContent(
+                            child: DayClosure(
+                              onEndMyDayTap: () => context.push(
+                                AppRoutes.endMyDay,
+                                extra: isSupervisor,
                               ),
                             ),
                           ),
                         ],
-
-                        const SizedBox(height: 24),
-                        _CenteredHomeContent(
-                          child: isSupervisor
-                              ? SupervisorQuickActions(
-                                  onAssignTaskTap: () => context.push(
-                                    AppRoutes.assignSupervisorTask,
-                                  ),
-                                  onAgentsStatusTap: () =>
-                                      context.push(AppRoutes.agentStatus),
-                                  onCheckStockTap: () =>
-                                      navigation.selectPage('supervisor-stock'),
-                                  onApprovalsTap: () =>
-                                      context.push(AppRoutes.supervisorExpense),
-                                )
-                              : QuickActions(
-                                  onAddCollectionTap: () =>
-                                      _openCollection(context, navigation),
-                                  onTasksTap: () =>
-                                      context.push(AppRoutes.tasks),
-                                  onLogExpenseTap: () =>
-                                      context.push(AppRoutes.wallet),
-                                ),
-                        ),
-
-                        const SizedBox(height: 24),
-                        _CenteredHomeContent(
-                          child: DayClosure(
-                            onEndMyDayTap: () => context.push(
-                              AppRoutes.endMyDay,
-                              extra: isSupervisor,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         );
       },
     );
+  }
+
+  Future<String> _activeCenterName() async {
+    final repository = EerlLocalRepository.instance;
+    final centerId = await repository.activeCenterId;
+    final centers = await repository.getCenters();
+    for (final center in centers) {
+      if (center.id == centerId) return center.name;
+    }
+    return centers.isEmpty ? '' : centers.first.name;
   }
 
   Future<void> _switchRole(
@@ -216,6 +236,13 @@ class HomeScreen extends StatelessWidget {
       extra: navigation.activeRole,
     );
     if (context.mounted && role != null && role != navigation.activeRole) {
+      await AppDatabase.instance.setSyncMeta('active_role', switch (role) {
+        DashboardUserRole.supervisor => 'SUPERVISOR',
+        DashboardUserRole.admin => 'ADMIN',
+        DashboardUserRole.collectionManager => 'COLLECTION_MANAGER',
+        DashboardUserRole.iecAgent => 'IEC_AGENT',
+        DashboardUserRole.collectionAgent => 'AGENT',
+      });
       navigation.changeRole(role);
     }
   }

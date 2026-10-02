@@ -7,6 +7,8 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_confirmation_dialog.dart';
 import 'package:eerl_app/shared/widgets/app_labeled_dropdown.dart';
 import 'package:eerl_app/shared/widgets/app_square_back_button.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../model/d2d_vehicle_item.dart';
 import '../widgets/d2d_vehicle_card.dart';
 import '../widgets/d2d_vehicle_details_card.dart';
@@ -24,32 +26,14 @@ class D2dVehicleManagementScreen extends StatefulWidget {
 
 class _D2dVehicleManagementScreenState
     extends State<D2dVehicleManagementScreen> {
-  static const _vehicles = <D2dVehicleItem>[
-    D2dVehicleItem(number: 'GJ-05-BX-1234', status: D2dVehicleStatus.active),
-    D2dVehicleItem(number: 'GJ-05-AB-4567', status: D2dVehicleStatus.active),
-    D2dVehicleItem(number: 'GJ-05-BX-7890', status: D2dVehicleStatus.active),
-    D2dVehicleItem(
-      number: 'GJ-05-BX-1234',
-      status: D2dVehicleStatus.deactivated,
-    ),
-    D2dVehicleItem(
-      number: 'GJ-05-AB-4567',
-      status: D2dVehicleStatus.deactivated,
-    ),
-    D2dVehicleItem(
-      number: 'GJ-05-BX-7890',
-      status: D2dVehicleStatus.deactivated,
-    ),
-    D2dVehicleItem(
-      number: 'GJ-05-BX-1546',
-      status: D2dVehicleStatus.deactivated,
-    ),
-  ];
-
   final _searchController = TextEditingController();
   final _vehicleNumberController = TextEditingController();
+  List<VehicleModel> _vehicles = const [];
+  List<CenterModel> _centers = const [];
+  List<VehicleTypeModel> _vehicleTypes = const [];
+  bool _loading = true;
   D2dVehicleStatus _status = D2dVehicleStatus.active;
-  D2dVehicleItem? _selectedVehicle;
+  VehicleModel? _selectedVehicle;
   int _selectedCenter = -1;
   bool _centerExpanded = false;
   bool _showForm = false;
@@ -60,15 +44,49 @@ class _D2dVehicleManagementScreenState
   bool _bannerIsDeactivated = false;
   String _query = '';
 
-  List<D2dVehicleItem> get _visibleVehicles {
+  List<VehicleModel> get _visibleVehicles {
     final query = _query.trim().toLowerCase();
     return _vehicles
-        .where((vehicle) => vehicle.status == _status)
+        .where(
+          (vehicle) => vehicle.isActive == (_status == D2dVehicleStatus.active),
+        )
         .where(
           (vehicle) =>
-              query.isEmpty || vehicle.number.toLowerCase().contains(query),
+              query.isEmpty ||
+              vehicle.plateNumber.toLowerCase().contains(query),
         )
         .toList(growable: false);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load({String? centerId}) async {
+    setState(() => _loading = true);
+    final repository = EerlLocalRepository.instance;
+    final results = await Future.wait([
+      repository.getCenters(),
+      repository.getVehicleTypes(),
+    ]);
+    final centers = results[0] as List<CenterModel>;
+    final types = results[1] as List<VehicleTypeModel>;
+    var selected = centerId;
+    selected ??= await repository.activeCenterId;
+    if (selected == null && centers.isNotEmpty) selected = centers.first.id;
+    final vehicles = selected == null
+        ? const <VehicleModel>[]
+        : await repository.getVehicles(centerId: selected, activeOnly: false);
+    if (!mounted) return;
+    setState(() {
+      _centers = centers;
+      _vehicleTypes = types;
+      _selectedCenter = centers.indexWhere((center) => center.id == selected);
+      _vehicles = vehicles;
+      _loading = false;
+    });
   }
 
   @override
@@ -98,12 +116,15 @@ class _D2dVehicleManagementScreenState
         : _buildDetails(),
   );
 
-  List<String> _centerOptions(BuildContext context) => <String>[
-    context.l10n.ragpickerCenterSurat,
-    context.l10n.ragpickerCenterSuratEast,
-    context.l10n.ragpickerCenterSuratWest,
-    context.l10n.ragpickerCenterSuratSouth,
-  ];
+  List<String> get _centerOptions =>
+      _centers.map((center) => center.name).toList(growable: false);
+
+  String _centerName(String? id) {
+    for (final center in _centers) {
+      if (center.id == id) return center.name;
+    }
+    return '';
+  }
 
   void _openForm({required bool editing}) {
     setState(() {
@@ -112,12 +133,34 @@ class _D2dVehicleManagementScreenState
       _formCenter = -1;
       _formCenterExpanded = false;
       _vehicleNumberController.text = editing
-          ? _selectedVehicle?.number ?? 'GJ-05-BX-1234'
+          ? _selectedVehicle?.plateNumber ?? ''
           : '';
     });
   }
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
+    final plate = _vehicleNumberController.text.trim();
+    if (plate.isEmpty || _centers.isEmpty || _vehicleTypes.isEmpty) return;
+    final centerIndex = _formCenter >= 0 ? _formCenter : _selectedCenter;
+    if (centerIndex < 0 || centerIndex >= _centers.length) return;
+    final existing = _selectedVehicle;
+    final type = _vehicleTypes.first;
+    await EerlLocalRepository.instance.saveVehicle(
+      VehicleModel(
+        id:
+            existing?.id ??
+            'local_vehicle_${DateTime.now().microsecondsSinceEpoch}',
+        centerId: _centers[centerIndex].id,
+        plateNumber: plate,
+        typeId: existing?.typeId ?? type.id,
+        typeName: existing?.typeName ?? type.name,
+        capacityKg: existing?.capacityKg,
+        driverName: existing?.driverName,
+        isActive: true,
+        syncState: 'pending',
+      ),
+    );
+    if (!mounted) return;
     setState(() {
       _showForm = false;
       _selectedVehicle = null;
@@ -125,6 +168,7 @@ class _D2dVehicleManagementScreenState
       _showBanner = true;
       _bannerIsDeactivated = false;
     });
+    await _load(centerId: _centers[centerIndex].id);
   }
 
   Future<void> _confirmStatusChange(bool currentlyActive) async {
@@ -143,6 +187,12 @@ class _D2dVehicleManagementScreenState
     );
     if (!mounted || !confirmed) return;
 
+    final vehicle = _selectedVehicle!;
+    await EerlLocalRepository.instance.setVehicleActive(
+      vehicle,
+      !currentlyActive,
+    );
+    if (!mounted) return;
     setState(() {
       _selectedVehicle = null;
       _status = currentlyActive
@@ -151,11 +201,12 @@ class _D2dVehicleManagementScreenState
       _showBanner = true;
       _bannerIsDeactivated = currentlyActive;
     });
+    await _load(centerId: vehicle.centerId);
   }
 
   Widget _buildList() {
     final vehicles = _visibleVehicles;
-    final centerOptions = _centerOptions(context);
+    final centerOptions = _centerOptions;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -213,19 +264,26 @@ class _D2dVehicleManagementScreenState
                               onToggle: () => setState(
                                 () => _centerExpanded = !_centerExpanded,
                               ),
-                              onSelected: (index) => setState(() {
-                                _selectedCenter = index;
-                                _centerExpanded = false;
-                              }),
+                              onSelected: (index) {
+                                setState(() {
+                                  _selectedCenter = index;
+                                  _centerExpanded = false;
+                                });
+                                _load(centerId: _centers[index].id);
+                              },
                             ),
                             const SizedBox(height: 16),
                             D2dVehicleSegmentedControl(
                               status: _status,
                               activeLabel: context.l10n.d2dVehicleActiveCount(
-                                3,
+                                _vehicles.where((item) => item.isActive).length,
                               ),
                               deactivatedLabel: context.l10n
-                                  .d2dVehicleDeactivatedCount(5),
+                                  .d2dVehicleDeactivatedCount(
+                                    _vehicles
+                                        .where((item) => !item.isActive)
+                                        .length,
+                                  ),
                               onChanged: (status) => setState(() {
                                 _status = status;
                                 _centerExpanded = false;
@@ -242,22 +300,28 @@ class _D2dVehicleManagementScreenState
                           ],
                         ),
                       ),
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                        sliver: SliverList.separated(
-                          itemCount: vehicles.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: 16),
-                          itemBuilder: (context, index) => D2dVehicleCard(
-                            item: vehicles[index],
-                            activeLabel: context.l10n.ragpickerActive,
-                            deactivatedLabel: context.l10n.ragpickerDeactivated,
-                            onTap: () => setState(
-                              () => _selectedVehicle = vehicles[index],
+                      if (_loading)
+                        const SliverFillRemaining(
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                          sliver: SliverList.separated(
+                            itemCount: vehicles.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 16),
+                            itemBuilder: (context, index) => D2dVehicleCard(
+                              item: vehicles[index],
+                              activeLabel: context.l10n.ragpickerActive,
+                              deactivatedLabel:
+                                  context.l10n.ragpickerDeactivated,
+                              onTap: () => setState(
+                                () => _selectedVehicle = vehicles[index],
+                              ),
                             ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -276,7 +340,7 @@ class _D2dVehicleManagementScreenState
 
   Widget _buildDetails() {
     final vehicle = _selectedVehicle!;
-    final active = vehicle.status == D2dVehicleStatus.active;
+    final active = vehicle.isActive;
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
@@ -309,9 +373,9 @@ class _D2dVehicleManagementScreenState
                       const SizedBox(height: 16),
                       D2dVehicleDetailsCard(
                         centerLabel: context.l10n.d2dCollectionCenter,
-                        centerValue: context.l10n.ragpickerCenterSurat,
+                        centerValue: _centerName(vehicle.centerId),
                         numberLabel: context.l10n.d2dVehicleNumber,
-                        number: vehicle.number,
+                        number: vehicle.plateNumber,
                       ),
                     ],
                   ),
@@ -335,7 +399,7 @@ class _D2dVehicleManagementScreenState
   Widget _buildForm() => D2dVehicleForm(
     editing: _editingForm,
     numberController: _vehicleNumberController,
-    centerOptions: _centerOptions(context),
+    centerOptions: _centerOptions,
     selectedCenter: _formCenter,
     centerExpanded: _formCenterExpanded,
     onCenterToggle: () =>

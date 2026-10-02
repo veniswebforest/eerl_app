@@ -11,11 +11,15 @@ class MrfDetailsForm extends StatefulWidget {
     required this.people,
     required this.selectedLabor,
     required this.onLaborSelected,
+    this.supervisorName,
+    this.supervisorPhone,
   });
 
   final List<String> people;
   final String? selectedLabor;
   final ValueChanged<String> onLaborSelected;
+  final String? supervisorName;
+  final String? supervisorPhone;
 
   @override
   State<MrfDetailsForm> createState() => _MrfDetailsFormState();
@@ -47,11 +51,12 @@ class _MrfDetailsFormState extends State<MrfDetailsForm> {
                 style: AppTextStyles.semiboldH7_18,
               ),
               const SizedBox(height: 16),
-              const _ContactCard(
-                cardKey: Key('mrf-contact-supervisor-details'),
-                fullName: 'Chunilal Yadav',
-                mobileNumber: '1234567890',
-              ),
+              if (widget.supervisorName?.isNotEmpty == true)
+                _ContactCard(
+                  cardKey: const Key('mrf-contact-supervisor-details'),
+                  fullName: widget.supervisorName!,
+                  mobileNumber: widget.supervisorPhone ?? '',
+                ),
             ],
           ),
         ),
@@ -276,11 +281,12 @@ class _MrfDetailsFormState extends State<MrfDetailsForm> {
         style: AppTextStyles.mediumSH8_14,
       ),
       const SizedBox(height: 8),
-      const _ContactCard(
-        cardKey: Key('mrf-supervisor-details'),
-        fullName: 'Chunilal Yadav',
-        mobileNumber: '1234567890',
-      ),
+      if (widget.supervisorName?.isNotEmpty == true)
+        _ContactCard(
+          cardKey: const Key('mrf-supervisor-details'),
+          fullName: widget.supervisorName!,
+          mobileNumber: widget.supervisorPhone ?? '',
+        ),
       const SizedBox(height: 8),
       Text.rich(
         key: const Key('mrf-team-verification'),

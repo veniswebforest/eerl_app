@@ -1,12 +1,13 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
-import '../model/task_list_item.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../widgets/task_information_card.dart';
 import '../widgets/task_photo_grid.dart';
 
@@ -17,7 +18,7 @@ class TaskDetailScreen extends StatefulWidget {
     this.initiallyFilled = false,
   });
 
-  final TaskListItem task;
+  final TaskModel task;
   final bool initiallyFilled;
 
   @override
@@ -28,34 +29,22 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late final TextEditingController _descriptionController;
   late List<String> _proofImages;
 
-  static const _supervisorImages = [
-    'assets/images/collection_detail/pet_collection.png',
-    'assets/images/collection_detail/hdpe_collection.png',
-  ];
-  static const _mockProofImages = [
-    'assets/images/collection_detail/pp_collection.png',
-    'assets/images/collection_detail/pet_thumbnail.png',
-  ];
-
   bool get _canComplete =>
       _proofImages.isNotEmpty && _descriptionController.text.trim().isNotEmpty;
 
   @override
   void initState() {
     super.initState();
-    _proofImages = widget.initiallyFilled || _isClosed
-        ? [..._mockProofImages]
-        : [];
-    _descriptionController = TextEditingController();
+    _proofImages = _isClosed ? [...widget.task.photoUrls] : [];
+    _descriptionController = TextEditingController(
+      text: widget.task.description ?? '',
+    );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if ((widget.initiallyFilled || _isClosed) &&
-        _descriptionController.text.isEmpty) {
-      _descriptionController.text = context.l10n.taskFilledDescription;
-    }
+    // Presentation formatting is initialized from the SQLite-backed model.
   }
 
   @override
@@ -64,15 +53,18 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     super.dispose();
   }
 
-  void _addMockProof() {
-    if (_proofImages.isNotEmpty) return;
-    setState(() {
-      _proofImages = [..._mockProofImages];
-      _descriptionController.text = context.l10n.taskFilledDescription;
-    });
+  Future<void> _captureProof() async {
+    final image = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      imageQuality: 85,
+    );
+    if (image != null && mounted) {
+      setState(() => _proofImages.add(image.path));
+    }
   }
 
-  bool get _isClosed => widget.task.status == TaskListStatus.closed;
+  bool get _isClosed =>
+      const {'COMPLETED', 'CLOSED'}.contains(widget.task.status.toUpperCase());
 
   Future<void> _showCompletedDialog() async {
     final completed = await showDialog<bool>(
@@ -112,14 +104,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              context.l10n.taskOverviewDescription,
+                              widget.task.description ?? widget.task.title,
                               style: AppTextStyles.regularB8_12.copyWith(
                                 color: AppColors.neutral700,
                               ),
                             ),
                             const SizedBox(height: 10),
                             _BySupervisor(
-                              label: context.l10n.taskSupervisorName,
+                              label:
+                                  widget.task.assignedByName ??
+                                  widget.task.assignedBy,
                             ),
                           ],
                         ),
@@ -130,10 +124,12 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const TaskPhotoGrid(images: _supervisorImages),
+                            TaskPhotoGrid(images: widget.task.photoUrls),
                             const SizedBox(height: 10),
                             _BySupervisor(
-                              label: context.l10n.taskSupervisorName,
+                              label:
+                                  widget.task.assignedByName ??
+                                  widget.task.assignedBy,
                             ),
                           ],
                         ),
@@ -143,7 +139,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       const SizedBox(height: 10),
                       _CaptureProof(
                         enabled: _proofImages.isEmpty,
-                        onTap: _addMockProof,
+                        onTap: _captureProof,
                       ),
                       if (_proofImages.isNotEmpty) ...[
                         const SizedBox(height: 12),
@@ -257,7 +253,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     const SizedBox(height: 14),
     _sectionLabel(context.l10n.taskDescriptionPlain),
     const SizedBox(height: 10),
-    _ReadOnlyDescription(text: context.l10n.taskFilledDescription),
+    _ReadOnlyDescription(text: widget.task.description ?? ''),
     const SizedBox(height: 18),
     _sectionLabel(context.l10n.taskSupervisorDetails),
     const SizedBox(height: 10),
@@ -274,14 +270,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              context.l10n.taskOverviewDescription,
+              widget.task.description ?? widget.task.title,
               style: AppTextStyles.regularB8_12.copyWith(
                 color: AppColors.neutral700,
               ),
             ),
           ),
           const SizedBox(height: 10),
-          _BySupervisor(label: context.l10n.taskSupervisorName),
+          _BySupervisor(
+            label: widget.task.assignedByName ?? widget.task.assignedBy,
+          ),
         ],
       ),
     ),
@@ -293,9 +291,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         children: [
           const SizedBox(height: 10),
 
-          const TaskPhotoGrid(images: _supervisorImages),
+          TaskPhotoGrid(images: widget.task.photoUrls),
           const SizedBox(height: 10),
-          _BySupervisor(label: context.l10n.taskSupervisorName),
+          _BySupervisor(
+            label: widget.task.assignedByName ?? widget.task.assignedBy,
+          ),
         ],
       ),
     ),
@@ -305,7 +305,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 class _TaskStatusRow extends StatelessWidget {
   const _TaskStatusRow({required this.task});
 
-  final TaskListItem task;
+  final TaskModel task;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -320,7 +320,7 @@ class _TaskStatusRow extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: [
-        if (task.status == TaskListStatus.closed)
+        if (const {'COMPLETED', 'CLOSED'}.contains(task.status.toUpperCase()))
           _DetailChip(
             icon: Icons.check_circle_outline_rounded,
             label: context.l10n.taskCompletedTime,

@@ -10,8 +10,8 @@ class RoleSwitchCard extends StatelessWidget {
   const RoleSwitchCard({
     super.key,
     required this.onSwitchRoleTap,
-    this.roleTitle = 'Collection Agent',
-    this.zoneName = 'EERL - Surat South Zone',
+    required this.roleTitle,
+    required this.zoneName,
     this.roleIcon = RoleSwitcherAssets.agent,
   });
 

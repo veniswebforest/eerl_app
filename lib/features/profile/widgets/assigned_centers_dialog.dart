@@ -7,39 +7,36 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'profile_assets.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
-Future<void> showAssignedCentersDialog(BuildContext context) =>
-    showGeneralDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      barrierLabel: context.l10n.profileAssignedCentersTitle,
-      barrierColor: Colors.black.withValues(alpha: .6),
-      transitionDuration: const Duration(milliseconds: 180),
-      pageBuilder: (context, _, _) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: const _AssignedCentersDialog(),
-      ),
-      transitionBuilder: (_, animation, _, child) => FadeTransition(
-        opacity: animation,
-        child: ScaleTransition(
-          scale: Tween<double>(begin: .96, end: 1).animate(animation),
-          child: child,
-        ),
-      ),
-    );
+Future<void> showAssignedCentersDialog(
+  BuildContext context, {
+  required List<CenterModel> centers,
+}) => showGeneralDialog<void>(
+  context: context,
+  barrierDismissible: false,
+  barrierLabel: context.l10n.profileAssignedCentersTitle,
+  barrierColor: Colors.black.withValues(alpha: .6),
+  transitionDuration: const Duration(milliseconds: 180),
+  pageBuilder: (context, _, _) => BackdropFilter(
+    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+    child: _AssignedCentersDialog(centers: centers),
+  ),
+  transitionBuilder: (_, animation, _, child) => FadeTransition(
+    opacity: animation,
+    child: ScaleTransition(
+      scale: Tween<double>(begin: .96, end: 1).animate(animation),
+      child: child,
+    ),
+  ),
+);
 
 class _AssignedCentersDialog extends StatelessWidget {
-  const _AssignedCentersDialog();
+  const _AssignedCentersDialog({required this.centers});
+  final List<CenterModel> centers;
 
   @override
   Widget build(BuildContext context) {
-    final centers = [
-      context.l10n.profileCenterSouth,
-      context.l10n.profileCenterNorth,
-      context.l10n.profileCenterWest,
-      context.l10n.profileCenterEast,
-    ];
-
     return Dialog(
       key: const Key('profile-assigned-centers-dialog'),
       insetPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -82,7 +79,7 @@ class _AssignedCentersDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        '•  ${centers[index]}',
+                        '•  ${centers[index].name}',
                         style: AppTextStyles.mediumSH8_14.copyWith(
                           color: AppColors.neutral950,
                         ),

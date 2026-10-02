@@ -3,9 +3,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import 'package:eerl_app/core/router/app_routes.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/task_list_item.dart';
 import '../widgets/task_list_card.dart';
@@ -21,168 +25,160 @@ class MyTasksScreen extends StatefulWidget {
 class _MyTasksScreenState extends State<MyTasksScreen> {
   TaskListStatus _status = TaskListStatus.open;
   String _query = '';
+  late final LocalQueryController<List<TaskModel>> _controller;
+  int _bootstrapRevision = -1;
 
-  static const _items = [
-    TaskListItem(
-      id: 'task-1',
-      status: TaskListStatus.open,
-      priority: TaskPriority.high,
-      scheduleKey: 'today',
-      timeKey: '0900',
-    ),
-    TaskListItem(
-      id: 'task-2',
-      status: TaskListStatus.open,
-      priority: TaskPriority.normal,
-      scheduleKey: 'tomorrow',
-      timeKey: '1145',
-    ),
-    TaskListItem(
-      id: 'task-3',
-      status: TaskListStatus.open,
-      priority: TaskPriority.low,
-      scheduleKey: 'date',
-      timeKey: '0900',
-    ),
-    TaskListItem(
-      id: 'task-4',
-      status: TaskListStatus.closed,
-      priority: TaskPriority.high,
-      scheduleKey: 'completed',
-      timeKey: '1000',
-    ),
-    TaskListItem(
-      id: 'task-5',
-      status: TaskListStatus.closed,
-      priority: TaskPriority.normal,
-      scheduleKey: 'completed',
-      timeKey: '1210',
-    ),
-    TaskListItem(
-      id: 'task-6',
-      status: TaskListStatus.closed,
-      priority: TaskPriority.low,
-      scheduleKey: 'completed',
-      timeKey: '0600',
-    ),
-  ];
-
-  List<TaskListItem> get _visibleItems {
-    final items = _items.where((item) => item.status == _status);
-    if (_query.trim().isEmpty) return items.toList(growable: false);
-    final query = _query.trim().toLowerCase();
-    return items
-        .where(
-          (_) =>
-              context.l10n.taskSupervisorName.toLowerCase().contains(query) ||
-              context.l10n.taskDescription.toLowerCase().contains(query),
-        )
-        .toList(growable: false);
+  @override
+  void initState() {
+    super.initState();
+    _controller = LocalQueryController(
+      () => EerlLocalRepository.instance.getTasks(search: _query),
+    )..load();
   }
 
   @override
-  Widget build(BuildContext context) {
-    final items = _visibleItems;
-    return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
-      appBar: CustomAppBar(
-        title: context.l10n.myTasks,
-        backIconAsset: 'assets/icons/records/back.svg',
-      ),
-      body: SafeArea(
-        top: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                  child: Column(
-                    children: [
-                      TaskSegmentedControl(
-                        status: _status,
-                        openLabel: context.l10n.taskOpenCount(3),
-                        closedLabel: context.l10n.taskClosedCount(3),
-                        onChanged: (status) => setState(() => _status = status),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        height: 56,
-                        child: TextField(
-                          key: const Key('task-search-field'),
-                          onChanged: (value) => setState(() => _query = value),
-                          style: AppTextStyles.regularB7_14,
-                          decoration: InputDecoration(
-                            hintText: context.l10n.recordsSearchHint,
-                            hintStyle: AppTextStyles.regularB7_14.copyWith(
-                              color: AppColors.neutral400,
-                            ),
-                            prefixIcon: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: SvgPicture.asset(
-                                'assets/icons/wallet/search.svg',
-                                width: 24,
-                                height: 24,
-                                colorFilter: const ColorFilter.mode(
-                                  AppColors.cool600,
-                                  BlendMode.srcIn,
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final revision = BootstrapSyncService.instance.revision;
+    if (_bootstrapRevision >= 0 && revision != _bootstrapRevision) {
+      _controller.load();
+    }
+    _bootstrapRevision = revision;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  bool _closed(TaskModel item) =>
+      const {'COMPLETED', 'CLOSED'}.contains(item.status.toUpperCase());
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: AppColors.backgroundColor,
+    appBar: CustomAppBar(
+      title: context.l10n.myTasks,
+      backIconAsset: 'assets/icons/records/back.svg',
+    ),
+    body: SafeArea(
+      top: false,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: ListenableBuilder(
+            listenable: _controller,
+            builder: (context, _) {
+              final all = _controller.data ?? const <TaskModel>[];
+              final openCount = all.where((item) => !_closed(item)).length;
+              final closedCount = all.where(_closed).length;
+              final items = all
+                  .where(
+                    (item) => _status == TaskListStatus.closed
+                        ? _closed(item)
+                        : !_closed(item),
+                  )
+                  .toList(growable: false);
+              return Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    child: Column(
+                      children: [
+                        TaskSegmentedControl(
+                          status: _status,
+                          openLabel: context.l10n.taskOpenCount(openCount),
+                          closedLabel: context.l10n.taskClosedCount(
+                            closedCount,
+                          ),
+                          onChanged: (status) =>
+                              setState(() => _status = status),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 56,
+                          child: TextField(
+                            key: const Key('task-search-field'),
+                            onChanged: (value) {
+                              _query = value;
+                              _controller.load();
+                            },
+                            style: AppTextStyles.regularB7_14,
+                            decoration: InputDecoration(
+                              hintText: context.l10n.recordsSearchHint,
+                              hintStyle: AppTextStyles.regularB7_14.copyWith(
+                                color: AppColors.neutral400,
+                              ),
+                              prefixIcon: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: SvgPicture.asset(
+                                  'assets/icons/wallet/search.svg',
+                                  width: 24,
+                                  height: 24,
                                 ),
                               ),
-                            ),
-                            filled: true,
-                            fillColor: Colors.white,
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: AppColors.cool400,
+                              filled: true,
+                              fillColor: Colors.white,
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: AppColors.cool400,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: AppColors.primary500,
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                  color: AppColors.primary500,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: items.isEmpty
-                      ? _EmptyTasks(label: context.l10n.taskEmptyMessage)
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                          itemCount: items.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: 16),
-                          itemBuilder: (context, index) => TaskListCard(
-                            key: ValueKey(items[index].id),
-                            item: items[index],
-                            onTap: () => context.push(
-                              AppRoutes.taskDetail,
-                              extra: items[index],
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: _controller.isLoading && !_controller.hasData
+                        ? const Center(child: CircularProgressIndicator())
+                        : _controller.error != null
+                        ? Center(
+                            child: TextButton(
+                              onPressed: _controller.load,
+                              child: const Text('Retry'),
+                            ),
+                          )
+                        : items.isEmpty
+                        ? _EmptyTasks(label: context.l10n.taskEmptyMessage)
+                        : ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                            itemCount: items.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 16),
+                            itemBuilder: (context, index) => TaskListCard(
+                              key: ValueKey(items[index].id),
+                              item: items[index],
+                              onTap: () => context.push(
+                                AppRoutes.taskDetail,
+                                extra: items[index],
+                              ),
                             ),
                           ),
-                        ),
-                ),
-              ],
-            ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _EmptyTasks extends StatelessWidget {
   const _EmptyTasks({required this.label});
-
   final String label;
-
   @override
   Widget build(BuildContext context) => Center(
     child: Column(

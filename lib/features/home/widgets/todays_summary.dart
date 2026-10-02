@@ -6,6 +6,9 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'home_assets.dart';
 import 'home_styles.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 
 /// 2×2 grid summary section showing today's collection stats.
 class TodaysSummary extends StatefulWidget {
@@ -19,120 +22,163 @@ class TodaysSummary extends StatefulWidget {
 
 class _TodaysSummaryState extends State<TodaysSummary> {
   bool _isSummaryVisible = true;
+  late final LocalQueryController<
+    ({AgentHomeSummaryModel summary, WalletSummaryModel wallet})
+  >
+  _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = LocalQueryController(() async {
+      final values = await Future.wait([
+        EerlLocalRepository.instance.getAgentHomeSummary(),
+        EerlLocalRepository.instance.getWalletSummary(),
+      ]);
+      return (
+        summary: values[0] as AgentHomeSummaryModel,
+        wallet: values[1] as WalletSummaryModel,
+      );
+    })..load();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) {
+        final summary = _controller.data?.summary;
+        final wallet = _controller.data?.wallet;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: Text(
-                context.l10n.todaysSummary,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: HomeStyles.sectionTitle,
-              ),
-            ),
-            Semantics(
-              button: true,
-              toggled: _isSummaryVisible,
-              label: _isSummaryVisible
-                  ? context.l10n.hideTodaysSummary
-                  : context.l10n.showTodaysSummary,
-              child: Tooltip(
-                message: _isSummaryVisible
-                    ? context.l10n.hideTodaysSummary
-                    : context.l10n.showTodaysSummary,
-                child: InkWell(
-                  key: const Key('home-toggle-todays-summary'),
-                  onTap: () =>
-                      setState(() => _isSummaryVisible = !_isSummaryVisible),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: SvgPicture.asset(
-                      _isSummaryVisible
-                          ? HomeAssets.summaryHide
-                          : HomeAssets.summaryView,
-                      width: 28,
-                      height: 28,
-                      colorFilter: ColorFilter.mode(
-                        AppColors.primary500,
-                        BlendMode.srcIn,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.l10n.todaysSummary,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: HomeStyles.sectionTitle,
+                  ),
+                ),
+                Semantics(
+                  button: true,
+                  toggled: _isSummaryVisible,
+                  label: _isSummaryVisible
+                      ? context.l10n.hideTodaysSummary
+                      : context.l10n.showTodaysSummary,
+                  child: Tooltip(
+                    message: _isSummaryVisible
+                        ? context.l10n.hideTodaysSummary
+                        : context.l10n.showTodaysSummary,
+                    child: InkWell(
+                      key: const Key('home-toggle-todays-summary'),
+                      onTap: () => setState(
+                        () => _isSummaryVisible = !_isSummaryVisible,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: SvgPicture.asset(
+                          _isSummaryVisible
+                              ? HomeAssets.summaryHide
+                              : HomeAssets.summaryView,
+                          width: 28,
+                          height: 28,
+                          colorFilter: ColorFilter.mode(
+                            AppColors.primary500,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeInOut,
+              alignment: Alignment.topCenter,
+              child: _isSummaryVisible
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final columns = constraints.maxWidth < 320 ? 1 : 2;
+                          final cardWidth =
+                              (constraints.maxWidth - (columns - 1) * 8) /
+                              columns;
+
+                          return Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children:
+                                [
+                                      SummaryCard(
+                                        iconAsset: HomeAssets.collected,
+                                        iconColor: AppColors.orchid,
+                                        iconBg: AppColors.orchidLight,
+                                        label: context.l10n.collectedToday,
+                                        value: context.l10n.weightKg(
+                                          (summary?.kg ?? 0).round(),
+                                        ),
+                                        valueColor: AppColors.orchid,
+                                      ),
+                                      SummaryCard(
+                                        iconAsset: HomeAssets.verified,
+                                        iconColor: AppColors.primary500,
+                                        iconBg: AppColors.primary100,
+                                        label: context.l10n.verifiedEntries,
+                                        value: '${summary?.collections ?? 0}',
+                                        valueColor: AppColors.primary500,
+                                      ),
+                                      SummaryCard(
+                                        iconAsset: HomeAssets.transfer,
+                                        iconColor: AppColors.purple,
+                                        iconBg: AppColors.purpleLight,
+                                        label: context.l10n.transferRequests,
+                                        value: '${summary?.tasks ?? 0}',
+                                        valueColor: AppColors.purple,
+                                      ),
+                                      SummaryCard(
+                                        key: const Key(
+                                          'home-wallet-summary-card',
+                                        ),
+                                        iconAsset: HomeAssets.wallet,
+                                        iconColor: AppColors.secondary500,
+                                        iconBg: AppColors.secondary100,
+                                        label: context.l10n.walletBalance,
+                                        value: context.l10n.walletAmount(
+                                          (wallet?.balanceNow ?? 0)
+                                              .toStringAsFixed(2),
+                                        ),
+                                        valueColor: AppColors.secondary500,
+                                      ),
+                                    ]
+                                    .map(
+                                      (card) => SizedBox(
+                                        width: cardWidth,
+                                        child: card,
+                                      ),
+                                    )
+                                    .toList(),
+                          );
+                        },
+                      ),
+                    )
+                  : const SizedBox(width: double.infinity),
             ),
           ],
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeInOut,
-          alignment: Alignment.topCenter,
-          child: _isSummaryVisible
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final columns = constraints.maxWidth < 320 ? 1 : 2;
-                      final cardWidth =
-                          (constraints.maxWidth - (columns - 1) * 8) / columns;
-
-                      return Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children:
-                            [
-                                  SummaryCard(
-                                    iconAsset: HomeAssets.collected,
-                                    iconColor: AppColors.orchid,
-                                    iconBg: AppColors.orchidLight,
-                                    label: context.l10n.collectedToday,
-                                    value: context.l10n.weightKg(320),
-                                    valueColor: AppColors.orchid,
-                                  ),
-                                  SummaryCard(
-                                    iconAsset: HomeAssets.verified,
-                                    iconColor: AppColors.primary500,
-                                    iconBg: AppColors.primary100,
-                                    label: context.l10n.verifiedEntries,
-                                    value: '18',
-                                    valueColor: AppColors.primary500,
-                                  ),
-                                  SummaryCard(
-                                    iconAsset: HomeAssets.transfer,
-                                    iconColor: AppColors.purple,
-                                    iconBg: AppColors.purpleLight,
-                                    label: context.l10n.transferRequests,
-                                    value: '04',
-                                    valueColor: AppColors.purple,
-                                  ),
-                                  SummaryCard(
-                                    key: const Key('home-wallet-summary-card'),
-                                    iconAsset: HomeAssets.wallet,
-                                    iconColor: AppColors.secondary500,
-                                    iconBg: AppColors.secondary100,
-                                    label: context.l10n.walletBalance,
-                                    value: context.l10n.walletAmount('50,000'),
-                                    valueColor: AppColors.secondary500,
-                                  ),
-                                ]
-                                .map(
-                                  (card) =>
-                                      SizedBox(width: cardWidth, child: card),
-                                )
-                                .toList(),
-                      );
-                    },
-                  ),
-                )
-              : const SizedBox(width: double.infinity),
-        ),
-      ],
+        );
+      },
     );
   }
 }

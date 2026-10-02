@@ -2,7 +2,6 @@ import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/loader_widget.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +23,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-  static const String _debugDummyPhone = '9876543210';
   final _phoneController = TextEditingController();
   final _phoneFocusNode = FocusNode();
 
@@ -61,11 +59,6 @@ class _LoginScreenState extends State<LoginScreen>
       if (savedPhone.isNotEmpty) {
         _phoneController.text = savedPhone;
         return;
-      }
-
-      // Keep test autofill local to debug so release builds start empty.
-      if (kDebugMode) {
-        _phoneController.text = _debugDummyPhone;
       }
     });
   }

@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import '../model/d2d_vehicle_item.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class D2dVehicleCard extends StatelessWidget {
   const D2dVehicleCard({
@@ -14,19 +14,19 @@ class D2dVehicleCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final D2dVehicleItem item;
+  final VehicleModel item;
   final String activeLabel;
   final String deactivatedLabel;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final active = item.status == D2dVehicleStatus.active;
+    final active = item.isActive;
     final color = active ? AppColors.primary500 : AppColors.red500;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        key: ValueKey('d2d-vehicle-${item.number}'),
+        key: ValueKey('d2d-vehicle-${item.plateNumber}'),
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: Container(
@@ -49,7 +49,7 @@ class D2dVehicleCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.number,
+                    item.plateNumber,
                     style: AppTextStyles.semiboldH7_18.copyWith(
                       color: AppColors.neutral950,
                     ),

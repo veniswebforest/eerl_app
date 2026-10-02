@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import '../model/collection_record_model.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'records_assets.dart';
 
 class CollectionDraftCard extends StatelessWidget {
@@ -17,7 +18,7 @@ class CollectionDraftCard extends StatelessWidget {
     required this.onContinue,
   });
 
-  final CollectionDraftModel item;
+  final CollectionModel item;
   final String pendingLabel;
   final String discardLabel;
   final String continueLabel;
@@ -52,7 +53,7 @@ class CollectionDraftCard extends StatelessWidget {
                 ),
               ),
               Text(
-                item.date,
+                _date(item.updatedAt),
                 style: AppTextStyles.mediumSH9_12.copyWith(
                   color: AppColors.neutral950,
                 ),
@@ -71,15 +72,21 @@ class CollectionDraftCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.name,
+                  item.channel,
                   style: AppTextStyles.mediumSH7_16.copyWith(
                     color: AppColors.neutral950,
                   ),
                 ),
                 const SizedBox(height: 10),
-                _DraftInfo(icon: RecordsAssets.weight, text: item.weight),
+                _DraftInfo(
+                  icon: RecordsAssets.weight,
+                  text: '${item.totalQty.toStringAsFixed(2)} kg',
+                ),
                 const SizedBox(height: 8),
-                _DraftInfo(icon: RecordsAssets.items, text: item.itemCount),
+                _DraftInfo(
+                  icon: RecordsAssets.items,
+                  text: '${item.itemCount} items',
+                ),
               ],
             ),
           ),
@@ -106,6 +113,13 @@ class CollectionDraftCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _date(String value) {
+    final date = DateTime.tryParse(value)?.toLocal();
+    return date == null
+        ? value
+        : DateFormat('dd MMM yyyy, hh:mm a').format(date);
   }
 }
 

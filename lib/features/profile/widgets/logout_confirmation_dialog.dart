@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
 
 import '../model/logout_data_status.dart';
 import 'profile_assets.dart';
@@ -108,7 +112,7 @@ class LogoutConfirmationDialog extends StatelessWidget {
                       label: context.l10n.logoutYes,
                       backgroundColor: AppColors.red500,
                       foregroundColor: AppColors.neutral50,
-                      onPressed: onYes ?? () => Navigator.pop(context),
+                      onPressed: onYes ?? () => _confirmLogout(context),
                     ),
                   ),
                 ],
@@ -118,6 +122,14 @@ class LogoutConfirmationDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _confirmLogout(BuildContext context) async {
+    final authProvider = context.read<AuthProvider>();
+    final router = GoRouter.of(context);
+    Navigator.pop(context);
+    await authProvider.logout();
+    router.go(AppRoutes.login);
   }
 }
 

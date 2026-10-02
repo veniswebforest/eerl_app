@@ -1,8 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import '../model/collection_material_model.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class CollectionMaterialCard extends StatelessWidget {
   const CollectionMaterialCard({
@@ -12,15 +14,13 @@ class CollectionMaterialCard extends StatelessWidget {
     required this.verifiedWeightLabel,
     required this.rateLabel,
     required this.totalLabel,
-    required this.weightValue,
   });
 
-  final CollectionMaterialModel item;
+  final CollectionItemModel item;
   final String collectionWeightLabel;
   final String verifiedWeightLabel;
   final String rateLabel;
   final String totalLabel;
-  final String weightValue;
 
   @override
   Widget build(BuildContext context) {
@@ -29,19 +29,19 @@ class CollectionMaterialCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(5),
-              child: Image.asset(
-                item.thumbnail,
-                width: 42,
-                height: 42,
-                fit: BoxFit.cover,
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: AppColors.cool200,
+                borderRadius: BorderRadius.circular(5),
               ),
+              child: const Icon(Icons.recycling, color: AppColors.primary500),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                item.name,
+                item.name ?? item.itemId,
                 style: AppTextStyles.boldH8_14.copyWith(
                   color: AppColors.cool950,
                 ),
@@ -56,7 +56,7 @@ class CollectionMaterialCard extends StatelessWidget {
               child: _WeightBox(
                 label: collectionWeightLabel,
                 color: AppColors.cool200,
-                value: weightValue,
+                value: '${item.qty.toStringAsFixed(2)} ${item.unitCode ?? ''}',
               ),
             ),
             const SizedBox(width: 14),
@@ -64,7 +64,8 @@ class CollectionMaterialCard extends StatelessWidget {
               child: _WeightBox(
                 label: verifiedWeightLabel,
                 color: AppColors.primary100,
-                value: weightValue,
+                value:
+                    '${(item.verifiedQty ?? item.qty).toStringAsFixed(2)} ${item.unitCode ?? ''}',
               ),
             ),
           ],
@@ -75,7 +76,7 @@ class CollectionMaterialCard extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                rateLabel,
+                '$rateLabel ${item.rate?.toStringAsFixed(2) ?? '-'}',
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.mediumSH9_12.copyWith(
                   color: AppColors.neutral950,
@@ -85,7 +86,7 @@ class CollectionMaterialCard extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                totalLabel,
+                '$totalLabel ${item.amount?.toStringAsFixed(2) ?? '-'}',
                 textAlign: TextAlign.end,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.mediumSH9_12.copyWith(
@@ -96,13 +97,20 @@ class CollectionMaterialCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(child: _MaterialPhoto(path: item.collectionPhoto)),
-            const SizedBox(width: 12),
-            Expanded(child: _MaterialPhoto(path: item.verifiedPhoto)),
-          ],
-        ),
+        if (item.photoUrls.isNotEmpty)
+          Row(
+            children: item.photoUrls
+                .take(2)
+                .map(
+                  (path) => Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: _MaterialPhoto(path: path),
+                    ),
+                  ),
+                )
+                .toList(growable: false),
+          ),
       ],
     );
   }
@@ -155,7 +163,11 @@ class _MaterialPhoto extends StatelessWidget {
     borderRadius: BorderRadius.circular(5),
     child: AspectRatio(
       aspectRatio: 1.45,
-      child: Image.asset(path, fit: BoxFit.cover),
+      child: path.startsWith('http://') || path.startsWith('https://')
+          ? Image.network(path, fit: BoxFit.cover)
+          : path.startsWith('assets/')
+          ? Image.asset(path, fit: BoxFit.cover)
+          : Image.file(File(path), fit: BoxFit.cover),
     ),
   );
 }

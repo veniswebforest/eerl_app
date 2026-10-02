@@ -6,15 +6,19 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
-import '../model/request_list_item.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../widgets/request_detail_section_card.dart';
 
 class RequestDetailScreen extends StatelessWidget {
-  const RequestDetailScreen({super.key, required this.status});
+  const RequestDetailScreen({super.key, required this.request});
 
-  final RequestListStatus status;
+  final RequestModel request;
 
-  bool get _isClosed => status == RequestListStatus.closed;
+  bool get _isClosed => const {
+    'ANSWERED',
+    'RESOLVED',
+    'CLOSED',
+  }.contains(request.status.toUpperCase());
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -37,9 +41,9 @@ class RequestDetailScreen extends StatelessWidget {
               _RequestDetailStatus(closed: _isClosed),
               const SizedBox(height: 20),
               if (_isClosed)
-                const _ClosedRequestDetails()
+                _ClosedRequestDetails(request: request)
               else
-                const _OpenRequestDetails(),
+                _OpenRequestDetails(request: request),
             ],
           ),
         ),
@@ -99,7 +103,8 @@ class _RequestDetailStatus extends StatelessWidget {
 }
 
 class _OpenRequestDetails extends StatelessWidget {
-  const _OpenRequestDetails();
+  const _OpenRequestDetails({required this.request});
+  final RequestModel request;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -107,7 +112,7 @@ class _OpenRequestDetails extends StatelessWidget {
       RequestDetailSectionCard(
         title: context.l10n.requestAssignTo,
         child: Text(
-          context.l10n.requestSupervisorName,
+          request.createdByName ?? request.createdBy,
           style: AppTextStyles.regularB8_12.copyWith(
             color: AppColors.neutral600,
           ),
@@ -117,7 +122,7 @@ class _OpenRequestDetails extends StatelessWidget {
       RequestDetailSectionCard(
         title: context.l10n.requestVerifyCollectionDetails,
         child: Text(
-          context.l10n.requestDetailDescription,
+          request.body,
           style: AppTextStyles.regularB8_12.copyWith(
             color: AppColors.neutral600,
           ),
@@ -131,7 +136,7 @@ class _OpenRequestDetails extends StatelessWidget {
           child: Align(
             alignment: Alignment.bottomLeft,
             child: Text(
-              '•  ${context.l10n.requestSupervisorName.split(' (').first}',
+              '•  ${request.createdByName ?? request.createdBy}',
               style: AppTextStyles.regularB8_12.copyWith(
                 color: AppColors.neutral600,
               ),
@@ -144,7 +149,8 @@ class _OpenRequestDetails extends StatelessWidget {
 }
 
 class _ClosedRequestDetails extends StatelessWidget {
-  const _ClosedRequestDetails();
+  const _ClosedRequestDetails({required this.request});
+  final RequestModel request;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -174,7 +180,7 @@ class _ClosedRequestDetails extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              context.l10n.requestFilledDescription,
+              request.answer ?? request.body,
               style: AppTextStyles.regularB7_14,
             ),
             Text(

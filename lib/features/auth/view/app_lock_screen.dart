@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/local_database/app_database.dart';
 import '../../../core/providers/app_lock_provider.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/services/app_lock_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../dashboard/model/bottom_nav_item_model.dart';
 import '../widgets/logo_component.dart';
 
 class AppLockScreen extends StatefulWidget {
@@ -66,7 +68,20 @@ class _AppLockScreenState extends State<AppLockScreen> {
       if (widget.onAuthSuccess != null) {
         widget.onAuthSuccess!();
       } else {
-        context.go(AppRoutes.home);
+        final storedRole = await AppDatabase.instance.getSyncMeta(
+          'active_role',
+        );
+        if (!mounted) return;
+        final role = storedRole == 'SUPERVISOR'
+            ? DashboardUserRole.supervisor
+            : storedRole == 'ADMIN'
+            ? DashboardUserRole.admin
+            : storedRole == 'COLLECTION_MANAGER'
+            ? DashboardUserRole.collectionManager
+            : storedRole == 'IEC_AGENT'
+            ? DashboardUserRole.iecAgent
+            : DashboardUserRole.collectionAgent;
+        context.go(AppRoutes.home, extra: role);
       }
     } else {
       if (widget.onAuthFailed != null) {

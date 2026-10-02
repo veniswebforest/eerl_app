@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:eerl_app/core/constants/app_constants.dart';
+import 'package:eerl_app/core/network/app_http_client.dart';
 import 'package:eerl_app/features/auth/model/auth_api_exception.dart';
 import 'package:eerl_app/features/auth/model/send_otp_request.dart';
 import 'package:eerl_app/features/auth/model/send_otp_response.dart';
@@ -13,13 +14,11 @@ import 'package:http/http.dart' as http;
 
 class AuthRemoteService {
   AuthRemoteService({http.Client? client})
-    : _client = client ?? http.Client(),
-      _ownsClient = client == null;
+    : _client = client ?? AppHttpClient.instance.client;
 
   static const _timeout = Duration(seconds: 30);
 
   final http.Client _client;
-  final bool _ownsClient;
 
   Future<SendOtpResponse> sendOtp(SendOtpRequest request) async {
     const tag = '[SendOtpAPI]';
@@ -199,7 +198,5 @@ class AuthRemoteService {
     return value;
   }
 
-  void close() {
-    if (_ownsClient) _client.close();
-  }
+  void close() {}
 }

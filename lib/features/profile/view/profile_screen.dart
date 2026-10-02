@@ -18,16 +18,70 @@ import '../widgets/profile_info_card.dart';
 import '../widgets/assigned_centers_dialog.dart';
 import '../widgets/logout_confirmation_dialog.dart';
 import '../widgets/sync_data_dialog.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key, this.isSupervisor = false});
 
   final bool isSupervisor;
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late final LocalQueryController<
+    ({ProfileModel profile, List<CenterModel> centers, List<MyRoleModel> roles})
+  >
+  _controller;
+
+  bool get isSupervisor => widget.isSupervisor;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        LocalQueryController(() async {
+            final values = await Future.wait([
+              EerlLocalRepository.instance.getProfile(),
+              EerlLocalRepository.instance.getCenters(),
+              EerlLocalRepository.instance.getRoles(),
+            ]);
+            return (
+              profile: values[0] as ProfileModel,
+              centers: values[1] as List<CenterModel>,
+              roles: values[2] as List<MyRoleModel>,
+            );
+          })
+          ..addListener(_refresh)
+          ..load();
+  }
+
+  void _refresh() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_refresh);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final localeProvider = context.watch<LocaleProvider>();
+    final profile = _controller.data?.profile;
+    final centers = _controller.data?.centers ?? const <CenterModel>[];
+    final roles = _controller.data?.roles ?? const <MyRoleModel>[];
+    final role = roles.where(
+      (item) =>
+          item.roleKey.toUpperCase() == (isSupervisor ? 'SUPERVISOR' : 'AGENT'),
+    );
+    final roleName = role.isEmpty ? '' : role.first.roleName;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -58,6 +112,8 @@ class ProfileScreen extends StatelessWidget {
               _ProfileHeader(
                 localeProvider: localeProvider,
                 isSupervisor: isSupervisor,
+                profile: profile,
+                roleName: roleName,
               ),
               const SizedBox(height: 28),
               Padding(
@@ -76,33 +132,34 @@ class ProfileScreen extends StatelessWidget {
                               icon: ProfileAssets.facility,
                               label: l10n.profileAssignedFacility,
                               value: isSupervisor
-                                  ? l10n.profileSupervisorFacilityValue
-                                  : l10n.profileFacilityValue,
+                                  ? centers
+                                        .map((center) => center.name)
+                                        .join(', ')
+                                  : (centers.isEmpty ? '' : centers.first.name),
                               trailingIcon: isSupervisor
                                   ? ProfileAssets.arrowRight
                                   : null,
                               onTap: isSupervisor
-                                  ? () => showAssignedCentersDialog(context)
+                                  ? () => showAssignedCentersDialog(
+                                      context,
+                                      centers: centers,
+                                    )
                                   : null,
                             ),
                             ProfileInfoItem(
                               icon: ProfileAssets.mobile,
                               label: l10n.profileMobileNumber,
-                              value: l10n.profileMobileValue,
+                              value: profile?.userPhone ?? '',
                             ),
                             ProfileInfoItem(
                               icon: ProfileAssets.role,
                               label: l10n.profileRole,
-                              value: isSupervisor
-                                  ? l10n.roleCollectionSupervisor
-                                  : l10n.drawerUserRole,
+                              value: roleName,
                             ),
                             ProfileInfoItem(
                               icon: ProfileAssets.sessionExpiry,
                               label: l10n.profileSessionExpires,
-                              value: isSupervisor
-                                  ? l10n.profileSupervisorSessionExpiryValue
-                                  : l10n.profileSessionExpiryValue,
+                              value: profile?.sessionExpiresAt ?? '',
                             ),
                           ],
                         ),
@@ -164,10 +221,14 @@ class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader({
     required this.localeProvider,
     required this.isSupervisor,
+    required this.profile,
+    required this.roleName,
   });
 
   final LocaleProvider localeProvider;
   final bool isSupervisor;
+  final ProfileModel? profile;
+  final String roleName;
 
   @override
   Widget build(BuildContext context) {
@@ -226,21 +287,28 @@ class _ProfileHeader extends StatelessWidget {
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        ClipOval(
-                          child: Image.asset(
-                            isSupervisor
-                                ? ProfileAssets.supervisorPortrait
-                                : ProfileAssets.portrait,
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                          ),
+                        CircleAvatar(
+                          radius: 60,
+                          backgroundColor: AppColors.primary100,
+                          backgroundImage:
+                              profile?.userPhotoUrl?.isNotEmpty == true
+                              ? NetworkImage(profile!.userPhotoUrl!)
+                              : null,
+                          child: profile?.userPhotoUrl?.isNotEmpty == true
+                              ? null
+                              : Text(
+                                  (profile?.userName?.isNotEmpty == true
+                                          ? profile!.userName![0]
+                                          : '?')
+                                      .toUpperCase(),
+                                  style: AppTextStyles.boldH5_24.copyWith(
+                                    color: AppColors.primary500,
+                                  ),
+                                ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          isSupervisor
-                              ? context.l10n.drawerSupervisorUserName
-                              : context.l10n.drawerUserName,
+                          profile?.userName ?? '',
                           style: AppTextStyles.semiboldH6_20.copyWith(
                             color: AppColors.neutral950,
                           ),
@@ -256,9 +324,7 @@ class _ProfileHeader extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            isSupervisor
-                                ? context.l10n.roleCollectionSupervisor
-                                : context.l10n.drawerUserRole,
+                            roleName,
                             style: AppTextStyles.boldH8_14.copyWith(
                               color: AppColors.primary400,
                             ),

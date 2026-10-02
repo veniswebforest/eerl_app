@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../../home/widgets/home_styles.dart';
-import '../model/verification_entry.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class VerificationEntryCard extends StatelessWidget {
   const VerificationEntryCard({super.key, required this.entry, this.onTap});
 
-  final VerificationEntry entry;
+  final CollectionModel entry;
   final VoidCallback? onTap;
 
   @override
@@ -38,7 +39,7 @@ class VerificationEntryCard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 28),
                   child: Text(
-                    '${entry.person} • ${entry.collectionType}',
+                    '${entry.agentName} • ${entry.channel}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.semiboldH8_16.copyWith(
@@ -58,27 +59,27 @@ class VerificationEntryCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        entry.weightAndAmount,
+                        '${entry.totalQty.toStringAsFixed(2)} kg • ₹${(entry.totalAmount ?? 0).toStringAsFixed(2)}',
                         style: AppTextStyles.boldH8_14.copyWith(
                           color: AppColors.green600,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        entry.collectionIdAndTime,
+                        '${entry.slipNumber ?? entry.id} • ${_time(entry.collectedAt)}',
                         style: AppTextStyles.mediumSH8_14.copyWith(
                           color: AppColors.neutral900,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        entry.facility,
+                        entry.centerName ?? entry.centerId,
                         style: AppTextStyles.mediumSH8_14.copyWith(
                           color: AppColors.neutral900,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _VerificationStatusChip(result: entry.result),
+                      _VerificationStatusChip(status: entry.status),
                     ],
                   ),
                 ),
@@ -104,33 +105,39 @@ class VerificationEntryCard extends StatelessWidget {
       ),
     ),
   );
+
+  String _time(String? value) {
+    final parsed = DateTime.tryParse(value ?? '')?.toLocal();
+    return parsed == null ? '' : DateFormat('dd MMM, hh:mm a').format(parsed);
+  }
 }
 
 class _VerificationStatusChip extends StatelessWidget {
-  const _VerificationStatusChip({required this.result});
+  const _VerificationStatusChip({required this.status});
 
-  final VerificationResult result;
+  final String status;
 
   @override
   Widget build(BuildContext context) {
-    final (asset, label, foreground, background) = switch (result) {
-      VerificationResult.pending => (
-        'assets/icons/records/status_pending.svg',
-        context.l10n.verificationPendingApproval,
-        AppColors.yellow600,
-        AppColors.yellow50,
-      ),
-      VerificationResult.verified => (
+    final normalized = status.toUpperCase();
+    final (asset, label, foreground, background) = switch (normalized) {
+      'VERIFIED' || 'APPROVED' => (
         'assets/icons/wallet/status_verified.svg',
         context.l10n.verificationVerified,
         AppColors.primary500,
         AppColors.primary50,
       ),
-      VerificationResult.rejected => (
+      'REJECTED' => (
         'assets/icons/wallet/status_flagged.svg',
         context.l10n.verificationRejected,
         AppColors.red600,
         AppColors.red50,
+      ),
+      _ => (
+        'assets/icons/records/status_pending.svg',
+        context.l10n.verificationPendingApproval,
+        AppColors.yellow600,
+        AppColors.yellow50,
       ),
     };
 

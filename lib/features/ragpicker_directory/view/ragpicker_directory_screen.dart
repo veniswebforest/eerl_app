@@ -6,6 +6,8 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import 'package:eerl_app/shared/widgets/app_square_back_button.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../model/ragpicker_directory_item.dart';
 import '../model/ragpicker_directory_view.dart';
 import '../widgets/ragpicker_center_selector.dart';
@@ -32,57 +34,6 @@ class RagpickerDirectoryScreen extends StatefulWidget {
 }
 
 class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
-  static const _initialItems = <RagpickerDirectoryItem>[
-    RagpickerDirectoryItem(
-      id: 'ramesh',
-      name: 'Ramesh Bhai Patel',
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.active,
-    ),
-    RagpickerDirectoryItem(
-      id: 'umesh',
-      name: 'Umesh Yadav',
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.active,
-    ),
-    RagpickerDirectoryItem(
-      id: 'manohar',
-      name: 'Manohar Tiwari',
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.active,
-    ),
-    RagpickerDirectoryItem(
-      id: 'ramchand',
-      name: 'Ramchand Tripathi',
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.active,
-    ),
-    RagpickerDirectoryItem(
-      id: 'karshan',
-      name: 'Karshan Yadav',
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.deactivated,
-    ),
-    RagpickerDirectoryItem(
-      id: 'vikas',
-      name: 'Vikas Prajapati',
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.deactivated,
-    ),
-    RagpickerDirectoryItem(
-      id: 'suresh',
-      name: 'Suresh Makwana',
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.deactivated,
-    ),
-    RagpickerDirectoryItem(
-      id: 'munna',
-      name: 'Munna Tripathi',
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.deactivated,
-    ),
-  ];
-
   late RagpickerDirectoryView _view = widget.initialView;
   late RagpickerStatus _status = switch (widget.initialView) {
     RagpickerDirectoryView.deactivatedList ||
@@ -93,7 +44,11 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _identityController = TextEditingController();
-  RagpickerDirectoryItem? _selectedItem;
+  List<RagpickerModel> _allItems = const [];
+  List<CenterModel> _centers = const [];
+  bool _loading = true;
+  RagpickerModel? _selectedItem;
+  RagpickerModel? _editingItem;
   String _query = '';
   bool _hasPhotos = false;
   bool _showStatusSuccess = false;
@@ -103,92 +58,58 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   late int _selectedCenter = _status == RagpickerStatus.deactivated ? 0 : -1;
   int _formZoneIndex = -1;
 
-  List<RagpickerDirectoryItem> _localizedItems(BuildContext context) => [
-    RagpickerDirectoryItem(
-      id: 'chunilal',
-      name: context.l10n.ragpickerPersonChunilal,
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.active,
-    ),
-    RagpickerDirectoryItem(
-      id: 'umesh',
-      name: context.l10n.ragpickerPersonUmesh,
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.active,
-    ),
-    RagpickerDirectoryItem(
-      id: 'manohar',
-      name: context.l10n.ragpickerPersonManohar,
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.active,
-    ),
-    RagpickerDirectoryItem(
-      id: 'ramchand',
-      name: context.l10n.ragpickerPersonRamchand,
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.active,
-    ),
-    RagpickerDirectoryItem(
-      id: 'karshan',
-      name: context.l10n.ragpickerPersonKarshan,
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.deactivated,
-    ),
-    RagpickerDirectoryItem(
-      id: 'vikas',
-      name: context.l10n.ragpickerPersonVikas,
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.deactivated,
-    ),
-    RagpickerDirectoryItem(
-      id: 'suresh',
-      name: context.l10n.ragpickerPersonSuresh,
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.deactivated,
-    ),
-    RagpickerDirectoryItem(
-      id: 'munna',
-      name: context.l10n.ragpickerPersonMunna,
-      phone: '+91 98765 43210',
-      status: RagpickerStatus.deactivated,
-    ),
-  ];
+  List<String> get _centerOptions =>
+      _centers.map((center) => center.name).toList(growable: false);
 
-  List<String> _centerOptions(BuildContext context) => [
-    context.l10n.ragpickerCenterSurat,
-    context.l10n.ragpickerCenterSuratEast,
-    context.l10n.ragpickerCenterSuratWest,
-    context.l10n.ragpickerCenterSuratSouth,
-  ];
-
-  List<RagpickerDirectoryItem> _items(BuildContext context) =>
-      (widget.isSupervisor ? _localizedItems(context) : _initialItems)
-          .where((item) => item.status == _status)
-          .where((item) {
-            final query = _query.trim().toLowerCase();
-            return query.isEmpty ||
-                item.name.toLowerCase().contains(query) ||
-                item.phone.contains(query);
-          })
-          .toList(growable: false);
+  List<RagpickerModel> get _items => _allItems
+      .where((item) => item.isActive == (_status == RagpickerStatus.active))
+      .where((item) {
+        final query = _query.trim().toLowerCase();
+        return query.isEmpty ||
+            item.name.toLowerCase().contains(query) ||
+            (item.phone ?? '').contains(query);
+      })
+      .toList(growable: false);
 
   @override
   void initState() {
     super.initState();
-    if (_view == RagpickerDirectoryView.activeDetails) {
-      _selectedItem = _initialItems.first;
-    } else if (_view == RagpickerDirectoryView.deactivatedDetails) {
-      _selectedItem = _initialItems.firstWhere(
-        (item) => item.status == RagpickerStatus.deactivated,
-      );
-      _showStatusSuccess = true;
-    } else if (_view == RagpickerDirectoryView.addFilled) {
-      _nameController.text = 'Ramesh Bhai Patel';
-      _phoneController.text = '1234567890';
-      _identityController.text = '8478 8456 63245';
-      _hasPhotos = true;
-      _formZoneIndex = 0;
+    _load();
+  }
+
+  Future<void> _load({String? centerId}) async {
+    setState(() => _loading = true);
+    final repository = EerlLocalRepository.instance;
+    final centers = await repository.getCenters();
+    var selected = centerId ?? await repository.activeCenterId;
+    if (selected == null && centers.isNotEmpty) selected = centers.first.id;
+    final items = selected == null
+        ? const <RagpickerModel>[]
+        : await repository.getRagpickers(centerId: selected);
+    if (!mounted) return;
+    setState(() {
+      _centers = centers;
+      _selectedCenter = centers.indexWhere((center) => center.id == selected);
+      _allItems = items;
+      if ((_view == RagpickerDirectoryView.activeDetails ||
+              _view == RagpickerDirectoryView.deactivatedDetails) &&
+          _selectedItem == null) {
+        for (final item in items) {
+          if (item.isActive == (_status == RagpickerStatus.active)) {
+            _selectedItem = item;
+            break;
+          }
+        }
+      }
+      _loading = false;
+    });
+  }
+
+  String _centerName(String id) {
+    for (final center in _centers) {
+      if (center.id == id) return center.name;
     }
+    return '';
   }
 
   @override
@@ -235,19 +156,35 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
     );
     if (!mounted || !confirmed) return;
 
+    final item = _selectedItem!;
+    await EerlLocalRepository.instance.setRagpickerActive(
+      item,
+      !currentlyActive,
+    );
+    if (!mounted) return;
     setState(() {
       _status = currentlyActive
           ? RagpickerStatus.deactivated
           : RagpickerStatus.active;
-      _selectedItem = _selectedItem?.copyWith(status: _status);
+      _selectedItem = RagpickerModel(
+        id: item.id,
+        centerId: item.centerId,
+        name: item.name,
+        phone: item.phone,
+        idNumber: item.idNumber,
+        photoUrl: item.photoUrl,
+        isActive: !currentlyActive,
+        syncState: 'pending',
+      );
       _showStatusSuccess = true;
       _successIsReactivation = !currentlyActive;
     });
+    await _load(centerId: item.centerId);
   }
 
   Widget _buildDirectory() {
-    final items = _items(context);
-    final centers = _centerOptions(context);
+    final items = _items;
+    final centers = _centerOptions;
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
@@ -297,20 +234,27 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                                 onToggle: () => setState(
                                   () => _centerExpanded = !_centerExpanded,
                                 ),
-                                onSelected: (index) => setState(() {
-                                  _selectedCenter = index;
-                                  _centerExpanded = false;
-                                }),
+                                onSelected: (index) {
+                                  setState(() {
+                                    _selectedCenter = index;
+                                    _centerExpanded = false;
+                                  });
+                                  _load(centerId: _centers[index].id);
+                                },
                               ),
                               const SizedBox(height: 16),
                             ],
                             RagpickerSegmentedControl(
                               status: _status,
                               activeLabel: context.l10n.ragpickerActiveCount(
-                                12,
+                                _allItems.where((item) => item.isActive).length,
                               ),
                               deactivatedLabel: context.l10n
-                                  .ragpickerDeactivatedCount(5),
+                                  .ragpickerDeactivatedCount(
+                                    _allItems
+                                        .where((item) => !item.isActive)
+                                        .length,
+                                  ),
                               onChanged: (value) => setState(() {
                                 _status = value;
                                 _view = value == RagpickerStatus.active
@@ -368,29 +312,30 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                           ],
                         ),
                       ),
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                        sliver: SliverList.separated(
-                          itemCount: items.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: 16),
-                          itemBuilder: (context, index) =>
-                              RagpickerDirectoryCard(
-                                item: items[index],
-                                onTap: () => setState(() {
-                                  _selectedItem = widget.isSupervisor
-                                      ? items[index].copyWith(
-                                          phone: '+91 1234567890',
-                                        )
-                                      : items[index];
-                                  _view = _status == RagpickerStatus.active
-                                      ? RagpickerDirectoryView.activeDetails
-                                      : RagpickerDirectoryView
-                                            .deactivatedDetails;
-                                }),
-                              ),
+                      if (_loading)
+                        const SliverFillRemaining(
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                          sliver: SliverList.separated(
+                            itemCount: items.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 16),
+                            itemBuilder: (context, index) =>
+                                RagpickerDirectoryCard(
+                                  item: items[index],
+                                  onTap: () => setState(() {
+                                    _selectedItem = items[index];
+                                    _view = _status == RagpickerStatus.active
+                                        ? RagpickerDirectoryView.activeDetails
+                                        : RagpickerDirectoryView
+                                              .deactivatedDetails;
+                                  }),
+                                ),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -399,6 +344,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                     label: context.l10n.ragpickerAddButton,
                     onPressed: () => setState(() {
                       _view = RagpickerDirectoryView.addEmpty;
+                      _editingItem = null;
                       _nameController.clear();
                       _phoneController.clear();
                       _identityController.clear();
@@ -418,8 +364,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   Widget _buildDetails() {
     final item = _selectedItem!;
     final active =
-        item.status == RagpickerStatus.active &&
-        (!_showStatusSuccess || _successIsReactivation);
+        item.isActive && (!_showStatusSuccess || _successIsReactivation);
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
@@ -451,9 +396,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                     children: [
-                      RagpickerRegistrationCard(
-                        registrationId: item.registrationId,
-                      ),
+                      RagpickerRegistrationCard(registrationId: item.id),
                       const SizedBox(height: 16),
                       RagpickerInformationCard(
                         item: item,
@@ -465,12 +408,13 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                             ? context.l10n.ragpickerZoneLocationLabel
                             : null,
                         zoneValue: widget.isSupervisor
-                            ? context.l10n.ragpickerCenterSurat
+                            ? _centerName(item.centerId)
                             : null,
                       ),
                       const SizedBox(height: 16),
                       RagpickerProofCard(
                         title: context.l10n.ragpickerProofLabel,
+                        photoUrl: item.photoUrl,
                       ),
                     ],
                   ),
@@ -481,13 +425,16 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                   onEdit: active
                       ? () => setState(() {
                           _nameController.text = item.name;
-                          _phoneController.text = item.phone
+                          _phoneController.text = (item.phone ?? '')
                               .replaceAll('+91 ', '')
                               .replaceAll(' ', '');
-                          _identityController.text = item.identityNumber;
-                          _hasPhotos = true;
-                          _formZoneIndex = 0;
+                          _identityController.text = item.idNumber ?? '';
+                          _hasPhotos = item.photoUrl?.isNotEmpty == true;
+                          _formZoneIndex = _centers.indexWhere(
+                            (center) => center.id == item.centerId,
+                          );
                           _formZoneExpanded = false;
+                          _editingItem = item;
                           _selectedItem = null;
                           _view = RagpickerDirectoryView.addFilled;
                         })
@@ -551,7 +498,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                       RagpickerCenterSelector(
                         label: context.l10n.ragpickerZoneLocationLabel,
                         hint: context.l10n.ragpickerSelectZone,
-                        options: _centerOptions(context),
+                        options: _centerOptions,
                         selectedIndex: _formZoneIndex,
                         expanded: _formZoneExpanded,
                         onToggle: () => setState(
@@ -580,10 +527,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                 saveLabel: context.l10n.saveAndSelect,
                 onCancel: () =>
                     setState(() => _view = RagpickerDirectoryView.activeList),
-                onSave: () => setState(() {
-                  _status = RagpickerStatus.active;
-                  _view = RagpickerDirectoryView.activeList;
-                }),
+                onSave: _saveForm,
               ),
             ],
           ),
@@ -591,6 +535,38 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
       ),
     ),
   );
+
+  Future<void> _saveForm() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty || _centers.isEmpty) return;
+    final centerIndex = _formZoneIndex >= 0 ? _formZoneIndex : _selectedCenter;
+    if (centerIndex < 0 || centerIndex >= _centers.length) return;
+    final existing = _editingItem;
+    final phone = _phoneController.text.trim();
+    await EerlLocalRepository.instance.saveRagpicker(
+      RagpickerModel(
+        id:
+            existing?.id ??
+            'local_ragpicker_${DateTime.now().microsecondsSinceEpoch}',
+        centerId: _centers[centerIndex].id,
+        name: name,
+        phone: phone.isEmpty ? null : '+91 $phone',
+        idNumber: _identityController.text.trim().isEmpty
+            ? null
+            : _identityController.text.trim(),
+        photoUrl: existing?.photoUrl,
+        isActive: true,
+        syncState: 'pending',
+      ),
+    );
+    if (!mounted) return;
+    setState(() {
+      _editingItem = null;
+      _status = RagpickerStatus.active;
+      _view = RagpickerDirectoryView.activeList;
+    });
+    await _load(centerId: _centers[centerIndex].id);
+  }
 }
 
 class _FigmaBackButton extends StatelessWidget {

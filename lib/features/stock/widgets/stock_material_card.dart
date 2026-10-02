@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import '../model/stock_item.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class StockMaterialCard extends StatelessWidget {
   const StockMaterialCard({super.key, required this.item});
 
-  final StockMaterialItem item;
+  final StockModel item;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -26,14 +26,14 @@ class StockMaterialCard extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: Image.asset(
-            item.image,
-            width: 52,
-            height: 52,
-            fit: BoxFit.cover,
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            color: AppColors.primary50,
+            borderRadius: BorderRadius.circular(6),
           ),
+          child: const Icon(Icons.recycling, color: AppColors.primary500),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -41,7 +41,7 @@ class StockMaterialCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item.name,
+                item.name ?? item.itemId,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.semiboldH9_14.copyWith(
@@ -53,7 +53,7 @@ class StockMaterialCard extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      item.weight,
+                      '${item.qty.toStringAsFixed(2)} ${item.unitCode ?? ''}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.boldH8_14.copyWith(
@@ -67,7 +67,7 @@ class StockMaterialCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
-                      item.bin,
+                      item.stage,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.mediumSH8_14.copyWith(
@@ -81,12 +81,6 @@ class StockMaterialCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          item.updated,
-          style: AppTextStyles.mediumSH9_12.copyWith(
-            color: AppColors.neutral500,
-          ),
-        ),
       ],
     ),
   );

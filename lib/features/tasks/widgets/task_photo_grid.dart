@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class TaskPhotoGrid extends StatelessWidget {
@@ -24,7 +26,7 @@ class TaskPhotoGrid extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 child: AspectRatio(
                   aspectRatio: 1.85,
-                  child: Image.asset(images[index], fit: BoxFit.cover),
+                  child: _TaskImage(path: images[index]),
                 ),
               ),
               if (removable)
@@ -51,4 +53,20 @@ class TaskPhotoGrid extends StatelessWidget {
       ],
     ],
   );
+}
+
+class _TaskImage extends StatelessWidget {
+  const _TaskImage({required this.path});
+  final String path;
+
+  @override
+  Widget build(BuildContext context) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(path, fit: BoxFit.cover);
+    }
+    if (path.startsWith('assets/')) {
+      return Image.asset(path, fit: BoxFit.cover);
+    }
+    return Image.file(File(path), fit: BoxFit.cover);
+  }
 }

@@ -5,7 +5,8 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_message_banner.dart';
-import '../model/configurable_material_item.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../widgets/configurable_material_tile.dart';
 import '../widgets/material_segmented_control.dart';
 
@@ -23,71 +24,57 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
   bool _showPlastic = true;
   bool _typeDropdownOpen = true;
   bool _saved = false;
-  bool _hasChanges = true;
+  bool _hasChanges = false;
+  bool _loading = true;
+  bool _saving = false;
+  Object? _error;
   _MaterialCollectionType _collectionType = _MaterialCollectionType.d2d;
+  List<ItemModel> _plasticItems = const [];
+  List<ItemModel> _nonPlasticItems = const [];
 
-  final List<ConfigurableMaterialItem> _plasticItems = [
-    const ConfigurableMaterialItem(id: 'pet', nameKey: 'pet', selected: true),
-    const ConfigurableMaterialItem(id: 'hdpe', nameKey: 'hdpe', selected: true),
-    const ConfigurableMaterialItem(
-      id: 'milk_pouch',
-      nameKey: 'milkPouch',
-      selected: true,
-    ),
-    const ConfigurableMaterialItem(id: 'pp', nameKey: 'pp', selected: true),
-    const ConfigurableMaterialItem(
-      id: 'multi_layer',
-      nameKey: 'multiLayer',
-      selected: false,
-    ),
-    const ConfigurableMaterialItem(id: 'pvc', nameKey: 'pvc', selected: false),
-    const ConfigurableMaterialItem(
-      id: 'mixed',
-      nameKey: 'mixed',
-      selected: false,
-    ),
-  ];
-
-  final List<ConfigurableMaterialItem> _nonPlasticItems = [
-    const ConfigurableMaterialItem(
-      id: 'metals',
-      nameKey: 'metals',
-      selected: true,
-    ),
-    const ConfigurableMaterialItem(
-      id: 'glass',
-      nameKey: 'glass',
-      selected: true,
-    ),
-    const ConfigurableMaterialItem(
-      id: 'paper',
-      nameKey: 'paper',
-      selected: true,
-    ),
-    const ConfigurableMaterialItem(
-      id: 'organic',
-      nameKey: 'organic',
-      selected: true,
-    ),
-    const ConfigurableMaterialItem(
-      id: 'concrete',
-      nameKey: 'concrete',
-      selected: false,
-    ),
-    const ConfigurableMaterialItem(
-      id: 'ceramics',
-      nameKey: 'ceramics',
-      selected: false,
-    ),
-    const ConfigurableMaterialItem(
-      id: 'mixed',
-      nameKey: 'mixed',
-      selected: false,
-    ),
-  ];
-
-  List<ConfigurableMaterialItem> get _visibleItems =>
+  List<ItemModel> get _visibleItems =>
       _showPlastic ? _plasticItems : _nonPlasticItems;
+
+  String get _channel => switch (_collectionType) {
+    _MaterialCollectionType.d2d => 'D2D',
+    _MaterialCollectionType.mrfStation => 'MRF',
+    _MaterialCollectionType.ramp => 'RAMP',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadItems();
+  }
+
+  Future<void> _loadItems() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final items = await EerlLocalRepository.instance.getItems(
+        channel: _channel,
+      );
+      if (!mounted) return;
+      setState(() {
+        _plasticItems = items
+            .where((item) => item.materialType.toUpperCase() == 'PLASTIC')
+            .toList();
+        _nonPlasticItems = items
+            .where((item) => item.materialType.toUpperCase() != 'PLASTIC')
+            .toList();
+        _hasChanges = false;
+        _loading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = error;
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -128,10 +115,10 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
                       const SizedBox(height: 24),
                       MaterialSegmentedControl(
                         plasticLabel: context.l10n.configurePlasticCount(
-                          _saved ? 25 : 12,
+                          _plasticItems.length,
                         ),
                         nonPlasticLabel: context.l10n.configureNonPlasticCount(
-                          _saved ? 20 : 10,
+                          _nonPlasticItems.length,
                         ),
                         showPlastic: _showPlastic,
                         onChanged: (value) =>
@@ -153,37 +140,57 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
                       if (_typeDropdownOpen)
                         _TypeDropdown(
                           selected: _collectionType,
-                          onSelected: (type) => setState(() {
-                            _collectionType = type;
-                            _hasChanges = true;
-                            _saved = false;
-                          }),
+                          onSelected: (type) {
+                            setState(() {
+                              _collectionType = type;
+                              _saved = false;
+                            });
+                            _loadItems();
+                          },
                         ),
                       SizedBox(height: _typeDropdownOpen ? 10 : 24),
                     ],
                   ),
                 ),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: SliverReorderableList(
-                    itemCount: _visibleItems.length,
-                    onReorderItem: _reorder,
-                    itemBuilder: (context, index) {
-                      final item = _visibleItems[index];
-                      return Padding(
-                        key: ValueKey('${_showPlastic ? 'p' : 'n'}-${item.id}'),
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: ConfigurableMaterialTile(
-                          index: index,
-                          label: _itemLabel(item.nameKey),
-                          selected: item.selected,
-                          onSelected: (selected) =>
-                              _toggleItem(index, selected),
-                        ),
-                      );
-                    },
+                if (_loading)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (_error != null)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: TextButton(
+                        onPressed: _loadItems,
+                        child: const Text('Retry'),
+                      ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    sliver: SliverReorderableList(
+                      itemCount: _visibleItems.length,
+                      onReorderItem: _reorder,
+                      itemBuilder: (context, index) {
+                        final item = _visibleItems[index];
+                        return Padding(
+                          key: ValueKey(
+                            '${_showPlastic ? 'p' : 'n'}-${item.id}',
+                          ),
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: ConfigurableMaterialTile(
+                            index: index,
+                            label: item.name,
+                            selected: item.isSelected == true,
+                            onSelected: (selected) =>
+                                _toggleItem(index, selected),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
                 const SliverToBoxAdapter(child: SizedBox(height: 12)),
               ],
             ),
@@ -195,7 +202,7 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
               height: 52,
               child: ElevatedButton(
                 key: const Key('configure-material-save'),
-                onPressed: _hasChanges ? _saveOrder : null,
+                onPressed: _hasChanges && !_saving ? _saveOrder : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary500,
                   foregroundColor: Colors.white,
@@ -241,27 +248,23 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
     _MaterialCollectionType.ramp => 'assets/icons/home/collection_ramp.svg',
   };
 
-  String _itemLabel(String key) => switch (key) {
-    'pet' => context.l10n.configurePetBottles,
-    'hdpe' => context.l10n.configureHdpeRigid,
-    'milkPouch' => context.l10n.configureMilkPouch,
-    'pp' => context.l10n.configurePpHardPlastics,
-    'multiLayer' => context.l10n.configureMultiLayerPackaging,
-    'pvc' => context.l10n.configurePvcPlastic,
-    'mixed' => context.l10n.configureMixedGarbage,
-    'metals' => context.l10n.configureMetals,
-    'glass' => context.l10n.configureGlass,
-    'paper' => context.l10n.configurePaperCardboard,
-    'organic' => context.l10n.configureOrganicWood,
-    'concrete' => context.l10n.configureConcreteMasonry,
-    'ceramics' => context.l10n.configureCeramicsPorcelain,
-    _ => key,
-  };
-
   void _toggleItem(int index, bool selected) {
     setState(() {
       final list = _visibleItems;
-      list[index] = list[index].copyWith(selected: selected);
+      final item = list[index];
+      list[index] = ItemModel(
+        id: item.id,
+        name: item.name,
+        categoryName: item.categoryName,
+        materialType: item.materialType,
+        colour: item.colour,
+        hsnCode: item.hsnCode,
+        unitCode: item.unitCode,
+        unitName: item.unitName,
+        rate: item.rate,
+        isSelected: selected,
+        sortOrder: item.sortOrder,
+      );
       _hasChanges = true;
       _saved = false;
     });
@@ -277,11 +280,28 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
     });
   }
 
-  void _saveOrder() => setState(() {
-    _typeDropdownOpen = false;
-    _saved = true;
-    _hasChanges = false;
-  });
+  Future<void> _saveOrder() async {
+    setState(() => _saving = true);
+    try {
+      await EerlLocalRepository.instance.saveItemConfiguration(
+        channel: _channel,
+        items: [..._plasticItems, ..._nonPlasticItems],
+      );
+      if (!mounted) return;
+      setState(() {
+        _typeDropdownOpen = false;
+        _saved = true;
+        _hasChanges = false;
+        _saving = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = error;
+        _saving = false;
+      });
+    }
+  }
 }
 
 class _BackButton extends StatelessWidget {

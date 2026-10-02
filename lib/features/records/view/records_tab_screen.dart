@@ -7,9 +7,11 @@ import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
-import '../model/collection_detail_status.dart';
-import '../model/collection_record_model.dart';
 import '../model/records_view_flag.dart';
 import '../widgets/collection_draft_card.dart';
 import '../widgets/collection_history_card.dart';
@@ -29,10 +31,47 @@ class RecordsTabScreen extends StatefulWidget {
 
 class _RecordsTabScreenState extends State<RecordsTabScreen> {
   late RecordsViewFlag _view = widget.initialView;
-  int _draftCount = 3;
   _RecordsTypeFilter _typeFilter = _RecordsTypeFilter.all;
   _RecordsDateFilter _dateFilter = _RecordsDateFilter.today;
+  String _query = '';
+  String? _draftToDiscard;
+  late final LocalQueryController<
+    ({List<CollectionModel> history, List<CollectionModel> drafts})
+  >
+  _controller;
+  int _bootstrapRevision = -1;
   bool get _showDrafts => _view != RecordsViewFlag.history;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = LocalQueryController(() async {
+      final values = await Future.wait([
+        EerlLocalRepository.instance.getAgentCollections(search: _query),
+        EerlLocalRepository.instance.getAgentCollections(
+          drafts: true,
+          search: _query,
+        ),
+      ]);
+      return (history: values[0], drafts: values[1]);
+    })..load();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final revision = BootstrapSyncService.instance.revision;
+    if (_bootstrapRevision >= 0 && revision != _bootstrapRevision) {
+      _controller.load();
+    }
+    _bootstrapRevision = revision;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -71,7 +110,13 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      _SearchField(hint: context.l10n.recordsSearchHint),
+                      _SearchField(
+                        hint: context.l10n.recordsSearchHint,
+                        onChanged: (value) {
+                          _query = value;
+                          _controller.load();
+                        },
+                      ),
                       const SizedBox(height: 16),
                       RecordsSegmentedControl(
                         isDrafts: _showDrafts,
@@ -90,7 +135,25 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
                             setState(() => _typeFilter = value),
                       ),
                       const SizedBox(height: 24),
-                      if (_showDrafts) _buildDrafts() else _buildHistory(),
+                      ListenableBuilder(
+                        listenable: _controller,
+                        builder: (context, _) {
+                          if (_controller.isLoading && !_controller.hasData) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (_controller.error != null) {
+                            return Center(
+                              child: TextButton(
+                                onPressed: _controller.load,
+                                child: const Text('Retry'),
+                              ),
+                            );
+                          }
+                          return _showDrafts ? _buildDrafts() : _buildHistory();
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -110,129 +173,41 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
   );
 
   Widget _buildHistory() {
-    final groups = <(String, List<CollectionRecordModel>)>[
-      (
-        context.l10n.recordsAllCollections,
-        const [
-          CollectionRecordModel(
-            name: 'D2D',
-            receipt: 'RC-000248',
-            weight: '245 kg',
-            status: CollectionRecordStatus.pending,
-          ),
-          CollectionRecordModel(
-            name: 'MRF Station',
-            receipt: 'RC-000247',
-            weight: '115 kg',
-            status: CollectionRecordStatus.verified,
-          ),
-          CollectionRecordModel(
-            name: 'Ramp',
-            receipt: 'RC-000246',
-            weight: '320 kg',
-            status: CollectionRecordStatus.rejected,
-          ),
-        ],
-      ),
-      (
-        context.l10n.recordsYesterdayCollections,
-        const [
-          CollectionRecordModel(
-            name: 'Ramp',
-            receipt: 'RC-000246',
-            weight: '320 kg',
-            status: CollectionRecordStatus.verified,
-          ),
-          CollectionRecordModel(
-            name: 'D2D',
-            receipt: 'RC-000248',
-            weight: '245 kg',
-            status: CollectionRecordStatus.verified,
-          ),
-        ],
-      ),
-      (
-        context.l10n.recordsOctoberCollections,
-        const [
-          CollectionRecordModel(
-            name: 'Ramp',
-            receipt: 'RC-000246',
-            weight: '320 kg',
-            status: CollectionRecordStatus.pending,
-          ),
-          CollectionRecordModel(
-            name: 'D2D',
-            receipt: 'RC-000248',
-            weight: '245 kg',
-            status: CollectionRecordStatus.verified,
-          ),
-        ],
-      ),
-    ];
-    final visibleGroups = groups
-        .map(
-          (group) => (
-            group.$1,
-            group.$2.where((item) => _matchesType(item.name)).toList(),
-          ),
-        )
-        .where((group) => group.$2.isNotEmpty);
+    final items = (_controller.data?.history ?? const <CollectionModel>[])
+        .where((item) => _matchesType(item.channel) && _matchesDate(item))
+        .toList(growable: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final group in visibleGroups) ...[
-          Text(
-            group.$1,
-            style: AppTextStyles.semiboldH7_18.copyWith(
-              color: AppColors.neutral950,
-            ),
+        Text(
+          context.l10n.recordsAllCollections,
+          style: AppTextStyles.semiboldH7_18.copyWith(
+            color: AppColors.neutral950,
           ),
-          const SizedBox(height: 10),
-          for (final item in group.$2) ...[
+        ),
+        const SizedBox(height: 10),
+        if (items.isEmpty)
+          Center(child: Text(context.l10n.dashboardEmptyMessage))
+        else
+          for (final item in items) ...[
             CollectionHistoryCard(
               item: item,
               statusLabel: _statusLabel(item.status),
               onTap: () => context.push<void>(
                 AppRoutes.collectionDetail,
-                extra: _detailStatus(item.status),
+                extra: item.id,
               ),
             ),
             const SizedBox(height: 10),
           ],
-          const SizedBox(height: 6),
-        ],
       ],
     );
   }
 
   Widget _buildDrafts() {
-    final drafts = <CollectionDraftModel>[
-      CollectionDraftModel(
-        name: 'D2D',
-        date: context.l10n.recordsTodayTime,
-        weight: '240.20 KG',
-        itemCount: context.l10n.recordsFiveItemsSelected,
-        type: CollectionType.d2d,
-        resumeStep: CollectionEntryStep.photos,
-        selectedItems: const <int>{0, 1, 2, 3, 4},
-      ),
-      CollectionDraftModel(
-        name: 'MRF Station',
-        date: context.l10n.recordsOctober22Time,
-        weight: '240.20 KG',
-        itemCount: '....',
-        type: CollectionType.mrfStation,
-        resumeStep: CollectionEntryStep.items,
-      ),
-      CollectionDraftModel(
-        name: 'MRF Station',
-        date: context.l10n.recordsOctober21Time,
-        weight: '....',
-        itemCount: '....',
-        type: CollectionType.mrfStation,
-        resumeStep: CollectionEntryStep.items,
-      ),
-    ].where((draft) => _matchesType(draft.name)).take(_draftCount).toList();
+    final drafts = (_controller.data?.drafts ?? const <CollectionModel>[])
+        .where((draft) => _matchesType(draft.channel))
+        .toList(growable: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -272,8 +247,10 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
               pendingLabel: context.l10n.pendingSubmission,
               discardLabel: context.l10n.recordsDiscard,
               continueLabel: context.l10n.recordsContinue,
-              onDiscard: () =>
-                  setState(() => _view = RecordsViewFlag.discardConfirmation),
+              onDiscard: () => setState(() {
+                _draftToDiscard = item.id;
+                _view = RecordsViewFlag.discardConfirmation;
+              }),
               onContinue: () => _continueDraft(item),
             ),
             const SizedBox(height: 14),
@@ -282,27 +259,18 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
     );
   }
 
-  String _statusLabel(CollectionRecordStatus status) => switch (status) {
-    CollectionRecordStatus.pending => context.l10n.expensePendingSupervisor,
-    CollectionRecordStatus.verified => context.l10n.expenseVerified,
-    CollectionRecordStatus.rejected =>
-      context.l10n.collectionRejectedSupervisor,
+  String _statusLabel(String status) => switch (status.toUpperCase()) {
+    'VERIFIED' || 'APPROVED' => context.l10n.expenseVerified,
+    'REJECTED' => context.l10n.collectionRejectedSupervisor,
+    _ => context.l10n.expensePendingSupervisor,
   };
 
-  CollectionDetailStatus _detailStatus(CollectionRecordStatus status) =>
-      switch (status) {
-        CollectionRecordStatus.pending => CollectionDetailStatus.pending,
-        CollectionRecordStatus.verified => CollectionDetailStatus.approved,
-        CollectionRecordStatus.rejected => CollectionDetailStatus.rejected,
-      };
-
-  Future<void> _continueDraft(CollectionDraftModel draft) async {
+  Future<void> _continueDraft(CollectionModel draft) async {
     final saved = await context.push<bool>(
       AppRoutes.addCollection,
       extra: AddCollectionRouteData(
-        initialStep: draft.resumeStep,
-        initialType: draft.type,
-        initialSelectedItems: draft.selectedItems,
+        initialStep: CollectionEntryStep.items,
+        initialType: _collectionType(draft.channel),
       ),
     );
     if (mounted && saved == true) {
@@ -312,17 +280,47 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
 
   bool _matchesType(String name) => switch (_typeFilter) {
     _RecordsTypeFilter.all => true,
-    _RecordsTypeFilter.d2d => name == 'D2D',
-    _RecordsTypeFilter.mrf => name == 'MRF Station',
-    _RecordsTypeFilter.ramp => name == 'Ramp',
+    _RecordsTypeFilter.d2d => name.toUpperCase() == 'D2D',
+    _RecordsTypeFilter.mrf => name.toUpperCase().contains('MRF'),
+    _RecordsTypeFilter.ramp => name.toUpperCase() == 'RAMP',
   };
 
-  void _discardDraft() => setState(() {
-    _draftCount--;
-    _view = _draftCount <= 0
-        ? RecordsViewFlag.emptyDrafts
-        : RecordsViewFlag.afterDiscard;
-  });
+  CollectionType _collectionType(String channel) =>
+      channel.toUpperCase() == 'D2D'
+      ? CollectionType.d2d
+      : channel.toUpperCase() == 'RAMP'
+      ? CollectionType.ramp
+      : CollectionType.mrfStation;
+
+  bool _matchesDate(CollectionModel item) {
+    final value = DateTime.tryParse(
+      item.collectedAt ?? item.updatedAt,
+    )?.toLocal();
+    if (value == null) return true;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(value.year, value.month, value.day);
+    return switch (_dateFilter) {
+      _RecordsDateFilter.today => day == today,
+      _RecordsDateFilter.yesterday =>
+        day == today.subtract(const Duration(days: 1)),
+      _RecordsDateFilter.lastSevenDays =>
+        !day.isBefore(today.subtract(const Duration(days: 6))) &&
+            !day.isAfter(today),
+    };
+  }
+
+  Future<void> _discardDraft() async {
+    final id = _draftToDiscard;
+    if (id != null) await EerlLocalRepository.instance.discardDraft(id);
+    if (!mounted) return;
+    await _controller.load();
+    if (!mounted) return;
+    setState(() {
+      _draftToDiscard = null;
+      _view = RecordsViewFlag.afterDiscard;
+    });
+  }
 
   Future<void> _showDateFilter() async {
     final selected = await showModalBottomSheet<_RecordsDateFilter>(
@@ -338,12 +336,14 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
 }
 
 class _SearchField extends StatelessWidget {
-  const _SearchField({required this.hint});
+  const _SearchField({required this.hint, required this.onChanged});
   final String hint;
+  final ValueChanged<String> onChanged;
   @override
   Widget build(BuildContext context) => SizedBox(
     height: 55,
     child: TextField(
+      onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Padding(

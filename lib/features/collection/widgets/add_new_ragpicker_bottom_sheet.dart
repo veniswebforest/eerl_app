@@ -71,9 +71,6 @@ class _AddNewRagpickerBottomSheetState
     if (name.isNotEmpty) {
       widget.onSave(name);
       Navigator.pop(context);
-    } else {
-      widget.onSave('Ramesh');
-      Navigator.pop(context);
     }
   }
 

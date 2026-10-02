@@ -3,6 +3,7 @@ import 'package:eerl_app/features/auth/data/auth_repository.dart';
 import 'package:eerl_app/features/auth/model/auth_api_exception.dart';
 import 'package:eerl_app/features/auth/model/send_otp_response.dart';
 import 'package:eerl_app/features/auth/model/verify_otp_response.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:flutter/material.dart';
 
 /// Manages auth state (phone input, OTP input, countdown timer, validation, errors, API loading).
@@ -226,6 +227,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     await _repository.clearSession();
+    await BootstrapSyncService.instance.clearForLogout();
     reset();
   }
 

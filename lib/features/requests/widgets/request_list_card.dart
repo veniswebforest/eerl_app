@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import '../model/request_list_item.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class RequestListCard extends StatelessWidget {
-  const RequestListCard({
-    super.key,
-    required this.item,
-    required this.description,
-    this.onTap,
-  });
+  const RequestListCard({super.key, required this.item, this.onTap});
 
-  final RequestListItem item;
-  final String description;
+  final RequestModel item;
   final VoidCallback? onTap;
 
   @override
@@ -42,7 +37,7 @@ class RequestListCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  context.l10n.requestSupervisorName,
+                  item.createdByName ?? item.createdBy,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.semiboldH9_14.copyWith(
                     color: AppColors.neutral950,
@@ -65,7 +60,7 @@ class RequestListCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              description,
+              item.body,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.regularB8_12.copyWith(
@@ -96,7 +91,7 @@ class RequestListCard extends StatelessWidget {
               Expanded(child: _RequestStatusChip(status: item.status)),
               const SizedBox(width: 8),
               Text(
-                context.l10n.requestTodayTime(item.time),
+                _formatTime(item.createdAt),
                 style: AppTextStyles.regularB8_12.copyWith(
                   color: AppColors.neutral500,
                 ),
@@ -107,16 +102,25 @@ class RequestListCard extends StatelessWidget {
       ),
     ),
   );
+
+  String _formatTime(String value) {
+    final date = DateTime.tryParse(value)?.toLocal();
+    return date == null ? value : DateFormat('dd MMM, hh:mm a').format(date);
+  }
 }
 
 class _RequestStatusChip extends StatelessWidget {
   const _RequestStatusChip({required this.status});
 
-  final RequestListStatus status;
+  final String status;
 
   @override
   Widget build(BuildContext context) {
-    final closed = status == RequestListStatus.closed;
+    final closed = const {
+      'ANSWERED',
+      'RESOLVED',
+      'CLOSED',
+    }.contains(status.toUpperCase());
     final foreground = closed ? AppColors.primary500 : AppColors.yellow600;
     return Row(
       mainAxisSize: MainAxisSize.min,

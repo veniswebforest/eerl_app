@@ -1,8 +1,11 @@
+import 'package:eerl_app/core/local_database/app_database.dart';
+import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -23,7 +26,6 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen>
     with SingleTickerProviderStateMixin {
-  static const String _debugDummyOtp = '123456';
   late AnimationController _animController;
   late Animation<double> _fadeIn;
   late Animation<Offset> _slideUp;
@@ -51,9 +53,6 @@ class _OtpScreenState extends State<OtpScreen>
       if (widget.phoneNumber.isNotEmpty &&
           authProvider.phoneNumber != widget.phoneNumber) {
         authProvider.setPhoneNumber(widget.phoneNumber);
-      }
-      if (kDebugMode && authProvider.otp.isEmpty) {
-        authProvider.setOtp(_debugDummyOtp);
       }
     });
   }
@@ -92,10 +91,17 @@ class _OtpScreenState extends State<OtpScreen>
       if (!mounted) return;
 
       if (isValidSession) {
+        await BootstrapSyncService.instance.triggerBootstrap(
+          trigger: BootstrapTrigger.initialLogin,
+        );
+        if (!mounted) return;
+
+        final role = await _chooseRoleIfRequired();
+        if (!mounted) return;
         debugPrint(
           '[OtpScreen] OTP verification success & session valid; navigating home',
         );
-        context.go(AppRoutes.home);
+        context.go(AppRoutes.home, extra: role);
       } else {
         debugPrint(
           '[OtpScreen] Access token null or session expired; redirecting to login',
@@ -115,6 +121,47 @@ class _OtpScreenState extends State<OtpScreen>
       AppSnackbar.error(context, message: errorMessage);
     }
   }
+
+  Future<DashboardUserRole> _chooseRoleIfRequired() async {
+    final database = AppDatabase.instance;
+    final roles = await database.query(
+      DatabaseTables.myRoles,
+      columns: const ['role_key'],
+      orderBy: 'role_key',
+    );
+    final storedRole = await database.getSyncMeta('active_role');
+    final firstRoleKey = roles.isEmpty ? null : roles.first['role_key'];
+    var role = _dashboardRole(storedRole ?? firstRoleKey);
+
+    if (roles.length > 1 && mounted) {
+      final selected = await context.push<DashboardUserRole>(
+        AppRoutes.roleSwitcher,
+        extra: role,
+      );
+      if (selected != null) role = selected;
+    }
+
+    await database.setSyncMeta('active_role', _roleKey(role));
+    return role;
+  }
+
+  DashboardUserRole _dashboardRole(Object? key) => key == 'SUPERVISOR'
+      ? DashboardUserRole.supervisor
+      : key == 'ADMIN'
+      ? DashboardUserRole.admin
+      : key == 'COLLECTION_MANAGER'
+      ? DashboardUserRole.collectionManager
+      : key == 'IEC_AGENT'
+      ? DashboardUserRole.iecAgent
+      : DashboardUserRole.collectionAgent;
+
+  String _roleKey(DashboardUserRole role) => switch (role) {
+    DashboardUserRole.supervisor => 'SUPERVISOR',
+    DashboardUserRole.admin => 'ADMIN',
+    DashboardUserRole.collectionManager => 'COLLECTION_MANAGER',
+    DashboardUserRole.iecAgent => 'IEC_AGENT',
+    DashboardUserRole.collectionAgent => 'AGENT',
+  };
 
   @override
   Widget build(BuildContext context) {

@@ -2,7 +2,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
-import 'package:eerl_app/features/supervisor_requests/model/supervisor_agent_request.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_assets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -14,7 +14,7 @@ class SupervisorAgentRequestCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final SupervisorAgentRequest item;
+  final RequestModel item;
   final VoidCallback onTap;
 
   @override
@@ -38,18 +38,18 @@ class SupervisorAgentRequestCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  ClipOval(
-                    child: Image.asset(
-                      SupervisorRequestAssets.agentPhoto,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
+                  CircleAvatar(
+                    backgroundColor: AppColors.primary100,
+                    child: Text(
+                      (item.createdByName ?? '').isEmpty
+                          ? '?'
+                          : item.createdByName!.substring(0, 1).toUpperCase(),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      context.l10n.supervisorAgentRequestPerson,
+                      item.createdByName ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.boldH8_14.copyWith(
@@ -70,14 +70,14 @@ class SupervisorAgentRequestCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.l10n.supervisorAgentRequestCardTitle,
+                    item.priority,
                     style: AppTextStyles.semiboldH9_14.copyWith(
                       color: AppColors.neutral950,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    context.l10n.supervisorAgentRequestCardDescription,
+                    item.body,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.mediumSH8_14.copyWith(
@@ -86,27 +86,29 @@ class SupervisorAgentRequestCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  SvgPicture.asset(
-                    SupervisorRequestAssets.attachment,
-                    width: 20,
-                    height: 20,
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      context.l10n.requestPhotoAttached,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.mediumSH8_14.copyWith(
-                        color: AppColors.cool700,
+              if (item.photoUrls.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    SvgPicture.asset(
+                      SupervisorRequestAssets.attachment,
+                      width: 20,
+                      height: 20,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        context.l10n.taskPhotoAttached(item.photoUrls.length),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.mediumSH8_14.copyWith(
+                          color: AppColors.cool700,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -114,7 +116,7 @@ class SupervisorAgentRequestCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      context.l10n.supervisorAgentRequestTime,
+                      item.createdAt,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
@@ -136,11 +138,11 @@ class SupervisorAgentRequestCard extends StatelessWidget {
 class _RequestStatusChip extends StatelessWidget {
   const _RequestStatusChip({required this.status});
 
-  final SupervisorAgentRequestStatus status;
+  final String status;
 
   @override
   Widget build(BuildContext context) {
-    final isResolved = status == SupervisorAgentRequestStatus.resolved;
+    final isResolved = status.toUpperCase() != 'PENDING';
     return Container(
       height: 32,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),

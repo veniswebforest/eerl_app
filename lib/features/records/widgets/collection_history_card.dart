@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import '../model/collection_record_model.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'records_assets.dart';
 
 class CollectionHistoryCard extends StatelessWidget {
@@ -13,22 +13,26 @@ class CollectionHistoryCard extends StatelessWidget {
     required this.statusLabel,
     this.onTap,
   });
-  final CollectionRecordModel item;
+  final CollectionModel item;
   final String statusLabel;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = switch (item.status) {
-      CollectionRecordStatus.pending => AppColors.yellow600,
-      CollectionRecordStatus.verified => AppColors.green700,
-      CollectionRecordStatus.rejected => AppColors.red600,
-    };
-    final statusBackground = switch (item.status) {
-      CollectionRecordStatus.pending => AppColors.yellow50,
-      CollectionRecordStatus.verified => AppColors.primary50,
-      CollectionRecordStatus.rejected => AppColors.red50,
-    };
+    final normalizedStatus = item.status.toUpperCase();
+    final rejected = normalizedStatus == 'REJECTED';
+    final verified = const {'VERIFIED', 'APPROVED'}.contains(normalizedStatus);
+    final pending = !rejected && !verified;
+    final statusColor = rejected
+        ? AppColors.red600
+        : verified
+        ? AppColors.green700
+        : AppColors.yellow600;
+    final statusBackground = rejected
+        ? AppColors.red50
+        : verified
+        ? AppColors.primary50
+        : AppColors.yellow50;
 
     return GestureDetector(
       onTap: onTap,
@@ -37,9 +41,7 @@ class CollectionHistoryCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: item.status == CollectionRecordStatus.pending
-              ? Border.all(color: AppColors.primary400)
-              : null,
+          border: pending ? Border.all(color: AppColors.primary400) : null,
           boxShadow: const [
             BoxShadow(
               color: Color(0x14000000),
@@ -55,7 +57,7 @@ class CollectionHistoryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    item.name,
+                    item.channel,
                     style: AppTextStyles.semiboldH7_18.copyWith(
                       color: AppColors.neutral900,
                     ),
@@ -66,9 +68,7 @@ class CollectionHistoryCard extends StatelessWidget {
                   width: 14,
                   height: 14,
                   colorFilter: ColorFilter.mode(
-                    item.status == CollectionRecordStatus.pending
-                        ? AppColors.primary500
-                        : AppColors.cool400,
+                    pending ? AppColors.primary500 : AppColors.cool400,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -83,9 +83,15 @@ class CollectionHistoryCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  _Info(icon: RecordsAssets.receipt, text: item.receipt),
+                  _Info(
+                    icon: RecordsAssets.receipt,
+                    text: item.slipNumber ?? item.id,
+                  ),
                   const SizedBox(width: 16),
-                  _Info(icon: RecordsAssets.weight, text: item.weight),
+                  _Info(
+                    icon: RecordsAssets.weight,
+                    text: '${item.totalQty.toStringAsFixed(2)} kg',
+                  ),
                 ],
               ),
             ),

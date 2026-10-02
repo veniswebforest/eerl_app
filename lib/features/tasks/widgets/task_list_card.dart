@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../../home/widgets/home_styles.dart';
-import '../model/task_list_item.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class TaskListCard extends StatelessWidget {
   const TaskListCard({super.key, required this.item, this.onTap});
 
-  final TaskListItem item;
+  final TaskModel item;
   final VoidCallback? onTap;
 
   @override
@@ -44,7 +45,7 @@ class TaskListCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    context.l10n.taskSupervisorName,
+                    item.assignedByName ?? item.assignedBy,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.semiboldH9_14.copyWith(
@@ -68,7 +69,7 @@ class TaskListCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                context.l10n.taskDescription,
+                item.description ?? item.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.regularB7_14.copyWith(
@@ -86,7 +87,7 @@ class TaskListCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  context.l10n.taskPhotoAttached(1),
+                  context.l10n.taskPhotoAttached(item.photoUrls.length),
                   style: AppTextStyles.regularB8_12.copyWith(
                     color: AppColors.neutral600,
                   ),
@@ -98,7 +99,7 @@ class TaskListCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Expanded(
-                  child: item.status == TaskListStatus.closed
+                  child: _isClosed
                       ? Align(
                           alignment: Alignment.centerLeft,
                           child: _StatusChip(
@@ -141,43 +142,50 @@ class TaskListCard extends StatelessWidget {
     ),
   );
 
-  Widget _priorityChip(BuildContext context) => switch (item.priority) {
-    TaskPriority.high => _StatusChip(
-      icon: Icons.schedule_rounded,
-      label: context.l10n.taskPriorityHigh,
-      foreground: AppColors.red600,
-      background: AppColors.red50,
-    ),
-    TaskPriority.normal => _StatusChip(
-      icon: Icons.schedule_rounded,
-      label: context.l10n.taskPriorityNormal,
-      foreground: AppColors.yellow600,
-      background: const Color(0xFFFFFBEB),
-    ),
-    TaskPriority.low => _StatusChip(
-      icon: Icons.schedule_rounded,
-      label: context.l10n.taskPriorityLow,
-      foreground: AppColors.secondary500,
-      background: AppColors.secondary50,
-    ),
-  };
+  bool get _isClosed =>
+      const {'COMPLETED', 'CLOSED'}.contains(item.status.toUpperCase());
 
-  String _scheduleLabel(BuildContext context) => switch (item.scheduleKey) {
-    'today' => context.l10n.taskDueToday,
-    'tomorrow' => context.l10n.taskDueTomorrow,
-    'date' => context.l10n.taskDueDate,
-    'completed' => context.l10n.taskCompletedTime,
-    _ => item.scheduleKey,
-  };
+  Widget _priorityChip(BuildContext context) =>
+      switch (item.priority.toUpperCase()) {
+        'HIGH' => _StatusChip(
+          icon: Icons.schedule_rounded,
+          label: context.l10n.taskPriorityHigh,
+          foreground: AppColors.red600,
+          background: AppColors.red50,
+        ),
+        'NORMAL' || 'MEDIUM' => _StatusChip(
+          icon: Icons.schedule_rounded,
+          label: context.l10n.taskPriorityNormal,
+          foreground: AppColors.yellow600,
+          background: const Color(0xFFFFFBEB),
+        ),
+        _ => _StatusChip(
+          icon: Icons.schedule_rounded,
+          label: context.l10n.taskPriorityLow,
+          foreground: AppColors.secondary500,
+          background: AppColors.secondary50,
+        ),
+      };
 
-  String _timeLabel(BuildContext context) => switch (item.timeKey) {
-    '0900' => context.l10n.taskListTime0900,
-    '1000' => context.l10n.taskListTime1000,
-    '1145' => context.l10n.taskListTime1145,
-    '1210' => context.l10n.taskListTime1210,
-    '0600' => context.l10n.taskListTime0600,
-    _ => item.timeKey,
-  };
+  String _scheduleLabel(BuildContext context) {
+    if (_isClosed) return context.l10n.taskCompletedTime;
+    final due = DateTime.tryParse(item.dueAt ?? '')?.toLocal();
+    if (due == null) return item.status;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dueDay = DateTime(due.year, due.month, due.day);
+    if (dueDay == today) return context.l10n.taskDueToday;
+    if (dueDay == today.add(const Duration(days: 1))) {
+      return context.l10n.taskDueTomorrow;
+    }
+    return DateFormat('dd MMM yyyy').format(due);
+  }
+
+  String _timeLabel(BuildContext context) {
+    final raw = _isClosed ? item.completedAt : item.dueAt;
+    final value = DateTime.tryParse(raw ?? '')?.toLocal();
+    return value == null ? '' : DateFormat('hh:mm a').format(value);
+  }
 }
 
 class _StatusChip extends StatelessWidget {

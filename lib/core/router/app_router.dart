@@ -19,9 +19,7 @@ import 'package:eerl_app/features/end_my_day/view/end_my_day_screen.dart';
 import 'package:eerl_app/features/help_support/view/help_support_screen.dart';
 import 'package:eerl_app/features/notifications/view/notifications_screen.dart';
 import 'package:eerl_app/features/ragpicker_directory/view/ragpicker_directory_screen.dart';
-import 'package:eerl_app/features/records/model/collection_detail_status.dart';
 import 'package:eerl_app/features/records/view/collection_detail_screen.dart';
-import 'package:eerl_app/features/requests/model/request_list_item.dart';
 import 'package:eerl_app/features/requests/view/raise_request_screen.dart';
 import 'package:eerl_app/features/requests/view/request_detail_screen.dart';
 import 'package:eerl_app/features/requests/view/requests_screen.dart';
@@ -37,14 +35,13 @@ import 'package:eerl_app/features/supervisor_tasks/model/supervisor_task_detail_
 import 'package:eerl_app/features/supervisor_tasks/view/assign_supervisor_task_screen.dart';
 import 'package:eerl_app/features/supervisor_tasks/view/supervisor_task_detail_screen.dart';
 import 'package:eerl_app/features/supervisor_tasks/view/supervisor_tasks_screen.dart';
-import 'package:eerl_app/features/tasks/model/task_list_item.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/tasks/view/my_tasks_screen.dart';
 import 'package:eerl_app/features/tasks/view/task_detail_screen.dart';
 import 'package:eerl_app/features/transfer_requests/model/transfer_request_detail_state.dart';
 import 'package:eerl_app/features/transfer_requests/view/create_transfer_request_screen.dart';
 import 'package:eerl_app/features/transfer_requests/view/transfer_request_detail_screen.dart';
 import 'package:eerl_app/features/transfer_requests/view/transfer_requests_screen.dart';
-import 'package:eerl_app/features/verification/model/verification_entry.dart';
 import 'package:eerl_app/features/verification/view/reject_collection_screen.dart';
 import 'package:eerl_app/features/verification/view/verification_detail_screen.dart';
 import 'package:eerl_app/features/wallet/model/cash_request_detail_status.dart';
@@ -95,7 +92,12 @@ class AppRouter {
       name: 'home',
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) =>
-          homeBuilder?.call(context) ?? const MainDashboardScreen(),
+          homeBuilder?.call(context) ??
+          MainDashboardScreen(
+            userRole:
+                state.extra as DashboardUserRole? ??
+                DashboardUserRole.collectionAgent,
+          ),
     ),
 
     // ── Feature routes ──────────────────────────────────────────
@@ -174,11 +176,8 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.collectionDetail,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, state) => CollectionDetailScreen(
-        status:
-            state.extra as CollectionDetailStatus? ??
-            CollectionDetailStatus.pending,
-      ),
+      builder: (_, state) =>
+          CollectionDetailScreen(collectionId: state.extra! as String),
     ),
     GoRoute(
       path: AppRoutes.collectionReceipt,
@@ -247,8 +246,7 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.taskDetail,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, state) =>
-          TaskDetailScreen(task: state.extra! as TaskListItem),
+      builder: (_, state) => TaskDetailScreen(task: state.extra! as TaskModel),
     ),
     GoRoute(
       path: AppRoutes.supervisorTasks,
@@ -282,9 +280,8 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.requestDetail,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, state) => RequestDetailScreen(
-        status: state.extra as RequestListStatus? ?? RequestListStatus.open,
-      ),
+      builder: (_, state) =>
+          RequestDetailScreen(request: state.extra! as RequestModel),
     ),
     GoRoute(
       path: AppRoutes.supervisorRequests,
@@ -330,11 +327,8 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.verificationDetail,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, state) => VerificationDetailScreen(
-        status:
-            state.extra as VerificationDetailStatus? ??
-            VerificationDetailStatus.pending,
-      ),
+      builder: (_, state) =>
+          VerificationDetailScreen(collectionId: state.extra! as String),
     ),
     GoRoute(
       path: AppRoutes.rejectCollection,

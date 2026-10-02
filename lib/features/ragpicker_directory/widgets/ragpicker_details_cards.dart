@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import '../model/ragpicker_directory_item.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class RagpickerRegistrationCard extends StatelessWidget {
   const RagpickerRegistrationCard({super.key, required this.registrationId});
@@ -51,7 +51,7 @@ class RagpickerInformationCard extends StatelessWidget {
     this.zoneValue,
   });
 
-  final RagpickerDirectoryItem item;
+  final RagpickerModel item;
   final String fullNameLabel;
   final String mobileLabel;
   final String identityLabel;
@@ -63,9 +63,8 @@ class RagpickerInformationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final rows = <(String, String)>[
       (fullNameLabel, item.name),
-      (mobileLabel, item.phone),
-      (identityLabel, item.identityNumber),
-      (dateLabel, item.createdAt),
+      (mobileLabel, item.phone ?? '—'),
+      (identityLabel, item.idNumber ?? '—'),
       if (zoneLabel != null && zoneValue != null) (zoneLabel!, zoneValue!),
     ];
     return Container(
@@ -109,9 +108,10 @@ class RagpickerInformationCard extends StatelessWidget {
 }
 
 class RagpickerProofCard extends StatelessWidget {
-  const RagpickerProofCard({super.key, required this.title});
+  const RagpickerProofCard({super.key, required this.title, this.photoUrl});
 
   final String title;
+  final String? photoUrl;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -123,20 +123,21 @@ class RagpickerProofCard extends StatelessWidget {
       children: [
         Text(title, style: AppTextStyles.semiboldH7_18),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            _proofImage('assets/images/ragpicker_directory/profile_photo.png'),
-            const SizedBox(width: 12),
-            _proofImage('assets/images/ragpicker_directory/id_proof.png'),
-          ],
-        ),
+        if (photoUrl != null && photoUrl!.isNotEmpty)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image.network(
+              photoUrl!,
+              width: 109,
+              height: 70,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
+            ),
+          )
+        else
+          const Text('—'),
       ],
     ),
-  );
-
-  Widget _proofImage(String path) => ClipRRect(
-    borderRadius: BorderRadius.circular(6),
-    child: Image.asset(path, width: 109, height: 70, fit: BoxFit.cover),
   );
 }
 

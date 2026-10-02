@@ -12,6 +12,7 @@ class AppConstants {
   static const String apiBaseUrl = 'https://eerl-backend.onrender.com/api/v1';
   static const String sendOtpPath = '/mobile/auth/send-otp';
   static const String verifyOtpPath = '/mobile/auth/verify-otp';
+  static const String bootstrapPath = '/mobile/bootstrap';
 
   // SharedPreferences Keys
   static const String themeKey = 'app_theme_mode';

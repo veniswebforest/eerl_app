@@ -6,6 +6,9 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'home_assets.dart';
 import 'home_styles.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 
 class SupervisorTodaysSummary extends StatefulWidget {
   const SupervisorTodaysSummary({super.key});
@@ -17,15 +20,37 @@ class SupervisorTodaysSummary extends StatefulWidget {
 
 class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
   bool _isVisible = true;
+  late final LocalQueryController<SupervisorHomeSummaryModel> _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = LocalQueryController(
+      EerlLocalRepository.instance.getSupervisorHomeSummary,
+    )..load();
+    _controller.addListener(_refresh);
+  }
+
+  void _refresh() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_refresh);
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final summary = _controller.data;
     final items = [
       _SupervisorSummaryItem(
         icon: HomeAssets.supervisorActiveAgents,
         iconBackground: AppColors.secondary100,
         label: context.l10n.supervisorActiveAgents,
-        value: const TextSpan(text: '03'),
+        value: TextSpan(text: '${summary?.collections ?? 0}'),
         valueColor: AppColors.secondary500,
       ),
       _SupervisorSummaryItem(
@@ -34,12 +59,12 @@ class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
         label: context.l10n.supervisorTransportsDone,
         value: TextSpan(
           children: [
-            const TextSpan(
-              text: '12',
+            TextSpan(
+              text: '${summary?.pendingVerification ?? 0}',
               style: TextStyle(color: AppColors.orchid),
             ),
             TextSpan(
-              text: '/16',
+              text: '/${summary?.collections ?? 0}',
               style: TextStyle(color: AppColors.neutral700),
             ),
           ],
@@ -50,89 +75,93 @@ class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
         icon: HomeAssets.supervisorTotalStocks,
         iconBackground: AppColors.purpleLight,
         label: context.l10n.supervisorTotalStocks,
-        value: const TextSpan(text: '2,840 KG'),
+        value: TextSpan(text: '${(summary?.kg ?? 0).toStringAsFixed(2)} KG'),
         valueColor: AppColors.purple,
       ),
       _SupervisorSummaryItem(
         icon: HomeAssets.supervisorPendingExpenses,
         iconBackground: AppColors.yellow50,
         label: context.l10n.supervisorPendingExpenses,
-        value: const TextSpan(text: '04'),
+        value: TextSpan(text: '${summary?.openTasks ?? 0}'),
         valueColor: AppColors.yellow600,
       ),
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                context.l10n.todaysSummary,
-                style: HomeStyles.sectionTitle,
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  context.l10n.todaysSummary,
+                  style: HomeStyles.sectionTitle,
+                ),
               ),
-            ),
-            Semantics(
-              button: true,
-              toggled: _isVisible,
-              label: _isVisible
-                  ? context.l10n.hideTodaysSummary
-                  : context.l10n.showTodaysSummary,
-              child: Tooltip(
-                message: _isVisible
+              Semantics(
+                button: true,
+                toggled: _isVisible,
+                label: _isVisible
                     ? context.l10n.hideTodaysSummary
                     : context.l10n.showTodaysSummary,
-                child: InkWell(
-                  key: const Key('supervisor-toggle-todays-summary'),
-                  onTap: () => setState(() => _isVisible = !_isVisible),
-                  borderRadius: BorderRadius.circular(20),
-                  child: SvgPicture.asset(
-                    _isVisible
-                        ? HomeAssets.supervisorSummaryEye
-                        : HomeAssets.summaryHide,
-                    key: ValueKey(
+                child: Tooltip(
+                  message: _isVisible
+                      ? context.l10n.hideTodaysSummary
+                      : context.l10n.showTodaysSummary,
+                  child: InkWell(
+                    key: const Key('supervisor-toggle-todays-summary'),
+                    onTap: () => setState(() => _isVisible = !_isVisible),
+                    borderRadius: BorderRadius.circular(20),
+                    child: SvgPicture.asset(
                       _isVisible
-                          ? 'supervisor-summary-visible-icon'
-                          : 'supervisor-summary-hidden-icon',
+                          ? HomeAssets.supervisorSummaryEye
+                          : HomeAssets.summaryHide,
+                      key: ValueKey(
+                        _isVisible
+                            ? 'supervisor-summary-visible-icon'
+                            : 'supervisor-summary-hidden-icon',
+                      ),
+                      width: 28,
+                      height: 28,
                     ),
-                    width: 28,
-                    height: 28,
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 220),
-          alignment: Alignment.topCenter,
-          child: _isVisible
-              ? Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final columns = constraints.maxWidth < 320 ? 1 : 2;
-                      final width =
-                          (constraints.maxWidth - (columns - 1) * 8) / columns;
-                      return Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: items
-                            .map(
-                              (item) => SizedBox(
-                                width: width,
-                                child: _SupervisorSummaryCard(item: item),
-                              ),
-                            )
-                            .toList(),
-                      );
-                    },
-                  ),
-                )
-              : const SizedBox(width: double.infinity),
-        ),
-      ],
+            ],
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            alignment: Alignment.topCenter,
+            child: _isVisible
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final columns = constraints.maxWidth < 320 ? 1 : 2;
+                        final width =
+                            (constraints.maxWidth - (columns - 1) * 8) /
+                            columns;
+                        return Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: items
+                              .map(
+                                (item) => SizedBox(
+                                  width: width,
+                                  child: _SupervisorSummaryCard(item: item),
+                                ),
+                              )
+                              .toList(),
+                        );
+                      },
+                    ),
+                  )
+                : const SizedBox(width: double.infinity),
+          ),
+        ],
+      ),
     );
   }
 }

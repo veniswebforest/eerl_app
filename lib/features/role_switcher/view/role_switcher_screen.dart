@@ -6,6 +6,9 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import '../widgets/role_switcher_assets.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 
 class RoleSwitcherScreen extends StatefulWidget {
   const RoleSwitcherScreen({super.key, required this.initialRole});
@@ -18,6 +21,39 @@ class RoleSwitcherScreen extends StatefulWidget {
 
 class _RoleSwitcherScreenState extends State<RoleSwitcherScreen> {
   late DashboardUserRole _selectedRole = widget.initialRole;
+  late final LocalQueryController<
+    ({List<MyRoleModel> roles, List<CenterModel> centers})
+  >
+  _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = LocalQueryController(() async {
+      final values = await Future.wait([
+        EerlLocalRepository.instance.getRoles(),
+        EerlLocalRepository.instance.getCenters(),
+      ]);
+      return (
+        roles: values[0] as List<MyRoleModel>,
+        centers: values[1] as List<CenterModel>,
+      );
+    })..load();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  DashboardUserRole _role(String key) => switch (key.toUpperCase()) {
+    'SUPERVISOR' => DashboardUserRole.supervisor,
+    'ADMIN' => DashboardUserRole.admin,
+    'COLLECTION_MANAGER' => DashboardUserRole.collectionManager,
+    'IEC_AGENT' => DashboardUserRole.iecAgent,
+    _ => DashboardUserRole.collectionAgent,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -59,28 +95,35 @@ class _RoleSwitcherScreenState extends State<RoleSwitcherScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-              _RoleOptionCard(
-                key: const Key('role-option-agent'),
-                title: context.l10n.drawerUserRole,
-                zone: context.l10n.homeSuratSouthZone,
-                icon: RoleSwitcherAssets.agent,
-                selected: _selectedRole == DashboardUserRole.collectionAgent,
-                onTap: () => setState(
-                  () => _selectedRole = DashboardUserRole.collectionAgent,
+              Expanded(
+                child: ListenableBuilder(
+                  listenable: _controller,
+                  builder: (context, _) {
+                    final data = _controller.data;
+                    final roles = data?.roles ?? const <MyRoleModel>[];
+                    final centerNames =
+                        data?.centers.map((center) => center.name).join(', ') ??
+                        '';
+                    return ListView.separated(
+                      itemCount: roles.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final role = _role(roles[index].roleKey);
+                        return _RoleOptionCard(
+                          key: ValueKey(roles[index].roleKey),
+                          title: roles[index].roleName,
+                          zone: centerNames,
+                          icon: role == DashboardUserRole.supervisor
+                              ? RoleSwitcherAssets.supervisor
+                              : RoleSwitcherAssets.agent,
+                          selected: _selectedRole == role,
+                          onTap: () => setState(() => _selectedRole = role),
+                        );
+                      },
+                    );
+                  },
                 ),
               ),
-              const SizedBox(height: 16),
-              _RoleOptionCard(
-                key: const Key('role-option-supervisor'),
-                title: context.l10n.roleCollectionSupervisor,
-                zone: context.l10n.homeSuratNorthZone,
-                icon: RoleSwitcherAssets.supervisor,
-                selected: _selectedRole == DashboardUserRole.supervisor,
-                onTap: () => setState(
-                  () => _selectedRole = DashboardUserRole.supervisor,
-                ),
-              ),
-              const Spacer(),
               SizedBox(
                 width: double.infinity,
                 height: 52,
