@@ -9,7 +9,7 @@ class AppConstants {
 
   static const String appName = 'EERL App';
 
-  static const String apiBaseUrl = 'https://eerl-backend.onrender.com/api/v1';
+  static const String apiBaseUrl = 'https://api.eco-vision.in/api/v1';
   static const String sendOtpPath = '/mobile/auth/send-otp';
   static const String verifyOtpPath = '/mobile/auth/verify-otp';
   static const String bootstrapPath = '/mobile/bootstrap';

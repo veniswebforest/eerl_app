@@ -250,6 +250,7 @@ class VehicleTypeModel {
 class VehicleModel {
   const VehicleModel({
     required this.id,
+    this.number,
     this.centerId,
     required this.plateNumber,
     required this.typeId,
@@ -260,6 +261,7 @@ class VehicleModel {
     required this.syncState,
   });
   final String id;
+  final String? number;
   final String? centerId;
   final String plateNumber;
   final String typeId;
@@ -270,6 +272,7 @@ class VehicleModel {
   final String syncState;
   factory VehicleModel.fromMap(DbMap map) => VehicleModel(
     id: map['id'] as String,
+    number: map['number'] as String?,
     centerId: map['center_id'] as String?,
     plateNumber: map['plate_number'] as String,
     typeId: map['type_id'] as String,
@@ -281,6 +284,7 @@ class VehicleModel {
   );
   DbMap toMap() => {
     'id': id,
+    'number': number,
     'center_id': centerId,
     'plate_number': plateNumber,
     'type_id': typeId,
@@ -295,6 +299,7 @@ class VehicleModel {
 class MrfPersonModel {
   const MrfPersonModel({
     required this.id,
+    this.number,
     required this.centerId,
     required this.name,
     this.phone,
@@ -305,6 +310,7 @@ class MrfPersonModel {
     required this.syncState,
   });
   final String id;
+  final String? number;
   final String centerId;
   final String name;
   final String? phone;
@@ -315,6 +321,7 @@ class MrfPersonModel {
   final String syncState;
   factory MrfPersonModel.fromMap(DbMap map) => MrfPersonModel(
     id: map['id'] as String,
+    number: map['number'] as String?,
     centerId: map['center_id'] as String,
     name: map['name'] as String,
     phone: map['phone'] as String?,
@@ -326,6 +333,7 @@ class MrfPersonModel {
   );
   DbMap toMap() => {
     'id': id,
+    'number': number,
     'center_id': centerId,
     'name': name,
     'phone': phone,
@@ -340,6 +348,7 @@ class MrfPersonModel {
 class RagpickerModel {
   const RagpickerModel({
     required this.id,
+    this.number,
     required this.centerId,
     required this.name,
     this.phone,
@@ -349,6 +358,7 @@ class RagpickerModel {
     required this.syncState,
   });
   final String id;
+  final String? number;
   final String centerId;
   final String name;
   final String? phone;
@@ -358,6 +368,7 @@ class RagpickerModel {
   final String syncState;
   factory RagpickerModel.fromMap(DbMap map) => RagpickerModel(
     id: map['id'] as String,
+    number: map['number'] as String?,
     centerId: map['center_id'] as String,
     name: map['name'] as String,
     phone: map['phone'] as String?,
@@ -368,6 +379,7 @@ class RagpickerModel {
   );
   DbMap toMap() => {
     'id': id,
+    'number': number,
     'center_id': centerId,
     'name': name,
     'phone': phone,
@@ -678,6 +690,7 @@ class ExpenseModel {
 class CashRequestModel {
   const CashRequestModel({
     required this.id,
+    this.number,
     required this.centerId,
     required this.requestedBy,
     this.requestedByName,
@@ -691,6 +704,7 @@ class CashRequestModel {
     required this.syncState,
   });
   final String id;
+  final String? number;
   final String centerId;
   final String requestedBy;
   final String? requestedByName;
@@ -704,6 +718,7 @@ class CashRequestModel {
   final String syncState;
   factory CashRequestModel.fromMap(DbMap map) => CashRequestModel(
     id: map['id'] as String,
+    number: map['number'] as String?,
     centerId: map['center_id'] as String,
     requestedBy: map['requested_by'] as String,
     requestedByName: map['requested_by_name'] as String?,
@@ -718,6 +733,7 @@ class CashRequestModel {
   );
   DbMap toMap() => {
     'id': id,
+    'number': number,
     'center_id': centerId,
     'requested_by': requestedBy,
     'requested_by_name': requestedByName,
@@ -735,6 +751,7 @@ class CashRequestModel {
 class CategoryRequestModel {
   const CategoryRequestModel({
     required this.id,
+    this.number,
     required this.centerId,
     required this.requestedBy,
     required this.name,
@@ -744,6 +761,7 @@ class CategoryRequestModel {
     required this.syncState,
   });
   final String id;
+  final String? number;
   final String centerId;
   final String requestedBy;
   final String name;
@@ -753,6 +771,7 @@ class CategoryRequestModel {
   final String syncState;
   factory CategoryRequestModel.fromMap(DbMap map) => CategoryRequestModel(
     id: map['id'] as String,
+    number: map['number'] as String?,
     centerId: map['center_id'] as String,
     requestedBy: map['requested_by'] as String,
     name: map['name'] as String,
@@ -763,6 +782,7 @@ class CategoryRequestModel {
   );
   DbMap toMap() => {
     'id': id,
+    'number': number,
     'center_id': centerId,
     'requested_by': requestedBy,
     'name': name,
@@ -907,6 +927,7 @@ class TransferItemModel {
 class TaskModel {
   const TaskModel({
     required this.id,
+    this.number,
     this.centerId,
     required this.assignedTo,
     this.assignedToName,
@@ -923,6 +944,7 @@ class TaskModel {
     required this.syncState,
   });
   final String id;
+  final String? number;
   final String? centerId;
   final String assignedTo;
   final String? assignedToName;
@@ -939,13 +961,14 @@ class TaskModel {
   final String syncState;
   factory TaskModel.fromMap(DbMap map) => TaskModel(
     id: map['id'] as String,
+    number: map['number'] as String?,
     centerId: map['center_id'] as String?,
     assignedTo: map['assigned_to'] as String,
     assignedToName: map['assigned_to_name'] as String?,
     assignedBy: map['assigned_by'] as String,
     assignedByName: map['assigned_by_name'] as String?,
     title: map['title'] as String,
-    description: map['description'] as String?,
+    description: (map['description'] ?? map['note']) as String?,
     priority: map['priority'] as String,
     status: map['status'] as String,
     dueAt: map['due_at'] as String?,
@@ -956,6 +979,7 @@ class TaskModel {
   );
   DbMap toMap() => {
     'id': id,
+    'number': number,
     'center_id': centerId,
     'assigned_to': assignedTo,
     'assigned_to_name': assignedToName,
@@ -976,6 +1000,7 @@ class TaskModel {
 class RequestModel {
   const RequestModel({
     required this.id,
+    this.number,
     this.centerId,
     required this.createdBy,
     this.createdByName,
@@ -989,6 +1014,7 @@ class RequestModel {
     required this.syncState,
   });
   final String id;
+  final String? number;
   final String? centerId;
   final String createdBy;
   final String? createdByName;
@@ -1002,6 +1028,7 @@ class RequestModel {
   final String syncState;
   factory RequestModel.fromMap(DbMap map) => RequestModel(
     id: map['id'] as String,
+    number: map['number'] as String?,
     centerId: map['center_id'] as String?,
     createdBy: map['created_by'] as String,
     createdByName: map['created_by_name'] as String?,
@@ -1016,6 +1043,7 @@ class RequestModel {
   );
   DbMap toMap() => {
     'id': id,
+    'number': number,
     'center_id': centerId,
     'created_by': createdBy,
     'created_by_name': createdByName,

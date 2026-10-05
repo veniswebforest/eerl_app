@@ -397,10 +397,10 @@ class _NoVehicleFoundCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        _ContactSupervisorButton(
-          label: context.l10n.collectionContactSupervisor,
-          onPressed: onContactSupervisor,
-        ),
+        // _ContactSupervisorButton(
+        //   label: context.l10n.collectionContactSupervisor,
+        //   onPressed: onContactSupervisor,
+        // ),
       ],
     ),
   );

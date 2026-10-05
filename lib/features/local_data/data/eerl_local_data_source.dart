@@ -1,8 +1,8 @@
-import 'dart:convert';
-
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
+import 'package:eerl_app/core/local_database/outbox_queue.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
 class EerlLocalDataSource {
@@ -72,7 +72,8 @@ class EerlLocalDataSource {
 
   Future<AgentHomeSummaryModel> getAgentHomeSummary() async {
     final userId = await currentUserId;
-    if (userId == null) {
+    final centerId = await activeCenterId;
+    if (userId == null || centerId == null) {
       return const AgentHomeSummaryModel(
         collections: 0,
         kg: 0,
@@ -81,49 +82,68 @@ class EerlLocalDataSource {
         toFix: 0,
       );
     }
+    final todayStart = _startOfIstDayUtc();
     final rows = await _database.rawQuery(
       '''
       SELECT
         (SELECT COUNT(*) FROM ${DatabaseTables.collections}
-          WHERE agent_id = ? AND status != 'DRAFT'
-            AND date(collected_at, 'localtime') = date('now', 'localtime')) AS collections,
-        (SELECT COALESCE(SUM(ci.qty), 0)
+          WHERE agent_id = ? AND center_id = ? AND status != 'DRAFT'
+            AND collected_at >= ?) AS collections,
+        (SELECT COALESCE(SUM(CASE WHEN i.unit_code = 'KG'
+          THEN COALESCE(ci.verified_qty, ci.qty) ELSE 0 END), 0)
           FROM ${DatabaseTables.collectionItems} ci
           JOIN ${DatabaseTables.collections} c ON c.id = ci.collection_id
-          WHERE c.agent_id = ? AND c.status != 'DRAFT'
-            AND date(c.collected_at, 'localtime') = date('now', 'localtime')) AS kg,
+          JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
+          WHERE c.agent_id = ? AND c.center_id = ? AND c.status != 'DRAFT'
+            AND c.collected_at >= ?) AS kg,
         (SELECT COUNT(*) FROM ${DatabaseTables.tasks}
-          WHERE assigned_to = ? AND status NOT IN ('COMPLETED', 'CLOSED')) AS tasks,
+          WHERE assigned_to = ? AND status = 'PENDING') AS tasks,
         (SELECT COUNT(*) FROM ${DatabaseTables.collections}
           WHERE agent_id = ? AND status = 'DRAFT') AS drafts,
         (SELECT COUNT(*) FROM ${DatabaseTables.collections}
           WHERE agent_id = ? AND status = 'REJECTED') AS to_fix
     ''',
-      [userId, userId, userId, userId, userId],
+      [
+        userId,
+        centerId,
+        todayStart,
+        userId,
+        centerId,
+        todayStart,
+        userId,
+        userId,
+        userId,
+      ],
     );
     return AgentHomeSummaryModel.fromMap(rows.single);
   }
 
   Future<SupervisorHomeSummaryModel> getSupervisorHomeSummary() async {
-    final rows = await _database.rawQuery('''
+    final todayStart = _startOfIstDayUtc();
+    final rows = await _database.rawQuery(
+      '''
       SELECT
         (SELECT COUNT(*) FROM ${DatabaseTables.collections} c
           WHERE c.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})
             AND c.status != 'DRAFT'
-            AND date(c.collected_at, 'localtime') = date('now', 'localtime')) AS collections,
-        (SELECT COALESCE(SUM(ci.qty), 0)
+            AND c.collected_at >= ?) AS collections,
+        (SELECT COALESCE(SUM(CASE WHEN i.unit_code = 'KG'
+          THEN COALESCE(ci.verified_qty, ci.qty) ELSE 0 END), 0)
           FROM ${DatabaseTables.collectionItems} ci
           JOIN ${DatabaseTables.collections} c ON c.id = ci.collection_id
+          JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
           WHERE c.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})
             AND c.status != 'DRAFT'
-            AND date(c.collected_at, 'localtime') = date('now', 'localtime')) AS kg,
+            AND c.collected_at >= ?) AS kg,
         (SELECT COUNT(*) FROM ${DatabaseTables.collections} c
           WHERE c.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})
-            AND c.status IN ('SUBMITTED', 'PENDING', 'PENDING_VERIFICATION')) AS pending_verification,
+            AND c.status = 'SUBMITTED') AS pending_verification,
         (SELECT COUNT(*) FROM ${DatabaseTables.tasks} t
           WHERE t.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})
-            AND t.status NOT IN ('COMPLETED', 'CLOSED')) AS open_tasks
-    ''');
+            AND t.status = 'PENDING') AS open_tasks
+    ''',
+      [todayStart, todayStart],
+    );
     return SupervisorHomeSummaryModel.fromMap(rows.single);
   }
 
@@ -148,69 +168,248 @@ class EerlLocalDataSource {
     if (resolvedCenter == null) return const [];
     final rows = await _database.rawQuery(
       '''
-      SELECT i.*, ci.rate, ci.is_selected, ci.sort_order
+      SELECT i.*,
+        CASE WHEN COALESCE(ch.show_price, 0) = 1 THEN ci.rate END AS rate,
+        COALESCE(ci.is_selected, 0) AS is_selected,
+        ci.sort_order,
+        ci.item_id AS configured_item_id
+      FROM ${DatabaseTables.items} i
+      LEFT JOIN ${DatabaseTables.centerItems} ci
+        ON ci.item_id = i.id AND ci.center_id = ? AND ci.channel = ?
+      LEFT JOIN ${DatabaseTables.centerChannels} ch
+        ON ch.center_id = ? AND ch.channel = ?
+      ${selectedOnly ? 'WHERE COALESCE(ci.is_selected, 0) = 1' : ''}
+      ORDER BY
+        CASE WHEN ci.sort_order IS NULL THEN 1 ELSE 0 END,
+        ci.sort_order,
+        i.name COLLATE NOCASE
+    ''',
+      [resolvedCenter, channel, resolvedCenter, channel],
+    );
+    if (kDebugMode) {
+      final configured = rows
+          .where((row) => row['configured_item_id'] != null)
+          .length;
+      final selected = rows
+          .where((row) => (row['is_selected'] as num?)?.toInt() == 1)
+          .length;
+      debugPrint(
+        '📚 [EERL_MATERIAL_CONFIG][SQLITE][LOAD] ITEMS '
+        'center=$resolvedCenter channel=$channel total=${rows.length} '
+        'configured=$configured selected=$selected',
+      );
+    }
+    return rows.map(ItemModel.fromMap).toList(growable: false);
+  }
+
+  Future<List<ItemModel>> getCollectionMaterials({
+    String? centerId,
+    required String channel,
+  }) async {
+    final resolvedCenter = centerId ?? await activeCenterId;
+    if (resolvedCenter == null) return const [];
+    final rows = await _database.rawQuery(
+      '''
+      SELECT i.*,
+        CASE WHEN ch.show_price = 1 THEN ci.rate END AS rate,
+        ci.is_selected,
+        ci.sort_order
       FROM ${DatabaseTables.centerItems} ci
       JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
-      WHERE ci.center_id = ? AND ci.channel = ?
-        ${selectedOnly ? 'AND ci.is_selected = 1' : ''}
+      JOIN ${DatabaseTables.centerChannels} ch
+        ON ch.center_id = ci.center_id AND ch.channel = ci.channel
+      WHERE ci.center_id = ?
+        AND ci.channel = ?
+        AND ci.is_selected = 1
       ORDER BY ci.sort_order, i.name COLLATE NOCASE
-    ''',
+      ''',
       [resolvedCenter, channel],
     );
+    if (kDebugMode) {
+      debugPrint(
+        '📦 [EERL_ADD_COLLECTION][SQLITE][LOAD] CENTER_ITEMS '
+        'center=$resolvedCenter channel=$channel selected_items=${rows.length}',
+      );
+    }
     return rows.map(ItemModel.fromMap).toList(growable: false);
   }
 
   Future<void> saveItemConfiguration({
     String? centerId,
     required String channel,
+    required String tab,
     required List<ItemModel> items,
   }) async {
     final resolvedCenter = centerId ?? await activeCenterId;
     if (resolvedCenter == null) {
       throw StateError('No active center is available.');
     }
+    final itemIds = items.map((item) => item.id).toList(growable: false);
+    if (itemIds.toSet().length != itemIds.length) {
+      throw ArgumentError('Material configuration contains duplicate items.');
+    }
     final now = DateTime.now().toUtc().toIso8601String();
+    final entityId = '$resolvedCenter:$channel:$tab';
+    final refs = <String>[resolvedCenter, ...itemIds];
     final body = <String, Object?>{
-      'center_id': resolvedCenter,
-      'channel': channel,
+      'centerId': resolvedCenter,
+      'collectionChannel': channel,
+      'tab': tab,
       'items': [
         for (var index = 0; index < items.length; index++)
           {
-            'item_id': items[index].id,
-            'is_selected': items[index].isSelected == true ? 1 : 0,
-            'sort_order': index,
+            'itemId': items[index].id,
+            'isSelected': items[index].isSelected == true,
+            'sortOrder': index,
             'rate': items[index].rate,
           },
       ],
     };
 
     await _database.transaction((txn) async {
+      if (itemIds.isNotEmpty) {
+        final placeholders = List.filled(itemIds.length, '?').join(',');
+        final sourceItemCount = Sqflite.firstIntValue(
+          await txn.rawQuery(
+            'SELECT COUNT(*) FROM ${DatabaseTables.items} '
+            'WHERE id IN ($placeholders)',
+            itemIds,
+          ),
+        );
+        if (sourceItemCount != itemIds.length) {
+          throw StateError(
+            'Material configuration contains an item missing from the '
+            '${DatabaseTables.items} table.',
+          );
+        }
+      }
+
       for (var index = 0; index < items.length; index++) {
         final item = items[index];
-        await txn.update(
+        await txn.insert(DatabaseTables.centerItems, {
+          'center_id': resolvedCenter,
+          'channel': channel,
+          'item_id': item.id,
+          'is_selected': item.isSelected == true ? 1 : 0,
+          'sort_order': index,
+          'rate': item.rate,
+          'sync_state': 'pending',
+        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+        final values = <String, Object?>{
+          'is_selected': item.isSelected == true ? 1 : 0,
+          'sort_order': index,
+          'sync_state': 'pending',
+        };
+        if (item.rate != null) values['rate'] = item.rate;
+        final changed = await txn.update(
           DatabaseTables.centerItems,
-          {
-            'is_selected': item.isSelected == true ? 1 : 0,
-            'sort_order': index,
-            'sync_state': 'pending',
-          },
+          values,
           where: 'center_id = ? AND channel = ? AND item_id = ?',
           whereArgs: [resolvedCenter, channel, item.id],
         );
+        if (changed != 1) {
+          throw StateError(
+            'Material configuration could not be stored for '
+            '$resolvedCenter/$channel/${item.id}.',
+          );
+        }
       }
-      await txn.insert(DatabaseTables.outbox, {
-        'method': 'PUT',
-        'path': '/api/v1/mobile/center-items',
-        'body': jsonEncode(body),
-        'entity': 'center_items',
-        'entity_id': '$resolvedCenter:$channel',
-        'kind': 'CONFIGURE',
-        'refs': jsonEncode([for (final item in items) item.id]),
-        'status': 'pending',
-        'attempts': 0,
-        'created_at': now,
-      });
+
+      final updated = await OutboxQueue.updateQueued(
+        txn,
+        entity: DatabaseTables.centerItems,
+        entityId: entityId,
+        kind: 'item_config',
+        body: body,
+        refs: refs,
+      );
+      if (updated == 0) {
+        await OutboxQueue.enqueue(
+          txn,
+          method: 'PUT',
+          path: '/item-config',
+          body: body,
+          entity: DatabaseTables.centerItems,
+          entityId: entityId,
+          kind: 'item_config',
+          refs: refs,
+          createdAt: now,
+        );
+      }
     });
+    if (kDebugMode) {
+      await _debugLogMaterialConfigCommit(
+        centerId: resolvedCenter,
+        channel: channel,
+        tab: tab,
+        itemIds: itemIds,
+      );
+    }
+  }
+
+  Future<void> _debugLogMaterialConfigCommit({
+    required String centerId,
+    required String channel,
+    required String tab,
+    required List<String> itemIds,
+  }) async {
+    try {
+      final entityId = '$centerId:$channel:$tab';
+      final placeholders = List.filled(itemIds.length, '?').join(',');
+      final counts = itemIds.isEmpty
+          ? <String, Object?>{
+              'stored_count': 0,
+              'selected_count': 0,
+              'pending_count': 0,
+            }
+          : (await _database.rawQuery(
+              '''
+              SELECT COUNT(*) AS stored_count,
+                SUM(CASE WHEN is_selected = 1 THEN 1 ELSE 0 END)
+                  AS selected_count,
+                SUM(CASE WHEN sync_state = 'pending' THEN 1 ELSE 0 END)
+                  AS pending_count
+              FROM ${DatabaseTables.centerItems}
+              WHERE center_id = ? AND channel = ?
+                AND item_id IN ($placeholders)
+              ''',
+              [centerId, channel, ...itemIds],
+            )).single;
+      final outbox = await _database.query(
+        DatabaseTables.outbox,
+        columns: const ['seq', 'method', 'path', 'kind', 'status'],
+        where: 'entity = ? AND entity_id = ? AND kind = ?',
+        whereArgs: [DatabaseTables.centerItems, entityId, 'item_config'],
+        orderBy: 'seq DESC',
+        limit: 1,
+      );
+      final storedCount = (counts['stored_count'] as num?)?.toInt() ?? 0;
+      if (storedCount != itemIds.length || outbox.isEmpty) {
+        debugPrint(
+          '🛑 [EERL_MATERIAL_CONFIG][SQLITE][COMMIT] VERIFY_FAILED '
+          'center=$centerId channel=$channel tab=$tab '
+          'rows=$storedCount/${itemIds.length} '
+          'outbox_stored=${outbox.isNotEmpty}',
+        );
+        return;
+      }
+
+      final queued = outbox.single;
+      debugPrint(
+        '✅ [EERL_MATERIAL_CONFIG][SQLITE][COMMIT] STORED '
+        'center=$centerId channel=$channel tab=$tab '
+        'rows=$storedCount selected=${counts['selected_count'] ?? 0} '
+        'pending=${counts['pending_count'] ?? 0} '
+        'outbox_seq=${queued['seq']} method=${queued['method']} '
+        'kind=${queued['kind']} queue_status=${queued['status']} '
+        'path=${queued['path']}',
+      );
+    } catch (error) {
+      debugPrint(
+        '🛑 [EERL_MATERIAL_CONFIG][SQLITE][COMMIT] LOG_FAILED '
+        'center=$centerId channel=$channel tab=$tab error=$error',
+      );
+    }
   }
 
   Future<List<VehicleModel>> getVehicles({
@@ -221,9 +420,11 @@ class EerlLocalDataSource {
     if (resolvedCenter == null) return const [];
     final rows = await _database.query(
       DatabaseTables.vehicles,
-      where: 'center_id = ?${activeOnly ? ' AND is_active = 1' : ''}',
+      where:
+          '(center_id = ? OR center_id IS NULL)'
+          '${activeOnly ? ' AND is_active = 1' : ''}',
       whereArgs: [resolvedCenter],
-      orderBy: 'plate_number COLLATE NOCASE',
+      orderBy: 'center_id IS NULL, plate_number COLLATE NOCASE',
     );
     return rows.map(VehicleModel.fromMap).toList(growable: false);
   }
@@ -234,41 +435,118 @@ class EerlLocalDataSource {
         orderBy: 'name COLLATE NOCASE',
       )).map(VehicleTypeModel.fromMap).toList(growable: false);
 
-  Future<void> saveVehicle(VehicleModel vehicle) async {
+  Future<void> saveVehicle(VehicleModel vehicle, {required bool isNew}) async {
     final now = DateTime.now().toUtc().toIso8601String();
+    final body = <String, Object?>{...vehicle.toMap()}..remove('sync_state');
+    final refs = <String>[
+      if (vehicle.centerId != null) vehicle.centerId!,
+      vehicle.typeId,
+    ];
     await _database.transaction((txn) async {
-      await txn.insert(DatabaseTables.vehicles, {
+      await _upsertById(txn, DatabaseTables.vehicles, {
         ...vehicle.toMap(),
         'sync_state': 'pending',
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
-      await txn.insert(DatabaseTables.outbox, {
-        'method': 'PUT',
-        'path': '/api/v1/mobile/vehicles/${vehicle.id}',
-        'body': jsonEncode(vehicle.toMap()),
-        'entity': 'vehicles',
-        'entity_id': vehicle.id,
-        'kind': 'UPSERT',
-        'status': 'pending',
-        'attempts': 0,
-        'created_at': now,
       });
+
+      final updated = await OutboxQueue.updateQueued(
+        txn,
+        entity: DatabaseTables.vehicles,
+        entityId: vehicle.id,
+        kind: 'upsert',
+        body: body,
+        refs: refs,
+      );
+      if (updated == 0) {
+        await OutboxQueue.enqueue(
+          txn,
+          method: isNew ? 'PUT' : 'PATCH',
+          path: '/vehicles/${vehicle.id}',
+          body: body,
+          entity: DatabaseTables.vehicles,
+          entityId: vehicle.id,
+          kind: 'upsert',
+          refs: refs,
+          createdAt: now,
+        );
+      }
     });
+    if (kDebugMode) await _debugLogVehicleCommit(vehicle.id);
   }
 
-  Future<void> setVehicleActive(VehicleModel vehicle, bool active) =>
-      saveVehicle(
-        VehicleModel(
-          id: vehicle.id,
-          centerId: vehicle.centerId,
-          plateNumber: vehicle.plateNumber,
-          typeId: vehicle.typeId,
-          typeName: vehicle.typeName,
-          capacityKg: vehicle.capacityKg,
-          driverName: vehicle.driverName,
-          isActive: active,
-          syncState: 'pending',
-        ),
+  Future<void> _debugLogVehicleCommit(String vehicleId) async {
+    try {
+      final vehicles = await _database.query(
+        DatabaseTables.vehicles,
+        columns: const [
+          'id',
+          'center_id',
+          'plate_number',
+          'type_id',
+          'is_active',
+          'sync_state',
+        ],
+        where: 'id = ?',
+        whereArgs: [vehicleId],
+        limit: 1,
       );
+      final outbox = await _database.query(
+        DatabaseTables.outbox,
+        columns: const ['seq', 'method', 'path', 'kind', 'status'],
+        where: 'entity = ? AND entity_id = ? AND kind = ?',
+        whereArgs: [DatabaseTables.vehicles, vehicleId, 'upsert'],
+        orderBy: 'seq DESC',
+        limit: 1,
+      );
+      if (vehicles.isEmpty || outbox.isEmpty) {
+        debugPrint(
+          '🛑 [EERL_VEHICLE][SQLITE][COMMIT] VERIFY_FAILED '
+          'vehicle_id=$vehicleId vehicle_stored=${vehicles.isNotEmpty} '
+          'outbox_stored=${outbox.isNotEmpty}',
+        );
+        return;
+      }
+
+      final vehicle = vehicles.single;
+      final queued = outbox.single;
+      debugPrint(
+        '✅ [EERL_VEHICLE][SQLITE][COMMIT] STORED '
+        'vehicle_id=$vehicleId center=${vehicle['center_id']} '
+        'plate=${vehicle['plate_number']} type_id=${vehicle['type_id']} '
+        'is_active=${vehicle['is_active']} '
+        'sync_state=${vehicle['sync_state']} '
+        'outbox_seq=${queued['seq']} method=${queued['method']} '
+        'kind=${queued['kind']} queue_status=${queued['status']} '
+        'path=${queued['path']}',
+      );
+    } catch (error) {
+      debugPrint(
+        '🛑 [EERL_VEHICLE][SQLITE][COMMIT] LOG_FAILED '
+        'vehicle_id=$vehicleId error=$error',
+      );
+    }
+  }
+
+  Future<void> setVehicleActive(VehicleModel vehicle, bool active) async {
+    final now = DateTime.now().toUtc().toIso8601String();
+    await _database.transaction((txn) async {
+      await txn.update(
+        DatabaseTables.vehicles,
+        {'is_active': active ? 1 : 0, 'sync_state': 'pending'},
+        where: 'id = ?',
+        whereArgs: [vehicle.id],
+      );
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/vehicles/${vehicle.id}/status',
+        body: {'is_active': active},
+        entity: DatabaseTables.vehicles,
+        entityId: vehicle.id,
+        kind: 'status',
+        createdAt: now,
+      );
+    });
+  }
 
   Future<List<MrfPersonModel>> getMrfPeople({
     String? centerId,
@@ -320,37 +598,44 @@ class EerlLocalDataSource {
   Future<void> saveRagpicker(RagpickerModel ragpicker) async {
     final now = DateTime.now().toUtc().toIso8601String();
     await _database.transaction((txn) async {
-      await txn.insert(DatabaseTables.ragpickers, {
+      await _upsertById(txn, DatabaseTables.ragpickers, {
         ...ragpicker.toMap(),
         'sync_state': 'pending',
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
-      await txn.insert(DatabaseTables.outbox, {
-        'method': 'PUT',
-        'path': '/api/v1/mobile/ragpickers/${ragpicker.id}',
-        'body': jsonEncode(ragpicker.toMap()),
-        'entity': 'ragpickers',
-        'entity_id': ragpicker.id,
-        'kind': 'UPSERT',
-        'status': 'pending',
-        'attempts': 0,
-        'created_at': now,
       });
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'PUT',
+        path: '/ragpickers/${ragpicker.id}',
+        body: ragpicker.toMap(),
+        entity: DatabaseTables.ragpickers,
+        entityId: ragpicker.id,
+        kind: 'upsert',
+        createdAt: now,
+      );
     });
   }
 
-  Future<void> setRagpickerActive(RagpickerModel ragpicker, bool active) =>
-      saveRagpicker(
-        RagpickerModel(
-          id: ragpicker.id,
-          centerId: ragpicker.centerId,
-          name: ragpicker.name,
-          phone: ragpicker.phone,
-          idNumber: ragpicker.idNumber,
-          photoUrl: ragpicker.photoUrl,
-          isActive: active,
-          syncState: 'pending',
-        ),
+  Future<void> setRagpickerActive(RagpickerModel ragpicker, bool active) async {
+    final now = DateTime.now().toUtc().toIso8601String();
+    await _database.transaction((txn) async {
+      await txn.update(
+        DatabaseTables.ragpickers,
+        {'is_active': active ? 1 : 0, 'sync_state': 'pending'},
+        where: 'id = ?',
+        whereArgs: [ragpicker.id],
       );
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/ragpickers/${ragpicker.id}/status',
+        body: {'is_active': active},
+        entity: DatabaseTables.ragpickers,
+        entityId: ragpicker.id,
+        kind: 'status',
+        createdAt: now,
+      );
+    });
+  }
 
   Future<List<ExpenseCategoryModel>> getExpenseCategories({
     String? centerId,
@@ -399,6 +684,10 @@ class EerlLocalDataSource {
       drafts ? "c.status = 'DRAFT'" : "c.status != 'DRAFT'",
     ];
     final args = <Object?>[userId];
+    if (!drafts) {
+      conditions.add('c.collected_at >= ?');
+      args.add(_startOfIstDayUtc(daysAgo: 6));
+    }
     if (channel != null && channel.isNotEmpty) {
       conditions.add('c.channel = ?');
       args.add(channel);
@@ -429,8 +718,8 @@ class EerlLocalDataSource {
     final conditions = <String>[
       'c.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})',
       pending
-          ? "c.status IN ('SUBMITTED', 'PENDING', 'PENDING_VERIFICATION')"
-          : "c.status IN ('VERIFIED', 'APPROVED', 'REJECTED')",
+          ? "c.status = 'SUBMITTED'"
+          : "c.status IN ('APPROVED', 'REJECTED')",
     ];
     final args = <Object?>[];
     if (channel != null && channel.isNotEmpty) {
@@ -497,66 +786,339 @@ class EerlLocalDataSource {
     required List<CollectionItemModel> items,
     required bool submit,
   }) async {
+    if (items.isEmpty) {
+      throw ArgumentError.value(
+        items,
+        'items',
+        'At least one item is required.',
+      );
+    }
+    for (final item in items) {
+      if (item.collectionId != collection.id || item.qty <= 0) {
+        throw ArgumentError('Collection item identity or quantity is invalid.');
+      }
+      if (submit && (item.verifiedQty == null || item.verifiedQty! <= 0)) {
+        throw ArgumentError('Verified quantity is required before submission.');
+      }
+    }
     final now = DateTime.now().toUtc().toIso8601String();
     final photoIds = <String>[];
+    final savedItemIds = <String>[];
     await _database.transaction((txn) async {
-      await txn.insert(DatabaseTables.collections, {
+      final channelRows = await txn.query(
+        DatabaseTables.centerChannels,
+        columns: const ['takes_payment'],
+        where: 'center_id = ? AND channel = ?',
+        whereArgs: [collection.centerId, collection.channel],
+        limit: 1,
+      );
+      final takesPayment = channelRows.isEmpty
+          ? collection.takesPayment
+          : channelRows.single['takes_payment'] == 1;
+      if (submit && collection.channel.toUpperCase() == 'MRF') {
+        final supervisors = await txn.query(
+          DatabaseTables.mrfPeople,
+          columns: const ['id'],
+          where: "id = ? AND role = 'SUPERVISOR' AND is_active = 1",
+          whereArgs: [collection.mrfPersonId],
+          limit: 1,
+        );
+        if (supervisors.isEmpty) {
+          throw StateError('An active MRF supervisor is required.');
+        }
+      }
+      final existing = await txn.query(
+        DatabaseTables.collections,
+        columns: const ['status', 'slip_number', 'collected_at'],
+        where: 'id = ?',
+        whereArgs: [collection.id],
+        limit: 1,
+      );
+      final existingRow = existing.isEmpty ? null : existing.single;
+      final isResubmission = existingRow?['status'] == 'REJECTED';
+      var slipNumber =
+          collection.slipNumber ?? existingRow?['slip_number'] as String?;
+      var collectedAt =
+          collection.collectedAt ?? existingRow?['collected_at'] as String?;
+
+      if (submit && !isResubmission && slipNumber == null) {
+        final centerRows = await txn.rawQuery(
+          '''
+          SELECT c.code, m.agent_number, m.slip_date, m.slip_last_count
+          FROM ${DatabaseTables.myCenters} m
+          JOIN ${DatabaseTables.centers} c ON c.id = m.center_id
+          WHERE m.center_id = ?
+          LIMIT 1
+        ''',
+          [collection.centerId],
+        );
+        if (centerRows.isEmpty) {
+          throw StateError('Cannot create a slip for an unavailable center.');
+        }
+        final istNow = DateTime.now().toUtc().add(
+          const Duration(hours: 5, minutes: 30),
+        );
+        final today = _dateKey(istNow);
+        final center = centerRows.single;
+        final lastCount = center['slip_date'] == today
+            ? ((center['slip_last_count'] as num?)?.toInt() ?? 0)
+            : 0;
+        final nextCount = lastCount + 1;
+        final code = (center['code'] as String?)?.trim();
+        final agentNumber = (center['agent_number'] as num?)?.toInt();
+        if (code == null || code.isEmpty || agentNumber == null) {
+          throw StateError('Center code or agent number is missing.');
+        }
+        final compactDate =
+            '${today.substring(2, 4)}${today.substring(5, 7)}${today.substring(8, 10)}';
+        slipNumber =
+            '$code-$compactDate-${agentNumber.toString().padLeft(2, '0')}-${nextCount.toString().padLeft(3, '0')}';
+        await txn.update(
+          DatabaseTables.myCenters,
+          {'slip_date': today, 'slip_last_count': nextCount},
+          where: 'center_id = ?',
+          whereArgs: [collection.centerId],
+        );
+      }
+      if (submit) collectedAt ??= now;
+
+      final collectionRow = <String, Object?>{
         ...collection.toMap(),
-        'status': submit ? 'PENDING' : 'DRAFT',
+        'status': submit ? 'SUBMITTED' : 'DRAFT',
+        'slip_number': slipNumber,
+        'collected_at': collectedAt,
+        'takes_payment': takesPayment == null ? null : (takesPayment ? 1 : 0),
+        'rejection_reason': submit ? null : collection.rejectionReason,
+        'updated_at': now,
         'sync_state': 'pending',
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      };
+      await _upsertById(txn, DatabaseTables.collections, collectionRow);
+
+      // Collection ids are generated on the phone. Read the saved parent row
+      // back before writing its complete child set so every line is linked to
+      // an id that is present in `collections` inside this transaction.
+      final savedParents = await txn.query(
+        DatabaseTables.collections,
+        columns: const ['id'],
+        where: 'id = ?',
+        whereArgs: [collection.id],
+        limit: 1,
+      );
+      if (savedParents.isEmpty) {
+        throw StateError('Collection parent row was not saved.');
+      }
+      final savedCollectionId = savedParents.single['id']! as String;
+
       await txn.delete(
         DatabaseTables.collectionItems,
         where: 'collection_id = ?',
-        whereArgs: [collection.id],
+        whereArgs: [savedCollectionId],
       );
+      final handoverPhotoIds = <String>[];
+      for (
+        var index = 0;
+        index < collection.handoverPhotoUrls.length;
+        index++
+      ) {
+        final photoId = '${collection.id}_handover_$index';
+        handoverPhotoIds.add(photoId);
+        photoIds.add(photoId);
+        await _upsertById(txn, DatabaseTables.photos, {
+          'id': photoId,
+          'owner_table': DatabaseTables.collections,
+          'owner_id': collection.id,
+          'field': 'handover',
+          'purpose': 'COLLECTION_HANDOVER',
+          'content_type': 'image/jpeg',
+          'local_path': collection.handoverPhotoUrls[index],
+          'status': 'local',
+          'created_at': now,
+        });
+      }
+      final bodyItems = <Map<String, Object?>>[];
       for (final item in items) {
-        await txn.insert(DatabaseTables.collectionItems, item.toMap());
+        final itemPhotoIds = <String>[];
+        final normalizedItem = <String, Object?>{
+          ...item.toMap(),
+          // The data source owns the parent/child relationship. Never rely on
+          // a caller-provided map value when persisting the child list.
+          'collection_id': savedCollectionId,
+          'amount': item.rate == null || item.verifiedQty == null
+              ? null
+              : double.parse(
+                  (item.verifiedQty! * item.rate!).toStringAsFixed(2),
+                ),
+        };
+        await txn.insert(DatabaseTables.collectionItems, normalizedItem);
+        savedItemIds.add(item.id);
         for (var index = 0; index < item.photoUrls.length; index++) {
           final path = item.photoUrls[index];
           final photoId = '${item.id}_photo_$index';
+          itemPhotoIds.add(photoId);
           photoIds.add(photoId);
-          await txn.insert(DatabaseTables.photos, {
+          await _upsertById(txn, DatabaseTables.photos, {
             'id': photoId,
             'owner_table': DatabaseTables.collectionItems,
             'owner_id': item.id,
-            'field': 'photo_urls',
-            'purpose': 'collection_item',
+            'field': 'item',
+            'purpose': 'COLLECTION_LINE',
             'content_type': 'image/jpeg',
             'local_path': path,
-            'status': 'pending',
+            'status': 'local',
             'created_at': now,
-          }, conflictAlgorithm: ConflictAlgorithm.replace);
+          });
         }
+        bodyItems.add({...normalizedItem, 'photo_urls': itemPhotoIds});
+      }
+
+      final savedItemCount = Sqflite.firstIntValue(
+        await txn.rawQuery(
+          'SELECT COUNT(*) FROM ${DatabaseTables.collectionItems} '
+          'WHERE collection_id = ?',
+          [savedCollectionId],
+        ),
+      );
+      if (savedItemCount != items.length) {
+        throw StateError(
+          'Collection item set was not saved completely '
+          '(${savedItemCount ?? 0}/${items.length}).',
+        );
       }
       final body = {
-        ...collection.toMap(),
-        'status': submit ? 'PENDING' : 'DRAFT',
-        'items': items.map((item) => item.toMap()).toList(growable: false),
+        ...collectionRow,
+        'handover_photo_urls': handoverPhotoIds,
+        'items': bodyItems,
       };
-      final seq = await txn.insert(DatabaseTables.outbox, {
-        'method': 'PUT',
-        'path': '/api/v1/mobile/collections/${collection.id}',
-        'body': jsonEncode(body),
-        'entity': 'collections',
-        'entity_id': collection.id,
-        'kind': submit ? 'SUBMIT' : 'DRAFT',
-        'refs': jsonEncode(photoIds),
-        'status': 'pending',
-        'attempts': 0,
-        'created_at': now,
-      });
-      for (final photoId in photoIds) {
-        await txn.insert(DatabaseTables.outboxPhotos, {
-          'outbox_seq': seq,
-          'photo_id': photoId,
-        });
+
+      final hasDraftOutbox = await OutboxQueue.hasQueued(
+        txn,
+        entity: DatabaseTables.collections,
+        entityId: savedCollectionId,
+        kind: 'draft_save',
+      );
+      if (submit && hasDraftOutbox) {
+        await OutboxQueue.removeQueued(
+          txn,
+          entity: DatabaseTables.collections,
+          entityId: savedCollectionId,
+          kind: 'draft_save',
+        );
+      } else if (!submit && hasDraftOutbox) {
+        await OutboxQueue.updateQueued(
+          txn,
+          entity: DatabaseTables.collections,
+          entityId: savedCollectionId,
+          kind: 'draft_save',
+          body: body,
+          refs: photoIds,
+        );
+        return;
       }
+
+      await OutboxQueue.enqueue(
+        txn,
+        method: submit ? 'POST' : 'PUT',
+        path: submit
+            ? '/collections/$savedCollectionId/submit'
+            : '/collections/$savedCollectionId',
+        body: body,
+        entity: DatabaseTables.collections,
+        entityId: savedCollectionId,
+        kind: submit ? 'submit' : 'draft_save',
+        refs: photoIds,
+        blockingPhotoIds: submit ? photoIds : const <String>[],
+        createdAt: now,
+      );
     });
+    if (kDebugMode) {
+      await _debugLogCollectionCommit(
+        collectionId: collection.id,
+        centerId: collection.centerId,
+        channel: collection.channel,
+        expectedItemIds: savedItemIds,
+      );
+    }
+  }
+
+  Future<void> _debugLogCollectionCommit({
+    required String collectionId,
+    required String centerId,
+    required String channel,
+    required List<String> expectedItemIds,
+  }) async {
+    final graphRows = await _database.rawQuery(
+      '''
+      SELECT c.id, c.status, c.sync_state,
+        (SELECT COUNT(*)
+         FROM ${DatabaseTables.collectionItems} ci
+         WHERE ci.collection_id = c.id) AS item_count,
+        (SELECT COUNT(*)
+         FROM ${DatabaseTables.photos} p
+         WHERE (p.owner_table = ? AND p.owner_id = c.id)
+            OR (p.owner_table = ? AND p.owner_id IN (
+              SELECT ci.id
+              FROM ${DatabaseTables.collectionItems} ci
+              WHERE ci.collection_id = c.id
+            ))) AS photo_count
+      FROM ${DatabaseTables.collections} c
+      WHERE c.id = ?
+      LIMIT 1
+    ''',
+      [
+        DatabaseTables.collections,
+        DatabaseTables.collectionItems,
+        collectionId,
+      ],
+    );
+    final outboxRows = await _database.query(
+      DatabaseTables.outbox,
+      columns: const ['seq', 'method', 'path', 'kind', 'status'],
+      where: 'entity = ? AND entity_id = ?',
+      whereArgs: [DatabaseTables.collections, collectionId],
+      orderBy: 'seq DESC',
+      limit: 1,
+    );
+    if (graphRows.isEmpty || outboxRows.isEmpty) {
+      debugPrint(
+        '🛑 [EERL_COLLECTION][SQLITE][COMMIT] VERIFY_FAILED '
+        'collection_id=$collectionId collection_stored=${graphRows.isNotEmpty} '
+        'outbox_stored=${outboxRows.isNotEmpty}',
+      );
+      return;
+    }
+
+    final graph = graphRows.single;
+    final outbox = outboxRows.single;
+    final outboxSeq = (outbox['seq'] as num).toInt();
+    final blockedPhotos =
+        Sqflite.firstIntValue(
+          await _database.rawQuery(
+            'SELECT COUNT(*) FROM ${DatabaseTables.outboxPhotos} '
+            'WHERE outbox_seq = ?',
+            [outboxSeq],
+          ),
+        ) ??
+        0;
+    debugPrint(
+      '✅ [EERL_COLLECTION][SQLITE][COMMIT] STORED '
+      'collection_id=$collectionId center=$centerId channel=$channel '
+      'status=${graph['status']} sync_state=${graph['sync_state']} '
+      'collection_items=${graph['item_count']} '
+      'item_ids=${expectedItemIds.join(',')} photos=${graph['photo_count']} '
+      'outbox_seq=$outboxSeq method=${outbox['method']} '
+      'kind=${outbox['kind']} queue_status=${outbox['status']} '
+      'outbox_photos=$blockedPhotos path=${outbox['path']}',
+    );
   }
 
   Future<void> discardDraft(String collectionId) =>
       _database.runInTransaction((txn) async {
+        await OutboxQueue.removeQueued(
+          txn,
+          entity: DatabaseTables.collections,
+          entityId: collectionId,
+          kind: 'draft_save',
+        );
         await txn.delete(
           DatabaseTables.collectionItems,
           where: 'collection_id = ?',
@@ -567,6 +1129,14 @@ class EerlLocalDataSource {
           where: "id = ? AND status = 'DRAFT'",
           whereArgs: [collectionId],
         );
+        await OutboxQueue.enqueue(
+          txn,
+          method: 'DELETE',
+          path: '/collections/$collectionId',
+          entity: DatabaseTables.collections,
+          entityId: collectionId,
+          kind: 'discard',
+        );
       });
 
   Future<List<ExpenseModel>> getExpenses({
@@ -575,12 +1145,16 @@ class EerlLocalDataSource {
   }) async {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
+    final centerId = await activeCenterId;
+    if (!supervisor && centerId == null) return const [];
     final conditions = <String>[
       supervisor
           ? 'e.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
-          : 'e.user_id = ?',
+          : 'e.user_id = ? AND e.center_id = ?',
     ];
-    final args = <Object?>[if (!supervisor) userId];
+    final args = <Object?>[
+      if (!supervisor) ...[userId, centerId],
+    ];
     if (status != null && status.isNotEmpty) {
       conditions.add('e.status = ?');
       args.add(status);
@@ -600,12 +1174,14 @@ class EerlLocalDataSource {
   }) async {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
+    final centerId = await activeCenterId;
+    if (!supervisor && centerId == null) return const [];
     final rows = await _database.query(
       DatabaseTables.cashRequests,
       where: supervisor
           ? 'center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
-          : 'requested_by = ?',
-      whereArgs: supervisor ? null : [userId],
+          : 'requested_by = ? AND center_id = ?',
+      whereArgs: supervisor ? null : [userId, centerId],
       orderBy: 'created_at DESC',
     );
     return rows.map(CashRequestModel.fromMap).toList(growable: false);
@@ -616,12 +1192,14 @@ class EerlLocalDataSource {
   }) async {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
+    final centerId = await activeCenterId;
+    if (!supervisor && centerId == null) return const [];
     final rows = await _database.query(
       DatabaseTables.categoryRequests,
       where: supervisor
           ? 'center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
-          : 'requested_by = ?',
-      whereArgs: supervisor ? null : [userId],
+          : 'requested_by = ? AND center_id = ?',
+      whereArgs: supervisor ? null : [userId, centerId],
       orderBy: 'created_at DESC',
     );
     return rows.map(CategoryRequestModel.fromMap).toList(growable: false);
@@ -681,16 +1259,18 @@ class EerlLocalDataSource {
     ];
     final args = <Object?>[if (!supervisor) userId];
     if (search.trim().isNotEmpty) {
-      conditions.add('(title LIKE ? OR description LIKE ?)');
+      conditions.add('(title LIKE ? OR description LIKE ? OR note LIKE ?)');
       final like = '%${search.trim()}%';
-      args.addAll([like, like]);
+      args.addAll([like, like, like]);
     }
     final rows = await _database.query(
       DatabaseTables.tasks,
       where: conditions.join(' AND '),
       whereArgs: args,
-      orderBy:
-          "CASE priority WHEN 'HIGH' THEN 0 WHEN 'NORMAL' THEN 1 ELSE 2 END, due_at, created_at DESC",
+      orderBy: supervisor
+          ? "CASE status WHEN 'PENDING' THEN 0 ELSE 1 END, due_at"
+          : "CASE status WHEN 'PENDING' THEN 0 ELSE 1 END, "
+                "CASE priority WHEN 'HIGH' THEN 0 WHEN 'NORMAL' THEN 1 ELSE 2 END, created_at DESC",
     );
     return rows.map(TaskModel.fromMap).toList(growable: false);
   }
@@ -735,14 +1315,27 @@ class EerlLocalDataSource {
       '''
       SELECT
         COALESCE((SELECT balance FROM ${DatabaseTables.centerBalances}
-          WHERE center_id = ?), 0) AS balance_now,
-        COALESCE(SUM(CASE WHEN kind IN ('CASH_IN', 'CREDIT') THEN amount ELSE 0 END), 0) AS cash_in,
-        COALESCE(SUM(CASE WHEN kind IN ('PAID_OUT', 'PAYMENT') THEN amount ELSE 0 END), 0) AS paid_out,
-        COALESCE(SUM(CASE WHEN kind IN ('SPENT', 'EXPENSE') THEN amount ELSE 0 END), 0) AS spent
+          WHERE center_id = ?), 0)
+          - COALESCE((SELECT SUM(amount) FROM ${DatabaseTables.expenses}
+              WHERE center_id = ? AND sync_state = 'pending'), 0)
+          - COALESCE((SELECT SUM(total_amount) FROM ${DatabaseTables.collections}
+              WHERE center_id = ? AND sync_state = 'pending'
+                AND status = 'SUBMITTED' AND takes_payment = 1), 0) AS balance_now,
+        COALESCE(SUM(CASE WHEN kind = 'TOP_UP' THEN amount ELSE 0 END), 0) AS cash_in,
+        -COALESCE(SUM(CASE WHEN kind IN ('COLLECTION_PAYMENT', 'COLLECTION_REVERSAL')
+          THEN amount ELSE 0 END), 0) AS paid_out,
+        -COALESCE(SUM(CASE WHEN kind IN ('EXPENSE', 'EXPENSE_REVERSAL')
+          THEN amount ELSE 0 END), 0) AS spent
       FROM ${DatabaseTables.walletEntries}
-      WHERE center_id = ?
+      WHERE center_id = ? AND created_at >= ?
     ''',
-      [resolvedCenter, resolvedCenter],
+      [
+        resolvedCenter,
+        resolvedCenter,
+        resolvedCenter,
+        resolvedCenter,
+        _startOfIstDayUtc(),
+      ],
     );
     return WalletSummaryModel.fromMap(rows.single);
   }
@@ -750,11 +1343,16 @@ class EerlLocalDataSource {
   Future<List<WalletEntryModel>> getWalletEntries({String? centerId}) async {
     final resolvedCenter = centerId ?? await activeCenterId;
     if (resolvedCenter == null) return const [];
-    final rows = await _database.query(
-      DatabaseTables.walletEntries,
-      where: 'center_id = ?',
-      whereArgs: [resolvedCenter],
-      orderBy: 'created_at DESC',
+    final rows = await _database.rawQuery(
+      '''
+      SELECT w.*, c.slip_number, e.number AS expense_number
+      FROM ${DatabaseTables.walletEntries} w
+      LEFT JOIN ${DatabaseTables.collections} c ON c.id = w.collection_id
+      LEFT JOIN ${DatabaseTables.expenses} e ON e.id = w.expense_id
+      WHERE w.center_id = ?
+      ORDER BY w.created_at DESC
+    ''',
+      [resolvedCenter],
     );
     return rows.map(WalletEntryModel.fromMap).toList(growable: false);
   }
@@ -777,15 +1375,26 @@ class EerlLocalDataSource {
         orderBy: 'created_at DESC',
       )).map(NotificationModel.fromMap).toList(growable: false);
 
-  Future<void> markNotificationRead(String id) => _database.update(
-    DatabaseTables.notifications,
-    {
-      'read_at': DateTime.now().toUtc().toIso8601String(),
-      'sync_state': 'pending',
-    },
-    where: 'id = ?',
-    whereArgs: [id],
-  );
+  Future<void> markNotificationRead(String id) =>
+      _database.runInTransaction((txn) async {
+        final now = DateTime.now().toUtc().toIso8601String();
+        final changed = await txn.update(
+          DatabaseTables.notifications,
+          {'read_at': now, 'sync_state': 'pending'},
+          where: 'id = ? AND read_at IS NULL',
+          whereArgs: [id],
+        );
+        if (changed == 0) return;
+        await OutboxQueue.enqueue(
+          txn,
+          method: 'POST',
+          path: '/notifications/$id/read',
+          entity: DatabaseTables.notifications,
+          entityId: id,
+          kind: 'read',
+          createdAt: now,
+        );
+      });
 
   Future<List<StockModel>> getStock({String? centerId, String? stage}) async {
     final resolvedCenter = centerId ?? await activeCenterId;
@@ -808,20 +1417,25 @@ class EerlLocalDataSource {
   }
 
   Future<List<AgentStatusModel>> getAgentStatus() async {
-    final rows = await _database.rawQuery('''
+    final todayStart = _startOfIstDayUtc();
+    final rows = await _database.rawQuery(
+      '''
       SELECT cp.user_id, cp.name, cp.phone, c.name AS center_name,
-        COUNT(CASE WHEN date(col.collected_at, 'localtime') = date('now', 'localtime') THEN 1 END) AS collections_today,
+        COUNT(col.id) AS collections_today,
         MAX(col.collected_at) AS last_collection_at,
-        COUNT(CASE WHEN col.status IN ('SUBMITTED', 'PENDING', 'PENDING_VERIFICATION') THEN 1 END) AS waiting_review
+        SUM(CASE WHEN col.status = 'SUBMITTED' THEN 1 ELSE 0 END) AS waiting_review
       FROM ${DatabaseTables.centerPeople} cp
       JOIN ${DatabaseTables.centers} c ON c.id = cp.center_id
       LEFT JOIN ${DatabaseTables.collections} col
         ON col.agent_id = cp.user_id AND col.center_id = cp.center_id
+        AND col.status != 'DRAFT' AND col.collected_at >= ?
       WHERE cp.is_agent = 1
         AND cp.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})
       GROUP BY cp.user_id, cp.center_id
       ORDER BY cp.name COLLATE NOCASE
-    ''');
+    ''',
+      [todayStart],
+    );
     return rows.map(AgentStatusModel.fromMap).toList(growable: false);
   }
 
@@ -837,7 +1451,7 @@ class EerlLocalDataSource {
         (SELECT COUNT(*) FROM ${DatabaseTables.outbox}
           WHERE status = 'failed') AS failed_count,
         (SELECT COUNT(*) FROM ${DatabaseTables.photos}
-          WHERE status IN ('local', 'queued', 'uploading')) AS waiting_photo_count
+          WHERE status IN ('local', 'uploading', 'failed')) AS waiting_photo_count
     ''');
     return SyncStatusModel.fromMap(rows.single);
   }
@@ -857,4 +1471,50 @@ class EerlLocalDataSource {
         where: "status = 'failed'",
         orderBy: 'seq',
       )).map(FailedOutboxItemModel.fromMap).toList(growable: false);
+
+  Future<void> retryFailedOutboxItem(int seq) => _database.update(
+    DatabaseTables.outbox,
+    {'status': 'queued', 'next_attempt_at': null},
+    where: "seq = ? AND status = 'failed'",
+    whereArgs: [seq],
+  );
+
+  static Future<void> _upsertById(
+    Transaction txn,
+    String table,
+    Map<String, Object?> values,
+  ) async {
+    final id = values['id'];
+    if (id == null) throw ArgumentError('$table upsert requires an id.');
+
+    final updates = <String, Object?>{...values}..remove('id');
+    final changed = await txn.update(
+      table,
+      updates,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (changed == 0) {
+      await txn.insert(table, values);
+    }
+  }
+
+  static String _startOfIstDayUtc({int daysAgo = 0}) {
+    final istNow = DateTime.now().toUtc().add(
+      const Duration(hours: 5, minutes: 30),
+    );
+    final istStart = DateTime.utc(
+      istNow.year,
+      istNow.month,
+      istNow.day,
+    ).subtract(Duration(days: daysAgo));
+    return istStart
+        .subtract(const Duration(hours: 5, minutes: 30))
+        .toIso8601String();
+  }
+
+  static String _dateKey(DateTime value) =>
+      '${value.year.toString().padLeft(4, '0')}-'
+      '${value.month.toString().padLeft(2, '0')}-'
+      '${value.day.toString().padLeft(2, '0')}';
 }

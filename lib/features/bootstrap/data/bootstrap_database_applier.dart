@@ -4,6 +4,7 @@ import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/features/bootstrap/model/bootstrap_response.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_log.dart';
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
 class BootstrapDatabaseApplier {
@@ -45,6 +46,19 @@ class BootstrapDatabaseApplier {
     DatabaseTables.dayCloses: 'id',
     DatabaseTables.centerBalances: 'center_id',
     DatabaseTables.stock: 'id',
+  };
+
+  /// Only these API table names are handled by this applier. Keeping this
+  /// allow-list also makes the post-commit count query safe for table names.
+  static const _bootstrapTableNames = <String>{
+    ..._referenceWithoutSyncState,
+    ..._referenceWithSyncState,
+    ..._recordWithSyncState,
+    DatabaseTables.dayCloses,
+    DatabaseTables.centerBalances,
+    DatabaseTables.stock,
+    DatabaseTables.collectionItems,
+    DatabaseTables.transferItems,
   };
 
   static const _recordColumns = <String, Set<String>>{
@@ -91,6 +105,7 @@ class BootstrapDatabaseApplier {
     },
     DatabaseTables.cashRequests: {
       'id',
+      'number',
       'center_id',
       'requested_by',
       'requested_by_name',
@@ -105,6 +120,7 @@ class BootstrapDatabaseApplier {
     },
     DatabaseTables.categoryRequests: {
       'id',
+      'number',
       'center_id',
       'requested_by',
       'name',
@@ -138,12 +154,14 @@ class BootstrapDatabaseApplier {
     },
     DatabaseTables.tasks: {
       'id',
+      'number',
       'center_id',
       'assigned_to',
       'assigned_to_name',
       'assigned_by',
       'assigned_by_name',
       'title',
+      'note',
       'description',
       'priority',
       'status',
@@ -155,6 +173,7 @@ class BootstrapDatabaseApplier {
     },
     DatabaseTables.requests: {
       'id',
+      'number',
       'center_id',
       'created_by',
       'created_by_name',
@@ -195,6 +214,10 @@ class BootstrapDatabaseApplier {
     _log('BEGIN page transaction for cursor=${data.cursor}');
     try {
       await _database.runInTransaction((txn) async {
+        // Bootstrap can replace reference parents before recreating them in
+        // the same page. Defer validation until commit, when the complete
+        // parent/child graph has been applied.
+        await txn.execute('PRAGMA defer_foreign_keys = ON');
         await _applyMe(txn, data.me);
         await _applyReferenceTables(txn, data.tables);
         await _applyRecordUpserts(txn, data.tables);
@@ -203,11 +226,77 @@ class BootstrapDatabaseApplier {
         await _applyParentDeletes(txn, data.tables);
         await _savePageMeta(txn, data);
       });
-      _log('Page transaction committed; cursor=${data.cursor}');
     } catch (error) {
       _log('Page transaction rolled back: $error');
       rethrow;
     }
+
+    _log('Page transaction committed; cursor=${data.cursor}');
+    if (kDebugMode) {
+      await _logCommittedPage(data);
+    }
+  }
+
+  /// Re-reads committed data from SQLite so this log confirms persisted data,
+  /// rather than only reporting how many rows arrived in the API response.
+  Future<void> _logCommittedPage(BootstrapData data) async {
+    try {
+      if (data.me != null) {
+        final storedRoles = await _rowCount(DatabaseTables.myRoles);
+        final storedCenters = await _rowCount(DatabaseTables.myCenters);
+        BootstrapLog.databaseCommit(
+          'STORED section=me '
+          'api_roles=${data.me!.roles.length} sqlite_roles=$storedRoles '
+          'api_centers=${data.me!.centers.length} '
+          'sqlite_centers=$storedCenters',
+        );
+      }
+
+      var verifiedTableCount = 0;
+      for (final entry in data.tables.entries) {
+        final table = entry.key;
+        if (!_bootstrapTableNames.contains(table)) {
+          BootstrapLog.warning(
+            'SQLite commit verification skipped for unsupported API '
+            'table=$table',
+          );
+          continue;
+        }
+
+        final change = entry.value;
+        final storedRows = await _rowCount(table);
+        BootstrapLog.databaseCommit(
+          'STORED table=$table '
+          'replace_received=${change.replace.length} '
+          'upserts_received=${change.upserts.length} '
+          'deletes_received=${change.deletes.length} '
+          'sqlite_total=$storedRows',
+        );
+        verifiedTableCount++;
+      }
+
+      final storedCursor = await _database.getSyncMeta('cursor');
+      if (storedCursor == data.cursor) {
+        BootstrapLog.databaseCommit(
+          'PAGE_STORED cursor=${data.cursor} cursor_verified=true '
+          'tables_verified=$verifiedTableCount',
+        );
+      } else {
+        BootstrapLog.error(
+          'SQLITE COMMIT VERIFY_FAILED expected_cursor=${data.cursor} '
+          'stored_cursor=${storedCursor ?? 'null'}',
+        );
+      }
+    } catch (error) {
+      // The page is already committed. A diagnostic query failure must not
+      // make the successful sync retry or claim the transaction rolled back.
+      BootstrapLog.error('SQLITE COMMIT LOG_FAILED error=$error');
+    }
+  }
+
+  Future<int> _rowCount(String table) async {
+    final rows = await _database.rawQuery('SELECT COUNT(*) FROM "$table"');
+    return Sqflite.firstIntValue(rows) ?? 0;
   }
 
   Future<void> _applyMe(Transaction txn, BootstrapMe? me) async {

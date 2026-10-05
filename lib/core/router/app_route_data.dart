@@ -6,9 +6,11 @@ class AddCollectionRouteData {
     this.initialStep = CollectionEntryStep.items,
     this.initialType,
     this.initialSelectedItems = const <int>{},
+    this.collectionId,
   });
 
   final CollectionEntryStep initialStep;
   final CollectionType? initialType;
   final Set<int> initialSelectedItems;
+  final String? collectionId;
 }

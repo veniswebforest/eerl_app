@@ -13,6 +13,11 @@ abstract final class BootstrapLog {
 
   static void database(String message) => _write('🗄️', 'SQLITE', message);
 
+  /// Printed only after a Bootstrap page has committed to SQLite.
+  /// Search Logcat for `EERL_BOOTSTRAP][SQLITE][COMMIT` to see stored rows.
+  static void databaseCommit(String message) =>
+      _write('✅', 'SQLITE][COMMIT', message);
+
   static void warning(String message) => _write('⚠️', 'WARNING', message);
 
   static void error(String message) => _write('🛑', 'ERROR', message);

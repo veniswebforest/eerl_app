@@ -27,12 +27,14 @@ class AddCollectionScreen extends StatefulWidget {
     this.initialType,
     this.initialSelectedItems = const <int>{},
     this.initialD2dReview = false,
+    this.initialCollectionId,
   });
 
   final CollectionEntryStep initialStep;
   final CollectionType? initialType;
   final Set<int> initialSelectedItems;
   final bool initialD2dReview;
+  final String? initialCollectionId;
 
   @override
   State<AddCollectionScreen> createState() => _AddCollectionScreenState();
@@ -65,13 +67,25 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   String? _centerId;
   String? _userId;
   String? _draftId;
+  bool _saving = false;
 
   List<String> get _vehicleNumbers =>
       _vehicles.map((item) => item.plateNumber).toList(growable: false);
   List<String> get _personNamesList =>
       _ragpickers.map((item) => item.name).toList(growable: false);
-  List<String> get _mrfPersonNames =>
-      _mrfPeople.map((item) => item.name).toList(growable: false);
+  List<String> get _mrfPersonNames => _mrfPeople
+      .where((item) => item.role.toUpperCase() == 'LABOUR')
+      .map((item) => item.name)
+      .toList(growable: false);
+
+  MrfPersonModel? get _mrfSupervisor {
+    for (final person in _mrfPeople) {
+      if (person.isActive && person.role.toUpperCase() == 'SUPERVISOR') {
+        return person;
+      }
+    }
+    return null;
+  }
 
   @override
   void initState() {
@@ -79,6 +93,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     _step = widget.initialStep;
     _d2dReview = widget.initialD2dReview;
     _type = widget.initialType;
+    _draftId = widget.initialCollectionId;
     if (_type == CollectionType.mrfStation) {
       _mrfAgentName = null;
     }
@@ -103,13 +118,13 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       repository.getVehicles(centerId: centerId),
       repository.getMrfPeople(centerId: centerId),
       repository.getRagpickers(centerId: centerId, activeOnly: true),
-      repository.getItems(
-        centerId: centerId,
-        channel: _channel,
-        selectedOnly: true,
-      ),
+      repository.getCollectionMaterials(centerId: centerId, channel: _channel),
       repository.getProfile(),
       repository.currentUserId,
+      if (widget.initialCollectionId != null)
+        repository.getCollection(widget.initialCollectionId!),
+      if (widget.initialCollectionId != null)
+        repository.getCollectionItems(widget.initialCollectionId!),
     ]);
     if (!mounted) return;
     setState(() {
@@ -120,10 +135,66 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       _materials = values[3] as List<ItemModel>;
       _profile = values[4] as ProfileModel;
       _userId = values[5] as String?;
-      _mrfAgentName = _profile?.userName;
+      _mrfAgentName = _mrfSupervisor?.name;
       _selected.removeWhere((index) => index >= _materials.length);
+      if (widget.initialCollectionId != null) {
+        _restoreDraft(
+          values[6] as CollectionModel?,
+          values[7] as List<CollectionItemModel>,
+        );
+      }
     });
   }
+
+  void _restoreDraft(
+    CollectionModel? collection,
+    List<CollectionItemModel> items,
+  ) {
+    if (collection == null || collection.status != 'DRAFT') return;
+    _vehicleNumber = _vehicles
+        .where((vehicle) => vehicle.id == collection.vehicleId)
+        .map((vehicle) => vehicle.plateNumber)
+        .firstOrNull;
+    _givenBy = collection.givenByName ?? '';
+    _mrfLabor = collection.givenByName;
+    _personName = _ragpickers
+        .where((person) => person.id == collection.ragpickerId)
+        .map((person) => person.name)
+        .firstOrNull;
+    _d2dPaymentMode = collection.paidBy?.toUpperCase() == 'UPI'
+        ? D2dPaymentMode.upi
+        : D2dPaymentMode.cash;
+
+    _selected.clear();
+    _collectionWeights.clear();
+    _verifiedWeights.clear();
+    _photos.clear();
+    for (final item in items) {
+      final index = _materials.indexWhere(
+        (material) => material.id == item.itemId,
+      );
+      if (index < 0) continue;
+      _selected.add(index);
+      _collectionWeights[index] = _numberText(item.qty);
+      if (item.verifiedQty != null) {
+        _verifiedWeights[index] = _numberText(item.verifiedQty!);
+      }
+      _photos[index] = item.photoUrls.map(XFile.new).toList(growable: true);
+      _d2dUnits[index] = item.unitCode?.toUpperCase() == 'KG'
+          ? D2dMeasureUnit.kg
+          : D2dMeasureUnit.pcs;
+    }
+    final handoverKey = _type == CollectionType.ramp ? 99 : -1;
+    if (collection.handoverPhotoUrls.isNotEmpty) {
+      _photos[handoverKey] = collection.handoverPhotoUrls
+          .map(XFile.new)
+          .toList(growable: true);
+    }
+  }
+
+  String _numberText(double value) => value == value.roundToDouble()
+      ? value.toInt().toString()
+      : value.toString();
 
   int get _stepNumber => _step.index + 1;
 
@@ -217,8 +288,8 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         people: _mrfPersonNames,
         selectedLabor: _mrfLabor,
         onLaborSelected: (person) => setState(() => _mrfLabor = person),
-        supervisorName: _profile?.supervisorName,
-        supervisorPhone: _profile?.supervisorPhone,
+        supervisorName: _mrfSupervisor?.name,
+        supervisorPhone: _mrfSupervisor?.phone,
       );
     }
     if (_type == CollectionType.ramp) {
@@ -444,7 +515,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
             _type = type;
             _selected.clear();
             _itemsOpen = false;
-            _mrfAgentName = _profile?.userName;
+            _mrfAgentName = _mrfSupervisor?.name;
             _typeOpen = false;
             _conditionalFieldOpen = false;
           });
@@ -476,28 +547,39 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
 
   Widget _itemDropdown(BuildContext context) {
     final names = _itemNames(context);
+    bool isPlastic(int index) =>
+        _materials[index].materialType.trim().toUpperCase() == 'PLASTIC';
+    final plasticCount = List.generate(
+      _materials.length,
+      (index) => index,
+    ).where(isPlastic).length;
+    final visibleIndices = <int>[
+      for (var index = 0; index < _materials.length; index++)
+        if (isPlastic(index) == _showPlasticItems) index,
+    ];
     return _DropdownBox(
       children: [
         Row(
           children: [
             Expanded(
               child: _Tab(
-                text: context.l10n.collectionPlasticCount,
+                text: context.l10n.configurePlasticCount(plasticCount),
                 active: _showPlasticItems,
                 onTap: () => setState(() => _showPlasticItems = true),
               ),
             ),
             Expanded(
               child: _Tab(
-                text: context.l10n.collectionNonPlasticCount,
+                text: context.l10n.configureNonPlasticCount(
+                  _materials.length - plasticCount,
+                ),
                 active: !_showPlasticItems,
                 onTap: () => setState(() => _showPlasticItems = false),
               ),
             ),
           ],
         ),
-        ...List.generate(
-          names.length,
+        ...visibleIndices.map(
           (i) => InkWell(
             onTap: () => setState(() {
               if (!_selected.add(i)) _selected.remove(i);
@@ -517,7 +599,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                       const Color(0xFFFF9FA1),
                       const Color(0xFFB5FFDF),
                       const Color(0xFFF9C7FE),
-                    ][i],
+                    ][i % 6],
                   ],
                 ),
               ),
@@ -604,7 +686,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   }
 
   Widget _d2dWasteItemsStep(BuildContext context) => D2dWasteItemsStep(
-    items: _itemNames(context),
+    items: _materials,
     selectedItems: _selected,
     isOpen: _itemsOpen,
     showPlasticItems: _showPlasticItems,
@@ -741,7 +823,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
           Expanded(
             child: OutlinedButton(
               key: const Key('d2d-review-save-draft'),
-              onPressed: () => _saveCollection(submit: false),
+              onPressed: _saving ? null : () => _saveCollection(submit: false),
               child: Text(context.l10n.collectionSaveDraft),
             ),
           ),
@@ -749,7 +831,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
           Expanded(
             child: ElevatedButton(
               key: const Key('d2d-review-submit'),
-              onPressed: _submit,
+              onPressed: _saving ? null : _submit,
               child: Text(context.l10n.collectionSubmit),
             ),
           ),
@@ -793,14 +875,14 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
           Expanded(
             child: OutlinedButton(
               key: const Key('collection-save-draft'),
-              onPressed: () => _saveCollection(submit: false),
+              onPressed: _saving ? null : () => _saveCollection(submit: false),
               child: Text(context.l10n.collectionSaveDraft),
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: ElevatedButton(
-              onPressed: _submit,
+              onPressed: _saving ? null : _submit,
               child: Text(context.l10n.collectionSubmit),
             ),
           ),
@@ -836,7 +918,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                         _type == CollectionType.ramp) {
                       _d2dUnits.putIfAbsent(
                         item,
-                        () => defaultCollectionUnit(item),
+                        () => _materials[item].unitCode.toUpperCase() == 'KG'
+                            ? D2dMeasureUnit.kg
+                            : D2dMeasureUnit.pcs,
                       );
                     }
                   }
@@ -868,6 +952,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   Future<void> _submit() => _saveCollection(submit: true);
 
   Future<void> _saveCollection({required bool submit}) async {
+    if (_saving) return;
     final centerId = _centerId;
     final userId = _userId;
     final profile = _profile;
@@ -877,16 +962,22 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         _type == null) {
       return;
     }
+    if (submit &&
+        _type == CollectionType.mrfStation &&
+        _mrfSupervisor == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An active MRF supervisor is required before submit.'),
+        ),
+      );
+      return;
+    }
     final id =
         _draftId ?? 'local_collection_${DateTime.now().microsecondsSinceEpoch}';
     _draftId = id;
     VehicleModel? vehicle;
     for (final value in _vehicles) {
       if (value.plateNumber == _vehicleNumber) vehicle = value;
-    }
-    MrfPersonModel? mrfPerson;
-    for (final value in _mrfPeople) {
-      if (value.name == _mrfLabor) mrfPerson = value;
     }
     RagpickerModel? ragpicker;
     for (final value in _ragpickers) {
@@ -908,7 +999,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
           qty: qty,
           verifiedQty: verified,
           rate: material.rate,
-          amount: material.rate == null ? null : material.rate! * qty,
+          amount: material.rate == null || verified == null
+              ? null
+              : double.parse((material.rate! * verified).toStringAsFixed(2)),
           photoUrls: (_photos[index] ?? const [])
               .map((photo) => photo.path)
               .toList(growable: false),
@@ -923,35 +1016,52 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         (_photos[_type == CollectionType.ramp ? 99 : -1] ?? const <XFile>[])
             .map((photo) => photo.path)
             .toList(growable: false);
-    await EerlLocalRepository.instance.saveCollection(
-      collection: CollectionModel(
-        id: id,
-        centerId: centerId,
-        agentId: userId,
-        agentName: profile.userName ?? '',
-        channel: _channel,
-        status: submit ? 'PENDING' : 'DRAFT',
-        collectedAt: submit ? now : null,
-        vehicleId: vehicle?.id,
-        mrfPersonId: mrfPerson?.id,
-        ragpickerId: ragpicker?.id,
-        givenByName: _type == CollectionType.d2d ? _givenBy : null,
-        handedOverBy: _type == CollectionType.ramp ? _personName : null,
-        paidBy: _type == CollectionType.mrfStation
-            ? null
-            : _d2dPaymentMode.name.toUpperCase(),
-        totalAmount: items.fold<double>(
-          0,
-          (total, item) => total + (item.amount ?? 0),
+    setState(() => _saving = true);
+    try {
+      await EerlLocalRepository.instance.saveCollection(
+        collection: CollectionModel(
+          id: id,
+          centerId: centerId,
+          agentId: userId,
+          agentName: profile.userName ?? '',
+          channel: _channel,
+          status: submit ? 'SUBMITTED' : 'DRAFT',
+          collectedAt: submit ? now : null,
+          vehicleId: vehicle?.id,
+          mrfPersonId: _type == CollectionType.mrfStation
+              ? _mrfSupervisor?.id
+              : null,
+          ragpickerId: ragpicker?.id,
+          givenByName: switch (_type) {
+            CollectionType.d2d => _givenBy,
+            CollectionType.mrfStation => _mrfLabor,
+            CollectionType.ramp || null => null,
+          },
+          handedOverBy: _type == CollectionType.ramp ? _personName : null,
+          paidBy: _type == CollectionType.mrfStation
+              ? null
+              : _d2dPaymentMode.name.toUpperCase(),
+          totalAmount: items.fold<double>(
+            0,
+            (total, item) => total + (item.amount ?? 0),
+          ),
+          handoverPhotoUrls: handoverPhotos,
+          updatedAt: now,
+          syncState: 'pending',
         ),
-        handoverPhotoUrls: handoverPhotos,
-        updatedAt: now,
-        syncState: 'pending',
-      ),
-      items: items,
-      submit: submit,
-    );
+        items: items,
+        submit: submit,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Collection was not saved: $error')),
+      );
+      return;
+    }
     if (!mounted) return;
+    setState(() => _saving = false);
     if (!submit) {
       Navigator.of(context).pop(true);
       return;
@@ -1091,7 +1201,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       _selected.isNotEmpty &&
       _selected.every(
         (item) =>
-            (_collectionWeights[item]?.trim().isNotEmpty ?? false) &&
+            (double.tryParse(_collectionWeights[item]?.trim() ?? '') ?? 0) >
+                0 &&
+            (double.tryParse(_verifiedWeights[item]?.trim() ?? '') ?? 0) > 0 &&
             (_photos[item]?.isNotEmpty ?? false),
       ) &&
       (_type != CollectionType.ramp || (_photos[99]?.isNotEmpty ?? false));

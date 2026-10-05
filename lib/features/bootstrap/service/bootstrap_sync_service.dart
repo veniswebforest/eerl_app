@@ -84,8 +84,7 @@ class BootstrapSyncService extends ChangeNotifier {
       _lastError is BootstrapApiException &&
       (_lastError as BootstrapApiException).statusCode == 401;
 
-  /// Registers the future outbox/photo sender that must run before Bootstrap.
-  /// The current project has no sender yet, so this remains unset by default.
+  /// Registers the outbox/photo sender that runs before Bootstrap.
   void configureOutgoingSync(Future<void> Function()? callback) {
     _beforeBootstrap = callback;
   }
@@ -148,6 +147,15 @@ class BootstrapSyncService extends ChangeNotifier {
     );
     _log('Bootstrap start: trigger=${trigger.name}');
     await _beforeBootstrap?.call();
+    final activeOutboxCount = await _outboxCount(
+      where: "status IN ('queued', 'sending')",
+    );
+    if (activeOutboxCount > 0) {
+      _log(
+        'Bootstrap postponed: $activeOutboxCount outgoing item(s) still active',
+      );
+      return;
+    }
 
     String? cursor = await _database.getSyncMeta('cursor');
     if (cursor != null && cursor.isEmpty) cursor = null;
@@ -177,6 +185,7 @@ class BootstrapSyncService extends ChangeNotifier {
             !invalidCursorResetUsed) {
           _log('Server rejected cursor; resetting server-backed scope');
           invalidCursorResetUsed = true;
+          await _requireDrainedOutboxForReset();
           await _database.scopeReset();
           cursor = null;
           page = 0;
@@ -198,6 +207,7 @@ class BootstrapSyncService extends ChangeNotifier {
         if (resetReason == 'Different authenticated user') {
           await _fullUserReset();
         } else {
+          await _requireDrainedOutboxForReset();
           await _database.scopeReset();
         }
         cursor = null;
@@ -238,6 +248,23 @@ class BootstrapSyncService extends ChangeNotifier {
   }
 
   Future<void> clearForLogout() => _fullUserReset();
+
+  Future<int> _outboxCount({String? where}) async {
+    final rows = await _database.rawQuery(
+      'SELECT COUNT(*) AS total FROM ${DatabaseTables.outbox}'
+      '${where == null ? '' : ' WHERE $where'}',
+    );
+    return (rows.single['total'] as num?)?.toInt() ?? 0;
+  }
+
+  Future<void> _requireDrainedOutboxForReset() async {
+    final count = await _outboxCount();
+    if (count != 0) {
+      throw StateError(
+        'Scope reset postponed until all $count outgoing item(s) are resolved.',
+      );
+    }
+  }
 
   Future<void> _fullUserReset() async {
     final photoRows = await _database.query(

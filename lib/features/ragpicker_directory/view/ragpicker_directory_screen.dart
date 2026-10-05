@@ -168,6 +168,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
           : RagpickerStatus.active;
       _selectedItem = RagpickerModel(
         id: item.id,
+        number: item.number,
         centerId: item.centerId,
         name: item.name,
         phone: item.phone,
@@ -548,6 +549,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
         id:
             existing?.id ??
             'local_ragpicker_${DateTime.now().microsecondsSinceEpoch}',
+        number: existing?.number,
         centerId: _centers[centerIndex].id,
         name: name,
         phone: phone.isEmpty ? null : '+91 $phone',

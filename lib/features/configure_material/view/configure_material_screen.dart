@@ -181,6 +181,7 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
                           ),
                           padding: const EdgeInsets.only(bottom: 12),
                           child: ConfigurableMaterialTile(
+                            color: item.colour,
                             index: index,
                             label: item.name,
                             selected: item.isSelected == true,
@@ -285,7 +286,8 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
     try {
       await EerlLocalRepository.instance.saveItemConfiguration(
         channel: _channel,
-        items: [..._plasticItems, ..._nonPlasticItems],
+        tab: _showPlastic ? 'PLASTIC' : 'NON_PLASTIC',
+        items: List<ItemModel>.from(_visibleItems),
       );
       if (!mounted) return;
       setState(() {

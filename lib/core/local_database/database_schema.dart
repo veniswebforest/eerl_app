@@ -17,7 +17,7 @@ abstract final class DatabaseSchema {
     ''',
     '''
       CREATE TABLE ${DatabaseTables.myCenters} (
-        center_id TEXT PRIMARY KEY,
+        center_id TEXT PRIMARY KEY REFERENCES ${DatabaseTables.centers} (id),
         is_primary INTEGER NOT NULL,
         agent_number INTEGER,
         slip_date TEXT,
@@ -47,7 +47,7 @@ abstract final class DatabaseSchema {
     ''',
     '''
       CREATE TABLE ${DatabaseTables.centerChannels} (
-        center_id TEXT NOT NULL,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         channel TEXT NOT NULL,
         show_price INTEGER NOT NULL,
         takes_payment INTEGER NOT NULL,
@@ -56,14 +56,15 @@ abstract final class DatabaseSchema {
     ''',
     '''
       CREATE TABLE ${DatabaseTables.centerItems} (
-        center_id TEXT NOT NULL,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         channel TEXT NOT NULL,
-        item_id TEXT NOT NULL,
+        item_id TEXT NOT NULL REFERENCES ${DatabaseTables.items} (id),
         is_selected INTEGER NOT NULL,
         sort_order INTEGER NOT NULL,
         rate REAL,
         sync_state TEXT NOT NULL DEFAULT 'synced',
-        PRIMARY KEY (center_id, channel, item_id)
+        PRIMARY KEY (center_id, channel, item_id),
+        FOREIGN KEY (center_id, channel) REFERENCES ${DatabaseTables.centerChannels} (center_id, channel)
       )
     ''',
     '''
@@ -75,9 +76,10 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.vehicles} (
         id TEXT PRIMARY KEY,
-        center_id TEXT,
+        number TEXT,
+        center_id TEXT REFERENCES ${DatabaseTables.centers} (id),
         plate_number TEXT NOT NULL,
-        type_id TEXT NOT NULL,
+        type_id TEXT NOT NULL REFERENCES ${DatabaseTables.vehicleTypes} (id),
         type_name TEXT NOT NULL,
         capacity_kg REAL,
         driver_name TEXT,
@@ -88,7 +90,8 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.mrfPeople} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
+        number TEXT,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         name TEXT NOT NULL,
         phone TEXT,
         id_number TEXT,
@@ -101,7 +104,8 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.ragpickers} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
+        number TEXT,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         name TEXT NOT NULL,
         phone TEXT,
         id_number TEXT,
@@ -113,7 +117,7 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.expenseCategories} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         name TEXT NOT NULL,
         is_active INTEGER NOT NULL
       )
@@ -121,7 +125,7 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.centerPeople} (
         user_id TEXT NOT NULL,
-        center_id TEXT NOT NULL,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         name TEXT NOT NULL,
         phone TEXT NOT NULL,
         is_agent INTEGER NOT NULL,
@@ -137,16 +141,16 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.collections} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         agent_id TEXT NOT NULL,
         agent_name TEXT NOT NULL,
         channel TEXT NOT NULL,
         status TEXT NOT NULL,
         slip_number TEXT,
         collected_at TEXT,
-        vehicle_id TEXT,
-        mrf_person_id TEXT,
-        ragpicker_id TEXT,
+        vehicle_id TEXT REFERENCES ${DatabaseTables.vehicles} (id),
+        mrf_person_id TEXT REFERENCES ${DatabaseTables.mrfPeople} (id),
+        ragpicker_id TEXT REFERENCES ${DatabaseTables.ragpickers} (id),
         given_by_name TEXT,
         handed_over_by TEXT,
         paid_by TEXT,
@@ -163,8 +167,8 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.collectionItems} (
         id TEXT PRIMARY KEY,
-        collection_id TEXT NOT NULL,
-        item_id TEXT NOT NULL,
+        collection_id TEXT NOT NULL REFERENCES ${DatabaseTables.collections} (id),
+        item_id TEXT NOT NULL REFERENCES ${DatabaseTables.items} (id),
         qty REAL NOT NULL,
         verified_qty REAL,
         rate REAL,
@@ -176,10 +180,10 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.expenses} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         user_id TEXT NOT NULL,
         user_name TEXT,
-        category_id TEXT NOT NULL,
+        category_id TEXT NOT NULL REFERENCES ${DatabaseTables.expenseCategories} (id),
         amount REAL NOT NULL,
         note TEXT,
         status TEXT NOT NULL,
@@ -195,7 +199,8 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.cashRequests} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
+        number TEXT,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         requested_by TEXT NOT NULL,
         requested_by_name TEXT,
         amount REAL NOT NULL,
@@ -211,7 +216,8 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.categoryRequests} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
+        number TEXT,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         requested_by TEXT NOT NULL,
         name TEXT NOT NULL,
         reason TEXT,
@@ -223,11 +229,11 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.transfers} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         type TEXT NOT NULL,
         status TEXT NOT NULL,
         number TEXT,
-        destination_id TEXT,
+        destination_id TEXT REFERENCES ${DatabaseTables.destinations} (id),
         destination_name TEXT,
         truck_expected_at TEXT,
         fixed_qty REAL,
@@ -248,8 +254,8 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.transferItems} (
         id TEXT PRIMARY KEY,
-        transfer_id TEXT NOT NULL,
-        item_id TEXT NOT NULL,
+        transfer_id TEXT NOT NULL REFERENCES ${DatabaseTables.transfers} (id),
+        item_id TEXT NOT NULL REFERENCES ${DatabaseTables.items} (id),
         qty REAL NOT NULL,
         dispatched_qty REAL
       )
@@ -257,12 +263,14 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.tasks} (
         id TEXT PRIMARY KEY,
-        center_id TEXT,
+        number TEXT,
+        center_id TEXT REFERENCES ${DatabaseTables.centers} (id),
         assigned_to TEXT NOT NULL,
         assigned_to_name TEXT,
         assigned_by TEXT NOT NULL,
         assigned_by_name TEXT,
         title TEXT NOT NULL,
+        note TEXT,
         description TEXT,
         priority TEXT NOT NULL,
         status TEXT NOT NULL,
@@ -276,7 +284,8 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.requests} (
         id TEXT PRIMARY KEY,
-        center_id TEXT,
+        number TEXT,
+        center_id TEXT REFERENCES ${DatabaseTables.centers} (id),
         created_by TEXT NOT NULL,
         created_by_name TEXT,
         body TEXT NOT NULL,
@@ -292,12 +301,12 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.walletEntries} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         kind TEXT NOT NULL,
         amount REAL NOT NULL,
         note TEXT,
-        collection_id TEXT,
-        expense_id TEXT,
+        collection_id TEXT REFERENCES ${DatabaseTables.collections} (id),
+        expense_id TEXT REFERENCES ${DatabaseTables.expenses} (id),
         confirmed_at TEXT,
         created_at TEXT NOT NULL,
         sync_state TEXT NOT NULL DEFAULT 'synced'
@@ -306,7 +315,7 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.dayCloses} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         date TEXT NOT NULL,
         closed_by_name TEXT,
         closed_at TEXT NOT NULL
@@ -326,7 +335,7 @@ abstract final class DatabaseSchema {
     ''',
     '''
       CREATE TABLE ${DatabaseTables.centerBalances} (
-        center_id TEXT PRIMARY KEY,
+        center_id TEXT PRIMARY KEY REFERENCES ${DatabaseTables.centers} (id),
         balance REAL NOT NULL,
         updated_at TEXT
       )
@@ -334,8 +343,8 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.stock} (
         id TEXT PRIMARY KEY,
-        center_id TEXT NOT NULL,
-        item_id TEXT NOT NULL,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
+        item_id TEXT NOT NULL REFERENCES ${DatabaseTables.items} (id),
         stage TEXT NOT NULL,
         qty REAL NOT NULL
       )
@@ -375,8 +384,8 @@ abstract final class DatabaseSchema {
     ''',
     '''
       CREATE TABLE ${DatabaseTables.outboxPhotos} (
-        outbox_seq INTEGER NOT NULL,
-        photo_id TEXT NOT NULL,
+        outbox_seq INTEGER NOT NULL REFERENCES ${DatabaseTables.outbox} (seq),
+        photo_id TEXT NOT NULL REFERENCES ${DatabaseTables.photos} (id),
         PRIMARY KEY (outbox_seq, photo_id)
       )
     ''',
@@ -404,6 +413,7 @@ abstract final class DatabaseSchema {
     'CREATE INDEX ix_photos_status ON ${DatabaseTables.photos} (status)',
     'CREATE INDEX ix_outbox_status ON ${DatabaseTables.outbox} (status, seq)',
     'CREATE INDEX ix_outbox_entity ON ${DatabaseTables.outbox} (entity, entity_id, status)',
+    'CREATE INDEX ix_outbox_photos ON ${DatabaseTables.outboxPhotos} (photo_id)',
   ];
 
   static const indexNames = <String>[
@@ -428,5 +438,6 @@ abstract final class DatabaseSchema {
     'ix_photos_status',
     'ix_outbox_status',
     'ix_outbox_entity',
+    'ix_outbox_photos',
   ];
 }

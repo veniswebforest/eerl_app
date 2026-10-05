@@ -18,6 +18,7 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/data/auth_session_storage.dart';
 import 'features/auth/presentation/auth_provider.dart';
 import 'features/bootstrap/service/bootstrap_sync_service.dart';
+import 'features/bootstrap/service/outgoing_sync_service.dart';
 import 'shared/widgets/network_status_overlay.dart';
 
 void main() async {
@@ -44,6 +45,9 @@ void main() async {
   final networkProvider = NetworkProvider();
   final appLockProvider = AppLockProvider();
   final bootstrapSyncService = BootstrapSyncService.instance;
+  bootstrapSyncService.configureOutgoingSync(
+    OutgoingSyncService.instance.drain,
+  );
 
   var wasOffline = networkProvider.isOffline;
   networkProvider.addListener(() {

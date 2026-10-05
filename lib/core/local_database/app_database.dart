@@ -62,8 +62,8 @@ class AppDatabase {
   }
 
   Future<void> _onConfigure(Database db) async {
-    await db.execute('PRAGMA foreign_keys = OFF');
-    _log('Database configured with foreign keys disabled');
+    await db.execute('PRAGMA foreign_keys = ON');
+    _log('Database configured with foreign keys enabled');
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -152,6 +152,11 @@ class AppDatabase {
     return db.rawQuery(sql, arguments);
   }
 
+  Future<int> rawUpdate(String sql, [List<Object?>? arguments]) async {
+    final db = await database;
+    return db.rawUpdate(sql, arguments);
+  }
+
   Future<T> transaction<T>(Future<T> Function(Transaction txn) action) async {
     final db = await database;
     return db.transaction(action);
@@ -187,65 +192,40 @@ class AppDatabase {
   }
 
   Future<void> scopeReset() {
-    _log('Scope reset started; pending/failed and queued data will be kept');
+    _log('Scope reset started; outgoing work must already be drained');
     return runInTransaction((txn) async {
-      const fullyServerOwnedTables = <String>[
+      const tablesToClear = <String>[
         DatabaseTables.myRoles,
-        DatabaseTables.myCenters,
-        DatabaseTables.centers,
-        DatabaseTables.items,
-        DatabaseTables.centerChannels,
-        DatabaseTables.vehicleTypes,
-        DatabaseTables.expenseCategories,
-        DatabaseTables.centerPeople,
-        DatabaseTables.destinations,
+        DatabaseTables.walletEntries,
+        DatabaseTables.collectionItems,
+        DatabaseTables.transferItems,
+        DatabaseTables.stock,
         DatabaseTables.dayCloses,
         DatabaseTables.centerBalances,
-        DatabaseTables.stock,
-      ];
-
-      for (final table in fullyServerOwnedTables) {
-        await txn.delete(table);
-      }
-
-      // Child rows belonging to locally pending/failed parents must survive a
-      // scope refresh because foreign keys are intentionally disabled.
-      await txn.rawDelete('''
-        DELETE FROM ${DatabaseTables.collectionItems}
-        WHERE collection_id IN (
-          SELECT id FROM ${DatabaseTables.collections}
-          WHERE sync_state = 'synced'
-        )
-      ''');
-      await txn.rawDelete('''
-        DELETE FROM ${DatabaseTables.transferItems}
-        WHERE transfer_id IN (
-          SELECT id FROM ${DatabaseTables.transfers}
-          WHERE sync_state = 'synced'
-        )
-      ''');
-
-      const tablesWithLocalChanges = <String>[
+        DatabaseTables.expenses,
+        DatabaseTables.cashRequests,
+        DatabaseTables.categoryRequests,
+        DatabaseTables.tasks,
+        DatabaseTables.requests,
+        DatabaseTables.collections,
+        DatabaseTables.transfers,
         DatabaseTables.centerItems,
         DatabaseTables.vehicles,
         DatabaseTables.mrfPeople,
         DatabaseTables.ragpickers,
-        DatabaseTables.collections,
-        DatabaseTables.expenses,
-        DatabaseTables.cashRequests,
-        DatabaseTables.categoryRequests,
-        DatabaseTables.transfers,
-        DatabaseTables.tasks,
-        DatabaseTables.requests,
-        DatabaseTables.walletEntries,
+        DatabaseTables.expenseCategories,
+        DatabaseTables.centerPeople,
+        DatabaseTables.myCenters,
+        DatabaseTables.centerChannels,
+        DatabaseTables.vehicleTypes,
+        DatabaseTables.destinations,
         DatabaseTables.notifications,
+        DatabaseTables.items,
+        DatabaseTables.centers,
       ];
-      for (final table in tablesWithLocalChanges) {
-        await txn.delete(
-          table,
-          where: 'sync_state = ?',
-          whereArgs: const ['synced'],
-        );
+
+      for (final table in tablesToClear) {
+        await txn.delete(table);
       }
 
       await txn.delete(
@@ -270,32 +250,32 @@ class AppDatabase {
         DatabaseTables.outbox,
         DatabaseTables.photos,
         DatabaseTables.myRoles,
-        DatabaseTables.myCenters,
-        DatabaseTables.centers,
-        DatabaseTables.items,
-        DatabaseTables.centerChannels,
+        DatabaseTables.walletEntries,
+        DatabaseTables.collectionItems,
+        DatabaseTables.transferItems,
+        DatabaseTables.stock,
+        DatabaseTables.dayCloses,
+        DatabaseTables.centerBalances,
+        DatabaseTables.expenses,
+        DatabaseTables.cashRequests,
+        DatabaseTables.categoryRequests,
+        DatabaseTables.tasks,
+        DatabaseTables.requests,
+        DatabaseTables.collections,
+        DatabaseTables.transfers,
         DatabaseTables.centerItems,
-        DatabaseTables.vehicleTypes,
         DatabaseTables.vehicles,
         DatabaseTables.mrfPeople,
         DatabaseTables.ragpickers,
         DatabaseTables.expenseCategories,
         DatabaseTables.centerPeople,
+        DatabaseTables.myCenters,
+        DatabaseTables.centerChannels,
+        DatabaseTables.vehicleTypes,
         DatabaseTables.destinations,
-        DatabaseTables.collections,
-        DatabaseTables.collectionItems,
-        DatabaseTables.expenses,
-        DatabaseTables.cashRequests,
-        DatabaseTables.categoryRequests,
-        DatabaseTables.transfers,
-        DatabaseTables.transferItems,
-        DatabaseTables.tasks,
-        DatabaseTables.requests,
-        DatabaseTables.walletEntries,
-        DatabaseTables.dayCloses,
         DatabaseTables.notifications,
-        DatabaseTables.centerBalances,
-        DatabaseTables.stock,
+        DatabaseTables.items,
+        DatabaseTables.centers,
         DatabaseTables.syncMeta,
       ];
 

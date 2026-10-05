@@ -25,7 +25,10 @@ void main() {
     await deleteDatabase(databasePath);
   });
 
-  setUp(() => database.clearDatabaseOnLogout());
+  setUp(() async {
+    await database.clearDatabaseOnLogout();
+    await _seedForeignKeyParents(database);
+  });
 
   tearDownAll(() async {
     await database.closeForTesting();
@@ -36,6 +39,10 @@ void main() {
   test(
     'first Bootstrap omits since and stores me, tables, and metadata',
     () async {
+      await database.insert(DatabaseTables.centers, {
+        'id': 'center-old',
+        'name': 'Old Center',
+      });
       await database.insert(DatabaseTables.myCenters, {
         'center_id': 'center-old',
         'is_primary': 0,
@@ -114,6 +121,50 @@ void main() {
   );
 
   test(
+    'production task note is stored without rolling back the page',
+    () async {
+      final gateway = _FakeGateway([
+        () async => _response(
+          cursor: 'TASK-NOTE',
+          tables: {
+            'tasks': {
+              'upserts': [
+                {
+                  'id': 'task-note-1',
+                  'number': 'CTR-TSK-001',
+                  'center_id': 'center-1',
+                  'assigned_to': 'user-1',
+                  'assigned_to_name': 'Test User',
+                  'assigned_by': 'supervisor-1',
+                  'assigned_by_name': 'Supervisor',
+                  'title': 'Clear the ramp',
+                  'note': 'Complete before the truck arrives.',
+                  'priority': 'HIGH',
+                  'status': 'PENDING',
+                  'due_at': '2026-10-06T12:00:00.000Z',
+                  'completed_at': null,
+                  'photo_urls': '[]',
+                  'created_at': '2026-10-05T12:00:00.000Z',
+                },
+              ],
+              'deletes': <String>[],
+            },
+          },
+        ),
+      ]);
+
+      final service = _service(gateway, database);
+      await service.triggerBootstrap(trigger: BootstrapTrigger.appOpen);
+
+      expect(service.lastError, isNull);
+      expect(await database.getSyncMeta('cursor'), 'TASK-NOTE');
+      final task = (await database.query(DatabaseTables.tasks)).single;
+      expect(task['note'], 'Complete before the truck arrives.');
+      expect(task['sync_state'], 'synced');
+    },
+  );
+
+  test(
     'delta changes only present tables and reference empty means clear',
     () async {
       await database.insert(DatabaseTables.items, _item('item-old', 'Old'));
@@ -144,8 +195,13 @@ void main() {
 
       expect(firstGateway.requestedCursors, ['OLD']);
       expect(
-        (await database.query(DatabaseTables.items)).single['id'],
-        'item-old',
+        await database.query(
+          DatabaseTables.items,
+          columns: const ['id'],
+          where: 'id = ?',
+          whereArgs: const ['item-old'],
+        ),
+        hasLength(1),
       );
       expect(await database.query(DatabaseTables.vehicles), hasLength(1));
       expect(await database.query(DatabaseTables.expenses), hasLength(1));
@@ -286,7 +342,15 @@ void main() {
         throwsFormatException,
       );
       expect(await database.getSyncMeta('cursor'), 'CURSOR_A');
-      expect((await database.query(DatabaseTables.items)).single['id'], 'old');
+      expect(
+        await database.query(
+          DatabaseTables.items,
+          columns: const ['id'],
+          where: 'id = ?',
+          whereArgs: const ['old'],
+        ),
+        hasLength(1),
+      );
     },
   );
 
@@ -486,7 +550,7 @@ void main() {
   );
 
   test(
-    'scope change preserves pending work and refetches without cursor',
+    'scope change clears drained scoped data and refetches without cursor',
     () async {
       await database.setSyncMeta('user_id', 'user-1');
       await database.setSyncMeta('scope_key', 'old-scope');
@@ -520,10 +584,7 @@ void main() {
         (await database.query(DatabaseTables.items)).single['id'],
         'new-item',
       );
-      expect(
-        (await database.query(DatabaseTables.expenses)).single['id'],
-        'pending-expense',
-      );
+      expect(await database.query(DatabaseTables.expenses), isEmpty);
     },
   );
 
@@ -550,8 +611,13 @@ void main() {
     expect(sessionExpired, isTrue);
     expect(service.sessionExpired, isTrue);
     expect(
-      (await database.query(DatabaseTables.items)).single['id'],
-      'cached-item',
+      await database.query(
+        DatabaseTables.items,
+        columns: const ['id'],
+        where: 'id = ?',
+        whereArgs: const ['cached-item'],
+      ),
+      hasLength(1),
     );
   });
 
@@ -664,8 +730,38 @@ BootstrapResponse _response({
         'supervisor': {'name': 'Supervisor', 'phone': '+919811111111'},
         'session': {'expiresAt': '2026-10-08T12:00:00.000Z'},
       },
-      'tables': tables,
+      'tables': {
+        'centers': {
+          'replace': [
+            {'id': 'center-1', 'name': 'Center One', 'code': 'CTR'},
+          ],
+        },
+        ...tables,
+      },
     },
+  });
+}
+
+Future<void> _seedForeignKeyParents(AppDatabase database) async {
+  await database.insert(DatabaseTables.centers, {
+    'id': 'center-1',
+    'name': 'Center One',
+    'code': 'CTR',
+  });
+  await database.insert(DatabaseTables.items, _item('item-1', 'Seed Item'));
+  await database.insert(DatabaseTables.vehicleTypes, {
+    'id': 'type-1',
+    'name': 'Mini Truck',
+  });
+  await database.insert(DatabaseTables.expenseCategories, {
+    'id': 'category-1',
+    'center_id': 'center-1',
+    'name': 'General',
+    'is_active': 1,
+  });
+  await database.insert(DatabaseTables.destinations, {
+    'id': 'destination-1',
+    'name': 'Plant',
   });
 }
 

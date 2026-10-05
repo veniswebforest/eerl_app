@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class D2dWasteItemsStep extends StatelessWidget {
   const D2dWasteItemsStep({
@@ -18,7 +19,7 @@ class D2dWasteItemsStep extends StatelessWidget {
     required this.onDone,
   });
 
-  final List<String> items;
+  final List<ItemModel> items;
   final Set<int> selectedItems;
   final bool isOpen;
   final bool showPlasticItems;
@@ -39,6 +40,12 @@ class D2dWasteItemsStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final plasticCount = items.where(_isPlastic).length;
+    final nonPlasticCount = items.length - plasticCount;
+    final visibleIndices = <int>[
+      for (var index = 0; index < items.length; index++)
+        if (_isPlastic(items[index]) == showPlasticItems) index,
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -117,14 +124,14 @@ class D2dWasteItemsStep extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _CategoryTab(
-                        text: l10n.collectionPlasticCount,
+                        text: l10n.configurePlasticCount(plasticCount),
                         active: showPlasticItems,
                         onTap: () => onCategoryChanged(true),
                       ),
                     ),
                     Expanded(
                       child: _CategoryTab(
-                        text: l10n.collectionNonPlasticCount,
+                        text: l10n.configureNonPlasticCount(nonPlasticCount),
                         active: !showPlasticItems,
                         onTap: () => onCategoryChanged(false),
                       ),
@@ -135,50 +142,55 @@ class D2dWasteItemsStep extends StatelessWidget {
                   constraints: const BoxConstraints(maxHeight: 230),
                   child: SingleChildScrollView(
                     child: Column(
-                      children: List.generate(
-                        items.length,
-                        (index) => InkWell(
-                          key: Key('d2d-waste-item-$index'),
-                          onTap: () => onItemChanged(index),
-                          child: Container(
-                            constraints: const BoxConstraints(minHeight: 38),
-                            margin: const EdgeInsets.symmetric(vertical: 4),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 9,
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.white,
-                                  _rowColors[index % _rowColors.length],
-                                ],
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                _SelectionCheck(
-                                  selected: selectedItems.contains(index),
+                      children: visibleIndices
+                          .map((index) {
+                            final item = items[index];
+                            final rowColor =
+                                _parseMaterialColor(item.colour) ??
+                                _rowColors[index % _rowColors.length];
+                            return InkWell(
+                              key: Key('d2d-waste-item-$index'),
+                              onTap: () => onItemChanged(index),
+                              child: Container(
+                                constraints: const BoxConstraints(
+                                  minHeight: 38,
                                 ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    items[index],
-                                    style: AppTextStyles.regularB7_14,
+                                margin: const EdgeInsets.symmetric(vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 9,
+                                ),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.white,
+                                      rowColor.withValues(alpha: 0.35),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  index == 1 || index == 3
-                                      ? l10n.collectionUnitPcs
-                                      : l10n.collectionUnitKg,
-                                  style: AppTextStyles.regularB7_14,
+                                child: Row(
+                                  children: [
+                                    _SelectionCheck(
+                                      selected: selectedItems.contains(index),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        item.name,
+                                        style: AppTextStyles.regularB7_14,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      _unitLabel(item, context),
+                                      style: AppTextStyles.regularB7_14,
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                              ),
+                            );
+                          })
+                          .toList(growable: false),
                     ),
                   ),
                 ),
@@ -219,6 +231,29 @@ class D2dWasteItemsStep extends StatelessWidget {
       ],
     );
   }
+
+  bool _isPlastic(ItemModel item) =>
+      item.materialType.trim().toUpperCase() == 'PLASTIC';
+
+  String _unitLabel(ItemModel item, BuildContext context) {
+    final code = item.unitCode.trim().toUpperCase();
+    if (code == 'KG') return context.l10n.collectionUnitKg;
+    if (code == 'PCS' || code == 'PC' || code == 'PIECE') {
+      return context.l10n.collectionUnitPcs;
+    }
+    return item.unitName.isNotEmpty ? item.unitName : item.unitCode;
+  }
+
+  Color? _parseMaterialColor(String? value) {
+    if (value == null) return null;
+    var hex = value.trim();
+    if (hex.startsWith('#')) hex = hex.substring(1);
+    if (hex.toLowerCase().startsWith('0x')) hex = hex.substring(2);
+    if (hex.length == 6) hex = 'FF$hex';
+    if (hex.length != 8) return null;
+    final parsed = int.tryParse(hex, radix: 16);
+    return parsed == null ? null : Color(parsed);
+  }
 }
 
 class _CategoryTab extends StatelessWidget {
@@ -238,7 +273,13 @@ class _CategoryTab extends StatelessWidget {
     child: Container(
       height: 44,
       alignment: Alignment.center,
-      color: active ? AppColors.primary500 : AppColors.cool50,
+      decoration: BoxDecoration(
+        color: active ? AppColors.primary500 : AppColors.cool50,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(8),
+          topRight: Radius.circular(8),
+        ),
+      ),
       child: Text(
         text,
         style: AppTextStyles.regularB7_14.copyWith(

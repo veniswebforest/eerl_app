@@ -150,6 +150,7 @@ class _D2dVehicleManagementScreenState
         id:
             existing?.id ??
             'local_vehicle_${DateTime.now().microsecondsSinceEpoch}',
+        number: existing?.number,
         centerId: _centers[centerIndex].id,
         plateNumber: plate,
         typeId: existing?.typeId ?? type.id,
@@ -159,6 +160,7 @@ class _D2dVehicleManagementScreenState
         isActive: true,
         syncState: 'pending',
       ),
+      isNew: !_editingForm,
     );
     if (!mounted) return;
     setState(() {

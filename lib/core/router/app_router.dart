@@ -170,6 +170,7 @@ class AppRouter {
           initialStep: data.initialStep,
           initialType: data.initialType,
           initialSelectedItems: data.initialSelectedItems,
+          initialCollectionId: data.collectionId,
         );
       },
     ),

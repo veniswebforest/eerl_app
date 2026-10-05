@@ -29,13 +29,19 @@ class EerlLocalRepository {
     channel: channel,
     selectedOnly: selectedOnly,
   );
+  Future<List<ItemModel>> getCollectionMaterials({
+    String? centerId,
+    required String channel,
+  }) => _local.getCollectionMaterials(centerId: centerId, channel: channel);
   Future<void> saveItemConfiguration({
     String? centerId,
     required String channel,
+    required String tab,
     required List<ItemModel> items,
   }) => _local.saveItemConfiguration(
     centerId: centerId,
     channel: channel,
+    tab: tab,
     items: items,
   );
   Future<List<VehicleModel>> getVehicles({
@@ -43,7 +49,8 @@ class EerlLocalRepository {
     bool activeOnly = true,
   }) => _local.getVehicles(centerId: centerId, activeOnly: activeOnly);
   Future<List<VehicleTypeModel>> getVehicleTypes() => _local.getVehicleTypes();
-  Future<void> saveVehicle(VehicleModel vehicle) => _local.saveVehicle(vehicle);
+  Future<void> saveVehicle(VehicleModel vehicle, {required bool isNew}) =>
+      _local.saveVehicle(vehicle, isNew: isNew);
   Future<void> setVehicleActive(VehicleModel vehicle, bool active) =>
       _local.setVehicleActive(vehicle, active);
   Future<List<MrfPersonModel>> getMrfPeople({
@@ -145,4 +152,6 @@ class EerlLocalRepository {
   Future<SyncStatusModel> getSyncStatus() => _local.getSyncStatus();
   Future<List<FailedOutboxItemModel>> getFailedOutboxItems() =>
       _local.getFailedOutboxItems();
+  Future<void> retryFailedOutboxItem(int seq) =>
+      _local.retryFailedOutboxItem(seq);
 }

@@ -271,6 +271,7 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
       extra: AddCollectionRouteData(
         initialStep: CollectionEntryStep.items,
         initialType: _collectionType(draft.channel),
+        collectionId: draft.id,
       ),
     );
     if (mounted && saved == true) {
