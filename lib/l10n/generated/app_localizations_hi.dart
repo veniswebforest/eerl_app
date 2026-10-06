@@ -1466,10 +1466,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get collectionDetailVerifiedWeight => 'सत्यापित वजन';
 
   @override
-  String get collectionDetailRate => 'दर: ₹45.00/KG';
+  String get collectionDetailRate => 'दर:';
 
   @override
-  String get collectionDetailMaterialTotal => 'कुल: ₹12,150.00';
+  String get collectionDetailMaterialTotal => 'कुल:';
 
   @override
   String get collectionDetailRampPersonPhoto => 'रैंप व्यक्ति फोटो';
@@ -1497,6 +1497,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get syncPendingCollections => '3 संग्रह लंबित';
+
+  @override
+  String syncPendingItems(int count) {
+    return '$count एंट्री सिंक होना बाकी';
+  }
 
   @override
   String get syncAlreadySyncedTitle => 'डेटा पहले से सिंक है';
@@ -1699,7 +1704,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String collectionRatePerUnit(String unit) {
-    return 'दर: ₹45.00/$unit';
+    return 'दर/$unit';
   }
 
   @override
@@ -1773,6 +1778,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get collectionPrintSlip => 'स्लिप प्रिंट करें';
+
+  @override
+  String get collectionBackToHome => 'होम पर वापस जाएँ';
 
   @override
   String get collectionSelectVehicle => 'वाहन नंबर प्लेट चुनें';
@@ -3710,4 +3718,35 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get supervisorMrfLocationSardar => 'सरदार मार्केट, उधना';
+
+  @override
+  String get locationServiceTitle => 'लोकेशन चालू करें';
+
+  @override
+  String get locationServiceMessage =>
+      'लोकेशन बंद है। इसे चालू करें ताकि ऑफलाइन होने पर भी collection record में GPS coordinates जोड़े जा सकें।';
+
+  @override
+  String get locationPermissionTitle => 'लोकेशन अनुमति आवश्यक है';
+
+  @override
+  String get locationPermissionSettingsMessage =>
+      'Collection record में GPS coordinates जोड़ने के लिए app settings में location access की अनुमति दें।';
+
+  @override
+  String get locationPermissionDenied =>
+      'लोकेशन की अनुमति नहीं मिली। अनुमति मिलने तक GPS नहीं जोड़ा जाएगा।';
+
+  @override
+  String get locationUnavailable =>
+      'अभी लोकेशन उपलब्ध नहीं है। उपलब्ध होने पर अंतिम सहेजी गई लोकेशन का उपयोग होगा।';
+
+  @override
+  String get locationNotNow => 'अभी नहीं';
+
+  @override
+  String get locationOpenSettings => 'Settings खोलें';
+
+  @override
+  String get locationSettingsUnavailable => 'Location settings नहीं खुल सकीं।';
 }

@@ -32,9 +32,29 @@ class OutgoingSyncService {
   Future<void> drain() {
     final active = _activeDrain;
     if (active != null) return active;
-    final run = _drain();
+    late final Future<void> run;
+    run = _drain().whenComplete(() {
+      if (identical(_activeDrain, run)) _activeDrain = null;
+    });
     _activeDrain = run;
-    return run.whenComplete(() => _activeDrain = null);
+    return run;
+  }
+
+  /// Immediately retries every locally stored mutation during a user-initiated
+  /// sync. Automatic sync keeps its backoff, while this path clears retry
+  /// delays and re-queues permanent failures because the user explicitly asked
+  /// the app to try all pending data again.
+  Future<void> retryAllAndDrain() async {
+    final active = _activeDrain;
+    if (active != null) await active;
+    final resetCount = await _database.update(DatabaseTables.outbox, {
+      'status': 'queued',
+      'attempts': 0,
+      'last_error': null,
+      'next_attempt_at': null,
+    }, where: "status IN ('queued', 'failed')");
+    _log('MANUAL sync re-queued $resetCount outbox item(s)');
+    await drain();
   }
 
   Future<void> _drain() async {
@@ -53,12 +73,16 @@ class OutgoingSyncService {
       'status': 'failed',
     }, where: "status = 'uploading'");
 
-    await _uploadWaitingPhotos(token);
+    var photoProgress = await _uploadWaitingPhotos(token);
     while (true) {
       final next = await _nextOutboxItem();
       if (next == null) return;
       if ((next['photos_waiting'] as num?)?.toInt() != 0) {
-        await _uploadWaitingPhotos(token);
+        if (photoProgress == 0) {
+          _log('Oldest outgoing item is waiting for photo uploads');
+          return;
+        }
+        photoProgress = await _uploadWaitingPhotos(token);
         final refreshed = await _nextOutboxItem();
         if (refreshed == null ||
             (refreshed['photos_waiting'] as num?)?.toInt() != 0) {
@@ -122,9 +146,25 @@ class OutgoingSyncService {
       if (body != null) request.body = jsonEncode(body);
 
       _log('SEND #$seq ${item['method']} ${item['path']}');
+      final isCollection = item['entity'] == DatabaseTables.collections;
+      if (isCollection) {
+        _collectionLog(
+          'REQUEST',
+          '#$seq ${item['method']} ${request.url} '
+              'collection_id=${item['entity_id']} body=${request.body}',
+        );
+      }
       final streamed = await _client.send(request).timeout(_timeout);
       final response = await http.Response.fromStream(streamed);
       final responseBody = _decodeObject(response.body);
+      if (isCollection) {
+        _collectionLog(
+          'RESPONSE',
+          '#$seq status=${response.statusCode} '
+              'collection_id=${item['entity_id']} '
+              'body=${response.body.trim().isEmpty ? '{}' : response.body}',
+        );
+      }
       final code = _errorCode(responseBody);
       if (_isSuccess(response.statusCode, code)) {
         await _complete(item, responseBody);
@@ -232,6 +272,9 @@ class OutgoingSyncService {
           where: 'id = ?',
           whereArgs: [entityId],
         );
+        if (entity == DatabaseTables.collections) {
+          await _applyCollectionResponseLines(txn, entityId, response);
+        }
       }
     });
   }
@@ -243,6 +286,9 @@ class OutgoingSyncService {
   ) async {
     final data = response['data'];
     if (data is! Map) return <String, Object?>{};
+    if (table == DatabaseTables.collections) {
+      return _collectionServerValues(data);
+    }
     Object? candidate = data;
     if (data[table] is Map) candidate = data[table];
     if (candidate is! Map) return <String, Object?>{};
@@ -256,6 +302,71 @@ class OutgoingSyncService {
             entry.key != 'sync_state')
           entry.key.toString(): _sqliteValue(entry.value),
     };
+  }
+
+  Map<String, Object?> _collectionServerValues(Map<Object?, Object?> data) {
+    final agent = data['agent'];
+    final handover = data['handover'];
+    final totals = data['totals'];
+    final review = data['review'];
+    final vehicle = handover is Map ? handover['vehicle'] : null;
+    final mrfLabour = handover is Map ? handover['mrfLabour'] : null;
+    final ragpicker = handover is Map ? handover['ragpicker'] : null;
+    final reviewBy = review is Map ? review['by'] : null;
+    return <String, Object?>{
+      if (data['status'] != null) 'status': data['status'],
+      if (data['slipNumber'] != null) 'slip_number': data['slipNumber'],
+      if (data['collectedAt'] != null) 'collected_at': data['collectedAt'],
+      if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
+      if (data['takesPayment'] != null)
+        'takes_payment': _sqliteValue(data['takesPayment']),
+      if (agent is Map && agent['id'] != null) 'agent_id': agent['id'],
+      if (agent is Map && agent['name'] != null) 'agent_name': agent['name'],
+      if (vehicle is Map && vehicle['id'] != null) 'vehicle_id': vehicle['id'],
+      if (mrfLabour is Map && mrfLabour['id'] != null)
+        'mrf_person_id': mrfLabour['id'],
+      if (ragpicker is Map && ragpicker['id'] != null)
+        'ragpicker_id': ragpicker['id'],
+      if (handover is Map && handover['givenByName'] != null)
+        'given_by_name': handover['givenByName'],
+      if (handover is Map && handover['photoUrls'] is List)
+        'handover_photo_urls': jsonEncode(handover['photoUrls']),
+      if (data['paidBy'] != null) 'paid_by': data['paidBy'],
+      if (totals is Map && totals['amount'] != null)
+        'total_amount': totals['amount'],
+      if (review is Map && review['reason'] != null)
+        'rejection_reason': review['reason'],
+      if (reviewBy is Map && reviewBy['name'] != null)
+        'verified_by_name': reviewBy['name'],
+      if (review is Map && review['at'] != null) 'verified_at': review['at'],
+    };
+  }
+
+  Future<void> _applyCollectionResponseLines(
+    Transaction txn,
+    String collectionId,
+    Map<String, Object?> response,
+  ) async {
+    final data = response['data'];
+    if (data is! Map || data['lines'] is! List) return;
+    for (final rawLine in data['lines']! as List) {
+      if (rawLine is! Map || rawLine['itemId'] == null) continue;
+      await txn.update(
+        DatabaseTables.collectionItems,
+        {
+          if (rawLine['collectedQty'] != null) 'qty': rawLine['collectedQty'],
+          if (rawLine['verifiedQty'] != null)
+            'verified_qty': rawLine['verifiedQty'],
+          if (rawLine['rate'] != null) 'rate': rawLine['rate'],
+          if (rawLine['amount'] != null) 'amount': rawLine['amount'],
+          if (rawLine['photoUrls'] is List)
+            'photo_urls': jsonEncode(rawLine['photoUrls']),
+          if (rawLine['sortOrder'] != null) 'sort_order': rawLine['sortOrder'],
+        },
+        where: 'collection_id = ? AND item_id = ?',
+        whereArgs: [collectionId, rawLine['itemId']],
+      );
+    }
   }
 
   Object? _sqliteValue(Object? value) {
@@ -308,14 +419,45 @@ class OutgoingSyncService {
     _log('FAILED #${item['seq']}: $error');
   }
 
-  Future<void> _uploadWaitingPhotos(String token) async {
-    final rows = await _database.query(
+  Future<int> _uploadWaitingPhotos(String token) async {
+    final waitingRows = await _database.query(
       DatabaseTables.photos,
       where: "status IN ('local', 'failed')",
       orderBy: 'created_at',
       limit: 20,
     );
-    if (rows.isEmpty) return;
+    if (waitingRows.isEmpty) return 0;
+    final rows = <Map<String, Object?>>[];
+    for (final waitingRow in waitingRows) {
+      final row = Map<String, Object?>.from(waitingRow);
+      final id = row['id']! as String;
+      final localPath = row['local_path'] as String?;
+      if (localPath == null || localPath.trim().isEmpty) {
+        _log('PHOTO skipped id=$id: local path is missing');
+        continue;
+      }
+      final file = File(localPath);
+      int sizeBytes;
+      try {
+        sizeBytes = await file.length();
+      } on FileSystemException catch (error) {
+        _log('PHOTO skipped id=$id: ${error.message}');
+        continue;
+      }
+      if (sizeBytes <= 0) {
+        _log('PHOTO skipped id=$id: file is empty');
+        continue;
+      }
+      row['size_bytes'] = sizeBytes;
+      rows.add(row);
+      await _database.update(
+        DatabaseTables.photos,
+        {'size_bytes': sizeBytes},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    }
+    if (rows.isEmpty) return 0;
     final ids = rows.map((row) => row['id']! as String).toList();
     final marks = List.filled(ids.length, '?').join(',');
     await _database.rawUpdate(
@@ -323,7 +465,22 @@ class OutgoingSyncService {
       ids,
     );
 
+    var uploadedCount = 0;
     try {
+      final batchBody = {
+        'photos': [
+          for (final row in rows)
+            {
+              'purpose': row['purpose'],
+              'contentType': row['content_type'],
+              'sizeBytes': row['size_bytes'],
+            },
+        ],
+      };
+      _photoLog(
+        'BATCH_REQUEST',
+        'count=${rows.length} body=${jsonEncode(batchBody)}',
+      );
       final response = await _client
           .post(
             Uri.parse('${AppConstants.apiBaseUrl}/mobile/uploads/batch'),
@@ -332,40 +489,48 @@ class OutgoingSyncService {
               'content-type': 'application/json',
               'Authorization': 'Bearer $token',
             },
-            body: jsonEncode({
-              'files': [
-                for (final row in rows)
-                  {
-                    'id': row['id'],
-                    'purpose': row['purpose'],
-                    'contentType': row['content_type'],
-                    'sizeBytes': row['size_bytes'],
-                  },
-              ],
-            }),
+            body: jsonEncode(batchBody),
           )
           .timeout(_timeout);
+      _photoLog(
+        'BATCH_RESPONSE',
+        'status=${response.statusCode} '
+            'body=${response.body.trim().isEmpty ? '{}' : response.body}',
+      );
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw HttpException('Upload batch HTTP ${response.statusCode}');
+        throw HttpException(
+          'Upload batch HTTP ${response.statusCode}: ${response.body}',
+        );
       }
       final body = _decodeObject(response.body);
       final uploads = _uploadList(body);
-      final byId = {for (final row in rows) row['id']! as String: row};
-      for (final upload in uploads) {
-        final id = upload['id']?.toString() ?? upload['photoId']?.toString();
+      if (uploads.length != rows.length) {
+        _photoLog(
+          'BATCH_MISMATCH',
+          'requested=${rows.length} received=${uploads.length}',
+        );
+      }
+      final uploadCount = uploads.length < rows.length
+          ? uploads.length
+          : rows.length;
+      for (var index = 0; index < uploadCount; index++) {
+        final upload = uploads[index];
+        final source = rows[index];
+        // The API returns data.items without the local photo id. Response
+        // items retain request order, so the local rows are paired by index.
+        final id = source['id']! as String;
         final uploadUrl =
             upload['uploadUrl']?.toString() ?? upload['upload_url']?.toString();
         final fileUrl =
             upload['fileUrl']?.toString() ?? upload['file_url']?.toString();
-        if (id == null || uploadUrl == null || fileUrl == null) continue;
-        final source = byId[id];
-        final localPath = source?['local_path'] as String?;
+        if (uploadUrl == null || fileUrl == null) continue;
+        final localPath = source['local_path'] as String?;
         if (localPath == null || localPath.isEmpty) continue;
         final file = File(localPath);
         final put = await _client
             .put(
               Uri.parse(uploadUrl),
-              headers: {'content-type': source?['content_type']! as String},
+              headers: {'content-type': source['content_type']! as String},
               body: await file.readAsBytes(),
             )
             .timeout(_timeout);
@@ -380,6 +545,11 @@ class OutgoingSyncService {
           where: 'id = ?',
           whereArgs: [id],
         );
+        uploadedCount++;
+        _photoLog(
+          'UPLOADED',
+          'photo_id=$id size_bytes=${source['size_bytes']}',
+        );
       }
     } catch (error) {
       _log('PHOTO batch failed: $error');
@@ -390,13 +560,14 @@ class OutgoingSyncService {
         ids,
       );
     }
+    return uploadedCount;
   }
 
   List<Map<String, Object?>> _uploadList(Map<String, Object?> body) {
     final data = body['data'];
     final raw = data is Map
-        ? (data['uploads'] ?? data['files'])
-        : (body['uploads'] ?? body['files']);
+        ? (data['items'] ?? data['uploads'] ?? data['files'])
+        : (body['items'] ?? body['uploads'] ?? body['files']);
     if (raw is! List) return const [];
     return raw
         .whereType<Map>()
@@ -447,5 +618,15 @@ class OutgoingSyncService {
 
   static void _log(String message) {
     if (kDebugMode) debugPrint('📤 [EERL_OUTBOX] $message');
+  }
+
+  static void _collectionLog(String stage, String message) {
+    if (kDebugMode) {
+      debugPrint('🌐 [EERL_COLLECTION_API][$stage] $message');
+    }
+  }
+
+  static void _photoLog(String stage, String message) {
+    if (kDebugMode) debugPrint('📸 [EERL_PHOTO_UPLOAD][$stage] $message');
   }
 }

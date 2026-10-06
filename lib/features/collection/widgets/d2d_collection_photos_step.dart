@@ -8,19 +8,25 @@ import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/bootstrap/service/item_image_cache_service.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 enum D2dMeasureUnit { kg, pcs }
 
 enum D2dPaymentMode { cash, upi }
 
-D2dMeasureUnit defaultCollectionUnit(int item) =>
-    item == 1 || item == 3 ? D2dMeasureUnit.pcs : D2dMeasureUnit.kg;
+D2dMeasureUnit defaultCollectionUnit(ItemModel item) {
+  final code = item.unitCode.trim().toUpperCase();
+  return code == 'PCS' || code == 'PC' || code == 'PIECE'
+      ? D2dMeasureUnit.pcs
+      : D2dMeasureUnit.kg;
+}
 
 class D2dCollectionPhotosStep extends StatelessWidget {
   const D2dCollectionPhotosStep({
     super.key,
     required this.selectedItems,
-    required this.itemNames,
+    required this.items,
     required this.photos,
     required this.collectionWeights,
     required this.verifiedWeights,
@@ -36,7 +42,7 @@ class D2dCollectionPhotosStep extends StatelessWidget {
   });
 
   final List<int> selectedItems;
-  final List<String> itemNames;
+  final List<ItemModel> items;
   final Map<int, List<XFile>> photos;
   final Map<int, String> collectionWeights;
   final Map<int, String> verifiedWeights;
@@ -59,16 +65,20 @@ class D2dCollectionPhotosStep extends StatelessWidget {
         style: AppTextStyles.mediumSH8_14,
       ),
       const SizedBox(height: 16),
-      ...selectedItems.map(
-        (item) => Padding(
+      ...selectedItems.map((item) {
+        final material = items[item];
+        return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: _D2dMaterialCard(
             item: item,
-            name: itemNames[item],
+            name: material.name,
+            imageUrl: material.imageUrl,
+            colour: material.colour,
+            rate: material.rate,
             photos: photos[item] ?? const [],
             collectionWeight: collectionWeights[item] ?? '',
             verifiedWeight: verifiedWeights[item] ?? '',
-            unit: units[item] ?? defaultCollectionUnit(item),
+            unit: units[item] ?? defaultCollectionUnit(material),
             onCollectionWeightChanged: (value) =>
                 onCollectionWeightChanged(item, value),
             onVerifiedWeightChanged: (value) =>
@@ -77,8 +87,8 @@ class D2dCollectionPhotosStep extends StatelessWidget {
             onRemove: (index) => onRemove(item, index),
             onPreview: onPreview,
           ),
-        ),
-      ),
+        );
+      }),
       if (showPaymentMode)
         Container(
           key: const Key('d2d-payment-mode'),
@@ -127,6 +137,9 @@ class _D2dMaterialCard extends StatelessWidget {
   const _D2dMaterialCard({
     required this.item,
     required this.name,
+    required this.imageUrl,
+    required this.colour,
+    required this.rate,
     required this.photos,
     required this.collectionWeight,
     required this.verifiedWeight,
@@ -140,6 +153,9 @@ class _D2dMaterialCard extends StatelessWidget {
 
   final int item;
   final String name;
+  final String? imageUrl;
+  final String? colour;
+  final double? rate;
   final List<XFile> photos;
   final String collectionWeight;
   final String verifiedWeight;
@@ -155,6 +171,18 @@ class _D2dMaterialCard extends StatelessWidget {
     final unitLabel = unit == D2dMeasureUnit.kg
         ? context.l10n.collectionUnitKg
         : context.l10n.collectionUnitPcs;
+    final verifiedQuantity = double.tryParse(verifiedWeight.trim());
+    final materialTotal = rate == null || verifiedQuantity == null
+        ? null
+        : rate! * verifiedQuantity;
+    final rateText = rate == null
+        ? '${context.l10n.collectionDetailRate} —'
+        : '${context.l10n.collectionDetailRate} '
+              '₹${rate!.toStringAsFixed(2)}/$unitLabel';
+    final totalText = materialTotal == null
+        ? '${context.l10n.collectionDetailMaterialTotal} —'
+        : '${context.l10n.collectionDetailMaterialTotal} '
+              '₹${materialTotal.toStringAsFixed(2)}';
     return Container(
       key: Key('d2d-material-card-$item'),
       clipBehavior: Clip.antiAlias,
@@ -173,10 +201,10 @@ class _D2dMaterialCard extends StatelessWidget {
             color: AppColors.cool200,
             child: Row(
               children: [
-                const Icon(
-                  Icons.recycling,
-                  size: 40,
-                  color: AppColors.primary500,
+                _MaterialThumbnail(
+                  name: name,
+                  imageUrl: imageUrl,
+                  colour: colour,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -232,25 +260,27 @@ class _D2dMaterialCard extends StatelessWidget {
                   ),
                   child: const SizedBox(width: double.infinity, height: 0),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        context.l10n.collectionRatePerUnit(unitLabel),
-                        style: AppTextStyles.regularB8_12,
+                if (rate != null) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          rateText,
+                          style: AppTextStyles.regularB8_12,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      context.l10n.collectionDetailMaterialTotal,
-                      style: AppTextStyles.regularB8_12.copyWith(
-                        color: AppColors.primary500,
+                      const SizedBox(width: 8),
+                      Text(
+                        totalText,
+                        style: AppTextStyles.regularB8_12.copyWith(
+                          color: AppColors.primary500,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 14),
                 InkWell(
                   key: Key('d2d-capture-photo-$item'),
@@ -346,6 +376,80 @@ class _D2dMaterialCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _MaterialThumbnail extends StatelessWidget {
+  const _MaterialThumbnail({
+    required this.name,
+    required this.imageUrl,
+    required this.colour,
+  });
+
+  final String name;
+  final String? imageUrl;
+  final String? colour;
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<File?>(
+    future: ItemImageCacheService.instance.localFileForUrl(imageUrl),
+    builder: (context, snapshot) {
+      final file = snapshot.data;
+      if (file == null) {
+        return Container(
+          key: Key('material-colour-swatch-$name'),
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: _parseMaterialColour(colour),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.cool400),
+          ),
+        );
+      }
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: Key('material-image-$name'),
+          onTap: () => showDialog<void>(
+            context: context,
+            barrierColor: Colors.black87,
+            builder: (dialogContext) => Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.all(20),
+              child: Stack(
+                children: [
+                  InteractiveViewer(
+                    child: Image.file(file, fit: BoxFit.contain),
+                  ),
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: IconButton.filled(
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          borderRadius: BorderRadius.circular(8),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.file(file, width: 40, height: 40, fit: BoxFit.cover),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+Color _parseMaterialColour(String? value) {
+  final normalized = value?.trim().replaceFirst('#', '');
+  if (normalized == null) return AppColors.primary100;
+  final hex = normalized.length == 6 ? 'FF$normalized' : normalized;
+  final parsed = int.tryParse(hex, radix: 16);
+  return parsed == null ? AppColors.primary100 : Color(parsed);
 }
 
 class _MeasureField extends StatelessWidget {

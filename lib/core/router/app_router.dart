@@ -183,7 +183,8 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.collectionReceipt,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, _) => const CollectionReceiptScreen(),
+      builder: (_, state) =>
+          CollectionReceiptScreen(collectionId: state.extra! as String),
     ),
     GoRoute(
       path: AppRoutes.collectionImagePreview,

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_assets.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_detail_widgets.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
@@ -63,9 +64,9 @@ class _SupervisorResolveRequestScreenState
 
   Future<void> _capturePhoto() async {
     try {
-      final photo = await _imagePicker.pickImage(
+      final photo = await ImageCompressor.pickAndCompress(
+        picker: _imagePicker,
         source: ImageSource.camera,
-        imageQuality: 82,
       );
       if (photo != null && mounted) {
         setState(() {

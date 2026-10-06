@@ -73,6 +73,17 @@ abstract final class DatabaseMigrations {
       // unchanged, as required for response.data.tables fields.
       await _addColumnIfMissing(db, 'tasks', 'note', 'TEXT');
     }
+    if (oldVersion < 6 && newVersion >= 6) {
+      await _addColumnIfMissing(db, 'collections', 'gps_lat', 'REAL');
+      await _addColumnIfMissing(db, 'collections', 'gps_lng', 'REAL');
+      await _addColumnIfMissing(db, 'transfers', 'gps_lat', 'REAL');
+      await _addColumnIfMissing(db, 'transfers', 'gps_lng', 'REAL');
+      await _addColumnIfMissing(db, 'items', 'image_url', 'TEXT');
+      await db.insert('sync_meta', {
+        'key': 'item_images_refetch_required',
+        'value': '1',
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
   }
 
   static Future<void> _addColumnIfMissing(

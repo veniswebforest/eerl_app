@@ -9,6 +9,7 @@ import 'package:eerl_app/features/bootstrap/data/bootstrap_remote_service.dart';
 import 'package:eerl_app/features/bootstrap/data/bootstrap_repository.dart';
 import 'package:eerl_app/features/bootstrap/model/bootstrap_response.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_log.dart';
+import 'package:eerl_app/features/bootstrap/service/item_image_cache_service.dart';
 import 'package:flutter/foundation.dart';
 
 enum BootstrapTrigger {
@@ -16,6 +17,7 @@ enum BootstrapTrigger {
   appOpen,
   appResume,
   reconnect,
+  localMutation,
   outboxFinished,
   pullToRefresh,
 }
@@ -25,11 +27,13 @@ class BootstrapSyncService extends ChangeNotifier {
     required BootstrapGateway gateway,
     required AppDatabase database,
     required BootstrapDatabaseApplier applier,
+    required ItemImageCacheService itemImageCache,
     required Future<String?> Function() accessTokenProvider,
     required Future<void> Function() onSessionExpired,
   }) : _gateway = gateway,
        _database = database,
        _applier = applier,
+       _itemImageCache = itemImageCache,
        _accessTokenProvider = accessTokenProvider,
        _onSessionExpired = onSessionExpired;
 
@@ -37,6 +41,7 @@ class BootstrapSyncService extends ChangeNotifier {
     required BootstrapGateway gateway,
     AppDatabase? database,
     BootstrapDatabaseApplier? applier,
+    ItemImageCacheService? itemImageCache,
     required Future<String?> Function() accessTokenProvider,
     Future<void> Function()? onSessionExpired,
   }) {
@@ -45,6 +50,8 @@ class BootstrapSyncService extends ChangeNotifier {
       gateway: gateway,
       database: resolvedDatabase,
       applier: applier ?? BootstrapDatabaseApplier(database: resolvedDatabase),
+      itemImageCache:
+          itemImageCache ?? ItemImageCacheService(database: resolvedDatabase),
       accessTokenProvider: accessTokenProvider,
       onSessionExpired: onSessionExpired ?? () async {},
     );
@@ -54,6 +61,7 @@ class BootstrapSyncService extends ChangeNotifier {
     gateway: BootstrapRepository(),
     database: AppDatabase.instance,
     applier: BootstrapDatabaseApplier(),
+    itemImageCache: ItemImageCacheService.instance,
     accessTokenProvider: AuthSessionStorage().getAccessToken,
     onSessionExpired: AuthSessionStorage().clearSession,
   );
@@ -63,6 +71,7 @@ class BootstrapSyncService extends ChangeNotifier {
   final BootstrapGateway _gateway;
   final AppDatabase _database;
   final BootstrapDatabaseApplier _applier;
+  final ItemImageCacheService _itemImageCache;
   final Future<String?> Function() _accessTokenProvider;
   final Future<void> Function() _onSessionExpired;
 
@@ -104,6 +113,14 @@ class BootstrapSyncService extends ChangeNotifier {
 
   Future<void> triggerAfterOutboxFinished() {
     return triggerBootstrap(trigger: BootstrapTrigger.outboxFinished);
+  }
+
+  /// Starts the outgoing queue after a local transaction has committed.
+  ///
+  /// The configured outgoing sync uploads blocking photos first, sends the
+  /// queued API request, and then Bootstrap refreshes the local server state.
+  Future<void> triggerAfterLocalMutation() {
+    return triggerBootstrap(trigger: BootstrapTrigger.localMutation);
   }
 
   Future<void> _runQueued(BootstrapTrigger initialTrigger) async {
@@ -157,6 +174,9 @@ class BootstrapSyncService extends ChangeNotifier {
       return;
     }
 
+    final itemImagesNeedRefetch =
+        await _database.getSyncMeta('item_images_refetch_required') == '1';
+    var itemImageResetDone = false;
     String? cursor = await _database.getSyncMeta('cursor');
     if (cursor != null && cursor.isEmpty) cursor = null;
     _log(cursor == null ? 'Starting full/first sync' : 'Starting cursor sync');
@@ -194,6 +214,23 @@ class BootstrapSyncService extends ChangeNotifier {
         rethrow;
       }
 
+      // Wait for one successful network response before clearing synced data.
+      // This preserves the existing offline catalogue when the app is upgraded
+      // without connectivity. The fetched page is intentionally discarded;
+      // the next request is a full download without a cursor.
+      if (itemImagesNeedRefetch && !itemImageResetDone) {
+        _log(
+          'Item image schema upgraded and network is available; '
+          'resetting scope for a full item fetch',
+        );
+        await _requireDrainedOutboxForReset();
+        await _database.scopeReset();
+        cursor = null;
+        page = 0;
+        itemImageResetDone = true;
+        continue;
+      }
+
       final data = response.data;
       _logPage(data);
 
@@ -216,6 +253,9 @@ class BootstrapSyncService extends ChangeNotifier {
       }
 
       await _applier.apply(data);
+      if (data.tables.containsKey(DatabaseTables.items)) {
+        await _itemImageCache.reconcile();
+      }
 
       if (!data.hasMore) break;
       if (data.cursor == cursor) {
@@ -224,6 +264,10 @@ class BootstrapSyncService extends ChangeNotifier {
         );
       }
       cursor = data.cursor;
+    }
+    if (itemImageResetDone) {
+      await _database.setSyncMeta('item_images_refetch_required', '0');
+      _log('One-time item image full refetch completed');
     }
   }
 

@@ -13,7 +13,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 1;
+  static const databaseVersion = 6;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;

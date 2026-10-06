@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../widgets/transfer_request_detail_widgets.dart';
 
@@ -58,9 +59,9 @@ class _TransferDispatchFlowScreenState
   }
 
   Future<void> _capturePhoto({required bool vehicle}) async {
-    final photo = await _imagePicker.pickImage(
+    final photo = await ImageCompressor.pickAndCompress(
+      picker: _imagePicker,
       source: ImageSource.camera,
-      imageQuality: 82,
     );
     if (photo == null || !mounted) return;
     setState(() {

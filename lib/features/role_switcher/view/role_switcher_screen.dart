@@ -47,13 +47,7 @@ class _RoleSwitcherScreenState extends State<RoleSwitcherScreen> {
     super.dispose();
   }
 
-  DashboardUserRole _role(String key) => switch (key.toUpperCase()) {
-    'SUPERVISOR' => DashboardUserRole.supervisor,
-    'ADMIN' => DashboardUserRole.admin,
-    'COLLECTION_MANAGER' => DashboardUserRole.collectionManager,
-    'IEC_AGENT' => DashboardUserRole.iecAgent,
-    _ => DashboardUserRole.collectionAgent,
-  };
+  DashboardUserRole _role(String key) => DashboardUserRoleX.fromKey(key);
 
   @override
   Widget build(BuildContext context) {

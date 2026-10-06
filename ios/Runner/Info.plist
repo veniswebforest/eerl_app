@@ -32,6 +32,8 @@
 	<string>Photo library access is used to select collection photos.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Please authenticate to access the app.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is attached to collection records as GPS evidence.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -8,6 +8,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
@@ -18,6 +19,7 @@ import '../widgets/collection_history_card.dart';
 import '../widgets/records_assets.dart';
 import '../widgets/records_segmented_control.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class RecordsTabScreen extends StatefulWidget {
   const RecordsTabScreen({
@@ -81,80 +83,87 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
       child: Stack(
         children: [
           Positioned.fill(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                20,
-                AppScreenHeaderMetrics.topInset,
-                20,
-                112,
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AppScreenHeader(
-                        title: context.l10n.recordsCollectionsTitle,
-                        subtitle: context.l10n.recordsCollectionsSubtitle,
-                        actions: [
-                          IconButton(
-                            key: const Key('records-date-filter'),
-                            onPressed: _showDateFilter,
-                            icon: SvgPicture.asset(
-                              RecordsAssets.filter,
-                              width: 28,
-                              height: 28,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      _SearchField(
-                        hint: context.l10n.recordsSearchHint,
-                        onChanged: (value) {
-                          _query = value;
-                          _controller.load();
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      RecordsSegmentedControl(
-                        isDrafts: _showDrafts,
-                        historyLabel: context.l10n.recordsHistory,
-                        draftsLabel: context.l10n.recordsDrafts,
-                        onChanged: (drafts) => setState(
-                          () => _view = drafts
-                              ? RecordsViewFlag.drafts
-                              : RecordsViewFlag.history,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _RecordsTypeChips(
-                        selected: _typeFilter,
-                        onSelected: (value) =>
-                            setState(() => _typeFilter = value),
-                      ),
-                      const SizedBox(height: 24),
-                      ListenableBuilder(
-                        listenable: _controller,
-                        builder: (context, _) {
-                          if (_controller.isLoading && !_controller.hasData) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                          if (_controller.error != null) {
-                            return Center(
-                              child: TextButton(
-                                onPressed: _controller.load,
-                                child: const Text('Retry'),
+            child: RefreshIndicator(
+              key: const Key('collection-records-refresh'),
+              onRefresh: _refreshLocalCollections,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(
+                  20,
+                  AppScreenHeaderMetrics.topInset,
+                  20,
+                  112,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppScreenHeader(
+                          title: context.l10n.recordsCollectionsTitle,
+                          subtitle: context.l10n.recordsCollectionsSubtitle,
+                          actions: [
+                            IconButton(
+                              key: const Key('records-date-filter'),
+                              onPressed: _showDateFilter,
+                              icon: SvgPicture.asset(
+                                RecordsAssets.filter,
+                                width: 28,
+                                height: 28,
                               ),
-                            );
-                          }
-                          return _showDrafts ? _buildDrafts() : _buildHistory();
-                        },
-                      ),
-                    ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        _SearchField(
+                          hint: context.l10n.recordsSearchHint,
+                          onChanged: (value) {
+                            _query = value;
+                            _controller.load();
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        RecordsSegmentedControl(
+                          isDrafts: _showDrafts,
+                          historyLabel: context.l10n.recordsHistory,
+                          draftsLabel: context.l10n.recordsDrafts,
+                          onChanged: (drafts) => setState(
+                            () => _view = drafts
+                                ? RecordsViewFlag.drafts
+                                : RecordsViewFlag.history,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _RecordsTypeChips(
+                          selected: _typeFilter,
+                          onSelected: (value) =>
+                              setState(() => _typeFilter = value),
+                        ),
+                        const SizedBox(height: 24),
+                        ListenableBuilder(
+                          listenable: _controller,
+                          builder: (context, _) {
+                            if (_controller.isLoading && !_controller.hasData) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (_controller.error != null) {
+                              return Center(
+                                child: TextButton(
+                                  onPressed: _controller.load,
+                                  child: const Text('Retry'),
+                                ),
+                              );
+                            }
+                            return _showDrafts
+                                ? _buildDrafts()
+                                : _buildHistory();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -171,6 +180,8 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
       ),
     ),
   );
+
+  Future<void> _refreshLocalCollections() => _controller.load();
 
   Widget _buildHistory() {
     final items = (_controller.data?.history ?? const <CollectionModel>[])
@@ -266,7 +277,7 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
   };
 
   Future<void> _continueDraft(CollectionModel draft) async {
-    final saved = await context.push<bool>(
+    final result = await context.push<CollectionRouteResult>(
       AppRoutes.addCollection,
       extra: AddCollectionRouteData(
         initialStep: CollectionEntryStep.items,
@@ -274,8 +285,14 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
         collectionId: draft.id,
       ),
     );
-    if (mounted && saved == true) {
-      setState(() => _view = RecordsViewFlag.drafts);
+    if (!mounted) return;
+    switch (result) {
+      case CollectionRouteResult.draftSaved:
+        setState(() => _view = RecordsViewFlag.drafts);
+      case CollectionRouteResult.openCollections:
+        context.read<DashboardNavigationProvider>().selectPage('collections');
+      case null:
+        break;
     }
   }
 

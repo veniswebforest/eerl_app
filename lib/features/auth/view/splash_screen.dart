@@ -74,15 +74,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<DashboardUserRole> _storedDashboardRole() async {
     final role = await AppDatabase.instance.getSyncMeta('active_role');
-    return role == 'SUPERVISOR'
-        ? DashboardUserRole.supervisor
-        : role == 'ADMIN'
-        ? DashboardUserRole.admin
-        : role == 'COLLECTION_MANAGER'
-        ? DashboardUserRole.collectionManager
-        : role == 'IEC_AGENT'
-        ? DashboardUserRole.iecAgent
-        : DashboardUserRole.collectionAgent;
+    return DashboardUserRoleX.fromKey(role);
   }
 
   @override

@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:eerl_app/core/location/device_location_service.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/core/local_database/outbox_queue.dart';
+import 'package:eerl_app/core/utils/uuid_generator.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
@@ -673,17 +677,20 @@ class EerlLocalDataSource {
       )).map(DestinationModel.fromMap).toList(growable: false);
 
   Future<List<CollectionModel>> getAgentCollections({
+    String? centerId,
     bool drafts = false,
     String? channel,
     String search = '',
   }) async {
     final userId = await currentUserId;
-    if (userId == null) return const [];
+    final resolvedCenter = centerId ?? await activeCenterId;
+    if (userId == null || resolvedCenter == null) return const [];
     final conditions = <String>[
       'c.agent_id = ?',
+      'c.center_id = ?',
       drafts ? "c.status = 'DRAFT'" : "c.status != 'DRAFT'",
     ];
-    final args = <Object?>[userId];
+    final args = <Object?>[userId, resolvedCenter];
     if (!drafts) {
       conditions.add('c.collected_at >= ?');
       args.add(_startOfIstDayUtc(daysAgo: 6));
@@ -707,6 +714,15 @@ class EerlLocalDataSource {
       GROUP BY c.id
       ORDER BY ${drafts ? 'c.updated_at' : 'c.collected_at'} DESC
     ''', args);
+    if (kDebugMode) {
+      debugPrint(
+        '📋 [EERL_COLLECTION_RECORDS][SQLITE][LOAD] COLLECTIONS '
+        'center=$resolvedCenter agent=$userId '
+        'view=${drafts ? 'drafts' : 'history'} channel=${channel ?? 'ALL'} '
+        'search=${search.trim().isEmpty ? '[EMPTY]' : search.trim()} '
+        'rows=${rows.length}',
+      );
+    }
     return rows.map(CollectionModel.fromMap).toList(growable: false);
   }
 
@@ -802,8 +818,29 @@ class EerlLocalDataSource {
       }
     }
     final now = DateTime.now().toUtc().toIso8601String();
+    final locationRows = submit
+        ? await _database.query(
+            DatabaseTables.collections,
+            columns: const ['status'],
+            where: 'id = ?',
+            whereArgs: [collection.id],
+            limit: 1,
+          )
+        : const <Map<String, Object?>>[];
+    final resubmittingRejected =
+        locationRows.isNotEmpty && locationRows.single['status'] == 'REJECTED';
+    final capturedGps = submit && !resubmittingRejected
+        ? await DeviceLocationService.instance.bestAvailableCoordinates()
+        : null;
     final photoIds = <String>[];
     final savedItemIds = <String>[];
+    final photoSizes = <String, int?>{};
+    for (final path in <String>{
+      ...collection.handoverPhotoUrls,
+      for (final item in items) ...item.photoUrls,
+    }) {
+      photoSizes[path] = await _localFileSize(path);
+    }
     await _database.transaction((txn) async {
       final channelRows = await txn.query(
         DatabaseTables.centerChannels,
@@ -829,7 +866,13 @@ class EerlLocalDataSource {
       }
       final existing = await txn.query(
         DatabaseTables.collections,
-        columns: const ['status', 'slip_number', 'collected_at'],
+        columns: const [
+          'status',
+          'slip_number',
+          'collected_at',
+          'gps_lat',
+          'gps_lng',
+        ],
         where: 'id = ?',
         whereArgs: [collection.id],
         limit: 1,
@@ -840,6 +883,16 @@ class EerlLocalDataSource {
           collection.slipNumber ?? existingRow?['slip_number'] as String?;
       var collectedAt =
           collection.collectedAt ?? existingRow?['collected_at'] as String?;
+      final gpsLat = submit
+          ? (isResubmission
+                ? (existingRow?['gps_lat'] as num?)?.toDouble()
+                : capturedGps?.latitude)
+          : (existingRow?['gps_lat'] as num?)?.toDouble();
+      final gpsLng = submit
+          ? (isResubmission
+                ? (existingRow?['gps_lng'] as num?)?.toDouble()
+                : capturedGps?.longitude)
+          : (existingRow?['gps_lng'] as num?)?.toDouble();
 
       if (submit && !isResubmission && slipNumber == null) {
         final centerRows = await txn.rawQuery(
@@ -889,6 +942,8 @@ class EerlLocalDataSource {
         'collected_at': collectedAt,
         'takes_payment': takesPayment == null ? null : (takesPayment ? 1 : 0),
         'rejection_reason': submit ? null : collection.rejectionReason,
+        'gps_lat': gpsLat,
+        'gps_lng': gpsLng,
         'updated_at': now,
         'sync_state': 'pending',
       };
@@ -909,6 +964,29 @@ class EerlLocalDataSource {
       }
       final savedCollectionId = savedParents.single['id']! as String;
 
+      final previousPhotoRows = await txn.rawQuery(
+        '''
+        SELECT id
+        FROM ${DatabaseTables.photos}
+        WHERE (owner_table = ? AND owner_id = ?)
+           OR (owner_table = ? AND owner_id IN (
+             SELECT id
+             FROM ${DatabaseTables.collectionItems}
+             WHERE collection_id = ?
+           ))
+        ''',
+        [
+          DatabaseTables.collections,
+          savedCollectionId,
+          DatabaseTables.collectionItems,
+          savedCollectionId,
+        ],
+      );
+      final previousPhotoIds = previousPhotoRows
+          .map((row) => row['id'])
+          .whereType<String>()
+          .toList(growable: false);
+
       await txn.delete(
         DatabaseTables.collectionItems,
         where: 'collection_id = ?',
@@ -920,7 +998,7 @@ class EerlLocalDataSource {
         index < collection.handoverPhotoUrls.length;
         index++
       ) {
-        final photoId = '${collection.id}_handover_$index';
+        final photoId = UuidGenerator.v4();
         handoverPhotoIds.add(photoId);
         photoIds.add(photoId);
         await _upsertById(txn, DatabaseTables.photos, {
@@ -932,6 +1010,7 @@ class EerlLocalDataSource {
           'content_type': 'image/jpeg',
           'local_path': collection.handoverPhotoUrls[index],
           'status': 'local',
+          'size_bytes': photoSizes[collection.handoverPhotoUrls[index]],
           'created_at': now,
         });
       }
@@ -953,7 +1032,7 @@ class EerlLocalDataSource {
         savedItemIds.add(item.id);
         for (var index = 0; index < item.photoUrls.length; index++) {
           final path = item.photoUrls[index];
-          final photoId = '${item.id}_photo_$index';
+          final photoId = UuidGenerator.v4();
           itemPhotoIds.add(photoId);
           photoIds.add(photoId);
           await _upsertById(txn, DatabaseTables.photos, {
@@ -965,6 +1044,7 @@ class EerlLocalDataSource {
             'content_type': 'image/jpeg',
             'local_path': path,
             'status': 'local',
+            'size_bytes': photoSizes[path],
             'created_at': now,
           });
         }
@@ -984,11 +1064,17 @@ class EerlLocalDataSource {
           '(${savedItemCount ?? 0}/${items.length}).',
         );
       }
-      final body = {
-        ...collectionRow,
-        'handover_photo_urls': handoverPhotoIds,
-        'items': bodyItems,
-      };
+      final body = submit
+          ? _collectionSubmitBody(
+              collectionRow: collectionRow,
+              handoverPhotoIds: handoverPhotoIds,
+              items: bodyItems,
+            )
+          : _collectionDraftBody(
+              collectionRow: collectionRow,
+              handoverPhotoIds: handoverPhotoIds,
+              items: bodyItems,
+            );
 
       final hasDraftOutbox = await OutboxQueue.hasQueued(
         txn,
@@ -996,14 +1082,7 @@ class EerlLocalDataSource {
         entityId: savedCollectionId,
         kind: 'draft_save',
       );
-      if (submit && hasDraftOutbox) {
-        await OutboxQueue.removeQueued(
-          txn,
-          entity: DatabaseTables.collections,
-          entityId: savedCollectionId,
-          kind: 'draft_save',
-        );
-      } else if (!submit && hasDraftOutbox) {
+      if (!submit && hasDraftOutbox) {
         await OutboxQueue.updateQueued(
           txn,
           entity: DatabaseTables.collections,
@@ -1012,6 +1091,36 @@ class EerlLocalDataSource {
           body: body,
           refs: photoIds,
         );
+        await _deleteUnreferencedPhotoRows(txn, previousPhotoIds);
+        return;
+      }
+      if (submit && hasDraftOutbox) {
+        await OutboxQueue.removeQueued(
+          txn,
+          entity: DatabaseTables.collections,
+          entityId: savedCollectionId,
+          kind: 'draft_save',
+        );
+      }
+      final hasSubmitOutbox =
+          submit &&
+          await OutboxQueue.hasQueued(
+            txn,
+            entity: DatabaseTables.collections,
+            entityId: savedCollectionId,
+            kind: 'submit',
+          );
+      if (hasSubmitOutbox) {
+        await OutboxQueue.updateQueued(
+          txn,
+          entity: DatabaseTables.collections,
+          entityId: savedCollectionId,
+          kind: 'submit',
+          body: body,
+          refs: photoIds,
+          blockingPhotoIds: photoIds,
+        );
+        await _deleteUnreferencedPhotoRows(txn, previousPhotoIds);
         return;
       }
 
@@ -1029,6 +1138,7 @@ class EerlLocalDataSource {
         blockingPhotoIds: submit ? photoIds : const <String>[],
         createdAt: now,
       );
+      await _deleteUnreferencedPhotoRows(txn, previousPhotoIds);
     });
     if (kDebugMode) {
       await _debugLogCollectionCommit(
@@ -1109,6 +1219,91 @@ class EerlLocalDataSource {
       'kind=${outbox['kind']} queue_status=${outbox['status']} '
       'outbox_photos=$blockedPhotos path=${outbox['path']}',
     );
+  }
+
+  Future<int?> _localFileSize(String path) async {
+    if (path.trim().isEmpty) return null;
+    try {
+      final size = await File(path).length();
+      return size > 0 ? size : null;
+    } on FileSystemException {
+      return null;
+    }
+  }
+
+  Map<String, Object?> _collectionSubmitBody({
+    required Map<String, Object?> collectionRow,
+    required List<String> handoverPhotoIds,
+    required List<Map<String, Object?>> items,
+  }) {
+    final slipNumber = collectionRow['slip_number'];
+    final collectedAt = collectionRow['collected_at'];
+    final vehicleId = collectionRow['vehicle_id'];
+    final givenByName = collectionRow['given_by_name'];
+    final mrfLabourId = collectionRow['mrf_person_id'];
+    final ragpickerId = collectionRow['ragpicker_id'];
+    final paidBy = collectionRow['paid_by'];
+    final gpsLat = (collectionRow['gps_lat'] as num?)?.toDouble();
+    final gpsLng = (collectionRow['gps_lng'] as num?)?.toDouble();
+    return <String, Object?>{
+      'centerId': collectionRow['center_id'],
+      'type': collectionRow['channel'],
+      'slipNumber': ?slipNumber,
+      'collectedAt': ?collectedAt,
+      'vehicleId': ?vehicleId,
+      'givenByName': ?givenByName,
+      'mrfLabourId': ?mrfLabourId,
+      'ragpickerId': ?ragpickerId,
+      'handoverPhotoUrls': handoverPhotoIds,
+      'paidBy': ?paidBy,
+      'lines': [
+        for (final item in items)
+          {
+            'itemId': item['item_id'],
+            'collectedQty': item['qty'],
+            if (item['verified_qty'] != null)
+              'verifiedQty': item['verified_qty'],
+            if (item['rate'] != null) 'rate': item['rate'],
+            if (item['amount'] != null) 'amount': item['amount'],
+            'photoUrls': item['photo_urls'],
+          },
+      ],
+      'gps': gpsLat == null || gpsLng == null
+          ? null
+          : {'lat': gpsLat, 'lng': gpsLng},
+    };
+  }
+
+  Map<String, Object?> _collectionDraftBody({
+    required Map<String, Object?> collectionRow,
+    required List<String> handoverPhotoIds,
+    required List<Map<String, Object?>> items,
+  }) {
+    final body = <String, Object?>{
+      ...collectionRow,
+      'handover_photo_urls': handoverPhotoIds,
+      'items': items,
+    };
+    body.remove('gps_lat');
+    body.remove('gps_lng');
+    return body;
+  }
+
+  Future<void> _deleteUnreferencedPhotoRows(
+    Transaction txn,
+    List<String> photoIds,
+  ) async {
+    if (photoIds.isEmpty) return;
+    final marks = List.filled(photoIds.length, '?').join(',');
+    await txn.rawDelete('''
+      DELETE FROM ${DatabaseTables.photos}
+      WHERE id IN ($marks)
+        AND NOT EXISTS (
+          SELECT 1
+          FROM ${DatabaseTables.outboxPhotos} op
+          WHERE op.photo_id = ${DatabaseTables.photos}.id
+        )
+      ''', photoIds);
   }
 
   Future<void> discardDraft(String collectionId) =>

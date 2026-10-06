@@ -2881,13 +2881,13 @@ abstract class AppLocalizations {
   /// No description provided for @collectionDetailRate.
   ///
   /// In en, this message translates to:
-  /// **'Rate: ₹45.00/KG'**
+  /// **'Rate:'**
   String get collectionDetailRate;
 
   /// No description provided for @collectionDetailMaterialTotal.
   ///
   /// In en, this message translates to:
-  /// **'Total: ₹12,150.00'**
+  /// **'Total:'**
   String get collectionDetailMaterialTotal;
 
   /// No description provided for @collectionDetailRampPersonPhoto.
@@ -2943,6 +2943,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'3 collection Pending'**
   String get syncPendingCollections;
+
+  /// No description provided for @syncPendingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} item(s) pending sync'**
+  String syncPendingItems(int count);
 
   /// No description provided for @syncAlreadySyncedTitle.
   ///
@@ -3313,7 +3319,7 @@ abstract class AppLocalizations {
   /// No description provided for @collectionRatePerUnit.
   ///
   /// In en, this message translates to:
-  /// **'Rate: ₹45.00/{unit}'**
+  /// **'Rate/{unit}'**
   String collectionRatePerUnit(String unit);
 
   /// No description provided for @collectionPaymentCash.
@@ -3459,6 +3465,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Print Slip'**
   String get collectionPrintSlip;
+
+  /// No description provided for @collectionBackToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Home'**
+  String get collectionBackToHome;
 
   /// No description provided for @collectionSelectVehicle.
   ///
@@ -7167,6 +7179,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sardar Market, Udhana'**
   String get supervisorMrfLocationSardar;
+
+  /// No description provided for @locationServiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location'**
+  String get locationServiceTitle;
+
+  /// No description provided for @locationServiceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is off. Turn it on so collection records can include GPS coordinates, even when the app is offline.'**
+  String get locationServiceMessage;
+
+  /// No description provided for @locationPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission required'**
+  String get locationPermissionTitle;
+
+  /// No description provided for @locationPermissionSettingsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location access in app settings so collection records can include GPS coordinates.'**
+  String get locationPermissionSettingsMessage;
+
+  /// No description provided for @locationPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission was not granted. GPS will not be included until permission is allowed.'**
+  String get locationPermissionDenied;
+
+  /// No description provided for @locationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A location fix is temporarily unavailable. The last saved location will be used when available.'**
+  String get locationUnavailable;
+
+  /// No description provided for @locationNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get locationNotNow;
+
+  /// No description provided for @locationOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get locationOpenSettings;
+
+  /// No description provided for @locationSettingsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Location settings could not be opened.'**
+  String get locationSettingsUnavailable;
 }
 
 class _AppLocalizationsDelegate

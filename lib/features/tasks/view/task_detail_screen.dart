@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../widgets/task_information_card.dart';
@@ -54,9 +55,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   Future<void> _captureProof() async {
-    final image = await ImagePicker().pickImage(
+    final image = await ImageCompressor.pickAndCompress(
       source: ImageSource.camera,
-      imageQuality: 85,
     );
     if (image != null && mounted) {
       setState(() => _proofImages.add(image.path));

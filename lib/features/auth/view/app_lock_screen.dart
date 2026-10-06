@@ -72,15 +72,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
           'active_role',
         );
         if (!mounted) return;
-        final role = storedRole == 'SUPERVISOR'
-            ? DashboardUserRole.supervisor
-            : storedRole == 'ADMIN'
-            ? DashboardUserRole.admin
-            : storedRole == 'COLLECTION_MANAGER'
-            ? DashboardUserRole.collectionManager
-            : storedRole == 'IEC_AGENT'
-            ? DashboardUserRole.iecAgent
-            : DashboardUserRole.collectionAgent;
+        final role = DashboardUserRoleX.fromKey(storedRole);
         context.go(AppRoutes.home, extra: role);
       }
     } else {

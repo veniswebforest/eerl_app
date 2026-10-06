@@ -130,8 +130,8 @@ class _OtpScreenState extends State<OtpScreen>
       orderBy: 'role_key',
     );
     final storedRole = await database.getSyncMeta('active_role');
-    final firstRoleKey = roles.isEmpty ? null : roles.first['role_key'];
-    var role = _dashboardRole(storedRole ?? firstRoleKey);
+    final firstRoleKey = roles.isEmpty ? null : roles.first['role_key'] as String?;
+    var role = DashboardUserRoleX.fromKey(storedRole ?? firstRoleKey);
 
     if (roles.length > 1 && mounted) {
       final selected = await context.push<DashboardUserRole>(
@@ -141,27 +141,9 @@ class _OtpScreenState extends State<OtpScreen>
       if (selected != null) role = selected;
     }
 
-    await database.setSyncMeta('active_role', _roleKey(role));
+    await database.setSyncMeta('active_role', role.syncMetaKey);
     return role;
   }
-
-  DashboardUserRole _dashboardRole(Object? key) => key == 'SUPERVISOR'
-      ? DashboardUserRole.supervisor
-      : key == 'ADMIN'
-      ? DashboardUserRole.admin
-      : key == 'COLLECTION_MANAGER'
-      ? DashboardUserRole.collectionManager
-      : key == 'IEC_AGENT'
-      ? DashboardUserRole.iecAgent
-      : DashboardUserRole.collectionAgent;
-
-  String _roleKey(DashboardUserRole role) => switch (role) {
-    DashboardUserRole.supervisor => 'SUPERVISOR',
-    DashboardUserRole.admin => 'ADMIN',
-    DashboardUserRole.collectionManager => 'COLLECTION_MANAGER',
-    DashboardUserRole.iecAgent => 'IEC_AGENT',
-    DashboardUserRole.collectionAgent => 'AGENT',
-  };
 
   @override
   Widget build(BuildContext context) {

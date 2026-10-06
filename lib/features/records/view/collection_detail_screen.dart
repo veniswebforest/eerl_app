@@ -234,8 +234,10 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                 height: 56,
                 child: ElevatedButton.icon(
                   key: const Key('collection-detail-preview-slip'),
-                  onPressed: () =>
-                      context.push<void>(AppRoutes.collectionReceipt),
+                  onPressed: () => context.push<void>(
+                    AppRoutes.collectionReceipt,
+                    extra: collection.id,
+                  ),
                   icon: SvgPicture.asset(
                     CollectionDetailAssets.preview,
                     width: 24,

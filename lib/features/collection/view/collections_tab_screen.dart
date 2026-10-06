@@ -5,6 +5,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/router/app_route_data.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
 import 'package:eerl_app/features/home/widgets/collection_types.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import '../widgets/collection_assets.dart';
@@ -58,7 +59,7 @@ class CollectionsTabScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     CollectionTypes(
-                      onTypeTap: (type) => context.push<void>(
+                      onTypeTap: (type) => context.push<CollectionRouteResult>(
                         AppRoutes.addCollection,
                         extra: AddCollectionRouteData(initialType: type),
                       ),

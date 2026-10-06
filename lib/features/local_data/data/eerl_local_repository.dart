@@ -83,10 +83,12 @@ class EerlLocalRepository {
   }) => _local.getCenterPeople(centerId: centerId, agentsOnly: agentsOnly);
   Future<List<DestinationModel>> getDestinations() => _local.getDestinations();
   Future<List<CollectionModel>> getAgentCollections({
+    String? centerId,
     bool drafts = false,
     String? channel,
     String search = '',
   }) => _local.getAgentCollections(
+    centerId: centerId,
     drafts: drafts,
     channel: channel,
     search: search,

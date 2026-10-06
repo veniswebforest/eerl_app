@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/core/location/device_location_service.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -8,6 +9,7 @@ import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
 import 'package:eerl_app/features/profile/widgets/sync_data_dialog.dart';
@@ -31,12 +33,44 @@ import '../widgets/zone_selector.dart';
 /// Home screen — composes all home widgets from the widget/ folder.
 ///
 /// Each section is a separate, focused widget for maintainability.
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  bool _locationCheckRunning = false;
+  bool _waitingForLocationSettings = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _ensureLocation());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _waitingForLocationSettings) {
+      _waitingForLocationSettings = false;
+      _ensureLocation();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final navigation = context.watch<DashboardNavigationProvider>();
+    // Rebuild and re-query outbox counts when an outgoing/bootstrap run starts
+    // or finishes. This hides Sync Now immediately after the queue is drained.
+    context.watch<BootstrapSyncService>();
     final isSupervisor = navigation.activeRole == DashboardUserRole.supervisor;
     final roleTitle = isSupervisor
         ? context.l10n.roleCollectionSupervisor
@@ -113,13 +147,28 @@ class HomeScreen extends StatelessWidget {
                       ),
                       sliver: SliverList.list(
                         children: [
-                          _CenteredHomeContent(
-                            child: OnlineStatusBanner(
-                              onSyncNowTap: () => showSyncDataDialog(context),
-                              subtitle: isSupervisor
-                                  ? context.l10n.supervisorLastSynced
-                                  : null,
-                            ),
+                          FutureBuilder<SyncStatusModel>(
+                            future: EerlLocalRepository.instance
+                                .getSyncStatus(),
+                            builder: (context, snapshot) {
+                              final status = snapshot.data;
+                              final hasOutbox =
+                                  status?.hasOutboxEntries ?? false;
+                              return _CenteredHomeContent(
+                                child: OnlineStatusBanner(
+                                  pendingCount: status?.outboxCount ?? 0,
+                                  onSyncNowTap: hasOutbox
+                                      ? () => showSyncDataDialog(
+                                          context,
+                                          pendingCount: status!.outboxCount,
+                                        )
+                                      : null,
+                                  subtitle: isSupervisor
+                                      ? context.l10n.supervisorLastSynced
+                                      : null,
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(height: 12),
                           FutureBuilder<String>(
@@ -217,6 +266,76 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _ensureLocation() async {
+    if (_locationCheckRunning || !mounted) return;
+    _locationCheckRunning = true;
+    final state = await DeviceLocationService.instance.requestOnHomeOpen();
+    _locationCheckRunning = false;
+    if (!mounted) return;
+    switch (state) {
+      case HomeLocationState.serviceDisabled:
+        await _showLocationSettingsDialog(
+          title: context.l10n.locationServiceTitle,
+          message: context.l10n.locationServiceMessage,
+          openSettings: DeviceLocationService.instance.openLocationSettings,
+        );
+      case HomeLocationState.permissionDeniedForever:
+        await _showLocationSettingsDialog(
+          title: context.l10n.locationPermissionTitle,
+          message: context.l10n.locationPermissionSettingsMessage,
+          openSettings: DeviceLocationService.instance.openAppSettings,
+        );
+      case HomeLocationState.permissionDenied:
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.locationPermissionDenied)),
+          );
+        }
+      case HomeLocationState.unavailable:
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.locationUnavailable)),
+          );
+        }
+      case HomeLocationState.ready:
+        break;
+    }
+  }
+
+  Future<void> _showLocationSettingsDialog({
+    required String title,
+    required String message,
+    required Future<bool> Function() openSettings,
+  }) async {
+    final shouldOpen = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(context.l10n.locationNotNow),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(context.l10n.locationOpenSettings),
+          ),
+        ],
+      ),
+    );
+    if (shouldOpen != true || !mounted) return;
+    _waitingForLocationSettings = true;
+    final opened = await openSettings();
+    if (!opened && mounted) {
+      _waitingForLocationSettings = false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.locationSettingsUnavailable)),
+      );
+    }
+  }
+
   Future<String> _activeCenterName() async {
     final repository = EerlLocalRepository.instance;
     final centerId = await repository.activeCenterId;
@@ -236,13 +355,7 @@ class HomeScreen extends StatelessWidget {
       extra: navigation.activeRole,
     );
     if (context.mounted && role != null && role != navigation.activeRole) {
-      await AppDatabase.instance.setSyncMeta('active_role', switch (role) {
-        DashboardUserRole.supervisor => 'SUPERVISOR',
-        DashboardUserRole.admin => 'ADMIN',
-        DashboardUserRole.collectionManager => 'COLLECTION_MANAGER',
-        DashboardUserRole.iecAgent => 'IEC_AGENT',
-        DashboardUserRole.collectionAgent => 'AGENT',
-      });
+      await AppDatabase.instance.setSyncMeta('active_role', role.syncMetaKey);
       navigation.changeRole(role);
     }
   }
@@ -254,7 +367,7 @@ class HomeScreen extends StatelessWidget {
     CollectionType? type,
     Set<int> selectedItems = const <int>{},
   }) async {
-    final saved = await context.push<bool>(
+    final result = await context.push<CollectionRouteResult>(
       AppRoutes.addCollection,
       extra: AddCollectionRouteData(
         initialStep: step,
@@ -262,8 +375,14 @@ class HomeScreen extends StatelessWidget {
         initialSelectedItems: selectedItems,
       ),
     );
-    if (context.mounted && saved == true) {
-      navigation.showSavedCollections();
+    if (!context.mounted) return;
+    switch (result) {
+      case CollectionRouteResult.draftSaved:
+        navigation.showSavedCollections();
+      case CollectionRouteResult.openCollections:
+        navigation.selectPage('collections');
+      case null:
+        break;
     }
   }
 }

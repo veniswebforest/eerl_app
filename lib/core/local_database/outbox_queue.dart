@@ -81,18 +81,44 @@ abstract final class OutboxQueue {
     required String kind,
     required Object body,
     Iterable<Object?> refs = const [],
-  }) {
-    return txn.update(
+    Iterable<String>? blockingPhotoIds,
+  }) async {
+    final queuedRows = await txn.query(
+      DatabaseTables.outbox,
+      columns: const ['seq'],
+      where: "entity = ? AND entity_id = ? AND kind = ? AND status = 'queued'",
+      whereArgs: [entity, entityId, kind],
+    );
+    final updated = await txn.update(
       DatabaseTables.outbox,
       {
         'body': jsonEncode(body),
         'refs': jsonEncode(refs.toList(growable: false)),
+        'attempts': 0,
         'last_error': null,
         'next_attempt_at': null,
       },
       where: "entity = ? AND entity_id = ? AND kind = ? AND status = 'queued'",
       whereArgs: [entity, entityId, kind],
     );
+    if (blockingPhotoIds != null) {
+      final photoIds = blockingPhotoIds.toSet();
+      for (final row in queuedRows) {
+        final seq = row['seq']! as int;
+        await txn.delete(
+          DatabaseTables.outboxPhotos,
+          where: 'outbox_seq = ?',
+          whereArgs: [seq],
+        );
+        for (final photoId in photoIds) {
+          await txn.insert(DatabaseTables.outboxPhotos, {
+            'outbox_seq': seq,
+            'photo_id': photoId,
+          });
+        }
+      }
+    }
+    return updated;
   }
 
   static Future<int> removeQueued(

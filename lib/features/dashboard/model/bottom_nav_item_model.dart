@@ -9,6 +9,29 @@ enum DashboardUserRole {
   admin,
 }
 
+extension DashboardUserRoleX on DashboardUserRole {
+  String get syncMetaKey => switch (this) {
+    DashboardUserRole.supervisor => 'SUPERVISOR',
+    DashboardUserRole.admin => 'ADMIN',
+    DashboardUserRole.collectionManager => 'COLLECTION_MANAGER',
+    DashboardUserRole.iecAgent => 'IEC_AGENT',
+    DashboardUserRole.collectionAgent => 'AGENT',
+  };
+
+  static DashboardUserRole fromKey(String? key) {
+    if (key == null) return DashboardUserRole.collectionAgent;
+    final normalized = key.trim().toUpperCase();
+    return switch (normalized) {
+      'SUPERVISOR' => DashboardUserRole.supervisor,
+      'ADMIN' => DashboardUserRole.admin,
+      'COLLECTION_MANAGER' => DashboardUserRole.collectionManager,
+      'IEC_AGENT' => DashboardUserRole.iecAgent,
+      'AGENT' || 'COLLECTION_AGENT' => DashboardUserRole.collectionAgent,
+      _ => DashboardUserRole.collectionAgent,
+    };
+  }
+}
+
 /// Describes a single dashboard destination independently of its UI.
 class BottomNavItemModel {
   const BottomNavItemModel({

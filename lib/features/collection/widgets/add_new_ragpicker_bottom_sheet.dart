@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/image_compressor.dart';
 
 class AddNewRagpickerBottomSheet extends StatefulWidget {
   const AddNewRagpickerBottomSheet({super.key, required this.onSave});
@@ -59,7 +60,10 @@ class _AddNewRagpickerBottomSheetState
 
   Future<void> _pickImage() async {
     try {
-      final image = await _imagePicker.pickImage(source: ImageSource.camera);
+      final image = await ImageCompressor.pickAndCompress(
+        picker: _imagePicker,
+        source: ImageSource.camera,
+      );
       if (image != null) {
         setState(() => _photo = image);
       }

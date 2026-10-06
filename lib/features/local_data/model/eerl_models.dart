@@ -123,6 +123,7 @@ class ItemModel {
     required this.materialType,
     this.colour,
     this.hsnCode,
+    this.imageUrl,
     required this.unitCode,
     required this.unitName,
     this.rate,
@@ -136,6 +137,7 @@ class ItemModel {
   final String materialType;
   final String? colour;
   final String? hsnCode;
+  final String? imageUrl;
   final String unitCode;
   final String unitName;
   final double? rate;
@@ -149,6 +151,7 @@ class ItemModel {
     materialType: map['material_type'] as String,
     colour: map['colour'] as String?,
     hsnCode: map['hsn_code'] as String?,
+    imageUrl: map['image_url'] as String?,
     unitCode: map['unit_code'] as String,
     unitName: map['unit_name'] as String,
     rate: (map['rate'] as num?)?.toDouble(),
@@ -165,6 +168,7 @@ class ItemModel {
     'material_type': materialType,
     'colour': colour,
     'hsn_code': hsnCode,
+    'image_url': imageUrl,
     'unit_code': unitCode,
     'unit_name': unitName,
   };
@@ -475,6 +479,8 @@ class CollectionModel {
     this.rejectionReason,
     this.verifiedByName,
     this.verifiedAt,
+    this.gpsLat,
+    this.gpsLng,
     required this.updatedAt,
     required this.syncState,
     this.totalQty = 0,
@@ -501,6 +507,8 @@ class CollectionModel {
   final String? rejectionReason;
   final String? verifiedByName;
   final String? verifiedAt;
+  final double? gpsLat;
+  final double? gpsLng;
   final String updatedAt;
   final String syncState;
   final double totalQty;
@@ -529,6 +537,8 @@ class CollectionModel {
     rejectionReason: map['rejection_reason'] as String?,
     verifiedByName: map['verified_by_name'] as String?,
     verifiedAt: map['verified_at'] as String?,
+    gpsLat: (map['gps_lat'] as num?)?.toDouble(),
+    gpsLng: (map['gps_lng'] as num?)?.toDouble(),
     updatedAt: map['updated_at'] as String,
     syncState: map['sync_state'] as String,
     totalQty: _double(map['total_qty']),
@@ -556,6 +566,8 @@ class CollectionModel {
     'rejection_reason': rejectionReason,
     'verified_by_name': verifiedByName,
     'verified_at': verifiedAt,
+    'gps_lat': gpsLat,
+    'gps_lng': gpsLng,
     'updated_at': updatedAt,
     'sync_state': syncState,
   };
@@ -813,6 +825,8 @@ class TransferModel {
     this.approvedAt,
     this.rejectionReason,
     this.handedOverAt,
+    this.gpsLat,
+    this.gpsLng,
     required this.photoUrls,
     this.updatedAt,
     required this.syncState,
@@ -836,6 +850,8 @@ class TransferModel {
   final String? approvedAt;
   final String? rejectionReason;
   final String? handedOverAt;
+  final double? gpsLat;
+  final double? gpsLng;
   final List<String> photoUrls;
   final String? updatedAt;
   final String syncState;
@@ -859,6 +875,8 @@ class TransferModel {
     approvedAt: map['approved_at'] as String?,
     rejectionReason: map['rejection_reason'] as String?,
     handedOverAt: map['handed_over_at'] as String?,
+    gpsLat: (map['gps_lat'] as num?)?.toDouble(),
+    gpsLng: (map['gps_lng'] as num?)?.toDouble(),
     photoUrls: _strings(map['photo_urls']),
     updatedAt: map['updated_at'] as String?,
     syncState: map['sync_state'] as String,
@@ -883,6 +901,8 @@ class TransferModel {
     'approved_at': approvedAt,
     'rejection_reason': rejectionReason,
     'handed_over_at': handedOverAt,
+    'gps_lat': gpsLat,
+    'gps_lng': gpsLng,
     'photo_urls': _jsonStrings(photoUrls),
     'updated_at': updatedAt,
     'sync_state': syncState,
@@ -1355,6 +1375,8 @@ class SyncStatusModel {
   final int sendingCount;
   final int failedCount;
   final int waitingPhotoCount;
+  int get outboxCount => queuedCount + sendingCount + failedCount;
+  bool get hasOutboxEntries => outboxCount > 0;
   factory SyncStatusModel.fromMap(DbMap map) => SyncStatusModel(
     lastBootstrapAt: map['last_bootstrap_at'] as String?,
     queuedCount: _int(map['queued_count']),

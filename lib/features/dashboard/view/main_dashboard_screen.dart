@@ -55,7 +55,9 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   @override
   void didUpdateWidget(covariant MainDashboardScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _navigation.updateRoleFromParent(widget.userRole);
+    if (oldWidget.userRole != widget.userRole) {
+      _navigation.updateRoleFromParent(widget.userRole);
+    }
   }
 
   @override

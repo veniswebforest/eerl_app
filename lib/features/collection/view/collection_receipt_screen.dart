@@ -1,149 +1,250 @@
-import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
+import 'package:go_router/go_router.dart';
 
-class CollectionReceiptScreen extends StatelessWidget {
-  const CollectionReceiptScreen({super.key});
+class CollectionReceiptScreen extends StatefulWidget {
+  const CollectionReceiptScreen({super.key, required this.collectionId});
+
+  final String collectionId;
+
+  @override
+  State<CollectionReceiptScreen> createState() =>
+      _CollectionReceiptScreenState();
+}
+
+class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
+  late final LocalQueryController<
+    ({
+      CollectionModel? collection,
+      List<CollectionItemModel> items,
+      String? supervisorName,
+    })
+  >
+  _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = LocalQueryController(() async {
+      final repository = EerlLocalRepository.instance;
+      final collection = await repository.getCollection(widget.collectionId);
+      if (collection == null) {
+        return (
+          collection: null,
+          items: const <CollectionItemModel>[],
+          supervisorName: null,
+        );
+      }
+      final items = await repository.getCollectionItems(collection.id);
+      String? supervisorName = collection.verifiedByName;
+      if (collection.mrfPersonId != null) {
+        final people = await repository.getMrfPeople(
+          centerId: collection.centerId,
+          activeOnly: false,
+        );
+        for (final person in people) {
+          if (person.id == collection.mrfPersonId) {
+            supervisorName = person.name;
+            break;
+          }
+        }
+      }
+      return (
+        collection: collection,
+        items: items,
+        supervisorName: supervisorName,
+      );
+    })..load();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.backgroundColor,
     body: SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Material(
-                    color: AppColors.primary500,
+      child: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          if (_controller.isLoading && !_controller.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final data = _controller.data;
+          final collection = data?.collection;
+          if (_controller.error != null || collection == null) {
+            return Center(
+              child: TextButton(
+                onPressed: _controller.load,
+                child: const Text('Retry'),
+              ),
+            );
+          }
+          return _content(
+            context,
+            collection,
+            data!.items,
+            data.supervisorName,
+          );
+        },
+      ),
+    ),
+  );
+
+  Widget _content(
+    BuildContext context,
+    CollectionModel collection,
+    List<CollectionItemModel> items,
+    String? supervisorName,
+  ) {
+    final timestamp = collection.collectedAt ?? collection.updatedAt;
+    final parsedTimestamp = DateTime.tryParse(timestamp)?.toLocal();
+    final unitTotals = _unitTotals(items);
+    final itemAmounts = items.map(_itemAmount).whereType<double>().toList();
+    final totalAmount = itemAmounts.fold<double>(
+      0,
+      (total, amount) => total + amount,
+    );
+    final channel = collection.channel.trim().toUpperCase();
+    final isMrf = channel == 'MRF';
+    final givenBy = collection.handedOverBy ?? collection.givenByName;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Material(
+                  color: AppColors.primary500,
+                  borderRadius: BorderRadius.circular(10),
+                  child: InkWell(
+                    key: const Key('collection-receipt-back'),
+                    onTap: () => Navigator.of(context).maybePop(),
                     borderRadius: BorderRadius.circular(10),
-                    child: InkWell(
-                      key: const Key('collection-receipt-back'),
-                      onTap: () => Navigator.of(context).maybePop(),
-                      borderRadius: BorderRadius.circular(10),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: SvgPicture.asset(
-                          'assets/icons/records/back.svg',
-                          width: 20,
-                          height: 20,
-                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: SvgPicture.asset(
+                        'assets/icons/records/back.svg',
+                        width: 20,
+                        height: 20,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x18000000), blurRadius: 8),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'assets/images/collection_detail/eer_logo.png',
-                        width: 141,
-                        height: 50,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(height: 20),
-                      _receiptRow(
-                        context.l10n.collectionReceiptId,
-                        '#REC-2026-002',
-                      ),
-                      _receiptRow(
-                        context.l10n.collectionReceiptDate,
-                        '24 Oct 2026',
-                      ),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                key: const Key('collection-receipt-content'),
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x18000000), blurRadius: 8),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/images/collection_detail/eer_logo.png',
+                      width: 141,
+                      height: 50,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 20),
+                    _receiptRow(
+                      context.l10n.collectionReceiptId,
+                      collection.slipNumber ?? collection.id,
+                    ),
+                    _receiptRow(
+                      context.l10n.collectionReceiptDate,
+                      parsedTimestamp == null
+                          ? timestamp
+                          : DateFormat('dd MMM yyyy').format(parsedTimestamp),
+                    ),
+                    if (parsedTimestamp != null)
                       _receiptRow(
                         context.l10n.collectionReceiptTime,
-                        '03:45 PM',
+                        DateFormat('hh:mm a').format(parsedTimestamp),
                       ),
-                      _receiptRow(
-                        context.l10n.collectionReceiptCenter,
-                        'EERL - Surat Zone',
-                      ),
-                      _receiptRow(
-                        context.l10n.collectionReceiptAgent,
-                        'Rahul Patel',
-                      ),
-                      _receiptRow(context.l10n.collectionDetailType, 'MRF'),
+                    _receiptRow(
+                      context.l10n.collectionReceiptCenter,
+                      collection.centerName ?? collection.centerId,
+                    ),
+                    _receiptRow(
+                      context.l10n.collectionReceiptAgent,
+                      collection.agentName,
+                    ),
+                    _receiptRow(
+                      context.l10n.collectionDetailType,
+                      collection.channel,
+                    ),
+                    if (isMrf && _hasText(supervisorName))
                       _receiptRow(
                         context.l10n.collectionReceiptSupervisor,
-                        'Mohan Prasad',
+                        supervisorName!,
                       ),
-                      _receiptRow(
-                        context.l10n.collectionGivenBy,
-                        'Chunilal Yadav',
-                      ),
+                    if (isMrf && _hasText(collection.givenByName))
                       _receiptRow(
                         context.l10n.collectionReceiptLabor,
-                        'Vikram Singh (••• 4321)',
+                        collection.givenByName!,
                       ),
-                      const _ReceiptDivider(),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          context.l10n.collectionCollectedItems,
-                          style: AppTextStyles.boldH8_14.copyWith(
-                            color: AppColors.cool950,
-                          ),
+                    if (!isMrf && _hasText(givenBy))
+                      _receiptRow(context.l10n.collectionGivenBy, givenBy!),
+                    const _ReceiptDivider(),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        context.l10n.collectionCollectedItems,
+                        style: AppTextStyles.boldH8_14.copyWith(
+                          color: AppColors.cool950,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      _receiptItem(
-                        context.l10n.collectionDetailPetBottles,
-                        context.l10n.collectionPetReceiptDetail,
-                        '₹1,440.00',
-                        context: context,
-                        unit: context.l10n.collectionUnitKg,
-                        quantity: '120.00',
-                      ),
-                      const _ReceiptDivider(),
-                      _receiptItem(
-                        context.l10n.collectionDetailHdpeRigid,
-                        context.l10n.collectionReceiptHdpePieces,
-                        '₹726.75',
-                        context: context,
-                        unit: context.l10n.collectionUnitPcs,
-                        quantity: '80',
-                      ),
-                      const _ReceiptDivider(),
-                      _receiptItem(
-                        context.l10n.collectionDetailPpHardPlastics,
-                        context.l10n.collectionPpReceiptDetail,
-                        '₹540.00',
-                        context: context,
-                        unit: context.l10n.collectionUnitKg,
-                        quantity: '120.00',
-                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (items.isEmpty)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(context.l10n.dashboardEmptyMessage),
+                      )
+                    else
+                      for (var index = 0; index < items.length; index++) ...[
+                        _receiptItem(context, items[index]),
+                        if (index != items.length - 1) const _ReceiptDivider(),
+                      ],
+                    for (final entry in unitTotals.entries) ...[
                       const _ReceiptDivider(),
                       _quantityBlock(
                         context,
-                        context.l10n.collectionReceiptKgBlock,
-                        '217.5 ${context.l10n.collectionUnitKg}',
-                        '-20.00 ${context.l10n.collectionUnitKg}',
+                        _unitBlockTitle(context, entry.key),
+                        _quantityValue(entry.value.collected, entry.key),
+                        _quantityValue(entry.value.verified, entry.key),
+                        _quantityValue(
+                          entry.value.verified - entry.value.collected,
+                          entry.key,
+                          signed: true,
+                        ),
                       ),
-                      const _ReceiptDivider(),
-                      _quantityBlock(
-                        context,
-                        context.l10n.collectionReceiptPcsBlock,
-                        '80 ${context.l10n.collectionUnitPcs}',
-                        '00 ${context.l10n.collectionUnitPcs}',
-                      ),
+                    ],
+                    if (itemAmounts.isNotEmpty) ...[
                       const _ReceiptDivider(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -153,110 +254,137 @@ class CollectionReceiptScreen extends StatelessWidget {
                             style: AppTextStyles.mediumSH6_18,
                           ),
                           Text(
-                            '₹2,706.75',
+                            _money(totalAmount),
                             style: AppTextStyles.mediumSH6_18.copyWith(
                               color: AppColors.primary500,
                             ),
                           ),
                         ],
                       ),
-                      const _ReceiptDivider(),
-                      Text(
-                        context.l10n.collectionReceiptAgent,
-                        style: AppTextStyles.mediumSH9_12.copyWith(
-                          color: AppColors.neutral500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text('Rahul Patel', style: AppTextStyles.mediumSH8_14),
-                      const SizedBox(height: 16),
-                      Text(
-                        context.l10n.collectionThankYou,
-                        style: AppTextStyles.boldH8_14.copyWith(
-                          color: AppColors.primary500,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n.collectionSystemGeneratedSlip,
-                        style: AppTextStyles.mediumSH9_12.copyWith(
-                          color: AppColors.neutral500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SvgPicture.asset(
-                        'assets/icons/collection/receipt_dots.svg',
-                        width: 116,
-                        height: 8,
-                      ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.collectionPrinterHint,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.mediumSH9_12.copyWith(
-                    color: AppColors.cool600,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {},
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SvgPicture.asset(
-                              'assets/icons/collection/share_slip.svg',
-                              width: 24,
-                              height: 24,
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(context.l10n.collectionShareSlip),
-                            ),
-                          ],
-                        ),
+                    const _ReceiptDivider(),
+                    Text(
+                      context.l10n.collectionReceiptAgent,
+                      style: AppTextStyles.mediumSH9_12.copyWith(
+                        color: AppColors.neutral500,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SvgPicture.asset(
-                              'assets/icons/collection/print_slip.svg',
-                              width: 24,
-                              height: 24,
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(context.l10n.collectionPrintSlip),
-                            ),
-                          ],
-                        ),
+                    const SizedBox(height: 8),
+                    Text(
+                      collection.agentName,
+                      style: AppTextStyles.mediumSH8_14,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      context.l10n.collectionThankYou,
+                      style: AppTextStyles.boldH8_14.copyWith(
+                        color: AppColors.primary500,
                       ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      context.l10n.collectionSystemGeneratedSlip,
+                      style: AppTextStyles.mediumSH9_12.copyWith(
+                        color: AppColors.neutral500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SvgPicture.asset(
+                      'assets/icons/collection/receipt_dots.svg',
+                      width: 116,
+                      height: 8,
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                context.l10n.collectionPrinterHint,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.mediumSH9_12.copyWith(
+                  color: AppColors.cool600,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {},
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/collection/share_slip.svg',
+                            width: 24,
+                            height: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(context.l10n.collectionShareSlip),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/collection/print_slip.svg',
+                            width: 24,
+                            height: 24,
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(context.l10n.collectionPrintSlip),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  key: const Key('collection-receipt-back-home'),
+                  onPressed: () => context.go(AppRoutes.home),
+                  child: Text(context.l10n.collectionBackToHome),
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
+
+  Map<String, _UnitTotals> _unitTotals(List<CollectionItemModel> items) {
+    final totals = <String, _UnitTotals>{};
+    for (final item in items) {
+      final unit = _unitCode(item);
+      final current = totals[unit] ?? const _UnitTotals();
+      totals[unit] = _UnitTotals(
+        collected: current.collected + item.qty,
+        verified: current.verified + (item.verifiedQty ?? item.qty),
+      );
+    }
+    return totals;
+  }
 
   Widget _receiptRow(String label, String value) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
+        Flexible(
           child: Text(
             label,
             style: AppTextStyles.mediumSH8_14.copyWith(
@@ -264,7 +392,7 @@ class CollectionReceiptScreen extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 24),
         Flexible(
           child: Text(
             value,
@@ -279,64 +407,79 @@ class CollectionReceiptScreen extends StatelessWidget {
   Widget _quantityBlock(
     BuildContext context,
     String title,
-    String total,
+    String collected,
+    String verified,
     String difference,
   ) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(title, style: AppTextStyles.semiboldH9_14),
       const SizedBox(height: 8),
-      _receiptRow(context.l10n.collectionReceiptCollectedTotal, total),
-      _receiptRow(context.l10n.collectionReceiptVerifiedTotal, total),
+      _receiptRow(context.l10n.collectionReceiptCollectedTotal, collected),
+      _receiptRow(context.l10n.collectionReceiptVerifiedTotal, verified),
       _receiptRow(context.l10n.collectionReceiptDifference, difference),
     ],
   );
 
-  Widget _receiptItem(
-    String name,
-    String detail,
-    String price, {
-    required BuildContext context,
-    required String unit,
-    required String quantity,
-  }) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: AppTextStyles.mediumSH8_14),
-                const SizedBox(height: 4),
-                Text(
-                  detail,
-                  style: AppTextStyles.regularB8_12.copyWith(
-                    color: AppColors.neutral500,
+  Widget _receiptItem(BuildContext context, CollectionItemModel item) {
+    final unit = _unitCode(item);
+    final verified = item.verifiedQty ?? item.qty;
+    final amount = _itemAmount(item);
+    final detail = item.rate == null
+        ? '${_number(verified)} $unit'
+        : '${_number(verified)} $unit × ${_money(item.rate!)}/$unit';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name ?? item.itemId,
+                    style: AppTextStyles.mediumSH8_14,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    detail,
+                    style: AppTextStyles.regularB8_12.copyWith(
+                      color: AppColors.neutral500,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Text(price, style: AppTextStyles.regularB7_14),
-        ],
-      ),
-      const SizedBox(height: 12),
-      Row(
-        children: [
-          Expanded(
-            child: _quantity(context.l10n.collectionCollected, unit, quantity),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _quantity(context.l10n.expenseVerified, unit, quantity),
-          ),
-        ],
-      ),
-    ],
-  );
+            if (amount != null) ...[
+              const SizedBox(width: 12),
+              Text(_money(amount), style: AppTextStyles.regularB7_14),
+            ],
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _quantity(
+                context.l10n.collectionCollected,
+                unit,
+                _number(item.qty),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _quantity(
+                context.l10n.expenseVerified,
+                unit,
+                _number(verified),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
   Widget _quantity(String label, String unit, String value) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,6 +489,49 @@ class CollectionReceiptScreen extends StatelessWidget {
       Text('$unit   $value', style: AppTextStyles.regularB7_14),
     ],
   );
+
+  String _unitCode(CollectionItemModel item) {
+    final code = item.unitCode?.trim().toUpperCase();
+    if (code != null && code.isNotEmpty) return code;
+    final name = item.unitName?.trim();
+    return name == null || name.isEmpty ? '-' : name;
+  }
+
+  String _unitBlockTitle(BuildContext context, String unit) => switch (unit) {
+    'KG' => context.l10n.collectionReceiptKgBlock,
+    'PCS' || 'PC' || 'PIECE' => context.l10n.collectionReceiptPcsBlock,
+    _ => unit,
+  };
+
+  String _quantityValue(double value, String unit, {bool signed = false}) {
+    final prefix = signed && value > 0 ? '+' : '';
+    return '$prefix${_number(value)} $unit';
+  }
+
+  String _number(double value) => value == value.roundToDouble()
+      ? value.toInt().toString()
+      : value.toStringAsFixed(2);
+
+  String _money(double value) => NumberFormat.currency(
+    locale: 'en_IN',
+    symbol: '₹',
+    decimalDigits: 2,
+  ).format(value);
+
+  double? _itemAmount(CollectionItemModel item) {
+    if (item.amount != null) return item.amount;
+    final rate = item.rate;
+    return rate == null ? null : rate * (item.verifiedQty ?? item.qty);
+  }
+
+  bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
+}
+
+class _UnitTotals {
+  const _UnitTotals({this.collected = 0, this.verified = 0});
+
+  final double collected;
+  final double verified;
 }
 
 class _ReceiptDivider extends StatelessWidget {

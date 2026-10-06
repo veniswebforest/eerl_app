@@ -4,6 +4,7 @@ import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/features/bootstrap/model/bootstrap_response.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_log.dart';
+import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -322,11 +323,14 @@ class BootstrapDatabaseApplier {
     }
 
     final existingActiveRole = await _getMeta(txn, 'active_role');
+    final availableRoles = roleKeys.map(DashboardUserRoleX.fromKey).toSet();
     if (roleKeys.length == 1) {
       await _setMeta(txn, 'active_role', roleKeys.single);
-    } else if (existingActiveRole != null &&
-        !roleKeys.contains(existingActiveRole)) {
-      await _setMeta(txn, 'active_role', null);
+    } else if (existingActiveRole != null) {
+      final existingRole = DashboardUserRoleX.fromKey(existingActiveRole);
+      if (!availableRoles.contains(existingRole)) {
+        await _setMeta(txn, 'active_role', null);
+      }
     }
 
     final incomingCenterIds = <String>[];

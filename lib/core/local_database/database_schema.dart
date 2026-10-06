@@ -41,6 +41,7 @@ abstract final class DatabaseSchema {
         material_type TEXT NOT NULL,
         colour TEXT,
         hsn_code TEXT,
+        image_url TEXT,
         unit_code TEXT NOT NULL,
         unit_name TEXT NOT NULL
       )
@@ -160,6 +161,8 @@ abstract final class DatabaseSchema {
         rejection_reason TEXT,
         verified_by_name TEXT,
         verified_at TEXT,
+        gps_lat REAL,
+        gps_lng REAL,
         updated_at TEXT NOT NULL,
         sync_state TEXT NOT NULL DEFAULT 'synced'
       )
@@ -246,6 +249,8 @@ abstract final class DatabaseSchema {
         approved_at TEXT,
         rejection_reason TEXT,
         handed_over_at TEXT,
+        gps_lat REAL,
+        gps_lng REAL,
         photo_urls TEXT NOT NULL DEFAULT '[]',
         updated_at TEXT,
         sync_state TEXT NOT NULL DEFAULT 'synced'

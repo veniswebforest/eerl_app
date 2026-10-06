@@ -9,10 +9,16 @@ import 'home_styles.dart';
 
 /// Green banner showing connectivity status and pending sync count.
 class OnlineStatusBanner extends StatelessWidget {
-  const OnlineStatusBanner({super.key, this.onSyncNowTap, this.subtitle});
+  const OnlineStatusBanner({
+    super.key,
+    this.onSyncNowTap,
+    this.subtitle,
+    this.pendingCount = 0,
+  });
 
   final VoidCallback? onSyncNowTap;
   final String? subtitle;
+  final int pendingCount;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +59,10 @@ class OnlineStatusBanner extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    subtitle ?? context.l10n.pendingCollections(3),
+                    subtitle ??
+                        (pendingCount > 0
+                            ? context.l10n.pendingCollections(pendingCount)
+                            : context.l10n.syncAlreadySyncedTitle),
                     style: AppTextStyles.mediumSH8_14.copyWith(
                       color: AppColors.neutral600,
                     ),
@@ -62,26 +71,28 @@ class OnlineStatusBanner extends StatelessWidget {
               ),
             ),
 
-            // Sync Now button
-            ElevatedButton(
-              key: const Key('home-sync-now-button'),
-              onPressed: onSyncNowTap,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary500,
-                foregroundColor: AppColors.neutral50,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
+            // No outbox rows means there is nothing to upload, so the action
+            // is removed rather than displayed as a disabled button.
+            if (onSyncNowTap != null)
+              ElevatedButton(
+                key: const Key('home-sync-now-button'),
+                onPressed: onSyncNowTap,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary500,
+                  foregroundColor: AppColors.neutral50,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
+                  minimumSize: const Size(0, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                  textStyle: AppTextStyles.boldH9_12,
                 ),
-                minimumSize: const Size(0, 40),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-                textStyle: AppTextStyles.boldH9_12,
+                child: Text(context.l10n.syncNow),
               ),
-              child: Text(context.l10n.syncNow),
-            ),
           ],
         ),
       ),

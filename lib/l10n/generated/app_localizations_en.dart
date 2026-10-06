@@ -1465,10 +1465,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionDetailVerifiedWeight => 'Verified Weight';
 
   @override
-  String get collectionDetailRate => 'Rate: ₹45.00/KG';
+  String get collectionDetailRate => 'Rate:';
 
   @override
-  String get collectionDetailMaterialTotal => 'Total: ₹12,150.00';
+  String get collectionDetailMaterialTotal => 'Total:';
 
   @override
   String get collectionDetailRampPersonPhoto => 'Ramp Person Photo';
@@ -1497,6 +1497,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncPendingCollections => '3 collection Pending';
+
+  @override
+  String syncPendingItems(int count) {
+    return '$count item(s) pending sync';
+  }
 
   @override
   String get syncAlreadySyncedTitle => 'Data Already Synced';
@@ -1699,7 +1704,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String collectionRatePerUnit(String unit) {
-    return 'Rate: ₹45.00/$unit';
+    return 'Rate/$unit';
   }
 
   @override
@@ -1773,6 +1778,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionPrintSlip => 'Print Slip';
+
+  @override
+  String get collectionBackToHome => 'Back to Home';
 
   @override
   String get collectionSelectVehicle => 'Select Vehicle Number Plate';
@@ -3714,4 +3722,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supervisorMrfLocationSardar => 'Sardar Market, Udhana';
+
+  @override
+  String get locationServiceTitle => 'Turn on location';
+
+  @override
+  String get locationServiceMessage =>
+      'Location is off. Turn it on so collection records can include GPS coordinates, even when the app is offline.';
+
+  @override
+  String get locationPermissionTitle => 'Location permission required';
+
+  @override
+  String get locationPermissionSettingsMessage =>
+      'Allow location access in app settings so collection records can include GPS coordinates.';
+
+  @override
+  String get locationPermissionDenied =>
+      'Location permission was not granted. GPS will not be included until permission is allowed.';
+
+  @override
+  String get locationUnavailable =>
+      'A location fix is temporarily unavailable. The last saved location will be used when available.';
+
+  @override
+  String get locationNotNow => 'Not now';
+
+  @override
+  String get locationOpenSettings => 'Open settings';
+
+  @override
+  String get locationSettingsUnavailable =>
+      'Location settings could not be opened.';
 }

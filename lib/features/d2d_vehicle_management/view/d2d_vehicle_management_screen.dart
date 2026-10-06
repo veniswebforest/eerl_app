@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/uuid_generator.dart';
 import 'package:eerl_app/shared/widgets/app_confirmation_dialog.dart';
 import 'package:eerl_app/shared/widgets/app_labeled_dropdown.dart';
 import 'package:eerl_app/shared/widgets/app_square_back_button.dart';
@@ -147,9 +148,7 @@ class _D2dVehicleManagementScreenState
     final type = _vehicleTypes.first;
     await EerlLocalRepository.instance.saveVehicle(
       VehicleModel(
-        id:
-            existing?.id ??
-            'local_vehicle_${DateTime.now().microsecondsSinceEpoch}',
+        id: existing?.id ?? UuidGenerator.v4(),
         number: existing?.number,
         centerId: _centers[centerIndex].id,
         plateNumber: plate,

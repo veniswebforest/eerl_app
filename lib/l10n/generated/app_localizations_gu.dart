@@ -1465,10 +1465,10 @@ class AppLocalizationsGu extends AppLocalizations {
   String get collectionDetailVerifiedWeight => 'ચકાસાયેલ વજન';
 
   @override
-  String get collectionDetailRate => 'દર: ₹45.00/KG';
+  String get collectionDetailRate => 'દર:';
 
   @override
-  String get collectionDetailMaterialTotal => 'કુલ: ₹12,150.00';
+  String get collectionDetailMaterialTotal => 'કુલ:';
 
   @override
   String get collectionDetailRampPersonPhoto => 'રેમ્પ વ્યક્તિનો ફોટો';
@@ -1497,6 +1497,11 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get syncPendingCollections => '3 કલેક્શન બાકી';
+
+  @override
+  String syncPendingItems(int count) {
+    return '$count એન્ટ્રી સિંક થવાની બાકી';
+  }
 
   @override
   String get syncAlreadySyncedTitle => 'ડેટા પહેલેથી સિંક છે';
@@ -1699,7 +1704,7 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String collectionRatePerUnit(String unit) {
-    return 'દર: ₹45.00/$unit';
+    return 'દર/$unit';
   }
 
   @override
@@ -1773,6 +1778,9 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get collectionPrintSlip => 'સ્લિપ પ્રિન્ટ કરો';
+
+  @override
+  String get collectionBackToHome => 'હોમ પર પાછા જાઓ';
 
   @override
   String get collectionSelectVehicle => 'વાહન નંબર પ્લેટ પસંદ કરો';
@@ -3700,4 +3708,35 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get supervisorMrfLocationSardar => 'સરદાર માર્કેટ, ઉધના';
+
+  @override
+  String get locationServiceTitle => 'લોકેશન ચાલુ કરો';
+
+  @override
+  String get locationServiceMessage =>
+      'લોકેશન બંધ છે. Collection recordમાં GPS coordinates offline સ્થિતિમાં પણ જોડાય તે માટે તેને ચાલુ કરો.';
+
+  @override
+  String get locationPermissionTitle => 'લોકેશન પરવાનગી જરૂરી છે';
+
+  @override
+  String get locationPermissionSettingsMessage =>
+      'Collection recordમાં GPS coordinates જોડવા માટે app settingsમાં location access મંજૂર કરો.';
+
+  @override
+  String get locationPermissionDenied =>
+      'લોકેશન પરવાનગી મળી નથી. પરવાનગી આપ્યા સુધી GPS જોડાશે નહીં.';
+
+  @override
+  String get locationUnavailable =>
+      'હાલ લોકેશન મળી શક્યું નથી. ઉપલબ્ધ હોય ત્યારે છેલ્લું સાચવેલું લોકેશન વપરાશે.';
+
+  @override
+  String get locationNotNow => 'હમણાં નહીં';
+
+  @override
+  String get locationOpenSettings => 'Settings ખોલો';
+
+  @override
+  String get locationSettingsUnavailable => 'Location settings ખોલી શકાઈ નથી.';
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
@@ -8,6 +9,9 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/image_compressor.dart';
+import 'package:eerl_app/core/utils/uuid_generator.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../model/collection_entry_state.dart';
@@ -156,7 +160,10 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         .map((vehicle) => vehicle.plateNumber)
         .firstOrNull;
     _givenBy = collection.givenByName ?? '';
-    _mrfLabor = collection.givenByName;
+    _mrfLabor = _mrfPeople
+        .where((person) => person.id == collection.mrfPersonId)
+        .map((person) => person.name)
+        .firstOrNull;
     _personName = _ragpickers
         .where((person) => person.id == collection.ragpickerId)
         .map((person) => person.name)
@@ -341,7 +348,8 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
             }),
             onCapturePhoto: () async {
               try {
-                final image = await _imagePicker.pickImage(
+                final image = await ImageCompressor.pickAndCompress(
+                  picker: _imagePicker,
                   source: ImageSource.camera,
                 );
                 if (image != null) {
@@ -703,7 +711,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   Widget _d2dCollectionPhotosStep(BuildContext context) =>
       D2dCollectionPhotosStep(
         selectedItems: _selected.toList(),
-        itemNames: _itemNames(context),
+        items: _materials,
         photos: _photos,
         collectionWeights: _collectionWeights,
         verifiedWeights: _verifiedWeights,
@@ -713,9 +721,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         onCollectionWeightChanged: (item, value) => setState(() {
           _collectionWeights[item] = value;
         }),
-        onVerifiedWeightChanged: (item, value) {
+        onVerifiedWeightChanged: (item, value) => setState(() {
           _verifiedWeights[item] = value;
-        },
+        }),
         onCapture: _pickD2dCollectionImage,
         onRemove: (item, index) => setState(() {
           _photos[item]?.removeAt(index);
@@ -795,11 +803,14 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
               children: [
                 _ReviewMaterial(
                   name: _itemNames(context)[entry.$2],
+                  rate: _materials[entry.$2].rate,
                   collectionWeight: _collectionWeights[entry.$2] ?? '',
                   verifiedWeight: _verifiedWeights[entry.$2] ?? '',
                   pickedImages: _photos[entry.$2] ?? const [],
                   onPreview: _showImagePreview,
-                  unit: _d2dUnits[entry.$2] ?? defaultCollectionUnit(entry.$2),
+                  unit:
+                      _d2dUnits[entry.$2] ??
+                      defaultCollectionUnit(_materials[entry.$2]),
                 ),
                 if (entry.$1 < _selected.length - 1)
                   const Divider(height: 49, color: AppColors.cool400),
@@ -972,8 +983,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       );
       return;
     }
-    final id =
-        _draftId ?? 'local_collection_${DateTime.now().microsecondsSinceEpoch}';
+    final id = _draftId ?? UuidGenerator.v4();
     _draftId = id;
     VehicleModel? vehicle;
     for (final value in _vehicles) {
@@ -982,6 +992,12 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     RagpickerModel? ragpicker;
     for (final value in _ragpickers) {
       if (value.name == _personName) ragpicker = value;
+    }
+    MrfPersonModel? mrfLabor;
+    for (final value in _mrfPeople) {
+      if (value.role.toUpperCase() == 'LABOUR' && value.name == _mrfLabor) {
+        mrfLabor = value;
+      }
     }
     final now = DateTime.now().toUtc().toIso8601String();
     final items = <CollectionItemModel>[];
@@ -993,7 +1009,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       final verified = double.tryParse(_verifiedWeights[index] ?? '');
       items.add(
         CollectionItemModel(
-          id: '${id}_${material.id}',
+          id: UuidGenerator.v4(),
           collectionId: id,
           itemId: material.id,
           qty: qty,
@@ -1028,14 +1044,11 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
           status: submit ? 'SUBMITTED' : 'DRAFT',
           collectedAt: submit ? now : null,
           vehicleId: vehicle?.id,
-          mrfPersonId: _type == CollectionType.mrfStation
-              ? _mrfSupervisor?.id
-              : null,
+          mrfPersonId: _type == CollectionType.mrfStation ? mrfLabor?.id : null,
           ragpickerId: ragpicker?.id,
           givenByName: switch (_type) {
             CollectionType.d2d => _givenBy,
-            CollectionType.mrfStation => _mrfLabor,
-            CollectionType.ramp || null => null,
+            CollectionType.mrfStation || CollectionType.ramp || null => null,
           },
           handedOverBy: _type == CollectionType.ramp ? _personName : null,
           paidBy: _type == CollectionType.mrfStation
@@ -1052,6 +1065,14 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         items: items,
         submit: submit,
       );
+      if (submit) {
+        debugPrint(
+          '🚀 [EERL_COLLECTION_SYNC][QUEUED] collection_id=$id; '
+          'photos=${handoverPhotos.length + items.fold<int>(0, (count, item) => count + item.photoUrls.length)}; '
+          'items=${items.length}; source=local_commit',
+        );
+        unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() => _saving = false);
@@ -1063,25 +1084,20 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     if (!mounted) return;
     setState(() => _saving = false);
     if (!submit) {
-      Navigator.of(context).pop(true);
+      Navigator.of(context).pop(CollectionRouteResult.draftSaved);
       return;
     }
     await showDialog<void>(
       context: context,
       barrierColor: Colors.black54,
-      builder: (_) => CollectionSuccessDialog(
+      builder: (dialogContext) => CollectionSuccessDialog(
         onPreview: () {
-          Navigator.of(context, rootNavigator: true).pop();
-          context.push<void>(AppRoutes.collectionDetail, extra: id);
+          Navigator.of(dialogContext).pop();
+          context.push<void>(AppRoutes.collectionReceipt, extra: id);
         },
         onAddNew: () {
-          Navigator.of(context, rootNavigator: true).pop();
-          setState(() {
-            _draftId = null;
-            _step = CollectionEntryStep.items;
-            _type = null;
-            _selected.clear();
-          });
+          Navigator.of(dialogContext).pop();
+          Navigator.of(context).pop(CollectionRouteResult.openCollections);
         },
       ),
     );
@@ -1122,20 +1138,18 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       ),
     );
     if (source == null || !mounted) return;
-    final image = await _imagePicker.pickImage(
+    final image = await ImageCompressor.pickAndCompress(
+      picker: _imagePicker,
       source: source,
-      imageQuality: 85,
-      maxWidth: 1600,
     );
     if (image == null || !mounted) return;
     setState(() => (_photos[itemId] ??= []).add(image));
   }
 
   Future<void> _pickVehicleImage() async {
-    final image = await _imagePicker.pickImage(
+    final image = await ImageCompressor.pickAndCompress(
+      picker: _imagePicker,
       source: ImageSource.camera,
-      imageQuality: 85,
-      maxWidth: 1600,
     );
     if (image == null || !mounted) return;
     setState(() => _photos[-1] = [image]);
@@ -1143,10 +1157,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
 
   Future<void> _pickD2dCollectionImage(int itemId) async {
     if ((_photos[itemId]?.length ?? 0) >= 2) return;
-    final image = await _imagePicker.pickImage(
+    final image = await ImageCompressor.pickAndCompress(
+      picker: _imagePicker,
       source: ImageSource.camera,
-      imageQuality: 85,
-      maxWidth: 1600,
     );
     if (image == null || !mounted) return;
     setState(() => (_photos[itemId] ??= []).add(image));
@@ -1814,6 +1827,7 @@ class _ReviewVehiclePhotoCard extends StatelessWidget {
 class _ReviewMaterial extends StatelessWidget {
   const _ReviewMaterial({
     required this.name,
+    required this.rate,
     required this.collectionWeight,
     required this.verifiedWeight,
     required this.pickedImages,
@@ -1822,6 +1836,7 @@ class _ReviewMaterial extends StatelessWidget {
   });
 
   final String name;
+  final double? rate;
   final String collectionWeight, verifiedWeight;
   final List<XFile> pickedImages;
   final ValueChanged<XFile> onPreview;
@@ -1833,6 +1848,18 @@ class _ReviewMaterial extends StatelessWidget {
     final unitLabel = isKg
         ? context.l10n.collectionUnitKg
         : context.l10n.collectionUnitPcs;
+    final verifiedQuantity = double.tryParse(verifiedWeight.trim());
+    final materialTotal = rate == null || verifiedQuantity == null
+        ? null
+        : rate! * verifiedQuantity;
+    final rateText = rate == null
+        ? '${context.l10n.collectionDetailRate} —'
+        : '${context.l10n.collectionDetailRate} '
+              '₹${rate!.toStringAsFixed(2)}/$unitLabel';
+    final totalText = materialTotal == null
+        ? '${context.l10n.collectionDetailMaterialTotal} —'
+        : '${context.l10n.collectionDetailMaterialTotal} '
+              '₹${materialTotal.toStringAsFixed(2)}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1879,32 +1906,34 @@ class _ReviewMaterial extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        const Divider(height: 1, color: AppColors.cool400),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                context.l10n.collectionRatePerUnit(unitLabel),
-                maxLines: 2,
-                style: AppTextStyles.mediumSH8_14,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                context.l10n.collectionDetailMaterialTotal,
-                maxLines: 2,
-                textAlign: TextAlign.end,
-                style: AppTextStyles.semiboldH9_14.copyWith(
-                  color: AppColors.primary500,
+        if (rate != null) ...[
+          const SizedBox(height: 16),
+          const Divider(height: 1, color: AppColors.cool400),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  rateText,
+                  maxLines: 2,
+                  style: AppTextStyles.mediumSH8_14,
                 ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  totalText,
+                  maxLines: 2,
+                  textAlign: TextAlign.end,
+                  style: AppTextStyles.semiboldH9_14.copyWith(
+                    color: AppColors.primary500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 16),
         _ReviewPhotos(images: pickedImages, onPreview: onPreview),
       ],
