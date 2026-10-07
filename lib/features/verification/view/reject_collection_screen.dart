@@ -7,14 +7,23 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/records/widgets/collection_detail_assets.dart';
 
 class RejectCollectionScreen extends StatefulWidget {
-  const RejectCollectionScreen({super.key});
+  const RejectCollectionScreen({super.key, this.collectionId});
+
+  final String? collectionId;
 
   @override
   State<RejectCollectionScreen> createState() => _RejectCollectionScreenState();
 }
 
 class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
-  final Set<int> _selectedReasons = {0, 2};
+  final Set<int> _selectedReasons = {};
+  final TextEditingController _remarksController = TextEditingController();
+
+  @override
+  void dispose() {
+    _remarksController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +59,9 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                 ),
                 const SizedBox(height: 24),
                 _CollectionIdCard(
-                  value: context.l10n.verificationDetailCollectionIdValue,
+                  value: widget.collectionId?.startsWith('#') == true
+                      ? widget.collectionId!
+                      : '#${widget.collectionId ?? ''}',
                 ),
                 const SizedBox(height: 16),
                 Text.rich(
@@ -91,7 +102,7 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   key: const Key('verification-reject-remarks'),
-                  initialValue: context.l10n.verificationRejectRemarksValue,
+                  controller: _remarksController,
                   minLines: 5,
                   maxLines: 5,
                   style: AppTextStyles.regularB7_14.copyWith(
@@ -127,7 +138,15 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                     key: const Key('verification-confirm-rejection'),
                     onPressed: _selectedReasons.isEmpty
                         ? null
-                        : () => Navigator.of(context).pop(true),
+                        : () {
+                            final selected = _selectedReasons.toList()..sort();
+                            final reasonParts = <String>[
+                              for (final index in selected) reasons[index],
+                              if (_remarksController.text.trim().isNotEmpty)
+                                _remarksController.text.trim(),
+                            ];
+                            Navigator.of(context).pop(reasonParts.join('. '));
+                          },
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: AppColors.red500,

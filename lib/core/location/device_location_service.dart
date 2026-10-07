@@ -91,11 +91,18 @@ class DeviceLocationService {
     }
   }
 
-  /// Returns a fresh fix when permission and GPS are available. No permission
-  /// dialog is shown here; the Home screen owns that user interaction.
-  Future<DeviceCoordinates?> bestAvailableCoordinates() async {
+  /// Returns a fresh fix when permission and GPS are available, falling back
+  /// to the platform or SQLite cached fix. Collection submission passes
+  /// [requestPermission] so the API is never queued before location access has
+  /// been attempted from the submission flow itself.
+  Future<DeviceCoordinates?> bestAvailableCoordinates({
+    bool requestPermission = false,
+  }) async {
     try {
-      final permission = await Geolocator.checkPermission();
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied && requestPermission) {
+        permission = await Geolocator.requestPermission();
+      }
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
         return null;

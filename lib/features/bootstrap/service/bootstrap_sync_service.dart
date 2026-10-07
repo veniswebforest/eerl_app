@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
+import 'package:eerl_app/core/network/internet_connectivity_service.dart';
 import 'package:eerl_app/features/auth/data/auth_session_storage.dart';
 import 'package:eerl_app/features/bootstrap/data/bootstrap_database_applier.dart';
 import 'package:eerl_app/features/bootstrap/data/bootstrap_remote_service.dart';
@@ -30,12 +31,14 @@ class BootstrapSyncService extends ChangeNotifier {
     required ItemImageCacheService itemImageCache,
     required Future<String?> Function() accessTokenProvider,
     required Future<void> Function() onSessionExpired,
+    required Future<bool> Function() internetAccessChecker,
   }) : _gateway = gateway,
        _database = database,
        _applier = applier,
        _itemImageCache = itemImageCache,
        _accessTokenProvider = accessTokenProvider,
-       _onSessionExpired = onSessionExpired;
+       _onSessionExpired = onSessionExpired,
+       _internetAccessChecker = internetAccessChecker;
 
   factory BootstrapSyncService.forTesting({
     required BootstrapGateway gateway,
@@ -44,6 +47,7 @@ class BootstrapSyncService extends ChangeNotifier {
     ItemImageCacheService? itemImageCache,
     required Future<String?> Function() accessTokenProvider,
     Future<void> Function()? onSessionExpired,
+    Future<bool> Function()? internetAccessChecker,
   }) {
     final resolvedDatabase = database ?? AppDatabase.instance;
     return BootstrapSyncService._(
@@ -54,6 +58,7 @@ class BootstrapSyncService extends ChangeNotifier {
           itemImageCache ?? ItemImageCacheService(database: resolvedDatabase),
       accessTokenProvider: accessTokenProvider,
       onSessionExpired: onSessionExpired ?? () async {},
+      internetAccessChecker: internetAccessChecker ?? () async => true,
     );
   }
 
@@ -64,6 +69,8 @@ class BootstrapSyncService extends ChangeNotifier {
     itemImageCache: ItemImageCacheService.instance,
     accessTokenProvider: AuthSessionStorage().getAccessToken,
     onSessionExpired: AuthSessionStorage().clearSession,
+    internetAccessChecker:
+        InternetConnectivityService.instance.hasInternetAccess,
   );
 
   static const _maximumPagesPerRun = 100;
@@ -74,6 +81,9 @@ class BootstrapSyncService extends ChangeNotifier {
   final ItemImageCacheService _itemImageCache;
   final Future<String?> Function() _accessTokenProvider;
   final Future<void> Function() _onSessionExpired;
+  // Nullable so a singleton retained across Flutter hot reload can safely
+  // fall back when this field did not exist on the original instance.
+  final Future<bool> Function()? _internetAccessChecker;
 
   Future<void> Function()? _beforeBootstrap;
   Future<void>? _activeRun;
@@ -152,6 +162,10 @@ class BootstrapSyncService extends ChangeNotifier {
   }
 
   Future<void> _performBootstrap(BootstrapTrigger trigger) async {
+    if (!await _hasInternetAccess()) {
+      _log('Skipped ${trigger.name}: internet is unavailable');
+      return;
+    }
     final accessToken = await _accessTokenProvider();
     if (accessToken == null || accessToken.trim().isEmpty) {
       _log('Skipped ${trigger.name}: no authenticated session');
@@ -268,6 +282,17 @@ class BootstrapSyncService extends ChangeNotifier {
     if (itemImageResetDone) {
       await _database.setSyncMeta('item_images_refetch_required', '0');
       _log('One-time item image full refetch completed');
+    }
+  }
+
+  Future<bool> _hasInternetAccess() async {
+    try {
+      final checker = _internetAccessChecker;
+      return await (checker ??
+          InternetConnectivityService.instance.hasInternetAccess)();
+    } on Object catch (error) {
+      _log('Internet check failed safely: $error');
+      return false;
     }
   }
 

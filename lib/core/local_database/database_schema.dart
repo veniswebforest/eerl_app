@@ -241,6 +241,7 @@ abstract final class DatabaseSchema {
         truck_expected_at TEXT,
         fixed_qty REAL,
         estimated_expense REAL,
+        note TEXT,
         vehicle_plate TEXT,
         requested_by TEXT NOT NULL,
         requested_by_name TEXT NOT NULL,

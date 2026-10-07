@@ -38,7 +38,6 @@ import 'package:eerl_app/features/supervisor_tasks/view/supervisor_tasks_screen.
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/tasks/view/my_tasks_screen.dart';
 import 'package:eerl_app/features/tasks/view/task_detail_screen.dart';
-import 'package:eerl_app/features/transfer_requests/model/transfer_request_detail_state.dart';
 import 'package:eerl_app/features/transfer_requests/view/create_transfer_request_screen.dart';
 import 'package:eerl_app/features/transfer_requests/view/transfer_request_detail_screen.dart';
 import 'package:eerl_app/features/transfer_requests/view/transfer_requests_screen.dart';
@@ -313,11 +312,8 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.transferRequestDetail,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, state) => TransferRequestDetailScreen(
-        state:
-            state.extra as TransferRequestDetailState? ??
-            TransferRequestDetailState.pendingVerification,
-      ),
+      builder: (_, state) =>
+          TransferRequestDetailScreen(transferId: state.extra! as String),
     ),
     GoRoute(
       path: AppRoutes.stockDetail,
@@ -335,7 +331,8 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.rejectCollection,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, _) => const RejectCollectionScreen(),
+      builder: (_, state) =>
+          RejectCollectionScreen(collectionId: state.extra as String?),
     ),
     GoRoute(
       path: AppRoutes.supervisorExpense,

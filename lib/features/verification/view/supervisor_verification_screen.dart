@@ -179,10 +179,13 @@ class _SupervisorVerificationScreenState
                         itemBuilder: (context, index) => VerificationEntryCard(
                           key: ValueKey(entries[index].id),
                           entry: entries[index],
-                          onTap: () => context.push<void>(
-                            AppRoutes.verificationDetail,
-                            extra: entries[index].id,
-                          ),
+                          onTap: () async {
+                            await context.push<void>(
+                              AppRoutes.verificationDetail,
+                              extra: entries[index].id,
+                            );
+                            if (mounted) _controller.load();
+                          },
                         ),
                       ),
                     ),

@@ -1,17 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/transfer_request_detail_state.dart';
 import '../widgets/transfer_request_detail_widgets.dart';
 import 'transfer_dispatch_flow_screen.dart';
 
-class TransferRequestDetailScreen extends StatefulWidget {
-  const TransferRequestDetailScreen({super.key, required this.state});
+typedef TransferRequestDetailData = ({
+  TransferModel? transfer,
+  List<TransferItemModel> items,
+});
+typedef TransferRequestDetailLoader =
+    Future<TransferRequestDetailData> Function(String transferId);
 
-  final TransferRequestDetailState state;
+class TransferRequestDetailScreen extends StatefulWidget {
+  const TransferRequestDetailScreen({
+    super.key,
+    required this.transferId,
+    this.detailLoader,
+  });
+
+  final String transferId;
+  final TransferRequestDetailLoader? detailLoader;
 
   @override
   State<TransferRequestDetailScreen> createState() =>
@@ -21,6 +37,34 @@ class TransferRequestDetailScreen extends StatefulWidget {
 class _TransferRequestDetailScreenState
     extends State<TransferRequestDetailScreen> {
   bool _dispatchFlowOpen = false;
+  late final LocalQueryController<TransferRequestDetailData> _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = LocalQueryController(() {
+      final loader = widget.detailLoader;
+      if (loader != null) return loader(widget.transferId);
+      return _loadLocalDetail(widget.transferId);
+    })..load();
+  }
+
+  Future<TransferRequestDetailData> _loadLocalDetail(String transferId) async {
+    final values = await Future.wait<Object?>([
+      EerlLocalRepository.instance.getTransfer(transferId),
+      EerlLocalRepository.instance.getTransferItems(transferId),
+    ]);
+    return (
+      transfer: values[0] as TransferModel?,
+      items: values[1]! as List<TransferItemModel>,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => PopScope(
@@ -30,20 +74,74 @@ class _TransferRequestDetailScreenState
             onBack: () => setState(() => _dispatchFlowOpen = false),
             onComplete: () => setState(() => _dispatchFlowOpen = false),
           )
-        : _TransferRequestDetailContent(
-            state: widget.state,
-            onVehicleArrived: () => setState(() => _dispatchFlowOpen = true),
+        : ListenableBuilder(
+            listenable: _controller,
+            builder: (context, _) {
+              if (_controller.isLoading && !_controller.hasData) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
+              if (_controller.error != null ||
+                  _controller.data?.transfer == null) {
+                return Scaffold(
+                  appBar: CustomAppBar(
+                    title: context.l10n.transferDetailTitle,
+                    backIconAsset: 'assets/icons/records/back.svg',
+                  ),
+                  body: Center(
+                    child: TextButton(
+                      onPressed: _controller.load,
+                      child: const Text('Retry'),
+                    ),
+                  ),
+                );
+              }
+              final transfer = _controller.data?.transfer;
+              return _TransferRequestDetailContent(
+                state: _detailState(transfer!.status),
+                transfer: transfer,
+                items: _controller.data?.items ?? const <TransferItemModel>[],
+                onVehicleArrived: () =>
+                    setState(() => _dispatchFlowOpen = true),
+              );
+            },
           ),
   );
+
+  TransferRequestDetailState _detailState(String value) {
+    final status = value.toUpperCase();
+    if (status.contains('REJECT')) {
+      return TransferRequestDetailState.rejected;
+    }
+    if (status.contains('UNAVAILABLE') || status.contains('CANCEL')) {
+      return TransferRequestDetailState.vehicleUnavailable;
+    }
+    if (status.contains('COMPLET') ||
+        status.contains('CLOSED') ||
+        status.contains('HAND')) {
+      return TransferRequestDetailState.completed;
+    }
+    if (status.contains('DISPATCH') ||
+        status.contains('LOADING') ||
+        status.contains('APPROV')) {
+      return TransferRequestDetailState.waitingForLoading;
+    }
+    return TransferRequestDetailState.pendingVerification;
+  }
 }
 
 class _TransferRequestDetailContent extends StatelessWidget {
   const _TransferRequestDetailContent({
     required this.state,
+    required this.transfer,
+    required this.items,
     required this.onVehicleArrived,
   });
 
   final TransferRequestDetailState state;
+  final TransferModel? transfer;
+  final List<TransferItemModel> items;
   final VoidCallback onVehicleArrived;
 
   bool get _isRejected => state == TransferRequestDetailState.rejected;
@@ -52,8 +150,16 @@ class _TransferRequestDetailContent extends StatelessWidget {
 
   bool get _isLoading => state == TransferRequestDetailState.waitingForLoading;
 
-  bool get _hasVehicle =>
-      state != TransferRequestDetailState.vehicleUnavailable && !_isRejected;
+  bool get _isVehicleUnavailable =>
+      state == TransferRequestDetailState.vehicleUnavailable;
+
+  bool get _hasVehicle {
+    if (_isRejected || _isVehicleUnavailable) {
+      return false;
+    }
+    if (transfer == null) return true;
+    return transfer!.vehiclePlate?.trim().isNotEmpty == true;
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -62,9 +168,8 @@ class _TransferRequestDetailContent extends StatelessWidget {
       title: context.l10n.transferDetailTitle,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
-    bottomNavigationBar: _isRejected || _isCompleted
-        ? null
-        : SafeArea(
+    bottomNavigationBar: _isLoading && _hasVehicle
+        ? SafeArea(
             top: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
@@ -87,7 +192,8 @@ class _TransferRequestDetailContent extends StatelessWidget {
                 ),
               ),
             ),
-          ),
+          )
+        : null,
     body: SafeArea(
       top: false,
       child: Center(
@@ -98,25 +204,33 @@ class _TransferRequestDetailContent extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
             children: [
               if (_isRejected) ...[
-                _RejectReasonCard(),
+                _RejectReasonCard(reason: transfer?.rejectionReason),
                 const SizedBox(height: 12),
               ],
-              _RequestIdCard(),
+              _RequestIdCard(
+                value:
+                    transfer?.number ??
+                    transfer?.id ??
+                    context.l10n.transferDetailRequestId,
+              ),
               const SizedBox(height: 12),
               _InformationCard(
                 state: state,
+                transfer: transfer,
+                items: items,
                 isRejected: _isRejected,
                 isCompleted: _isCompleted,
                 isLoading: _isLoading,
+                isVehicleUnavailable: _isVehicleUnavailable,
               ),
               const SizedBox(height: 12),
               if (_hasVehicle) ...[
-                const _CollectionManagerCard(),
+                _CollectionManagerCard(transfer: transfer),
                 const SizedBox(height: 12),
               ],
-              const _ItemsCard(),
+              _ItemsCard(items: items),
               const SizedBox(height: 12),
-              _TimelineCard(state: state),
+              _TimelineCard(state: state, transfer: transfer),
             ],
           ),
         ),
@@ -126,6 +240,10 @@ class _TransferRequestDetailContent extends StatelessWidget {
 }
 
 class _RequestIdCard extends StatelessWidget {
+  const _RequestIdCard({required this.value});
+
+  final String value;
+
   @override
   Widget build(BuildContext context) => TransferDetailCard(
     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -149,7 +267,7 @@ class _RequestIdCard extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Text(
-          context.l10n.transferDetailRequestId,
+          value,
           style: AppTextStyles.semiboldH8_16.copyWith(
             color: AppColors.neutral900,
           ),
@@ -160,6 +278,10 @@ class _RequestIdCard extends StatelessWidget {
 }
 
 class _RejectReasonCard extends StatelessWidget {
+  const _RejectReasonCard({this.reason});
+
+  final String? reason;
+
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
@@ -178,12 +300,7 @@ class _RejectReasonCard extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          context.l10n.transferRejectReason,
-          style: AppTextStyles.regularB8_12,
-        ),
-        const SizedBox(height: 6),
-        Text(
-          context.l10n.transferRejectRemarks,
+          reason?.trim().isNotEmpty == true ? reason! : '-',
           style: AppTextStyles.regularB8_12,
         ),
       ],
@@ -194,21 +311,41 @@ class _RejectReasonCard extends StatelessWidget {
 class _InformationCard extends StatelessWidget {
   const _InformationCard({
     required this.state,
+    required this.transfer,
+    required this.items,
     required this.isRejected,
     required this.isCompleted,
     required this.isLoading,
+    required this.isVehicleUnavailable,
   });
 
   final TransferRequestDetailState state;
+  final TransferModel? transfer;
+  final List<TransferItemModel> items;
   final bool isRejected;
   final bool isCompleted;
   final bool isLoading;
+  final bool isVehicleUnavailable;
 
   @override
   Widget build(BuildContext context) {
+    final totalQuantity =
+        transfer?.fixedQty ??
+        items.fold<double>(
+          0,
+          (total, item) => total + (item.dispatchedQty ?? item.qty),
+        );
+    final rawStatus = transfer?.status.toUpperCase() ?? '';
     final (status, color, background, icon) = isRejected
         ? (
             context.l10n.transferDetailRejected,
+            AppColors.red600,
+            AppColors.red50,
+            'assets/icons/profile/logout_warning.svg',
+          )
+        : isVehicleUnavailable
+        ? (
+            context.l10n.transferDetailVehicleUnavailable,
             AppColors.red600,
             AppColors.red50,
             'assets/icons/profile/logout_warning.svg',
@@ -222,16 +359,18 @@ class _InformationCard extends StatelessWidget {
           )
         : isLoading
         ? (
-            context.l10n.transferDetailWaitingLoading,
+            rawStatus.contains('DISPATCH')
+                ? context.l10n.transferDetailVehicleDispatched
+                : context.l10n.transferDetailWaitingLoading,
             AppColors.secondary500,
             AppColors.secondary50,
             'assets/icons/home/transfer.svg',
           )
         : (
-            context.l10n.transferDetailVehicleDispatched,
-            AppColors.secondary600,
-            AppColors.secondary50,
-            'assets/icons/home/transfer.svg',
+            context.l10n.transferDetailWaitingManager,
+            AppColors.yellow600,
+            AppColors.yellow50,
+            'assets/icons/records/status_pending.svg',
           );
 
     return TransferDetailCard(
@@ -249,23 +388,48 @@ class _InformationCard extends StatelessWidget {
           const SizedBox(height: 12),
           TransferDetailRow(
             label: context.l10n.transferDetailFromLocation,
-            values: [context.l10n.transferDetailFromLocationValue],
+            values: [
+              transfer?.centerName ??
+                  transfer?.centerId ??
+                  (transfer == null
+                      ? context.l10n.transferDetailFromLocationValue
+                      : '-'),
+            ],
           ),
           TransferDetailRow(
             label: context.l10n.transferDetailToLocation,
-            values: [context.l10n.transferDetailToLocationValue],
+            values: [
+              transfer?.destinationName ??
+                  transfer?.destinationId ??
+                  (transfer == null
+                      ? context.l10n.transferDetailToLocationValue
+                      : '-'),
+            ],
           ),
           TransferDetailRow(
             label: context.l10n.transferDetailAvailableStock,
-            values: [context.l10n.transferDetailAvailableStockValue],
+            values: [
+              transfer == null
+                  ? context.l10n.transferDetailAvailableStockValue
+                  : '${totalQuantity.toStringAsFixed(2)} KG',
+            ],
           ),
           TransferDetailRow(
             label: context.l10n.transferDetailDateTime,
-            values: [context.l10n.transferDetailDateTimeValue],
+            values: [
+              transfer == null
+                  ? context.l10n.transferDetailDateTimeValue
+                  : _formatTransferDateTime(transfer!.requestedAt),
+            ],
           ),
           TransferDetailRow(
             label: context.l10n.transferDetailRequestedBy,
-            values: [context.l10n.transferDetailRequestedByValue],
+            values: [
+              transfer?.requestedByName ??
+                  (transfer == null
+                      ? context.l10n.transferDetailRequestedByValue
+                      : '-'),
+            ],
           ),
           Text(
             context.l10n.transferDetailRequestStatus,
@@ -287,7 +451,9 @@ class _InformationCard extends StatelessWidget {
 }
 
 class _CollectionManagerCard extends StatelessWidget {
-  const _CollectionManagerCard();
+  const _CollectionManagerCard({required this.transfer});
+
+  final TransferModel? transfer;
 
   @override
   Widget build(BuildContext context) => TransferDetailCard(
@@ -305,11 +471,22 @@ class _CollectionManagerCard extends StatelessWidget {
         const SizedBox(height: 12),
         TransferDetailRow(
           label: context.l10n.transferDetailVehicle,
-          values: [context.l10n.transferDetailVehicleNumber],
+          values: [
+            transfer?.vehiclePlate ??
+                (transfer == null
+                    ? context.l10n.transferDetailVehicleNumber
+                    : '-'),
+          ],
         ),
         TransferDetailRow(
           label: context.l10n.transferEstimateTimeToReach,
-          values: [context.l10n.transferEstimateTimeValue],
+          values: [
+            transfer?.truckExpectedAt == null
+                ? (transfer == null
+                      ? context.l10n.transferEstimateTimeValue
+                      : '-')
+                : _formatTransferDateTime(transfer!.truckExpectedAt!),
+          ],
           showDivider: false,
         ),
       ],
@@ -318,7 +495,9 @@ class _CollectionManagerCard extends StatelessWidget {
 }
 
 class _ItemsCard extends StatelessWidget {
-  const _ItemsCard();
+  const _ItemsCard({required this.items});
+
+  final List<TransferItemModel> items;
 
   @override
   Widget build(BuildContext context) => TransferDetailCard(
@@ -353,33 +532,52 @@ class _ItemsCard extends StatelessWidget {
         const SizedBox(height: 8),
         const Divider(height: 1, color: AppColors.cool300),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                context.l10n.transferDetailPetBottles,
-                style: AppTextStyles.boldH8_14.copyWith(
-                  color: AppColors.primary500,
+        if (items.isEmpty)
+          Text(
+            '-',
+            style: AppTextStyles.regularB7_14.copyWith(
+              color: AppColors.neutral600,
+            ),
+          )
+        else
+          for (var index = 0; index < items.length; index++) ...[
+            Row(
+              key: ValueKey(items[index].id),
+              children: [
+                Expanded(
+                  child: Text(
+                    items[index].name ?? items[index].itemId,
+                    style: AppTextStyles.boldH8_14.copyWith(
+                      color: AppColors.primary500,
+                    ),
+                  ),
                 ),
-              ),
+                Text(
+                  '${(items[index].dispatchedQty ?? items[index].qty).toStringAsFixed(2)} '
+                          '${items[index].unitCode ?? ''}'
+                      .trim(),
+                  style: AppTextStyles.boldH8_14.copyWith(
+                    color: AppColors.primary500,
+                  ),
+                ),
+              ],
             ),
-            Text(
-              context.l10n.transferDetailQuantityValue,
-              style: AppTextStyles.boldH8_14.copyWith(
-                color: AppColors.primary500,
-              ),
-            ),
+            if (index != items.length - 1) ...[
+              const SizedBox(height: 10),
+              const Divider(height: 1, color: AppColors.cool300),
+              const SizedBox(height: 10),
+            ],
           ],
-        ),
       ],
     ),
   );
 }
 
 class _TimelineCard extends StatelessWidget {
-  const _TimelineCard({required this.state});
+  const _TimelineCard({required this.state, required this.transfer});
 
   final TransferRequestDetailState state;
+  final TransferModel? transfer;
 
   @override
   Widget build(BuildContext context) {
@@ -399,7 +597,9 @@ class _TimelineCard extends StatelessWidget {
           const SizedBox(height: 14),
           TransferTimelineStep(
             title: context.l10n.transferTimelineCreated,
-            subtitle: context.l10n.transferTimelineCreatedDate,
+            subtitle: transfer == null
+                ? context.l10n.transferTimelineCreatedDate
+                : _formatTransferDateTime(transfer!.requestedAt),
             color: AppColors.primary500,
             iconAsset: 'assets/icons/wallet/status_verified.svg',
           ),
@@ -454,4 +654,9 @@ class _TimelineCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _formatTransferDateTime(String value) {
+  final date = DateTime.tryParse(value)?.toLocal();
+  return date == null ? value : DateFormat('dd MMM yyyy, hh:mm a').format(date);
 }

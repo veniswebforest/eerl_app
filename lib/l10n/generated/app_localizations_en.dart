@@ -372,7 +372,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String transferAvailableStock(String weight) {
-    return 'Available Stock $weight';
+    return 'Stock in Hand $weight';
   }
 
   @override
@@ -386,6 +386,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferEstimatedExpenseHint => 'Enter estimated expense';
+
+  @override
+  String get transferNoteLabel => 'Note';
+
+  @override
+  String get transferNoteHint => 'Add note (optional)';
 
   @override
   String get transferTotalKg => 'Total KG';
@@ -1504,6 +1510,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get syncInternetRequired =>
+      'No internet connection. Pending data was not changed.';
+
+  @override
   String get syncAlreadySyncedTitle => 'Data Already Synced';
 
   @override
@@ -1852,6 +1862,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get collectionPrinterHint =>
       'Ensure your Bluetooth thermal printer is switched on and connected.';
+
+  @override
+  String get collectionSlipActionError =>
+      'Could not prepare the slip. Please try again.';
 
   @override
   String get collectionPetReceiptDetail => '120 KG × ₹12.00/KG';
@@ -3744,6 +3758,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get locationUnavailable =>
       'A location fix is temporarily unavailable. The last saved location will be used when available.';
+
+  @override
+  String get collectionLocationRequired =>
+      'Location is required to submit a collection. Turn on location and allow access, then try again.';
 
   @override
   String get locationNotNow => 'Not now';

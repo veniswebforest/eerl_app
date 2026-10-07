@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
-import 'database_migrations.dart';
 import 'database_schema.dart';
 import 'database_tables.dart';
 
@@ -13,7 +12,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 6;
+  static const databaseVersion = 1;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -54,7 +53,7 @@ class AppDatabase {
       version: databaseVersion,
       onConfigure: _onConfigure,
       onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
+      onOpen: _onOpen,
     );
 
     _log('Database initialized successfully (version $databaseVersion)');
@@ -85,8 +84,54 @@ class AppDatabase {
     );
   }
 
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) {
-    return DatabaseMigrations.upgrade(db, oldVersion, newVersion);
+  Future<void> _onOpen(Database db) async {
+    await _ensureVersionOneSchema(db);
+  }
+
+  Future<void> ensureCurrentSchema() async {
+    await _ensureVersionOneSchema(await database);
+  }
+
+  Future<void> _ensureVersionOneSchema(Database db) async {
+    // The testing database intentionally stays at version 1. Keep an existing
+    // version-1 installation aligned with the current baseline schema without
+    // introducing numbered migrations or deleting any local data.
+    const additiveColumns = <String, Map<String, String>>{
+      DatabaseTables.myCenters: {'agent_number': 'INTEGER'},
+      DatabaseTables.vehicles: {'number': 'TEXT'},
+      DatabaseTables.mrfPeople: {'number': 'TEXT'},
+      DatabaseTables.ragpickers: {'number': 'TEXT'},
+      DatabaseTables.cashRequests: {'number': 'TEXT'},
+      DatabaseTables.categoryRequests: {'number': 'TEXT'},
+      DatabaseTables.tasks: {'number': 'TEXT', 'note': 'TEXT'},
+      DatabaseTables.requests: {'number': 'TEXT'},
+      DatabaseTables.collections: {'gps_lat': 'REAL', 'gps_lng': 'REAL'},
+      DatabaseTables.transfers: {
+        'note': 'TEXT',
+        'gps_lat': 'REAL',
+        'gps_lng': 'REAL',
+      },
+      DatabaseTables.items: {'image_url': 'TEXT'},
+    };
+
+    for (final tableEntry in additiveColumns.entries) {
+      final columns = await db.rawQuery(
+        'PRAGMA table_info("${tableEntry.key}")',
+      );
+      if (columns.isEmpty) continue;
+      final existingNames = columns.map((row) => row['name']).toSet();
+      for (final columnEntry in tableEntry.value.entries) {
+        if (existingNames.contains(columnEntry.key)) continue;
+        await db.execute(
+          'ALTER TABLE "${tableEntry.key}" '
+          'ADD COLUMN "${columnEntry.key}" ${columnEntry.value}',
+        );
+        _log(
+          'Added missing baseline column '
+          '${tableEntry.key}.${columnEntry.key}',
+        );
+      }
+    }
   }
 
   Future<int> insert(

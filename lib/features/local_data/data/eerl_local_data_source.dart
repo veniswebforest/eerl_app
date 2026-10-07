@@ -9,6 +9,13 @@ import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
+class CollectionLocationUnavailableException implements Exception {
+  const CollectionLocationUnavailableException();
+
+  @override
+  String toString() => 'A valid location is required to submit a collection.';
+}
+
 class EerlLocalDataSource {
   EerlLocalDataSource({AppDatabase? database})
     : _database = database ?? AppDatabase.instance;
@@ -797,6 +804,84 @@ class EerlLocalDataSource {
     return rows.map(CollectionItemModel.fromMap).toList(growable: false);
   }
 
+  Future<void> approveCollection(String collectionId) =>
+      _saveCollectionReview(collectionId: collectionId, approved: true);
+
+  Future<void> rejectCollection(String collectionId, String reason) {
+    final normalizedReason = reason.trim();
+    if (normalizedReason.isEmpty) {
+      throw ArgumentError.value(reason, 'reason', 'Reject reason is required.');
+    }
+    return _saveCollectionReview(
+      collectionId: collectionId,
+      approved: false,
+      reason: normalizedReason,
+    );
+  }
+
+  Future<void> _saveCollectionReview({
+    required String collectionId,
+    required bool approved,
+    String? reason,
+  }) async {
+    final now = DateTime.now().toUtc().toIso8601String();
+    final kind = approved ? 'approve' : 'reject';
+    await _database.runInTransaction((txn) async {
+      final rows = await txn.query(
+        DatabaseTables.collections,
+        columns: const ['status'],
+        where: 'id = ?',
+        whereArgs: [collectionId],
+        limit: 1,
+      );
+      if (rows.isEmpty) {
+        throw StateError('Collection $collectionId was not found.');
+      }
+      if (rows.single['status'] != 'SUBMITTED') {
+        throw StateError(
+          'Only a submitted collection can be approved or rejected.',
+        );
+      }
+
+      final updated = await txn.update(
+        DatabaseTables.collections,
+        {
+          'status': approved ? 'APPROVED' : 'REJECTED',
+          'rejection_reason': approved ? null : reason,
+          'verified_at': now,
+          'updated_at': now,
+          'sync_state': 'pending',
+        },
+        where: "id = ? AND status = 'SUBMITTED'",
+        whereArgs: [collectionId],
+      );
+      if (updated != 1) {
+        throw StateError(
+          'Collection review state changed before it was saved.',
+        );
+      }
+
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/collections/$collectionId/$kind',
+        entity: DatabaseTables.collections,
+        entityId: collectionId,
+        kind: kind,
+        body: approved ? null : {'reason': reason},
+        refs: [collectionId],
+        createdAt: now,
+      );
+    });
+    if (kDebugMode) {
+      debugPrint(
+        '✅ [EERL_COLLECTION_REVIEW][SQLITE] ${kind.toUpperCase()} STORED '
+        'collection_id=$collectionId status=${approved ? 'APPROVED' : 'REJECTED'} '
+        'outbox_path=/collections/$collectionId/$kind',
+      );
+    }
+  }
+
   Future<void> saveCollection({
     required CollectionModel collection,
     required List<CollectionItemModel> items,
@@ -821,7 +906,7 @@ class EerlLocalDataSource {
     final locationRows = submit
         ? await _database.query(
             DatabaseTables.collections,
-            columns: const ['status'],
+            columns: const ['status', 'gps_lat', 'gps_lng'],
             where: 'id = ?',
             whereArgs: [collection.id],
             limit: 1,
@@ -829,9 +914,27 @@ class EerlLocalDataSource {
         : const <Map<String, Object?>>[];
     final resubmittingRejected =
         locationRows.isNotEmpty && locationRows.single['status'] == 'REJECTED';
-    final capturedGps = submit && !resubmittingRejected
-        ? await DeviceLocationService.instance.bestAvailableCoordinates()
+    final existingLocation = locationRows.isEmpty ? null : locationRows.single;
+    final hasStoredGps = _isValidGps(
+      (existingLocation?['gps_lat'] as num?)?.toDouble(),
+      (existingLocation?['gps_lng'] as num?)?.toDouble(),
+    );
+    final suppliedGps = _isValidGps(collection.gpsLat, collection.gpsLng)
+        ? DeviceCoordinates(
+            latitude: collection.gpsLat!,
+            longitude: collection.gpsLng!,
+            capturedAt: DateTime.now().toUtc(),
+          )
         : null;
+    final capturedGps = submit && (!resubmittingRejected || !hasStoredGps)
+        ? suppliedGps ??
+              await DeviceLocationService.instance.bestAvailableCoordinates(
+                requestPermission: true,
+              )
+        : null;
+    if (submit && !hasStoredGps && capturedGps == null) {
+      throw const CollectionLocationUnavailableException();
+    }
     final photoIds = <String>[];
     final savedItemIds = <String>[];
     final photoSizes = <String, int?>{};
@@ -885,12 +988,14 @@ class EerlLocalDataSource {
           collection.collectedAt ?? existingRow?['collected_at'] as String?;
       final gpsLat = submit
           ? (isResubmission
-                ? (existingRow?['gps_lat'] as num?)?.toDouble()
+                ? (existingRow?['gps_lat'] as num?)?.toDouble() ??
+                      capturedGps?.latitude
                 : capturedGps?.latitude)
           : (existingRow?['gps_lat'] as num?)?.toDouble();
       final gpsLng = submit
           ? (isResubmission
-                ? (existingRow?['gps_lng'] as num?)?.toDouble()
+                ? (existingRow?['gps_lng'] as num?)?.toDouble() ??
+                      capturedGps?.longitude
                 : capturedGps?.longitude)
           : (existingRow?['gps_lng'] as num?)?.toDouble();
 
@@ -1158,7 +1263,7 @@ class EerlLocalDataSource {
   }) async {
     final graphRows = await _database.rawQuery(
       '''
-      SELECT c.id, c.status, c.sync_state,
+      SELECT c.id, c.status, c.sync_state, c.gps_lat, c.gps_lng,
         (SELECT COUNT(*)
          FROM ${DatabaseTables.collectionItems} ci
          WHERE ci.collection_id = c.id) AS item_count,
@@ -1213,6 +1318,7 @@ class EerlLocalDataSource {
       '✅ [EERL_COLLECTION][SQLITE][COMMIT] STORED '
       'collection_id=$collectionId center=$centerId channel=$channel '
       'status=${graph['status']} sync_state=${graph['sync_state']} '
+      'gps={lat:${graph['gps_lat']},lng:${graph['gps_lng']}} '
       'collection_items=${graph['item_count']} '
       'item_ids=${expectedItemIds.join(',')} photos=${graph['photo_count']} '
       'outbox_seq=$outboxSeq method=${outbox['method']} '
@@ -1245,6 +1351,9 @@ class EerlLocalDataSource {
     final paidBy = collectionRow['paid_by'];
     final gpsLat = (collectionRow['gps_lat'] as num?)?.toDouble();
     final gpsLng = (collectionRow['gps_lng'] as num?)?.toDouble();
+    if (!_isValidGps(gpsLat, gpsLng)) {
+      throw const CollectionLocationUnavailableException();
+    }
     return <String, Object?>{
       'centerId': collectionRow['center_id'],
       'type': collectionRow['channel'],
@@ -1268,11 +1377,19 @@ class EerlLocalDataSource {
             'photoUrls': item['photo_urls'],
           },
       ],
-      'gps': gpsLat == null || gpsLng == null
-          ? null
-          : {'lat': gpsLat, 'lng': gpsLng},
+      'gps': {'lat': gpsLat, 'lng': gpsLng},
     };
   }
+
+  bool _isValidGps(double? latitude, double? longitude) =>
+      latitude != null &&
+      longitude != null &&
+      latitude.isFinite &&
+      longitude.isFinite &&
+      latitude >= -90 &&
+      latitude <= 90 &&
+      longitude >= -180 &&
+      longitude <= 180;
 
   Map<String, Object?> _collectionDraftBody({
     required Map<String, Object?> collectionRow,
@@ -1403,28 +1520,147 @@ class EerlLocalDataSource {
   Future<List<TransferModel>> getTransfers({
     bool supervisor = false,
     String? status,
+    bool allCenters = false,
   }) async {
-    final centerId = await activeCenterId;
-    if (!supervisor && centerId == null) return const [];
-    final conditions = <String>[
-      supervisor
-          ? 't.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
-          : 't.center_id = ?',
-    ];
-    final args = <Object?>[if (!supervisor) centerId];
+    final conditions = <String>[];
+    final args = <Object?>[];
+    if (!allCenters) {
+      final centerId = await activeCenterId;
+      if (!supervisor && centerId == null) return const [];
+      conditions.add(
+        supervisor
+            ? 't.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
+            : 't.center_id = ?',
+      );
+      if (!supervisor) args.add(centerId);
+    }
     if (status != null && status.isNotEmpty) {
       conditions.add('t.status = ?');
       args.add(status);
     }
     final rows = await _database.rawQuery('''
-      SELECT t.*, COUNT(ti.id) AS lines
+      SELECT t.*, c.name AS center_name, COUNT(ti.id) AS lines,
+             COALESCE(SUM(COALESCE(ti.dispatched_qty, ti.qty)), 0) AS total_qty
       FROM ${DatabaseTables.transfers} t
+      LEFT JOIN ${DatabaseTables.centers} c ON c.id = t.center_id
       LEFT JOIN ${DatabaseTables.transferItems} ti ON ti.transfer_id = t.id
-      WHERE ${conditions.join(' AND ')}
+      ${conditions.isEmpty ? '' : 'WHERE ${conditions.join(' AND ')}'}
       GROUP BY t.id
       ORDER BY t.requested_at DESC
     ''', args);
     return rows.map(TransferModel.fromMap).toList(growable: false);
+  }
+
+  Future<String> saveTransferRequest({
+    required Map<String, double> itemQuantities,
+    required double estimatedExpense,
+    String? note,
+  }) async {
+    // Also repair an already-open version-1 database (for example after a hot
+    // reload) before writing fields recently added to the baseline schema.
+    await _database.ensureCurrentSchema();
+
+    final normalizedItems = Map<String, double>.fromEntries(
+      itemQuantities.entries.where(
+        (entry) => entry.key.trim().isNotEmpty && entry.value > 0,
+      ),
+    );
+    if (normalizedItems.isEmpty) {
+      throw ArgumentError('At least one transfer item is required.');
+    }
+    if (!estimatedExpense.isFinite || estimatedExpense < 0) {
+      throw ArgumentError.value(
+        estimatedExpense,
+        'estimatedExpense',
+        'Estimated expense must be zero or greater.',
+      );
+    }
+
+    final centerId = await activeCenterId;
+    final userId = await currentUserId;
+    final profile = await getProfile();
+    if (centerId == null || userId == null) {
+      throw StateError('Active center and signed-in user are required.');
+    }
+
+    final transferId = UuidGenerator.v4();
+    final now = DateTime.now().toUtc().toIso8601String();
+    final normalizedNote = note?.trim();
+    final totalQty = normalizedItems.values.fold<double>(0, (a, b) => a + b);
+    final body = <String, Object?>{
+      'centerId': centerId,
+      'items': [
+        for (final item in normalizedItems.entries)
+          {'itemId': item.key, 'quantity': item.value},
+      ],
+      'estimatedExpense': estimatedExpense,
+      'note': normalizedNote?.isEmpty == true ? null : normalizedNote,
+    };
+
+    await _database.runInTransaction((txn) async {
+      await txn.insert(DatabaseTables.transfers, {
+        'id': transferId,
+        'center_id': centerId,
+        'type': 'STOCK_TRANSFER',
+        'status': 'PENDING',
+        'fixed_qty': totalQty,
+        'estimated_expense': estimatedExpense,
+        'note': normalizedNote?.isEmpty == true ? null : normalizedNote,
+        'requested_by': userId,
+        'requested_by_name': profile.userName ?? '',
+        'requested_at': now,
+        'photo_urls': '[]',
+        'updated_at': now,
+        'sync_state': 'pending',
+      });
+      for (final item in normalizedItems.entries) {
+        await txn.insert(DatabaseTables.transferItems, {
+          'id': UuidGenerator.v4(),
+          'transfer_id': transferId,
+          'item_id': item.key,
+          'qty': item.value,
+          'dispatched_qty': null,
+        });
+      }
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'PUT',
+        path: '/transfers/$transferId',
+        entity: DatabaseTables.transfers,
+        entityId: transferId,
+        kind: 'create',
+        body: body,
+        refs: [centerId, ...normalizedItems.keys],
+        createdAt: now,
+      );
+    });
+
+    if (kDebugMode) {
+      debugPrint(
+        '✅ [EERL_TRANSFER][SQLITE][COMMIT] STORED '
+        'transfer_id=$transferId center=$centerId status=PENDING '
+        'items=${normalizedItems.length} total_qty=$totalQty '
+        'estimated_expense=$estimatedExpense outbox_path=/transfers/$transferId',
+      );
+    }
+    return transferId;
+  }
+
+  Future<TransferModel?> getTransfer(String transferId) async {
+    final rows = await _database.rawQuery(
+      '''
+      SELECT t.*, c.name AS center_name, COUNT(ti.id) AS lines,
+             COALESCE(SUM(COALESCE(ti.dispatched_qty, ti.qty)), 0) AS total_qty
+      FROM ${DatabaseTables.transfers} t
+      LEFT JOIN ${DatabaseTables.centers} c ON c.id = t.center_id
+      LEFT JOIN ${DatabaseTables.transferItems} ti ON ti.transfer_id = t.id
+      WHERE t.id = ?
+      GROUP BY t.id
+      LIMIT 1
+      ''',
+      [transferId],
+    );
+    return rows.isEmpty ? null : TransferModel.fromMap(rows.single);
   }
 
   Future<List<TransferItemModel>> getTransferItems(String transferId) async {
@@ -1432,7 +1668,7 @@ class EerlLocalDataSource {
       '''
       SELECT ti.*, i.name, i.unit_code
       FROM ${DatabaseTables.transferItems} ti
-      JOIN ${DatabaseTables.items} i ON i.id = ti.item_id
+      LEFT JOIN ${DatabaseTables.items} i ON i.id = ti.item_id
       WHERE ti.transfer_id = ?
       ORDER BY i.name COLLATE NOCASE
     ''',
@@ -1608,6 +1844,36 @@ class EerlLocalDataSource {
       WHERE ${conditions.join(' AND ')}
       ORDER BY s.stage, i.name COLLATE NOCASE
     ''', args);
+    return rows.map(StockModel.fromMap).toList(growable: false);
+  }
+
+  /// RM stock currently available for a transfer. The server stock snapshot is
+  /// combined with submitted collections that are still pending in outbox.
+  Future<List<StockModel>> getTransferStockInHand({String? centerId}) async {
+    final resolvedCenter = centerId ?? await activeCenterId;
+    if (resolvedCenter == null) return const [];
+    final rows = await _database.rawQuery(
+      '''
+      SELECT MIN(s.id) AS id, s.center_id, s.item_id, s.stage,
+             i.name, i.unit_code,
+             SUM(s.qty) + COALESCE((
+               SELECT SUM(ci.verified_qty)
+               FROM ${DatabaseTables.collectionItems} ci
+               JOIN ${DatabaseTables.collections} col
+                 ON col.id = ci.collection_id
+               WHERE col.center_id = s.center_id
+                 AND ci.item_id = s.item_id
+                 AND col.sync_state = 'pending'
+                 AND col.status = 'SUBMITTED'
+             ), 0) AS qty
+      FROM ${DatabaseTables.stock} s
+      JOIN ${DatabaseTables.items} i ON i.id = s.item_id
+      WHERE s.center_id = ? AND s.stage = 'RM'
+      GROUP BY s.center_id, s.item_id, s.stage, i.name, i.unit_code
+      ORDER BY qty DESC
+      ''',
+      [resolvedCenter],
+    );
     return rows.map(StockModel.fromMap).toList(growable: false);
   }
 

@@ -63,10 +63,7 @@ class TransferRequestCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _DetailRow(
-            icon: HomeAssets.location,
-            label: context.l10n.transferDestination,
-          ),
+          _DetailRow(icon: HomeAssets.location, label: item.destination),
           const SizedBox(height: 10),
           _DetailRow(
             icon: 'assets/icons/home/collection_weight.svg',

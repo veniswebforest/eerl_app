@@ -787,7 +787,7 @@ abstract class AppLocalizations {
   /// No description provided for @transferAvailableStock.
   ///
   /// In en, this message translates to:
-  /// **'Available Stock {weight}'**
+  /// **'Stock in Hand {weight}'**
   String transferAvailableStock(String weight);
 
   /// No description provided for @transferCardboard.
@@ -813,6 +813,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter estimated expense'**
   String get transferEstimatedExpenseHint;
+
+  /// No description provided for @transferNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get transferNoteLabel;
+
+  /// No description provided for @transferNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add note (optional)'**
+  String get transferNoteHint;
 
   /// No description provided for @transferTotalKg.
   ///
@@ -2950,6 +2962,12 @@ abstract class AppLocalizations {
   /// **'{count} item(s) pending sync'**
   String syncPendingItems(int count);
 
+  /// No description provided for @syncInternetRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Pending data was not changed.'**
+  String get syncInternetRequired;
+
   /// No description provided for @syncAlreadySyncedTitle.
   ///
   /// In en, this message translates to:
@@ -3609,6 +3627,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ensure your Bluetooth thermal printer is switched on and connected.'**
   String get collectionPrinterHint;
+
+  /// No description provided for @collectionSlipActionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare the slip. Please try again.'**
+  String get collectionSlipActionError;
 
   /// No description provided for @collectionPetReceiptDetail.
   ///
@@ -7215,6 +7239,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A location fix is temporarily unavailable. The last saved location will be used when available.'**
   String get locationUnavailable;
+
+  /// No description provided for @collectionLocationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is required to submit a collection. Turn on location and allow access, then try again.'**
+  String get collectionLocationRequired;
 
   /// No description provided for @locationNotNow.
   ///

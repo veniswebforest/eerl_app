@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/location/device_location_service.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -983,6 +984,20 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       );
       return;
     }
+    DeviceCoordinates? submissionCoordinates;
+    if (submit) {
+      setState(() => _saving = true);
+      submissionCoordinates = await DeviceLocationService.instance
+          .bestAvailableCoordinates(requestPermission: true);
+      if (!mounted) return;
+      if (submissionCoordinates == null) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.collectionLocationRequired)),
+        );
+        return;
+      }
+    }
     final id = _draftId ?? UuidGenerator.v4();
     _draftId = id;
     VehicleModel? vehicle;
@@ -1032,7 +1047,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         (_photos[_type == CollectionType.ramp ? 99 : -1] ?? const <XFile>[])
             .map((photo) => photo.path)
             .toList(growable: false);
-    setState(() => _saving = true);
+    if (!submit) setState(() => _saving = true);
     try {
       await EerlLocalRepository.instance.saveCollection(
         collection: CollectionModel(
@@ -1059,6 +1074,8 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
             (total, item) => total + (item.amount ?? 0),
           ),
           handoverPhotoUrls: handoverPhotos,
+          gpsLat: submissionCoordinates?.latitude,
+          gpsLng: submissionCoordinates?.longitude,
           updatedAt: now,
           syncState: 'pending',
         ),

@@ -14,6 +14,7 @@ class CollectionMaterialCard extends StatelessWidget {
     required this.verifiedWeightLabel,
     required this.rateLabel,
     required this.totalLabel,
+    this.thumbnailPath,
   });
 
   final CollectionItemModel item;
@@ -21,6 +22,7 @@ class CollectionMaterialCard extends StatelessWidget {
   final String verifiedWeightLabel;
   final String rateLabel;
   final String totalLabel;
+  final String? thumbnailPath;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,12 @@ class CollectionMaterialCard extends StatelessWidget {
                 color: AppColors.cool200,
                 borderRadius: BorderRadius.circular(5),
               ),
-              child: const Icon(Icons.recycling, color: AppColors.primary500),
+              child: thumbnailPath == null
+                  ? const Icon(Icons.recycling, color: AppColors.primary500)
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Image.asset(thumbnailPath!, fit: BoxFit.cover),
+                    ),
             ),
             const SizedBox(width: 10),
             Expanded(

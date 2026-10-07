@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/network/internet_connectivity_service.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
@@ -51,10 +52,21 @@ class _SyncDataDialogState extends State<SyncDataDialog> {
   late SyncDataStatus _status = widget.initialStatus;
   late int _pendingCount = widget.pendingCount;
   bool _syncing = false;
+  bool _internetUnavailable = false;
 
   Future<void> _syncAll() async {
     if (_syncing) return;
-    setState(() => _syncing = true);
+    final hasInternet = await InternetConnectivityService.instance
+        .hasInternetAccess();
+    if (!mounted) return;
+    if (!hasInternet) {
+      setState(() => _internetUnavailable = true);
+      return;
+    }
+    setState(() {
+      _syncing = true;
+      _internetUnavailable = false;
+    });
     try {
       await OutgoingSyncService.instance.retryAllAndDrain();
       await BootstrapSyncService.instance.triggerBootstrap(
@@ -141,6 +153,17 @@ class _SyncDataDialogState extends State<SyncDataDialog> {
                               ),
                             ],
                           ),
+                          if (_internetUnavailable) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              context.l10n.syncInternetRequired,
+                              key: const Key('sync-dialog-offline-message'),
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.mediumSH9_12.copyWith(
+                                color: AppColors.red600,
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 16),
                           _SyncButton(
                             label: context.l10n.syncNow,

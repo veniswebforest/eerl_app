@@ -1,9 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/create_transfer_request_view.dart';
 import '../widgets/transfer_material_card.dart';
@@ -13,9 +19,11 @@ class CreateTransferRequestScreen extends StatefulWidget {
   const CreateTransferRequestScreen({
     super.key,
     this.initialView = CreateTransferRequestView.items,
+    this.stockLoader,
   });
 
   final CreateTransferRequestView initialView;
+  final Future<List<StockModel>> Function()? stockLoader;
 
   @override
   State<CreateTransferRequestScreen> createState() =>
@@ -24,32 +32,121 @@ class CreateTransferRequestScreen extends StatefulWidget {
 
 class _CreateTransferRequestScreenState
     extends State<CreateTransferRequestScreen> {
-  late final TextEditingController _quantityController;
-  int _selectedMaterial = 0;
+  late final LocalQueryController<List<StockModel>> _controller;
+  final Map<String, TextEditingController> _quantityControllers = {};
+  final TextEditingController _estimatedExpenseController =
+      TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
+  final Set<String> _selectedItemIds = {};
+  String _query = '';
+  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    _quantityController = TextEditingController(
-      text: widget.initialView == CreateTransferRequestView.error
-          ? '27000.00'
-          : '',
-    );
+    _controller = LocalQueryController(
+      widget.stockLoader ?? EerlLocalRepository.instance.getTransferStockInHand,
+    )..load();
+    _estimatedExpenseController.addListener(_quantityChanged);
   }
 
   @override
   void dispose() {
-    _quantityController.dispose();
+    _controller.dispose();
+    _estimatedExpenseController.dispose();
+    _noteController.dispose();
+    for (final controller in _quantityControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
+  TextEditingController _quantityController(String itemId) =>
+      _quantityControllers.putIfAbsent(itemId, () {
+        final controller = TextEditingController();
+        controller.addListener(_quantityChanged);
+        return controller;
+      });
+
+  void _quantityChanged() {
+    if (mounted) setState(() {});
+  }
+
+  double get _totalKg => _selectedItemIds.fold<double>(0, (total, itemId) {
+    final value = double.tryParse(_quantityControllers[itemId]?.text ?? '');
+    return total + (value ?? 0);
+  });
+
+  bool get _hasValidQuantities {
+    if (_selectedItemIds.isEmpty) return false;
+    final stockByItem = {
+      for (final stock in _controller.data ?? const <StockModel>[])
+        stock.itemId: stock.qty,
+    };
+    return _selectedItemIds.every((itemId) {
+      final quantity = double.tryParse(
+        _quantityControllers[itemId]?.text ?? '',
+      );
+      final available = stockByItem[itemId];
+      return quantity != null &&
+          quantity > 0 &&
+          available != null &&
+          quantity <= available;
+    });
+  }
+
+  double? get _estimatedExpense =>
+      double.tryParse(_estimatedExpenseController.text.trim());
+
+  bool get _hasValidExpense =>
+      _estimatedExpense != null &&
+      _estimatedExpense!.isFinite &&
+      _estimatedExpense! >= 0;
+
+  Map<String, double> get _selectedQuantities => {
+    for (final itemId in _selectedItemIds)
+      itemId: double.parse(_quantityControllers[itemId]!.text),
+  };
+
+  void _toggleItem(String itemId) {
+    setState(() {
+      if (!_selectedItemIds.add(itemId)) {
+        _selectedItemIds.remove(itemId);
+      }
+    });
+  }
+
   Future<void> _continue() async {
-    final submitted = await showDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: .58),
-      builder: (_) => const TransferRequestSuccessDialog(),
-    );
-    if (submitted == true && mounted) Navigator.of(context).pop();
+    if (!_hasValidQuantities || !_hasValidExpense || _saving) return;
+    setState(() => _saving = true);
+    try {
+      await EerlLocalRepository.instance.saveTransferRequest(
+        itemQuantities: _selectedQuantities,
+        estimatedExpense: _estimatedExpense!,
+        note: _noteController.text,
+      );
+      unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+      if (!mounted) return;
+      final submitted = await showDialog<bool>(
+        context: context,
+        barrierColor: Colors.black.withValues(alpha: .58),
+        builder: (_) => const TransferRequestSuccessDialog(),
+      );
+      if (submitted == true && mounted) Navigator.of(context).pop();
+    } catch (error) {
+      if (!mounted) return;
+      debugPrint('Transfer request save failed: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          behavior: SnackBarBehavior.fixed,
+          content: Text(
+            'Transfer request could not be saved. Please try again.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
@@ -66,8 +163,34 @@ class _CreateTransferRequestScreenState
           constraints: const BoxConstraints(maxWidth: 600),
           child: Column(
             children: [
-              Expanded(child: _content(context)),
-              _BottomAction(onPressed: _continue),
+              Expanded(
+                child: ListenableBuilder(
+                  listenable: _controller,
+                  builder: (context, _) {
+                    if (_controller.isLoading && !_controller.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (_controller.error != null) {
+                      return Center(
+                        child: TextButton(
+                          onPressed: _controller.load,
+                          child: const Text('Retry'),
+                        ),
+                      );
+                    }
+                    return _content(
+                      context,
+                      _controller.data ?? const <StockModel>[],
+                    );
+                  },
+                ),
+              ),
+              _BottomAction(
+                totalKg: _totalKg,
+                onPressed: _hasValidQuantities && _hasValidExpense && !_saving
+                    ? _continue
+                    : null,
+              ),
             ],
           ),
         ),
@@ -75,77 +198,161 @@ class _CreateTransferRequestScreenState
     ),
   );
 
-  Widget _content(BuildContext context) {
-    final materials = [
-      (
-        context.l10n.configurePetBottles,
-        context.l10n.transferAvailableStock('1200.60 KG'),
-      ),
-      (
-        context.l10n.transferPlasticWaste,
-        context.l10n.transferCapacity('950.60 KG'),
-      ),
-      (
-        context.l10n.configureMilkPouch,
-        context.l10n.transferCapacity('800.60 KG'),
-      ),
-      (
-        context.l10n.transferCardboard,
-        context.l10n.transferCapacity('1000.60 KG'),
-      ),
-      (
-        context.l10n.transferPaperWaste,
-        context.l10n.transferCapacity('1300.60 KG'),
-      ),
-    ];
+  Widget _content(BuildContext context, List<StockModel> stocks) {
+    final normalizedQuery = _query.trim().toLowerCase();
+    final visibleStocks = stocks
+        .where(
+          (stock) =>
+              normalizedQuery.isEmpty ||
+              (stock.name ?? stock.itemId).toLowerCase().contains(
+                normalizedQuery,
+              ),
+        )
+        .toList(growable: false);
 
-    return SingleChildScrollView(
-      key: const Key('create-transfer-scroll'),
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.transferSelectItemsTitle,
-            style: AppTextStyles.semiboldH7_18.copyWith(
-              color: AppColors.neutral950,
+    return RefreshIndicator(
+      onRefresh: _controller.load,
+      child: SingleChildScrollView(
+        key: const Key('create-transfer-scroll'),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.transferSelectItemsTitle,
+              style: AppTextStyles.semiboldH7_18.copyWith(
+                color: AppColors.neutral950,
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            context.l10n.transferSelectItemsSubtitle,
-            style: AppTextStyles.mediumSH8_14.copyWith(
-              color: AppColors.neutral600,
+            const SizedBox(height: 6),
+            Text(
+              context.l10n.transferSelectItemsSubtitle,
+              style: AppTextStyles.mediumSH8_14.copyWith(
+                color: AppColors.neutral600,
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          _SearchField(hint: context.l10n.transferSearchHint),
-          const SizedBox(height: 16),
-          for (var index = 0; index < materials.length; index++) ...[
-            TransferMaterialCard(
-              key: Key('transfer-material-$index'),
-              name: materials[index].$1,
-              capacity: materials[index].$2,
-              selected: _selectedMaterial == index,
-              onTap: () => setState(() => _selectedMaterial = index),
-              child: _QuantityField(controller: _quantityController),
+            const SizedBox(height: 24),
+            _SearchField(
+              hint: context.l10n.transferSearchHint,
+              onChanged: (value) => setState(() => _query = value),
             ),
-            if (index != materials.length - 1) const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            if (visibleStocks.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 60),
+                child: Center(child: Text(context.l10n.transferEmptyMessage)),
+              )
+            else
+              for (var index = 0; index < visibleStocks.length; index++) ...[
+                Builder(
+                  builder: (context) {
+                    final stock = visibleStocks[index];
+                    final selected = _selectedItemIds.contains(stock.itemId);
+                    final enteredQuantity = double.tryParse(
+                      _quantityControllers[stock.itemId]?.text ?? '',
+                    );
+                    return TransferMaterialCard(
+                      key: Key('transfer-material-${stock.itemId}'),
+                      name: stock.name ?? stock.itemId,
+                      capacity: context.l10n.transferAvailableStock(
+                        '${stock.qty.toStringAsFixed(2)} ${stock.unitCode ?? 'KG'}',
+                      ),
+                      selected: selected,
+                      onTap: () => _toggleItem(stock.itemId),
+                      child: _QuantityField(
+                        itemId: stock.itemId,
+                        controller: _quantityController(stock.itemId),
+                        errorText:
+                            enteredQuantity != null &&
+                                enteredQuantity > stock.qty
+                            ? context.l10n.transferStockValidation
+                            : null,
+                      ),
+                    );
+                  },
+                ),
+                if (index != visibleStocks.length - 1)
+                  const SizedBox(height: 12),
+              ],
+            const SizedBox(height: 20),
+            _TransferRequestFields(
+              estimatedExpenseController: _estimatedExpenseController,
+              noteController: _noteController,
+            ),
           ],
-        ],
+        ),
       ),
     );
   }
 }
 
+class _TransferRequestFields extends StatelessWidget {
+  const _TransferRequestFields({
+    required this.estimatedExpenseController,
+    required this.noteController,
+  });
+
+  final TextEditingController estimatedExpenseController;
+  final TextEditingController noteController;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        context.l10n.transferEstimatedExpenseLabel,
+        style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
+      ),
+      const SizedBox(height: 8),
+      TextField(
+        key: const Key('transfer-estimated-expense'),
+        controller: estimatedExpenseController,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        decoration: _inputDecoration(context.l10n.transferEstimatedExpenseHint),
+      ),
+      const SizedBox(height: 16),
+      Text(
+        context.l10n.transferNoteLabel,
+        style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
+      ),
+      const SizedBox(height: 8),
+      TextField(
+        key: const Key('transfer-note'),
+        controller: noteController,
+        maxLines: 3,
+        decoration: _inputDecoration(context.l10n.transferNoteHint),
+      ),
+    ],
+  );
+
+  InputDecoration _inputDecoration(String hint) => InputDecoration(
+    hintText: hint,
+    hintStyle: AppTextStyles.regularB7_14.copyWith(color: AppColors.neutral400),
+    filled: true,
+    fillColor: AppColors.neutral50,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    enabledBorder: OutlineInputBorder(
+      borderSide: const BorderSide(color: AppColors.cool400),
+      borderRadius: BorderRadius.circular(10),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderSide: const BorderSide(color: AppColors.primary500),
+      borderRadius: BorderRadius.circular(10),
+    ),
+  );
+}
+
 class _SearchField extends StatelessWidget {
-  const _SearchField({required this.hint});
+  const _SearchField({required this.hint, required this.onChanged});
   final String hint;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) => SizedBox(
     height: 55,
     child: TextField(
+      onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: AppTextStyles.regularB7_14.copyWith(
@@ -172,27 +379,34 @@ class _SearchField extends StatelessWidget {
 }
 
 class _QuantityField extends StatelessWidget {
-  const _QuantityField({required this.controller});
+  const _QuantityField({
+    required this.itemId,
+    required this.controller,
+    this.errorText,
+  });
+  final String itemId;
   final TextEditingController controller;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        context.l10n.transferEstimatedExpenseLabel,
+        context.l10n.transferTotalKgLabel,
         style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
       ),
       const SizedBox(height: 8),
       SizedBox(
-        height: 55,
+        height: errorText == null ? 55 : 78,
         child: TextField(
-          key: const Key('transfer-total-kg'),
+          key: Key('transfer-item-kg-$itemId'),
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           style: AppTextStyles.regularB7_14,
           decoration: InputDecoration(
-            hintText: context.l10n.transferEstimatedExpenseHint,
+            errorText: errorText,
+            hintText: context.l10n.transferTotalKgHint,
             hintStyle: AppTextStyles.regularB7_14.copyWith(
               color: AppColors.neutral400,
             ),
@@ -215,8 +429,9 @@ class _QuantityField extends StatelessWidget {
 }
 
 class _BottomAction extends StatelessWidget {
-  const _BottomAction({required this.onPressed});
-  final VoidCallback onPressed;
+  const _BottomAction({required this.totalKg, required this.onPressed});
+  final double totalKg;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -250,7 +465,7 @@ class _BottomAction extends StatelessWidget {
               Container(width: 1, height: 24, color: AppColors.neutral950),
               Expanded(
                 child: Text(
-                  context.l10n.transferTotalKgValue,
+                  '${totalKg.toStringAsFixed(2)} KG',
                   textAlign: TextAlign.end,
                   style: AppTextStyles.boldH7_16.copyWith(
                     color: AppColors.primary500,

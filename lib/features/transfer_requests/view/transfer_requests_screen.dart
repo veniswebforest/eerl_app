@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/transfer_request_item.dart';
-import '../model/transfer_request_detail_state.dart';
 import '../widgets/transfer_request_card.dart';
 import '../widgets/transfer_request_filter_bar.dart';
 import 'package:go_router/go_router.dart';
@@ -17,10 +21,12 @@ class TransferRequestsScreen extends StatefulWidget {
     super.key,
     this.viewMode = TransferRequestsViewMode.populated,
     this.initialFilter = TransferRequestFilter.all,
+    this.transferLoader,
   });
 
   final TransferRequestsViewMode viewMode;
   final TransferRequestFilter initialFilter;
+  final Future<List<TransferModel>> Function()? transferLoader;
 
   @override
   State<TransferRequestsScreen> createState() => _TransferRequestsScreenState();
@@ -30,6 +36,17 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
   late TransferRequestFilter _filter = widget.initialFilter;
   final _searchController = TextEditingController();
   String _query = '';
+  late final LocalQueryController<List<TransferModel>> _controller;
+  int _bootstrapRevision = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = LocalQueryController(
+      widget.transferLoader ??
+          () => EerlLocalRepository.instance.getTransfers(allCenters: true),
+    )..load();
+  }
 
   @override
   void didUpdateWidget(covariant TransferRequestsScreen oldWidget) {
@@ -39,58 +56,31 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
     }
   }
 
-  static const _items = [
-    TransferRequestItem(
-      id: '#TRF-2026-089',
-      totalWeight: '240.00 KG',
-      date: '22 October',
-      time: '11:15 AM',
-      status: TransferRequestStatus.pending,
-    ),
-    TransferRequestItem(
-      id: '#TRF-2026-089',
-      totalWeight: '240.00 KG',
-      date: '22 October',
-      time: '11:15 AM',
-      status: TransferRequestStatus.rejected,
-    ),
-    TransferRequestItem(
-      id: '#TRF-2026-089',
-      totalWeight: '240.20 KG',
-      date: '21 October',
-      time: '09:15 AM',
-      status: TransferRequestStatus.approved,
-    ),
-    TransferRequestItem(
-      id: '#TRF-2026-089',
-      totalWeight: '240.20 KG',
-      date: '21 October',
-      time: '09:15 AM',
-      status: TransferRequestStatus.dispatch,
-    ),
-    TransferRequestItem(
-      id: '#TRF-2026-089',
-      totalWeight: '240.00 KG',
-      date: '20 October',
-      time: '12:15 PM',
-      status: TransferRequestStatus.rejected,
-    ),
-  ];
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final revision = BootstrapSyncService.instance.revision;
+    if (_bootstrapRevision >= 0 && revision != _bootstrapRevision) {
+      _controller.load();
+    }
+    _bootstrapRevision = revision;
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   List<TransferRequestItem> get _visibleItems {
     if (widget.viewMode == TransferRequestsViewMode.empty) return const [];
     final normalizedQuery = _query.trim().toLowerCase();
-    return _items
+    return (_controller.data ?? const <TransferModel>[])
+        .map(_toRequestItem)
         .where((item) {
           final matchesFilter = switch (_filter) {
-            TransferRequestFilter.all =>
-              item.status != TransferRequestStatus.rejected,
+            TransferRequestFilter.all => true,
             TransferRequestFilter.pending =>
               item.status == TransferRequestStatus.pending,
             TransferRequestFilter.dispatch =>
@@ -101,14 +91,47 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
           };
           return matchesFilter &&
               (normalizedQuery.isEmpty ||
-                  item.id.toLowerCase().contains(normalizedQuery));
+                  item.id.toLowerCase().contains(normalizedQuery) ||
+                  item.destination.toLowerCase().contains(normalizedQuery));
         })
         .toList(growable: false);
   }
 
+  TransferRequestItem _toRequestItem(TransferModel transfer) {
+    final requestedAt = DateTime.tryParse(transfer.requestedAt)?.toLocal();
+    final quantity = transfer.fixedQty ?? transfer.totalQty;
+    return TransferRequestItem(
+      transferId: transfer.id,
+      id: transfer.number ?? transfer.id,
+      destination: transfer.destinationName ?? transfer.destinationId ?? '-',
+      totalWeight: '${quantity.toStringAsFixed(2)} KG',
+      date: requestedAt == null
+          ? transfer.requestedAt
+          : DateFormat('dd MMM yyyy').format(requestedAt),
+      time: requestedAt == null
+          ? ''
+          : DateFormat('hh:mm a').format(requestedAt),
+      status: _requestStatus(transfer.status),
+    );
+  }
+
+  TransferRequestStatus _requestStatus(String value) {
+    final status = value.toUpperCase();
+    if (status.contains('REJECT')) return TransferRequestStatus.rejected;
+    if (status.contains('DISPATCH') || status.contains('LOADING')) {
+      return TransferRequestStatus.dispatch;
+    }
+    if (status.contains('APPROV') ||
+        status.contains('COMPLET') ||
+        status.contains('CLOSED') ||
+        status.contains('HAND')) {
+      return TransferRequestStatus.approved;
+    }
+    return TransferRequestStatus.pending;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final items = _visibleItems;
     final labels = {
       TransferRequestFilter.all: context.l10n.transferFilterAll,
       TransferRequestFilter.pending: context.l10n.transferFilterPending,
@@ -123,7 +146,10 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
         backIconAsset: 'assets/icons/records/back.svg',
       ),
       floatingActionButton: _TransferAddButton(
-        onTap: () => context.push<void>(AppRoutes.createTransferRequest),
+        onTap: () async {
+          await context.push<void>(AppRoutes.createTransferRequest);
+          if (mounted) await _controller.load();
+        },
       ),
       body: SafeArea(
         top: false,
@@ -151,24 +177,7 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Expanded(
-                  child: items.isEmpty
-                      ? _EmptyTransferRequests(
-                          label: context.l10n.transferEmptyMessage,
-                        )
-                      : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
-                          itemCount: items.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: 14),
-                          itemBuilder: (_, index) => TransferRequestCard(
-                            key: ValueKey('${items[index].status.name}-$index'),
-                            item: items[index],
-                            highlighted: index == 0,
-                            onTap: () => _openRequest(items[index]),
-                          ),
-                        ),
-                ),
+                Expanded(child: _buildTransferList()),
               ],
             ),
           ),
@@ -177,18 +186,61 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
     );
   }
 
-  void _openRequest(TransferRequestItem request) {
-    context.push<void>(
+  Widget _buildTransferList() => ListenableBuilder(
+    listenable: _controller,
+    builder: (context, _) {
+      if (_controller.isLoading && !_controller.hasData) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (_controller.error != null) {
+        return Center(
+          child: TextButton(
+            onPressed: _controller.load,
+            child: const Text('Retry'),
+          ),
+        );
+      }
+      final items = _visibleItems;
+      if (items.isEmpty) {
+        return RefreshIndicator(
+          onRefresh: _controller.load,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              SizedBox(
+                height: 420,
+                child: _EmptyTransferRequests(
+                  label: context.l10n.transferEmptyMessage,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+      return RefreshIndicator(
+        onRefresh: _controller.load,
+        child: ListView.separated(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
+          itemCount: items.length,
+          separatorBuilder: (_, _) => const SizedBox(height: 14),
+          itemBuilder: (_, index) => TransferRequestCard(
+            key: ValueKey(items[index].transferId),
+            item: items[index],
+            highlighted: index == 0,
+            onTap: () => _openRequest(items[index]),
+          ),
+        ),
+      );
+    },
+  );
+
+  Future<void> _openRequest(TransferRequestItem request) async {
+    await context.push<void>(
       AppRoutes.transferRequestDetail,
-      extra: switch (request.status) {
-        TransferRequestStatus.pending =>
-          TransferRequestDetailState.pendingVerification,
-        TransferRequestStatus.approved => TransferRequestDetailState.completed,
-        TransferRequestStatus.dispatch =>
-          TransferRequestDetailState.waitingForLoading,
-        TransferRequestStatus.rejected => TransferRequestDetailState.rejected,
-      },
+      extra: request.transferId,
     );
+    if (mounted) await _controller.load();
   }
 }
 

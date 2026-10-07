@@ -6,6 +6,7 @@ import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/core/network/app_http_client.dart';
+import 'package:eerl_app/core/network/internet_connectivity_service.dart';
 import 'package:eerl_app/features/auth/data/auth_session_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -17,9 +18,13 @@ class OutgoingSyncService {
     AppDatabase? database,
     http.Client? client,
     AuthSessionStorage? sessionStorage,
+    Future<bool> Function()? internetAccessChecker,
   }) : _database = database ?? AppDatabase.instance,
        _client = client ?? AppHttpClient.instance.client,
-       _sessionStorage = sessionStorage ?? AuthSessionStorage();
+       _sessionStorage = sessionStorage ?? AuthSessionStorage(),
+       _internetAccessChecker =
+           internetAccessChecker ??
+           InternetConnectivityService.instance.hasInternetAccess;
 
   static final OutgoingSyncService instance = OutgoingSyncService();
   static const _timeout = Duration(seconds: 30);
@@ -27,6 +32,9 @@ class OutgoingSyncService {
   final AppDatabase _database;
   final http.Client _client;
   final AuthSessionStorage _sessionStorage;
+  // Nullable so a singleton retained across Flutter hot reload can safely
+  // fall back when this field did not exist on the original instance.
+  final Future<bool> Function()? _internetAccessChecker;
   Future<void>? _activeDrain;
 
   Future<void> drain() {
@@ -45,6 +53,10 @@ class OutgoingSyncService {
   /// delays and re-queues permanent failures because the user explicitly asked
   /// the app to try all pending data again.
   Future<void> retryAllAndDrain() async {
+    if (!await _hasInternetAccess()) {
+      _log('MANUAL sync skipped: internet is unavailable');
+      return;
+    }
     final active = _activeDrain;
     if (active != null) await active;
     final resetCount = await _database.update(DatabaseTables.outbox, {
@@ -58,6 +70,10 @@ class OutgoingSyncService {
   }
 
   Future<void> _drain() async {
+    if (!await _hasInternetAccess()) {
+      _log('Outgoing sync skipped: internet is unavailable');
+      return;
+    }
     final token = await _sessionStorage.getAccessToken();
     if (token == null || token.trim().isEmpty) {
       _log('Skipped outgoing sync: access token not found');
@@ -93,6 +109,17 @@ class OutgoingSyncService {
       } else {
         await _send(next, token);
       }
+    }
+  }
+
+  Future<bool> _hasInternetAccess() async {
+    try {
+      final checker = _internetAccessChecker;
+      return await (checker ??
+          InternetConnectivityService.instance.hasInternetAccess)();
+    } on Object catch (error) {
+      _log('Internet check failed safely: $error');
+      return false;
     }
   }
 
@@ -132,7 +159,11 @@ class OutgoingSyncService {
     );
 
     try {
-      final body = await _resolvedBody(item['body'] as String?);
+      var body = await _resolvedBody(item['body'] as String?);
+      if (item['entity'] == DatabaseTables.collections &&
+          item['kind'] == 'submit') {
+        body = await _ensureCollectionSubmitGps(item, body);
+      }
       final request =
           http.Request(
               item['method']! as String,
@@ -205,6 +236,64 @@ class OutgoingSyncService {
     };
     return _replacePhotoIds(decoded, urls);
   }
+
+  Future<Object?> _ensureCollectionSubmitGps(
+    Map<String, Object?> item,
+    Object? body,
+  ) async {
+    if (body is! Map) {
+      throw StateError('Collection submit body is unavailable.');
+    }
+    final resolved = Map<String, Object?>.from(body);
+    final outboxGps = resolved['gps'];
+    final outboxLatitude = outboxGps is Map && outboxGps['lat'] is num
+        ? (outboxGps['lat'] as num).toDouble()
+        : null;
+    final outboxLongitude = outboxGps is Map && outboxGps['lng'] is num
+        ? (outboxGps['lng'] as num).toDouble()
+        : null;
+    if (_isValidGps(outboxLatitude, outboxLongitude)) {
+      return resolved;
+    }
+
+    final collectionId = item['entity_id'] as String?;
+    if (collectionId == null || collectionId.isEmpty) {
+      throw StateError('Collection submit is missing its collection id.');
+    }
+    final rows = await _database.query(
+      DatabaseTables.collections,
+      columns: const ['gps_lat', 'gps_lng'],
+      where: 'id = ?',
+      whereArgs: [collectionId],
+      limit: 1,
+    );
+    final latitude = rows.isEmpty
+        ? null
+        : (rows.single['gps_lat'] as num?)?.toDouble();
+    final longitude = rows.isEmpty
+        ? null
+        : (rows.single['gps_lng'] as num?)?.toDouble();
+    if (!_isValidGps(latitude, longitude)) {
+      throw StateError(
+        'Collection $collectionId has no valid GPS in the outbox or local table.',
+      );
+    }
+
+    // Older queued rows may not contain GPS. Backfill those from the local
+    // collection row, while preserving coordinates already saved in outbox.
+    resolved['gps'] = {'lat': latitude, 'lng': longitude};
+    return resolved;
+  }
+
+  bool _isValidGps(double? latitude, double? longitude) =>
+      latitude != null &&
+      longitude != null &&
+      latitude.isFinite &&
+      longitude.isFinite &&
+      latitude >= -90 &&
+      latitude <= 90 &&
+      longitude >= -180 &&
+      longitude <= 180;
 
   Object? _replacePhotoIds(Object? value, Map<String, String> urls) {
     if (value is String) return urls[value] ?? value;
@@ -313,6 +402,7 @@ class OutgoingSyncService {
     final mrfLabour = handover is Map ? handover['mrfLabour'] : null;
     final ragpicker = handover is Map ? handover['ragpicker'] : null;
     final reviewBy = review is Map ? review['by'] : null;
+    final gps = data['gps'];
     return <String, Object?>{
       if (data['status'] != null) 'status': data['status'],
       if (data['slipNumber'] != null) 'slip_number': data['slipNumber'],
@@ -339,6 +429,10 @@ class OutgoingSyncService {
       if (reviewBy is Map && reviewBy['name'] != null)
         'verified_by_name': reviewBy['name'],
       if (review is Map && review['at'] != null) 'verified_at': review['at'],
+      if (gps is Map && gps['lat'] is num)
+        'gps_lat': (gps['lat'] as num).toDouble(),
+      if (gps is Map && gps['lng'] is num)
+        'gps_lng': (gps['lng'] as num).toDouble(),
     };
   }
 

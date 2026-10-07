@@ -303,7 +303,7 @@
   "@transferCapacity": {
     "placeholders": { "weight": { "type": "String" } }
   },
-  "transferAvailableStock": "Available Stock {weight}",
+  "transferAvailableStock": "Stock in Hand {weight}",
   "@transferAvailableStock": {
     "placeholders": {"weight": {"type": "String"}}
   },
@@ -311,6 +311,8 @@
   "transferPaperWaste": "Paper Waste",
   "transferEstimatedExpenseLabel": "Estimated Expense *",
   "transferEstimatedExpenseHint": "Enter estimated expense",
+  "transferNoteLabel": "Note",
+  "transferNoteHint": "Add note (optional)",
   "transferTotalKg": "Total KG",
   "transferTotalKgValue": "0.00 KG",
   "transferContinuePlain": "Continue",
@@ -692,6 +694,7 @@
   "syncPendingCollections": "3 collection Pending",
   "syncPendingItems": "{count} item(s) pending sync",
   "@syncPendingItems": { "placeholders": { "count": { "type": "int" } } },
+  "syncInternetRequired": "No internet connection. Pending data was not changed.",
   "syncNow": "Sync Now",
   "syncAlreadySyncedTitle": "Data Already Synced",
   "syncBack": "Back",
@@ -805,6 +808,7 @@
   "collectionReceiptAgent": "Collection Agent",
   "collectionSystemGeneratedSlip": "System Generated Slip",
   "collectionPrinterHint": "Ensure your Bluetooth thermal printer is switched on and connected.",
+  "collectionSlipActionError": "Could not prepare the slip. Please try again.",
   "collectionPetReceiptDetail": "120 KG × ₹12.00/KG",
   "collectionHdpeReceiptDetail": "85.5 KG × ₹8.50/KG",
   "collectionPpReceiptDetail": "12 KG × ₹45.00/KG",
@@ -1421,6 +1425,7 @@
   "locationPermissionSettingsMessage": "Allow location access in app settings so collection records can include GPS coordinates.",
   "locationPermissionDenied": "Location permission was not granted. GPS will not be included until permission is allowed.",
   "locationUnavailable": "A location fix is temporarily unavailable. The last saved location will be used when available.",
+  "collectionLocationRequired": "Location is required to submit a collection. Turn on location and allow access, then try again.",
   "locationNotNow": "Not now",
   "locationOpenSettings": "Open settings",
   "locationSettingsUnavailable": "Location settings could not be opened."

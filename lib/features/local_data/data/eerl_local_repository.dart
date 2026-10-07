@@ -105,6 +105,10 @@ class EerlLocalRepository {
   Future<CollectionModel?> getCollection(String id) => _local.getCollection(id);
   Future<List<CollectionItemModel>> getCollectionItems(String collectionId) =>
       _local.getCollectionItems(collectionId);
+  Future<void> approveCollection(String collectionId) =>
+      _local.approveCollection(collectionId);
+  Future<void> rejectCollection(String collectionId, String reason) =>
+      _local.rejectCollection(collectionId, reason);
   Future<void> saveCollection({
     required CollectionModel collection,
     required List<CollectionItemModel> items,
@@ -127,7 +131,22 @@ class EerlLocalRepository {
   Future<List<TransferModel>> getTransfers({
     bool supervisor = false,
     String? status,
-  }) => _local.getTransfers(supervisor: supervisor, status: status);
+    bool allCenters = false,
+  }) => _local.getTransfers(
+    supervisor: supervisor,
+    status: status,
+    allCenters: allCenters,
+  );
+  Future<String> saveTransferRequest({
+    required Map<String, double> itemQuantities,
+    required double estimatedExpense,
+    String? note,
+  }) => _local.saveTransferRequest(
+    itemQuantities: itemQuantities,
+    estimatedExpense: estimatedExpense,
+    note: note,
+  );
+  Future<TransferModel?> getTransfer(String id) => _local.getTransfer(id);
   Future<List<TransferItemModel>> getTransferItems(String id) =>
       _local.getTransferItems(id);
   Future<List<TaskModel>> getTasks({
@@ -150,6 +169,8 @@ class EerlLocalRepository {
       _local.markNotificationRead(id);
   Future<List<StockModel>> getStock({String? centerId, String? stage}) =>
       _local.getStock(centerId: centerId, stage: stage);
+  Future<List<StockModel>> getTransferStockInHand({String? centerId}) =>
+      _local.getTransferStockInHand(centerId: centerId);
   Future<List<AgentStatusModel>> getAgentStatus() => _local.getAgentStatus();
   Future<SyncStatusModel> getSyncStatus() => _local.getSyncStatus();
   Future<List<FailedOutboxItemModel>> getFailedOutboxItems() =>

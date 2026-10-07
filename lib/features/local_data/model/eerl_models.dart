@@ -817,6 +817,7 @@ class TransferModel {
     this.truckExpectedAt,
     this.fixedQty,
     this.estimatedExpense,
+    this.note,
     this.vehiclePlate,
     required this.requestedBy,
     required this.requestedByName,
@@ -831,6 +832,8 @@ class TransferModel {
     this.updatedAt,
     required this.syncState,
     this.lines = 0,
+    this.centerName,
+    this.totalQty = 0,
   });
   final String id;
   final String centerId;
@@ -842,6 +845,7 @@ class TransferModel {
   final String? truckExpectedAt;
   final double? fixedQty;
   final double? estimatedExpense;
+  final String? note;
   final String? vehiclePlate;
   final String requestedBy;
   final String requestedByName;
@@ -856,6 +860,8 @@ class TransferModel {
   final String? updatedAt;
   final String syncState;
   final int lines;
+  final String? centerName;
+  final double totalQty;
   factory TransferModel.fromMap(DbMap map) => TransferModel(
     id: map['id'] as String,
     centerId: map['center_id'] as String,
@@ -867,6 +873,7 @@ class TransferModel {
     truckExpectedAt: map['truck_expected_at'] as String?,
     fixedQty: (map['fixed_qty'] as num?)?.toDouble(),
     estimatedExpense: (map['estimated_expense'] as num?)?.toDouble(),
+    note: map['note'] as String?,
     vehiclePlate: map['vehicle_plate'] as String?,
     requestedBy: map['requested_by'] as String,
     requestedByName: map['requested_by_name'] as String,
@@ -881,6 +888,8 @@ class TransferModel {
     updatedAt: map['updated_at'] as String?,
     syncState: map['sync_state'] as String,
     lines: _int(map['lines']),
+    centerName: map['center_name'] as String?,
+    totalQty: _double(map['total_qty']),
   );
   DbMap toMap() => {
     'id': id,
@@ -893,6 +902,7 @@ class TransferModel {
     'truck_expected_at': truckExpectedAt,
     'fixed_qty': fixedQty,
     'estimated_expense': estimatedExpense,
+    'note': note,
     'vehicle_plate': vehiclePlate,
     'requested_by': requestedBy,
     'requested_by_name': requestedByName,

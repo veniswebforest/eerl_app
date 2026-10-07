@@ -371,7 +371,7 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String transferAvailableStock(String weight) {
-    return 'ઉપલબ્ધ સ્ટોક $weight';
+    return 'હાથમાં રહેલો સ્ટોક $weight';
   }
 
   @override
@@ -385,6 +385,12 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get transferEstimatedExpenseHint => 'અંદાજિત ખર્ચ દાખલ કરો';
+
+  @override
+  String get transferNoteLabel => 'નોંધ';
+
+  @override
+  String get transferNoteHint => 'નોંધ ઉમેરો (વૈકલ્પિક)';
 
   @override
   String get transferTotalKg => 'કુલ KG';
@@ -1504,6 +1510,10 @@ class AppLocalizationsGu extends AppLocalizations {
   }
 
   @override
+  String get syncInternetRequired =>
+      'ઇન્ટરનેટ કનેક્શન નથી. બાકી dataમાં કોઈ ફેરફાર થયો નથી.';
+
+  @override
   String get syncAlreadySyncedTitle => 'ડેટા પહેલેથી સિંક છે';
 
   @override
@@ -1852,6 +1862,10 @@ class AppLocalizationsGu extends AppLocalizations {
   @override
   String get collectionPrinterHint =>
       'ખાતરી કરો કે તમારું Bluetooth થર્મલ પ્રિન્ટર ચાલુ અને જોડાયેલું છે.';
+
+  @override
+  String get collectionSlipActionError =>
+      'સ્લિપ તૈયાર થઈ શકી નથી. કૃપા કરીને ફરી પ્રયાસ કરો.';
 
   @override
   String get collectionPetReceiptDetail => '120 KG × ₹12.00/KG';
@@ -3730,6 +3744,10 @@ class AppLocalizationsGu extends AppLocalizations {
   @override
   String get locationUnavailable =>
       'હાલ લોકેશન મળી શક્યું નથી. ઉપલબ્ધ હોય ત્યારે છેલ્લું સાચવેલું લોકેશન વપરાશે.';
+
+  @override
+  String get collectionLocationRequired =>
+      'Collection submit કરવા માટે location જરૂરી છે. Location ચાલુ કરીને પરવાનગી આપો અને ફરી પ્રયાસ કરો.';
 
   @override
   String get locationNotNow => 'હમણાં નહીં';
