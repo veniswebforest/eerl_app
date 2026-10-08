@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import 'package:flutter/material.dart';
 
 class TaskPhotoGrid extends StatelessWidget {
@@ -60,13 +59,6 @@ class _TaskImage extends StatelessWidget {
   final String path;
 
   @override
-  Widget build(BuildContext context) {
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return Image.network(path, fit: BoxFit.cover);
-    }
-    if (path.startsWith('assets/')) {
-      return Image.asset(path, fit: BoxFit.cover);
-    }
-    return Image.file(File(path), fit: BoxFit.cover);
-  }
+  Widget build(BuildContext context) =>
+      CachedAppImage(source: path, fit: BoxFit.cover);
 }

@@ -7,6 +7,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
@@ -37,7 +38,7 @@ class _CreateTransferRequestScreenState
   final TextEditingController _estimatedExpenseController =
       TextEditingController();
   final TextEditingController _noteController = TextEditingController();
-  final Set<String> _selectedItemIds = {};
+  String? _selectedItemId;
   String _query = '';
   bool _saving = false;
 
@@ -72,27 +73,19 @@ class _CreateTransferRequestScreenState
     if (mounted) setState(() {});
   }
 
-  double get _totalKg => _selectedItemIds.fold<double>(0, (total, itemId) {
-    final value = double.tryParse(_quantityControllers[itemId]?.text ?? '');
-    return total + (value ?? 0);
-  });
-
   bool get _hasValidQuantities {
-    if (_selectedItemIds.isEmpty) return false;
+    final itemId = _selectedItemId;
+    if (itemId == null) return false;
     final stockByItem = {
       for (final stock in _controller.data ?? const <StockModel>[])
         stock.itemId: stock.qty,
     };
-    return _selectedItemIds.every((itemId) {
-      final quantity = double.tryParse(
-        _quantityControllers[itemId]?.text ?? '',
-      );
-      final available = stockByItem[itemId];
-      return quantity != null &&
-          quantity > 0 &&
-          available != null &&
-          quantity <= available;
-    });
+    final quantity = double.tryParse(_quantityControllers[itemId]?.text ?? '');
+    final available = stockByItem[itemId];
+    return quantity != null &&
+        quantity > 0 &&
+        available != null &&
+        quantity <= available;
   }
 
   double? get _estimatedExpense =>
@@ -103,16 +96,15 @@ class _CreateTransferRequestScreenState
       _estimatedExpense!.isFinite &&
       _estimatedExpense! >= 0;
 
-  Map<String, double> get _selectedQuantities => {
-    for (final itemId in _selectedItemIds)
-      itemId: double.parse(_quantityControllers[itemId]!.text),
-  };
+  Map<String, double> get _selectedQuantities {
+    final itemId = _selectedItemId;
+    if (itemId == null) return const {};
+    return {itemId: double.parse(_quantityControllers[itemId]!.text)};
+  }
 
   void _toggleItem(String itemId) {
     setState(() {
-      if (!_selectedItemIds.add(itemId)) {
-        _selectedItemIds.remove(itemId);
-      }
+      _selectedItemId = _selectedItemId == itemId ? null : itemId;
     });
   }
 
@@ -133,6 +125,17 @@ class _CreateTransferRequestScreenState
         builder: (_) => const TransferRequestSuccessDialog(),
       );
       if (submitted == true && mounted) Navigator.of(context).pop();
+    } on TransferStockUnavailableException catch (error) {
+      if (!mounted) return;
+      debugPrint('Transfer request rejected by local free-stock check: $error');
+      await _controller.load();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.fixed,
+          content: Text(context.l10n.transferStockValidation),
+        ),
+      );
     } catch (error) {
       if (!mounted) return;
       debugPrint('Transfer request save failed: $error');
@@ -186,7 +189,6 @@ class _CreateTransferRequestScreenState
                 ),
               ),
               _BottomAction(
-                totalKg: _totalKg,
                 onPressed: _hasValidQuantities && _hasValidExpense && !_saving
                     ? _continue
                     : null,
@@ -248,7 +250,7 @@ class _CreateTransferRequestScreenState
                 Builder(
                   builder: (context) {
                     final stock = visibleStocks[index];
-                    final selected = _selectedItemIds.contains(stock.itemId);
+                    final selected = _selectedItemId == stock.itemId;
                     final enteredQuantity = double.tryParse(
                       _quantityControllers[stock.itemId]?.text ?? '',
                     );
@@ -429,8 +431,7 @@ class _QuantityField extends StatelessWidget {
 }
 
 class _BottomAction extends StatelessWidget {
-  const _BottomAction({required this.totalKg, required this.onPressed});
-  final double totalKg;
+  const _BottomAction({required this.onPressed});
   final VoidCallback? onPressed;
 
   @override
@@ -440,42 +441,6 @@ class _BottomAction extends StatelessWidget {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
-          decoration: BoxDecoration(
-            color: AppColors.primary100,
-            border: Border.all(color: AppColors.primary400),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              SvgPicture.asset(
-                'assets/icons/records/ic_true_underline.svg',
-                width: 24,
-                height: 24,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  context.l10n.transferTotalKg,
-                  style: AppTextStyles.semiboldH9_14,
-                ),
-              ),
-              Container(width: 1, height: 24, color: AppColors.neutral950),
-              Expanded(
-                child: Text(
-                  '${totalKg.toStringAsFixed(2)} KG',
-                  textAlign: TextAlign.end,
-                  style: AppTextStyles.boldH7_16.copyWith(
-                    color: AppColors.primary500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
           height: 52,

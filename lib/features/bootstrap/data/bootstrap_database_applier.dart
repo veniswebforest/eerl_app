@@ -145,6 +145,11 @@ class BootstrapDatabaseApplier {
       'estimated_expense',
       'note',
       'vehicle_plate',
+      'driver_name',
+      'dispatched_weight',
+      'bale_count',
+      'vehicle_photo_urls',
+      'weighbridge_photo_urls',
       'requested_by',
       'requested_by_name',
       'requested_at',
@@ -152,7 +157,6 @@ class BootstrapDatabaseApplier {
       'approved_at',
       'rejection_reason',
       'handed_over_at',
-      'photo_urls',
       'updated_at',
       'sync_state',
     },
@@ -507,6 +511,9 @@ class BootstrapDatabaseApplier {
     Map<String, Object?> serverRow,
   ) async {
     final values = <String, Object?>{...serverRow, 'sync_state': 'synced'};
+    // Old Bootstrap pages can still contain this legacy transfer field. It is
+    // deliberately ignored: dispatch now has two field-specific photo lists.
+    if (table == DatabaseTables.transfers) values.remove('photo_urls');
     final allowedColumns = _recordColumns[table]!;
     final unknownColumns = values.keys
         .where((column) => !allowedColumns.contains(column))

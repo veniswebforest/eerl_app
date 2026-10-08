@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
@@ -72,7 +74,12 @@ class _TransferRequestDetailScreenState
     child: _dispatchFlowOpen
         ? TransferDispatchFlowScreen(
             onBack: () => setState(() => _dispatchFlowOpen = false),
-            onComplete: () => setState(() => _dispatchFlowOpen = false),
+            onComplete: () {
+              setState(() => _dispatchFlowOpen = false);
+              _controller.load();
+            },
+            transfer: _controller.data!.transfer!,
+            items: _controller.data!.items,
           )
         : ListenableBuilder(
             listenable: _controller,
@@ -119,7 +126,8 @@ class _TransferRequestDetailScreenState
     }
     if (status.contains('COMPLET') ||
         status.contains('CLOSED') ||
-        status.contains('HAND')) {
+        status.contains('HAND') ||
+        status.contains('RECEIV')) {
       return TransferRequestDetailState.completed;
     }
     if (status.contains('DISPATCH') ||
@@ -153,14 +161,6 @@ class _TransferRequestDetailContent extends StatelessWidget {
   bool get _isVehicleUnavailable =>
       state == TransferRequestDetailState.vehicleUnavailable;
 
-  bool get _hasVehicle {
-    if (_isRejected || _isVehicleUnavailable) {
-      return false;
-    }
-    if (transfer == null) return true;
-    return transfer!.vehiclePlate?.trim().isNotEmpty == true;
-  }
-
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.backgroundColor,
@@ -168,7 +168,7 @@ class _TransferRequestDetailContent extends StatelessWidget {
       title: context.l10n.transferDetailTitle,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
-    bottomNavigationBar: _isLoading && _hasVehicle
+    bottomNavigationBar: transfer?.status.toUpperCase() == 'APPROVED'
         ? SafeArea(
             top: false,
             child: Padding(
@@ -224,8 +224,12 @@ class _TransferRequestDetailContent extends StatelessWidget {
                 isVehicleUnavailable: _isVehicleUnavailable,
               ),
               const SizedBox(height: 12),
-              if (_hasVehicle) ...[
+              if (transfer?.truckExpectedAt != null) ...[
                 _CollectionManagerCard(transfer: transfer),
+                const SizedBox(height: 12),
+              ],
+              if (transfer?.status.toUpperCase() == 'DISPATCHED') ...[
+                _AgentDispatchCard(transfer: transfer!),
                 const SizedBox(height: 12),
               ],
               _ItemsCard(items: items),
@@ -360,7 +364,7 @@ class _InformationCard extends StatelessWidget {
         : isLoading
         ? (
             rawStatus.contains('DISPATCH')
-                ? context.l10n.transferDetailVehicleDispatched
+                ? 'Dispatched'
                 : context.l10n.transferDetailWaitingLoading,
             AppColors.secondary500,
             AppColors.secondary50,
@@ -470,16 +474,7 @@ class _CollectionManagerCard extends StatelessWidget {
         const Divider(height: 1, color: AppColors.cool300),
         const SizedBox(height: 12),
         TransferDetailRow(
-          label: context.l10n.transferDetailVehicle,
-          values: [
-            transfer?.vehiclePlate ??
-                (transfer == null
-                    ? context.l10n.transferDetailVehicleNumber
-                    : '-'),
-          ],
-        ),
-        TransferDetailRow(
-          label: context.l10n.transferEstimateTimeToReach,
+          label: 'Truck arrives',
           values: [
             transfer?.truckExpectedAt == null
                 ? (transfer == null
@@ -489,6 +484,140 @@ class _CollectionManagerCard extends StatelessWidget {
           ],
           showDivider: false,
         ),
+      ],
+    ),
+  );
+}
+
+class _DispatchPhotos extends StatelessWidget {
+  const _DispatchPhotos({required this.transfer});
+
+  final TransferModel transfer;
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) => FutureBuilder<TransferDispatchDraftModel>(
+    future: EerlLocalRepository.instance.getTransferDispatchDraft(transfer.id),
+    builder: (context, snapshot) {
+      final localById = {
+        for (final photo
+            in snapshot.data?.photos ?? const <TransferDispatchPhotoModel>[])
+          photo.id: photo,
+      };
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _photoGroup('Vehicle photos', transfer.vehiclePhotoUrls, localById),
+          if (transfer.weighbridgePhotoUrls.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _photoGroup(
+              'Weighbridge photos',
+              transfer.weighbridgePhotoUrls,
+              localById,
+            ),
+          ],
+        ],
+      );
+    },
+  );
+
+  Widget _photoGroup(
+    String label,
+    List<String> values,
+    Map<String, TransferDispatchPhotoModel> localById,
+  ) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label, style: AppTextStyles.semiboldH9_14),
+      const SizedBox(height: 8),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final value in values)
+            _photo(value, localById[value]?.localPath),
+        ],
+      ),
+    ],
+  );
+
+  Widget _photo(String value, String? localPath) => ClipRRect(
+    borderRadius: BorderRadius.circular(6),
+    child: localPath != null
+        ? Image.file(
+            File(localPath),
+            width: 76,
+            height: 58,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => _photoPlaceholder(),
+          )
+        : Image.network(
+            value,
+            width: 76,
+            height: 58,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => _photoPlaceholder(),
+          ),
+  );
+
+  Widget _photoPlaceholder() => Container(
+    width: 76,
+    height: 58,
+    color: AppColors.cool200,
+    child: const Icon(Icons.image_outlined),
+  );
+}
+
+class _AgentDispatchCard extends StatelessWidget {
+  const _AgentDispatchCard({required this.transfer});
+
+  final TransferModel transfer;
+
+  @override
+  Widget build(BuildContext context) => TransferDetailCard(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Agent dispatch', style: AppTextStyles.semiboldH7_18),
+        const SizedBox(height: 8),
+        const Divider(height: 1, color: AppColors.cool300),
+        const SizedBox(height: 12),
+        TransferDetailRow(
+          label: context.l10n.transferDetailVehicle,
+          values: [transfer.vehiclePlate ?? '-'],
+        ),
+        TransferDetailRow(
+          label: 'Driver',
+          values: [transfer.driverName ?? '-'],
+        ),
+        TransferDetailRow(
+          label: 'Loaded weight',
+          values: [
+            transfer.dispatchedWeight == null
+                ? '-'
+                : '${transfer.dispatchedWeight!.toStringAsFixed(2)} KG',
+          ],
+        ),
+        if (transfer.baleCount != null)
+          TransferDetailRow(
+            label: 'Bales / boris',
+            values: ['${transfer.baleCount}'],
+          ),
+        TransferDetailRow(
+          label: 'Dispatched at',
+          values: [
+            transfer.handedOverAt == null
+                ? '-'
+                : _formatTransferDateTime(transfer.handedOverAt!),
+          ],
+          showDivider: false,
+        ),
+        if (transfer.vehiclePhotoUrls.isNotEmpty ||
+            transfer.weighbridgePhotoUrls.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          _DispatchPhotos(transfer: transfer),
+        ],
       ],
     ),
   );

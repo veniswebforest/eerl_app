@@ -13,13 +13,11 @@ import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
-import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
-import 'package:go_router/go_router.dart';
 
 class CollectionReceiptScreen extends StatefulWidget {
   const CollectionReceiptScreen({super.key, required this.collectionId});
@@ -225,30 +223,33 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
     final parsedTimestamp = DateTime.tryParse(timestamp)?.toLocal();
     final unitTotals = _unitTotals(items);
     final itemAmounts = items.map(_itemAmount).whereType<double>().toList();
-    final totalAmount = itemAmounts.fold<double>(
+    final calculatedAmount = itemAmounts.fold<double>(
       0,
       (total, amount) => total + amount,
     );
+    final totalAmount = collection.totalAmount ?? calculatedAmount;
     final channel = collection.channel.trim().toUpperCase();
     final isMrf = channel == 'MRF';
-    final givenBy = collection.handedOverBy ?? collection.givenByName;
+    final givenBy =
+        collection.givenByName ?? (!isMrf ? collection.handedOverBy : null);
+    final labor = isMrf ? collection.handedOverBy : null;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
+          constraints: const BoxConstraints(maxWidth: 448),
           child: Column(
             children: [
               Align(
                 alignment: Alignment.centerLeft,
                 child: Material(
                   color: AppColors.primary500,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   child: InkWell(
                     key: const Key('collection-receipt-back'),
                     onTap: () => Navigator.of(context).maybePop(),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: SvgPicture.asset(
@@ -260,159 +261,26 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
+              _printerStatus(context),
+              const SizedBox(height: 8),
               RepaintBoundary(
                 key: _receiptBoundaryKey,
-                child: Container(
-                  key: const Key('collection-receipt-content'),
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x18000000), blurRadius: 8),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Image.asset(
-                        'assets/images/collection_detail/eer_logo.png',
-                        width: 141,
-                        height: 50,
-                        fit: BoxFit.contain,
-                      ),
-                      const SizedBox(height: 20),
-                      _receiptRow(
-                        context.l10n.collectionReceiptId,
-                        collection.slipNumber ?? collection.id,
-                      ),
-                      _receiptRow(
-                        context.l10n.collectionReceiptDate,
-                        parsedTimestamp == null
-                            ? timestamp
-                            : DateFormat('dd MMM yyyy').format(parsedTimestamp),
-                      ),
-                      if (parsedTimestamp != null)
-                        _receiptRow(
-                          context.l10n.collectionReceiptTime,
-                          DateFormat('hh:mm a').format(parsedTimestamp),
-                        ),
-                      _receiptRow(
-                        context.l10n.collectionReceiptCenter,
-                        collection.centerName ?? collection.centerId,
-                      ),
-                      _receiptRow(
-                        context.l10n.collectionReceiptAgent,
-                        collection.agentName,
-                      ),
-                      _receiptRow(
-                        context.l10n.collectionDetailType,
-                        collection.channel,
-                      ),
-                      if (isMrf && _hasText(supervisorName))
-                        _receiptRow(
-                          context.l10n.collectionReceiptSupervisor,
-                          supervisorName!,
-                        ),
-                      if (isMrf && _hasText(collection.givenByName))
-                        _receiptRow(
-                          context.l10n.collectionReceiptLabor,
-                          collection.givenByName!,
-                        ),
-                      if (!isMrf && _hasText(givenBy))
-                        _receiptRow(context.l10n.collectionGivenBy, givenBy!),
-                      const _ReceiptDivider(),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          context.l10n.collectionCollectedItems,
-                          style: AppTextStyles.boldH8_14.copyWith(
-                            color: AppColors.cool950,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      if (items.isEmpty)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(context.l10n.dashboardEmptyMessage),
-                        )
-                      else
-                        for (var index = 0; index < items.length; index++) ...[
-                          _receiptItem(context, items[index]),
-                          if (index != items.length - 1)
-                            const _ReceiptDivider(),
-                        ],
-                      for (final entry in unitTotals.entries) ...[
-                        const _ReceiptDivider(),
-                        _quantityBlock(
-                          context,
-                          _unitBlockTitle(context, entry.key),
-                          _quantityValue(entry.value.collected, entry.key),
-                          _quantityValue(entry.value.verified, entry.key),
-                          _quantityValue(
-                            entry.value.verified - entry.value.collected,
-                            entry.key,
-                            signed: true,
-                          ),
-                        ),
-                      ],
-                      if (itemAmounts.isNotEmpty) ...[
-                        const _ReceiptDivider(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              context.l10n.collectionReceiptTotal,
-                              style: AppTextStyles.mediumSH6_18,
-                            ),
-                            Text(
-                              _money(totalAmount),
-                              style: AppTextStyles.mediumSH6_18.copyWith(
-                                color: AppColors.primary500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                      const _ReceiptDivider(),
-                      Text(
-                        context.l10n.collectionReceiptAgent,
-                        style: AppTextStyles.mediumSH9_12.copyWith(
-                          color: AppColors.neutral500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        collection.agentName,
-                        style: AppTextStyles.mediumSH8_14,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        context.l10n.collectionThankYou,
-                        style: AppTextStyles.boldH8_14.copyWith(
-                          color: AppColors.primary500,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n.collectionSystemGeneratedSlip,
-                        style: AppTextStyles.mediumSH9_12.copyWith(
-                          color: AppColors.neutral500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SvgPicture.asset(
-                        'assets/icons/collection/receipt_dots.svg',
-                        width: 116,
-                        height: 8,
-                      ),
-                    ],
-                  ),
+                child: _receiptCard(
+                  context: context,
+                  collection: collection,
+                  items: items,
+                  unitTotals: unitTotals,
+                  totalAmount: totalAmount,
+                  timestamp: timestamp,
+                  parsedTimestamp: parsedTimestamp,
+                  isMrf: isMrf,
+                  supervisorName: supervisorName,
+                  givenBy: givenBy,
+                  labor: labor,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               Text(
                 context.l10n.collectionPrinterHint,
                 textAlign: TextAlign.center,
@@ -420,7 +288,7 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
                   color: AppColors.cool600,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 28),
               Row(
                 children: [
                   Expanded(
@@ -470,21 +338,269 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  key: const Key('collection-receipt-back-home'),
-                  onPressed: () => context.go(AppRoutes.home),
-                  child: Text(context.l10n.collectionBackToHome),
-                ),
-              ),
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget _printerStatus(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(7),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: AppColors.cool300),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 22,
+          height: 22,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppColors.primary50,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: const Icon(
+            Icons.bluetooth,
+            size: 14,
+            color: AppColors.primary500,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '${context.l10n.collectionPrinterReady}: ',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                TextSpan(text: context.l10n.collectionPrinterConnected),
+              ],
+            ),
+            style: _receiptText(size: 10, color: AppColors.neutral950),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _receiptCard({
+    required BuildContext context,
+    required CollectionModel collection,
+    required List<CollectionItemModel> items,
+    required Map<String, _UnitTotals> unitTotals,
+    required double totalAmount,
+    required String timestamp,
+    required DateTime? parsedTimestamp,
+    required bool isMrf,
+    required String? supervisorName,
+    required String? givenBy,
+    required String? labor,
+  }) => Container(
+    key: const Key('collection-receipt-content'),
+    width: double.infinity,
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: AppColors.cool300),
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x22000000),
+          blurRadius: 8,
+          offset: Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Column(
+      children: [
+        Container(height: 6, color: AppColors.neutral950),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+          child: Column(
+            children: [
+              Image.asset(
+                'assets/images/collection_detail/eer_logo.png',
+                width: 141,
+                height: 50,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 8),
+              const Divider(height: 1, color: AppColors.cool300),
+              const SizedBox(height: 7),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: _receiptLabelValue(
+                      context.l10n.collectionReceiptId.replaceAll(':', ''),
+                      collection.slipNumber ?? collection.id,
+                    ),
+                  ),
+                  Expanded(
+                    child: _receiptLabelValue(
+                      context.l10n.collectionReceiptDateTime,
+                      parsedTimestamp == null
+                          ? timestamp
+                          : DateFormat(
+                              'dd MMM yyyy, hh:mm a',
+                            ).format(parsedTimestamp),
+                      alignEnd: true,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 7),
+              const Divider(height: 1, color: AppColors.cool300),
+              const SizedBox(height: 8),
+              _receiptMetaGrid(
+                context: context,
+                collection: collection,
+                isMrf: isMrf,
+                supervisorName: supervisorName,
+                givenBy: givenBy,
+                labor: labor,
+              ),
+              const SizedBox(height: 8),
+              _dashedLine(),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.l10n.collectionReceiptBreakdown.toUpperCase(),
+                      style: _receiptText(size: 10, weight: FontWeight.w700),
+                    ),
+                  ),
+                  Text(
+                    context.l10n.collectionItemsCount(items.length),
+                    style: _receiptText(size: 9, color: AppColors.neutral600),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 7),
+              if (items.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    context.l10n.dashboardEmptyMessage,
+                    style: _receiptText(size: 10),
+                  ),
+                )
+              else
+                for (final item in items) ...[
+                  _receiptItem(context, item),
+                  const SizedBox(height: 6),
+                ],
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: context.l10n.collectionReceiptAggregateSummary,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      TextSpan(
+                        text:
+                            ' (${context.l10n.collectionReceiptAggregateHint})',
+                      ),
+                    ],
+                  ),
+                  style: _receiptText(size: 9, color: AppColors.neutral600),
+                ),
+              ),
+              const SizedBox(height: 6),
+              for (final entry in unitTotals.entries) ...[
+                _quantityBlock(
+                  context,
+                  _unitBlockTitle(context, entry.key),
+                  _quantityValue(entry.value.collected, entry.key),
+                  _quantityValue(entry.value.verified, entry.key),
+                  _quantityValue(
+                    entry.value.verified - entry.value.collected,
+                    entry.key,
+                    signed: true,
+                  ),
+                  entry.key,
+                ),
+                const SizedBox(height: 6),
+              ],
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    context.l10n.collectionReceiptPaymentBy,
+                    style: _receiptText(size: 10),
+                  ),
+                  Text(
+                    _paymentLabel(context, collection.paidBy),
+                    style: _receiptText(size: 11, weight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.cool400),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.l10n.collectionReceiptTotalSettlement,
+                        style: _receiptText(size: 12, weight: FontWeight.w600),
+                      ),
+                    ),
+                    Text(
+                      _money(totalAmount),
+                      style: _receiptText(size: 18, weight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        _dashedLine(),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10, 8, 10, 9),
+          child: Column(
+            children: [
+              Text(
+                '${context.l10n.collectionReceiptCollectedAgent}: ${collection.agentName}',
+                style: _receiptText(size: 9, color: AppColors.neutral600),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                context.l10n.collectionThankYou,
+                style: _receiptText(size: 10, weight: FontWeight.w700),
+              ),
+              Text(
+                context.l10n.collectionSystemGeneratedSlip.toUpperCase(),
+                style: _receiptText(size: 7, color: AppColors.neutral600),
+              ),
+              const SizedBox(height: 4),
+              SvgPicture.asset(
+                'assets/icons/collection/receipt_dots.svg',
+                width: 38,
+                height: 4,
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 
   Widget _receiptActionIcon({
     required _ReceiptAction action,
@@ -512,30 +628,139 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
     return totals;
   }
 
-  Widget _receiptRow(String label, String value) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 6),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Flexible(
-          child: Text(
-            label,
-            style: AppTextStyles.mediumSH8_14.copyWith(
-              color: AppColors.neutral600,
-            ),
-          ),
+  TextStyle _receiptText({
+    double size = 10,
+    FontWeight weight = FontWeight.w400,
+    Color color = AppColors.neutral950,
+  }) => TextStyle(
+    fontFamily: 'Manrope',
+    fontSize: size,
+    height: 1.25,
+    fontWeight: weight,
+    color: color,
+  );
+
+  Widget _receiptLabelValue(
+    String label,
+    String value, {
+    bool alignEnd = false,
+  }) => Column(
+    crossAxisAlignment: alignEnd
+        ? CrossAxisAlignment.end
+        : CrossAxisAlignment.start,
+    children: [
+      Text(
+        label.toUpperCase(),
+        textAlign: alignEnd ? TextAlign.right : TextAlign.left,
+        style: _receiptText(size: 8, color: AppColors.neutral600),
+      ),
+      const SizedBox(height: 3),
+      Text(
+        value,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        textAlign: alignEnd ? TextAlign.right : TextAlign.left,
+        style: _receiptText(size: 11, weight: FontWeight.w700),
+      ),
+    ],
+  );
+
+  Widget _receiptMetaGrid({
+    required BuildContext context,
+    required CollectionModel collection,
+    required bool isMrf,
+    required String? supervisorName,
+    required String? givenBy,
+    required String? labor,
+  }) {
+    final cells = <({String label, String value, bool chip})>[
+      (
+        label: context.l10n.collectionReceiptCenter.replaceAll(':', ''),
+        value: collection.centerName ?? collection.centerId,
+        chip: false,
+      ),
+      (
+        label: context.l10n.collectionReceiptAgent,
+        value: collection.agentName,
+        chip: false,
+      ),
+      (
+        label: context.l10n.collectionDetailType,
+        value: collection.channel,
+        chip: true,
+      ),
+      if (isMrf && _hasText(supervisorName))
+        (
+          label: context.l10n.collectionReceiptSupervisor.replaceAll(':', ''),
+          value: supervisorName!,
+          chip: false,
         ),
-        const SizedBox(width: 24),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: AppTextStyles.regularB7_14,
-          ),
+      if (_hasText(givenBy))
+        (label: context.l10n.collectionGivenBy, value: givenBy!, chip: false),
+      if (_hasText(labor))
+        (
+          label: context.l10n.collectionReceiptLaborInvolved,
+          value: labor!,
+          chip: false,
         ),
-      ],
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = (constraints.maxWidth - 12) / 2;
+        return Wrap(
+          spacing: 12,
+          runSpacing: 7,
+          children: [
+            for (final cell in cells)
+              SizedBox(
+                width: width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      cell.label,
+                      style: _receiptText(size: 9, color: AppColors.neutral600),
+                    ),
+                    const SizedBox(height: 1),
+                    if (cell.chip)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.cool100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          cell.value.toUpperCase(),
+                          style: _receiptText(size: 9, weight: FontWeight.w600),
+                        ),
+                      )
+                    else
+                      Text(
+                        cell.value,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: _receiptText(size: 11, weight: FontWeight.w700),
+                      ),
+                  ],
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _dashedLine() => DottedBorder(
+    options: const RectDottedBorderOptions(
+      color: AppColors.cool400,
+      dashPattern: [3, 3],
+      padding: EdgeInsets.zero,
     ),
+    child: const SizedBox(width: double.infinity, height: 0),
   );
 
   Widget _quantityBlock(
@@ -544,14 +769,63 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
     String collected,
     String verified,
     String difference,
-  ) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
+    String unit,
+  ) => Container(
+    padding: const EdgeInsets.fromLTRB(8, 7, 8, 8),
+    decoration: BoxDecoration(
+      border: Border.all(color: AppColors.cool400),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: _receiptText(size: 11, weight: FontWeight.w600),
+              ),
+            ),
+            Text(
+              unit == 'KG'
+                  ? context.l10n.collectionReceiptWeight
+                  : context.l10n.collectionReceiptPieces,
+              style: _receiptText(size: 7, color: AppColors.neutral600),
+            ),
+          ],
+        ),
+        const Divider(height: 8, color: AppColors.cool300),
+        Row(
+          children: [
+            Expanded(
+              child: _summaryValue(context.l10n.collectionCollected, collected),
+            ),
+            const SizedBox(height: 34, child: VerticalDivider(width: 1)),
+            Expanded(
+              child: _summaryValue(context.l10n.expenseVerified, verified),
+            ),
+            const SizedBox(height: 34, child: VerticalDivider(width: 1)),
+            Expanded(
+              child: _summaryValue(
+                context.l10n.collectionReceiptDifference,
+                difference,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+
+  Widget _summaryValue(String label, String value) => Column(
     children: [
-      Text(title, style: AppTextStyles.semiboldH9_14),
-      const SizedBox(height: 8),
-      _receiptRow(context.l10n.collectionReceiptCollectedTotal, collected),
-      _receiptRow(context.l10n.collectionReceiptVerifiedTotal, verified),
-      _receiptRow(context.l10n.collectionReceiptDifference, difference),
+      Text(label, style: _receiptText(size: 8, color: AppColors.neutral500)),
+      const SizedBox(height: 4),
+      Text(
+        value,
+        textAlign: TextAlign.center,
+        style: _receiptText(size: 10, weight: FontWeight.w700),
+      ),
     ],
   );
 
@@ -561,68 +835,109 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
     final amount = _itemAmount(item);
     final detail = item.rate == null
         ? '${_number(verified)} $unit'
-        : '${_number(verified)} $unit × ${_money(item.rate!)}/$unit';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.name ?? item.itemId,
-                    style: AppTextStyles.mediumSH8_14,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    detail,
-                    style: AppTextStyles.regularB8_12.copyWith(
-                      color: AppColors.neutral500,
-                    ),
-                  ),
-                ],
+        : '${_number(verified)} $unit × ${_money(item.rate!)}';
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 7, 8, 6),
+      decoration: BoxDecoration(
+        color: AppColors.cool50,
+        border: Border.all(color: AppColors.cool300),
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                margin: const EdgeInsets.only(top: 3, right: 7),
+                decoration: const BoxDecoration(
+                  color: AppColors.neutral950,
+                  shape: BoxShape.circle,
+                ),
               ),
-            ),
-            if (amount != null) ...[
-              const SizedBox(width: 12),
-              Text(_money(amount), style: AppTextStyles.regularB7_14),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: item.name ?? item.itemId,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      TextSpan(
+                        text: '  $detail',
+                        style: const TextStyle(fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  ),
+                  style: _receiptText(size: 10),
+                ),
+              ),
+              if (amount != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  _money(amount),
+                  style: _receiptText(size: 12, weight: FontWeight.w700),
+                ),
+              ],
             ],
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _quantity(
-                context.l10n.collectionCollected,
-                unit,
-                _number(item.qty),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: _quantity(
+                  context.l10n.collectionCollected,
+                  unit,
+                  _number(item.qty),
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _quantity(
-                context.l10n.expenseVerified,
-                unit,
-                _number(verified),
+              const SizedBox(width: 6),
+              Expanded(
+                child: _quantity(
+                  context.l10n.expenseVerified,
+                  unit,
+                  _number(verified),
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _quantity(String label, String unit, String value) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: AppTextStyles.regularB8_12),
-      const SizedBox(height: 4),
-      Text('$unit   $value', style: AppTextStyles.regularB7_14),
-    ],
+  Widget _quantity(String label, String unit, String value) => Container(
+    height: 19,
+    padding: const EdgeInsets.symmetric(horizontal: 7),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      border: Border.all(color: AppColors.cool400),
+      borderRadius: BorderRadius.circular(5),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: Text(
+            '$label:',
+            overflow: TextOverflow.ellipsis,
+            style: _receiptText(size: 8, color: AppColors.neutral500),
+          ),
+        ),
+        Text(
+          '$value $unit',
+          style: _receiptText(size: 8, weight: FontWeight.w600),
+        ),
+      ],
+    ),
   );
+
+  String _paymentLabel(BuildContext context, String? paidBy) {
+    final value = paidBy?.trim().toUpperCase();
+    if (value == 'UPI') return context.l10n.collectionPaymentUpi;
+    return context.l10n.collectionPaymentCash;
+  }
 
   String _unitCode(CollectionItemModel item) {
     final code = item.unitCode?.trim().toUpperCase();
@@ -668,21 +983,4 @@ class _UnitTotals {
 
   final double collected;
   final double verified;
-}
-
-class _ReceiptDivider extends StatelessWidget {
-  const _ReceiptDivider();
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 16),
-    child: DottedBorder(
-      options: const RectDottedBorderOptions(
-        color: AppColors.cool400,
-        dashPattern: [3, 4],
-        padding: EdgeInsets.zero,
-      ),
-      child: const SizedBox(width: double.infinity, height: 0),
-    ),
-  );
 }

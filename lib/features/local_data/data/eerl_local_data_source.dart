@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:eerl_app/core/location/device_location_service.dart';
@@ -14,6 +15,31 @@ class CollectionLocationUnavailableException implements Exception {
 
   @override
   String toString() => 'A valid location is required to submit a collection.';
+}
+
+class TransferStockUnavailableException implements Exception {
+  const TransferStockUnavailableException({
+    required this.itemId,
+    required this.requestedQuantity,
+    required this.freeQuantity,
+  });
+
+  final String itemId;
+  final double requestedQuantity;
+  final double freeQuantity;
+
+  @override
+  String toString() =>
+      'TransferStockUnavailableException(itemId: $itemId, '
+      'requested: $requestedQuantity, free: $freeQuantity)';
+}
+
+class TransferDispatchValidationException implements Exception {
+  const TransferDispatchValidationException(this.message);
+  final String message;
+
+  @override
+  String toString() => message;
 }
 
 class EerlLocalDataSource {
@@ -793,7 +819,8 @@ class EerlLocalDataSource {
   ) async {
     final rows = await _database.rawQuery(
       '''
-      SELECT ci.*, i.name, i.unit_code, i.unit_name
+      SELECT ci.*, i.name, i.unit_code, i.unit_name,
+        i.image_url AS item_image_url
       FROM ${DatabaseTables.collectionItems} ci
       JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
       WHERE ci.collection_id = ?
@@ -1481,6 +1508,140 @@ class EerlLocalDataSource {
     return rows.map(ExpenseModel.fromMap).toList(growable: false);
   }
 
+  Future<String> saveExpense({
+    required String categoryId,
+    required double amount,
+    required List<String> receiptPaths,
+    String? note,
+    String? collectionId,
+  }) async {
+    if (categoryId.trim().isEmpty) {
+      throw ArgumentError.value(
+        categoryId,
+        'categoryId',
+        'Category is required.',
+      );
+    }
+    if (!amount.isFinite || amount <= 0) {
+      throw ArgumentError.value(
+        amount,
+        'amount',
+        'Amount must be greater than zero.',
+      );
+    }
+    if (receiptPaths.isEmpty) {
+      throw ArgumentError.value(
+        receiptPaths,
+        'receiptPaths',
+        'A receipt is required.',
+      );
+    }
+
+    final centerId = await activeCenterId;
+    final userId = await currentUserId;
+    if (centerId == null || userId == null) {
+      throw StateError('Active center and signed-in user are required.');
+    }
+    final categoryRows = await _database.query(
+      DatabaseTables.expenseCategories,
+      columns: const ['id'],
+      where: 'id = ? AND center_id = ? AND is_active = 1',
+      whereArgs: [categoryId, centerId],
+      limit: 1,
+    );
+    if (categoryRows.isEmpty) {
+      throw StateError('The selected expense category is unavailable.');
+    }
+
+    final expenseId = UuidGenerator.v4();
+    final now = DateTime.now().toUtc().toIso8601String();
+    final profile = await getProfile();
+    final normalizedNote = note?.trim();
+    final uniqueReceiptPaths = receiptPaths
+        .map((path) => path.trim())
+        .where((path) => path.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+    if (uniqueReceiptPaths.isEmpty) {
+      throw ArgumentError.value(
+        receiptPaths,
+        'receiptPaths',
+        'A receipt is required.',
+      );
+    }
+    final photoSizes = <String, int?>{
+      for (final path in uniqueReceiptPaths) path: await _localFileSize(path),
+    };
+    final photoIds = <String>[];
+    late final int outboxSeq;
+
+    await _database.runInTransaction((txn) async {
+      for (final path in uniqueReceiptPaths) {
+        final photoId = UuidGenerator.v4();
+        photoIds.add(photoId);
+        await txn.insert(DatabaseTables.photos, {
+          'id': photoId,
+          'owner_table': DatabaseTables.expenses,
+          'owner_id': expenseId,
+          'field': 'receipt',
+          'purpose': 'EXPENSE_RECEIPT',
+          'content_type': 'image/jpeg',
+          'local_path': path,
+          'status': 'local',
+          'size_bytes': photoSizes[path],
+          'created_at': now,
+        });
+      }
+
+      await txn.insert(DatabaseTables.expenses, {
+        'id': expenseId,
+        'center_id': centerId,
+        'user_id': userId,
+        'user_name': profile.userName,
+        'category_id': categoryId,
+        'amount': amount,
+        'note': normalizedNote?.isEmpty == true ? null : normalizedNote,
+        'status': 'PENDING',
+        'receipt_photo_urls': jsonEncode(photoIds),
+        'created_at': now,
+        'updated_at': now,
+        'sync_state': 'pending',
+      });
+
+      outboxSeq = await OutboxQueue.enqueue(
+        txn,
+        method: 'PUT',
+        path: '/expenses/$expenseId',
+        entity: DatabaseTables.expenses,
+        entityId: expenseId,
+        kind: 'create',
+        body: <String, Object?>{
+          'centerId': centerId,
+          'categoryId': categoryId,
+          'amount': amount,
+          'spentAt': now,
+          'note': normalizedNote?.isEmpty == true ? null : normalizedNote,
+          'collectionId': collectionId,
+          'photoUrls': photoIds,
+        },
+        refs: [centerId, categoryId, ?collectionId],
+        blockingPhotoIds: photoIds,
+        createdAt: now,
+      );
+    });
+
+    if (kDebugMode) {
+      debugPrint(
+        '💸 [EERL_EXPENSE][SQLITE][COMMIT] STORED '
+        'expense_id=$expenseId center=$centerId category=$categoryId '
+        'amount=$amount status=PENDING sync_state=pending '
+        'photos=${photoIds.length} outbox_seq=$outboxSeq '
+        'method=PUT path=/expenses/$expenseId',
+      );
+    }
+    return expenseId;
+  }
+
   Future<List<CashRequestModel>> getCashRequests({
     bool supervisor = false,
   }) async {
@@ -1515,6 +1676,64 @@ class EerlLocalDataSource {
       orderBy: 'created_at DESC',
     );
     return rows.map(CategoryRequestModel.fromMap).toList(growable: false);
+  }
+
+  Future<String> saveCategoryRequest({
+    required String name,
+    String? reason,
+  }) async {
+    final normalizedName = name.trim();
+    if (normalizedName.isEmpty) {
+      throw ArgumentError.value(name, 'name', 'Category name is required.');
+    }
+    final centerId = await activeCenterId;
+    final userId = await currentUserId;
+    if (centerId == null || userId == null) {
+      throw StateError('Active center and signed-in user are required.');
+    }
+
+    final requestId = UuidGenerator.v4();
+    final now = DateTime.now().toUtc().toIso8601String();
+    final normalizedReason = reason?.trim();
+    final body = <String, Object?>{
+      'centerId': centerId,
+      'name': normalizedName,
+      'reason': normalizedReason?.isEmpty == true ? null : normalizedReason,
+    };
+
+    await _database.runInTransaction((txn) async {
+      await txn.insert(DatabaseTables.categoryRequests, {
+        'id': requestId,
+        'center_id': centerId,
+        'requested_by': userId,
+        'name': normalizedName,
+        'reason': normalizedReason?.isEmpty == true ? null : normalizedReason,
+        'status': 'PENDING',
+        'created_at': now,
+        'sync_state': 'pending',
+      });
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'PUT',
+        path: '/expense-categories/requests/$requestId',
+        entity: DatabaseTables.categoryRequests,
+        entityId: requestId,
+        kind: 'create',
+        body: body,
+        refs: [centerId],
+        createdAt: now,
+      );
+    });
+
+    if (kDebugMode) {
+      debugPrint(
+        '✅ [EERL_CATEGORY_REQUEST][SQLITE][COMMIT] STORED '
+        'request_id=$requestId center=$centerId name=$normalizedName '
+        'status=PENDING sync_state=pending '
+        'method=PUT path=/expense-categories/requests/$requestId',
+      );
+    }
+    return requestId;
   }
 
   Future<List<TransferModel>> getTransfers({
@@ -1568,6 +1787,9 @@ class EerlLocalDataSource {
     if (normalizedItems.isEmpty) {
       throw ArgumentError('At least one transfer item is required.');
     }
+    if (normalizedItems.length != 1) {
+      throw ArgumentError('Exactly one transfer item is required.');
+    }
     if (!estimatedExpense.isFinite || estimatedExpense < 0) {
       throw ArgumentError.value(
         estimatedExpense,
@@ -1598,6 +1820,21 @@ class EerlLocalDataSource {
     };
 
     await _database.runInTransaction((txn) async {
+      for (final item in normalizedItems.entries) {
+        final freeQuantity = await _transferFreeQuantity(
+          txn,
+          centerId: centerId,
+          itemId: item.key,
+        );
+        if (item.value > freeQuantity) {
+          throw TransferStockUnavailableException(
+            itemId: item.key,
+            requestedQuantity: item.value,
+            freeQuantity: freeQuantity,
+          );
+        }
+      }
+
       await txn.insert(DatabaseTables.transfers, {
         'id': transferId,
         'center_id': centerId,
@@ -1609,7 +1846,6 @@ class EerlLocalDataSource {
         'requested_by': userId,
         'requested_by_name': profile.userName ?? '',
         'requested_at': now,
-        'photo_urls': '[]',
         'updated_at': now,
         'sync_state': 'pending',
       });
@@ -1675,6 +1911,334 @@ class EerlLocalDataSource {
       [transferId],
     );
     return rows.map(TransferItemModel.fromMap).toList(growable: false);
+  }
+
+  Future<TransferDispatchDraftModel> getTransferDispatchDraft(
+    String transferId,
+  ) async {
+    String? vehicleNumber;
+    String? driverName;
+    final transferRows = await _database.query(
+      DatabaseTables.transfers,
+      columns: const ['vehicle_plate', 'driver_name'],
+      where: 'id = ?',
+      whereArgs: [transferId],
+      limit: 1,
+    );
+    if (transferRows.isNotEmpty) {
+      vehicleNumber = transferRows.single['vehicle_plate'] as String?;
+      driverName = transferRows.single['driver_name'] as String?;
+    }
+    final photoRows = await _database.query(
+      DatabaseTables.photos,
+      where: 'owner_table = ? AND owner_id = ? AND field IN (?, ?)',
+      whereArgs: [
+        DatabaseTables.transfers,
+        transferId,
+        'vehicle',
+        'weighbridge',
+      ],
+      orderBy: 'created_at, id',
+    );
+    return TransferDispatchDraftModel(
+      vehicleNumber: vehicleNumber,
+      driverName: driverName,
+      photos: photoRows
+          .map(TransferDispatchPhotoModel.fromMap)
+          .toList(growable: false),
+    );
+  }
+
+  Future<void> saveTransferDispatchDraft({
+    required String transferId,
+    required String vehicleNumber,
+    required String driverName,
+  }) async {
+    final plate = vehicleNumber.trim();
+    final driver = driverName.trim();
+    if (plate.length < 4 || plate.length > 20 || driver.isEmpty) {
+      throw const TransferDispatchValidationException(
+        'Enter a valid vehicle number and driver name.',
+      );
+    }
+    final vehiclePhotos = await _database.query(
+      DatabaseTables.photos,
+      columns: const ['id'],
+      where: 'owner_table = ? AND owner_id = ? AND field = ?',
+      whereArgs: [DatabaseTables.transfers, transferId, 'vehicle'],
+      orderBy: 'created_at, id',
+    );
+    if (vehiclePhotos.isEmpty || vehiclePhotos.length > 5) {
+      throw const TransferDispatchValidationException(
+        'Add between 1 and 5 vehicle photos.',
+      );
+    }
+    final updated = await _database.update(
+      DatabaseTables.transfers,
+      {
+        'vehicle_plate': plate,
+        'driver_name': driver,
+        'vehicle_photo_urls': jsonEncode(
+          vehiclePhotos.map((row) => row['id']).toList(growable: false),
+        ),
+        'updated_at': DateTime.now().toUtc().toIso8601String(),
+        'sync_state': 'pending',
+      },
+      where: 'id = ? AND status = ?',
+      whereArgs: [transferId, 'APPROVED'],
+    );
+    if (updated != 1) {
+      throw const TransferDispatchValidationException(
+        'Only an approved transfer can start loading.',
+      );
+    }
+    if (kDebugMode) {
+      debugPrint(
+        '🚚 [EERL_TRANSFER][SQLITE] LOADING_DETAILS_STORED '
+        'transfer_id=$transferId vehicle=$plate driver=$driver '
+        'photos=${vehiclePhotos.length} table=transfers api_call=false',
+      );
+    }
+  }
+
+  Future<TransferDispatchPhotoModel> addTransferDispatchPhoto({
+    required String transferId,
+    required String field,
+    required String localPath,
+  }) async {
+    if (field != 'vehicle' && field != 'weighbridge') {
+      throw ArgumentError.value(
+        field,
+        'field',
+        'Unsupported dispatch photo field',
+      );
+    }
+    final existing = await _database.rawQuery(
+      'SELECT COUNT(*) AS total FROM ${DatabaseTables.photos} '
+      'WHERE owner_table = ? AND owner_id = ? AND field = ?',
+      [DatabaseTables.transfers, transferId, field],
+    );
+    if (((existing.single['total'] as num?)?.toInt() ?? 0) >= 5) {
+      throw const TransferDispatchValidationException(
+        'A maximum of 5 photos is allowed.',
+      );
+    }
+    final id = UuidGenerator.v4();
+    await _database.insert(DatabaseTables.photos, {
+      'id': id,
+      'owner_table': DatabaseTables.transfers,
+      'owner_id': transferId,
+      'field': field,
+      'purpose': 'TRANSFER_HANDOVER',
+      'content_type': 'image/jpeg',
+      'local_path': localPath,
+      'status': 'local',
+      'created_at': DateTime.now().toUtc().toIso8601String(),
+    });
+    if (kDebugMode) {
+      debugPrint(
+        '📸 [EERL_TRANSFER][SQLITE] PHOTO_STORED transfer_id=$transferId '
+        'photo_id=$id field=$field',
+      );
+    }
+    return TransferDispatchPhotoModel(
+      id: id,
+      field: field,
+      localPath: localPath,
+      status: 'local',
+    );
+  }
+
+  Future<void> removeTransferDispatchPhoto(String photoId) async {
+    await _database.delete(
+      DatabaseTables.photos,
+      where: 'id = ?',
+      whereArgs: [photoId],
+    );
+  }
+
+  Future<void> submitTransferDispatch({
+    required String transferId,
+    required String vehicleNumber,
+    required String driverName,
+    required double dispatchedWeight,
+    int? baleCount,
+    double? piecesLoaded,
+  }) async {
+    final plate = vehicleNumber.trim();
+    final driver = driverName.trim();
+    if (plate.length < 4 || plate.length > 20) {
+      throw const TransferDispatchValidationException(
+        'Vehicle number must be 4 to 20 characters.',
+      );
+    }
+    if (driver.isEmpty) {
+      throw const TransferDispatchValidationException(
+        'Driver name is required.',
+      );
+    }
+    if (!dispatchedWeight.isFinite || dispatchedWeight <= 0) {
+      throw const TransferDispatchValidationException(
+        'Loaded weight must be more than zero.',
+      );
+    }
+    if (baleCount != null && (baleCount < 1 || baleCount > 9999)) {
+      throw const TransferDispatchValidationException(
+        'Bales must be between 1 and 9999.',
+      );
+    }
+
+    final transferRows = await _database.query(
+      DatabaseTables.transfers,
+      columns: const ['center_id', 'status', 'note'],
+      where: 'id = ?',
+      whereArgs: [transferId],
+      limit: 1,
+    );
+    if (transferRows.isEmpty || transferRows.single['status'] != 'APPROVED') {
+      throw const TransferDispatchValidationException(
+        'Only an approved transfer can be dispatched.',
+      );
+    }
+    final itemRows = await _database.rawQuery(
+      '''
+      SELECT ti.id, ti.item_id, ti.qty, ti.dispatched_qty, i.unit_code
+      FROM ${DatabaseTables.transferItems} ti
+      LEFT JOIN ${DatabaseTables.items} i ON i.id = ti.item_id
+      WHERE ti.transfer_id = ?
+      ORDER BY ti.id
+      ''',
+      [transferId],
+    );
+    if (itemRows.isEmpty) {
+      throw const TransferDispatchValidationException(
+        'A transfer dispatch must contain at least one item.',
+      );
+    }
+    final singleItemIsPieces =
+        itemRows.length == 1 &&
+        itemRows.single['unit_code']?.toString().toUpperCase() == 'PCS';
+    if (singleItemIsPieces &&
+        (piecesLoaded == null ||
+            !piecesLoaded.isFinite ||
+            piecesLoaded <= 0 ||
+            piecesLoaded != piecesLoaded.roundToDouble())) {
+      throw const TransferDispatchValidationException(
+        'Enter how many pieces went.',
+      );
+    }
+    final dispatchItems = [
+      for (final item in itemRows)
+        {
+          'itemId': item['item_id'],
+          'quantity': itemRows.length == 1
+              ? (singleItemIsPieces ? piecesLoaded : dispatchedWeight)
+              : ((item['dispatched_qty'] ?? item['qty']) as num).toDouble(),
+        },
+    ];
+    final photos = await _database.query(
+      DatabaseTables.photos,
+      columns: const ['id', 'field'],
+      where: 'owner_table = ? AND owner_id = ? AND field IN (?, ?)',
+      whereArgs: [
+        DatabaseTables.transfers,
+        transferId,
+        'vehicle',
+        'weighbridge',
+      ],
+      orderBy: 'created_at, id',
+    );
+    final vehiclePhotoIds = photos
+        .where((row) => row['field'] == 'vehicle')
+        .map((row) => row['id']! as String)
+        .toList(growable: false);
+    final weighbridgePhotoIds = photos
+        .where((row) => row['field'] == 'weighbridge')
+        .map((row) => row['id']! as String)
+        .toList(growable: false);
+    if (vehiclePhotoIds.isEmpty || vehiclePhotoIds.length > 5) {
+      throw const TransferDispatchValidationException(
+        'Add between 1 and 5 vehicle photos.',
+      );
+    }
+    if (weighbridgePhotoIds.length > 5) {
+      throw const TransferDispatchValidationException(
+        'A maximum of 5 weighbridge photos is allowed.',
+      );
+    }
+
+    final coordinates = await DeviceLocationService.instance
+        .bestAvailableCoordinates(requestPermission: true);
+    final now = DateTime.now().toUtc().toIso8601String();
+    final body = <String, Object?>{
+      'centerId': transferRows.single['center_id'],
+      'handedOverAt': now,
+      'vehicleNumber': plate,
+      'driverName': driver,
+      'vehiclePhotoUrls': vehiclePhotoIds,
+      'dispatchedWeight': dispatchedWeight,
+      ...(baleCount == null
+          ? const <String, Object?>{}
+          : <String, Object?>{'baleCount': baleCount}),
+      'weighbridgePhotoUrls': weighbridgePhotoIds,
+      'items': dispatchItems,
+      'note': transferRows.single['note'],
+      if (coordinates != null)
+        'gps': {'lat': coordinates.latitude, 'lng': coordinates.longitude},
+    };
+    await _database.runInTransaction((txn) async {
+      final updated = await txn.update(
+        DatabaseTables.transfers,
+        {
+          'status': 'DISPATCHED',
+          'handed_over_at': now,
+          'vehicle_plate': plate,
+          'driver_name': driver,
+          'dispatched_weight': dispatchedWeight,
+          'bale_count': baleCount,
+          'gps_lat': coordinates?.latitude,
+          'gps_lng': coordinates?.longitude,
+          'vehicle_photo_urls': jsonEncode(vehiclePhotoIds),
+          'weighbridge_photo_urls': jsonEncode(weighbridgePhotoIds),
+          'updated_at': now,
+          'sync_state': 'pending',
+        },
+        where: 'id = ? AND status = ?',
+        whereArgs: [transferId, 'APPROVED'],
+      );
+      if (updated != 1) {
+        throw const TransferDispatchValidationException(
+          'Transfer is no longer approved.',
+        );
+      }
+      for (var index = 0; index < itemRows.length; index++) {
+        await txn.update(
+          DatabaseTables.transferItems,
+          {'dispatched_qty': dispatchItems[index]['quantity']},
+          where: 'id = ?',
+          whereArgs: [itemRows[index]['id']],
+        );
+      }
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/transfers/$transferId/handover',
+        entity: DatabaseTables.transfers,
+        entityId: transferId,
+        kind: 'handover',
+        body: body,
+        blockingPhotoIds: [...vehiclePhotoIds, ...weighbridgePhotoIds],
+        createdAt: now,
+      );
+    });
+    if (kDebugMode) {
+      debugPrint(
+        '✅ [EERL_TRANSFER][SQLITE][COMMIT] DISPATCHED '
+        'transfer_id=$transferId vehicle_photos=${vehiclePhotoIds.length} '
+        'weighbridge_photos=${weighbridgePhotoIds.length} '
+        'outbox_path=/transfers/$transferId/handover',
+      );
+    }
   }
 
   Future<List<TaskModel>> getTasks({
@@ -1847,8 +2411,9 @@ class EerlLocalDataSource {
     return rows.map(StockModel.fromMap).toList(growable: false);
   }
 
-  /// RM stock currently available for a transfer. The server stock snapshot is
-  /// combined with submitted collections that are still pending in outbox.
+  /// RM stock currently free for a transfer. The server stock snapshot is
+  /// combined with submitted collections that are still pending in outbox,
+  /// then quantities promised to other open transfers are subtracted.
   Future<List<StockModel>> getTransferStockInHand({String? centerId}) async {
     final resolvedCenter = centerId ?? await activeCenterId;
     if (resolvedCenter == null) return const [];
@@ -1865,6 +2430,13 @@ class EerlLocalDataSource {
                  AND ci.item_id = s.item_id
                  AND col.sync_state = 'pending'
                  AND col.status = 'SUBMITTED'
+             ), 0) - COALESCE((
+               SELECT SUM(ti.qty)
+               FROM ${DatabaseTables.transferItems} ti
+               JOIN ${DatabaseTables.transfers} t ON t.id = ti.transfer_id
+               WHERE t.center_id = s.center_id
+                 AND ti.item_id = s.item_id
+                 AND UPPER(t.status) IN ('PENDING', 'REQUESTED', 'APPROVED')
              ), 0) AS qty
       FROM ${DatabaseTables.stock} s
       JOIN ${DatabaseTables.items} i ON i.id = s.item_id
@@ -1874,7 +2446,50 @@ class EerlLocalDataSource {
       ''',
       [resolvedCenter],
     );
-    return rows.map(StockModel.fromMap).toList(growable: false);
+    return rows
+        .map((row) {
+          final normalized = Map<String, Object?>.from(row);
+          final quantity = (normalized['qty'] as num?)?.toDouble() ?? 0;
+          normalized['qty'] = quantity < 0 ? 0.0 : quantity;
+          return StockModel.fromMap(normalized);
+        })
+        .toList(growable: false);
+  }
+
+  Future<double> _transferFreeQuantity(
+    DatabaseExecutor executor, {
+    required String centerId,
+    required String itemId,
+  }) async {
+    final rows = await executor.rawQuery(
+      '''
+      SELECT MAX(
+        COALESCE((
+          SELECT SUM(s.qty)
+          FROM ${DatabaseTables.stock} s
+          WHERE s.center_id = ? AND s.item_id = ? AND s.stage = 'RM'
+        ), 0) + COALESCE((
+          SELECT SUM(ci.verified_qty)
+          FROM ${DatabaseTables.collectionItems} ci
+          JOIN ${DatabaseTables.collections} col ON col.id = ci.collection_id
+          WHERE col.center_id = ?
+            AND ci.item_id = ?
+            AND col.sync_state = 'pending'
+            AND col.status = 'SUBMITTED'
+        ), 0) - COALESCE((
+          SELECT SUM(ti.qty)
+          FROM ${DatabaseTables.transferItems} ti
+          JOIN ${DatabaseTables.transfers} t ON t.id = ti.transfer_id
+          WHERE t.center_id = ?
+            AND ti.item_id = ?
+            AND UPPER(t.status) IN ('PENDING', 'REQUESTED', 'APPROVED')
+        ), 0),
+        0
+      ) AS qty_free
+      ''',
+      [centerId, itemId, centerId, itemId, centerId, itemId],
+    );
+    return (rows.single['qty_free'] as num?)?.toDouble() ?? 0;
   }
 
   Future<List<AgentStatusModel>> getAgentStatus() async {

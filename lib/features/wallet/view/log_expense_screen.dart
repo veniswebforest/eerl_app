@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/image_compressor.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:image_picker/image_picker.dart';
 import '../widgets/expense_category_selector.dart';
 import '../widgets/log_expense_field.dart';
 import '../widgets/receipt_upload_section.dart';
@@ -12,8 +19,26 @@ import '../widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'package:go_router/go_router.dart';
 
+typedef ExpenseSaver =
+    Future<String> Function({
+      required String categoryId,
+      required double amount,
+      required List<String> receiptPaths,
+      String? note,
+      String? collectionId,
+    });
+
 class LogExpenseScreen extends StatefulWidget {
-  const LogExpenseScreen({super.key});
+  const LogExpenseScreen({
+    super.key,
+    this.receiptPhotoPicker,
+    this.initialCategories,
+    this.expenseSaver,
+  });
+
+  final Future<XFile?> Function()? receiptPhotoPicker;
+  final List<ExpenseCategoryModel>? initialCategories;
+  final ExpenseSaver? expenseSaver;
 
   @override
   State<LogExpenseScreen> createState() => _LogExpenseScreenState();
@@ -22,19 +47,30 @@ class LogExpenseScreen extends StatefulWidget {
 class _LogExpenseScreenState extends State<LogExpenseScreen> {
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _imagePicker = ImagePicker();
+  final List<XFile> _receiptPhotos = [];
+  List<ExpenseCategoryModel> _categories = const [];
   int? _selectedCategory;
   bool _categoryOpen = false;
-  bool _hasReceipts = false;
+  bool _isSubmitting = false;
 
   bool get _canSubmit =>
+      !_isSubmitting &&
       _selectedCategory != null &&
-      _amountController.text.trim().isNotEmpty &&
-      _hasReceipts;
+      _selectedCategory! < _categories.length &&
+      (double.tryParse(_amountController.text.trim()) ?? 0) > 0 &&
+      _receiptPhotos.isNotEmpty;
 
   @override
   void initState() {
     super.initState();
     _amountController.addListener(_refresh);
+    final initialCategories = widget.initialCategories;
+    if (initialCategories != null) {
+      _categories = initialCategories;
+    } else {
+      unawaited(_loadCategories());
+    }
   }
 
   @override
@@ -48,22 +84,67 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
 
   void _refresh() => setState(() {});
 
+  Future<void> _loadCategories() async {
+    try {
+      final categories = await EerlLocalRepository.instance
+          .getExpenseCategories();
+      if (mounted) setState(() => _categories = categories);
+    } catch (error) {
+      debugPrint('Expense category load failed: $error');
+    }
+  }
+
+  Future<void> _captureReceipt() async {
+    if (_receiptPhotos.length >= 2) return;
+    final picker = widget.receiptPhotoPicker;
+    final photo = picker != null
+        ? await picker()
+        : await ImageCompressor.pickAndCompress(
+            picker: _imagePicker,
+            source: ImageSource.camera,
+          );
+    if (photo == null || !mounted) return;
+    setState(() => _receiptPhotos.add(photo));
+  }
+
   Future<void> _submitExpense() async {
-    final submitted = await context.push<bool>(AppRoutes.expenseSubmitted);
-    if (submitted == true && mounted) Navigator.of(context).pop();
+    if (!_canSubmit) return;
+    final selectedCategory = _categories[_selectedCategory!];
+    final amount = double.parse(_amountController.text.trim());
+    setState(() => _isSubmitting = true);
+    try {
+      final saver =
+          widget.expenseSaver ?? EerlLocalRepository.instance.saveExpense;
+      await saver(
+        categoryId: selectedCategory.id,
+        amount: amount,
+        receiptPaths: _receiptPhotos
+            .map((photo) => photo.path)
+            .toList(growable: false),
+        note: _descriptionController.text,
+      );
+      unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+      if (!mounted) return;
+      final submitted = await context.push<bool>(AppRoutes.expenseSubmitted);
+      if (submitted == true && mounted) Navigator.of(context).pop();
+    } catch (error) {
+      debugPrint('Expense save failed: $error');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final categories = [
-      l10n.expenseCategoryLabour,
-      l10n.expenseCategoryFuel,
-      l10n.expenseCategoryVehicle,
-      l10n.expenseCategoryFood,
-      l10n.expenseCategorySupplies,
-      l10n.expenseCategoryOther,
-    ];
+    final categories = _categories
+        .map((category) => category.name)
+        .toList(growable: false);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -103,13 +184,24 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
                           });
                         },
                         requestNewCategoryLabel: l10n.requestNewExpenseCategory,
-                        onRequestNewCategory: () {
+                        onRequestNewCategory: () async {
                           setState(() => _categoryOpen = false);
-                          showDialog<void>(
+                          final saved = await showDialog<bool>(
                             context: context,
                             builder: (_) =>
                                 const RequestNewExpenseCategoryDialog(),
                           );
+                          if (saved == true && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  context
+                                      .l10n
+                                      .expenseCategoryRequestSavedForSync,
+                                ),
+                              ),
+                            );
+                          }
                         },
                       ),
                     ),
@@ -126,13 +218,16 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
                     const SizedBox(height: 24),
                     LogExpenseField(
                       label: l10n.uploadReceiptLabel,
-                      requiredField: !_hasReceipts,
+                      requiredField: _receiptPhotos.isEmpty,
                       child: ReceiptUploadSection(
                         captureLabel: l10n.capturePhoto,
                         helperText: l10n.receiptSupportMessage,
-                        hasReceipts: _hasReceipts,
-                        onCapture: () => setState(() => _hasReceipts = true),
-                        onRemove: () => setState(() => _hasReceipts = false),
+                        receiptPaths: _receiptPhotos
+                            .map((photo) => photo.path)
+                            .toList(growable: false),
+                        onCapture: _captureReceipt,
+                        onRemove: (index) =>
+                            setState(() => _receiptPhotos.removeAt(index)),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -164,7 +259,15 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
                           ),
                           textStyle: AppTextStyles.boldH7_16,
                         ),
-                        child: Text(l10n.submitExpenseClaim),
+                        child: _isSubmitting
+                            ? const SizedBox.square(
+                                dimension: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(l10n.submitExpenseClaim),
                       ),
                     ),
                     const SizedBox(height: 12),

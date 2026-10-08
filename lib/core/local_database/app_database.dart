@@ -12,7 +12,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 1;
+  static const databaseVersion = 2;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -53,6 +53,7 @@ class AppDatabase {
       version: databaseVersion,
       onConfigure: _onConfigure,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
       onOpen: _onOpen,
     );
 
@@ -84,6 +85,29 @@ class AppDatabase {
     );
   }
 
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await _addMissingColumns(db, DatabaseTables.transfers, const {
+        'driver_name': 'TEXT',
+        'dispatched_weight': 'REAL',
+        'bale_count': 'INTEGER',
+        'vehicle_photo_urls': "TEXT NOT NULL DEFAULT '[]'",
+        'weighbridge_photo_urls': "TEXT NOT NULL DEFAULT '[]'",
+      });
+      final syncMeta = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+        [DatabaseTables.syncMeta],
+      );
+      if (syncMeta.isNotEmpty) {
+        await db.insert(DatabaseTables.syncMeta, const {
+          'key': 'transfer_dispatch_refetch_required',
+          'value': '1',
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+      _log('Upgraded transfer dispatch schema to version 2');
+    }
+  }
+
   Future<void> _onOpen(Database db) async {
     await _ensureVersionOneSchema(db);
   }
@@ -110,6 +134,11 @@ class AppDatabase {
         'note': 'TEXT',
         'gps_lat': 'REAL',
         'gps_lng': 'REAL',
+        'driver_name': 'TEXT',
+        'dispatched_weight': 'REAL',
+        'bale_count': 'INTEGER',
+        'vehicle_photo_urls': "TEXT NOT NULL DEFAULT '[]'",
+        'weighbridge_photo_urls': "TEXT NOT NULL DEFAULT '[]'",
       },
       DatabaseTables.items: {'image_url': 'TEXT'},
     };
@@ -131,6 +160,22 @@ class AppDatabase {
           '${tableEntry.key}.${columnEntry.key}',
         );
       }
+    }
+  }
+
+  Future<void> _addMissingColumns(
+    DatabaseExecutor db,
+    String table,
+    Map<String, String> columns,
+  ) async {
+    final tableInfo = await db.rawQuery('PRAGMA table_info("$table")');
+    if (tableInfo.isEmpty) return;
+    final existing = tableInfo.map((row) => row['name']).toSet();
+    for (final entry in columns.entries) {
+      if (existing.contains(entry.key)) continue;
+      await db.execute(
+        'ALTER TABLE "$table" ADD COLUMN "${entry.key}" ${entry.value}',
+      );
     }
   }
 

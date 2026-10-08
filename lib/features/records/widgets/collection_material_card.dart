@@ -1,10 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 
 class CollectionMaterialCard extends StatelessWidget {
   const CollectionMaterialCard({
@@ -15,6 +15,8 @@ class CollectionMaterialCard extends StatelessWidget {
     required this.rateLabel,
     required this.totalLabel,
     this.thumbnailPath,
+    this.matchSummaryDesign = false,
+    this.onPhotoTap,
   });
 
   final CollectionItemModel item;
@@ -23,6 +25,8 @@ class CollectionMaterialCard extends StatelessWidget {
   final String rateLabel;
   final String totalLabel;
   final String? thumbnailPath;
+  final bool matchSummaryDesign;
+  final ValueChanged<String>? onPhotoTap;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +46,10 @@ class CollectionMaterialCard extends StatelessWidget {
                   ? const Icon(Icons.recycling, color: AppColors.primary500)
                   : ClipRRect(
                       borderRadius: BorderRadius.circular(5),
-                      child: Image.asset(thumbnailPath!, fit: BoxFit.cover),
+                      child: CachedAppImage(
+                        source: thumbnailPath!,
+                        fit: BoxFit.cover,
+                      ),
                     ),
             ),
             const SizedBox(width: 10),
@@ -63,7 +70,7 @@ class CollectionMaterialCard extends StatelessWidget {
               child: _WeightBox(
                 label: collectionWeightLabel,
                 color: AppColors.cool200,
-                value: '${item.qty.toStringAsFixed(2)} ${item.unitCode ?? ''}',
+                value: _quantity(item.qty),
               ),
             ),
             const SizedBox(width: 14),
@@ -71,8 +78,7 @@ class CollectionMaterialCard extends StatelessWidget {
               child: _WeightBox(
                 label: verifiedWeightLabel,
                 color: AppColors.primary100,
-                value:
-                    '${(item.verifiedQty ?? item.qty).toStringAsFixed(2)} ${item.unitCode ?? ''}',
+                value: _quantity(item.verifiedQty ?? item.qty),
               ),
             ),
           ],
@@ -83,7 +89,9 @@ class CollectionMaterialCard extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                '$rateLabel ${item.rate?.toStringAsFixed(2) ?? '-'}',
+                matchSummaryDesign
+                    ? '$rateLabel ₹${item.rate?.toStringAsFixed(2) ?? '-'}/$_rateUnit'
+                    : '$rateLabel ${item.rate?.toStringAsFixed(2) ?? '-'}',
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.mediumSH9_12.copyWith(
                   color: AppColors.neutral950,
@@ -93,7 +101,9 @@ class CollectionMaterialCard extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                '$totalLabel ${item.amount?.toStringAsFixed(2) ?? '-'}',
+                matchSummaryDesign
+                    ? '$totalLabel ₹${item.amount == null ? '-' : NumberFormat('#,##0.00').format(item.amount)}'
+                    : '$totalLabel ${item.amount?.toStringAsFixed(2) ?? '-'}',
                 textAlign: TextAlign.end,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.mediumSH9_12.copyWith(
@@ -112,7 +122,12 @@ class CollectionMaterialCard extends StatelessWidget {
                   (path) => Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(right: 12),
-                      child: _MaterialPhoto(path: path),
+                      child: _MaterialPhoto(
+                        path: path,
+                        onTap: onPhotoTap == null
+                            ? null
+                            : () => onPhotoTap!(path),
+                      ),
                     ),
                   ),
                 )
@@ -121,6 +136,16 @@ class CollectionMaterialCard extends StatelessWidget {
       ],
     );
   }
+
+  String _quantity(double value) {
+    final unit = item.unitCode ?? '';
+    return matchSummaryDesign
+        ? '$unit   ${value.toStringAsFixed(2)}'
+        : '${value.toStringAsFixed(2)} $unit';
+  }
+
+  String get _rateUnit =>
+      (item.unitCode ?? '').toUpperCase() == 'PCS' ? 'Piece' : 'KG';
 }
 
 class _WeightBox extends StatelessWidget {
@@ -163,18 +188,24 @@ class _WeightBox extends StatelessWidget {
 }
 
 class _MaterialPhoto extends StatelessWidget {
-  const _MaterialPhoto({required this.path});
+  const _MaterialPhoto({required this.path, this.onTap});
   final String path;
+  final VoidCallback? onTap;
+
   @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(5),
-    child: AspectRatio(
-      aspectRatio: 1.45,
-      child: path.startsWith('http://') || path.startsWith('https://')
-          ? Image.network(path, fit: BoxFit.cover)
-          : path.startsWith('assets/')
-          ? Image.asset(path, fit: BoxFit.cover)
-          : Image.file(File(path), fit: BoxFit.cover),
+  Widget build(BuildContext context) => Semantics(
+    button: onTap != null,
+    child: GestureDetector(
+      key: ValueKey('collection-material-photo-$path'),
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(5),
+        child: AspectRatio(
+          aspectRatio: 1.45,
+          child: CachedAppImage(source: path, fit: BoxFit.cover),
+        ),
+      ),
     ),
   );
 }

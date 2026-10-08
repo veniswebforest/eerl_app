@@ -25,20 +25,14 @@ enum BootstrapTrigger {
 
 class BootstrapSyncService extends ChangeNotifier {
   BootstrapSyncService._({
-    required BootstrapGateway gateway,
-    required AppDatabase database,
-    required BootstrapDatabaseApplier applier,
-    required ItemImageCacheService itemImageCache,
-    required Future<String?> Function() accessTokenProvider,
-    required Future<void> Function() onSessionExpired,
-    required Future<bool> Function() internetAccessChecker,
-  }) : _gateway = gateway,
-       _database = database,
-       _applier = applier,
-       _itemImageCache = itemImageCache,
-       _accessTokenProvider = accessTokenProvider,
-       _onSessionExpired = onSessionExpired,
-       _internetAccessChecker = internetAccessChecker;
+    required this._gateway,
+    required this._database,
+    required this._applier,
+    required this._itemImageCache,
+    required this._accessTokenProvider,
+    required this._onSessionExpired,
+    required this._internetAccessChecker,
+  });
 
   factory BootstrapSyncService.forTesting({
     required BootstrapGateway gateway,
@@ -190,7 +184,12 @@ class BootstrapSyncService extends ChangeNotifier {
 
     final itemImagesNeedRefetch =
         await _database.getSyncMeta('item_images_refetch_required') == '1';
-    var itemImageResetDone = false;
+    final transferDispatchNeedsRefetch =
+        await _database.getSyncMeta('transfer_dispatch_refetch_required') ==
+        '1';
+    final schemaRefetchRequired =
+        itemImagesNeedRefetch || transferDispatchNeedsRefetch;
+    var schemaResetDone = false;
     String? cursor = await _database.getSyncMeta('cursor');
     if (cursor != null && cursor.isEmpty) cursor = null;
     _log(cursor == null ? 'Starting full/first sync' : 'Starting cursor sync');
@@ -232,16 +231,16 @@ class BootstrapSyncService extends ChangeNotifier {
       // This preserves the existing offline catalogue when the app is upgraded
       // without connectivity. The fetched page is intentionally discarded;
       // the next request is a full download without a cursor.
-      if (itemImagesNeedRefetch && !itemImageResetDone) {
+      if (schemaRefetchRequired && !schemaResetDone) {
         _log(
-          'Item image schema upgraded and network is available; '
-          'resetting scope for a full item fetch',
+          'Local schema upgraded and network is available; resetting scope '
+          'for a full Bootstrap fetch',
         );
         await _requireDrainedOutboxForReset();
         await _database.scopeReset();
         cursor = null;
         page = 0;
-        itemImageResetDone = true;
+        schemaResetDone = true;
         continue;
       }
 
@@ -267,9 +266,6 @@ class BootstrapSyncService extends ChangeNotifier {
       }
 
       await _applier.apply(data);
-      if (data.tables.containsKey(DatabaseTables.items)) {
-        await _itemImageCache.reconcile();
-      }
 
       if (!data.hasMore) break;
       if (data.cursor == cursor) {
@@ -279,9 +275,15 @@ class BootstrapSyncService extends ChangeNotifier {
       }
       cursor = data.cursor;
     }
-    if (itemImageResetDone) {
-      await _database.setSyncMeta('item_images_refetch_required', '0');
-      _log('One-time item image full refetch completed');
+    await _itemImageCache.reconcile();
+    if (schemaResetDone) {
+      if (itemImagesNeedRefetch) {
+        await _database.setSyncMeta('item_images_refetch_required', '0');
+      }
+      if (transferDispatchNeedsRefetch) {
+        await _database.setSyncMeta('transfer_dispatch_refetch_required', '0');
+      }
+      _log('One-time schema full refetch completed');
     }
   }
 
@@ -342,6 +344,7 @@ class BootstrapSyncService extends ChangeNotifier {
       where: 'local_path IS NOT NULL',
     );
     await _database.clearDatabaseOnLogout();
+    await _itemImageCache.clear();
     for (final row in photoRows) {
       final path = row['local_path'];
       if (path is! String || path.isEmpty) continue;

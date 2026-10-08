@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +17,7 @@ import 'package:eerl_app/features/records/widgets/collection_detail_cards.dart';
 import 'package:eerl_app/features/records/widgets/collection_material_card.dart';
 import 'package:eerl_app/features/verification/model/verification_entry.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 
 class VerificationDetailScreen extends StatefulWidget {
   const VerificationDetailScreen({
@@ -402,11 +401,7 @@ class _VehiclePhoto extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           child: AspectRatio(
             aspectRatio: 2.35,
-            child: path.startsWith('assets/')
-                ? Image.asset(path, fit: BoxFit.cover)
-                : path.startsWith('http')
-                ? Image.network(path, fit: BoxFit.cover)
-                : Image.file(File(path), fit: BoxFit.cover),
+            child: CachedAppImage(source: path, fit: BoxFit.cover),
           ),
         ),
       ],

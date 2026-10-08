@@ -1,1 +1,1 @@
-enum CollectionDetailStatus { pending, approved, rejected }
+enum CollectionDetailStatus { draft, pending, approved, rejected }

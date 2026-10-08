@@ -8,6 +8,7 @@ import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/core/network/app_http_client.dart';
 import 'package:eerl_app/core/network/internet_connectivity_service.dart';
 import 'package:eerl_app/features/auth/data/auth_session_storage.dart';
+import 'package:eerl_app/features/bootstrap/service/item_image_cache_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
@@ -18,10 +19,12 @@ class OutgoingSyncService {
     AppDatabase? database,
     http.Client? client,
     AuthSessionStorage? sessionStorage,
+    ItemImageCacheService? imageCache,
     Future<bool> Function()? internetAccessChecker,
   }) : _database = database ?? AppDatabase.instance,
        _client = client ?? AppHttpClient.instance.client,
        _sessionStorage = sessionStorage ?? AuthSessionStorage(),
+       _imageCache = imageCache ?? ItemImageCacheService.instance,
        _internetAccessChecker =
            internetAccessChecker ??
            InternetConnectivityService.instance.hasInternetAccess;
@@ -32,6 +35,7 @@ class OutgoingSyncService {
   final AppDatabase _database;
   final http.Client _client;
   final AuthSessionStorage _sessionStorage;
+  final ItemImageCacheService _imageCache;
   // Nullable so a singleton retained across Flutter hot reload can safely
   // fall back when this field did not exist on the original instance.
   final Future<bool> Function()? _internetAccessChecker;
@@ -78,6 +82,18 @@ class OutgoingSyncService {
     if (token == null || token.trim().isEmpty) {
       _log('Skipped outgoing sync: access token not found');
       return;
+    }
+
+    // A failed row must stay part of the outgoing queue. Re-queue it once at
+    // the beginning of each drain so a later app-open/reconnect/local mutation
+    // can retry it. Rows that fail again remain failed until the next drain,
+    // which prevents a permanent 4xx response from looping in this run.
+    final failedRetryCount = await _database.update(DatabaseTables.outbox, {
+      'status': 'queued',
+      'next_attempt_at': null,
+    }, where: "status = 'failed'");
+    if (failedRetryCount > 0) {
+      _log('RE-QUEUED $failedRetryCount failed outbox item(s)');
     }
 
     // A process death can leave a row in sending/uploading. Both operations
@@ -178,11 +194,27 @@ class OutgoingSyncService {
 
       _log('SEND #$seq ${item['method']} ${item['path']}');
       final isCollection = item['entity'] == DatabaseTables.collections;
+      final isTransfer = item['entity'] == DatabaseTables.transfers;
+      final isExpense = item['entity'] == DatabaseTables.expenses;
       if (isCollection) {
         _collectionLog(
           'REQUEST',
           '#$seq ${item['method']} ${request.url} '
               'collection_id=${item['entity_id']} body=${request.body}',
+        );
+      }
+      if (isTransfer) {
+        _transferLog(
+          'REQUEST',
+          '#$seq ${item['method']} ${request.url} '
+              'transfer_id=${item['entity_id']} body=${request.body}',
+        );
+      }
+      if (isExpense) {
+        _expenseLog(
+          'REQUEST',
+          '#$seq ${item['method']} ${request.url} '
+              'expense_id=${item['entity_id']} body=${request.body}',
         );
       }
       final streamed = await _client.send(request).timeout(_timeout);
@@ -193,6 +225,22 @@ class OutgoingSyncService {
           'RESPONSE',
           '#$seq status=${response.statusCode} '
               'collection_id=${item['entity_id']} '
+              'body=${response.body.trim().isEmpty ? '{}' : response.body}',
+        );
+      }
+      if (isTransfer) {
+        _transferLog(
+          'RESPONSE',
+          '#$seq status=${response.statusCode} '
+              'transfer_id=${item['entity_id']} '
+              'body=${response.body.trim().isEmpty ? '{}' : response.body}',
+        );
+      }
+      if (isExpense) {
+        _expenseLog(
+          'RESPONSE',
+          '#$seq status=${response.statusCode} '
+              'expense_id=${item['entity_id']} '
               'body=${response.body.trim().isEmpty ? '{}' : response.body}',
         );
       }
@@ -378,6 +426,12 @@ class OutgoingSyncService {
     if (table == DatabaseTables.collections) {
       return _collectionServerValues(data);
     }
+    if (table == DatabaseTables.transfers) {
+      return _transferServerValues(data);
+    }
+    if (table == DatabaseTables.expenses) {
+      return _expenseServerValues(data);
+    }
     Object? candidate = data;
     if (data[table] is Map) candidate = data[table];
     if (candidate is! Map) return <String, Object?>{};
@@ -435,6 +489,38 @@ class OutgoingSyncService {
         'gps_lng': (gps['lng'] as num).toDouble(),
     };
   }
+
+  Map<String, Object?> _transferServerValues(Map<Object?, Object?> data) => {
+    if (data['status'] != null) 'status': data['status'],
+    if (data['number'] != null) 'number': data['number'],
+    if (data['destinationId'] != null) 'destination_id': data['destinationId'],
+    if (data['destinationName'] != null)
+      'destination_name': data['destinationName'],
+    if (data['truckExpectedAt'] != null)
+      'truck_expected_at': data['truckExpectedAt'],
+    if (data['vehicleNumber'] != null) 'vehicle_plate': data['vehicleNumber'],
+    if (data['driverName'] != null) 'driver_name': data['driverName'],
+    if (data['handedOverAt'] != null) 'handed_over_at': data['handedOverAt'],
+    if (data['dispatchedWeight'] != null)
+      'dispatched_weight': data['dispatchedWeight'],
+    if (data.containsKey('baleCount')) 'bale_count': data['baleCount'],
+    if (data['vehiclePhotoUrls'] is List)
+      'vehicle_photo_urls': jsonEncode(data['vehiclePhotoUrls']),
+    if (data['weighbridgePhotoUrls'] is List)
+      'weighbridge_photo_urls': jsonEncode(data['weighbridgePhotoUrls']),
+    if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
+  };
+
+  Map<String, Object?> _expenseServerValues(Map<Object?, Object?> data) => {
+    if (data['status'] != null) 'status': data['status'],
+    if (data['number'] != null) 'number': data['number'],
+    if (data['amount'] != null) 'amount': data['amount'],
+    if (data.containsKey('note')) 'note': data['note'],
+    if (data['photoUrls'] is List)
+      'receipt_photo_urls': jsonEncode(data['photoUrls']),
+    if (data['createdAt'] != null) 'created_at': data['createdAt'],
+    if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
+  };
 
   Future<void> _applyCollectionResponseLines(
     Transaction txn,
@@ -621,13 +707,12 @@ class OutgoingSyncService {
         final localPath = source['local_path'] as String?;
         if (localPath == null || localPath.isEmpty) continue;
         final file = File(localPath);
-        final put = await _client
-            .put(
-              Uri.parse(uploadUrl),
-              headers: {'content-type': source['content_type']! as String},
-              body: await file.readAsBytes(),
-            )
-            .timeout(_timeout);
+        final request = http.StreamedRequest('PUT', Uri.parse(uploadUrl))
+          ..headers['content-type'] = source['content_type']! as String
+          ..contentLength = await file.length();
+        final responseFuture = _client.send(request).timeout(_timeout);
+        await file.openRead().pipe(request.sink);
+        final put = await responseFuture;
         if (put.statusCode < 200 || put.statusCode >= 300) continue;
         await _database.update(
           DatabaseTables.photos,
@@ -639,6 +724,7 @@ class OutgoingSyncService {
           where: 'id = ?',
           whereArgs: [id],
         );
+        await _imageCache.storeLocalFileForUrl(fileUrl, file);
         uploadedCount++;
         _photoLog(
           'UPLOADED',
@@ -692,7 +778,9 @@ class OutgoingSyncService {
   bool _isSuccess(int statusCode, String? code) =>
       (statusCode >= 200 && statusCode < 300) ||
       (statusCode == 409 &&
-          (code == 'NOT_PENDING' || code == 'ALREADY_CLOSED'));
+          (code == 'NOT_PENDING' ||
+              code == 'ALREADY_CLOSED' ||
+              code == 'ALREADY_DISPATCHED'));
 
   static const _tablesWithSyncState = <String>{
     DatabaseTables.centerItems,
@@ -717,6 +805,18 @@ class OutgoingSyncService {
   static void _collectionLog(String stage, String message) {
     if (kDebugMode) {
       debugPrint('🌐 [EERL_COLLECTION_API][$stage] $message');
+    }
+  }
+
+  static void _transferLog(String stage, String message) {
+    if (kDebugMode) {
+      debugPrint('🚚 [EERL_TRANSFER_API][$stage] $message');
+    }
+  }
+
+  static void _expenseLog(String stage, String message) {
+    if (kDebugMode) {
+      debugPrint('💸 [EERL_EXPENSE_API][$stage] $message');
     }
   }
 

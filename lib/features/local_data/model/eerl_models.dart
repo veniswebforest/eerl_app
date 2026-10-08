@@ -587,6 +587,7 @@ class CollectionItemModel {
     this.name,
     this.unitCode,
     this.unitName,
+    this.itemImageUrl,
   });
   final String id;
   final String collectionId;
@@ -600,6 +601,7 @@ class CollectionItemModel {
   final String? name;
   final String? unitCode;
   final String? unitName;
+  final String? itemImageUrl;
   factory CollectionItemModel.fromMap(DbMap map) => CollectionItemModel(
     id: map['id'] as String,
     collectionId: map['collection_id'] as String,
@@ -613,6 +615,7 @@ class CollectionItemModel {
     name: map['name'] as String?,
     unitCode: map['unit_code'] as String?,
     unitName: map['unit_name'] as String?,
+    itemImageUrl: map['item_image_url'] as String?,
   );
   DbMap toMap() => {
     'id': id,
@@ -819,6 +822,13 @@ class TransferModel {
     this.estimatedExpense,
     this.note,
     this.vehiclePlate,
+    this.driverName,
+    this.dispatchedWeight,
+    this.baleCount,
+    this.vehiclePhotoUrls = const [],
+    this.weighbridgePhotoUrls = const [],
+    @Deprecated('Transfer dispatch uses the two field-specific photo lists.')
+    List<String> photoUrls = const [],
     required this.requestedBy,
     required this.requestedByName,
     required this.requestedAt,
@@ -828,7 +838,6 @@ class TransferModel {
     this.handedOverAt,
     this.gpsLat,
     this.gpsLng,
-    required this.photoUrls,
     this.updatedAt,
     required this.syncState,
     this.lines = 0,
@@ -847,6 +856,11 @@ class TransferModel {
   final double? estimatedExpense;
   final String? note;
   final String? vehiclePlate;
+  final String? driverName;
+  final double? dispatchedWeight;
+  final int? baleCount;
+  final List<String> vehiclePhotoUrls;
+  final List<String> weighbridgePhotoUrls;
   final String requestedBy;
   final String requestedByName;
   final String requestedAt;
@@ -856,7 +870,6 @@ class TransferModel {
   final String? handedOverAt;
   final double? gpsLat;
   final double? gpsLng;
-  final List<String> photoUrls;
   final String? updatedAt;
   final String syncState;
   final int lines;
@@ -875,6 +888,11 @@ class TransferModel {
     estimatedExpense: (map['estimated_expense'] as num?)?.toDouble(),
     note: map['note'] as String?,
     vehiclePlate: map['vehicle_plate'] as String?,
+    driverName: map['driver_name'] as String?,
+    dispatchedWeight: (map['dispatched_weight'] as num?)?.toDouble(),
+    baleCount: (map['bale_count'] as num?)?.toInt(),
+    vehiclePhotoUrls: _strings(map['vehicle_photo_urls']),
+    weighbridgePhotoUrls: _strings(map['weighbridge_photo_urls']),
     requestedBy: map['requested_by'] as String,
     requestedByName: map['requested_by_name'] as String,
     requestedAt: map['requested_at'] as String,
@@ -884,7 +902,6 @@ class TransferModel {
     handedOverAt: map['handed_over_at'] as String?,
     gpsLat: (map['gps_lat'] as num?)?.toDouble(),
     gpsLng: (map['gps_lng'] as num?)?.toDouble(),
-    photoUrls: _strings(map['photo_urls']),
     updatedAt: map['updated_at'] as String?,
     syncState: map['sync_state'] as String,
     lines: _int(map['lines']),
@@ -904,6 +921,11 @@ class TransferModel {
     'estimated_expense': estimatedExpense,
     'note': note,
     'vehicle_plate': vehiclePlate,
+    'driver_name': driverName,
+    'dispatched_weight': dispatchedWeight,
+    'bale_count': baleCount,
+    'vehicle_photo_urls': _jsonStrings(vehiclePhotoUrls),
+    'weighbridge_photo_urls': _jsonStrings(weighbridgePhotoUrls),
     'requested_by': requestedBy,
     'requested_by_name': requestedByName,
     'requested_at': requestedAt,
@@ -913,7 +935,6 @@ class TransferModel {
     'handed_over_at': handedOverAt,
     'gps_lat': gpsLat,
     'gps_lng': gpsLng,
-    'photo_urls': _jsonStrings(photoUrls),
     'updated_at': updatedAt,
     'sync_state': syncState,
   };
@@ -952,6 +973,46 @@ class TransferItemModel {
     'qty': qty,
     'dispatched_qty': dispatchedQty,
   };
+}
+
+class TransferDispatchPhotoModel {
+  const TransferDispatchPhotoModel({
+    required this.id,
+    required this.field,
+    required this.localPath,
+    this.remoteUrl,
+    required this.status,
+  });
+
+  final String id;
+  final String field;
+  final String? localPath;
+  final String? remoteUrl;
+  final String status;
+
+  factory TransferDispatchPhotoModel.fromMap(DbMap map) =>
+      TransferDispatchPhotoModel(
+        id: map['id']! as String,
+        field: map['field']! as String,
+        localPath: map['local_path'] as String?,
+        remoteUrl: map['remote_url'] as String?,
+        status: map['status']! as String,
+      );
+}
+
+class TransferDispatchDraftModel {
+  const TransferDispatchDraftModel({
+    this.vehicleNumber,
+    this.driverName,
+    this.photos = const [],
+  });
+
+  final String? vehicleNumber;
+  final String? driverName;
+  final List<TransferDispatchPhotoModel> photos;
+
+  List<TransferDispatchPhotoModel> photosFor(String field) =>
+      photos.where((photo) => photo.field == field).toList(growable: false);
 }
 
 class TaskModel {

@@ -198,7 +198,10 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
         ),
         const SizedBox(height: 10),
         if (items.isEmpty)
-          Center(child: Text(context.l10n.dashboardEmptyMessage))
+          _RecordsEmptyState(
+            key: const Key('records-history-empty'),
+            message: context.l10n.verificationEmpty,
+          )
         else
           for (final item in items) ...[
             CollectionHistoryCard(
@@ -230,26 +233,9 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
         ),
         const SizedBox(height: 12),
         if (_view == RecordsViewFlag.emptyDrafts || drafts.isEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 42),
-            child: Center(
-              child: Column(
-                children: [
-                  SvgPicture.asset(
-                    RecordsAssets.emptyDrafts,
-                    width: 213,
-                    height: 233,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    context.l10n.recordsNoDrafts,
-                    style: AppTextStyles.semiboldH8_16.copyWith(
-                      color: AppColors.neutral400,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          _RecordsEmptyState(
+            key: const Key('records-drafts-empty'),
+            message: context.l10n.recordsNoDrafts,
           )
         else
           for (final item in drafts) ...[
@@ -351,6 +337,32 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
       setState(() => _dateFilter = selected);
     }
   }
+}
+
+class _RecordsEmptyState extends StatelessWidget {
+  const _RecordsEmptyState({super.key, required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 42),
+    child: Center(
+      child: Column(
+        children: [
+          SvgPicture.asset(RecordsAssets.emptyDrafts, width: 213, height: 233),
+          const SizedBox(height: 16),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.semiboldH8_16.copyWith(
+              color: AppColors.neutral400,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _SearchField extends StatelessWidget {

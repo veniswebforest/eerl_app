@@ -2092,6 +2092,18 @@ abstract class AppLocalizations {
   /// **'Request New Category'**
   String get requestNewExpenseCategory;
 
+  /// No description provided for @expenseCategoryRequestSavedForSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Category request saved. It will sync automatically.'**
+  String get expenseCategoryRequestSavedForSync;
+
+  /// No description provided for @expenseCategoryRequestSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Category request could not be saved. Please try again.'**
+  String get expenseCategoryRequestSaveFailed;
+
   /// No description provided for @expenseCategoryName.
   ///
   /// In en, this message translates to:
@@ -3627,6 +3639,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ensure your Bluetooth thermal printer is switched on and connected.'**
   String get collectionPrinterHint;
+
+  /// No description provided for @collectionPrinterReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer Ready'**
+  String get collectionPrinterReady;
+
+  /// No description provided for @collectionPrinterConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth thermal printer connected.'**
+  String get collectionPrinterConnected;
+
+  /// No description provided for @collectionReceiptDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & Time'**
+  String get collectionReceiptDateTime;
+
+  /// No description provided for @collectionReceiptBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected Items Breakdown'**
+  String get collectionReceiptBreakdown;
+
+  /// No description provided for @collectionItemsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Items'**
+  String collectionItemsCount(int count);
+
+  /// No description provided for @collectionReceiptAggregateSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggregate Summary'**
+  String get collectionReceiptAggregateSummary;
+
+  /// No description provided for @collectionReceiptAggregateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight & Count Summary'**
+  String get collectionReceiptAggregateHint;
+
+  /// No description provided for @collectionReceiptLaborInvolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Labor Involved'**
+  String get collectionReceiptLaborInvolved;
+
+  /// No description provided for @collectionReceiptWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get collectionReceiptWeight;
+
+  /// No description provided for @collectionReceiptPieces.
+  ///
+  /// In en, this message translates to:
+  /// **'Pieces'**
+  String get collectionReceiptPieces;
+
+  /// No description provided for @collectionReceiptPaymentBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment By'**
+  String get collectionReceiptPaymentBy;
+
+  /// No description provided for @collectionReceiptTotalSettlement.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Settlement'**
+  String get collectionReceiptTotalSettlement;
+
+  /// No description provided for @collectionReceiptCollectedAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected Agent'**
+  String get collectionReceiptCollectedAgent;
 
   /// No description provided for @collectionSlipActionError.
   ///

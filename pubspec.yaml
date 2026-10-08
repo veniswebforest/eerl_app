@@ -57,6 +57,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/collection_detail/
+    - assets/images/collection_detail/figma/
     - assets/images/verification/
     - assets/images/verification/figma/
     - assets/images/stock/

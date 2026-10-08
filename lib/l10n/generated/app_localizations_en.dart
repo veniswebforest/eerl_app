@@ -1063,6 +1063,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requestNewExpenseCategory => 'Request New Category';
 
   @override
+  String get expenseCategoryRequestSavedForSync =>
+      'Category request saved. It will sync automatically.';
+
+  @override
+  String get expenseCategoryRequestSaveFailed =>
+      'Category request could not be saved. Please try again.';
+
+  @override
   String get expenseCategoryName => 'Category Name';
 
   @override
@@ -1862,6 +1870,48 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get collectionPrinterHint =>
       'Ensure your Bluetooth thermal printer is switched on and connected.';
+
+  @override
+  String get collectionPrinterReady => 'Printer Ready';
+
+  @override
+  String get collectionPrinterConnected =>
+      'Bluetooth thermal printer connected.';
+
+  @override
+  String get collectionReceiptDateTime => 'Date & Time';
+
+  @override
+  String get collectionReceiptBreakdown => 'Collected Items Breakdown';
+
+  @override
+  String collectionItemsCount(int count) {
+    return '$count Items';
+  }
+
+  @override
+  String get collectionReceiptAggregateSummary => 'Aggregate Summary';
+
+  @override
+  String get collectionReceiptAggregateHint => 'Weight & Count Summary';
+
+  @override
+  String get collectionReceiptLaborInvolved => 'Labor Involved';
+
+  @override
+  String get collectionReceiptWeight => 'Weight';
+
+  @override
+  String get collectionReceiptPieces => 'Pieces';
+
+  @override
+  String get collectionReceiptPaymentBy => 'Payment By';
+
+  @override
+  String get collectionReceiptTotalSettlement => 'Total Settlement';
+
+  @override
+  String get collectionReceiptCollectedAgent => 'Collected Agent';
 
   @override
   String get collectionSlipActionError =>

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -10,16 +12,18 @@ class ReceiptUploadSection extends StatelessWidget {
     super.key,
     required this.captureLabel,
     required this.helperText,
-    required this.hasReceipts,
+    required this.receiptPaths,
     required this.onCapture,
     required this.onRemove,
   });
 
   final String captureLabel;
   final String helperText;
-  final bool hasReceipts;
+  final List<String> receiptPaths;
   final VoidCallback onCapture;
-  final VoidCallback onRemove;
+  final ValueChanged<int> onRemove;
+
+  bool get hasReceipts => receiptPaths.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +32,7 @@ class ReceiptUploadSection extends StatelessWidget {
       children: [
         InkWell(
           key: const Key('capture-receipt-button'),
-          onTap: onCapture,
+          onTap: receiptPaths.length < 2 ? onCapture : null,
           borderRadius: BorderRadius.circular(8),
           child: Container(
             height: 115,
@@ -71,9 +75,17 @@ class ReceiptUploadSection extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(child: _ReceiptPreview(onRemove: onRemove)),
-              const SizedBox(width: 8),
-              Expanded(child: _ReceiptPreview(onRemove: onRemove)),
+              for (var index = 0; index < receiptPaths.length; index++) ...[
+                Expanded(
+                  child: _ReceiptPreview(
+                    path: receiptPaths[index],
+                    index: index,
+                    onRemove: () => onRemove(index),
+                  ),
+                ),
+                if (index != receiptPaths.length - 1) const SizedBox(width: 8),
+              ],
+              if (receiptPaths.length == 1) const Expanded(child: SizedBox()),
             ],
           ),
         ],
@@ -121,8 +133,14 @@ class _DashedBorderPainter extends CustomPainter {
 }
 
 class _ReceiptPreview extends StatelessWidget {
-  const _ReceiptPreview({required this.onRemove});
+  const _ReceiptPreview({
+    required this.path,
+    required this.index,
+    required this.onRemove,
+  });
 
+  final String path;
+  final int index;
   final VoidCallback onRemove;
 
   @override
@@ -134,15 +152,26 @@ class _ReceiptPreview extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: Image.asset(
-              'assets/images/expense_receipt.png',
+            child: Image.file(
+              File(path),
+              key: ValueKey('expense-receipt-image-$index'),
               fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => const ColoredBox(
+                color: AppColors.cool100,
+                child: Center(
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    color: AppColors.neutral400,
+                  ),
+                ),
+              ),
             ),
           ),
           Positioned(
             right: 6,
             top: 6,
             child: InkWell(
+              key: ValueKey('remove-expense-receipt-$index'),
               onTap: onRemove,
               child: SvgPicture.asset(
                 WalletAssets.expenseRemove,

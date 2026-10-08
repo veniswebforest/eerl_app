@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -22,6 +23,9 @@ class HomeAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).toString();
+    final today = DateFormat('EEE, dd MMM yyyy', locale).format(DateTime.now());
+
     return SizedBox(
       height: 45,
       child: Row(
@@ -50,7 +54,8 @@ class HomeAppBar extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  context.l10n.homeDateZone,
+                  today,
+                  key: const Key('home-today-date'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.mediumSH9_12.copyWith(

@@ -123,11 +123,26 @@ class EerlLocalRepository {
     bool supervisor = false,
     String? status,
   }) => _local.getExpenses(supervisor: supervisor, status: status);
+  Future<String> saveExpense({
+    required String categoryId,
+    required double amount,
+    required List<String> receiptPaths,
+    String? note,
+    String? collectionId,
+  }) => _local.saveExpense(
+    categoryId: categoryId,
+    amount: amount,
+    receiptPaths: receiptPaths,
+    note: note,
+    collectionId: collectionId,
+  );
   Future<List<CashRequestModel>> getCashRequests({bool supervisor = false}) =>
       _local.getCashRequests(supervisor: supervisor);
   Future<List<CategoryRequestModel>> getCategoryRequests({
     bool supervisor = false,
   }) => _local.getCategoryRequests(supervisor: supervisor);
+  Future<String> saveCategoryRequest({required String name, String? reason}) =>
+      _local.saveCategoryRequest(name: name, reason: reason);
   Future<List<TransferModel>> getTransfers({
     bool supervisor = false,
     String? status,
@@ -149,6 +164,43 @@ class EerlLocalRepository {
   Future<TransferModel?> getTransfer(String id) => _local.getTransfer(id);
   Future<List<TransferItemModel>> getTransferItems(String id) =>
       _local.getTransferItems(id);
+  Future<TransferDispatchDraftModel> getTransferDispatchDraft(String id) =>
+      _local.getTransferDispatchDraft(id);
+  Future<void> saveTransferDispatchDraft({
+    required String transferId,
+    required String vehicleNumber,
+    required String driverName,
+  }) => _local.saveTransferDispatchDraft(
+    transferId: transferId,
+    vehicleNumber: vehicleNumber,
+    driverName: driverName,
+  );
+  Future<TransferDispatchPhotoModel> addTransferDispatchPhoto({
+    required String transferId,
+    required String field,
+    required String localPath,
+  }) => _local.addTransferDispatchPhoto(
+    transferId: transferId,
+    field: field,
+    localPath: localPath,
+  );
+  Future<void> removeTransferDispatchPhoto(String photoId) =>
+      _local.removeTransferDispatchPhoto(photoId);
+  Future<void> submitTransferDispatch({
+    required String transferId,
+    required String vehicleNumber,
+    required String driverName,
+    required double dispatchedWeight,
+    int? baleCount,
+    double? piecesLoaded,
+  }) => _local.submitTransferDispatch(
+    transferId: transferId,
+    vehicleNumber: vehicleNumber,
+    driverName: driverName,
+    dispatchedWeight: dispatchedWeight,
+    baleCount: baleCount,
+    piecesLoaded: piecesLoaded,
+  );
   Future<List<TaskModel>> getTasks({
     bool supervisor = false,
     String search = '',

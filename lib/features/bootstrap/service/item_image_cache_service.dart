@@ -9,9 +9,11 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
-/// Keeps server-managed material thumbnails available while the phone is
-/// offline. The URL is immutable content identity: when an admin replaces an
-/// image, the new URL naturally gets a new cache file.
+/// Keeps every server-managed image available while the phone is offline.
+///
+/// A remote URL is only returned to the UI after its bytes have been committed
+/// to the persistent cache. The URL is the content identity: when the server
+/// replaces an image, the new URL naturally gets a new cache file.
 class ItemImageCacheService {
   ItemImageCacheService({
     AppDatabase? database,
@@ -27,24 +29,21 @@ class ItemImageCacheService {
   final AppDatabase _database;
   final http.Client _client;
   final Future<Directory> Function() _directoryProvider;
+  final Map<String, Future<File?>> _inFlight = {};
+  int _generation = 0;
 
   Future<void> reconcile() async {
-    final rows = await _database.query(
-      DatabaseTables.items,
-      columns: const ['image_url'],
-      where: "image_url IS NOT NULL AND TRIM(image_url) <> ''",
-    );
-    final urls = rows
-        .map((row) => row['image_url'])
-        .whereType<String>()
-        .toSet();
+    final urls = await _storedRemoteUrls();
     final directory = await _directoryProvider();
     await directory.create(recursive: true);
 
-    for (final url in urls) {
-      final file = File(p.join(directory.path, _fileName(url)));
-      if (await file.exists()) continue;
-      await _download(url, file);
+    // Bound concurrency so a large Bootstrap response does not saturate the
+    // radio, file descriptors, or image server.
+    final pending = urls.toList(growable: false);
+    const parallelDownloads = 3;
+    for (var start = 0; start < pending.length; start += parallelDownloads) {
+      final end = (start + parallelDownloads).clamp(0, pending.length);
+      await Future.wait(pending.sublist(start, end).map(cacheFileForUrl));
     }
 
     final expectedNames = urls.map(_fileName).toSet();
@@ -69,26 +68,150 @@ class ItemImageCacheService {
     return await file.exists() ? file : null;
   }
 
-  Future<void> _download(String url, File destination) async {
+  Future<void> clear() async {
+    _generation++;
+    final directory = await _directoryProvider();
+    if (await directory.exists()) await directory.delete(recursive: true);
+    _inFlight.clear();
+  }
+
+  /// Downloads [url] when missing and returns only the persistent local file.
+  /// Concurrent callers for the same URL share one download.
+  Future<File?> cacheFileForUrl(String? url) {
+    if (!_isRemoteUrl(url)) return Future<File?>.value(null);
+    final normalized = url!.trim();
+    final active = _inFlight[normalized];
+    if (active != null) return active;
+
+    late final Future<File?> operation;
+    final generation = _generation;
+    operation = _cacheFile(normalized, generation).whenComplete(() {
+      if (identical(_inFlight[normalized], operation)) {
+        _inFlight.remove(normalized);
+      }
+    });
+    _inFlight[normalized] = operation;
+    return operation;
+  }
+
+  /// Seeds the persistent cache from an already-uploaded local photo, avoiding
+  /// an unnecessary download of the same bytes from the remote URL.
+  Future<File?> storeLocalFileForUrl(String? url, File source) async {
+    if (!_isRemoteUrl(url) || !await source.exists()) return null;
+    final generation = _generation;
+    final directory = await _directoryProvider();
+    await directory.create(recursive: true);
+    final destination = File(p.join(directory.path, _fileName(url!.trim())));
+    if (await destination.exists()) return destination;
+
+    final temporary = File('${destination.path}.tmp');
+    try {
+      await source.openRead().pipe(temporary.openWrite());
+      if (generation != _generation) {
+        await temporary.delete();
+        return null;
+      }
+      await temporary.rename(destination.path);
+      return destination;
+    } on FileSystemException catch (error) {
+      _log('Could not cache uploaded image: ${error.message}');
+      if (await temporary.exists()) await temporary.delete();
+      return null;
+    }
+  }
+
+  Future<File?> _cacheFile(String url, int generation) async {
+    final existing = await localFileForUrl(url);
+    if (existing != null) return existing;
+    final directory = await _directoryProvider();
+    await directory.create(recursive: true);
+    final destination = File(p.join(directory.path, _fileName(url)));
+    final downloaded = await _download(url, destination);
+    if (!downloaded) return null;
+    if (generation == _generation) return destination;
+    if (await destination.exists()) await destination.delete();
+    return null;
+  }
+
+  Future<bool> _download(String url, File destination) async {
     File? temporary;
     try {
       final uri = Uri.tryParse(url);
-      if (uri == null || !uri.hasScheme) return;
-      final response = await _client.get(uri).timeout(_timeout);
+      if (uri == null || !uri.hasScheme) return false;
+      final request = http.Request('GET', uri);
+      final response = await _client.send(request).timeout(_timeout);
       if (response.statusCode < 200 || response.statusCode >= 300) {
         _log('Download HTTP ${response.statusCode}: $url');
-        return;
+        return false;
       }
       temporary = File('${destination.path}.tmp');
-      await temporary.writeAsBytes(response.bodyBytes, flush: true);
+      await response.stream.timeout(_timeout).pipe(temporary.openWrite());
       await temporary.rename(destination.path);
       _log('Downloaded ${p.basename(destination.path)}');
+      return true;
     } catch (error) {
       _log('Download failed; will retry after next Bootstrap: $error');
       if (temporary != null && await temporary.exists()) {
         await temporary.delete();
       }
+      return false;
     }
+  }
+
+  Future<Set<String>> _storedRemoteUrls() async {
+    final urls = <String>{};
+
+    Future<void> addColumn(String table, String column) async {
+      final rows = await _database.query(
+        table,
+        columns: [column],
+        where: '$column IS NOT NULL AND TRIM($column) <> \'\'',
+      );
+      for (final value in rows.map((row) => row[column])) {
+        _addValueUrls(urls, value);
+      }
+    }
+
+    await addColumn(DatabaseTables.items, 'image_url');
+    await addColumn(DatabaseTables.mrfPeople, 'photo_url');
+    await addColumn(DatabaseTables.ragpickers, 'photo_url');
+    await addColumn(DatabaseTables.collections, 'handover_photo_urls');
+    await addColumn(DatabaseTables.collectionItems, 'photo_urls');
+    await addColumn(DatabaseTables.expenses, 'receipt_photo_urls');
+    await addColumn(DatabaseTables.transfers, 'vehicle_photo_urls');
+    await addColumn(DatabaseTables.transfers, 'weighbridge_photo_urls');
+    await addColumn(DatabaseTables.tasks, 'photo_urls');
+    await addColumn(DatabaseTables.requests, 'photo_urls');
+    await addColumn(DatabaseTables.photos, 'remote_url');
+
+    final profileUrl = await _database.getSyncMeta('user_photo_url');
+    _addValueUrls(urls, profileUrl);
+    return urls;
+  }
+
+  static void _addValueUrls(Set<String> urls, Object? value) {
+    if (value is! String || value.trim().isEmpty) return;
+    final normalized = value.trim();
+    if (_isRemoteUrl(normalized)) {
+      urls.add(normalized);
+      return;
+    }
+    try {
+      final decoded = jsonDecode(normalized);
+      if (decoded is List) {
+        for (final item in decoded.whereType<String>()) {
+          if (_isRemoteUrl(item)) urls.add(item.trim());
+        }
+      }
+    } on FormatException {
+      // Local file paths and non-JSON values are intentionally ignored.
+    }
+  }
+
+  static bool _isRemoteUrl(String? value) {
+    if (value == null) return false;
+    final uri = Uri.tryParse(value.trim());
+    return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
   }
 
   static String _fileName(String url) =>

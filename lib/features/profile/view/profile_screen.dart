@@ -10,6 +10,7 @@ import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import 'package:go_router/go_router.dart';
 import '../../home/widgets/home_assets.dart';
 import '../widgets/profile_action_card.dart';
@@ -290,12 +291,26 @@ class _ProfileHeader extends StatelessWidget {
                         CircleAvatar(
                           radius: 60,
                           backgroundColor: AppColors.primary100,
-                          backgroundImage:
-                              profile?.userPhotoUrl?.isNotEmpty == true
-                              ? NetworkImage(profile!.userPhotoUrl!)
-                              : null,
                           child: profile?.userPhotoUrl?.isNotEmpty == true
-                              ? null
+                              ? ClipOval(
+                                  child: CachedAppImage(
+                                    source: profile!.userPhotoUrl,
+                                    width: 120,
+                                    height: 120,
+                                    fit: BoxFit.cover,
+                                    placeholder: Center(
+                                      child: Text(
+                                        (profile!.userName?.isNotEmpty == true
+                                                ? profile!.userName![0]
+                                                : '?')
+                                            .toUpperCase(),
+                                        style: AppTextStyles.boldH5_24.copyWith(
+                                          color: AppColors.primary500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
                               : Text(
                                   (profile?.userName?.isNotEmpty == true
                                           ? profile!.userName![0]

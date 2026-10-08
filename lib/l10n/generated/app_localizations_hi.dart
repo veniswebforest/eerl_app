@@ -1063,6 +1063,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get requestNewExpenseCategory => 'नई श्रेणी का अनुरोध करें';
 
   @override
+  String get expenseCategoryRequestSavedForSync =>
+      'श्रेणी अनुरोध सहेजा गया। यह अपने आप सिंक होगा।';
+
+  @override
+  String get expenseCategoryRequestSaveFailed =>
+      'श्रेणी अनुरोध सहेजा नहीं जा सका। कृपया फिर से प्रयास करें।';
+
+  @override
   String get expenseCategoryName => 'श्रेणी का नाम';
 
   @override
@@ -1862,6 +1870,48 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get collectionPrinterHint =>
       'सुनिश्चित करें कि आपका Bluetooth थर्मल प्रिंटर चालू और कनेक्टेड है।';
+
+  @override
+  String get collectionPrinterReady => 'प्रिंटर तैयार';
+
+  @override
+  String get collectionPrinterConnected =>
+      'Bluetooth थर्मल प्रिंटर कनेक्टेड है।';
+
+  @override
+  String get collectionReceiptDateTime => 'दिनांक और समय';
+
+  @override
+  String get collectionReceiptBreakdown => 'एकत्रित वस्तुओं का विवरण';
+
+  @override
+  String collectionItemsCount(int count) {
+    return '$count वस्तुएँ';
+  }
+
+  @override
+  String get collectionReceiptAggregateSummary => 'कुल सारांश';
+
+  @override
+  String get collectionReceiptAggregateHint => 'वज़न और संख्या सारांश';
+
+  @override
+  String get collectionReceiptLaborInvolved => 'शामिल श्रमिक';
+
+  @override
+  String get collectionReceiptWeight => 'वज़न';
+
+  @override
+  String get collectionReceiptPieces => 'नग';
+
+  @override
+  String get collectionReceiptPaymentBy => 'भुगतान माध्यम';
+
+  @override
+  String get collectionReceiptTotalSettlement => 'कुल सेटलमेंट';
+
+  @override
+  String get collectionReceiptCollectedAgent => 'कलेक्शन एजेंट';
 
   @override
   String get collectionSlipActionError =>
