@@ -1,26 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import '../model/expense_claim_detail_status.dart';
 import '../widgets/expense_detail_cards.dart';
 import '../widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 
-class ExpenseClaimDetailScreen extends StatelessWidget {
-  const ExpenseClaimDetailScreen({super.key, required this.status});
+class ExpenseClaimDetailScreen extends StatefulWidget {
+  const ExpenseClaimDetailScreen({
+    super.key,
+    required this.status,
+    this.expense,
+  });
 
   final ExpenseClaimDetailStatus status;
+  final ExpenseModel? expense;
+
+  @override
+  State<ExpenseClaimDetailScreen> createState() =>
+      _ExpenseClaimDetailScreenState();
+}
+
+class _ExpenseClaimDetailScreenState extends State<ExpenseClaimDetailScreen> {
+  Future<List<String>>? _receiptSources;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReceiptSources();
+  }
+
+  @override
+  void didUpdateWidget(covariant ExpenseClaimDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.expense?.id != widget.expense?.id) {
+      _loadReceiptSources();
+    }
+  }
+
+  void _loadReceiptSources() {
+    final expense = widget.expense;
+    _receiptSources = expense == null
+        ? null
+        : EerlLocalRepository.instance.getExpenseReceiptSources(expense.id);
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final statusLabel = switch (status) {
+    final expense = widget.expense;
+    final statusLabel = switch (widget.status) {
       ExpenseClaimDetailStatus.pending => l10n.expenseWaitingSupervisor,
       ExpenseClaimDetailStatus.verified => l10n.expenseVerifiedSupervisor,
       ExpenseClaimDetailStatus.rejected => l10n.expenseRejectedSupervisor,
     };
+    final category = _valueOrFallback(
+      expense?.categoryName,
+      fallback: expense?.categoryId,
+    );
+    final requestedBy = _valueOrFallback(
+      expense?.userName,
+      fallback: expense?.userId,
+    );
+    final note = expense?.note?.trim();
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -46,7 +94,12 @@ class ExpenseClaimDetailScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    ExpenseReferenceCard(reference: l10n.expenseClaimReference),
+                    ExpenseReferenceCard(
+                      reference: _valueOrFallback(
+                        expense?.number,
+                        fallback: expense?.id,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     ExpenseDetailCard(
                       child: Column(
@@ -54,22 +107,28 @@ class ExpenseClaimDetailScreen extends StatelessWidget {
                         children: [
                           ExpenseDetailRow(
                             label: l10n.expenseDetailCategory,
-                            value: l10n.expenseCategoryFuel,
+                            value: category,
                           ),
                           const _DetailDivider(),
                           ExpenseDetailRow(
                             label: l10n.expenseDetailAmount,
-                            value: l10n.expenseDetailAmountValue,
+                            value: expense == null
+                                ? '—'
+                                : NumberFormat.currency(
+                                    locale: 'en_IN',
+                                    symbol: '₹',
+                                    decimalDigits: 2,
+                                  ).format(expense.amount),
                           ),
                           const _DetailDivider(),
                           ExpenseDetailRow(
                             label: l10n.expenseRequestedBy,
-                            value: l10n.expenseRequestedByValue,
+                            value: requestedBy,
                           ),
                           const _DetailDivider(),
                           ExpenseDetailRow(
                             label: l10n.expenseDateTime,
-                            value: l10n.expenseFuelDate,
+                            value: _formattedDate(expense?.createdAt),
                           ),
                           const _DetailDivider(),
                           Text(
@@ -80,62 +139,41 @@ class ExpenseClaimDetailScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           ExpenseDetailStatusChip(
-                            status: status,
+                            status: widget.status,
                             label: statusLabel,
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    ExpenseDetailCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.expenseUploadedPhoto,
-                            style: AppTextStyles.semiboldH7_18.copyWith(
-                              color: AppColors.neutral950,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: const [
-                              _ExpensePhoto(
-                                asset:
-                                    'assets/images/expense_detail_vehicle.png',
+                    if (_receiptSources != null) ...[
+                      const SizedBox(height: 16),
+                      _ExpensePhotosCard(sources: _receiptSources!),
+                    ],
+                    if (note?.isNotEmpty == true) ...[
+                      const SizedBox(height: 16),
+                      ExpenseDetailCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.expenseDescriptionLabel,
+                              style: AppTextStyles.semiboldH7_18.copyWith(
+                                color: AppColors.neutral950,
                               ),
-                              SizedBox(width: 12),
-                              _ExpensePhoto(
-                                asset:
-                                    'assets/images/expense_detail_receipt.png',
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              note!,
+                              style: AppTextStyles.mediumSH9_12.copyWith(
+                                color: AppColors.neutral900,
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ExpenseDetailCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.expenseDescriptionLabel,
-                            style: AppTextStyles.semiboldH7_18.copyWith(
-                              color: AppColors.neutral950,
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.expenseDetailDescription,
-                            style: AppTextStyles.mediumSH9_12.copyWith(
-                              color: AppColors.neutral900,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    if (status == ExpenseClaimDetailStatus.rejected) ...[
+                    ],
+                    if (widget.status == ExpenseClaimDetailStatus.rejected &&
+                        expense?.decisionReason?.trim().isNotEmpty == true) ...[
                       const SizedBox(height: 20),
                       ExpenseDetailCard(
                         border: AppColors.red500,
@@ -153,12 +191,7 @@ class ExpenseClaimDetailScreen extends StatelessWidget {
                             const SizedBox(height: 12),
                             _LabeledParagraph(
                               label: l10n.expenseRejectReasonLabel,
-                              value: l10n.expenseRejectReasonValue,
-                            ),
-                            const SizedBox(height: 8),
-                            _LabeledParagraph(
-                              label: l10n.expenseRejectRemarksLabel,
-                              value: l10n.expenseRejectRemarksValue,
+                              value: expense!.decisionReason!.trim(),
                             ),
                           ],
                         ),
@@ -172,6 +205,19 @@ class ExpenseClaimDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _valueOrFallback(String? value, {String? fallback}) {
+    final normalized = value?.trim();
+    if (normalized?.isNotEmpty == true) return normalized!;
+    final normalizedFallback = fallback?.trim();
+    return normalizedFallback?.isNotEmpty == true ? normalizedFallback! : '—';
+  }
+
+  String _formattedDate(String? value) {
+    final date = value == null ? null : DateTime.tryParse(value)?.toLocal();
+    if (date == null) return _valueOrFallback(value);
+    return DateFormat('dd MMM yyyy, hh:mm a').format(date);
   }
 }
 
@@ -187,16 +233,62 @@ class _DetailDivider extends StatelessWidget {
   }
 }
 
-class _ExpensePhoto extends StatelessWidget {
-  const _ExpensePhoto({required this.asset});
+class _ExpensePhotosCard extends StatelessWidget {
+  const _ExpensePhotosCard({required this.sources});
 
-  final String asset;
+  final Future<List<String>> sources;
+
+  @override
+  Widget build(BuildContext context) => FutureBuilder<List<String>>(
+    future: sources,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const ExpenseDetailCard(
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+      final values = snapshot.data ?? const <String>[];
+      if (values.isEmpty) return const SizedBox.shrink();
+      return ExpenseDetailCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.expenseUploadedPhoto,
+              style: AppTextStyles.semiboldH7_18.copyWith(
+                color: AppColors.neutral950,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (final source in values) _ExpensePhoto(source: source),
+              ],
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+class _ExpensePhoto extends StatelessWidget {
+  const _ExpensePhoto({required this.source});
+
+  final String source;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(6),
-      child: Image.asset(asset, width: 109, height: 70, fit: BoxFit.cover),
+      child: CachedAppImage(
+        source: source,
+        width: 109,
+        height: 70,
+        fit: BoxFit.cover,
+      ),
     );
   }
 }

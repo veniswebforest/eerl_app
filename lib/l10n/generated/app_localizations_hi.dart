@@ -2728,6 +2728,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get ragpickerAddButton => 'रैगपिकर जोड़ें';
 
   @override
+  String get ragpickerNoDetailsFound => 'रैगपिकर का कोई विवरण नहीं मिला';
+
+  @override
   String get ragpickerDetailsTitle => 'रैगपिकर विवरण';
 
   @override
@@ -2753,6 +2756,18 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get ragpickerNameHint => 'पूरा नाम दर्ज करें';
+
+  @override
+  String get ragpickerNameRequired => 'कृपया पूरा नाम दर्ज करें।';
+
+  @override
+  String ragpickerNameAlreadyExists(String name) {
+    return '$name नाम रैगपिकर सूची में पहले से मौजूद है।';
+  }
+
+  @override
+  String get ragpickerInvalidMobile =>
+      'मान्य 10 अंकों का मोबाइल नंबर दर्ज करें या खाली छोड़ें।';
 
   @override
   String get ragpickerPhoneLabel => 'मोबाइल नंबर *';

@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
-import 'package:flutter/foundation.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
@@ -221,6 +221,6 @@ class ItemImageCacheService {
       Directory(p.join(await getDatabasesPath(), 'item_images'));
 
   static void _log(String message) {
-    if (kDebugMode) debugPrint('🖼️ [EERL_ITEM_IMAGE_CACHE] $message');
+    AppLogger.diagnostic('IMAGE_CACHE', message);
   }
 }

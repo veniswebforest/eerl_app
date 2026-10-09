@@ -1,10 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/uuid_generator.dart';
+import 'package:eerl_app/core/utils/image_compressor.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import 'package:eerl_app/shared/widgets/app_square_back_button.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
@@ -14,6 +20,7 @@ import '../model/ragpicker_directory_view.dart';
 import '../widgets/ragpicker_center_selector.dart';
 import '../widgets/ragpicker_details_cards.dart';
 import '../widgets/ragpicker_directory_card.dart';
+import '../widgets/ragpicker_empty_state.dart';
 import '../widgets/ragpicker_form_field.dart';
 import '../widgets/ragpicker_photo_section.dart';
 import '../widgets/ragpicker_segmented_control.dart';
@@ -45,13 +52,16 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _identityController = TextEditingController();
+  final _imagePicker = ImagePicker();
   List<RagpickerModel> _allItems = const [];
   List<CenterModel> _centers = const [];
   bool _loading = true;
   RagpickerModel? _selectedItem;
   RagpickerModel? _editingItem;
   String _query = '';
-  bool _hasPhotos = false;
+  String? _nameError;
+  String? _photoSource;
+  bool _saving = false;
   bool _showStatusSuccess = false;
   bool _successIsReactivation = false;
   bool _centerExpanded = false;
@@ -318,6 +328,16 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                         const SliverFillRemaining(
                           child: Center(child: CircularProgressIndicator()),
                         )
+                      else if (items.isEmpty)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                            child: RagpickerEmptyState(
+                              message: context.l10n.ragpickerNoDetailsFound,
+                            ),
+                          ),
+                        )
                       else
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
@@ -350,7 +370,8 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                       _nameController.clear();
                       _phoneController.clear();
                       _identityController.clear();
-                      _hasPhotos = false;
+                      _nameError = null;
+                      _photoSource = null;
                       _formZoneIndex = -1;
                       _formZoneExpanded = false;
                     }),
@@ -398,7 +419,9 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                     children: [
-                      RagpickerRegistrationCard(registrationId: item.id),
+                      RagpickerRegistrationCard(
+                        registrationId: item.number ?? '',
+                      ),
                       const SizedBox(height: 16),
                       RagpickerInformationCard(
                         item: item,
@@ -431,7 +454,8 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                               .replaceAll('+91 ', '')
                               .replaceAll(' ', '');
                           _identityController.text = item.idNumber ?? '';
-                          _hasPhotos = item.photoUrl?.isNotEmpty == true;
+                          _nameError = null;
+                          _photoSource = item.photoUrl;
                           _formZoneIndex = _centers.indexWhere(
                             (center) => center.id == item.centerId,
                           );
@@ -482,10 +506,20 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                       label: context.l10n.ragpickerNameLabel,
                       hint: context.l10n.ragpickerNameHint,
                       controller: _nameController,
+                      errorText: _nameError,
+                      onChanged: (value) {
+                        final error = _nameValidationError(
+                          value,
+                          showRequired: false,
+                        );
+                        if (error != _nameError) {
+                          setState(() => _nameError = error);
+                        }
+                      },
                     ),
                     const SizedBox(height: 16),
                     _MobileField(
-                      label: context.l10n.ragpickerPhoneLabel,
+                      label: context.l10n.ragpickerMobileLabel,
                       hint: context.l10n.ragpickerPhoneHint,
                       controller: _phoneController,
                     ),
@@ -517,9 +551,9 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                       label: context.l10n.ragpickerProofLabel,
                       captureLabel: context.l10n.ragpickerCapturePhoto,
                       helperText: context.l10n.ragpickerPhotoHelper,
-                      hasPhotos: _hasPhotos,
-                      onCapture: () => setState(() => _hasPhotos = true),
-                      onRemove: (_) => setState(() => _hasPhotos = false),
+                      photoSource: _photoSource,
+                      onCapture: _capturePhoto,
+                      onRemove: (_) => setState(() => _photoSource = null),
                     ),
                   ],
                 ),
@@ -529,7 +563,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                 saveLabel: context.l10n.saveAndSelect,
                 onCancel: () =>
                     setState(() => _view = RagpickerDirectoryView.activeList),
-                onSave: _saveForm,
+                onSave: _saving ? null : _saveForm,
               ),
             ],
           ),
@@ -538,35 +572,108 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
     ),
   );
 
+  Future<void> _capturePhoto() async {
+    final photo = await ImageCompressor.pickAndCompress(
+      picker: _imagePicker,
+      source: ImageSource.camera,
+    );
+    if (photo == null || !mounted) return;
+    setState(() => _photoSource = photo.path);
+  }
+
   Future<void> _saveForm() async {
     final name = _nameController.text.trim();
-    if (name.isEmpty || _centers.isEmpty) return;
-    final centerIndex = _formZoneIndex >= 0 ? _formZoneIndex : _selectedCenter;
-    if (centerIndex < 0 || centerIndex >= _centers.length) return;
+    final phone = _phoneController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final nameError = _nameValidationError(name, showRequired: true);
+    if (nameError != null) {
+      setState(() => _nameError = nameError);
+      return;
+    }
     final existing = _editingItem;
-    final phone = _phoneController.text.trim();
-    await EerlLocalRepository.instance.saveRagpicker(
-      RagpickerModel(
-        id: existing?.id ?? UuidGenerator.v4(),
-        number: existing?.number,
-        centerId: _centers[centerIndex].id,
-        name: name,
-        phone: phone.isEmpty ? null : '+91 $phone',
-        idNumber: _identityController.text.trim().isEmpty
-            ? null
-            : _identityController.text.trim(),
-        photoUrl: existing?.photoUrl,
-        isActive: true,
-        syncState: 'pending',
-      ),
-    );
+    if (phone.isNotEmpty && phone.length != 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.ragpickerInvalidMobile)),
+      );
+      return;
+    }
+    if (_centers.isEmpty) return;
+    var centerIndex = _formZoneIndex >= 0 ? _formZoneIndex : _selectedCenter;
+    if (centerIndex < 0 || centerIndex >= _centers.length) {
+      final activeCenterId = await EerlLocalRepository.instance.activeCenterId;
+      centerIndex = _centers.indexWhere(
+        (center) => center.id == activeCenterId,
+      );
+    }
     if (!mounted) return;
-    setState(() {
-      _editingItem = null;
-      _status = RagpickerStatus.active;
-      _view = RagpickerDirectoryView.activeList;
-    });
-    await _load(centerId: _centers[centerIndex].id);
+    if (centerIndex < 0 || centerIndex >= _centers.length) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Select a center.')));
+      return;
+    }
+    final photoSource = _photoSource?.trim();
+    final isLocalPhoto =
+        photoSource != null &&
+        photoSource.isNotEmpty &&
+        !photoSource.startsWith('http://') &&
+        !photoSource.startsWith('https://');
+    setState(() => _saving = true);
+    try {
+      await EerlLocalRepository.instance.saveRagpicker(
+        RagpickerModel(
+          id: existing?.id ?? UuidGenerator.v4(),
+          number: existing?.number,
+          centerId: _centers[centerIndex].id,
+          name: name,
+          phone: phone.isEmpty ? null : phone,
+          idNumber: _identityController.text.trim().isEmpty
+              ? null
+              : _identityController.text.trim(),
+          photoUrl: isLocalPhoto ? null : photoSource,
+          isActive: true,
+          syncState: 'pending',
+        ),
+        localPhotoPath: isLocalPhoto ? photoSource : null,
+      );
+      unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+      if (!mounted) return;
+      setState(() {
+        _editingItem = null;
+        _status = RagpickerStatus.active;
+        _view = RagpickerDirectoryView.activeList;
+        _photoSource = null;
+      });
+      await _load(centerId: _centers[centerIndex].id);
+    } catch (error) {
+      AppLogger.error('RAGPICKER_SAVE', error.toString());
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  String _normalizeRagpickerName(String value) =>
+      value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+  String? _nameValidationError(String value, {required bool showRequired}) {
+    final name = value.trim();
+    if (name.isEmpty) {
+      return showRequired ? context.l10n.ragpickerNameRequired : null;
+    }
+    final existing = _editingItem;
+    final normalizedName = _normalizeRagpickerName(name);
+    final nameAlreadyExists = _allItems.any(
+      (item) =>
+          item.id != existing?.id &&
+          _normalizeRagpickerName(item.name) == normalizedName,
+    );
+    return nameAlreadyExists
+        ? context.l10n.ragpickerNameAlreadyExists(name)
+        : null;
   }
 }
 
@@ -687,7 +794,7 @@ class _FormActions extends StatelessWidget {
   final String cancelLabel;
   final String saveLabel;
   final VoidCallback onCancel;
-  final VoidCallback onSave;
+  final VoidCallback? onSave;
 
   @override
   Widget build(BuildContext context) => SafeArea(

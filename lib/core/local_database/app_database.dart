@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
+import '../logging/app_logger.dart';
 import 'database_schema.dart';
 import 'database_tables.dart';
 
@@ -12,7 +13,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 2;
+  static const databaseVersion = 3;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -46,7 +47,7 @@ class AppDatabase {
     final databasePath =
         _databasePathOverride ?? p.join(databaseDirectory, databaseName);
 
-    _log('Opening database at $databasePath');
+    _log('Opening database $databaseName');
 
     final db = await openDatabase(
       databasePath,
@@ -106,6 +107,33 @@ class AppDatabase {
       }
       _log('Upgraded transfer dispatch schema to version 2');
     }
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${DatabaseTables.transferVehicles} (
+          id TEXT PRIMARY KEY,
+          number TEXT NOT NULL,
+          ownership TEXT NOT NULL,
+          transporter_name TEXT,
+          vehicle_type TEXT,
+          capacity_kg REAL
+        )
+      ''');
+      await _addMissingColumns(db, DatabaseTables.categoryRequests, const {
+        'requested_by_name': 'TEXT',
+        'decided_by_name': 'TEXT',
+        'decided_at': 'TEXT',
+        'decision_reason': 'TEXT',
+      });
+      await _addMissingColumns(db, DatabaseTables.transfers, const {
+        'transfer_vehicle_id': 'TEXT',
+        'planned_vehicle_number': 'TEXT',
+        'planned_vehicle_ownership': 'TEXT',
+        'transporter_name': 'TEXT',
+        'transfer_fee': 'REAL',
+        'vehicle_differs': 'INTEGER NOT NULL DEFAULT 0',
+      });
+      _log('Upgraded category audit and transfer vehicle schema to version 3');
+    }
   }
 
   Future<void> _onOpen(Database db) async {
@@ -120,13 +148,30 @@ class AppDatabase {
     // The testing database intentionally stays at version 1. Keep an existing
     // version-1 installation aligned with the current baseline schema without
     // introducing numbered migrations or deleting any local data.
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ${DatabaseTables.transferVehicles} (
+        id TEXT PRIMARY KEY,
+        number TEXT NOT NULL,
+        ownership TEXT NOT NULL,
+        transporter_name TEXT,
+        vehicle_type TEXT,
+        capacity_kg REAL
+      )
+    ''');
+
     const additiveColumns = <String, Map<String, String>>{
       DatabaseTables.myCenters: {'agent_number': 'INTEGER'},
       DatabaseTables.vehicles: {'number': 'TEXT'},
       DatabaseTables.mrfPeople: {'number': 'TEXT'},
       DatabaseTables.ragpickers: {'number': 'TEXT'},
       DatabaseTables.cashRequests: {'number': 'TEXT'},
-      DatabaseTables.categoryRequests: {'number': 'TEXT'},
+      DatabaseTables.categoryRequests: {
+        'number': 'TEXT',
+        'requested_by_name': 'TEXT',
+        'decided_by_name': 'TEXT',
+        'decided_at': 'TEXT',
+        'decision_reason': 'TEXT',
+      },
       DatabaseTables.tasks: {'number': 'TEXT', 'note': 'TEXT'},
       DatabaseTables.requests: {'number': 'TEXT'},
       DatabaseTables.collections: {'gps_lat': 'REAL', 'gps_lng': 'REAL'},
@@ -139,6 +184,12 @@ class AppDatabase {
         'bale_count': 'INTEGER',
         'vehicle_photo_urls': "TEXT NOT NULL DEFAULT '[]'",
         'weighbridge_photo_urls': "TEXT NOT NULL DEFAULT '[]'",
+        'transfer_vehicle_id': 'TEXT',
+        'planned_vehicle_number': 'TEXT',
+        'planned_vehicle_ownership': 'TEXT',
+        'transporter_name': 'TEXT',
+        'transfer_fee': 'REAL',
+        'vehicle_differs': 'INTEGER NOT NULL DEFAULT 0',
       },
       DatabaseTables.items: {'image_url': 'TEXT'},
     };
@@ -299,6 +350,7 @@ class AppDatabase {
         DatabaseTables.requests,
         DatabaseTables.collections,
         DatabaseTables.transfers,
+        DatabaseTables.transferVehicles,
         DatabaseTables.centerItems,
         DatabaseTables.vehicles,
         DatabaseTables.mrfPeople,
@@ -353,6 +405,7 @@ class AppDatabase {
         DatabaseTables.requests,
         DatabaseTables.collections,
         DatabaseTables.transfers,
+        DatabaseTables.transferVehicles,
         DatabaseTables.centerItems,
         DatabaseTables.vehicles,
         DatabaseTables.mrfPeople,
@@ -411,13 +464,11 @@ class AppDatabase {
     }
 
     final tableNames = await getExistingTableNames();
-    debugPrint('SQLite tables: ${tableNames.join(', ')}');
+    AppLogger.sqlite('TABLES', tableNames.join(', '));
   }
 
   static void _log(String message) {
-    if (kDebugMode) {
-      debugPrint('🗄️ [EERL_DATABASE] $_logTag $message');
-    }
+    AppLogger.sqlite('DATABASE', '$_logTag $message');
   }
 
   @visibleForTesting

@@ -140,6 +140,16 @@ abstract final class DatabaseSchema {
       )
     ''',
     '''
+      CREATE TABLE ${DatabaseTables.transferVehicles} (
+        id TEXT PRIMARY KEY,
+        number TEXT NOT NULL,
+        ownership TEXT NOT NULL,
+        transporter_name TEXT,
+        vehicle_type TEXT,
+        capacity_kg REAL
+      )
+    ''',
+    '''
       CREATE TABLE ${DatabaseTables.collections} (
         id TEXT PRIMARY KEY,
         center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
@@ -222,9 +232,13 @@ abstract final class DatabaseSchema {
         number TEXT,
         center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
         requested_by TEXT NOT NULL,
+        requested_by_name TEXT,
         name TEXT NOT NULL,
         reason TEXT,
         status TEXT NOT NULL,
+        decided_by_name TEXT,
+        decided_at TEXT,
+        decision_reason TEXT,
         created_at TEXT NOT NULL,
         sync_state TEXT NOT NULL DEFAULT 'synced'
       )
@@ -239,6 +253,11 @@ abstract final class DatabaseSchema {
         destination_id TEXT REFERENCES ${DatabaseTables.destinations} (id),
         destination_name TEXT,
         truck_expected_at TEXT,
+        transfer_vehicle_id TEXT REFERENCES ${DatabaseTables.transferVehicles} (id),
+        planned_vehicle_number TEXT,
+        planned_vehicle_ownership TEXT,
+        transporter_name TEXT,
+        transfer_fee REAL,
         fixed_qty REAL,
         estimated_expense REAL,
         note TEXT,
@@ -248,6 +267,7 @@ abstract final class DatabaseSchema {
         bale_count INTEGER,
         vehicle_photo_urls TEXT NOT NULL DEFAULT '[]',
         weighbridge_photo_urls TEXT NOT NULL DEFAULT '[]',
+        vehicle_differs INTEGER NOT NULL DEFAULT 0,
         requested_by TEXT NOT NULL,
         requested_by_name TEXT NOT NULL,
         requested_at TEXT NOT NULL,

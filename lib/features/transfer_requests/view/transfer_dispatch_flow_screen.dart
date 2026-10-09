@@ -84,7 +84,8 @@ class _TransferDispatchFlowScreenState
       widget.transfer.id,
     );
     if (!mounted) return;
-    _vehicleController.text = draft.vehicleNumber ?? '';
+    _vehicleController.text =
+        draft.vehicleNumber ?? widget.transfer.plannedVehicleNumber ?? '';
     _driverController.text = draft.driverName ?? '';
     setState(() {
       _vehiclePhotos = draft.photosFor('vehicle');

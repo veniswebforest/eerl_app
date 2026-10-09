@@ -20,9 +20,6 @@ class LoadingWidget extends StatelessWidget {
           // height: double.infinity,
           // width: double.infinity,
           // fit: BoxFit.cover,
-          onLoaded: (composition) {
-            debugPrint("lottie start ===>");
-          },
           // height: 100,
         ),
       ),

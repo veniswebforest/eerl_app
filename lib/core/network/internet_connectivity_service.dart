@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:eerl_app/core/constants/app_constants.dart';
-import 'package:flutter/foundation.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 
 /// Verifies both a network interface and reachability of the EERL API host.
 ///
@@ -54,6 +54,6 @@ class InternetConnectivityService {
   }
 
   static void _log(String message) {
-    if (kDebugMode) debugPrint('📶 [EERL_CONNECTIVITY] $message');
+    AppLogger.diagnostic('CONNECTIVITY', message);
   }
 }

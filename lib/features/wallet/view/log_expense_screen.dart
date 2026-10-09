@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -86,12 +87,30 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
 
   Future<void> _loadCategories() async {
     try {
+      final selectedId =
+          _selectedCategory != null && _selectedCategory! < _categories.length
+          ? _categories[_selectedCategory!].id
+          : null;
       final categories = await EerlLocalRepository.instance
           .getExpenseCategories();
-      if (mounted) setState(() => _categories = categories);
+      if (!mounted) return;
+      setState(() {
+        _categories = categories;
+        if (selectedId != null) {
+          final refreshedIndex = categories.indexWhere(
+            (category) => category.id == selectedId,
+          );
+          _selectedCategory = refreshedIndex < 0 ? null : refreshedIndex;
+        }
+        _categoryOpen = false;
+      });
     } catch (error) {
-      debugPrint('Expense category load failed: $error');
+      AppLogger.error('EXPENSE_CATEGORY_LOAD', error.toString());
     }
+  }
+
+  Future<void> _refreshExpenseData() async {
+    await _loadCategories();
   }
 
   Future<void> _captureReceipt() async {
@@ -128,7 +147,7 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
       final submitted = await context.push<bool>(AppRoutes.expenseSubmitted);
       if (submitted == true && mounted) Navigator.of(context).pop();
     } catch (error) {
-      debugPrint('Expense save failed: $error');
+      AppLogger.error('EXPENSE_SAVE', error.toString());
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -150,155 +169,161 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            AppScreenHeaderMetrics.topInset,
-            20,
-            32,
-          ),
-          children: [
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 600),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    WalletScreenHeader(title: l10n.logExpense),
-                    const SizedBox(height: 24),
-                    LogExpenseField(
-                      label: l10n.expenseReasonLabel,
-                      requiredField: true,
-                      child: ExpenseCategorySelector(
-                        placeholder: l10n.selectExpenseCategory,
-                        items: categories,
-                        isOpen: _categoryOpen,
-                        selectedIndex: _selectedCategory,
-                        onToggle: () {
-                          setState(() => _categoryOpen = !_categoryOpen);
-                        },
-                        onSelected: (index) {
-                          setState(() {
-                            _selectedCategory = index;
-                            _categoryOpen = false;
-                          });
-                        },
-                        requestNewCategoryLabel: l10n.requestNewExpenseCategory,
-                        onRequestNewCategory: () async {
-                          setState(() => _categoryOpen = false);
-                          final saved = await showDialog<bool>(
-                            context: context,
-                            builder: (_) =>
-                                const RequestNewExpenseCategoryDialog(),
-                          );
-                          if (saved == true && context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  context
-                                      .l10n
-                                      .expenseCategoryRequestSavedForSync,
-                                ),
-                              ),
+        child: RefreshIndicator(
+          key: const Key('log-expense-refresh'),
+          onRefresh: _refreshExpenseData,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(
+              20,
+              AppScreenHeaderMetrics.topInset,
+              20,
+              32,
+            ),
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      WalletScreenHeader(title: l10n.logExpense),
+                      const SizedBox(height: 24),
+                      LogExpenseField(
+                        label: l10n.expenseReasonLabel,
+                        requiredField: true,
+                        child: ExpenseCategorySelector(
+                          placeholder: l10n.selectExpenseCategory,
+                          items: categories,
+                          isOpen: _categoryOpen,
+                          selectedIndex: _selectedCategory,
+                          onToggle: () {
+                            setState(() => _categoryOpen = !_categoryOpen);
+                          },
+                          onSelected: (index) {
+                            setState(() {
+                              _selectedCategory = index;
+                              _categoryOpen = false;
+                            });
+                          },
+                          requestNewCategoryLabel:
+                              l10n.requestNewExpenseCategory,
+                          onRequestNewCategory: () async {
+                            setState(() => _categoryOpen = false);
+                            final saved = await showDialog<bool>(
+                              context: context,
+                              builder: (_) =>
+                                  const RequestNewExpenseCategoryDialog(),
                             );
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    LogExpenseField(
-                      label: l10n.expenseAmountLabel,
-                      requiredField: true,
-                      child: LogExpenseInput(
-                        controller: _amountController,
-                        hint: l10n.expenseAmountHint,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    LogExpenseField(
-                      label: l10n.uploadReceiptLabel,
-                      requiredField: _receiptPhotos.isEmpty,
-                      child: ReceiptUploadSection(
-                        captureLabel: l10n.capturePhoto,
-                        helperText: l10n.receiptSupportMessage,
-                        receiptPaths: _receiptPhotos
-                            .map((photo) => photo.path)
-                            .toList(growable: false),
-                        onCapture: _captureReceipt,
-                        onRemove: (index) =>
-                            setState(() => _receiptPhotos.removeAt(index)),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    LogExpenseField(
-                      label: l10n.expenseDescriptionLabel,
-                      child: LogExpenseInput(
-                        controller: _descriptionController,
-                        hint: l10n.expenseDescriptionHint,
-                        maxLines: 5,
-                        maxLength: 150,
-                        counterText: l10n.expenseDescriptionCounter,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: ElevatedButton(
-                        key: const Key('submit-expense-button'),
-                        onPressed: _canSubmit ? _submitExpense : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary500,
-                          disabledBackgroundColor: AppColors.neutral400,
-                          foregroundColor: Colors.white,
-                          disabledForegroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: AppTextStyles.boldH7_16,
-                        ),
-                        child: _isSubmitting
-                            ? const SizedBox.square(
-                                dimension: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
+                            if (saved == true && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    context
+                                        .l10n
+                                        .expenseCategoryRequestSavedForSync,
+                                  ),
                                 ),
-                              )
-                            : Text(l10n.submitExpenseClaim),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 270),
-                        child: Text.rich(
-                          TextSpan(
-                            text: l10n.expensePendingPrefix,
-                            children: [
-                              TextSpan(
-                                text: l10n.expensePendingStatus,
-                                style: const TextStyle(
-                                  color: AppColors.yellow600,
-                                ),
-                              ),
-                              TextSpan(text: l10n.expensePendingSuffix),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.mediumSH9_12.copyWith(
-                            color: AppColors.cool600,
-                          ),
+                              );
+                            }
+                          },
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 24),
+                      LogExpenseField(
+                        label: l10n.expenseAmountLabel,
+                        requiredField: true,
+                        child: LogExpenseInput(
+                          controller: _amountController,
+                          hint: l10n.expenseAmountHint,
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      LogExpenseField(
+                        label: l10n.uploadReceiptLabel,
+                        requiredField: _receiptPhotos.isEmpty,
+                        child: ReceiptUploadSection(
+                          captureLabel: l10n.capturePhoto,
+                          helperText: l10n.receiptSupportMessage,
+                          receiptPaths: _receiptPhotos
+                              .map((photo) => photo.path)
+                              .toList(growable: false),
+                          onCapture: _captureReceipt,
+                          onRemove: (index) =>
+                              setState(() => _receiptPhotos.removeAt(index)),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      LogExpenseField(
+                        label: l10n.expenseDescriptionLabel,
+                        child: LogExpenseInput(
+                          controller: _descriptionController,
+                          hint: l10n.expenseDescriptionHint,
+                          maxLines: 5,
+                          maxLength: 150,
+                          counterText: l10n.expenseDescriptionCounter,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: ElevatedButton(
+                          key: const Key('submit-expense-button'),
+                          onPressed: _canSubmit ? _submitExpense : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary500,
+                            disabledBackgroundColor: AppColors.neutral400,
+                            foregroundColor: Colors.white,
+                            disabledForegroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            textStyle: AppTextStyles.boldH7_16,
+                          ),
+                          child: _isSubmitting
+                              ? const SizedBox.square(
+                                  dimension: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(l10n.submitExpenseClaim),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 270),
+                          child: Text.rich(
+                            TextSpan(
+                              text: l10n.expensePendingPrefix,
+                              children: [
+                                TextSpan(
+                                  text: l10n.expensePendingStatus,
+                                  style: const TextStyle(
+                                    color: AppColors.yellow600,
+                                  ),
+                                ),
+                                TextSpan(text: l10n.expensePendingSuffix),
+                              ],
+                            ),
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.mediumSH9_12.copyWith(
+                              color: AppColors.cool600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

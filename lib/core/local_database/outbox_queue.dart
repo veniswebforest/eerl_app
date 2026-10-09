@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'database_tables.dart';
@@ -165,6 +165,6 @@ abstract final class OutboxQueue {
   }
 
   static void _log(String message) {
-    if (kDebugMode) debugPrint('📥 [EERL_OUTBOX][QUEUE] $message');
+    AppLogger.sqlite('OUTBOX_QUEUE', message);
   }
 }

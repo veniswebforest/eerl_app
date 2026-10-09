@@ -13,6 +13,7 @@ abstract final class DatabaseTables {
   static const expenseCategories = 'expense_categories';
   static const centerPeople = 'center_people';
   static const destinations = 'destinations';
+  static const transferVehicles = 'transfer_vehicles';
   static const collections = 'collections';
   static const collectionItems = 'collection_items';
   static const expenses = 'expenses';
@@ -46,6 +47,7 @@ abstract final class DatabaseTables {
     expenseCategories,
     centerPeople,
     destinations,
+    transferVehicles,
     collections,
     collectionItems,
     expenses,

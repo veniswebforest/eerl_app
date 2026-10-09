@@ -81,7 +81,6 @@ class _OtpScreenState extends State<OtpScreen>
   }
 
   void _onVerify() async {
-    debugPrint('[OtpScreen] Verify button tap trigger');
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.verifyOtp();
     if (!mounted) return;
@@ -98,14 +97,8 @@ class _OtpScreenState extends State<OtpScreen>
 
         final role = await _chooseRoleIfRequired();
         if (!mounted) return;
-        debugPrint(
-          '[OtpScreen] OTP verification success & session valid; navigating home',
-        );
         context.go(AppRoutes.home, extra: role);
       } else {
-        debugPrint(
-          '[OtpScreen] Access token null or session expired; redirecting to login',
-        );
         AppSnackbar.error(
           context,
           message: 'Session expired or token invalid. Please log in again.',
@@ -117,7 +110,6 @@ class _OtpScreenState extends State<OtpScreen>
 
     final errorMessage = authProvider.errorMessage;
     if (errorMessage != null && errorMessage.isNotEmpty) {
-      debugPrint('[OtpScreen] Displaying OTP verification error');
       AppSnackbar.error(context, message: errorMessage);
     }
   }
@@ -130,7 +122,9 @@ class _OtpScreenState extends State<OtpScreen>
       orderBy: 'role_key',
     );
     final storedRole = await database.getSyncMeta('active_role');
-    final firstRoleKey = roles.isEmpty ? null : roles.first['role_key'] as String?;
+    final firstRoleKey = roles.isEmpty
+        ? null
+        : roles.first['role_key'] as String?;
     var role = DashboardUserRoleX.fromKey(storedRole ?? firstRoleKey);
 
     if (roles.length > 1 && mounted) {

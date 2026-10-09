@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:local_auth/local_auth.dart';
 
 class AppLockService {
   AppLockService({LocalAuthentication? auth})
-      : _auth = auth ?? LocalAuthentication();
+    : _auth = auth ?? LocalAuthentication();
 
   final LocalAuthentication _auth;
   String? lastErrorMessage;
@@ -18,12 +18,9 @@ class AppLockService {
       final isSupported = await _auth.isDeviceSupported();
       final canCheck = await _auth.canCheckBiometrics;
       final available = await _auth.getAvailableBiometrics();
-      debugPrint(
-        '[AppLockService] isDeviceSupported: $isSupported, canCheckBiometrics: $canCheck, availableBiometrics: $available',
-      );
       return isSupported || canCheck || available.isNotEmpty;
     } catch (e) {
-      debugPrint('[AppLockService] isLockSupported error: $e');
+      AppLogger.error('APP_LOCK', 'Support check failed: $e');
       return false;
     }
   }
@@ -40,10 +37,6 @@ class AppLockService {
       final isSupported = await _auth.isDeviceSupported();
       final canCheck = await _auth.canCheckBiometrics;
       final available = await _auth.getAvailableBiometrics();
-
-      debugPrint(
-        '[AppLockService] Authenticate called -> isSupported: $isSupported, canCheck: $canCheck, available: $available',
-      );
 
       final hasAnySupport = isSupported || canCheck || available.isNotEmpty;
       if (!hasAnySupport) {
@@ -64,8 +57,10 @@ class AppLockService {
           ),
         );
       } on PlatformException catch (pe) {
-        debugPrint(
-          '[AppLockService] Device credential auth failed with code: ${pe.code}, message: ${pe.message}. Trying biometric fallback...',
+        AppLogger.diagnostic(
+          'APP_LOCK',
+          'Credential authentication unavailable; trying biometric fallback '
+              '| code=${pe.code}',
         );
         if (canCheck || available.isNotEmpty) {
           // Attempt 2: Biometric only fallback if device credentials failed
@@ -87,16 +82,15 @@ class AppLockService {
       }
       return authenticated;
     } on PlatformException catch (e) {
-      debugPrint(
-        '[AppLockService] PlatformException: code=${e.code}, message=${e.message}, details=${e.details}',
-      );
+      AppLogger.error('APP_LOCK', 'Platform error code=${e.code}');
       if (e.code == auth_error.passcodeNotSet ||
           e.code == auth_error.notEnrolled ||
           e.code == 'PasscodeNotSet' ||
           e.code == 'NotEnrolled') {
         lastErrorMessage =
             'No screen lock configured. Please set up a PIN, Pattern, or Fingerprint in your device Settings.';
-      } else if (e.code == auth_error.notAvailable || e.code == 'NotAvailable') {
+      } else if (e.code == auth_error.notAvailable ||
+          e.code == 'NotAvailable') {
         lastErrorMessage =
             'Security lock is not available on this device. Please configure device security in Settings.';
       } else if (e.code == auth_error.lockedOut ||
@@ -112,7 +106,7 @@ class AppLockService {
       }
       return false;
     } catch (e) {
-      debugPrint('[AppLockService] Generic exception: $e');
+      AppLogger.error('APP_LOCK', e.toString());
       lastErrorMessage = 'Authentication failed: $e';
       return false;
     }

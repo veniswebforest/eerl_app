@@ -53,21 +53,12 @@ class _SplashScreenState extends State<SplashScreen>
       );
       final appLockProvider = context.read<AppLockProvider>();
       if (appLockProvider.isLockEnabled) {
-        debugPrint(
-          '[SplashScreen] Valid session & App Lock is enabled -> redirecting to App Lock Screen',
-        );
         context.go(AppRoutes.appLock);
       } else {
-        debugPrint(
-          '[SplashScreen] Valid active session found -> redirecting to Home Screen',
-        );
         final role = await _storedDashboardRole();
         if (mounted) context.go(AppRoutes.home, extra: role);
       }
     } else {
-      debugPrint(
-        '[SplashScreen] Access token null or session expired -> redirecting to Login Screen (Lock Screen is not displayed)',
-      );
       context.go(AppRoutes.login);
     }
   }
@@ -102,7 +93,6 @@ class _SplashScreenState extends State<SplashScreen>
         fit: BoxFit.cover,
 
         onLoaded: (composition) {
-          debugPrint("lottie start ===>");
           _controller
             ..duration = composition.duration
             ..forward(); // Play once

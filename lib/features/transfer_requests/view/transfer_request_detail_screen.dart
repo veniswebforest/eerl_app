@@ -224,7 +224,8 @@ class _TransferRequestDetailContent extends StatelessWidget {
                 isVehicleUnavailable: _isVehicleUnavailable,
               ),
               const SizedBox(height: 12),
-              if (transfer?.truckExpectedAt != null) ...[
+              if (transfer?.truckExpectedAt != null ||
+                  transfer?.plannedVehicleNumber != null) ...[
                 _CollectionManagerCard(transfer: transfer),
                 const SizedBox(height: 12),
               ],
@@ -473,6 +474,15 @@ class _CollectionManagerCard extends StatelessWidget {
         const SizedBox(height: 8),
         const Divider(height: 1, color: AppColors.cool300),
         const SizedBox(height: 12),
+        TransferDetailRow(
+          label: 'Arranged truck',
+          values: [
+            transfer?.plannedVehicleNumber == null
+                ? '-'
+                : '${transfer!.plannedVehicleNumber} · '
+                      '${transfer!.plannedVehicleOwnership == 'COMPANY' ? 'Company truck' : 'Hired'}',
+          ],
+        ),
         TransferDetailRow(
           label: 'Truck arrives',
           values: [

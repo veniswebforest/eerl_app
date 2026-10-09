@@ -72,20 +72,17 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   void _onContinue() async {
-    debugPrint('[LoginScreen] Continue button tap trigger');
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.sendOtp();
     if (!mounted) return;
 
     if (success) {
-      debugPrint('[LoginScreen] Send OTP success; navigating to OTP screen');
       context.push('${AppRoutes.otp}?phone=${authProvider.phoneNumber}');
       return;
     }
 
     final errorMessage = authProvider.errorMessage;
     if (errorMessage != null && errorMessage.isNotEmpty) {
-      debugPrint('[LoginScreen] Displaying send OTP error');
       AppSnackbar.error(context, message: errorMessage);
     }
   }

@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'core/local_database/app_database.dart';
+import 'core/logging/app_logger.dart';
 import 'core/providers/app_lock_provider.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/network_provider.dart';
@@ -29,14 +29,11 @@ void main() async {
   // the same database and do not recreate its tables.
   await AppDatabase.instance.database;
 
-  // Debug-only startup check. Never prints the access token in release builds.
-  if (kDebugMode) {
-    final storedAccessToken = await AuthSessionStorage().getAccessToken();
-    debugPrint(
-      '🔐 [EERL_AUTH][APP_OPEN] accessToken='
-      '${storedAccessToken == null || storedAccessToken.isEmpty ? '[NOT_FOUND]' : storedAccessToken}',
-    );
-  }
+  final storedAccessToken = await AuthSessionStorage().getAccessToken();
+  AppLogger.diagnostic(
+    'APP_OPEN',
+    'authenticated=${storedAccessToken?.isNotEmpty == true}',
+  );
 
   // Initialise providers and load persisted preferences.
   final themeProvider = ThemeProvider();

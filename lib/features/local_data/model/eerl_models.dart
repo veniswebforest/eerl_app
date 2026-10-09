@@ -457,6 +457,44 @@ class DestinationModel {
   DbMap toMap() => {'id': id, 'name': name};
 }
 
+class TransferVehicleModel {
+  const TransferVehicleModel({
+    required this.id,
+    required this.number,
+    required this.ownership,
+    this.transporterName,
+    this.vehicleType,
+    this.capacityKg,
+  });
+
+  final String id;
+  final String number;
+  final String ownership;
+  final String? transporterName;
+  final String? vehicleType;
+  final double? capacityKg;
+
+  bool get isHired => ownership.toUpperCase() == 'HIRED';
+
+  factory TransferVehicleModel.fromMap(DbMap map) => TransferVehicleModel(
+    id: map['id'] as String,
+    number: map['number'] as String,
+    ownership: map['ownership'] as String,
+    transporterName: map['transporter_name'] as String?,
+    vehicleType: map['vehicle_type'] as String?,
+    capacityKg: (map['capacity_kg'] as num?)?.toDouble(),
+  );
+
+  DbMap toMap() => {
+    'id': id,
+    'number': number,
+    'ownership': ownership,
+    'transporter_name': transporterName,
+    'vehicle_type': vehicleType,
+    'capacity_kg': capacityKg,
+  };
+}
+
 class CollectionModel {
   const CollectionModel({
     required this.id,
@@ -769,9 +807,13 @@ class CategoryRequestModel {
     this.number,
     required this.centerId,
     required this.requestedBy,
+    this.requestedByName,
     required this.name,
     this.reason,
     required this.status,
+    this.decidedByName,
+    this.decidedAt,
+    this.decisionReason,
     required this.createdAt,
     required this.syncState,
   });
@@ -779,9 +821,13 @@ class CategoryRequestModel {
   final String? number;
   final String centerId;
   final String requestedBy;
+  final String? requestedByName;
   final String name;
   final String? reason;
   final String status;
+  final String? decidedByName;
+  final String? decidedAt;
+  final String? decisionReason;
   final String createdAt;
   final String syncState;
   factory CategoryRequestModel.fromMap(DbMap map) => CategoryRequestModel(
@@ -789,9 +835,13 @@ class CategoryRequestModel {
     number: map['number'] as String?,
     centerId: map['center_id'] as String,
     requestedBy: map['requested_by'] as String,
+    requestedByName: map['requested_by_name'] as String?,
     name: map['name'] as String,
     reason: map['reason'] as String?,
     status: map['status'] as String,
+    decidedByName: map['decided_by_name'] as String?,
+    decidedAt: map['decided_at'] as String?,
+    decisionReason: map['decision_reason'] as String?,
     createdAt: map['created_at'] as String,
     syncState: map['sync_state'] as String,
   );
@@ -800,9 +850,13 @@ class CategoryRequestModel {
     'number': number,
     'center_id': centerId,
     'requested_by': requestedBy,
+    'requested_by_name': requestedByName,
     'name': name,
     'reason': reason,
     'status': status,
+    'decided_by_name': decidedByName,
+    'decided_at': decidedAt,
+    'decision_reason': decisionReason,
     'created_at': createdAt,
     'sync_state': syncState,
   };
@@ -818,6 +872,11 @@ class TransferModel {
     this.destinationId,
     this.destinationName,
     this.truckExpectedAt,
+    this.transferVehicleId,
+    this.plannedVehicleNumber,
+    this.plannedVehicleOwnership,
+    this.transporterName,
+    this.transferFee,
     this.fixedQty,
     this.estimatedExpense,
     this.note,
@@ -827,6 +886,7 @@ class TransferModel {
     this.baleCount,
     this.vehiclePhotoUrls = const [],
     this.weighbridgePhotoUrls = const [],
+    this.vehicleDiffers = false,
     @Deprecated('Transfer dispatch uses the two field-specific photo lists.')
     List<String> photoUrls = const [],
     required this.requestedBy,
@@ -852,6 +912,11 @@ class TransferModel {
   final String? destinationId;
   final String? destinationName;
   final String? truckExpectedAt;
+  final String? transferVehicleId;
+  final String? plannedVehicleNumber;
+  final String? plannedVehicleOwnership;
+  final String? transporterName;
+  final double? transferFee;
   final double? fixedQty;
   final double? estimatedExpense;
   final String? note;
@@ -861,6 +926,7 @@ class TransferModel {
   final int? baleCount;
   final List<String> vehiclePhotoUrls;
   final List<String> weighbridgePhotoUrls;
+  final bool vehicleDiffers;
   final String requestedBy;
   final String requestedByName;
   final String requestedAt;
@@ -884,6 +950,11 @@ class TransferModel {
     destinationId: map['destination_id'] as String?,
     destinationName: map['destination_name'] as String?,
     truckExpectedAt: map['truck_expected_at'] as String?,
+    transferVehicleId: map['transfer_vehicle_id'] as String?,
+    plannedVehicleNumber: map['planned_vehicle_number'] as String?,
+    plannedVehicleOwnership: map['planned_vehicle_ownership'] as String?,
+    transporterName: map['transporter_name'] as String?,
+    transferFee: (map['transfer_fee'] as num?)?.toDouble(),
     fixedQty: (map['fixed_qty'] as num?)?.toDouble(),
     estimatedExpense: (map['estimated_expense'] as num?)?.toDouble(),
     note: map['note'] as String?,
@@ -893,6 +964,7 @@ class TransferModel {
     baleCount: (map['bale_count'] as num?)?.toInt(),
     vehiclePhotoUrls: _strings(map['vehicle_photo_urls']),
     weighbridgePhotoUrls: _strings(map['weighbridge_photo_urls']),
+    vehicleDiffers: _bool(map['vehicle_differs']),
     requestedBy: map['requested_by'] as String,
     requestedByName: map['requested_by_name'] as String,
     requestedAt: map['requested_at'] as String,
@@ -917,6 +989,11 @@ class TransferModel {
     'destination_id': destinationId,
     'destination_name': destinationName,
     'truck_expected_at': truckExpectedAt,
+    'transfer_vehicle_id': transferVehicleId,
+    'planned_vehicle_number': plannedVehicleNumber,
+    'planned_vehicle_ownership': plannedVehicleOwnership,
+    'transporter_name': transporterName,
+    'transfer_fee': transferFee,
     'fixed_qty': fixedQty,
     'estimated_expense': estimatedExpense,
     'note': note,
@@ -926,6 +1003,7 @@ class TransferModel {
     'bale_count': baleCount,
     'vehicle_photo_urls': _jsonStrings(vehiclePhotoUrls),
     'weighbridge_photo_urls': _jsonStrings(weighbridgePhotoUrls),
+    'vehicle_differs': vehicleDiffers ? 1 : 0,
     'requested_by': requestedBy,
     'requested_by_name': requestedByName,
     'requested_at': requestedAt,

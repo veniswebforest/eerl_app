@@ -5,11 +5,11 @@ import 'dart:io';
 import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/network/app_http_client.dart';
 import 'package:eerl_app/core/network/internet_connectivity_service.dart';
 import 'package:eerl_app/features/auth/data/auth_session_storage.dart';
 import 'package:eerl_app/features/bootstrap/service/item_image_cache_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 
@@ -167,23 +167,37 @@ class OutgoingSyncService {
 
   Future<void> _send(Map<String, Object?> item, String token) async {
     final seq = (item['seq'] as num).toInt();
+    final isCollectionSubmit =
+        item['entity'] == DatabaseTables.collections &&
+        item['kind'] == 'submit';
+    final requestMethod = isCollectionSubmit
+        ? 'PUT'
+        : item['method']! as String;
+    final requestPath = isCollectionSubmit
+        ? '/collections/${item['entity_id']}'
+        : item['path']! as String;
+    final stopwatch = Stopwatch();
+    var apiSuccessLogged = false;
     await _database.update(
       DatabaseTables.outbox,
-      {'status': 'sending'},
+      {
+        'status': 'sending',
+        if (isCollectionSubmit) 'method': requestMethod,
+        if (isCollectionSubmit) 'path': requestPath,
+      },
       where: "seq = ? AND status = 'queued'",
       whereArgs: [seq],
     );
 
     try {
       var body = await _resolvedBody(item['body'] as String?);
-      if (item['entity'] == DatabaseTables.collections &&
-          item['kind'] == 'submit') {
+      if (isCollectionSubmit) {
         body = await _ensureCollectionSubmitGps(item, body);
       }
       final request =
           http.Request(
-              item['method']! as String,
-              Uri.parse('${AppConstants.apiBaseUrl}/mobile${item['path']}'),
+              requestMethod,
+              Uri.parse('${AppConstants.apiBaseUrl}/mobile$requestPath'),
             )
             ..headers.addAll({
               'accept': 'application/json',
@@ -192,60 +206,45 @@ class OutgoingSyncService {
             });
       if (body != null) request.body = jsonEncode(body);
 
-      _log('SEND #$seq ${item['method']} ${item['path']}');
-      final isCollection = item['entity'] == DatabaseTables.collections;
       final isTransfer = item['entity'] == DatabaseTables.transfers;
-      final isExpense = item['entity'] == DatabaseTables.expenses;
-      if (isCollection) {
-        _collectionLog(
-          'REQUEST',
-          '#$seq ${item['method']} ${request.url} '
-              'collection_id=${item['entity_id']} body=${request.body}',
-        );
-      }
-      if (isTransfer) {
-        _transferLog(
-          'REQUEST',
-          '#$seq ${item['method']} ${request.url} '
-              'transfer_id=${item['entity_id']} body=${request.body}',
-        );
-      }
-      if (isExpense) {
-        _expenseLog(
-          'REQUEST',
-          '#$seq ${item['method']} ${request.url} '
-              'expense_id=${item['entity_id']} body=${request.body}',
-        );
-      }
+      AppLogger.apiRequest(
+        requestMethod,
+        request.url.path,
+        message:
+            'outboxSeq=$seq | entity=${item['entity']}/${item['entity_id']}',
+      );
+      stopwatch.start();
       final streamed = await _client.send(request).timeout(_timeout);
       final response = await http.Response.fromStream(streamed);
       final responseBody = _decodeObject(response.body);
-      if (isCollection) {
-        _collectionLog(
-          'RESPONSE',
-          '#$seq status=${response.statusCode} '
-              'collection_id=${item['entity_id']} '
-              'body=${response.body.trim().isEmpty ? '{}' : response.body}',
-        );
-      }
-      if (isTransfer) {
-        _transferLog(
-          'RESPONSE',
-          '#$seq status=${response.statusCode} '
-              'transfer_id=${item['entity_id']} '
-              'body=${response.body.trim().isEmpty ? '{}' : response.body}',
-        );
-      }
-      if (isExpense) {
-        _expenseLog(
-          'RESPONSE',
-          '#$seq status=${response.statusCode} '
-              'expense_id=${item['entity_id']} '
-              'body=${response.body.trim().isEmpty ? '{}' : response.body}',
-        );
-      }
       final code = _errorCode(responseBody);
-      if (_isSuccess(response.statusCode, code)) {
+      final successful = _isSuccess(response.statusCode, code);
+      if (successful) {
+        AppLogger.apiSuccess(
+          requestMethod,
+          request.url.path,
+          statusCode: response.statusCode,
+          duration: stopwatch.elapsed,
+          message: 'outboxSeq=$seq',
+        );
+        apiSuccessLogged = true;
+      } else {
+        AppLogger.apiError(
+          requestMethod,
+          request.url.path,
+          statusCode: response.statusCode,
+          duration: stopwatch.elapsed,
+          error: code,
+        );
+      }
+      if (isTransfer &&
+          (item['kind'] == 'approve' || item['kind'] == 'reject') &&
+          response.statusCode == 409 &&
+          code == 'NOT_PENDING') {
+        await _refreshTransferAfterConflict(item, token);
+        return;
+      }
+      if (successful) {
         await _complete(item, responseBody);
         _log('DONE #$seq status=${response.statusCode}');
         return;
@@ -256,15 +255,61 @@ class OutgoingSyncService {
         await _retry(item, 'HTTP ${response.statusCode}');
         return;
       }
+      if (isTransfer &&
+          item['kind'] == 'approve' &&
+          response.statusCode == 422 &&
+          _transferApprovalRefusalCodes.contains(code)) {
+        await _undoTransferApproval(
+          item,
+          'HTTP ${response.statusCode}${code == null ? '' : ' $code'}',
+        );
+        return;
+      }
+      if (isTransfer &&
+          (item['kind'] == 'approve' || item['kind'] == 'reject') &&
+          response.statusCode == 404) {
+        await _dropTransferDecision(item, 'HTTP 404');
+        return;
+      }
       await _fail(
         item,
         'HTTP ${response.statusCode}${code == null ? '' : ' $code'}',
       );
-    } on TimeoutException {
+    } on TimeoutException catch (error) {
+      if (apiSuccessLogged) {
+        AppLogger.sync('OUTBOX_APPLY_FAILED', error.toString());
+      } else {
+        AppLogger.apiError(
+          requestMethod,
+          requestPath,
+          duration: stopwatch.elapsed,
+          error: error,
+        );
+      }
       await _retry(item, 'Request timed out');
     } on SocketException catch (error) {
+      if (apiSuccessLogged) {
+        AppLogger.sync('OUTBOX_APPLY_FAILED', error.message);
+      } else {
+        AppLogger.apiError(
+          requestMethod,
+          requestPath,
+          duration: stopwatch.elapsed,
+          error: error.message,
+        );
+      }
       await _retry(item, error.message);
     } catch (error) {
+      if (apiSuccessLogged) {
+        AppLogger.sync('OUTBOX_APPLY_FAILED', error.toString());
+      } else {
+        AppLogger.apiError(
+          requestMethod,
+          requestPath,
+          duration: stopwatch.elapsed,
+          error: error,
+        );
+      }
       await _retry(item, error.toString());
     }
   }
@@ -293,6 +338,56 @@ class OutgoingSyncService {
       throw StateError('Collection submit body is unavailable.');
     }
     final resolved = Map<String, Object?>.from(body);
+    final collectionId = item['entity_id'] as String?;
+    if (collectionId == null || collectionId.isEmpty) {
+      throw StateError('Collection submit is missing its collection id.');
+    }
+    final rows = await _database.query(
+      DatabaseTables.collections,
+      columns: const [
+        'center_id',
+        'channel',
+        'vehicle_id',
+        'given_by_name',
+        'mrf_person_id',
+        'ragpicker_id',
+        'paid_by',
+        'gps_lat',
+        'gps_lng',
+      ],
+      where: 'id = ?',
+      whereArgs: [collectionId],
+      limit: 1,
+    );
+    final collection = rows.isEmpty ? const <String, Object?>{} : rows.single;
+
+    // Repair older queued payloads too and keep the exact key contract used by
+    // PUT /collections/{id}. Slip number and collection time are managed by
+    // the server and intentionally excluded.
+    resolved.putIfAbsent('centerId', () => collection['center_id']);
+    resolved.putIfAbsent('type', () => collection['channel']);
+    resolved.putIfAbsent('vehicleId', () => collection['vehicle_id']);
+    resolved.putIfAbsent('givenByName', () => collection['given_by_name']);
+    resolved.putIfAbsent('mrfLabourId', () => collection['mrf_person_id']);
+    resolved.putIfAbsent('ragpickerId', () => collection['ragpicker_id']);
+    resolved.putIfAbsent('handoverPhotoUrls', () => <Object?>[]);
+    resolved.putIfAbsent('paidBy', () => collection['paid_by']);
+    final rawLines = resolved['lines'];
+    final lines = rawLines is List
+        ? [
+            for (final rawLine in rawLines)
+              if (rawLine is Map)
+                <String, Object?>{
+                  'itemId': rawLine['itemId'],
+                  'collectedQty': rawLine['collectedQty'],
+                  'verifiedQty': rawLine['verifiedQty'],
+                  'rate': rawLine['rate'],
+                  'amount': rawLine['amount'],
+                  'photoUrls': rawLine['photoUrls'] ?? <Object?>[],
+                },
+          ]
+        : <Object?>[];
+
     final outboxGps = resolved['gps'];
     final outboxLatitude = outboxGps is Map && outboxGps['lat'] is num
         ? (outboxGps['lat'] as num).toDouble()
@@ -301,26 +396,25 @@ class OutgoingSyncService {
         ? (outboxGps['lng'] as num).toDouble()
         : null;
     if (_isValidGps(outboxLatitude, outboxLongitude)) {
-      return resolved;
+      return <String, Object?>{
+        'centerId': resolved['centerId'],
+        'type': resolved['type'],
+        'vehicleId': resolved['vehicleId'],
+        'givenByName': resolved['givenByName'],
+        'mrfLabourId': resolved['mrfLabourId'],
+        'ragpickerId': resolved['ragpickerId'],
+        'handoverPhotoUrls': resolved['handoverPhotoUrls'],
+        'paidBy': resolved['paidBy'],
+        'lines': lines,
+        'gps': outboxGps,
+      };
     }
-
-    final collectionId = item['entity_id'] as String?;
-    if (collectionId == null || collectionId.isEmpty) {
-      throw StateError('Collection submit is missing its collection id.');
-    }
-    final rows = await _database.query(
-      DatabaseTables.collections,
-      columns: const ['gps_lat', 'gps_lng'],
-      where: 'id = ?',
-      whereArgs: [collectionId],
-      limit: 1,
-    );
     final latitude = rows.isEmpty
         ? null
-        : (rows.single['gps_lat'] as num?)?.toDouble();
+        : (collection['gps_lat'] as num?)?.toDouble();
     final longitude = rows.isEmpty
         ? null
-        : (rows.single['gps_lng'] as num?)?.toDouble();
+        : (collection['gps_lng'] as num?)?.toDouble();
     if (!_isValidGps(latitude, longitude)) {
       throw StateError(
         'Collection $collectionId has no valid GPS in the outbox or local table.',
@@ -329,8 +423,18 @@ class OutgoingSyncService {
 
     // Older queued rows may not contain GPS. Backfill those from the local
     // collection row, while preserving coordinates already saved in outbox.
-    resolved['gps'] = {'lat': latitude, 'lng': longitude};
-    return resolved;
+    return <String, Object?>{
+      'centerId': resolved['centerId'],
+      'type': resolved['type'],
+      'vehicleId': resolved['vehicleId'],
+      'givenByName': resolved['givenByName'],
+      'mrfLabourId': resolved['mrfLabourId'],
+      'ragpickerId': resolved['ragpickerId'],
+      'handoverPhotoUrls': resolved['handoverPhotoUrls'],
+      'paidBy': resolved['paidBy'],
+      'lines': lines,
+      'gps': {'lat': latitude, 'lng': longitude},
+    };
   }
 
   bool _isValidGps(double? latitude, double? longitude) =>
@@ -432,6 +536,15 @@ class OutgoingSyncService {
     if (table == DatabaseTables.expenses) {
       return _expenseServerValues(data);
     }
+    if (table == DatabaseTables.cashRequests) {
+      return _cashRequestServerValues(data);
+    }
+    if (table == DatabaseTables.categoryRequests) {
+      return _categoryRequestServerValues(data);
+    }
+    if (table == DatabaseTables.ragpickers) {
+      return _ragpickerServerValues(data);
+    }
     Object? candidate = data;
     if (data[table] is Map) candidate = data[table];
     if (candidate is! Map) return <String, Object?>{};
@@ -498,6 +611,15 @@ class OutgoingSyncService {
       'destination_name': data['destinationName'],
     if (data['truckExpectedAt'] != null)
       'truck_expected_at': data['truckExpectedAt'],
+    if (data.containsKey('transferVehicleId'))
+      'transfer_vehicle_id': data['transferVehicleId'],
+    if (data.containsKey('plannedVehicleNumber'))
+      'planned_vehicle_number': data['plannedVehicleNumber'],
+    if (data.containsKey('plannedVehicleOwnership'))
+      'planned_vehicle_ownership': data['plannedVehicleOwnership'],
+    if (data.containsKey('transporterName'))
+      'transporter_name': data['transporterName'],
+    if (data.containsKey('transferFee')) 'transfer_fee': data['transferFee'],
     if (data['vehicleNumber'] != null) 'vehicle_plate': data['vehicleNumber'],
     if (data['driverName'] != null) 'driver_name': data['driverName'],
     if (data['handedOverAt'] != null) 'handed_over_at': data['handedOverAt'],
@@ -508,6 +630,8 @@ class OutgoingSyncService {
       'vehicle_photo_urls': jsonEncode(data['vehiclePhotoUrls']),
     if (data['weighbridgePhotoUrls'] is List)
       'weighbridge_photo_urls': jsonEncode(data['weighbridgePhotoUrls']),
+    if (data.containsKey('vehicleDiffers'))
+      'vehicle_differs': _sqliteValue(data['vehicleDiffers']),
     if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
   };
 
@@ -520,6 +644,46 @@ class OutgoingSyncService {
       'receipt_photo_urls': jsonEncode(data['photoUrls']),
     if (data['createdAt'] != null) 'created_at': data['createdAt'],
     if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
+  };
+
+  Map<String, Object?> _cashRequestServerValues(Map<Object?, Object?> data) => {
+    if (data['number'] != null) 'number': data['number'],
+    if (data['amount'] != null) 'amount': data['amount'],
+    if (data['reason'] != null) 'reason': data['reason'],
+    if (data['status'] != null) 'status': data['status'],
+    if (data['createdAt'] != null) 'created_at': data['createdAt'],
+    if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
+  };
+
+  Map<String, Object?> _categoryRequestServerValues(
+    Map<Object?, Object?> data,
+  ) {
+    final requestedBy = data['requestedBy'];
+    final decision = data['decision'];
+    final decisionBy = decision is Map ? decision['by'] : null;
+    return <String, Object?>{
+      if (data['number'] != null) 'number': data['number'],
+      if (data['status'] != null) 'status': data['status'],
+      if (requestedBy is Map && requestedBy['name'] != null)
+        'requested_by_name': requestedBy['name'],
+      if (decisionBy is Map && decisionBy['name'] != null)
+        'decided_by_name': decisionBy['name'],
+      if (decision is Map && decision.containsKey('at'))
+        'decided_at': decision['at'],
+      if (decision is Map && decision.containsKey('reason'))
+        'decision_reason': decision['reason'],
+    };
+  }
+
+  Map<String, Object?> _ragpickerServerValues(Map<Object?, Object?> data) => {
+    if (data['number'] != null) 'number': data['number'],
+    if (data['centerId'] != null) 'center_id': data['centerId'],
+    if (data['name'] != null) 'name': data['name'],
+    if (data.containsKey('phone')) 'phone': data['phone'],
+    if (data.containsKey('idNumber')) 'id_number': data['idNumber'],
+    if (data.containsKey('photoUrl')) 'photo_url': data['photoUrl'],
+    if (data.containsKey('isActive'))
+      'is_active': _sqliteValue(data['isActive']),
   };
 
   Future<void> _applyCollectionResponseLines(
@@ -596,10 +760,138 @@ class OutgoingSyncService {
         );
       }
     });
-    _log('FAILED #${item['seq']}: $error');
+    AppLogger.syncError('OUTBOX_FAILED', '#${item['seq']}: $error');
+  }
+
+  Future<void> _undoTransferApproval(
+    Map<String, Object?> item,
+    String error,
+  ) async {
+    await _database.runInTransaction((txn) async {
+      await txn.delete(
+        DatabaseTables.outboxPhotos,
+        where: 'outbox_seq = ?',
+        whereArgs: [item['seq']],
+      );
+      await txn.delete(
+        DatabaseTables.outbox,
+        where: 'seq = ?',
+        whereArgs: [item['seq']],
+      );
+      await txn.update(
+        DatabaseTables.transfers,
+        {
+          'status': 'REQUESTED',
+          'destination_id': null,
+          'destination_name': null,
+          'truck_expected_at': null,
+          'transfer_vehicle_id': null,
+          'planned_vehicle_number': null,
+          'planned_vehicle_ownership': null,
+          'transporter_name': null,
+          'transfer_fee': null,
+          'decided_by_name': null,
+          'approved_at': null,
+          'sync_state': 'synced',
+        },
+        where: 'id = ?',
+        whereArgs: [item['entity_id']],
+      );
+    });
+    AppLogger.sync(
+      'APPROVAL_UNDONE',
+      'transfer_id=${item['entity_id']} error=$error',
+    );
+  }
+
+  Future<void> _refreshTransferAfterConflict(
+    Map<String, Object?> item,
+    String token,
+  ) async {
+    final transferId = item['entity_id']! as String;
+    final path = '/api/v1/mobile/transfers/$transferId';
+    final stopwatch = Stopwatch()..start();
+    AppLogger.apiRequest('GET', path, message: 'conflictRefresh=true');
+    final response = await _client
+        .get(
+          Uri.parse('${AppConstants.apiBaseUrl}/mobile/transfers/$transferId'),
+          headers: {
+            'accept': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        )
+        .timeout(_timeout);
+    final body = _decodeObject(response.body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      AppLogger.apiSuccess(
+        'GET',
+        path,
+        statusCode: response.statusCode,
+        duration: stopwatch.elapsed,
+        message: 'conflictRefresh=true',
+      );
+      await _complete(item, body);
+      return;
+    }
+    AppLogger.apiError(
+      'GET',
+      path,
+      statusCode: response.statusCode,
+      duration: stopwatch.elapsed,
+      error: 'conflictRefresh=true',
+    );
+    if (response.statusCode >= 500 ||
+        response.statusCode == 408 ||
+        response.statusCode == 429) {
+      await _retry(item, 'Conflict refresh HTTP ${response.statusCode}');
+      return;
+    }
+    await _fail(item, 'Conflict refresh HTTP ${response.statusCode}');
+  }
+
+  Future<void> _dropTransferDecision(
+    Map<String, Object?> item,
+    String error,
+  ) async {
+    await _database.runInTransaction((txn) async {
+      await txn.delete(
+        DatabaseTables.outboxPhotos,
+        where: 'outbox_seq = ?',
+        whereArgs: [item['seq']],
+      );
+      await txn.delete(
+        DatabaseTables.outbox,
+        where: 'seq = ?',
+        whereArgs: [item['seq']],
+      );
+      await txn.update(
+        DatabaseTables.transfers,
+        {'sync_state': 'synced'},
+        where: 'id = ?',
+        whereArgs: [item['entity_id']],
+      );
+    });
+    AppLogger.sync(
+      'DECISION_DROPPED',
+      'transfer_id=${item['entity_id']} error=$error',
+    );
   }
 
   Future<int> _uploadWaitingPhotos(String token) async {
+    // Repair rows created by the earlier unsupported enum before building the
+    // batch request. Do not translate any other purpose values here.
+    final repairedRagpickerPhotos = await _database.update(
+      DatabaseTables.photos,
+      {'purpose': 'RAGPICKER'},
+      where: 'purpose = ?',
+      whereArgs: ['RAGPICKER_PROFILE'],
+    );
+    if (repairedRagpickerPhotos > 0) {
+      AppLogger.sqlite(
+        'PHOTO_PURPOSE_REPAIRED',
+        'rows=$repairedRagpickerPhotos RAGPICKER_PROFILE -> RAGPICKER',
+      );
+    }
     final waitingRows = await _database.query(
       DatabaseTables.photos,
       where: "status IN ('local', 'failed')",
@@ -657,10 +949,9 @@ class OutgoingSyncService {
             },
         ],
       };
-      _photoLog(
-        'BATCH_REQUEST',
-        'count=${rows.length} body=${jsonEncode(batchBody)}',
-      );
+      const batchPath = '/api/v1/mobile/uploads/batch';
+      final batchStopwatch = Stopwatch()..start();
+      AppLogger.apiRequest('POST', batchPath, message: 'count=${rows.length}');
       final response = await _client
           .post(
             Uri.parse('${AppConstants.apiBaseUrl}/mobile/uploads/batch'),
@@ -672,21 +963,29 @@ class OutgoingSyncService {
             body: jsonEncode(batchBody),
           )
           .timeout(_timeout);
-      _photoLog(
-        'BATCH_RESPONSE',
-        'status=${response.statusCode} '
-            'body=${response.body.trim().isEmpty ? '{}' : response.body}',
-      );
       if (response.statusCode < 200 || response.statusCode >= 300) {
+        AppLogger.apiError(
+          'POST',
+          batchPath,
+          statusCode: response.statusCode,
+          duration: batchStopwatch.elapsed,
+        );
         throw HttpException(
           'Upload batch HTTP ${response.statusCode}: ${response.body}',
         );
       }
+      AppLogger.apiSuccess(
+        'POST',
+        batchPath,
+        statusCode: response.statusCode,
+        duration: batchStopwatch.elapsed,
+        message: 'count=${rows.length}',
+      );
       final body = _decodeObject(response.body);
       final uploads = _uploadList(body);
       if (uploads.length != rows.length) {
-        _photoLog(
-          'BATCH_MISMATCH',
+        AppLogger.error(
+          'PHOTO_BATCH_MISMATCH',
           'requested=${rows.length} received=${uploads.length}',
         );
       }
@@ -710,10 +1009,27 @@ class OutgoingSyncService {
         final request = http.StreamedRequest('PUT', Uri.parse(uploadUrl))
           ..headers['content-type'] = source['content_type']! as String
           ..contentLength = await file.length();
+        final uploadStopwatch = Stopwatch()..start();
+        AppLogger.apiRequest('PUT', request.url.path, message: 'photoId=$id');
         final responseFuture = _client.send(request).timeout(_timeout);
         await file.openRead().pipe(request.sink);
         final put = await responseFuture;
-        if (put.statusCode < 200 || put.statusCode >= 300) continue;
+        if (put.statusCode < 200 || put.statusCode >= 300) {
+          AppLogger.apiError(
+            'PUT',
+            request.url.path,
+            statusCode: put.statusCode,
+            duration: uploadStopwatch.elapsed,
+          );
+          continue;
+        }
+        AppLogger.apiSuccess(
+          'PUT',
+          request.url.path,
+          statusCode: put.statusCode,
+          duration: uploadStopwatch.elapsed,
+          message: 'photoId=$id',
+        );
         await _database.update(
           DatabaseTables.photos,
           {
@@ -726,13 +1042,13 @@ class OutgoingSyncService {
         );
         await _imageCache.storeLocalFileForUrl(fileUrl, file);
         uploadedCount++;
-        _photoLog(
-          'UPLOADED',
+        AppLogger.sync(
+          'PHOTO_UPLOADED',
           'photo_id=$id size_bytes=${source['size_bytes']}',
         );
       }
     } catch (error) {
-      _log('PHOTO batch failed: $error');
+      AppLogger.syncError('PHOTO_BATCH_FAILED', 'Upload will retry');
     } finally {
       await _database.rawUpdate(
         "UPDATE ${DatabaseTables.photos} SET status = 'failed' "
@@ -782,6 +1098,14 @@ class OutgoingSyncService {
               code == 'ALREADY_CLOSED' ||
               code == 'ALREADY_DISPATCHED'));
 
+  static const _transferApprovalRefusalCodes = <String>{
+    'OVER_STOCK',
+    'VEHICLE_REQUIRED',
+    'FEE_REQUIRED',
+    'VEHICLE_INACTIVE',
+    'VEHICLE_NOT_FOUND',
+  };
+
   static const _tablesWithSyncState = <String>{
     DatabaseTables.centerItems,
     DatabaseTables.vehicles,
@@ -799,28 +1123,6 @@ class OutgoingSyncService {
   };
 
   static void _log(String message) {
-    if (kDebugMode) debugPrint('📤 [EERL_OUTBOX] $message');
-  }
-
-  static void _collectionLog(String stage, String message) {
-    if (kDebugMode) {
-      debugPrint('🌐 [EERL_COLLECTION_API][$stage] $message');
-    }
-  }
-
-  static void _transferLog(String stage, String message) {
-    if (kDebugMode) {
-      debugPrint('🚚 [EERL_TRANSFER_API][$stage] $message');
-    }
-  }
-
-  static void _expenseLog(String stage, String message) {
-    if (kDebugMode) {
-      debugPrint('💸 [EERL_EXPENSE_API][$stage] $message');
-    }
-  }
-
-  static void _photoLog(String stage, String message) {
-    if (kDebugMode) debugPrint('📸 [EERL_PHOTO_UPLOAD][$stage] $message');
+    AppLogger.sync('OUTBOX', message);
   }
 }

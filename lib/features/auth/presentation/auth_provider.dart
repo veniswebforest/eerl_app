@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/features/auth/data/auth_repository.dart';
 import 'package:eerl_app/features/auth/model/auth_api_exception.dart';
 import 'package:eerl_app/features/auth/model/send_otp_response.dart';
@@ -11,8 +12,6 @@ class AuthProvider extends ChangeNotifier {
   AuthProvider({AuthRepository? repository})
     : _repository = repository ?? AuthRepository(),
       _ownsRepository = repository == null;
-
-  static const _tag = '[AuthProvider]';
 
   final AuthRepository _repository;
   final bool _ownsRepository;
@@ -94,19 +93,14 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> sendOtp() async {
     if (_isLoading) return false;
-    debugPrint('$_tag Send OTP event start');
     _loginAttempted = true;
     if (!isPhoneValid) {
-      debugPrint(
-        '$_tag Validation failed: invalid 10-digit Indian mobile number',
-      );
       _hasLoginError = true;
       _errorMessage = null;
       notifyListeners();
       return false;
     }
 
-    debugPrint('$_tag Loading state start');
     _isLoading = true;
     _hasLoginError = false;
     _errorMessage = null;
@@ -125,47 +119,36 @@ class AuthProvider extends ChangeNotifier {
             ? expirySeconds
             : 30,
       );
-      debugPrint('$_tag Success state: OTP request completed');
       return true;
-    } on AuthApiException catch (error, stackTrace) {
+    } on AuthApiException catch (error) {
       _errorMessage = error.message;
       _hasLoginError = error.field == 'phone';
-      debugPrint(
-        '$_tag Error state: code=${error.code}, status=${error.statusCode}',
-      );
-      debugPrintStack(label: '$_tag Stack Trace', stackTrace: stackTrace);
       return false;
-    } catch (error, stackTrace) {
+    } catch (error) {
       _errorMessage = 'Unable to send the login code. Please try again.';
-      debugPrint('$_tag Catch block error: $error');
-      debugPrintStack(label: '$_tag Stack Trace', stackTrace: stackTrace);
+      AppLogger.error('AUTH', 'Send OTP failed: $error');
       return false;
     } finally {
       _isLoading = false;
-      debugPrint('$_tag Loading state stop');
       notifyListeners();
     }
   }
 
   Future<bool> verifyOtp() async {
     if (_isLoading) return false;
-    debugPrint('$_tag Verify OTP event start');
     if (!isPhoneValid) {
       _hasOtpError = true;
       _errorMessage = 'Enter a valid 10-digit Indian mobile number.';
-      debugPrint('$_tag Validation failed: invalid phone number');
       notifyListeners();
       return false;
     }
     if (!isOtpComplete) {
       _hasOtpError = true;
       _errorMessage = 'Enter the complete 6-digit login code.';
-      debugPrint('$_tag Validation failed: OTP must contain 6 digits');
       notifyListeners();
       return false;
     }
 
-    debugPrint('$_tag Verify loading state start');
     _isLoading = true;
     _hasOtpError = false;
     _isVerified = false;
@@ -179,31 +162,18 @@ class AuthProvider extends ChangeNotifier {
       );
       _verifyOtpResponse = response;
       _isVerified = true;
-      debugPrint('$_tag Verify success state: authenticated session stored');
       return true;
-    } on AuthApiException catch (error, stackTrace) {
+    } on AuthApiException catch (error) {
       _hasOtpError = true;
       _errorMessage = error.message;
-      debugPrint(
-        '$_tag Verify error state: code=${error.code}, status=${error.statusCode}',
-      );
-      debugPrintStack(
-        label: '$_tag Verify Stack Trace',
-        stackTrace: stackTrace,
-      );
       return false;
-    } catch (error, stackTrace) {
+    } catch (error) {
       _hasOtpError = true;
       _errorMessage = 'Unable to verify the login code. Please try again.';
-      debugPrint('$_tag Verify catch block error: $error');
-      debugPrintStack(
-        label: '$_tag Verify Stack Trace',
-        stackTrace: stackTrace,
-      );
+      AppLogger.error('AUTH', 'Verify OTP failed: $error');
       return false;
     } finally {
       _isLoading = false;
-      debugPrint('$_tag Verify loading state stop');
       notifyListeners();
     }
   }
@@ -219,7 +189,7 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> checkSessionValidity() async {
     final isValid = await _repository.isSessionValid();
     if (!isValid) {
-      debugPrint('$_tag Session invalid or expired. Clearing storage.');
+      AppLogger.diagnostic('AUTH_SESSION', 'Invalid session cleared');
       await _repository.clearSession();
     }
     return isValid;

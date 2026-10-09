@@ -71,8 +71,10 @@ class EerlLocalRepository {
     search: search,
     activeOnly: activeOnly,
   );
-  Future<void> saveRagpicker(RagpickerModel ragpicker) =>
-      _local.saveRagpicker(ragpicker);
+  Future<void> saveRagpicker(
+    RagpickerModel ragpicker, {
+    String? localPhotoPath,
+  }) => _local.saveRagpicker(ragpicker, localPhotoPath: localPhotoPath);
   Future<void> setRagpickerActive(RagpickerModel ragpicker, bool active) =>
       _local.setRagpickerActive(ragpicker, active);
   Future<List<ExpenseCategoryModel>> getExpenseCategories({String? centerId}) =>
@@ -123,6 +125,8 @@ class EerlLocalRepository {
     bool supervisor = false,
     String? status,
   }) => _local.getExpenses(supervisor: supervisor, status: status);
+  Future<List<String>> getExpenseReceiptSources(String expenseId) =>
+      _local.getExpenseReceiptSources(expenseId);
   Future<String> saveExpense({
     required String categoryId,
     required double amount,
@@ -138,6 +142,10 @@ class EerlLocalRepository {
   );
   Future<List<CashRequestModel>> getCashRequests({bool supervisor = false}) =>
       _local.getCashRequests(supervisor: supervisor);
+  Future<String> saveCashRequest({
+    required double amount,
+    required String reason,
+  }) => _local.saveCashRequest(amount: amount, reason: reason);
   Future<List<CategoryRequestModel>> getCategoryRequests({
     bool supervisor = false,
   }) => _local.getCategoryRequests(supervisor: supervisor);
@@ -152,6 +160,31 @@ class EerlLocalRepository {
     status: status,
     allCenters: allCenters,
   );
+  Future<List<TransferVehicleModel>> getTransferVehicles() =>
+      _local.getTransferVehicles();
+  Future<void> approveTransfer({
+    required String transferId,
+    required String destinationId,
+    String? transferVehicleId,
+    String? vehicleNumber,
+    String? transporterName,
+    double? transferFee,
+    DateTime? vehicleArrivalTime,
+    String? note,
+  }) => _local.approveTransfer(
+    transferId: transferId,
+    destinationId: destinationId,
+    transferVehicleId: transferVehicleId,
+    vehicleNumber: vehicleNumber,
+    transporterName: transporterName,
+    transferFee: transferFee,
+    vehicleArrivalTime: vehicleArrivalTime,
+    note: note,
+  );
+  Future<void> rejectTransfer({
+    required String transferId,
+    required String reason,
+  }) => _local.rejectTransfer(transferId: transferId, reason: reason);
   Future<String> saveTransferRequest({
     required Map<String, double> itemQuantities,
     required double estimatedExpense,

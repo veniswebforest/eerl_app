@@ -10,6 +10,7 @@ import 'package:eerl_app/features/home/view/home_screen.dart';
 import 'package:eerl_app/features/help_support/view/help_support_screen.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/records/model/collection_detail_status.dart';
 import 'package:eerl_app/features/wallet/model/expense_claim_detail_status.dart';
 import 'package:eerl_app/features/records/model/records_view_flag.dart';
@@ -816,10 +817,35 @@ void main() {
             locale: variant.$2,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: ExpenseClaimDetailScreen(status: variant.$1),
+            home: ExpenseClaimDetailScreen(
+              status: variant.$1,
+              expense: const ExpenseModel(
+                id: 'expense-detail-test',
+                centerId: 'center-1',
+                userId: 'agent-1',
+                userName: 'Test Agent',
+                categoryId: 'category-1',
+                categoryName: 'Vehicle Fuel',
+                amount: 1250,
+                note: 'Fuel receipt submitted from the field.',
+                status: 'PENDING',
+                number: 'EXP-TEST-001',
+                receiptPhotoUrls: [],
+                createdAt: '2026-10-09T05:30:00.000Z',
+                syncState: 'synced',
+              ),
+            ),
           ),
         );
         await tester.pumpAndSettle();
+        expect(find.text('EXP-TEST-001'), findsOneWidget);
+        expect(find.text('Vehicle Fuel'), findsOneWidget);
+        expect(find.text('₹1,250.00'), findsOneWidget);
+        expect(find.text('Test Agent'), findsOneWidget);
+        expect(
+          find.text('Fuel receipt submitted from the field.'),
+          findsOneWidget,
+        );
         expect(tester.takeException(), isNull);
         await tester.drag(find.byType(ListView), const Offset(0, -900));
         await tester.pumpAndSettle();

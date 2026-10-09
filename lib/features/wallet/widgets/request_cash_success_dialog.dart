@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
+import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -19,7 +21,15 @@ class RequestCashSuccessDialog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: 66),
+          Lottie.asset(
+            '${AppConstants.assetLottie}ic_true.json',
+            key: const Key('cash-request-success-lottie'),
+            width: 135,
+            height: 135,
+            fit: BoxFit.contain,
+            repeat: false,
+          ),
+          const SizedBox(height: 24),
           Text(
             context.l10n.cashRequestSubmittedTitle,
             textAlign: TextAlign.center,

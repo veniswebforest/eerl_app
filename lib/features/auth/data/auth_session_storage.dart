@@ -1,11 +1,9 @@
 import 'package:eerl_app/core/constants/app_constants.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/features/auth/model/verify_otp_response.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthSessionStorage {
-  static const _tag = '[AuthSessionStorage]';
-
   Future<void> saveSession(VerifyOtpResponse response) async {
     final token = response.accessToken;
     final expiresAt = response.sessionExpiresAt;
@@ -21,9 +19,7 @@ class AuthSessionStorage {
         expiresAt.toIso8601String(),
       ),
     ]);
-    debugPrint(
-      '$_tag Session saved: token=${_maskToken(token)}, expiresAt=${expiresAt.toIso8601String()}',
-    );
+    AppLogger.diagnostic('AUTH_SESSION', 'Session saved');
   }
 
   Future<String?> getAccessToken() async {
@@ -42,17 +38,13 @@ class AuthSessionStorage {
     final token = await getAccessToken();
     final expiresAt = await getSessionExpiresAt();
     if (token == null || token.trim().isEmpty || expiresAt == null) {
-      debugPrint(
-        '$_tag Session invalid: token is null/empty or expiresAt missing',
-      );
+      AppLogger.diagnostic('AUTH_SESSION', 'Session is unavailable');
       return false;
     }
     final now = DateTime.now().toUtc();
     final expiryUtc = expiresAt.toUtc();
     final isValid = now.isBefore(expiryUtc);
-    debugPrint(
-      '$_tag Session check: tokenPresent=true, currentUtc=$now, expiresAtUtc=$expiryUtc, isValid=$isValid',
-    );
+    AppLogger.diagnostic('AUTH_SESSION', 'Session valid=$isValid');
     return isValid;
   }
 
@@ -62,11 +54,6 @@ class AuthSessionStorage {
       preferences.remove(AppConstants.accessTokenKey),
       preferences.remove(AppConstants.sessionExpiresAtKey),
     ]);
-    debugPrint('$_tag Session cleared');
-  }
-
-  String _maskToken(String token) {
-    if (token.length <= 10) return '[REDACTED]';
-    return '${token.substring(0, 6)}...${token.substring(token.length - 4)}';
+    AppLogger.diagnostic('AUTH_SESSION', 'Session cleared');
   }
 }

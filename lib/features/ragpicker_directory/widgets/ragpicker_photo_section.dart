@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 
 class RagpickerPhotoSection extends StatelessWidget {
   const RagpickerPhotoSection({
@@ -11,7 +12,7 @@ class RagpickerPhotoSection extends StatelessWidget {
     required this.label,
     required this.captureLabel,
     required this.helperText,
-    required this.hasPhotos,
+    this.photoSource,
     required this.onCapture,
     required this.onRemove,
   });
@@ -19,9 +20,11 @@ class RagpickerPhotoSection extends StatelessWidget {
   final String label;
   final String captureLabel;
   final String helperText;
-  final bool hasPhotos;
+  final String? photoSource;
   final VoidCallback onCapture;
   final ValueChanged<int> onRemove;
+
+  bool get hasPhoto => photoSource?.trim().isNotEmpty == true;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -35,14 +38,14 @@ class RagpickerPhotoSection extends StatelessWidget {
         child: DottedBorder(
           options: RoundedRectDottedBorderOptions(
             radius: const Radius.circular(10),
-            color: hasPhotos ? AppColors.cool400 : AppColors.primary500,
+            color: hasPhoto ? AppColors.cool400 : AppColors.primary500,
             dashPattern: const [4, 4],
           ),
           child: Container(
             width: double.infinity,
             height: 80,
             decoration: BoxDecoration(
-              color: hasPhotos ? AppColors.cool100 : AppColors.primary50,
+              color: hasPhoto ? AppColors.cool100 : AppColors.primary50,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -53,7 +56,7 @@ class RagpickerPhotoSection extends StatelessWidget {
                   width: 24,
                   height: 24,
                   colorFilter: ColorFilter.mode(
-                    hasPhotos ? AppColors.cool400 : AppColors.primary500,
+                    hasPhoto ? AppColors.cool400 : AppColors.primary500,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -61,11 +64,11 @@ class RagpickerPhotoSection extends StatelessWidget {
                 Text(
                   captureLabel,
                   style:
-                      (hasPhotos
+                      (hasPhoto
                               ? AppTextStyles.mediumSH8_14
                               : AppTextStyles.semiboldH9_14)
                           .copyWith(
-                            color: hasPhotos
+                            color: hasPhoto
                                 ? AppColors.neutral400
                                 : AppColors.neutral900,
                           ),
@@ -75,24 +78,11 @@ class RagpickerPhotoSection extends StatelessWidget {
           ),
         ),
       ),
-      if (hasPhotos) ...[
+      if (hasPhoto) ...[
         const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _PhotoTile(
-                path: 'assets/images/ragpicker_directory/profile_photo.png',
-                onRemove: () => onRemove(0),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _PhotoTile(
-                path: 'assets/images/ragpicker_directory/id_proof.png',
-                onRemove: () => onRemove(1),
-              ),
-            ),
-          ],
+        SizedBox(
+          width: 150,
+          child: _PhotoTile(path: photoSource!, onRemove: () => onRemove(0)),
         ),
       ],
       const SizedBox(height: 8),
@@ -118,7 +108,7 @@ class _PhotoTile extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(6),
-          child: Image.asset(path, fit: BoxFit.cover),
+          child: CachedAppImage(source: path, fit: BoxFit.cover),
         ),
         Positioned(
           top: 8,

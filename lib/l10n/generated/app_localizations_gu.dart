@@ -2726,6 +2726,9 @@ class AppLocalizationsGu extends AppLocalizations {
   String get ragpickerAddButton => 'રેગપિકર ઉમેરો';
 
   @override
+  String get ragpickerNoDetailsFound => 'રેગપિકરની કોઈ વિગતો મળી નથી';
+
+  @override
   String get ragpickerDetailsTitle => 'રેગપિકરની વિગતો';
 
   @override
@@ -2751,6 +2754,18 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get ragpickerNameHint => 'પૂરું નામ દાખલ કરો';
+
+  @override
+  String get ragpickerNameRequired => 'કૃપા કરીને પૂરું નામ દાખલ કરો.';
+
+  @override
+  String ragpickerNameAlreadyExists(String name) {
+    return '$name નામ રેગપિકર યાદીમાં પહેલેથી હાજર છે.';
+  }
+
+  @override
+  String get ragpickerInvalidMobile =>
+      'માન્ય 10 અંકનો મોબાઇલ નંબર દાખલ કરો અથવા ખાલી રાખો.';
 
   @override
   String get ragpickerPhoneLabel => 'મોબાઇલ નંબર *';

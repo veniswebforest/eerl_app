@@ -5254,6 +5254,12 @@ abstract class AppLocalizations {
   /// **'Add Ragpicker'**
   String get ragpickerAddButton;
 
+  /// No description provided for @ragpickerNoDetailsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Ragpicker Details Found'**
+  String get ragpickerNoDetailsFound;
+
   /// No description provided for @ragpickerDetailsTitle.
   ///
   /// In en, this message translates to:
@@ -5307,6 +5313,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter Full Name'**
   String get ragpickerNameHint;
+
+  /// No description provided for @ragpickerNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the full name.'**
+  String get ragpickerNameRequired;
+
+  /// No description provided for @ragpickerNameAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} already exists in the ragpicker list.'**
+  String ragpickerNameAlreadyExists(String name);
+
+  /// No description provided for @ragpickerInvalidMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid 10-digit mobile number or leave it blank.'**
+  String get ragpickerInvalidMobile;
 
   /// No description provided for @ragpickerPhoneLabel.
   ///

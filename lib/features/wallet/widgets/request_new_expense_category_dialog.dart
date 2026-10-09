@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
@@ -64,7 +65,7 @@ class _RequestNewExpenseCategoryDialogState
       }
       if (mounted) Navigator.of(context).pop(true);
     } catch (error) {
-      debugPrint('Expense category request save failed: $error');
+      AppLogger.error('EXPENSE_CATEGORY_SAVE', error.toString());
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.expenseCategoryRequestSaveFailed)),

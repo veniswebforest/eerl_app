@@ -11,7 +11,6 @@ import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import '../model/cash_request_detail_status.dart';
-import '../model/expense_claim_detail_status.dart';
 import '../widgets/expense_claim_card.dart';
 import '../widgets/expense_search_filters.dart';
 import '../widgets/wallet_action_card.dart';
@@ -59,6 +58,10 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
     super.dispose();
   }
 
+  Future<void> _refreshLocalData() async {
+    await _controller.load();
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.backgroundColor,
@@ -68,80 +71,89 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
         listenable: _controller,
         builder: (context, _) {
           final data = _controller.data;
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(
-              20,
-              AppScreenHeaderMetrics.topInset,
-              20,
-              130,
-            ),
-            children: [
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 600),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      WalletScreenHeader(
-                        title: context.l10n.walletFieldExpenses,
-                      ),
-                      const SizedBox(height: 24),
-                      WalletBalanceCard(
-                        balanceLabel: context.l10n.availableCashBalance,
-                        balance:
-                            '₹${(data?.summary.balanceNow ?? 0).toStringAsFixed(2)}',
-                        spentLabel: context.l10n.todaysSpent,
-                        spent:
-                            '₹${(data?.summary.spent ?? 0).toStringAsFixed(2)}',
-                        onRequestCash: () =>
-                            context.push<void>(AppRoutes.requestCash),
-                      ),
-                      const SizedBox(height: 24),
-                      WalletActionCard(
-                        title: context.l10n.fieldSpendingPrompt,
-                        description: context.l10n.fieldSpendingDescription,
-                        buttonLabel: context.l10n.logExpense,
-                        onPressed: () =>
-                            context.push<void>(AppRoutes.logExpense),
-                      ),
-                      const SizedBox(height: 32),
-                      Text(
-                        context.l10n.recentExpenseClaims,
-                        style: AppTextStyles.semiboldH7_18,
-                      ),
-                      const SizedBox(height: 16),
-                      ExpenseSearchFilters(
-                        typeLabels: [
-                          context.l10n.expenseTypeExpense,
-                          context.l10n.expenseTypeCashRequest,
-                        ],
-                        selectedTypeIndex: _selectedClaimType,
-                        onTypeSelected: (index) => setState(() {
-                          _selectedClaimType = index;
-                          _selectedFilter = 0;
-                        }),
-                        filters: [
-                          context.l10n.filterAll,
-                          context.l10n.filterToday,
-                          context.l10n.filterYesterday,
-                          context.l10n.filterLastWeek,
-                        ],
-                        selectedIndex: _selectedFilter,
-                        onFilterSelected: (index) =>
-                            setState(() => _selectedFilter = index),
-                      ),
-                      const SizedBox(height: 16),
-                      if (_controller.isLoading && !_controller.hasData)
-                        const Center(child: CircularProgressIndicator())
-                      else if (_selectedClaimType == 0)
-                        ..._expenseCards(data?.expenses ?? const [])
-                      else
-                        ..._cashCards(data?.cashRequests ?? const []),
-                    ],
+          return RefreshIndicator(
+            key: const Key('wallet-local-refresh'),
+            onRefresh: _refreshLocalData,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                20,
+                AppScreenHeaderMetrics.topInset,
+                20,
+                130,
+              ),
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        WalletScreenHeader(
+                          title: context.l10n.walletFieldExpenses,
+                        ),
+                        const SizedBox(height: 24),
+                        WalletBalanceCard(
+                          balanceLabel: context.l10n.availableCashBalance,
+                          balance:
+                              '₹${(data?.summary.balanceNow ?? 0).toStringAsFixed(2)}',
+                          spentLabel: context.l10n.todaysSpent,
+                          spent:
+                              '₹${(data?.summary.spent ?? 0).toStringAsFixed(2)}',
+                          onRequestCash: () async {
+                            await context.push<void>(AppRoutes.requestCash);
+                            if (mounted) await _refreshLocalData();
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        WalletActionCard(
+                          title: context.l10n.fieldSpendingPrompt,
+                          description: context.l10n.fieldSpendingDescription,
+                          buttonLabel: context.l10n.logExpense,
+                          onPressed: () async {
+                            await context.push<void>(AppRoutes.logExpense);
+                            if (mounted) await _refreshLocalData();
+                          },
+                        ),
+                        const SizedBox(height: 32),
+                        Text(
+                          context.l10n.recentExpenseClaims,
+                          style: AppTextStyles.semiboldH7_18,
+                        ),
+                        const SizedBox(height: 16),
+                        ExpenseSearchFilters(
+                          typeLabels: [
+                            context.l10n.expenseTypeExpense,
+                            context.l10n.expenseTypeCashRequest,
+                          ],
+                          selectedTypeIndex: _selectedClaimType,
+                          onTypeSelected: (index) => setState(() {
+                            _selectedClaimType = index;
+                            _selectedFilter = 0;
+                          }),
+                          filters: [
+                            context.l10n.filterAll,
+                            context.l10n.filterToday,
+                            context.l10n.filterYesterday,
+                            context.l10n.filterLastWeek,
+                          ],
+                          selectedIndex: _selectedFilter,
+                          onFilterSelected: (index) =>
+                              setState(() => _selectedFilter = index),
+                        ),
+                        const SizedBox(height: 16),
+                        if (_controller.isLoading && !_controller.hasData)
+                          const Center(child: CircularProgressIndicator())
+                        else if (_selectedClaimType == 0)
+                          ..._expenseCards(data?.expenses ?? const [])
+                        else
+                          ..._cashCards(data?.cashRequests ?? const []),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),
@@ -172,7 +184,7 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
         amount: '₹${item.amount.toStringAsFixed(2)}',
         statusLabel: item.status,
         status: _claimStatus(item.status),
-        onTap: () => _openExpenseClaim(_expenseStatus(item.status)),
+        onTap: () => _openExpenseClaim(item),
       ),
       const SizedBox(height: 12),
     ],
@@ -208,13 +220,6 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
         _ => ExpenseClaimStatus.pending,
       };
 
-  ExpenseClaimDetailStatus _expenseStatus(String value) =>
-      switch (value.toUpperCase()) {
-        'APPROVED' || 'VERIFIED' => ExpenseClaimDetailStatus.verified,
-        'REJECTED' => ExpenseClaimDetailStatus.rejected,
-        _ => ExpenseClaimDetailStatus.pending,
-      };
-
   CashRequestDetailStatus _cashStatus(String value) =>
       switch (value.toUpperCase()) {
         'APPROVED' || 'CREDITED' => CashRequestDetailStatus.approved,
@@ -222,8 +227,8 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
         _ => CashRequestDetailStatus.pending,
       };
 
-  void _openExpenseClaim(ExpenseClaimDetailStatus status) =>
-      context.push<void>(AppRoutes.expenseClaimDetail, extra: status);
+  void _openExpenseClaim(ExpenseModel expense) =>
+      context.push<void>(AppRoutes.expenseClaimDetail, extra: expense);
   void _openCashRequest(CashRequestDetailStatus status) =>
       context.push<void>(AppRoutes.cashRequestDetail, extra: status);
 }

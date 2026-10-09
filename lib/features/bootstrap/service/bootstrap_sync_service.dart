@@ -135,15 +135,17 @@ class BootstrapSyncService extends ChangeNotifier {
         _runAgain = false;
         _setSyncState(syncing: true, page: 0, error: null);
         try {
-          await _performBootstrap(trigger);
-          _revision++;
-          _log('Bootstrap finished');
+          final bootstrapCompleted = await _performBootstrap(trigger);
+          if (bootstrapCompleted) {
+            _revision++;
+            _log('Bootstrap finished');
+          }
         } catch (error) {
           _lastError = error;
           if (error is BootstrapApiException && error.statusCode == 401) {
             await _onSessionExpired();
           }
-          _log('Bootstrap stopped safely: $error');
+          BootstrapLog.error('Bootstrap stopped safely: $error');
         } finally {
           _setSyncState(syncing: false, page: _pageNumber);
         }
@@ -155,31 +157,30 @@ class BootstrapSyncService extends ChangeNotifier {
     }
   }
 
-  Future<void> _performBootstrap(BootstrapTrigger trigger) async {
+  Future<bool> _performBootstrap(BootstrapTrigger trigger) async {
     if (!await _hasInternetAccess()) {
       _log('Skipped ${trigger.name}: internet is unavailable');
-      return;
+      return false;
     }
     final accessToken = await _accessTokenProvider();
     if (accessToken == null || accessToken.trim().isEmpty) {
       _log('Skipped ${trigger.name}: no authenticated session');
-      return;
+      return false;
     }
 
-    _log(
-      'Authentication ready: locally stored access token loaded; '
-      'Bearer header will be attached to every Bootstrap request',
-    );
+    _log('Authentication ready; authorization will be attached to the request');
     _log('Bootstrap start: trigger=${trigger.name}');
     await _beforeBootstrap?.call();
-    final activeOutboxCount = await _outboxCount(
-      where: "status IN ('queued', 'sending')",
-    );
-    if (activeOutboxCount > 0) {
+    // Bootstrap is the final phase of a sync run. Do not download server
+    // state while any local mutation is still retained, including failed or
+    // delayed rows; those entries must be retried/resolved first.
+    final remainingOutboxCount = await _outboxCount();
+    if (remainingOutboxCount > 0) {
       _log(
-        'Bootstrap postponed: $activeOutboxCount outgoing item(s) still active',
+        'Bootstrap postponed: $remainingOutboxCount outgoing item(s) '
+        'still remain in the queue',
       );
-      return;
+      return false;
     }
 
     final itemImagesNeedRefetch =
@@ -285,6 +286,7 @@ class BootstrapSyncService extends ChangeNotifier {
       }
       _log('One-time schema full refetch completed');
     }
+    return true;
   }
 
   Future<bool> _hasInternetAccess() async {

@@ -11,6 +11,8 @@ class RagpickerFormField extends StatelessWidget {
     required this.controller,
     this.keyboardType,
     this.readOnly = false,
+    this.errorText,
+    this.onChanged,
   });
 
   final String label;
@@ -18,6 +20,8 @@ class RagpickerFormField extends StatelessWidget {
   final TextEditingController controller;
   final TextInputType? keyboardType;
   final bool readOnly;
+  final String? errorText;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -29,9 +33,14 @@ class RagpickerFormField extends StatelessWidget {
         controller: controller,
         readOnly: readOnly,
         keyboardType: keyboardType,
+        onChanged: onChanged,
         style: AppTextStyles.regularB7_14.copyWith(color: AppColors.neutral950),
         decoration: InputDecoration(
           hintText: hint,
+          errorText: errorText,
+          errorStyle: AppTextStyles.regularB8_12.copyWith(
+            color: AppColors.red500,
+          ),
           hintStyle: AppTextStyles.regularB7_14.copyWith(
             color: AppColors.cool500,
           ),
@@ -47,6 +56,14 @@ class RagpickerFormField extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(color: AppColors.primary500),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: AppColors.red500),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: AppColors.red500),
             borderRadius: BorderRadius.circular(12),
           ),
         ),

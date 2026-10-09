@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:eerl_app/core/local_database/app_database.dart';
-import 'package:flutter/foundation.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:geolocator/geolocator.dart';
 
 enum HomeLocationState {
@@ -168,6 +168,6 @@ class DeviceLocationService {
   }
 
   static void _log(String message) {
-    if (kDebugMode) debugPrint('📍 [EERL_LOCATION] $message');
+    AppLogger.diagnostic('LOCATION', message);
   }
 }

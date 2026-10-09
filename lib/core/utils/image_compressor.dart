@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// Utility to capture, compress, and ensure photos are under the 5 MB limit.
@@ -39,7 +39,7 @@ class ImageCompressor {
 
       return compressFile(picked, maxBytes: maxBytes);
     } catch (e) {
-      debugPrint('[ImageCompressor] Error capturing image: $e');
+      AppLogger.error('IMAGE_CAPTURE', e.toString());
       return null;
     }
   }
@@ -60,10 +60,7 @@ class ImageCompressor {
 
       // If file size exceeds maxBytes, perform secondary downscaling
       final bytes = await ioFile.readAsBytes();
-      final codec = await ui.instantiateImageCodec(
-        bytes,
-        targetWidth: 1280,
-      );
+      final codec = await ui.instantiateImageCodec(bytes, targetWidth: 1280);
       final frame = await codec.getNextFrame();
       final byteData = await frame.image.toByteData(
         format: ui.ImageByteFormat.png,
@@ -78,7 +75,7 @@ class ImageCompressor {
         return XFile(newFile.path);
       }
     } catch (e) {
-      debugPrint('[ImageCompressor] Error compressing file: $e');
+      AppLogger.error('IMAGE_COMPRESSION', e.toString());
     }
 
     return file;

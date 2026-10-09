@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 
 /// Search Logcat for `EERL_BOOTSTRAP` to see the complete sync timeline.
 abstract final class BootstrapLog {
@@ -9,31 +9,31 @@ abstract final class BootstrapLog {
     return 'B${_requestSequence.toString().padLeft(4, '0')}';
   }
 
-  static void sync(String message) => _write('🔄', 'SYNC', message);
+  static void sync(String message) => AppLogger.sync('BOOTSTRAP', message);
 
-  static void database(String message) => _write('🗄️', 'SQLITE', message);
+  static void database(String message) =>
+      AppLogger.sqlite('BOOTSTRAP', message);
 
   /// Printed only after a Bootstrap page has committed to SQLite.
   /// Search Logcat for `EERL_BOOTSTRAP][SQLITE][COMMIT` to see stored rows.
   static void databaseCommit(String message) =>
-      _write('✅', 'SQLITE][COMMIT', message);
+      AppLogger.sqlite('COMMIT', 'Bootstrap $message');
 
-  static void warning(String message) => _write('⚠️', 'WARNING', message);
+  static void warning(String message) =>
+      AppLogger.diagnostic('WARNING', message);
 
-  static void error(String message) => _write('🛑', 'ERROR', message);
+  static void error(String message) =>
+      AppLogger.syncError('BOOTSTRAP', message);
 
   static void httpRequest({
     required String requestId,
     required Uri uri,
     required bool hasCursor,
   }) {
-    _write('➡️', 'HTTP][$requestId', 'REQUEST GET ${uri.path}');
-    _write('  ', 'HTTP][$requestId', 'Query: ${uri.queryParameters}');
-    _write('  ', 'HTTP][$requestId', 'Cursor supplied: $hasCursor');
-    _write(
-      '  ',
-      'HTTP][$requestId',
-      'Headers: {accept: application/json, Authorization: Bearer [REDACTED]}',
+    AppLogger.apiRequest(
+      'GET',
+      uri.path,
+      message: 'requestId=$requestId | cursorSupplied=$hasCursor',
     );
   }
 
@@ -41,14 +41,14 @@ abstract final class BootstrapLog {
     required String requestId,
     required int statusCode,
     required int elapsedMilliseconds,
-    required Map<String, Object?> summary,
   }) {
-    _write(
-      '⬅️',
-      'HTTP][$requestId',
-      'RESPONSE $statusCode (${elapsedMilliseconds}ms)',
+    AppLogger.apiSuccess(
+      'GET',
+      '/api/v1/mobile/bootstrap',
+      statusCode: statusCode,
+      duration: Duration(milliseconds: elapsedMilliseconds),
+      message: 'requestId=$requestId',
     );
-    _write('  ', 'HTTP][$requestId', 'Safe response: $summary');
   }
 
   static void httpError({
@@ -57,15 +57,11 @@ abstract final class BootstrapLog {
     String? code,
     required Object error,
   }) {
-    _write(
-      '🛑',
-      'HTTP][$requestId',
-      'FAILED status=${statusCode ?? '-'} code=${code ?? '-'} error=$error',
+    AppLogger.apiError(
+      'GET',
+      '/api/v1/mobile/bootstrap',
+      statusCode: statusCode,
+      error: 'requestId=$requestId code=${code ?? '-'} $error',
     );
-  }
-
-  static void _write(String icon, String area, String message) {
-    if (!kDebugMode) return;
-    debugPrint('$icon [EERL_BOOTSTRAP][$area] $message');
   }
 }

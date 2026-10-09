@@ -1,8 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import '../widgets/request_cash_field.dart';
 import '../widgets/request_cash_reason_selector.dart';
@@ -21,9 +28,12 @@ class _RequestCashScreenState extends State<RequestCashScreen> {
   final _descriptionController = TextEditingController();
   int? _selectedReason;
   bool _reasonOpen = false;
+  bool _isSubmitting = false;
 
   bool get _canSubmit =>
-      _amountController.text.trim().isNotEmpty && _selectedReason != null;
+      !_isSubmitting &&
+      (double.tryParse(_amountController.text.trim()) ?? 0) > 0 &&
+      _selectedReason != null;
 
   @override
   void initState() {
@@ -158,11 +168,45 @@ class _RequestCashScreenState extends State<RequestCashScreen> {
                 ],
               ),
             ),
-            _SubmitArea(enabled: _canSubmit, onSubmit: _showSuccessDialog),
+            _SubmitArea(
+              enabled: _canSubmit,
+              isSubmitting: _isSubmitting,
+              onSubmit: () => _submitRequest(reasons),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _submitRequest(List<String> reasons) async {
+    if (!_canSubmit) return;
+    final amount = double.parse(_amountController.text.trim());
+    final purpose = reasons[_selectedReason!];
+    final description = _descriptionController.text.trim();
+    final reason = description.isEmpty ? purpose : '$purpose: $description';
+    setState(() => _isSubmitting = true);
+    try {
+      await EerlLocalRepository.instance.saveCashRequest(
+        amount: amount,
+        reason: reason,
+      );
+      unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+      if (!mounted) return;
+      await _showSuccessDialog();
+    } on CashRequestBalanceUnavailableException catch (error) {
+      AppLogger.diagnostic('CASH_REQUEST_VALIDATION', error.toString());
+      if (mounted) {
+        AppSnackbar.error(context, message: error.toString());
+      }
+    } catch (error) {
+      AppLogger.error('CASH_REQUEST_SAVE', error.toString());
+      if (mounted) {
+        AppSnackbar.error(context, message: error.toString());
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   Future<void> _showSuccessDialog() async {
@@ -177,9 +221,14 @@ class _RequestCashScreenState extends State<RequestCashScreen> {
 }
 
 class _SubmitArea extends StatelessWidget {
-  const _SubmitArea({required this.enabled, required this.onSubmit});
+  const _SubmitArea({
+    required this.enabled,
+    required this.isSubmitting,
+    required this.onSubmit,
+  });
 
   final bool enabled;
+  final bool isSubmitting;
   final VoidCallback onSubmit;
 
   @override
@@ -210,7 +259,15 @@ class _SubmitArea extends StatelessWidget {
                     ),
                     textStyle: AppTextStyles.semiboldH9_14,
                   ),
-                  child: Text(context.l10n.cashSubmitRequest),
+                  child: isSubmitting
+                      ? const SizedBox.square(
+                          dimension: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(context.l10n.cashSubmitRequest),
                 ),
               ),
               const SizedBox(height: 10),

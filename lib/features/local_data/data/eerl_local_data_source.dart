@@ -5,6 +5,7 @@ import 'package:eerl_app/core/location/device_location_service.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/core/local_database/outbox_queue.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/utils/uuid_generator.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:flutter/foundation.dart';
@@ -40,6 +41,45 @@ class TransferDispatchValidationException implements Exception {
 
   @override
   String toString() => message;
+}
+
+class TransferDecisionValidationException implements Exception {
+  const TransferDecisionValidationException(this.message);
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+class ExpenseBalanceUnavailableException implements Exception {
+  const ExpenseBalanceUnavailableException({
+    required this.requestedAmount,
+    required this.availableBalance,
+  });
+
+  final double requestedAmount;
+  final double availableBalance;
+
+  @override
+  String toString() =>
+      'Expense amount ₹${requestedAmount.toStringAsFixed(2)} exceeds the '
+      'available balance ₹${availableBalance.toStringAsFixed(2)}.';
+}
+
+class CashRequestBalanceUnavailableException implements Exception {
+  const CashRequestBalanceUnavailableException({
+    required this.requestedAmount,
+    required this.availableBalance,
+  });
+
+  final double requestedAmount;
+  final double availableBalance;
+
+  @override
+  String toString() =>
+      'Cash request amount ₹${requestedAmount.toStringAsFixed(2)} exceeds '
+      'the available cash balance ₹${availableBalance.toStringAsFixed(2)}. '
+      'Enter an amount equal to or below the available balance.';
 }
 
 class EerlLocalDataSource {
@@ -230,10 +270,10 @@ class EerlLocalDataSource {
       final selected = rows
           .where((row) => (row['is_selected'] as num?)?.toInt() == 1)
           .length;
-      debugPrint(
-        '📚 [EERL_MATERIAL_CONFIG][SQLITE][LOAD] ITEMS '
+      AppLogger.sqlite(
+        'LOAD_ITEMS',
         'center=$resolvedCenter channel=$channel total=${rows.length} '
-        'configured=$configured selected=$selected',
+            'configured=$configured selected=$selected',
       );
     }
     return rows.map(ItemModel.fromMap).toList(growable: false);
@@ -263,8 +303,8 @@ class EerlLocalDataSource {
       [resolvedCenter, channel],
     );
     if (kDebugMode) {
-      debugPrint(
-        '📦 [EERL_ADD_COLLECTION][SQLITE][LOAD] CENTER_ITEMS '
+      AppLogger.sqlite(
+        'LOAD_CENTER_ITEMS',
         'center=$resolvedCenter channel=$channel selected_items=${rows.length}',
       );
     }
@@ -422,29 +462,32 @@ class EerlLocalDataSource {
       );
       final storedCount = (counts['stored_count'] as num?)?.toInt() ?? 0;
       if (storedCount != itemIds.length || outbox.isEmpty) {
-        debugPrint(
-          '🛑 [EERL_MATERIAL_CONFIG][SQLITE][COMMIT] VERIFY_FAILED '
-          'center=$centerId channel=$channel tab=$tab '
-          'rows=$storedCount/${itemIds.length} '
-          'outbox_stored=${outbox.isNotEmpty}',
+        AppLogger.sqliteError(
+          'VERIFY',
+          'Material configuration commit failed | '
+              'center=$centerId channel=$channel tab=$tab '
+              'rows=$storedCount/${itemIds.length} '
+              'outbox_stored=${outbox.isNotEmpty}',
         );
         return;
       }
 
       final queued = outbox.single;
-      debugPrint(
-        '✅ [EERL_MATERIAL_CONFIG][SQLITE][COMMIT] STORED '
-        'center=$centerId channel=$channel tab=$tab '
-        'rows=$storedCount selected=${counts['selected_count'] ?? 0} '
-        'pending=${counts['pending_count'] ?? 0} '
-        'outbox_seq=${queued['seq']} method=${queued['method']} '
-        'kind=${queued['kind']} queue_status=${queued['status']} '
-        'path=${queued['path']}',
+      AppLogger.sqlite(
+        'COMMIT',
+        'Material configuration stored | '
+            'center=$centerId channel=$channel tab=$tab '
+            'rows=$storedCount selected=${counts['selected_count'] ?? 0} '
+            'pending=${counts['pending_count'] ?? 0} '
+            'outbox_seq=${queued['seq']} method=${queued['method']} '
+            'kind=${queued['kind']} queue_status=${queued['status']} '
+            'path=${queued['path']}',
       );
     } catch (error) {
-      debugPrint(
-        '🛑 [EERL_MATERIAL_CONFIG][SQLITE][COMMIT] LOG_FAILED '
-        'center=$centerId channel=$channel tab=$tab error=$error',
+      AppLogger.sqliteError(
+        'VERIFY',
+        'Material configuration verification log failed | '
+            'center=$centerId channel=$channel tab=$tab error=$error',
       );
     }
   }
@@ -535,30 +578,33 @@ class EerlLocalDataSource {
         limit: 1,
       );
       if (vehicles.isEmpty || outbox.isEmpty) {
-        debugPrint(
-          '🛑 [EERL_VEHICLE][SQLITE][COMMIT] VERIFY_FAILED '
-          'vehicle_id=$vehicleId vehicle_stored=${vehicles.isNotEmpty} '
-          'outbox_stored=${outbox.isNotEmpty}',
+        AppLogger.sqliteError(
+          'VERIFY',
+          'Vehicle commit failed | '
+              'vehicle_id=$vehicleId vehicle_stored=${vehicles.isNotEmpty} '
+              'outbox_stored=${outbox.isNotEmpty}',
         );
         return;
       }
 
       final vehicle = vehicles.single;
       final queued = outbox.single;
-      debugPrint(
-        '✅ [EERL_VEHICLE][SQLITE][COMMIT] STORED '
-        'vehicle_id=$vehicleId center=${vehicle['center_id']} '
-        'plate=${vehicle['plate_number']} type_id=${vehicle['type_id']} '
-        'is_active=${vehicle['is_active']} '
-        'sync_state=${vehicle['sync_state']} '
-        'outbox_seq=${queued['seq']} method=${queued['method']} '
-        'kind=${queued['kind']} queue_status=${queued['status']} '
-        'path=${queued['path']}',
+      AppLogger.sqlite(
+        'COMMIT',
+        'Vehicle stored | '
+            'vehicle_id=$vehicleId center=${vehicle['center_id']} '
+            'plate=${vehicle['plate_number']} type_id=${vehicle['type_id']} '
+            'is_active=${vehicle['is_active']} '
+            'sync_state=${vehicle['sync_state']} '
+            'outbox_seq=${queued['seq']} method=${queued['method']} '
+            'kind=${queued['kind']} queue_status=${queued['status']} '
+            'path=${queued['path']}',
       );
     } catch (error) {
-      debugPrint(
-        '🛑 [EERL_VEHICLE][SQLITE][COMMIT] LOG_FAILED '
-        'vehicle_id=$vehicleId error=$error',
+      AppLogger.sqliteError(
+        'VERIFY',
+        'Vehicle verification log failed | '
+            'vehicle_id=$vehicleId error=$error',
       );
     }
   }
@@ -632,24 +678,127 @@ class EerlLocalDataSource {
     return rows.map(RagpickerModel.fromMap).toList(growable: false);
   }
 
-  Future<void> saveRagpicker(RagpickerModel ragpicker) async {
+  Future<void> saveRagpicker(
+    RagpickerModel ragpicker, {
+    String? localPhotoPath,
+  }) async {
+    final normalizedName = ragpicker.name.trim();
+    if (normalizedName.isEmpty) {
+      throw ArgumentError.value(ragpicker.name, 'name', 'Name is required.');
+    }
+    final phoneDigits = (ragpicker.phone ?? '').replaceAll(
+      RegExp(r'[^0-9]'),
+      '',
+    );
+    final normalizedPhone = phoneDigits.isEmpty
+        ? null
+        : phoneDigits.length > 10
+        ? phoneDigits.substring(phoneDigits.length - 10)
+        : phoneDigits;
+    if (normalizedPhone != null && normalizedPhone.length != 10) {
+      throw ArgumentError.value(
+        ragpicker.phone,
+        'phone',
+        'Enter a valid 10-digit mobile number.',
+      );
+    }
+    final normalizedIdNumber = ragpicker.idNumber?.trim();
+    final normalizedPhotoPath = localPhotoPath?.trim();
+    final hasNewPhoto = normalizedPhotoPath?.isNotEmpty == true;
     final now = DateTime.now().toUtc().toIso8601String();
+    final photoId = hasNewPhoto ? UuidGenerator.v4() : null;
+    final blockingPhotoIds = photoId == null
+        ? const <String>[]
+        : <String>[photoId];
+    final body = <String, Object?>{
+      'centerId': ragpicker.centerId,
+      'name': normalizedName,
+      'phone': normalizedPhone,
+      'idNumber': normalizedIdNumber?.isEmpty == true
+          ? null
+          : normalizedIdNumber,
+      'photoUrl': photoId ?? ragpicker.photoUrl,
+    };
+    var outboxSeq = -1;
     await _database.transaction((txn) async {
+      if (photoId != null) {
+        await txn.insert(DatabaseTables.photos, {
+          'id': photoId,
+          'owner_table': DatabaseTables.ragpickers,
+          'owner_id': ragpicker.id,
+          'field': 'profile',
+          // Exact enum documented by POST /mobile/uploads/batch.
+          'purpose': 'RAGPICKER',
+          'content_type': 'image/jpeg',
+          'local_path': normalizedPhotoPath,
+          'status': 'local',
+          'size_bytes': await _localFileSize(normalizedPhotoPath!),
+          'created_at': now,
+        });
+      }
       await _upsertById(txn, DatabaseTables.ragpickers, {
         ...ragpicker.toMap(),
+        'name': normalizedName,
+        'phone': normalizedPhone,
+        'id_number': normalizedIdNumber?.isEmpty == true
+            ? null
+            : normalizedIdNumber,
+        'photo_url': hasNewPhoto ? normalizedPhotoPath : ragpicker.photoUrl,
         'sync_state': 'pending',
       });
-      await OutboxQueue.enqueue(
+      final updated = await OutboxQueue.updateQueued(
         txn,
-        method: 'PUT',
-        path: '/ragpickers/${ragpicker.id}',
-        body: ragpicker.toMap(),
         entity: DatabaseTables.ragpickers,
         entityId: ragpicker.id,
         kind: 'upsert',
-        createdAt: now,
+        body: body,
+        refs: [ragpicker.centerId],
+        blockingPhotoIds: blockingPhotoIds,
+      );
+      if (updated == 0) {
+        outboxSeq = await OutboxQueue.enqueue(
+          txn,
+          method: 'PUT',
+          path: '/ragpickers/${ragpicker.id}',
+          body: body,
+          entity: DatabaseTables.ragpickers,
+          entityId: ragpicker.id,
+          kind: 'upsert',
+          refs: [ragpicker.centerId],
+          blockingPhotoIds: blockingPhotoIds,
+          createdAt: now,
+        );
+      } else {
+        await txn.update(
+          DatabaseTables.outbox,
+          {'method': 'PUT', 'path': '/ragpickers/${ragpicker.id}'},
+          where:
+              "entity = ? AND entity_id = ? AND kind = 'upsert' "
+              "AND status = 'queued'",
+          whereArgs: [DatabaseTables.ragpickers, ragpicker.id],
+        );
+      }
+      await txn.delete(
+        DatabaseTables.photos,
+        where:
+            'owner_table = ? AND owner_id = ? '
+            "AND status IN ('local', 'failed')"
+            '${photoId == null ? '' : ' AND id <> ?'}',
+        whereArgs: [DatabaseTables.ragpickers, ragpicker.id, ?photoId],
       );
     });
+    if (kDebugMode) {
+      AppLogger.sqlite(
+        'COMMIT',
+        'Ragpicker stored | '
+            'ragpicker_id=${ragpicker.id} center=${ragpicker.centerId} '
+            'photo=${photoId != null ? 'queued' : 'none'} '
+            'sync_state=pending '
+            '${outboxSeq < 0 ? 'outbox=updated' : 'outbox_seq=$outboxSeq'} '
+            'method=PUT '
+            'path=/ragpickers/${ragpicker.id}',
+      );
+    }
   }
 
   Future<void> setRagpickerActive(RagpickerModel ragpicker, bool active) async {
@@ -748,12 +897,11 @@ class EerlLocalDataSource {
       ORDER BY ${drafts ? 'c.updated_at' : 'c.collected_at'} DESC
     ''', args);
     if (kDebugMode) {
-      debugPrint(
-        '📋 [EERL_COLLECTION_RECORDS][SQLITE][LOAD] COLLECTIONS '
+      AppLogger.sqlite(
+        'LOAD_COLLECTIONS',
         'center=$resolvedCenter agent=$userId '
-        'view=${drafts ? 'drafts' : 'history'} channel=${channel ?? 'ALL'} '
-        'search=${search.trim().isEmpty ? '[EMPTY]' : search.trim()} '
-        'rows=${rows.length}',
+            'view=${drafts ? 'drafts' : 'history'} channel=${channel ?? 'ALL'} '
+            'rows=${rows.length}',
       );
     }
     return rows.map(CollectionModel.fromMap).toList(growable: false);
@@ -901,10 +1049,11 @@ class EerlLocalDataSource {
       );
     });
     if (kDebugMode) {
-      debugPrint(
-        '✅ [EERL_COLLECTION_REVIEW][SQLITE] ${kind.toUpperCase()} STORED '
-        'collection_id=$collectionId status=${approved ? 'APPROVED' : 'REJECTED'} '
-        'outbox_path=/collections/$collectionId/$kind',
+      AppLogger.sqlite(
+        'COMMIT',
+        'Collection review ${kind.toUpperCase()} stored | '
+            'collection_id=$collectionId status=${approved ? 'APPROVED' : 'REJECTED'} '
+            'outbox_path=/collections/$collectionId/$kind',
       );
     }
   }
@@ -1252,16 +1401,22 @@ class EerlLocalDataSource {
           refs: photoIds,
           blockingPhotoIds: photoIds,
         );
+        await txn.update(
+          DatabaseTables.outbox,
+          {'method': 'PUT', 'path': '/collections/$savedCollectionId'},
+          where:
+              "entity = ? AND entity_id = ? AND kind = 'submit' "
+              "AND status = 'queued'",
+          whereArgs: [DatabaseTables.collections, savedCollectionId],
+        );
         await _deleteUnreferencedPhotoRows(txn, previousPhotoIds);
         return;
       }
 
       await OutboxQueue.enqueue(
         txn,
-        method: submit ? 'POST' : 'PUT',
-        path: submit
-            ? '/collections/$savedCollectionId/submit'
-            : '/collections/$savedCollectionId',
+        method: 'PUT',
+        path: '/collections/$savedCollectionId',
         body: body,
         entity: DatabaseTables.collections,
         entityId: savedCollectionId,
@@ -1321,10 +1476,11 @@ class EerlLocalDataSource {
       limit: 1,
     );
     if (graphRows.isEmpty || outboxRows.isEmpty) {
-      debugPrint(
-        '🛑 [EERL_COLLECTION][SQLITE][COMMIT] VERIFY_FAILED '
-        'collection_id=$collectionId collection_stored=${graphRows.isNotEmpty} '
-        'outbox_stored=${outboxRows.isNotEmpty}',
+      AppLogger.sqliteError(
+        'VERIFY',
+        'Collection commit failed | '
+            'collection_id=$collectionId collection_stored=${graphRows.isNotEmpty} '
+            'outbox_stored=${outboxRows.isNotEmpty}',
       );
       return;
     }
@@ -1341,16 +1497,17 @@ class EerlLocalDataSource {
           ),
         ) ??
         0;
-    debugPrint(
-      '✅ [EERL_COLLECTION][SQLITE][COMMIT] STORED '
-      'collection_id=$collectionId center=$centerId channel=$channel '
-      'status=${graph['status']} sync_state=${graph['sync_state']} '
-      'gps={lat:${graph['gps_lat']},lng:${graph['gps_lng']}} '
-      'collection_items=${graph['item_count']} '
-      'item_ids=${expectedItemIds.join(',')} photos=${graph['photo_count']} '
-      'outbox_seq=$outboxSeq method=${outbox['method']} '
-      'kind=${outbox['kind']} queue_status=${outbox['status']} '
-      'outbox_photos=$blockedPhotos path=${outbox['path']}',
+    AppLogger.sqlite(
+      'COMMIT',
+      'Collection stored | '
+          'collection_id=$collectionId center=$centerId channel=$channel '
+          'status=${graph['status']} sync_state=${graph['sync_state']} '
+          'gps={lat:${graph['gps_lat']},lng:${graph['gps_lng']}} '
+          'collection_items=${graph['item_count']} '
+          'item_ids=${expectedItemIds.join(',')} photos=${graph['photo_count']} '
+          'outbox_seq=$outboxSeq method=${outbox['method']} '
+          'kind=${outbox['kind']} queue_status=${outbox['status']} '
+          'outbox_photos=$blockedPhotos path=${outbox['path']}',
     );
   }
 
@@ -1369,8 +1526,6 @@ class EerlLocalDataSource {
     required List<String> handoverPhotoIds,
     required List<Map<String, Object?>> items,
   }) {
-    final slipNumber = collectionRow['slip_number'];
-    final collectedAt = collectionRow['collected_at'];
     final vehicleId = collectionRow['vehicle_id'];
     final givenByName = collectionRow['given_by_name'];
     final mrfLabourId = collectionRow['mrf_person_id'];
@@ -1384,23 +1539,22 @@ class EerlLocalDataSource {
     return <String, Object?>{
       'centerId': collectionRow['center_id'],
       'type': collectionRow['channel'],
-      'slipNumber': ?slipNumber,
-      'collectedAt': ?collectedAt,
-      'vehicleId': ?vehicleId,
-      'givenByName': ?givenByName,
-      'mrfLabourId': ?mrfLabourId,
-      'ragpickerId': ?ragpickerId,
+      // Keep this map identical to PUT /collections/{id}. Nullable fields
+      // must remain present, while slip metadata is local/server-managed.
+      'vehicleId': vehicleId,
+      'givenByName': givenByName,
+      'mrfLabourId': mrfLabourId,
+      'ragpickerId': ragpickerId,
       'handoverPhotoUrls': handoverPhotoIds,
-      'paidBy': ?paidBy,
+      'paidBy': paidBy,
       'lines': [
         for (final item in items)
           {
             'itemId': item['item_id'],
             'collectedQty': item['qty'],
-            if (item['verified_qty'] != null)
-              'verifiedQty': item['verified_qty'],
-            if (item['rate'] != null) 'rate': item['rate'],
-            if (item['amount'] != null) 'amount': item['amount'],
+            'verifiedQty': item['verified_qty'],
+            'rate': item['rate'],
+            'amount': item['amount'],
             'photoUrls': item['photo_urls'],
           },
       ],
@@ -1508,6 +1662,53 @@ class EerlLocalDataSource {
     return rows.map(ExpenseModel.fromMap).toList(growable: false);
   }
 
+  Future<List<String>> getExpenseReceiptSources(String expenseId) async {
+    final photoRows = await _database.query(
+      DatabaseTables.photos,
+      columns: const ['id', 'local_path', 'remote_url', 'created_at'],
+      where: 'owner_table = ? AND owner_id = ? AND field = ?',
+      whereArgs: [DatabaseTables.expenses, expenseId, 'receipt'],
+      orderBy: 'created_at ASC',
+    );
+    final sourceById = <String, String>{};
+    final orderedSources = <String>[];
+    for (final row in photoRows) {
+      final localPath = (row['local_path'] as String?)?.trim();
+      final remoteUrl = (row['remote_url'] as String?)?.trim();
+      final source = localPath?.isNotEmpty == true
+          ? localPath!
+          : remoteUrl?.isNotEmpty == true
+          ? remoteUrl!
+          : null;
+      if (source == null) continue;
+      sourceById[row['id']! as String] = source;
+      if (localPath?.isNotEmpty == true) sourceById[localPath!] = source;
+      if (remoteUrl?.isNotEmpty == true) sourceById[remoteUrl!] = source;
+      orderedSources.add(source);
+    }
+
+    final expenseRows = await _database.query(
+      DatabaseTables.expenses,
+      columns: const ['receipt_photo_urls'],
+      where: 'id = ?',
+      whereArgs: [expenseId],
+      limit: 1,
+    );
+    final storedReferences = expenseRows.isEmpty
+        ? const <String>[]
+        : _decodeStringList(expenseRows.first['receipt_photo_urls']);
+    final resolved = <String>[
+      for (final reference in storedReferences)
+        sourceById[reference] ?? reference,
+      ...orderedSources,
+    ];
+    return resolved
+        .map((source) => source.trim())
+        .where((source) => source.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+  }
+
   Future<String> saveExpense({
     required String categoryId,
     required double amount,
@@ -1552,11 +1753,19 @@ class EerlLocalDataSource {
     if (categoryRows.isEmpty) {
       throw StateError('The selected expense category is unavailable.');
     }
+    final wallet = await getWalletSummary(centerId: centerId);
+    if (amount > wallet.balanceNow) {
+      throw ExpenseBalanceUnavailableException(
+        requestedAmount: amount,
+        availableBalance: wallet.balanceNow,
+      );
+    }
 
     final expenseId = UuidGenerator.v4();
     final now = DateTime.now().toUtc().toIso8601String();
     final profile = await getProfile();
     final normalizedNote = note?.trim();
+    final normalizedCollectionId = collectionId?.trim();
     final uniqueReceiptPaths = receiptPaths
         .map((path) => path.trim())
         .where((path) => path.isNotEmpty)
@@ -1620,23 +1829,30 @@ class EerlLocalDataSource {
           'categoryId': categoryId,
           'amount': amount,
           'spentAt': now,
-          'note': normalizedNote?.isEmpty == true ? null : normalizedNote,
-          'collectionId': collectionId,
+          if (normalizedNote?.isNotEmpty == true) 'note': normalizedNote,
+          if (normalizedCollectionId?.isNotEmpty == true)
+            'collectionId': normalizedCollectionId,
           'photoUrls': photoIds,
         },
-        refs: [centerId, categoryId, ?collectionId],
+        refs: [
+          centerId,
+          categoryId,
+          if (normalizedCollectionId?.isNotEmpty == true)
+            normalizedCollectionId,
+        ],
         blockingPhotoIds: photoIds,
         createdAt: now,
       );
     });
 
     if (kDebugMode) {
-      debugPrint(
-        '💸 [EERL_EXPENSE][SQLITE][COMMIT] STORED '
-        'expense_id=$expenseId center=$centerId category=$categoryId '
-        'amount=$amount status=PENDING sync_state=pending '
-        'photos=${photoIds.length} outbox_seq=$outboxSeq '
-        'method=PUT path=/expenses/$expenseId',
+      AppLogger.sqlite(
+        'COMMIT',
+        'Expense stored | '
+            'expense_id=$expenseId center=$centerId category=$categoryId '
+            'amount=$amount status=PENDING sync_state=pending '
+            'photos=${photoIds.length} outbox_seq=$outboxSeq '
+            'method=PUT path=/expenses/$expenseId',
       );
     }
     return expenseId;
@@ -1658,6 +1874,89 @@ class EerlLocalDataSource {
       orderBy: 'created_at DESC',
     );
     return rows.map(CashRequestModel.fromMap).toList(growable: false);
+  }
+
+  Future<String> saveCashRequest({
+    required double amount,
+    required String reason,
+  }) async {
+    if (!amount.isFinite || amount <= 0) {
+      throw ArgumentError.value(
+        amount,
+        'amount',
+        'Requested amount must be greater than zero.',
+      );
+    }
+    final normalizedReason = reason.trim();
+    if (normalizedReason.isEmpty) {
+      throw ArgumentError.value(reason, 'reason', 'Reason is required.');
+    }
+
+    final centerId = await activeCenterId;
+    final userId = await currentUserId;
+    if (centerId == null || userId == null) {
+      throw StateError('Active center and signed-in user are required.');
+    }
+    final wallet = await getWalletSummary(centerId: centerId);
+    if (amount > wallet.balanceNow) {
+      if (kDebugMode) {
+        AppLogger.diagnostic(
+          'CASH_REQUEST_VALIDATION',
+          'Blocked | '
+              'center=$centerId amount=$amount available=${wallet.balanceNow} '
+              'sqlite_write=false outbox_write=false',
+        );
+      }
+      throw CashRequestBalanceUnavailableException(
+        requestedAmount: amount,
+        availableBalance: wallet.balanceNow,
+      );
+    }
+    final profile = await getProfile();
+    final requestId = UuidGenerator.v4();
+    final now = DateTime.now().toUtc().toIso8601String();
+    late final int outboxSeq;
+
+    await _database.runInTransaction((txn) async {
+      await txn.insert(DatabaseTables.cashRequests, {
+        'id': requestId,
+        'center_id': centerId,
+        'requested_by': userId,
+        'requested_by_name': profile.userName,
+        'amount': amount,
+        'reason': normalizedReason,
+        'status': 'PENDING',
+        'created_at': now,
+        'updated_at': now,
+        'sync_state': 'pending',
+      });
+      outboxSeq = await OutboxQueue.enqueue(
+        txn,
+        method: 'PUT',
+        path: '/cash-requests/$requestId',
+        entity: DatabaseTables.cashRequests,
+        entityId: requestId,
+        kind: 'create',
+        body: {
+          'centerId': centerId,
+          'amount': amount,
+          'reason': normalizedReason,
+        },
+        refs: [centerId],
+        createdAt: now,
+      );
+    });
+
+    if (kDebugMode) {
+      AppLogger.sqlite(
+        'COMMIT',
+        'Cash request stored | '
+            'request_id=$requestId center=$centerId amount=$amount '
+            'status=PENDING sync_state=pending outbox_seq=$outboxSeq '
+            'method=PUT path=/cash-requests/$requestId',
+      );
+    }
+    return requestId;
   }
 
   Future<List<CategoryRequestModel>> getCategoryRequests({
@@ -1691,6 +1990,7 @@ class EerlLocalDataSource {
     if (centerId == null || userId == null) {
       throw StateError('Active center and signed-in user are required.');
     }
+    final profile = await getProfile();
 
     final requestId = UuidGenerator.v4();
     final now = DateTime.now().toUtc().toIso8601String();
@@ -1706,6 +2006,7 @@ class EerlLocalDataSource {
         'id': requestId,
         'center_id': centerId,
         'requested_by': userId,
+        'requested_by_name': profile.userName,
         'name': normalizedName,
         'reason': normalizedReason?.isEmpty == true ? null : normalizedReason,
         'status': 'PENDING',
@@ -1726,11 +2027,12 @@ class EerlLocalDataSource {
     });
 
     if (kDebugMode) {
-      debugPrint(
-        '✅ [EERL_CATEGORY_REQUEST][SQLITE][COMMIT] STORED '
-        'request_id=$requestId center=$centerId name=$normalizedName '
-        'status=PENDING sync_state=pending '
-        'method=PUT path=/expense-categories/requests/$requestId',
+      AppLogger.sqlite(
+        'COMMIT',
+        'Category request stored | '
+            'request_id=$requestId center=$centerId '
+            'status=PENDING sync_state=pending '
+            'method=PUT path=/expense-categories/requests/$requestId',
       );
     }
     return requestId;
@@ -1768,6 +2070,198 @@ class EerlLocalDataSource {
       ORDER BY t.requested_at DESC
     ''', args);
     return rows.map(TransferModel.fromMap).toList(growable: false);
+  }
+
+  Future<List<TransferVehicleModel>> getTransferVehicles() async {
+    final rows = await _database.query(
+      DatabaseTables.transferVehicles,
+      orderBy: 'number COLLATE NOCASE',
+    );
+    return rows.map(TransferVehicleModel.fromMap).toList(growable: false);
+  }
+
+  Future<void> approveTransfer({
+    required String transferId,
+    required String destinationId,
+    String? transferVehicleId,
+    String? vehicleNumber,
+    String? transporterName,
+    double? transferFee,
+    DateTime? vehicleArrivalTime,
+    String? note,
+  }) async {
+    final normalizedDestinationId = destinationId.trim();
+    if (normalizedDestinationId.isEmpty) {
+      throw const TransferDecisionValidationException(
+        'Choose where the material is going.',
+      );
+    }
+
+    final destinationRows = await _database.query(
+      DatabaseTables.destinations,
+      where: 'id = ?',
+      whereArgs: [normalizedDestinationId],
+      limit: 1,
+    );
+    if (destinationRows.isEmpty) {
+      throw const TransferDecisionValidationException(
+        'Choose where the material is going.',
+      );
+    }
+
+    TransferVehicleModel? listedVehicle;
+    final normalizedVehicleId = transferVehicleId?.trim();
+    if (normalizedVehicleId != null && normalizedVehicleId.isNotEmpty) {
+      final rows = await _database.query(
+        DatabaseTables.transferVehicles,
+        where: 'id = ?',
+        whereArgs: [normalizedVehicleId],
+        limit: 1,
+      );
+      if (rows.isEmpty) {
+        throw const TransferDecisionValidationException(
+          'Choose the truck that will take it.',
+        );
+      }
+      listedVehicle = TransferVehicleModel.fromMap(rows.single);
+    }
+
+    final normalizedNumber = (listedVehicle?.number ?? vehicleNumber ?? '')
+        .trim()
+        .toUpperCase();
+    if (normalizedNumber.length < 4 || normalizedNumber.length > 20) {
+      throw const TransferDecisionValidationException(
+        'Enter the number as on the plate.',
+      );
+    }
+    final ownership = listedVehicle?.ownership.toUpperCase() ?? 'HIRED';
+    final normalizedTransporter =
+        (listedVehicle?.transporterName ?? transporterName)?.trim();
+    if ((normalizedTransporter?.length ?? 0) > 255) {
+      throw const TransferDecisionValidationException(
+        'Transporter name must be 255 characters or fewer.',
+      );
+    }
+    final fee = ownership == 'COMPANY' ? 0.0 : transferFee;
+    if (fee == null ||
+        !fee.isFinite ||
+        fee < 0 ||
+        ((fee * 100).roundToDouble() - (fee * 100)).abs() > 0.000001) {
+      throw const TransferDecisionValidationException(
+        'Enter the fee in rupees for this hired truck.',
+      );
+    }
+    final normalizedNote = note?.trim();
+    if ((normalizedNote?.length ?? 0) > 255) {
+      throw const TransferDecisionValidationException(
+        'Note must be 255 characters or fewer.',
+      );
+    }
+
+    final profile = await getProfile();
+    final now = DateTime.now().toUtc().toIso8601String();
+    final arrival = vehicleArrivalTime?.toUtc().toIso8601String();
+    final vehicleBody = listedVehicle == null
+        ? <String, Object?>{
+            'vehicleNumber': normalizedNumber,
+            'transporterName': normalizedTransporter?.isEmpty == true
+                ? null
+                : normalizedTransporter,
+            'transferFee': fee,
+          }
+        : <String, Object?>{
+            'transferVehicleId': listedVehicle.id,
+            if (listedVehicle.isHired) 'transferFee': fee,
+          };
+    final body = <String, Object?>{
+      'destinationFacilityId': normalizedDestinationId,
+      'vehicleArrivalTime': arrival,
+      'vehicle': vehicleBody,
+      'note': normalizedNote?.isEmpty == true ? null : normalizedNote,
+    };
+
+    await _database.runInTransaction((txn) async {
+      final updated = await txn.update(
+        DatabaseTables.transfers,
+        {
+          'status': 'APPROVED',
+          'destination_id': normalizedDestinationId,
+          'destination_name': destinationRows.single['name'],
+          'truck_expected_at': arrival,
+          'transfer_vehicle_id': listedVehicle?.id,
+          'planned_vehicle_number': normalizedNumber,
+          'planned_vehicle_ownership': ownership,
+          'transporter_name': ownership == 'COMPANY'
+              ? null
+              : normalizedTransporter,
+          'transfer_fee': fee,
+          if (normalizedNote?.isNotEmpty == true) 'note': normalizedNote,
+          'decided_by_name': profile.userName,
+          'approved_at': now,
+          'sync_state': 'pending',
+        },
+        where: "id = ? AND status IN ('REQUESTED', 'PENDING')",
+        whereArgs: [transferId],
+      );
+      if (updated != 1) {
+        throw StateError('This transfer is no longer waiting for approval.');
+      }
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/transfers/$transferId/approve',
+        entity: DatabaseTables.transfers,
+        entityId: transferId,
+        kind: 'approve',
+        body: body,
+        refs: [
+          normalizedDestinationId,
+          if (listedVehicle != null) listedVehicle.id,
+        ],
+        createdAt: now,
+      );
+    });
+  }
+
+  Future<void> rejectTransfer({
+    required String transferId,
+    required String reason,
+  }) async {
+    final normalizedReason = reason.trim();
+    if (normalizedReason.length < 3 || normalizedReason.length > 1000) {
+      throw const TransferDecisionValidationException(
+        'Rejection reason must be between 3 and 1000 characters.',
+      );
+    }
+    final profile = await getProfile();
+    final now = DateTime.now().toUtc().toIso8601String();
+    await _database.runInTransaction((txn) async {
+      final updated = await txn.update(
+        DatabaseTables.transfers,
+        {
+          'status': 'REJECTED',
+          'rejection_reason': normalizedReason,
+          'decided_by_name': profile.userName,
+          'approved_at': now,
+          'sync_state': 'pending',
+        },
+        where: "id = ? AND status IN ('REQUESTED', 'PENDING')",
+        whereArgs: [transferId],
+      );
+      if (updated != 1) {
+        throw StateError('This transfer is no longer waiting for approval.');
+      }
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/transfers/$transferId/reject',
+        entity: DatabaseTables.transfers,
+        entityId: transferId,
+        kind: 'reject',
+        body: {'reason': normalizedReason},
+        createdAt: now,
+      );
+    });
   }
 
   Future<String> saveTransferRequest({
@@ -1872,11 +2366,12 @@ class EerlLocalDataSource {
     });
 
     if (kDebugMode) {
-      debugPrint(
-        '✅ [EERL_TRANSFER][SQLITE][COMMIT] STORED '
-        'transfer_id=$transferId center=$centerId status=PENDING '
-        'items=${normalizedItems.length} total_qty=$totalQty '
-        'estimated_expense=$estimatedExpense outbox_path=/transfers/$transferId',
+      AppLogger.sqlite(
+        'COMMIT',
+        'Transfer stored | '
+            'transfer_id=$transferId center=$centerId status=PENDING '
+            'items=${normalizedItems.length} total_qty=$totalQty '
+            'estimated_expense=$estimatedExpense outbox_path=/transfers/$transferId',
       );
     }
     return transferId;
@@ -1920,13 +2415,15 @@ class EerlLocalDataSource {
     String? driverName;
     final transferRows = await _database.query(
       DatabaseTables.transfers,
-      columns: const ['vehicle_plate', 'driver_name'],
+      columns: const ['vehicle_plate', 'planned_vehicle_number', 'driver_name'],
       where: 'id = ?',
       whereArgs: [transferId],
       limit: 1,
     );
     if (transferRows.isNotEmpty) {
-      vehicleNumber = transferRows.single['vehicle_plate'] as String?;
+      vehicleNumber =
+          transferRows.single['vehicle_plate'] as String? ??
+          transferRows.single['planned_vehicle_number'] as String?;
       driverName = transferRows.single['driver_name'] as String?;
     }
     final photoRows = await _database.query(
@@ -1993,10 +2490,11 @@ class EerlLocalDataSource {
       );
     }
     if (kDebugMode) {
-      debugPrint(
-        '🚚 [EERL_TRANSFER][SQLITE] LOADING_DETAILS_STORED '
-        'transfer_id=$transferId vehicle=$plate driver=$driver '
-        'photos=${vehiclePhotos.length} table=transfers api_call=false',
+      AppLogger.sqlite(
+        'UPDATE_TRANSFER',
+        'Loading details stored | '
+            'transfer_id=$transferId '
+            'photos=${vehiclePhotos.length} table=transfers api_call=false',
       );
     }
   }
@@ -2036,9 +2534,10 @@ class EerlLocalDataSource {
       'created_at': DateTime.now().toUtc().toIso8601String(),
     });
     if (kDebugMode) {
-      debugPrint(
-        '📸 [EERL_TRANSFER][SQLITE] PHOTO_STORED transfer_id=$transferId '
-        'photo_id=$id field=$field',
+      AppLogger.sqlite(
+        'INSERT_PHOTO',
+        'transfer_id=$transferId '
+            'photo_id=$id field=$field',
       );
     }
     return TransferDispatchPhotoModel(
@@ -2232,11 +2731,12 @@ class EerlLocalDataSource {
       );
     });
     if (kDebugMode) {
-      debugPrint(
-        '✅ [EERL_TRANSFER][SQLITE][COMMIT] DISPATCHED '
-        'transfer_id=$transferId vehicle_photos=${vehiclePhotoIds.length} '
-        'weighbridge_photos=${weighbridgePhotoIds.length} '
-        'outbox_path=/transfers/$transferId/handover',
+      AppLogger.sqlite(
+        'COMMIT',
+        'Transfer dispatched | '
+            'transfer_id=$transferId vehicle_photos=${vehiclePhotoIds.length} '
+            'weighbridge_photos=${weighbridgePhotoIds.length} '
+            'outbox_path=/transfers/$transferId/handover',
       );
     }
   }
@@ -2572,6 +3072,20 @@ class EerlLocalDataSource {
     );
     if (changed == 0) {
       await txn.insert(table, values);
+    }
+  }
+
+  static List<String> _decodeStringList(Object? value) {
+    if (value is List) {
+      return value.map((item) => item.toString()).toList(growable: false);
+    }
+    if (value is! String || value.trim().isEmpty) return const [];
+    try {
+      final decoded = jsonDecode(value);
+      if (decoded is! List) return const [];
+      return decoded.map((item) => item.toString()).toList(growable: false);
+    } on FormatException {
+      return const [];
     }
   }
 

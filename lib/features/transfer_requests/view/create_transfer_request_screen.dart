@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
@@ -127,7 +128,7 @@ class _CreateTransferRequestScreenState
       if (submitted == true && mounted) Navigator.of(context).pop();
     } on TransferStockUnavailableException catch (error) {
       if (!mounted) return;
-      debugPrint('Transfer request rejected by local free-stock check: $error');
+      AppLogger.diagnostic('TRANSFER_VALIDATION', error.toString());
       await _controller.load();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -138,7 +139,7 @@ class _CreateTransferRequestScreenState
       );
     } catch (error) {
       if (!mounted) return;
-      debugPrint('Transfer request save failed: $error');
+      AppLogger.error('TRANSFER_SAVE', error.toString());
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           behavior: SnackBarBehavior.fixed,

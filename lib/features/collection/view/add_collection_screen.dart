@@ -1083,11 +1083,6 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         submit: submit,
       );
       if (submit) {
-        debugPrint(
-          '🚀 [EERL_COLLECTION_SYNC][QUEUED] collection_id=$id; '
-          'photos=${handoverPhotos.length + items.fold<int>(0, (count, item) => count + item.photoUrls.length)}; '
-          'items=${items.length}; source=local_commit',
-        );
         unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
       }
     } catch (error) {

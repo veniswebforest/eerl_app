@@ -143,11 +143,20 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.expenseClaimDetail,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, state) => ExpenseClaimDetailScreen(
-        status:
-            state.extra as ExpenseClaimDetailStatus? ??
-            ExpenseClaimDetailStatus.pending,
-      ),
+      builder: (_, state) {
+        final extra = state.extra;
+        final expense = extra is ExpenseModel ? extra : null;
+        final status = expense == null
+            ? extra is ExpenseClaimDetailStatus
+                  ? extra
+                  : ExpenseClaimDetailStatus.pending
+            : switch (expense.status.toUpperCase()) {
+                'APPROVED' || 'VERIFIED' => ExpenseClaimDetailStatus.verified,
+                'REJECTED' => ExpenseClaimDetailStatus.rejected,
+                _ => ExpenseClaimDetailStatus.pending,
+              };
+        return ExpenseClaimDetailScreen(expense: expense, status: status);
+      },
     ),
     GoRoute(
       path: AppRoutes.cashRequestDetail,
