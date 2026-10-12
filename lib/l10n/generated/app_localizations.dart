@@ -4546,6 +4546,30 @@ abstract class AppLocalizations {
   /// **'Next Follow-up Date & Time *'**
   String get requestFollowupDateTime;
 
+  /// No description provided for @requestFollowupFutureError.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a follow-up date and time in the future.'**
+  String get requestFollowupFutureError;
+
+  /// No description provided for @requestFollowupBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow up by {dateTime}'**
+  String requestFollowupBy(String dateTime);
+
+  /// No description provided for @requestOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get requestOverdue;
+
+  /// No description provided for @requestSubmitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Request could not be saved. Please try again.'**
+  String get requestSubmitFailed;
+
   /// No description provided for @requestSelectDateTime.
   ///
   /// In en, this message translates to:

@@ -69,7 +69,7 @@ class TaskListCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                item.description ?? item.title,
+                item.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.regularB7_14.copyWith(
@@ -78,23 +78,25 @@ class TaskListCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Row(
-              children: [
-                const Icon(
-                  Icons.attach_file_rounded,
-                  size: 18,
-                  color: AppColors.neutral600,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  context.l10n.taskPhotoAttached(item.photoUrls.length),
-                  style: AppTextStyles.regularB8_12.copyWith(
+            if (item.photoUrls.isNotEmpty) ...[
+              Row(
+                children: [
+                  const Icon(
+                    Icons.attach_file_rounded,
+                    size: 18,
                     color: AppColors.neutral600,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
+                  const SizedBox(width: 4),
+                  Text(
+                    context.l10n.taskPhotoAttached(item.photoUrls.length),
+                    style: AppTextStyles.regularB8_12.copyWith(
+                      color: AppColors.neutral600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+            ],
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -168,7 +170,9 @@ class TaskListCard extends StatelessWidget {
       };
 
   String _scheduleLabel(BuildContext context) {
-    if (_isClosed) return context.l10n.taskCompletedTime;
+    if (_isClosed) {
+      return context.l10n.taskCompletedTime.split(':').first.trim();
+    }
     final due = DateTime.tryParse(item.dueAt ?? '')?.toLocal();
     if (due == null) return item.status;
     final now = DateTime.now();

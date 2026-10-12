@@ -301,7 +301,8 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.supervisorResolveRequest,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, _) => const SupervisorResolveRequestScreen(),
+      builder: (_, state) =>
+          SupervisorResolveRequestScreen(request: state.extra! as RequestModel),
     ),
     GoRoute(
       path: AppRoutes.supervisorCompletedRequest,

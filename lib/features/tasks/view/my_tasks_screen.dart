@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -17,7 +16,6 @@ import '../widgets/task_segmented_control.dart';
 
 class MyTasksScreen extends StatefulWidget {
   const MyTasksScreen({super.key});
-
   @override
   State<MyTasksScreen> createState() => _MyTasksScreenState();
 }
@@ -54,6 +52,20 @@ class _MyTasksScreenState extends State<MyTasksScreen> {
 
   bool _closed(TaskModel item) =>
       const {'COMPLETED', 'CLOSED'}.contains(item.status.toUpperCase());
+
+  Future<void> _refresh() async {
+    await BootstrapSyncService.instance.triggerBootstrap(
+      trigger: BootstrapTrigger.pullToRefresh,
+    );
+    if (!mounted) return;
+    await _controller.load();
+  }
+
+  Future<void> _openTask(BuildContext context, TaskModel task) async {
+    await context.push(AppRoutes.taskDetail, extra: task);
+    if (!mounted) return;
+    await _controller.load();
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -149,21 +161,45 @@ class _MyTasksScreenState extends State<MyTasksScreen> {
                               child: const Text('Retry'),
                             ),
                           )
-                        : items.isEmpty
-                        ? _EmptyTasks(label: context.l10n.taskEmptyMessage)
-                        : ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                            itemCount: items.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(height: 16),
-                            itemBuilder: (context, index) => TaskListCard(
-                              key: ValueKey(items[index].id),
-                              item: items[index],
-                              onTap: () => context.push(
-                                AppRoutes.taskDetail,
-                                extra: items[index],
-                              ),
-                            ),
+                        : RefreshIndicator(
+                            key: const Key('agent-tasks-refresh'),
+                            onRefresh: _refresh,
+                            child: items.isEmpty
+                                ? LayoutBuilder(
+                                    builder: (context, constraints) => ListView(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      children: [
+                                        SizedBox(
+                                          height: constraints.maxHeight,
+                                          child: _EmptyTasks(
+                                            label:
+                                                context.l10n.taskEmptyMessage,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : ListView.separated(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      0,
+                                      20,
+                                      24,
+                                    ),
+                                    itemCount: items.length,
+                                    separatorBuilder: (_, _) =>
+                                        const SizedBox(height: 16),
+                                    itemBuilder: (context, index) =>
+                                        TaskListCard(
+                                          key: ValueKey(items[index].id),
+                                          item: items[index],
+                                          onTap: () =>
+                                              _openTask(context, items[index]),
+                                        ),
+                                  ),
                           ),
                   ),
                 ],
@@ -178,7 +214,9 @@ class _MyTasksScreenState extends State<MyTasksScreen> {
 
 class _EmptyTasks extends StatelessWidget {
   const _EmptyTasks({required this.label});
+
   final String label;
+
   @override
   Widget build(BuildContext context) => Center(
     child: Column(

@@ -43,7 +43,8 @@ abstract final class DatabaseSchema {
         hsn_code TEXT,
         image_url TEXT,
         unit_code TEXT NOT NULL,
-        unit_name TEXT NOT NULL
+        unit_name TEXT NOT NULL,
+        is_active INTEGER NOT NULL DEFAULT 1
       )
     ''',
     '''
@@ -261,6 +262,7 @@ abstract final class DatabaseSchema {
         fixed_qty REAL,
         estimated_expense REAL,
         note TEXT,
+        dispatch_note TEXT,
         vehicle_plate TEXT,
         driver_name TEXT,
         dispatched_weight REAL,
@@ -322,6 +324,7 @@ abstract final class DatabaseSchema {
         body TEXT NOT NULL,
         priority TEXT NOT NULL,
         status TEXT NOT NULL,
+        follow_up_at TEXT,
         answer TEXT,
         answered_at TEXT,
         photo_urls TEXT NOT NULL DEFAULT '[]',

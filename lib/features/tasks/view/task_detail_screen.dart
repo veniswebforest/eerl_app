@@ -1,12 +1,18 @@
+import 'dart:async';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../widgets/task_information_card.dart';
@@ -29,16 +35,25 @@ class TaskDetailScreen extends StatefulWidget {
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late final TextEditingController _descriptionController;
   late List<String> _proofImages;
+  bool _isCompleting = false;
 
   bool get _canComplete =>
       _proofImages.isNotEmpty && _descriptionController.text.trim().isNotEmpty;
+
+  String? get _assignmentDescription {
+    final description = widget.task.description?.trim();
+    if (description?.isNotEmpty == true) return description;
+    if (_isClosed) return null;
+    final note = widget.task.note?.trim();
+    return note?.isNotEmpty == true ? note : null;
+  }
 
   @override
   void initState() {
     super.initState();
     _proofImages = _isClosed ? [...widget.task.photoUrls] : [];
     _descriptionController = TextEditingController(
-      text: widget.task.description ?? '',
+      text: _isClosed ? widget.task.note ?? '' : '',
     );
   }
 
@@ -65,6 +80,30 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   bool get _isClosed =>
       const {'COMPLETED', 'CLOSED'}.contains(widget.task.status.toUpperCase());
+
+  Future<void> _completeTask() async {
+    if (!_canComplete || _isCompleting) return;
+    setState(() => _isCompleting = true);
+    try {
+      await EerlLocalRepository.instance.completeTask(
+        taskId: widget.task.id,
+        note: _descriptionController.text,
+        photoPaths: _proofImages,
+      );
+      unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+      if (!mounted) return;
+      await _showCompletedDialog();
+    } catch (error) {
+      AppLogger.error('TASK_COMPLETE', error.toString());
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
+      }
+    } finally {
+      if (mounted) setState(() => _isCompleting = false);
+    }
+  }
 
   Future<void> _showCompletedDialog() async {
     final completed = await showDialog<bool>(
@@ -99,17 +138,19 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     if (!_isClosed) ...[
                       const SizedBox(height: 12),
                       TaskInformationCard(
-                        title: context.l10n.taskOverviewTitle,
+                        title: widget.task.title,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              widget.task.description ?? widget.task.title,
-                              style: AppTextStyles.regularB8_12.copyWith(
-                                color: AppColors.neutral700,
+                            if (_assignmentDescription != null) ...[
+                              Text(
+                                _assignmentDescription!,
+                                style: AppTextStyles.regularB8_12.copyWith(
+                                  color: AppColors.neutral700,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 10),
+                              const SizedBox(height: 10),
+                            ],
                             _BySupervisor(
                               label:
                                   widget.task.assignedByName ??
@@ -118,22 +159,24 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      TaskInformationCard(
-                        title: context.l10n.taskAttachmentTitle,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TaskPhotoGrid(images: widget.task.photoUrls),
-                            const SizedBox(height: 10),
-                            _BySupervisor(
-                              label:
-                                  widget.task.assignedByName ??
-                                  widget.task.assignedBy,
-                            ),
-                          ],
+                      if (widget.task.photoUrls.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        TaskInformationCard(
+                          title: context.l10n.taskAttachmentTitle,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TaskPhotoGrid(images: widget.task.photoUrls),
+                              const SizedBox(height: 10),
+                              _BySupervisor(
+                                label:
+                                    widget.task.assignedByName ??
+                                    widget.task.assignedBy,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                       const SizedBox(height: 14),
                       _sectionLabel(context.l10n.taskCompletionProof),
                       const SizedBox(height: 10),
@@ -209,7 +252,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     height: 52,
                     child: ElevatedButton(
                       key: const Key('mark-task-completed-button'),
-                      onPressed: _canComplete ? _showCompletedDialog : null,
+                      onPressed: _canComplete && !_isCompleting
+                          ? _completeTask
+                          : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary500,
                         disabledBackgroundColor: AppColors.neutral400,
@@ -219,10 +264,19 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: Text(
-                        context.l10n.taskMarkCompleted,
-                        style: AppTextStyles.semiboldH9_14,
-                      ),
+                      child: _isCompleting
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              context.l10n.taskMarkCompleted,
+                              style: AppTextStyles.semiboldH9_14,
+                            ),
                     ),
                   ),
                 ),
@@ -239,60 +293,40 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   );
 
   List<Widget> _closedTaskContent(BuildContext context) => [
-    const SizedBox(height: 16),
-    _sectionLabel(context.l10n.taskCompletionProofPlain),
-    const SizedBox(height: 10),
-    _CaptureProof(enabled: false, onTap: () {}),
-    const SizedBox(height: 12),
-    TaskPhotoGrid(images: _proofImages),
-    const SizedBox(height: 8),
-    Text(
-      context.l10n.taskProofSupported,
-      style: AppTextStyles.regularB8_12.copyWith(color: AppColors.neutral500),
-    ),
-    const SizedBox(height: 14),
-    _sectionLabel(context.l10n.taskDescriptionPlain),
-    const SizedBox(height: 10),
-    _ReadOnlyDescription(text: widget.task.description ?? ''),
+    if (_proofImages.isNotEmpty) ...[
+      const SizedBox(height: 16),
+      _sectionLabel(context.l10n.taskCompletionProofPlain),
+      const SizedBox(height: 10),
+      TaskPhotoGrid(images: _proofImages),
+    ],
+    if (widget.task.note?.trim().isNotEmpty == true) ...[
+      const SizedBox(height: 14),
+      _sectionLabel(context.l10n.taskDescriptionPlain),
+      const SizedBox(height: 10),
+      _ReadOnlyDescription(text: widget.task.note!.trim()),
+    ],
     const SizedBox(height: 18),
     _sectionLabel(context.l10n.taskSupervisorDetails),
     const SizedBox(height: 10),
     TaskInformationCard(
-      title: context.l10n.taskDescriptionPlain,
+      title: widget.task.title,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              // color: AppColors.cool100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              widget.task.description ?? widget.task.title,
-              style: AppTextStyles.regularB8_12.copyWith(
-                color: AppColors.neutral700,
+          if (_assignmentDescription != null) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              child: Text(
+                _assignmentDescription!,
+                style: AppTextStyles.regularB8_12.copyWith(
+                  color: AppColors.neutral700,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 10),
-          _BySupervisor(
-            label: widget.task.assignedByName ?? widget.task.assignedBy,
-          ),
-        ],
-      ),
-    ),
-    const SizedBox(height: 12),
-    TaskInformationCard(
-      title: context.l10n.taskAttachmentTitle,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 10),
-
-          TaskPhotoGrid(images: widget.task.photoUrls),
-          const SizedBox(height: 10),
+            const SizedBox(height: 10),
+          ],
           _BySupervisor(
             label: widget.task.assignedByName ?? widget.task.assignedBy,
           ),
@@ -323,27 +357,61 @@ class _TaskStatusRow extends StatelessWidget {
         if (const {'COMPLETED', 'CLOSED'}.contains(task.status.toUpperCase()))
           _DetailChip(
             icon: Icons.check_circle_outline_rounded,
-            label: context.l10n.taskCompletedTime,
+            label: _completedLabel(context),
             color: AppColors.primary600,
             background: AppColors.primary50,
           )
         else ...[
           _DetailChip(
             icon: Icons.calendar_today_outlined,
-            label: context.l10n.taskDueToday,
+            label: _dueLabel(),
             color: AppColors.purple,
             background: const Color(0xFFF1EDFF),
           ),
           _DetailChip(
             icon: Icons.schedule_rounded,
-            label: context.l10n.taskPriorityHigh,
-            color: AppColors.red600,
-            background: AppColors.red50,
+            label: _priorityLabel(context),
+            color: _priorityColor,
+            background: _priorityBackground,
           ),
         ],
       ],
     ),
   );
+
+  String _dueLabel() {
+    final due = DateTime.tryParse(task.dueAt ?? '')?.toLocal();
+    return due == null
+        ? task.status
+        : DateFormat('dd MMM yyyy, hh:mm a').format(due);
+  }
+
+  String _completedLabel(BuildContext context) {
+    final label = context.l10n.taskCompletedTime.split(':').first.trim();
+    final completed = DateTime.tryParse(task.completedAt ?? '')?.toLocal();
+    if (completed == null) return label;
+    return '$label • '
+        '${DateFormat('dd MMM yyyy, hh:mm a').format(completed)}';
+  }
+
+  String _priorityLabel(BuildContext context) =>
+      switch (task.priority.toUpperCase()) {
+        'HIGH' => context.l10n.taskPriorityHigh,
+        'NORMAL' || 'MEDIUM' => context.l10n.taskPriorityNormal,
+        _ => context.l10n.taskPriorityLow,
+      };
+
+  Color get _priorityColor => switch (task.priority.toUpperCase()) {
+    'HIGH' => AppColors.red600,
+    'NORMAL' || 'MEDIUM' => AppColors.yellow600,
+    _ => AppColors.secondary500,
+  };
+
+  Color get _priorityBackground => switch (task.priority.toUpperCase()) {
+    'HIGH' => AppColors.red50,
+    'NORMAL' || 'MEDIUM' => const Color(0xFFFFFBEB),
+    _ => AppColors.secondary50,
+  };
 }
 
 class _ReadOnlyDescription extends StatelessWidget {
@@ -368,16 +436,6 @@ class _ReadOnlyDescription extends StatelessWidget {
           text,
           style: AppTextStyles.regularB7_14.copyWith(
             color: AppColors.neutral600,
-          ),
-        ),
-        const SizedBox(height: 28),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Text(
-            context.l10n.taskDescriptionMinimum,
-            style: AppTextStyles.regularB8_12.copyWith(
-              color: AppColors.neutral400,
-            ),
           ),
         ),
       ],

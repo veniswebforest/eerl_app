@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +31,12 @@ void main() async {
   await AppDatabase.instance.database;
 
   final storedAccessToken = await AuthSessionStorage().getAccessToken();
+  if (kDebugMode) {
+    debugPrint(
+      '[APP_OPEN][ACCESS_TOKEN] ${storedAccessToken ?? 'not_found'}',
+      wrapWidth: 1024,
+    );
+  }
   AppLogger.diagnostic(
     'APP_OPEN',
     'authenticated=${storedAccessToken?.isNotEmpty == true}',

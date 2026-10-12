@@ -105,6 +105,7 @@ class OutgoingSyncService {
       'status': 'failed',
     }, where: "status = 'uploading'");
 
+    await _repairUploadedPhotoReferences();
     var photoProgress = await _uploadWaitingPhotos(token);
     while (true) {
       final next = await _nextOutboxItem();
@@ -545,6 +546,12 @@ class OutgoingSyncService {
     if (table == DatabaseTables.ragpickers) {
       return _ragpickerServerValues(data);
     }
+    if (table == DatabaseTables.tasks) {
+      return _taskServerValues(data);
+    }
+    if (table == DatabaseTables.requests) {
+      return _requestServerValues(data);
+    }
     Object? candidate = data;
     if (data[table] is Map) candidate = data[table];
     if (candidate is! Map) return <String, Object?>{};
@@ -604,6 +611,10 @@ class OutgoingSyncService {
   }
 
   Map<String, Object?> _transferServerValues(Map<Object?, Object?> data) => {
+    if (data['dispatch'] is Map &&
+        (data['dispatch'] as Map).containsKey('note'))
+      'dispatch_note': (data['dispatch'] as Map)['note'],
+    if (data.containsKey('dispatchNote')) 'dispatch_note': data['dispatchNote'],
     if (data['status'] != null) 'status': data['status'],
     if (data['number'] != null) 'number': data['number'],
     if (data['destinationId'] != null) 'destination_id': data['destinationId'],
@@ -684,6 +695,27 @@ class OutgoingSyncService {
     if (data.containsKey('photoUrl')) 'photo_url': data['photoUrl'],
     if (data.containsKey('isActive'))
       'is_active': _sqliteValue(data['isActive']),
+  };
+
+  Map<String, Object?> _taskServerValues(Map<Object?, Object?> data) => {
+    if (data['number'] != null) 'number': data['number'],
+    if (data['status'] != null) 'status': data['status'],
+    if (data.containsKey('note')) 'note': data['note'],
+    if (data['completedAt'] != null) 'completed_at': data['completedAt'],
+    if (data['photoUrls'] is List) 'photo_urls': jsonEncode(data['photoUrls']),
+  };
+
+  Map<String, Object?> _requestServerValues(Map<Object?, Object?> data) => {
+    if (data['number'] != null) 'number': data['number'],
+    if (data['centerId'] != null) 'center_id': data['centerId'],
+    if (data['body'] != null) 'body': data['body'],
+    if (data['priority'] != null) 'priority': data['priority'],
+    if (data['status'] != null) 'status': data['status'],
+    if (data.containsKey('followUpAt')) 'follow_up_at': data['followUpAt'],
+    if (data.containsKey('answer')) 'answer': data['answer'],
+    if (data.containsKey('answeredAt')) 'answered_at': data['answeredAt'],
+    if (data['photoUrls'] is List) 'photo_urls': jsonEncode(data['photoUrls']),
+    if (data['createdAt'] != null) 'created_at': data['createdAt'],
   };
 
   Future<void> _applyCollectionResponseLines(
@@ -790,6 +822,7 @@ class OutgoingSyncService {
           'planned_vehicle_ownership': null,
           'transporter_name': null,
           'transfer_fee': null,
+          'dispatch_note': null,
           'decided_by_name': null,
           'approved_at': null,
           'sync_state': 'synced',
@@ -892,6 +925,20 @@ class OutgoingSyncService {
         'rows=$repairedRagpickerPhotos RAGPICKER_PROFILE -> RAGPICKER',
       );
     }
+    final repairedRequestPhotos = await _database.update(
+      DatabaseTables.photos,
+      {'purpose': 'TASK_COMPLETION'},
+      where: 'purpose = ?',
+      whereArgs: ['REQUEST'],
+    );
+    if (repairedRequestPhotos > 0) {
+      AppLogger.sqlite(
+        'PHOTO_PURPOSE_REPAIRED',
+        'rows=$repairedRequestPhotos REQUEST -> TASK',
+      );
+    }
+    // Friday's working flow uploads the oldest pending photos first, then
+    // resolves their ids to file URLs when dependent outbox rows are sent.
     final waitingRows = await _database.query(
       DatabaseTables.photos,
       where: "status IN ('local', 'failed')",
@@ -921,10 +968,12 @@ class OutgoingSyncService {
         continue;
       }
       row['size_bytes'] = sizeBytes;
+      final contentType = _photoContentType(localPath, row['content_type']);
+      row['content_type'] = contentType;
       rows.add(row);
       await _database.update(
         DatabaseTables.photos,
-        {'size_bytes': sizeBytes},
+        {'size_bytes': sizeBytes, 'content_type': contentType},
         where: 'id = ?',
         whereArgs: [id],
       );
@@ -951,7 +1000,7 @@ class OutgoingSyncService {
       };
       const batchPath = '/api/v1/mobile/uploads/batch';
       final batchStopwatch = Stopwatch()..start();
-      AppLogger.apiRequest('POST', batchPath, message: 'count=${rows.length}');
+      AppLogger.apiRequest('POST', batchPath, message: 'count=${rows}');
       final response = await _client
           .post(
             Uri.parse('${AppConstants.apiBaseUrl}/mobile/uploads/batch'),
@@ -964,11 +1013,15 @@ class OutgoingSyncService {
           )
           .timeout(_timeout);
       if (response.statusCode < 200 || response.statusCode >= 300) {
+        final responseSummary = response.body.length > 1200
+            ? '${response.body.substring(0, 1200)}…'
+            : response.body;
         AppLogger.apiError(
           'POST',
           batchPath,
           statusCode: response.statusCode,
           duration: batchStopwatch.elapsed,
+          error: responseSummary,
         );
         throw HttpException(
           'Upload batch HTTP ${response.statusCode}: ${response.body}',
@@ -1030,15 +1083,12 @@ class OutgoingSyncService {
           duration: uploadStopwatch.elapsed,
           message: 'photoId=$id',
         );
-        await _database.update(
-          DatabaseTables.photos,
-          {
-            'status': 'uploaded',
-            'remote_url': fileUrl,
-            'uploaded_at': DateTime.now().toUtc().toIso8601String(),
-          },
-          where: 'id = ?',
-          whereArgs: [id],
+        await _persistUploadedPhoto(
+          photoId: id,
+          fileUrl: fileUrl,
+          localPath: localPath,
+          ownerTable: source['owner_table']! as String,
+          ownerId: source['owner_id']! as String,
         );
         await _imageCache.storeLocalFileForUrl(fileUrl, file);
         uploadedCount++;
@@ -1057,6 +1107,130 @@ class OutgoingSyncService {
       );
     }
     return uploadedCount;
+  }
+
+  /// Repairs queued rows written by older builds where an already-uploaded
+  /// photo URL was only substituted in memory at request-send time.
+  Future<void> _repairUploadedPhotoReferences() async {
+    final rows = await _database.rawQuery('''
+      SELECT DISTINCT p.id, p.remote_url, p.local_path,
+        p.owner_table, p.owner_id
+      FROM ${DatabaseTables.photos} p
+      JOIN ${DatabaseTables.outboxPhotos} op ON op.photo_id = p.id
+      JOIN ${DatabaseTables.outbox} o ON o.seq = op.outbox_seq
+      WHERE p.status = 'uploaded'
+        AND p.remote_url IS NOT NULL
+        AND o.status IN ('queued', 'failed')
+      ''');
+    for (final row in rows) {
+      await _persistUploadedPhoto(
+        photoId: row['id']! as String,
+        fileUrl: row['remote_url']! as String,
+        localPath: row['local_path'] as String? ?? '',
+        ownerTable: row['owner_table']! as String,
+        ownerId: row['owner_id']! as String,
+      );
+    }
+    if (rows.isNotEmpty) {
+      AppLogger.sqlite(
+        'PHOTO_REFERENCES_REPAIRED',
+        'rows=${rows.length} outbox payload(s) now contain remote URLs',
+      );
+    }
+  }
+
+  /// Persists the uploaded URL everywhere before the dependent API call runs.
+  ///
+  /// Older code only replaced photo ids in memory inside [_resolvedBody]. That
+  /// sent the correct value in ideal conditions, but left the SQL outbox body
+  /// containing a local UUID. Persisting the replacement makes retries and
+  /// process restarts use the exact same URL-bearing payload.
+  Future<void> _persistUploadedPhoto({
+    required String photoId,
+    required String fileUrl,
+    required String localPath,
+    required String ownerTable,
+    required String ownerId,
+  }) async {
+    await _database.runInTransaction((txn) async {
+      await txn.update(
+        DatabaseTables.photos,
+        {
+          'status': 'uploaded',
+          'remote_url': fileUrl,
+          'uploaded_at': DateTime.now().toUtc().toIso8601String(),
+        },
+        where: 'id = ?',
+        whereArgs: [photoId],
+      );
+
+      final linkedOutboxRows = await txn.rawQuery(
+        '''
+        SELECT o.seq, o.body
+        FROM ${DatabaseTables.outbox} o
+        JOIN ${DatabaseTables.outboxPhotos} op ON op.outbox_seq = o.seq
+        WHERE op.photo_id = ?
+        ''',
+        [photoId],
+      );
+      for (final row in linkedOutboxRows) {
+        final rawBody = row['body'] as String?;
+        if (rawBody == null || rawBody.trim().isEmpty) continue;
+        final resolvedBody = _replacePhotoIds(jsonDecode(rawBody), {
+          photoId: fileUrl,
+        });
+        await txn.update(
+          DatabaseTables.outbox,
+          {'body': jsonEncode(resolvedBody)},
+          where: 'seq = ?',
+          whereArgs: [row['seq']],
+        );
+      }
+
+      if (ownerTable != DatabaseTables.requests &&
+          ownerTable != DatabaseTables.tasks) {
+        return;
+      }
+      final ownerRows = await txn.query(
+        ownerTable,
+        columns: const ['photo_urls'],
+        where: 'id = ?',
+        whereArgs: [ownerId],
+        limit: 1,
+      );
+      if (ownerRows.isEmpty) return;
+      final rawUrls = ownerRows.single['photo_urls'] as String?;
+      final decodedUrls = rawUrls == null || rawUrls.trim().isEmpty
+          ? <Object?>[]
+          : jsonDecode(rawUrls);
+      final urls = decodedUrls is List
+          ? decodedUrls.map((value) => value.toString()).toList()
+          : <String>[];
+      var replaced = false;
+      for (var index = 0; index < urls.length; index++) {
+        if (urls[index] == localPath || urls[index] == photoId) {
+          urls[index] = fileUrl;
+          replaced = true;
+        }
+      }
+      if (!replaced && !urls.contains(fileUrl)) urls.add(fileUrl);
+      await txn.update(
+        ownerTable,
+        {'photo_urls': jsonEncode(urls)},
+        where: 'id = ?',
+        whereArgs: [ownerId],
+      );
+    });
+  }
+
+  String _photoContentType(String path, Object? storedValue) {
+    final lowerPath = path.toLowerCase();
+    if (lowerPath.endsWith('.png')) return 'image/png';
+    if (lowerPath.endsWith('.jpg') || lowerPath.endsWith('.jpeg')) {
+      return 'image/jpeg';
+    }
+    final stored = storedValue?.toString().trim().toLowerCase();
+    return stored == 'image/png' ? 'image/png' : 'image/jpeg';
   }
 
   List<Map<String, Object?>> _uploadList(Map<String, Object?> body) {

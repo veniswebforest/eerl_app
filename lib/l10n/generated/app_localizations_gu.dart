@@ -2357,6 +2357,21 @@ class AppLocalizationsGu extends AppLocalizations {
   String get requestFollowupDateTime => 'આગામી ફોલો-અપ તારીખ અને સમય *';
 
   @override
+  String get requestFollowupFutureError =>
+      'આગામી ફોલો-અપ માટે ભવિષ્યની તારીખ અને સમય પસંદ કરો.';
+
+  @override
+  String requestFollowupBy(String dateTime) {
+    return 'ફોલો-અપ $dateTime સુધી';
+  }
+
+  @override
+  String get requestOverdue => 'સમય વીતી ગયો';
+
+  @override
+  String get requestSubmitFailed => 'વિનંતી સેવ થઈ શકી નથી. ફરી પ્રયત્ન કરો.';
+
+  @override
   String get requestSelectDateTime => 'તારીખ અને સમય પસંદ કરો';
 
   @override

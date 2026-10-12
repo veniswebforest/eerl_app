@@ -84,6 +84,7 @@ void main() {
               'planned_vehicle_ownership': 'HIRED',
               'transporter_name': 'Shree Ram Transport',
               'transfer_fee': 1800,
+              'dispatch_note': 'Load the dry bales first.',
               'vehicle_differs': 0,
               'requested_by': 'agent-1',
               'requested_by_name': 'Agent One',
@@ -113,6 +114,7 @@ void main() {
     expect(transfer['transfer_vehicle_id'], 'truck-1');
     expect(transfer['planned_vehicle_number'], 'GJ-05-EE-1001');
     expect(transfer['transfer_fee'], 1800.0);
+    expect(transfer['dispatch_note'], 'Load the dry bales first.');
     expect(transfer['vehicle_differs'], 0);
     expect(await database.getSyncMeta('cursor'), 'latest-1');
   });

@@ -126,6 +126,7 @@ class ItemModel {
     this.imageUrl,
     required this.unitCode,
     required this.unitName,
+    this.isActive = true,
     this.rate,
     this.isSelected,
     this.sortOrder,
@@ -140,6 +141,7 @@ class ItemModel {
   final String? imageUrl;
   final String unitCode;
   final String unitName;
+  final bool isActive;
   final double? rate;
   final bool? isSelected;
   final int? sortOrder;
@@ -154,6 +156,7 @@ class ItemModel {
     imageUrl: map['image_url'] as String?,
     unitCode: map['unit_code'] as String,
     unitName: map['unit_name'] as String,
+    isActive: map.containsKey('is_active') ? _bool(map['is_active']) : true,
     rate: (map['rate'] as num?)?.toDouble(),
     isSelected: map.containsKey('is_selected')
         ? _bool(map['is_selected'])
@@ -171,6 +174,7 @@ class ItemModel {
     'image_url': imageUrl,
     'unit_code': unitCode,
     'unit_name': unitName,
+    'is_active': isActive ? 1 : 0,
   };
 }
 
@@ -880,6 +884,7 @@ class TransferModel {
     this.fixedQty,
     this.estimatedExpense,
     this.note,
+    this.dispatchNote,
     this.vehiclePlate,
     this.driverName,
     this.dispatchedWeight,
@@ -920,6 +925,7 @@ class TransferModel {
   final double? fixedQty;
   final double? estimatedExpense;
   final String? note;
+  final String? dispatchNote;
   final String? vehiclePlate;
   final String? driverName;
   final double? dispatchedWeight;
@@ -958,6 +964,7 @@ class TransferModel {
     fixedQty: (map['fixed_qty'] as num?)?.toDouble(),
     estimatedExpense: (map['estimated_expense'] as num?)?.toDouble(),
     note: map['note'] as String?,
+    dispatchNote: map['dispatch_note'] as String?,
     vehiclePlate: map['vehicle_plate'] as String?,
     driverName: map['driver_name'] as String?,
     dispatchedWeight: (map['dispatched_weight'] as num?)?.toDouble(),
@@ -997,6 +1004,7 @@ class TransferModel {
     'fixed_qty': fixedQty,
     'estimated_expense': estimatedExpense,
     'note': note,
+    'dispatch_note': dispatchNote,
     'vehicle_plate': vehiclePlate,
     'driver_name': driverName,
     'dispatched_weight': dispatchedWeight,
@@ -1103,6 +1111,7 @@ class TaskModel {
     required this.assignedBy,
     this.assignedByName,
     required this.title,
+    this.note,
     this.description,
     required this.priority,
     required this.status,
@@ -1120,6 +1129,7 @@ class TaskModel {
   final String assignedBy;
   final String? assignedByName;
   final String title;
+  final String? note;
   final String? description;
   final String priority;
   final String status;
@@ -1137,7 +1147,8 @@ class TaskModel {
     assignedBy: map['assigned_by'] as String,
     assignedByName: map['assigned_by_name'] as String?,
     title: map['title'] as String,
-    description: (map['description'] ?? map['note']) as String?,
+    note: map['note'] as String?,
+    description: map['description'] as String?,
     priority: map['priority'] as String,
     status: map['status'] as String,
     dueAt: map['due_at'] as String?,
@@ -1155,6 +1166,7 @@ class TaskModel {
     'assigned_by': assignedBy,
     'assigned_by_name': assignedByName,
     'title': title,
+    'note': note,
     'description': description,
     'priority': priority,
     'status': status,
@@ -1176,6 +1188,8 @@ class RequestModel {
     required this.body,
     required this.priority,
     required this.status,
+    this.followUpAt,
+    this.overdue = false,
     this.answer,
     this.answeredAt,
     required this.photoUrls,
@@ -1190,6 +1204,8 @@ class RequestModel {
   final String body;
   final String priority;
   final String status;
+  final String? followUpAt;
+  final bool overdue;
   final String? answer;
   final String? answeredAt;
   final List<String> photoUrls;
@@ -1204,6 +1220,8 @@ class RequestModel {
     body: map['body'] as String,
     priority: map['priority'] as String,
     status: map['status'] as String,
+    followUpAt: map['follow_up_at'] as String?,
+    overdue: map.containsKey('overdue') && _bool(map['overdue']),
     answer: map['answer'] as String?,
     answeredAt: map['answered_at'] as String?,
     photoUrls: _strings(map['photo_urls']),
@@ -1219,6 +1237,7 @@ class RequestModel {
     'body': body,
     'priority': priority,
     'status': status,
+    'follow_up_at': followUpAt,
     'answer': answer,
     'answered_at': answeredAt,
     'photo_urls': _jsonStrings(photoUrls),

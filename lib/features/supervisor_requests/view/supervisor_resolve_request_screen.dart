@@ -4,15 +4,22 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
+import 'package:eerl_app/core/utils/ist_date_time.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_assets.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_detail_widgets.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class SupervisorResolveRequestScreen extends StatefulWidget {
-  const SupervisorResolveRequestScreen({super.key, this.initialFilled = false});
+  const SupervisorResolveRequestScreen({
+    super.key,
+    required this.request,
+    this.initialFilled = false,
+  });
 
+  final RequestModel request;
   final bool initialFilled;
 
   @override
@@ -122,10 +129,15 @@ class _SupervisorResolveRequestScreenState
                       const SizedBox(height: 16),
                       SupervisorRequestInfoCard(
                         title: context.l10n.requestDescriptionPlain,
-                        value:
-                            context.l10n.supervisorAgentRequestLongDescription,
-                        caption: context.l10n.requestAgentName,
+                        value: widget.request.body,
+                        caption:
+                            widget.request.createdByName ??
+                            widget.request.createdBy,
                       ),
+                      if (widget.request.followUpAt != null) ...[
+                        const SizedBox(height: 16),
+                        _FollowUpCard(request: widget.request),
+                      ],
                       const SizedBox(height: 16),
                       SupervisorRequestInfoCard(
                         title: context.l10n.supervisorAgentRequestAttachment,
@@ -352,4 +364,60 @@ class _SupervisorResolveRequestScreenState
       ),
     ),
   );
+}
+
+class _FollowUpCard extends StatelessWidget {
+  const _FollowUpCard({required this.request});
+
+  final RequestModel request;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = IstDateTime.formatUtc(
+      request.followUpAt ?? '',
+      'dd MMM yyyy, h:mm a',
+    );
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: request.overdue ? AppColors.red50 : Colors.white,
+        border: Border.all(
+          color: request.overdue ? AppColors.red300 : AppColors.cool300,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.schedule_rounded,
+            color: request.overdue ? AppColors.red600 : AppColors.primary500,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              context.l10n.requestFollowupBy(value),
+              style: AppTextStyles.mediumSH8_14.copyWith(
+                color: AppColors.neutral900,
+              ),
+            ),
+          ),
+          if (request.overdue)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.red100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                context.l10n.requestOverdue,
+                style: AppTextStyles.mediumSH9_12.copyWith(
+                  color: AppColors.red600,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }

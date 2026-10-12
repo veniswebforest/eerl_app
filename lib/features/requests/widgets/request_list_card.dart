@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/ist_date_time.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class RequestListCard extends StatelessWidget {
@@ -69,6 +70,29 @@ class RequestListCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
+          if (item.followUpAt != null) ...[
+            Row(
+              children: [
+                const Icon(
+                  Icons.schedule_rounded,
+                  size: 17,
+                  color: AppColors.neutral600,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    context.l10n.requestFollowupBy(
+                      _formatFollowUp(item.followUpAt!),
+                    ),
+                    style: AppTextStyles.regularB8_12.copyWith(
+                      color: AppColors.neutral600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ],
           Row(
             children: [
               const Icon(
@@ -106,6 +130,10 @@ class RequestListCard extends StatelessWidget {
   String _formatTime(String value) {
     final date = DateTime.tryParse(value)?.toLocal();
     return date == null ? value : DateFormat('dd MMM, hh:mm a').format(date);
+  }
+
+  String _formatFollowUp(String value) {
+    return IstDateTime.formatUtc(value, 'dd MMM, h:mm a');
   }
 }
 

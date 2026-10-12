@@ -90,6 +90,8 @@ class EerlLocalDataSource {
 
   Future<String?> get currentUserId => _database.getSyncMeta('user_id');
 
+  Future<String?> get activeRole => _database.getSyncMeta('active_role');
+
   Future<String?> get activeCenterId async {
     final saved = await _database.getSyncMeta('active_center_id');
     if (saved != null && saved.isNotEmpty) return saved;
@@ -250,18 +252,18 @@ class EerlLocalDataSource {
         COALESCE(ci.is_selected, 0) AS is_selected,
         ci.sort_order,
         ci.item_id AS configured_item_id
-      FROM ${DatabaseTables.items} i
-      LEFT JOIN ${DatabaseTables.centerItems} ci
-        ON ci.item_id = i.id AND ci.center_id = ? AND ci.channel = ?
-      LEFT JOIN ${DatabaseTables.centerChannels} ch
-        ON ch.center_id = ? AND ch.channel = ?
-      ${selectedOnly ? 'WHERE COALESCE(ci.is_selected, 0) = 1' : ''}
+      FROM ${DatabaseTables.centerItems} ci
+      JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
+      JOIN ${DatabaseTables.centerChannels} ch
+        ON ch.center_id = ci.center_id AND ch.channel = ci.channel
+      WHERE ci.center_id = ? AND ci.channel = ? AND i.is_active = 1
+        ${selectedOnly ? 'AND COALESCE(ci.is_selected, 0) = 1' : ''}
       ORDER BY
         CASE WHEN ci.sort_order IS NULL THEN 1 ELSE 0 END,
         ci.sort_order,
         i.name COLLATE NOCASE
     ''',
-      [resolvedCenter, channel, resolvedCenter, channel],
+      [resolvedCenter, channel],
     );
     if (kDebugMode) {
       final configured = rows
@@ -298,6 +300,7 @@ class EerlLocalDataSource {
       WHERE ci.center_id = ?
         AND ci.channel = ?
         AND ci.is_selected = 1
+        AND i.is_active = 1
       ORDER BY ci.sort_order, i.name COLLATE NOCASE
       ''',
       [resolvedCenter, channel],
@@ -349,7 +352,7 @@ class EerlLocalDataSource {
         final sourceItemCount = Sqflite.firstIntValue(
           await txn.rawQuery(
             'SELECT COUNT(*) FROM ${DatabaseTables.items} '
-            'WHERE id IN ($placeholders)',
+            'WHERE id IN ($placeholders) AND is_active = 1',
             itemIds,
           ),
         );
@@ -814,7 +817,7 @@ class EerlLocalDataSource {
         txn,
         method: 'POST',
         path: '/ragpickers/${ragpicker.id}/status',
-        body: {'is_active': active},
+        body: {'isActive': active},
         entity: DatabaseTables.ragpickers,
         entityId: ragpicker.id,
         kind: 'status',
@@ -2152,9 +2155,9 @@ class EerlLocalDataSource {
       );
     }
     final normalizedNote = note?.trim();
-    if ((normalizedNote?.length ?? 0) > 255) {
+    if ((normalizedNote?.length ?? 0) > 150) {
       throw const TransferDecisionValidationException(
-        'Note must be 255 characters or fewer.',
+        'Note must be 150 characters or fewer.',
       );
     }
 
@@ -2195,7 +2198,9 @@ class EerlLocalDataSource {
               ? null
               : normalizedTransporter,
           'transfer_fee': fee,
-          if (normalizedNote?.isNotEmpty == true) 'note': normalizedNote,
+          'dispatch_note': normalizedNote?.isEmpty == true
+              ? null
+              : normalizedNote,
           'decided_by_name': profile.userName,
           'approved_at': now,
           'sync_state': 'pending',
@@ -2770,6 +2775,106 @@ class EerlLocalDataSource {
     return rows.map(TaskModel.fromMap).toList(growable: false);
   }
 
+  Future<void> completeTask({
+    required String taskId,
+    required String note,
+    required List<String> photoPaths,
+  }) async {
+    final normalizedNote = note.trim();
+    if (normalizedNote.isEmpty) {
+      throw ArgumentError.value(note, 'note', 'Completion note is required.');
+    }
+    final uniquePhotoPaths = photoPaths
+        .map((path) => path.trim())
+        .where((path) => path.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+    if (uniquePhotoPaths.isEmpty) {
+      throw ArgumentError.value(
+        photoPaths,
+        'photoPaths',
+        'Completion proof is required.',
+      );
+    }
+
+    final now = DateTime.now().toUtc().toIso8601String();
+    final photoSizes = <String, int?>{
+      for (final path in uniquePhotoPaths) path: await _localFileSize(path),
+    };
+    final photoIds = <String>[];
+    late final int outboxSeq;
+
+    await _database.runInTransaction((txn) async {
+      final rows = await txn.query(
+        DatabaseTables.tasks,
+        columns: const ['status'],
+        where: 'id = ?',
+        whereArgs: [taskId],
+        limit: 1,
+      );
+      if (rows.isEmpty) throw StateError('Task $taskId was not found.');
+      final status = rows.single['status']?.toString().toUpperCase();
+      if (status == 'COMPLETED' || status == 'CLOSED') {
+        throw StateError('Task $taskId is already completed.');
+      }
+
+      for (final path in uniquePhotoPaths) {
+        final photoId = UuidGenerator.v4();
+        photoIds.add(photoId);
+        await txn.insert(DatabaseTables.photos, {
+          'id': photoId,
+          'owner_table': DatabaseTables.tasks,
+          'owner_id': taskId,
+          'field': 'completion',
+          'purpose': 'TASK',
+          'content_type': 'image/jpeg',
+          'local_path': path,
+          'status': 'local',
+          'size_bytes': photoSizes[path],
+          'created_at': now,
+        });
+      }
+
+      final updated = await txn.update(
+        DatabaseTables.tasks,
+        {
+          'status': 'COMPLETED',
+          'note': normalizedNote,
+          'completed_at': now,
+          'photo_urls': jsonEncode(uniquePhotoPaths),
+          'sync_state': 'pending',
+        },
+        where: "id = ? AND UPPER(status) NOT IN ('COMPLETED', 'CLOSED')",
+        whereArgs: [taskId],
+      );
+      if (updated != 1) {
+        throw StateError('Task $taskId changed before completion was saved.');
+      }
+
+      outboxSeq = await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/tasks/$taskId/complete',
+        entity: DatabaseTables.tasks,
+        entityId: taskId,
+        kind: 'complete',
+        body: {'note': normalizedNote, 'photoUrls': photoIds},
+        refs: [taskId],
+        blockingPhotoIds: photoIds,
+        createdAt: now,
+      );
+    });
+
+    if (kDebugMode) {
+      AppLogger.sqlite(
+        'COMMIT',
+        'Task completion stored | task_id=$taskId status=COMPLETED '
+            'photos=${photoIds.length} outbox_seq=$outboxSeq '
+            'method=POST path=/tasks/$taskId/complete',
+      );
+    }
+  }
+
   Future<List<RequestModel>> getRequests({
     bool supervisor = false,
     String search = '',
@@ -2787,13 +2892,153 @@ class EerlLocalDataSource {
       final like = '%${search.trim()}%';
       args.addAll([like, like]);
     }
-    final rows = await _database.query(
-      DatabaseTables.requests,
-      where: conditions.join(' AND '),
-      whereArgs: args,
-      orderBy: 'created_at DESC',
-    );
+    final rows = supervisor
+        ? await _database.rawQuery(
+            '''
+            SELECT r.*,
+              (r.follow_up_at IS NOT NULL
+                AND r.follow_up_at < ?
+                AND UPPER(r.status) IN ('OPEN', 'PENDING')) AS overdue
+            FROM ${DatabaseTables.requests} r
+            WHERE ${conditions.join(' AND ')}
+            ORDER BY
+              CASE UPPER(r.status) WHEN 'OPEN' THEN 0 WHEN 'PENDING' THEN 0 ELSE 1 END,
+              CASE r.priority WHEN 'HIGH' THEN 0 WHEN 'NORMAL' THEN 1 ELSE 2 END,
+              r.created_at DESC
+            ''',
+            [DateTime.now().toUtc().toIso8601String(), ...args],
+          )
+        : await _database.query(
+            DatabaseTables.requests,
+            where: conditions.join(' AND '),
+            whereArgs: args,
+            orderBy: 'created_at DESC',
+          );
     return rows.map(RequestModel.fromMap).toList(growable: false);
+  }
+
+  Future<String> raiseRequest({
+    required String body,
+    required String priority,
+    required DateTime followUpAt,
+    required List<String> photoPaths,
+  }) async {
+    final normalizedBody = body.trim();
+    if (normalizedBody.isEmpty) {
+      throw ArgumentError.value(
+        body,
+        'body',
+        'Request description is required.',
+      );
+    }
+    final normalizedPriority = priority.trim().toUpperCase();
+    if (!const {'LOW', 'NORMAL', 'HIGH'}.contains(normalizedPriority)) {
+      throw ArgumentError.value(
+        priority,
+        'priority',
+        'Invalid request priority.',
+      );
+    }
+    if (!followUpAt.isAfter(DateTime.now())) {
+      throw ArgumentError.value(
+        followUpAt,
+        'followUpAt',
+        'Follow-up date and time must be in the future.',
+      );
+    }
+    final uniquePhotoPaths = photoPaths
+        .map((path) => path.trim())
+        .where((path) => path.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+    if (uniquePhotoPaths.isEmpty) {
+      throw ArgumentError.value(
+        photoPaths,
+        'photoPaths',
+        'A photo is required.',
+      );
+    }
+
+    final centerId = await activeCenterId;
+    final userId = await currentUserId;
+    if (centerId == null || userId == null) {
+      throw StateError('Active center and signed-in user are required.');
+    }
+    final profile = await getProfile();
+    final requestId = UuidGenerator.v4();
+    final now = DateTime.now().toUtc().toIso8601String();
+    final followUpAtUtc = followUpAt.toUtc().toIso8601String();
+    final photoSizes = <String, int?>{
+      for (final path in uniquePhotoPaths) path: await _localFileSize(path),
+    };
+    final photoIds = <String>[];
+    late final int outboxSeq;
+
+    await _database.runInTransaction((txn) async {
+      for (final path in uniquePhotoPaths) {
+        final photoId = UuidGenerator.v4();
+        photoIds.add(photoId);
+        await txn.insert(DatabaseTables.photos, {
+          'id': photoId,
+          'owner_table': DatabaseTables.requests,
+          'owner_id': requestId,
+          'field': 'request',
+          // Request evidence uses the server's TASK upload bucket. The API
+          // accepts the resulting URL in PUT /requests/{id}.
+          'purpose': 'TASK',
+          'content_type': 'image/jpeg',
+          'local_path': path,
+          'status': 'local',
+          'size_bytes': photoSizes[path],
+          'created_at': now,
+        });
+      }
+
+      await txn.insert(DatabaseTables.requests, {
+        'id': requestId,
+        'center_id': centerId,
+        'created_by': userId,
+        'created_by_name': profile.userName,
+        'body': normalizedBody,
+        'priority': normalizedPriority,
+        'status': 'OPEN',
+        'follow_up_at': followUpAtUtc,
+        // Keep the captured files visible while they are waiting to upload.
+        // OutgoingSyncService replaces these paths with the uploaded URLs.
+        'photo_urls': jsonEncode(uniquePhotoPaths),
+        'created_at': now,
+        'sync_state': 'pending',
+      });
+
+      outboxSeq = await OutboxQueue.enqueue(
+        txn,
+        method: 'PUT',
+        path: '/requests/$requestId',
+        entity: DatabaseTables.requests,
+        entityId: requestId,
+        kind: 'raise',
+        body: {
+          'centerId': centerId,
+          'body': normalizedBody,
+          'priority': normalizedPriority,
+          'followUpAt': followUpAtUtc,
+          'photoUrls': photoIds,
+        },
+        refs: [centerId],
+        blockingPhotoIds: photoIds,
+        createdAt: now,
+      );
+    });
+
+    if (kDebugMode) {
+      AppLogger.sqlite(
+        'COMMIT',
+        'Request stored | request_id=$requestId center=$centerId '
+            'follow_up_at=$followUpAtUtc photos=${photoIds.length} '
+            'outbox_seq=$outboxSeq method=PUT path=/requests/$requestId',
+      );
+    }
+    return requestId;
   }
 
   Future<WalletSummaryModel> getWalletSummary({String? centerId}) async {

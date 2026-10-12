@@ -2359,6 +2359,22 @@ class AppLocalizationsHi extends AppLocalizations {
   String get requestFollowupDateTime => 'अगली फ़ॉलो-अप तारीख और समय *';
 
   @override
+  String get requestFollowupFutureError =>
+      'फ़ॉलो-अप के लिए भविष्य की तारीख और समय चुनें।';
+
+  @override
+  String requestFollowupBy(String dateTime) {
+    return 'फ़ॉलो-अप $dateTime तक';
+  }
+
+  @override
+  String get requestOverdue => 'समय सीमा पार';
+
+  @override
+  String get requestSubmitFailed =>
+      'अनुरोध सहेजा नहीं जा सका। फिर प्रयास करें।';
+
+  @override
   String get requestSelectDateTime => 'तारीख और समय चुनें';
 
   @override

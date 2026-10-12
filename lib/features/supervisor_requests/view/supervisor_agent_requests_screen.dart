@@ -38,7 +38,10 @@ class _SupervisorAgentRequestsScreenState
 
   List<RequestModel> get _items => _allItems
       .where((item) {
-        final pending = item.status.toUpperCase() == 'PENDING';
+        final pending = const {
+          'OPEN',
+          'PENDING',
+        }.contains(item.status.toUpperCase());
         return _status == SupervisorAgentRequestStatus.pending
             ? pending
             : !pending;
@@ -88,8 +91,10 @@ class _SupervisorAgentRequestsScreenState
                             ? 0
                             : _allItems
                                   .where(
-                                    (item) =>
-                                        item.status.toUpperCase() == 'PENDING',
+                                    (item) => const {
+                                      'OPEN',
+                                      'PENDING',
+                                    }.contains(item.status.toUpperCase()),
                                   )
                                   .length,
                       ),
@@ -98,8 +103,10 @@ class _SupervisorAgentRequestsScreenState
                             ? 0
                             : _allItems
                                   .where(
-                                    (item) =>
-                                        item.status.toUpperCase() != 'PENDING',
+                                    (item) => !const {
+                                      'OPEN',
+                                      'PENDING',
+                                    }.contains(item.status.toUpperCase()),
                                   )
                                   .length,
                       ),
@@ -179,13 +186,14 @@ class _SupervisorAgentRequestsScreenState
   );
 
   Future<void> _openRequest(RequestModel request) async {
-    if (request.status.toUpperCase() != 'PENDING') {
+    if (!const {'OPEN', 'PENDING'}.contains(request.status.toUpperCase())) {
       await context.push<void>(AppRoutes.supervisorCompletedRequest);
       return;
     }
 
     final resolved = await context.push<bool>(
       AppRoutes.supervisorResolveRequest,
+      extra: request,
     );
     if (mounted && resolved == true) {
       setState(() => _status = SupervisorAgentRequestStatus.resolved);

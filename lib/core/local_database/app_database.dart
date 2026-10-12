@@ -13,7 +13,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 3;
+  static const databaseVersion = 5;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -134,6 +134,21 @@ class AppDatabase {
       });
       _log('Upgraded category audit and transfer vehicle schema to version 3');
     }
+    if (oldVersion < 4) {
+      await _addMissingColumns(db, DatabaseTables.items, const {
+        'is_active': 'INTEGER NOT NULL DEFAULT 1',
+      });
+      await _addMissingColumns(db, DatabaseTables.requests, const {
+        'follow_up_at': 'TEXT',
+      });
+      _log('Upgraded material and request follow-up schema to version 4');
+    }
+    if (oldVersion < 5) {
+      await _addMissingColumns(db, DatabaseTables.transfers, const {
+        'dispatch_note': 'TEXT',
+      });
+      _log('Upgraded transfer dispatch-note schema to version 5');
+    }
   }
 
   Future<void> _onOpen(Database db) async {
@@ -173,10 +188,11 @@ class AppDatabase {
         'decision_reason': 'TEXT',
       },
       DatabaseTables.tasks: {'number': 'TEXT', 'note': 'TEXT'},
-      DatabaseTables.requests: {'number': 'TEXT'},
+      DatabaseTables.requests: {'number': 'TEXT', 'follow_up_at': 'TEXT'},
       DatabaseTables.collections: {'gps_lat': 'REAL', 'gps_lng': 'REAL'},
       DatabaseTables.transfers: {
         'note': 'TEXT',
+        'dispatch_note': 'TEXT',
         'gps_lat': 'REAL',
         'gps_lng': 'REAL',
         'driver_name': 'TEXT',
@@ -191,7 +207,10 @@ class AppDatabase {
         'transfer_fee': 'REAL',
         'vehicle_differs': 'INTEGER NOT NULL DEFAULT 0',
       },
-      DatabaseTables.items: {'image_url': 'TEXT'},
+      DatabaseTables.items: {
+        'image_url': 'TEXT',
+        'is_active': 'INTEGER NOT NULL DEFAULT 1',
+      },
     };
 
     for (final tableEntry in additiveColumns.entries) {

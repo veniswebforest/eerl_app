@@ -181,7 +181,12 @@ class _RequestsScreenState extends State<RequestsScreen> {
                       height: 52,
                       child: ElevatedButton(
                         key: const Key('raise-request-button'),
-                        onPressed: () => context.push(AppRoutes.raiseRequest),
+                        onPressed: () async {
+                          final created = await context.push<bool>(
+                            AppRoutes.raiseRequest,
+                          );
+                          if (created == true) await _controller.load();
+                        },
                         child: Text(context.l10n.requestRaiseButton),
                       ),
                     ),

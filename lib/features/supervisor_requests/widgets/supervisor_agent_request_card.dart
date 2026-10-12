@@ -1,6 +1,7 @@
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/ist_date_time.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_assets.dart';
@@ -109,6 +110,30 @@ class SupervisorAgentRequestCard extends StatelessWidget {
                   ],
                 ),
               ],
+              if (item.followUpAt != null) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.schedule_rounded,
+                      size: 18,
+                      color: AppColors.neutral600,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        context.l10n.requestFollowupBy(
+                          _formatFollowUp(item.followUpAt!),
+                        ),
+                        style: AppTextStyles.mediumSH9_12.copyWith(
+                          color: AppColors.neutral700,
+                        ),
+                      ),
+                    ),
+                    if (item.overdue) const _OverdueChip(),
+                  ],
+                ),
+              ],
               const SizedBox(height: 12),
               Row(
                 children: [
@@ -133,6 +158,27 @@ class SupervisorAgentRequestCard extends StatelessWidget {
       ),
     ),
   );
+
+  String _formatFollowUp(String value) {
+    return IstDateTime.formatUtc(value, 'dd MMM, h:mm a');
+  }
+}
+
+class _OverdueChip extends StatelessWidget {
+  const _OverdueChip();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: AppColors.red50,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Text(
+      context.l10n.requestOverdue,
+      style: AppTextStyles.mediumSH9_12.copyWith(color: AppColors.red600),
+    ),
+  );
 }
 
 class _RequestStatusChip extends StatelessWidget {
@@ -142,7 +188,10 @@ class _RequestStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isResolved = status.toUpperCase() != 'PENDING';
+    final isResolved = !const {
+      'OPEN',
+      'PENDING',
+    }.contains(status.toUpperCase());
     return Container(
       height: 32,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),

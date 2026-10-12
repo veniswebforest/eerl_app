@@ -172,6 +172,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
       item,
       !currentlyActive,
     );
+    unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
     if (!mounted) return;
     setState(() {
       _status = currentlyActive

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -76,8 +75,10 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
 
   List<String> get _vehicleNumbers =>
       _vehicles.map((item) => item.plateNumber).toList(growable: false);
+
   List<String> get _personNamesList =>
       _ragpickers.map((item) => item.name).toList(growable: false);
+
   List<String> get _mrfPersonNames => _mrfPeople
       .where((item) => item.role.toUpperCase() == 'LABOUR')
       .map((item) => item.name)

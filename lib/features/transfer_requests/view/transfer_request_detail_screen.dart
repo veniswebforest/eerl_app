@@ -225,7 +225,8 @@ class _TransferRequestDetailContent extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               if (transfer?.truckExpectedAt != null ||
-                  transfer?.plannedVehicleNumber != null) ...[
+                  transfer?.plannedVehicleNumber != null ||
+                  transfer?.dispatchNote?.trim().isNotEmpty == true) ...[
                 _CollectionManagerCard(transfer: transfer),
                 const SizedBox(height: 12),
               ],
@@ -461,42 +462,85 @@ class _CollectionManagerCard extends StatelessWidget {
   final TransferModel? transfer;
 
   @override
-  Widget build(BuildContext context) => TransferDetailCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.l10n.transferFromCollectionManager,
-          style: AppTextStyles.semiboldH7_18.copyWith(
-            color: AppColors.neutral950,
+  Widget build(BuildContext context) {
+    final status = transfer?.status.toUpperCase() ?? '';
+    final dispatchNote = transfer?.dispatchNote?.trim();
+    final showDispatchNote =
+        dispatchNote?.isNotEmpty == true &&
+        (status.contains('APPROV') ||
+            status.contains('DISPATCH') ||
+            status.contains('LOAD') ||
+            status.contains('HAND') ||
+            status.contains('RECEIV') ||
+            status.contains('COMPLET') ||
+            status.contains('CLOSED'));
+
+    return FutureBuilder<String?>(
+      future: EerlLocalRepository.instance.activeRole,
+      builder: (context, snapshot) {
+        final isSupervisor =
+            snapshot.data?.toUpperCase().contains('SUPERVISOR') == true;
+        final isSale = transfer?.type.toUpperCase().contains('SALE') == true;
+        final showApprovedBy =
+            showDispatchNote &&
+            isSupervisor &&
+            transfer?.decidedByName?.trim().isNotEmpty == true;
+        return TransferDetailCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.transferFromCollectionManager,
+                style: AppTextStyles.semiboldH7_18.copyWith(
+                  color: AppColors.neutral950,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Divider(height: 1, color: AppColors.cool300),
+              const SizedBox(height: 12),
+              TransferDetailRow(
+                label: 'Arranged truck',
+                values: [
+                  transfer?.plannedVehicleNumber == null
+                      ? '-'
+                      : '${transfer!.plannedVehicleNumber} · '
+                            '${transfer!.plannedVehicleOwnership == 'COMPANY' ? 'Company truck' : 'Hired'}',
+                ],
+              ),
+              TransferDetailRow(
+                label: 'Truck arrives',
+                values: [
+                  transfer?.truckExpectedAt == null
+                      ? (transfer == null
+                            ? context.l10n.transferEstimateTimeValue
+                            : '-')
+                      : _formatTransferDateTime(transfer!.truckExpectedAt!),
+                ],
+                showDivider: showApprovedBy || showDispatchNote,
+              ),
+              if (showApprovedBy)
+                TransferDetailRow(
+                  label: 'Approved by',
+                  values: [transfer!.decidedByName!.trim()],
+                  showDivider: true,
+                ),
+              if (showDispatchNote)
+                TransferDetailRow(
+                  key: const Key('transfer-dispatch-note'),
+                  label: isSupervisor
+                      ? 'Note for the agent'
+                      : isSale
+                      ? 'Note'
+                      : 'Note from supervisor',
+                  values: [dispatchNote!],
+                  showDivider: false,
+                ),
+            ],
           ),
-        ),
-        const SizedBox(height: 8),
-        const Divider(height: 1, color: AppColors.cool300),
-        const SizedBox(height: 12),
-        TransferDetailRow(
-          label: 'Arranged truck',
-          values: [
-            transfer?.plannedVehicleNumber == null
-                ? '-'
-                : '${transfer!.plannedVehicleNumber} · '
-                      '${transfer!.plannedVehicleOwnership == 'COMPANY' ? 'Company truck' : 'Hired'}',
-          ],
-        ),
-        TransferDetailRow(
-          label: 'Truck arrives',
-          values: [
-            transfer?.truckExpectedAt == null
-                ? (transfer == null
-                      ? context.l10n.transferEstimateTimeValue
-                      : '-')
-                : _formatTransferDateTime(transfer!.truckExpectedAt!),
-          ],
-          showDivider: false,
-        ),
-      ],
-    ),
-  );
+        );
+      },
+    );
+  }
 }
 
 class _DispatchPhotos extends StatelessWidget {

@@ -4,6 +4,7 @@ import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -64,6 +65,7 @@ void main() {
         transferVehicleId: 'truck-1',
         transferFee: 1800,
         vehicleArrivalTime: DateTime.utc(2026, 10, 10, 4, 30),
+        note: '  Load the dry bales first.  ',
       );
 
       final transfer = (await database.query(DatabaseTables.transfers)).single;
@@ -71,6 +73,8 @@ void main() {
       expect(transfer['planned_vehicle_number'], 'GJ-05-EE-1001');
       expect(transfer['planned_vehicle_ownership'], 'HIRED');
       expect(transfer['transfer_fee'], 1800.0);
+      expect(transfer['dispatch_note'], 'Load the dry bales first.');
+      expect(transfer['note'], isNull);
       expect(transfer['decided_by_name'], 'Supervisor One');
       expect(transfer['sync_state'], 'pending');
 
@@ -82,7 +86,7 @@ void main() {
         'destinationFacilityId': 'destination-1',
         'vehicleArrivalTime': '2026-10-10T04:30:00.000Z',
         'vehicle': {'transferVehicleId': 'truck-1', 'transferFee': 1800.0},
-        'note': null,
+        'note': 'Load the dry bales first.',
       });
     },
   );
@@ -102,6 +106,62 @@ void main() {
     expect(jsonDecode(outbox['body']! as String), {
       'reason': 'No vehicle available.',
     });
+  });
+
+  test('approval note is limited to 150 characters', () async {
+    await expectLater(
+      repository.approveTransfer(
+        transferId: 'transfer-1',
+        destinationId: 'destination-1',
+        transferVehicleId: 'truck-1',
+        transferFee: 1800,
+        note: List.filled(151, 'x').join(),
+      ),
+      throwsA(
+        isA<TransferDecisionValidationException>().having(
+          (error) => error.message,
+          'message',
+          'Note must be 150 characters or fewer.',
+        ),
+      ),
+    );
+
+    final transfer = (await database.query(DatabaseTables.transfers)).single;
+    expect(transfer['status'], 'REQUESTED');
+    expect(transfer['dispatch_note'], isNull);
+    expect(await database.query(DatabaseTables.outbox), isEmpty);
+  });
+
+  test('approval response applies nested dispatch note', () async {
+    await repository.approveTransfer(
+      transferId: 'transfer-1',
+      destinationId: 'destination-1',
+      transferVehicleId: 'truck-1',
+      transferFee: 1800,
+      note: 'Initial note',
+    );
+    final service = OutgoingSyncService(
+      database: database,
+      internetAccessChecker: () async => true,
+      client: MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'data': {
+              'status': 'APPROVED',
+              'dispatch': {'note': 'Updated note from server'},
+            },
+          }),
+          200,
+        ),
+      ),
+    );
+
+    await service.drain();
+
+    final transfer = (await database.query(DatabaseTables.transfers)).single;
+    expect(transfer['dispatch_note'], 'Updated note from server');
+    expect(transfer['sync_state'], 'synced');
+    expect(await database.query(DatabaseTables.outbox), isEmpty);
   });
 
   test(

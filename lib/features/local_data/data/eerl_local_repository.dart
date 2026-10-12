@@ -10,6 +10,7 @@ class EerlLocalRepository {
 
   Future<String?> get currentUserId => _local.currentUserId;
   Future<String?> get activeCenterId => _local.activeCenterId;
+  Future<String?> get activeRole => _local.activeRole;
   Future<void> selectCenter(String id) => _local.selectCenter(id);
   Future<List<MyRoleModel>> getRoles() => _local.getRoles();
   Future<List<CenterModel>> getCenters() => _local.getCenters();
@@ -238,10 +239,26 @@ class EerlLocalRepository {
     bool supervisor = false,
     String search = '',
   }) => _local.getTasks(supervisor: supervisor, search: search);
+  Future<void> completeTask({
+    required String taskId,
+    required String note,
+    required List<String> photoPaths,
+  }) => _local.completeTask(taskId: taskId, note: note, photoPaths: photoPaths);
   Future<List<RequestModel>> getRequests({
     bool supervisor = false,
     String search = '',
   }) => _local.getRequests(supervisor: supervisor, search: search);
+  Future<String> raiseRequest({
+    required String body,
+    required String priority,
+    required DateTime followUpAt,
+    required List<String> photoPaths,
+  }) => _local.raiseRequest(
+    body: body,
+    priority: priority,
+    followUpAt: followUpAt,
+    photoPaths: photoPaths,
+  );
   Future<WalletSummaryModel> getWalletSummary({String? centerId}) =>
       _local.getWalletSummary(centerId: centerId);
   Future<List<WalletEntryModel>> getWalletEntries({String? centerId}) =>

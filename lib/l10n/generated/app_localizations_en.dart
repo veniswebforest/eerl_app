@@ -2358,6 +2358,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requestFollowupDateTime => 'Next Follow-up Date & Time *';
 
   @override
+  String get requestFollowupFutureError =>
+      'Choose a follow-up date and time in the future.';
+
+  @override
+  String requestFollowupBy(String dateTime) {
+    return 'Follow up by $dateTime';
+  }
+
+  @override
+  String get requestOverdue => 'Overdue';
+
+  @override
+  String get requestSubmitFailed =>
+      'Request could not be saved. Please try again.';
+
+  @override
   String get requestSelectDateTime => 'Select Date & Time';
 
   @override

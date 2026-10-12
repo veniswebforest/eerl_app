@@ -189,6 +189,40 @@ void main() {
       'photoUrl': null,
     });
   });
+
+  test('posts ragpicker status with the API isActive parameter', () async {
+    const ragpicker = RagpickerModel(
+      id: 'ragpicker-1',
+      centerId: 'center-1',
+      name: 'Vikram Singh',
+      isActive: true,
+      syncState: 'synced',
+    );
+    await database.insert(DatabaseTables.ragpickers, ragpicker.toMap());
+
+    await repository.setRagpickerActive(ragpicker, false);
+
+    final outbox = (await database.query(DatabaseTables.outbox)).single;
+    expect(outbox['method'], 'POST');
+    expect(outbox['path'], '/ragpickers/ragpicker-1/status');
+    expect(jsonDecode(outbox['body']! as String), {'isActive': false});
+
+    late http.Request sent;
+    final service = OutgoingSyncService(
+      database: database,
+      internetAccessChecker: () async => true,
+      client: MockClient((request) async {
+        sent = request;
+        return http.Response('', 200);
+      }),
+    );
+
+    await service.drain();
+
+    expect(sent.method, 'POST');
+    expect(sent.url.path, '/api/v1/mobile/ragpickers/ragpicker-1/status');
+    expect(jsonDecode(sent.body), {'isActive': false});
+  });
 }
 
 Future<void> _save(EerlLocalRepository repository) => repository.saveRagpicker(
