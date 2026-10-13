@@ -650,6 +650,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recentExpenseClaims => 'Recent Expense Claims';
 
   @override
+  String get walletEmptyRequest => 'No Request Logged Yet';
+
+  @override
   String get expenseSearchHint => 'Search By Receipt Number, Name, Date...';
 
   @override
@@ -2477,6 +2480,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transferDetailVehicle => 'Vehicle';
 
   @override
+  String get transferVehicleInformation => 'Vehicle Information';
+
+  @override
+  String get supervisorTransferDispatchStatus => 'Dispatch';
+
+  @override
+  String transferEstimateHours(int count) {
+    return '$count Hours';
+  }
+
+  @override
   String get transferDetailVehicleNumber => 'GJ-05-AB-1234';
 
   @override
@@ -2548,6 +2562,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transferVehicleNumberPlateHint => 'Vehicle number plate';
 
   @override
+  String get transferVehiclePlateInputHint => 'Enter Vehicle number plate';
+
+  @override
+  String get transferVehicleNumberExample => 'e.g. GJ-05-BX-1234';
+
+  @override
   String get transferDriverDetailRequired => 'Driver Detail *';
 
   @override
@@ -2578,6 +2598,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transferLoadedWeight => 'Loaded Weight';
 
   @override
+  String get transferLoadedWeightRequired => 'Loaded Weight *';
+
+  @override
   String get transferLoadedWeightHint => 'e.g. 1250';
 
   @override
@@ -2585,6 +2608,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferNumberOfBalesHint => 'e.g. 10';
+
+  @override
+  String get transferBalesRequired => 'Bales / boris *';
+
+  @override
+  String get transferBalesCountHint => 'Count, e.g. 12';
+
+  @override
+  String get transferLoadedAtRequired => 'Loaded at *';
+
+  @override
+  String get transferSelectDateTime => 'Select Date & Time';
+
+  @override
+  String get transferVehicleWeighbridgePhotoRequired =>
+      'Vehicle & Weighbridge Photo *';
 
   @override
   String get transferWeighbridgeSlip => 'Weighbridge Slip';
@@ -3853,4 +3892,103 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get locationSettingsUnavailable =>
       'Location settings could not be opened.';
+
+  @override
+  String get supervisorTransferReject => 'Reject';
+
+  @override
+  String get supervisorTransferApprove => 'Approve';
+
+  @override
+  String get supervisorTransferRejectHint => 'Enter reason for rejection';
+
+  @override
+  String get supervisorTransferFreeToSend => 'Free to Send';
+
+  @override
+  String get supervisorTransferVehicleDetails => 'Vehicle Details';
+
+  @override
+  String get supervisorTransferSelectVehicle => 'Select Vehicle *';
+
+  @override
+  String get supervisorTransferVehicleHint => 'Select Vehicle for dispatch';
+
+  @override
+  String supervisorTransferCapacity(String capacity) {
+    return 'Capacity $capacity KG';
+  }
+
+  @override
+  String get supervisorTransferVehicleNumber => 'Vehicle Number *';
+
+  @override
+  String get supervisorTransferTransporter => 'Transporter *';
+
+  @override
+  String get supervisorTransferTransporterHint => 'Enter transporter name';
+
+  @override
+  String get supervisorTransferTruckFee => 'Truck Fee (₹) *';
+
+  @override
+  String get supervisorTransferOtherHired => 'Other Hired Truck';
+
+  @override
+  String get supervisorTransferHiredTruck => 'Hired truck';
+
+  @override
+  String get supervisorTransferCompanyTruck => 'Company truck';
+
+  @override
+  String supervisorTransferHiredFrom(String name) {
+    return 'Hired from $name';
+  }
+
+  @override
+  String get supervisorTransferSelectDestination => 'Select Destination';
+
+  @override
+  String get supervisorTransferSelectDestinationRequired =>
+      'Select Destination *';
+
+  @override
+  String get supervisorTransferDestinationHint => 'Select the destination';
+
+  @override
+  String get supervisorTransferExpectedDateTime => 'Truck Expected Date & Time';
+
+  @override
+  String get supervisorTransferDateOptional =>
+      'Leave it empty if the trip is not booked yet';
+
+  @override
+  String get supervisorTransferDescription => 'Description';
+
+  @override
+  String get supervisorTransferDescriptionHint => 'Add Description';
+
+  @override
+  String get supervisorTransferMaxCharacters => 'Max 150 Characters';
+
+  @override
+  String get supervisorTransferConfirm => 'Confirm Transfer';
+
+  @override
+  String supervisorTransferApprovedTitle(String id) {
+    return '$id approved!';
+  }
+
+  @override
+  String supervisorTransferApprovedMessage(
+    String requester,
+    String destination,
+    String vehicle,
+    String expected,
+  ) {
+    return '$requester will send it to $destination. Truck $vehicle, expected $expected.';
+  }
+
+  @override
+  String get supervisorTransferBackToRequests => 'Back to Requests';
 }

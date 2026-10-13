@@ -72,7 +72,7 @@ void main() {
       expect(photo['owner_table'], DatabaseTables.tasks);
       expect(photo['owner_id'], _pendingTask.id);
       expect(photo['field'], 'completion');
-      expect(photo['purpose'], 'TASK');
+      expect(photo['purpose'], 'TASK_COMPLETION');
 
       final outbox = (await database.query(DatabaseTables.outbox)).single;
       expect(outbox['method'], 'POST');

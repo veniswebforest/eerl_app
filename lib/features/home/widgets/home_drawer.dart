@@ -288,6 +288,15 @@ class _HomeDrawerState extends State<HomeDrawer> {
         },
       ),
       _DrawerItem(
+        key: const Key('drawer-supervisor-transfer-requests'),
+        label: context.l10n.transferRequests,
+        icon: '$_supervisorDrawerIconPath/transfer_requests.svg',
+        onTap: () {
+          _close(context);
+          context.push(AppRoutes.transferRequests);
+        },
+      ),
+      _DrawerItem(
         key: const Key('drawer-supervisor-mrf-person-list'),
         label: context.l10n.drawerSupervisorMrfPersonList,
         icon: '$_supervisorDrawerIconPath/mrf_person.svg',

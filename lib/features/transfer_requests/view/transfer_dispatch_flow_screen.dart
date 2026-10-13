@@ -5,6 +5,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -14,9 +15,7 @@ import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart'
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
-import '../widgets/transfer_request_detail_widgets.dart';
-
-enum _DispatchStep { vehicle, weighbridge }
+import '../widgets/transfer_dispatch_date_time_picker.dart';
 
 class TransferDispatchFlowScreen extends StatefulWidget {
   const TransferDispatchFlowScreen({
@@ -45,9 +44,11 @@ class _TransferDispatchFlowScreenState
   final _weightController = TextEditingController();
   final _balesController = TextEditingController();
   final _piecesController = TextEditingController();
-  _DispatchStep _step = _DispatchStep.vehicle;
   List<TransferDispatchPhotoModel> _vehiclePhotos = const [];
   List<TransferDispatchPhotoModel> _weighbridgePhotos = const [];
+  DateTime? _loadedAt;
+  bool _calendarExpanded = true;
+  late bool _usePieces;
   bool _loadingDraft = true;
   bool _saving = false;
 
@@ -55,27 +56,30 @@ class _TransferDispatchFlowScreenState
       widget.items.length == 1 &&
       widget.items.single.unitCode?.toUpperCase() == 'PCS';
 
-  bool get _vehicleReady =>
+  List<TransferDispatchPhotoModel> get _dispatchPhotos => [
+    ..._vehiclePhotos,
+    ..._weighbridgePhotos,
+  ];
+
+  TextEditingController get _loadedQuantityController =>
+      _usePieces ? _piecesController : _weightController;
+
+  bool get _formReady =>
       _vehicleController.text.trim().length >= 4 &&
       _vehicleController.text.trim().length <= 20 &&
       _driverController.text.trim().isNotEmpty &&
+      (double.tryParse(_loadedQuantityController.text.trim()) ?? 0) > 0 &&
+      ((int.tryParse(_balesController.text.trim()) ?? 0) >= 1 &&
+          (int.tryParse(_balesController.text.trim()) ?? 10000) <= 9999) &&
+      _loadedAt != null &&
       _vehiclePhotos.isNotEmpty &&
-      _vehiclePhotos.length <= 5 &&
-      !_saving;
-
-  bool get _weighbridgeReady =>
-      (double.tryParse(_weightController.text.trim()) ?? 0) > 0 &&
-      (_balesController.text.trim().isEmpty ||
-          ((int.tryParse(_balesController.text.trim()) ?? 0) >= 1 &&
-              (int.tryParse(_balesController.text.trim()) ?? 10000) <= 9999)) &&
-      (!_isPieces ||
-          (double.tryParse(_piecesController.text.trim()) ?? 0) > 0) &&
-      _weighbridgePhotos.length <= 5 &&
+      _dispatchPhotos.length <= 5 &&
       !_saving;
 
   @override
   void initState() {
     super.initState();
+    _usePieces = _isPieces;
     _restoreDraft();
   }
 
@@ -141,50 +145,19 @@ class _TransferDispatchFlowScreenState
     });
   }
 
-  Future<void> _startLoading() async {
-    if (!_vehicleReady) return;
-    setState(() => _saving = true);
-    try {
-      await EerlLocalRepository.instance.saveTransferDispatchDraft(
-        transferId: widget.transfer.id,
-        vehicleNumber: _vehicleController.text,
-        driverName: _driverController.text,
-      );
-      if (mounted) setState(() => _step = _DispatchStep.weighbridge);
-    } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
-      }
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  void _handleBack() {
-    if (_step == _DispatchStep.weighbridge) {
-      setState(() => _step = _DispatchStep.vehicle);
-    } else {
-      widget.onBack();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final vehicleStep = _step == _DispatchStep.vehicle;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _handleBack();
+        if (!didPop) widget.onBack();
       },
       child: Scaffold(
         backgroundColor: AppColors.backgroundColor,
         appBar: CustomAppBar(
-          title: vehicleStep
-              ? context.l10n.transferVehicleDetailsTitle
-              : context.l10n.transferWeighbridgeTitle,
-          onBackTap: _handleBack,
+          title: context.l10n.transferVehicleDetailsTitle,
+          titleStyle: AppTextStyles.semiboldH6_20,
+          onBackTap: widget.onBack,
           backIconAsset: 'assets/icons/records/back.svg',
         ),
         body: SafeArea(
@@ -194,9 +167,7 @@ class _TransferDispatchFlowScreenState
               constraints: const BoxConstraints(maxWidth: 600),
               child: _loadingDraft
                   ? const Center(child: CircularProgressIndicator())
-                  : vehicleStep
-                  ? _vehicleForm()
-                  : _weighbridgeForm(),
+                  : _dispatchForm(),
             ),
           ),
         ),
@@ -204,93 +175,98 @@ class _TransferDispatchFlowScreenState
     );
   }
 
-  Widget _vehicleForm() => Column(
+  Widget _dispatchForm() => Column(
     children: [
       Expanded(
         child: SingleChildScrollView(
           key: const Key('transfer-vehicle-details-scroll'),
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _DispatchField(
-                label: context.l10n.transferVehicleNumberRequired,
-                hint: context.l10n.transferVehicleNumberPlateHint,
-                controller: _vehicleController,
-                onChanged: (_) => setState(() {}),
+              _TransferNumberCard(
+                number: widget.transfer.number ?? widget.transfer.id,
               ),
               const SizedBox(height: 24),
               _DispatchField(
-                label: 'Driver name *',
-                hint: 'Enter driver name',
+                label: context.l10n.transferVehicleNumberRequired,
+                hint: context.l10n.transferVehiclePlateInputHint,
+                controller: _vehicleController,
+                onChanged: (_) => setState(() {}),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.l10n.transferVehicleNumberExample,
+                style: AppTextStyles.regularB7_14.copyWith(
+                  color: AppColors.neutral600,
+                ),
+              ),
+              const SizedBox(height: 24),
+              _DispatchField(
+                label: context.l10n.transferDriverDetailRequired,
+                hint: context.l10n.transferSelectDriverName,
                 controller: _driverController,
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 24),
-              _PhotoField(
-                label: context.l10n.transferVehiclePhotoRequired,
-                photos: _vehiclePhotos,
-                onCapture: () => _capturePhoto('vehicle'),
-                onRemove: _removePhoto,
+              Text(
+                context.l10n.transferLoadedWeightRequired,
+                style: AppTextStyles.mediumSH8_14,
               ),
-            ],
-          ),
-        ),
-      ),
-      _ActionButton(
-        buttonKey: const Key('transfer-start-loading'),
-        label: context.l10n.transferStartLoading,
-        enabled: _vehicleReady,
-        onPressed: _startLoading,
-      ),
-    ],
-  );
-
-  Widget _weighbridgeForm() => Column(
-    children: [
-      Expanded(
-        child: SingleChildScrollView(
-          key: const Key('transfer-weighbridge-scroll'),
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-          child: Column(
-            children: [
-              _TransferSummaryCard(
-                transfer: widget.transfer,
-                items: widget.items,
+              const SizedBox(height: 8),
+              _WeightUnitSelector(
+                usePieces: _usePieces,
+                onChanged: (value) => setState(() => _usePieces = value),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 8),
               _DispatchField(
-                label: 'Loaded weight (KG) *',
+                showLabel: false,
+                label: context.l10n.transferLoadedWeightRequired,
                 hint: context.l10n.transferLoadedWeightHint,
-                controller: _weightController,
-                prefix: context.l10n.transferKgPrefix,
+                controller: _loadedQuantityController,
+                prefix: _usePieces
+                    ? context.l10n.collectionUnitPcs
+                    : context.l10n.transferKgPrefix,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
                 onChanged: (_) => setState(() {}),
               ),
-              if (_isPieces) ...[
-                const SizedBox(height: 20),
-                _DispatchField(
-                  label: 'Pieces loaded *',
-                  hint: 'Enter number of pieces',
-                  controller: _piecesController,
-                  keyboardType: TextInputType.number,
-                  onChanged: (_) => setState(() {}),
-                ),
-              ],
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               _DispatchField(
-                label: context.l10n.transferNumberOfBales,
-                hint: context.l10n.transferNumberOfBalesHint,
+                label: context.l10n.transferBalesRequired,
+                hint: context.l10n.transferBalesCountHint,
                 controller: _balesController,
                 keyboardType: TextInputType.number,
                 onChanged: (_) => setState(() {}),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
+              Text(
+                context.l10n.transferLoadedAtRequired,
+                style: AppTextStyles.mediumSH8_14,
+              ),
+              const SizedBox(height: 8),
+              _LoadedAtField(
+                value: _loadedAt,
+                onTap: () =>
+                    setState(() => _calendarExpanded = !_calendarExpanded),
+              ),
+              if (_calendarExpanded) ...[
+                const SizedBox(height: 4),
+                TransferDispatchDateTimePicker(
+                  initialDateTime: _loadedAt,
+                  onCancel: () => setState(() => _calendarExpanded = false),
+                  onConfirm: (value) => setState(() {
+                    _loadedAt = value;
+                    _calendarExpanded = false;
+                  }),
+                ),
+              ],
+              const SizedBox(height: 24),
               _PhotoField(
-                label: 'Weighbridge photos (optional)',
-                photos: _weighbridgePhotos,
-                onCapture: () => _capturePhoto('weighbridge'),
+                label: context.l10n.transferVehicleWeighbridgePhotoRequired,
+                photos: _dispatchPhotos,
+                onCapture: () => _capturePhoto('vehicle'),
                 onRemove: _removePhoto,
               ),
             ],
@@ -300,27 +276,31 @@ class _TransferDispatchFlowScreenState
       _ActionButton(
         buttonKey: const Key('transfer-submit-transfer'),
         label: context.l10n.transferSubmitTransfer,
-        enabled: _weighbridgeReady,
+        enabled: _formReady,
         onPressed: _submit,
       ),
     ],
   );
 
   Future<void> _submit() async {
-    if (!_weighbridgeReady) return;
+    if (!_formReady) return;
     setState(() => _saving = true);
     try {
+      await EerlLocalRepository.instance.saveTransferDispatchDraft(
+        transferId: widget.transfer.id,
+        vehicleNumber: _vehicleController.text,
+        driverName: _driverController.text,
+      );
+      final loadedQuantity = double.parse(
+        _loadedQuantityController.text.trim(),
+      );
       await EerlLocalRepository.instance.submitTransferDispatch(
         transferId: widget.transfer.id,
         vehicleNumber: _vehicleController.text,
         driverName: _driverController.text,
-        dispatchedWeight: double.parse(_weightController.text.trim()),
-        baleCount: _balesController.text.trim().isEmpty
-            ? null
-            : int.parse(_balesController.text.trim()),
-        piecesLoaded: _isPieces
-            ? double.parse(_piecesController.text.trim())
-            : null,
+        dispatchedWeight: loadedQuantity,
+        baleCount: int.parse(_balesController.text.trim()),
+        piecesLoaded: _usePieces ? loadedQuantity : null,
       );
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
     } catch (error) {
@@ -387,6 +367,175 @@ class _TransferDispatchFlowScreenState
   }
 }
 
+class _TransferNumberCard extends StatelessWidget {
+  const _TransferNumberCard({required this.number});
+
+  final String number;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x1F000000),
+          blurRadius: 4,
+          offset: Offset(0, 2),
+        ),
+      ],
+    ),
+    child: Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primary100,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: SvgPicture.asset('assets/icons/home/transfer.svg'),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            number,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.semiboldH8_16.copyWith(
+              color: AppColors.neutral900,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _WeightUnitSelector extends StatelessWidget {
+  const _WeightUnitSelector({required this.usePieces, required this.onChanged});
+
+  final bool usePieces;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 32,
+    padding: const EdgeInsets.all(0),
+    decoration: BoxDecoration(
+      color: AppColors.cool200,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _WeightUnitOption(
+          label: context.l10n.transferKgPrefix,
+          selected: !usePieces,
+          onTap: () => onChanged(false),
+        ),
+        _WeightUnitOption(
+          label: context.l10n.collectionUnitPcs,
+          selected: usePieces,
+          onTap: () => onChanged(true),
+        ),
+      ],
+    ),
+  );
+}
+
+class _WeightUnitOption extends StatelessWidget {
+  const _WeightUnitOption({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: selected ? AppColors.primary500 : Colors.transparent,
+    borderRadius: BorderRadius.circular(12),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 80,
+        height: 32,
+        child: Center(
+          child: Text(
+            label,
+            style:
+                (selected
+                        ? AppTextStyles.semiboldH9_14
+                        : AppTextStyles.mediumSH8_14)
+                    .copyWith(
+                      color: selected ? Colors.white : AppColors.neutral950,
+                    ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _LoadedAtField extends StatelessWidget {
+  const _LoadedAtField({required this.value, required this.onTap});
+
+  final DateTime? value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(10),
+    child: InkWell(
+      key: const Key('transfer-loaded-at-field'),
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        height: 55,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.cool400),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                value == null
+                    ? context.l10n.transferSelectDateTime
+                    : DateFormat('dd MMM yyyy, hh:mm a').format(value!),
+                style: AppTextStyles.regularB7_14.copyWith(
+                  color: value == null
+                      ? AppColors.cool500
+                      : AppColors.neutral950,
+                ),
+              ),
+            ),
+            SvgPicture.asset(
+              'assets/icons/tasks/calendar.svg',
+              width: 24,
+              height: 24,
+              colorFilter: const ColorFilter.mode(
+                AppColors.primary500,
+                BlendMode.srcIn,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class _DispatchField extends StatelessWidget {
   const _DispatchField({
     required this.label,
@@ -395,6 +544,7 @@ class _DispatchField extends StatelessWidget {
     required this.onChanged,
     this.prefix,
     this.keyboardType,
+    this.showLabel = true,
   });
 
   final String label;
@@ -403,13 +553,16 @@ class _DispatchField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final String? prefix;
   final TextInputType? keyboardType;
+  final bool showLabel;
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: AppTextStyles.mediumSH8_14),
-      const SizedBox(height: 8),
+      if (showLabel) ...[
+        Text(label, style: AppTextStyles.mediumSH8_14),
+        const SizedBox(height: 8),
+      ],
       SizedBox(
         height: 55,
         child: TextField(
@@ -567,48 +720,6 @@ class _PhotoField extends StatelessWidget {
         style: AppTextStyles.regularB8_12.copyWith(color: AppColors.neutral600),
       ),
     ],
-  );
-}
-
-class _TransferSummaryCard extends StatelessWidget {
-  const _TransferSummaryCard({required this.transfer, required this.items});
-
-  final TransferModel transfer;
-  final List<TransferItemModel> items;
-
-  @override
-  Widget build(BuildContext context) => TransferDetailCard(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(context.l10n.transferDetails, style: AppTextStyles.semiboldH7_18),
-        const SizedBox(height: 8),
-        const Divider(height: 1, color: AppColors.cool300),
-        const SizedBox(height: 12),
-        TransferDetailRow(
-          label: context.l10n.transferId,
-          values: [transfer.number ?? transfer.id],
-        ),
-        TransferDetailRow(
-          label: context.l10n.transferItem,
-          values: [
-            if (items.isEmpty)
-              '-'
-            else
-              ...items.map((item) => item.name ?? item.itemId),
-          ],
-        ),
-        TransferDetailRow(
-          label: context.l10n.transferDetailFromLocation,
-          values: [transfer.centerName ?? transfer.centerId],
-        ),
-        TransferDetailRow(
-          label: context.l10n.transferDetailToLocation,
-          values: [transfer.destinationName ?? '-'],
-          showDivider: false,
-        ),
-      ],
-    ),
   );
 }
 

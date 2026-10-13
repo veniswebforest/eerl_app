@@ -91,6 +91,52 @@ void main() {
     },
   );
 
+  test('vehicle dropdown reads active records from vehicles table', () async {
+    await database.insert(DatabaseTables.vehicleTypes, {
+      'id': 'type-truck',
+      'name': 'Pickup Truck',
+    });
+    await database.insert(DatabaseTables.vehicles, {
+      'id': 'configured-truck-1',
+      'number': 'VH-001',
+      'center_id': 'center-1',
+      'plate_number': 'GJ-05-AB-4321',
+      'type_id': 'type-truck',
+      'type_name': 'Pickup Truck',
+      'capacity_kg': 3500,
+      'driver_name': 'Ketan Patel',
+      'is_active': 1,
+      'sync_state': 'synced',
+    });
+
+    final vehicles = await repository.getTransferVehicles();
+
+    expect(vehicles, hasLength(1));
+    expect(vehicles.single.id, 'configured-truck-1');
+    expect(vehicles.single.number, 'GJ-05-AB-4321');
+    expect(vehicles.single.vehicleType, 'Pickup Truck');
+    expect(vehicles.single.capacityKg, 3500);
+    expect(vehicles.single.ownership, 'COMPANY');
+  });
+
+  test('transfer list only returns the selected home center', () async {
+    await database.insert(DatabaseTables.centers, {
+      'id': 'center-2',
+      'name': 'Center Two',
+    });
+    await _insertTransfer(database, 'transfer-2', centerId: 'center-2');
+
+    await repository.selectCenter('center-1');
+    final centerOneTransfers = await repository.getTransfers();
+
+    expect(centerOneTransfers.map((item) => item.id), ['transfer-1']);
+
+    await repository.selectCenter('center-2');
+    final centerTwoTransfers = await repository.getTransfers();
+
+    expect(centerTwoTransfers.map((item) => item.id), ['transfer-2']);
+  });
+
   test('rejection updates locally and queues reason', () async {
     await repository.rejectTransfer(
       transferId: 'transfer-1',
@@ -199,14 +245,17 @@ void main() {
   );
 }
 
-Future<void> _insertTransfer(AppDatabase database, String id) =>
-    database.insert(DatabaseTables.transfers, {
-      'id': id,
-      'center_id': 'center-1',
-      'type': 'STOCK_TRANSFER',
-      'status': 'REQUESTED',
-      'requested_by': 'agent-1',
-      'requested_by_name': 'Agent One',
-      'requested_at': '2026-10-09T05:00:00.000Z',
-      'sync_state': 'synced',
-    });
+Future<void> _insertTransfer(
+  AppDatabase database,
+  String id, {
+  String centerId = 'center-1',
+}) => database.insert(DatabaseTables.transfers, {
+  'id': id,
+  'center_id': centerId,
+  'type': 'STOCK_TRANSFER',
+  'status': 'REQUESTED',
+  'requested_by': 'agent-1',
+  'requested_by_name': 'Agent One',
+  'requested_at': '2026-10-09T05:00:00.000Z',
+  'sync_state': 'synced',
+});

@@ -38,7 +38,7 @@ class RequestListCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  item.createdByName ?? item.createdBy,
+                  _supervisorName,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.semiboldH9_14.copyWith(
                     color: AppColors.neutral950,
@@ -126,6 +126,11 @@ class RequestListCard extends StatelessWidget {
       ),
     ),
   );
+
+  String get _supervisorName {
+    final name = item.supervisorName?.trim();
+    return name == null || name.isEmpty ? '-' : name;
+  }
 
   String _formatTime(String value) {
     final date = DateTime.tryParse(value)?.toLocal();

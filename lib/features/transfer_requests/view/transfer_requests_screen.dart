@@ -43,8 +43,7 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
   void initState() {
     super.initState();
     _controller = LocalQueryController(
-      widget.transferLoader ??
-          () => EerlLocalRepository.instance.getTransfers(allCenters: true),
+      widget.transferLoader ?? EerlLocalRepository.instance.getTransfers,
     )..load();
   }
 

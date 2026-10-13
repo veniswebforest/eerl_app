@@ -1,5 +1,6 @@
 abstract final class WalletAssets {
   static const _root = 'assets/icons/wallet';
+  static const _imagesRoot = 'assets/images';
 
   static const back = '$_root/back.svg';
   static const balanceDecoration = '$_root/balance_decoration.svg';
@@ -18,4 +19,5 @@ abstract final class WalletAssets {
   static const categoryRequestRejectedBanner =
       '$_root/category_request_rejected_banner.svg';
   static const categoryRequestClose = '$_root/category_request_close.svg';
+  static const emptyRequest = '$_imagesRoot/wallet_empty_request.png';
 }

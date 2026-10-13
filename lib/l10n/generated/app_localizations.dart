@@ -1306,6 +1306,12 @@ abstract class AppLocalizations {
   /// **'Recent Expense Claims'**
   String get recentExpenseClaims;
 
+  /// No description provided for @walletEmptyRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'No Request Logged Yet'**
+  String get walletEmptyRequest;
+
   /// No description provided for @expenseSearchHint.
   ///
   /// In en, this message translates to:
@@ -4768,6 +4774,24 @@ abstract class AppLocalizations {
   /// **'Vehicle'**
   String get transferDetailVehicle;
 
+  /// No description provided for @transferVehicleInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Information'**
+  String get transferVehicleInformation;
+
+  /// No description provided for @supervisorTransferDispatchStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Dispatch'**
+  String get supervisorTransferDispatchStatus;
+
+  /// No description provided for @transferEstimateHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Hours'**
+  String transferEstimateHours(int count);
+
   /// No description provided for @transferDetailVehicleNumber.
   ///
   /// In en, this message translates to:
@@ -4906,6 +4930,18 @@ abstract class AppLocalizations {
   /// **'Vehicle number plate'**
   String get transferVehicleNumberPlateHint;
 
+  /// No description provided for @transferVehiclePlateInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Vehicle number plate'**
+  String get transferVehiclePlateInputHint;
+
+  /// No description provided for @transferVehicleNumberExample.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. GJ-05-BX-1234'**
+  String get transferVehicleNumberExample;
+
   /// No description provided for @transferDriverDetailRequired.
   ///
   /// In en, this message translates to:
@@ -4966,6 +5002,12 @@ abstract class AppLocalizations {
   /// **'Loaded Weight'**
   String get transferLoadedWeight;
 
+  /// No description provided for @transferLoadedWeightRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded Weight *'**
+  String get transferLoadedWeightRequired;
+
   /// No description provided for @transferLoadedWeightHint.
   ///
   /// In en, this message translates to:
@@ -4983,6 +5025,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g. 10'**
   String get transferNumberOfBalesHint;
+
+  /// No description provided for @transferBalesRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Bales / boris *'**
+  String get transferBalesRequired;
+
+  /// No description provided for @transferBalesCountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Count, e.g. 12'**
+  String get transferBalesCountHint;
+
+  /// No description provided for @transferLoadedAtRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded at *'**
+  String get transferLoadedAtRequired;
+
+  /// No description provided for @transferSelectDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date & Time'**
+  String get transferSelectDateTime;
+
+  /// No description provided for @transferVehicleWeighbridgePhotoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle & Weighbridge Photo *'**
+  String get transferVehicleWeighbridgePhotoRequired;
 
   /// No description provided for @transferWeighbridgeSlip.
   ///
@@ -7401,6 +7473,179 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location settings could not be opened.'**
   String get locationSettingsUnavailable;
+
+  /// No description provided for @supervisorTransferReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get supervisorTransferReject;
+
+  /// No description provided for @supervisorTransferApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get supervisorTransferApprove;
+
+  /// No description provided for @supervisorTransferRejectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter reason for rejection'**
+  String get supervisorTransferRejectHint;
+
+  /// No description provided for @supervisorTransferFreeToSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Free to Send'**
+  String get supervisorTransferFreeToSend;
+
+  /// No description provided for @supervisorTransferVehicleDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Details'**
+  String get supervisorTransferVehicleDetails;
+
+  /// No description provided for @supervisorTransferSelectVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Vehicle *'**
+  String get supervisorTransferSelectVehicle;
+
+  /// No description provided for @supervisorTransferVehicleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Vehicle for dispatch'**
+  String get supervisorTransferVehicleHint;
+
+  /// No description provided for @supervisorTransferCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity {capacity} KG'**
+  String supervisorTransferCapacity(String capacity);
+
+  /// No description provided for @supervisorTransferVehicleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Number *'**
+  String get supervisorTransferVehicleNumber;
+
+  /// No description provided for @supervisorTransferTransporter.
+  ///
+  /// In en, this message translates to:
+  /// **'Transporter *'**
+  String get supervisorTransferTransporter;
+
+  /// No description provided for @supervisorTransferTransporterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter transporter name'**
+  String get supervisorTransferTransporterHint;
+
+  /// No description provided for @supervisorTransferTruckFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Truck Fee (₹) *'**
+  String get supervisorTransferTruckFee;
+
+  /// No description provided for @supervisorTransferOtherHired.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Hired Truck'**
+  String get supervisorTransferOtherHired;
+
+  /// No description provided for @supervisorTransferHiredTruck.
+  ///
+  /// In en, this message translates to:
+  /// **'Hired truck'**
+  String get supervisorTransferHiredTruck;
+
+  /// No description provided for @supervisorTransferCompanyTruck.
+  ///
+  /// In en, this message translates to:
+  /// **'Company truck'**
+  String get supervisorTransferCompanyTruck;
+
+  /// No description provided for @supervisorTransferHiredFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Hired from {name}'**
+  String supervisorTransferHiredFrom(String name);
+
+  /// No description provided for @supervisorTransferSelectDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Destination'**
+  String get supervisorTransferSelectDestination;
+
+  /// No description provided for @supervisorTransferSelectDestinationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Destination *'**
+  String get supervisorTransferSelectDestinationRequired;
+
+  /// No description provided for @supervisorTransferDestinationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the destination'**
+  String get supervisorTransferDestinationHint;
+
+  /// No description provided for @supervisorTransferExpectedDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Truck Expected Date & Time'**
+  String get supervisorTransferExpectedDateTime;
+
+  /// No description provided for @supervisorTransferDateOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave it empty if the trip is not booked yet'**
+  String get supervisorTransferDateOptional;
+
+  /// No description provided for @supervisorTransferDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get supervisorTransferDescription;
+
+  /// No description provided for @supervisorTransferDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Description'**
+  String get supervisorTransferDescriptionHint;
+
+  /// No description provided for @supervisorTransferMaxCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 150 Characters'**
+  String get supervisorTransferMaxCharacters;
+
+  /// No description provided for @supervisorTransferConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Transfer'**
+  String get supervisorTransferConfirm;
+
+  /// No description provided for @supervisorTransferApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{id} approved!'**
+  String supervisorTransferApprovedTitle(String id);
+
+  /// No description provided for @supervisorTransferApprovedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{requester} will send it to {destination}. Truck {vehicle}, expected {expected}.'**
+  String supervisorTransferApprovedMessage(
+    String requester,
+    String destination,
+    String vehicle,
+    String expected,
+  );
+
+  /// No description provided for @supervisorTransferBackToRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Requests'**
+  String get supervisorTransferBackToRequests;
 }
 
 class _AppLocalizationsDelegate

@@ -391,6 +391,14 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Image.asset(
+              'assets/images/expense_submitted_success.png',
+              key: const Key('request-sent-success-image'),
+              width: 135,
+              height: 135,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 24),
             Text(
               context.l10n.requestSentTitle,
               style: AppTextStyles.semiboldH7_18.copyWith(

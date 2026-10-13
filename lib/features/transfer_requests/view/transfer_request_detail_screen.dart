@@ -12,6 +12,7 @@ import 'package:eerl_app/features/local_data/presentation/local_query_controller
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/transfer_request_detail_state.dart';
 import '../widgets/transfer_request_detail_widgets.dart';
+import 'supervisor_transfer_approval_screen.dart';
 import 'transfer_dispatch_flow_screen.dart';
 
 typedef TransferRequestDetailData = ({
@@ -26,10 +27,12 @@ class TransferRequestDetailScreen extends StatefulWidget {
     super.key,
     required this.transferId,
     this.detailLoader,
+    this.roleLoader,
   });
 
   final String transferId;
   final TransferRequestDetailLoader? detailLoader;
+  final Future<String?> Function()? roleLoader;
 
   @override
   State<TransferRequestDetailScreen> createState() =>
@@ -39,6 +42,9 @@ class TransferRequestDetailScreen extends StatefulWidget {
 class _TransferRequestDetailScreenState
     extends State<TransferRequestDetailScreen> {
   bool _dispatchFlowOpen = false;
+  bool _approvalFlowOpen = false;
+  bool _isSupervisor = false;
+  bool _roleLoaded = false;
   late final LocalQueryController<TransferRequestDetailData> _controller;
 
   @override
@@ -49,6 +55,18 @@ class _TransferRequestDetailScreenState
       if (loader != null) return loader(widget.transferId);
       return _loadLocalDetail(widget.transferId);
     })..load();
+    _loadRole();
+  }
+
+  Future<void> _loadRole() async {
+    final role =
+        await (widget.roleLoader?.call() ??
+            EerlLocalRepository.instance.activeRole);
+    if (!mounted) return;
+    setState(() {
+      _isSupervisor = role?.toUpperCase().contains('SUPERVISOR') == true;
+      _roleLoaded = true;
+    });
   }
 
   Future<TransferRequestDetailData> _loadLocalDetail(String transferId) async {
@@ -70,8 +88,18 @@ class _TransferRequestDetailScreenState
 
   @override
   Widget build(BuildContext context) => PopScope(
-    canPop: !_dispatchFlowOpen,
-    child: _dispatchFlowOpen
+    canPop: !_dispatchFlowOpen && !_approvalFlowOpen,
+    child: _approvalFlowOpen
+        ? SupervisorTransferApprovalScreen(
+            transfer: _controller.data!.transfer!,
+            items: _controller.data!.items,
+            onBack: () => setState(() => _approvalFlowOpen = false),
+            onApproved: () {
+              setState(() => _approvalFlowOpen = false);
+              _controller.load();
+            },
+          )
+        : _dispatchFlowOpen
         ? TransferDispatchFlowScreen(
             onBack: () => setState(() => _dispatchFlowOpen = false),
             onComplete: () {
@@ -109,12 +137,61 @@ class _TransferRequestDetailScreenState
                 state: _detailState(transfer!.status),
                 transfer: transfer,
                 items: _controller.data?.items ?? const <TransferItemModel>[],
+                isSupervisor: _isSupervisor,
+                roleLoaded: _roleLoaded,
+                onApprove: () => setState(() => _approvalFlowOpen = true),
+                onReject: () => _rejectTransfer(transfer),
                 onVehicleArrived: () =>
                     setState(() => _dispatchFlowOpen = true),
               );
             },
           ),
   );
+
+  Future<void> _rejectTransfer(TransferModel transfer) async {
+    final controller = TextEditingController();
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.transferRejectReasonTitle),
+        content: TextField(
+          key: const Key('transfer-reject-reason'),
+          controller: controller,
+          minLines: 3,
+          maxLines: 5,
+          maxLength: 1000,
+          decoration: InputDecoration(
+            hintText: context.l10n.supervisorTransferRejectHint,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(context.l10n.supervisorTaskCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: Text(context.l10n.supervisorTransferReject),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (reason == null || reason.trim().length < 3) return;
+    try {
+      await EerlLocalRepository.instance.rejectTransfer(
+        transferId: transfer.id,
+        reason: reason,
+      );
+      await _controller.load();
+    } on Object catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    }
+  }
 
   TransferRequestDetailState _detailState(String value) {
     final status = value.toUpperCase();
@@ -144,12 +221,20 @@ class _TransferRequestDetailContent extends StatelessWidget {
     required this.state,
     required this.transfer,
     required this.items,
+    required this.isSupervisor,
+    required this.roleLoaded,
+    required this.onApprove,
+    required this.onReject,
     required this.onVehicleArrived,
   });
 
   final TransferRequestDetailState state;
   final TransferModel? transfer;
   final List<TransferItemModel> items;
+  final bool isSupervisor;
+  final bool roleLoaded;
+  final VoidCallback onApprove;
+  final VoidCallback onReject;
   final VoidCallback onVehicleArrived;
 
   bool get _isRejected => state == TransferRequestDetailState.rejected;
@@ -168,7 +253,56 @@ class _TransferRequestDetailContent extends StatelessWidget {
       title: context.l10n.transferDetailTitle,
       backIconAsset: 'assets/icons/records/back.svg',
     ),
-    bottomNavigationBar: transfer?.status.toUpperCase() == 'APPROVED'
+    bottomNavigationBar:
+        roleLoaded &&
+            isSupervisor &&
+            (transfer?.status.toUpperCase() == 'REQUESTED' ||
+                transfer?.status.toUpperCase() == 'PENDING')
+        ? SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      key: const Key('supervisor-transfer-reject'),
+                      onPressed: onReject,
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(52),
+                        foregroundColor: AppColors.red600,
+                        side: const BorderSide(color: AppColors.red600),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(context.l10n.supervisorTransferReject),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      key: const Key('supervisor-transfer-approve'),
+                      onPressed: onApprove,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(52),
+                        elevation: 0,
+                        backgroundColor: AppColors.primary500,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(context.l10n.supervisorTransferApprove),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        : roleLoaded &&
+              !isSupervisor &&
+              transfer?.status.toUpperCase() == 'APPROVED'
         ? SafeArea(
             top: false,
             child: Padding(
@@ -218,25 +352,34 @@ class _TransferRequestDetailContent extends StatelessWidget {
                 state: state,
                 transfer: transfer,
                 items: items,
+                isSupervisor: isSupervisor,
                 isRejected: _isRejected,
                 isCompleted: _isCompleted,
                 isLoading: _isLoading,
                 isVehicleUnavailable: _isVehicleUnavailable,
               ),
               const SizedBox(height: 12),
-              if (transfer?.truckExpectedAt != null ||
+              if (isSupervisor &&
+                  (transfer?.plannedVehicleNumber != null ||
+                      transfer?.vehiclePlate != null)) ...[
+                _SupervisorVehicleInformationCard(transfer: transfer!),
+                const SizedBox(height: 12),
+              ] else if (transfer?.truckExpectedAt != null ||
                   transfer?.plannedVehicleNumber != null ||
                   transfer?.dispatchNote?.trim().isNotEmpty == true) ...[
                 _CollectionManagerCard(transfer: transfer),
                 const SizedBox(height: 12),
               ],
-              if (transfer?.status.toUpperCase() == 'DISPATCHED') ...[
+              if (!isSupervisor &&
+                  transfer?.status.toUpperCase() == 'DISPATCHED') ...[
                 _AgentDispatchCard(transfer: transfer!),
                 const SizedBox(height: 12),
               ],
               _ItemsCard(items: items),
-              const SizedBox(height: 12),
-              _TimelineCard(state: state, transfer: transfer),
+              if (!isSupervisor) ...[
+                const SizedBox(height: 12),
+                _TimelineCard(state: state, transfer: transfer),
+              ],
             ],
           ),
         ),
@@ -272,10 +415,14 @@ class _RequestIdCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        Text(
-          value,
-          style: AppTextStyles.semiboldH8_16.copyWith(
-            color: AppColors.neutral900,
+        Expanded(
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.semiboldH8_16.copyWith(
+              color: AppColors.neutral900,
+            ),
           ),
         ),
       ],
@@ -319,6 +466,7 @@ class _InformationCard extends StatelessWidget {
     required this.state,
     required this.transfer,
     required this.items,
+    required this.isSupervisor,
     required this.isRejected,
     required this.isCompleted,
     required this.isLoading,
@@ -328,6 +476,7 @@ class _InformationCard extends StatelessWidget {
   final TransferRequestDetailState state;
   final TransferModel? transfer;
   final List<TransferItemModel> items;
+  final bool isSupervisor;
   final bool isRejected;
   final bool isCompleted;
   final bool isLoading;
@@ -335,12 +484,13 @@ class _InformationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalQuantity =
+    final freeToSend = items.fold<double>(
+      0,
+      (total, item) => total + (item.dispatchedQty ?? item.qty),
+    );
+    final availableStock =
         transfer?.fixedQty ??
-        items.fold<double>(
-          0,
-          (total, item) => total + (item.dispatchedQty ?? item.qty),
-        );
+        ((transfer?.totalQty ?? 0) > 0 ? transfer!.totalQty : freeToSend);
     final rawStatus = transfer?.status.toUpperCase() ?? '';
     final (status, color, background, icon) = isRejected
         ? (
@@ -365,8 +515,10 @@ class _InformationCard extends StatelessWidget {
           )
         : isLoading
         ? (
-            rawStatus.contains('DISPATCH')
-                ? 'Dispatched'
+            rawStatus.contains('DISPATCH') && isSupervisor
+                ? context.l10n.supervisorTransferDispatchStatus
+                : rawStatus.contains('DISPATCH')
+                ? context.l10n.transferDetailVehicleDispatched
                 : context.l10n.transferDetailWaitingLoading,
             AppColors.secondary500,
             AppColors.secondary50,
@@ -396,11 +548,11 @@ class _InformationCard extends StatelessWidget {
             label: context.l10n.transferDetailFromLocation,
             values: [
               transfer?.centerName ??
-                  transfer?.centerId ??
                   (transfer == null
                       ? context.l10n.transferDetailFromLocationValue
                       : '-'),
             ],
+            showDivider: !isSupervisor,
           ),
           TransferDetailRow(
             label: context.l10n.transferDetailToLocation,
@@ -417,8 +569,13 @@ class _InformationCard extends StatelessWidget {
             values: [
               transfer == null
                   ? context.l10n.transferDetailAvailableStockValue
-                  : '${totalQuantity.toStringAsFixed(2)} KG',
+                  : '${availableStock.toStringAsFixed(2)} KG',
             ],
+            showDivider: !isSupervisor,
+          ),
+          TransferDetailRow(
+            label: context.l10n.supervisorTransferFreeToSend,
+            values: ['${freeToSend.toStringAsFixed(2)} KG'],
           ),
           TransferDetailRow(
             label: context.l10n.transferDetailDateTime,
@@ -454,6 +611,53 @@ class _InformationCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _SupervisorVehicleInformationCard extends StatelessWidget {
+  const _SupervisorVehicleInformationCard({required this.transfer});
+
+  final TransferModel transfer;
+
+  @override
+  Widget build(BuildContext context) => TransferDetailCard(
+    key: const Key('supervisor-transfer-vehicle-information'),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.l10n.transferVehicleInformation,
+          style: AppTextStyles.semiboldH7_18.copyWith(
+            color: AppColors.neutral950,
+          ),
+        ),
+        const SizedBox(height: 16),
+        TransferDetailRow(
+          label: context.l10n.transferDetailVehicle,
+          values: [
+            transfer.plannedVehicleNumber ?? transfer.vehiclePlate ?? '-',
+          ],
+          showDivider: false,
+        ),
+        const SizedBox(height: 6),
+        TransferDetailRow(
+          label: context.l10n.transferEstimateTimeToReach,
+          values: [_estimateTimeToReach(context, transfer)],
+          showDivider: false,
+        ),
+      ],
+    ),
+  );
+}
+
+String _estimateTimeToReach(BuildContext context, TransferModel transfer) {
+  final requested = DateTime.tryParse(transfer.requestedAt);
+  final expected = DateTime.tryParse(transfer.truckExpectedAt ?? '');
+  if (requested == null || expected == null || !expected.isAfter(requested)) {
+    return context.l10n.transferEstimateTimeValue;
+  }
+  final minutes = expected.difference(requested).inMinutes;
+  final hours = (minutes / 60).ceil();
+  return context.l10n.transferEstimateHours(hours);
 }
 
 class _CollectionManagerCard extends StatelessWidget {

@@ -925,16 +925,28 @@ class OutgoingSyncService {
         'rows=$repairedRagpickerPhotos RAGPICKER_PROFILE -> RAGPICKER',
       );
     }
-    final repairedRequestPhotos = await _database.update(
+    final repairedTaskPhotos = await _database.update(
       DatabaseTables.photos,
       {'purpose': 'TASK_COMPLETION'},
-      where: 'purpose = ?',
-      whereArgs: ['REQUEST'],
+      where: 'purpose = ? AND (owner_table = ? OR field = ?)',
+      whereArgs: ['TASK', DatabaseTables.tasks, 'completion'],
+    );
+    if (repairedTaskPhotos > 0) {
+      AppLogger.sqlite(
+        'PHOTO_PURPOSE_REPAIRED',
+        'rows=$repairedTaskPhotos TASK -> TASK_COMPLETION',
+      );
+    }
+    final repairedRequestPhotos = await _database.update(
+      DatabaseTables.photos,
+      {'purpose': 'REQUEST'},
+      where: 'purpose = ? AND (owner_table = ? OR field = ?)',
+      whereArgs: ['TASK', DatabaseTables.requests, 'request'],
     );
     if (repairedRequestPhotos > 0) {
       AppLogger.sqlite(
         'PHOTO_PURPOSE_REPAIRED',
-        'rows=$repairedRequestPhotos REQUEST -> TASK',
+        'rows=$repairedRequestPhotos TASK -> REQUEST',
       );
     }
     // Friday's working flow uploads the oldest pending photos first, then

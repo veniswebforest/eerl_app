@@ -1185,6 +1185,7 @@ class RequestModel {
     this.centerId,
     required this.createdBy,
     this.createdByName,
+    this.supervisorName,
     required this.body,
     required this.priority,
     required this.status,
@@ -1201,6 +1202,7 @@ class RequestModel {
   final String? centerId;
   final String createdBy;
   final String? createdByName;
+  final String? supervisorName;
   final String body;
   final String priority;
   final String status;
@@ -1217,6 +1219,7 @@ class RequestModel {
     centerId: map['center_id'] as String?,
     createdBy: map['created_by'] as String,
     createdByName: map['created_by_name'] as String?,
+    supervisorName: map['supervisor_name'] as String?,
     body: map['body'] as String,
     priority: map['priority'] as String,
     status: map['status'] as String,

@@ -90,6 +90,12 @@ class _ZoneSelectorState extends State<ZoneSelector> {
         widget.options ?? centers.map((center) => center.name).toList();
     final safeZones = zones.isEmpty ? [context.l10n.zoneName] : zones;
     if (_selectedIndex >= safeZones.length) _selectedIndex = 0;
+    final selectedLabel =
+        widget.options != null &&
+            !_hasSelectedOption &&
+            widget.initialLabel != null
+        ? widget.initialLabel!
+        : safeZones[_selectedIndex];
 
     return Material(
       type: MaterialType.transparency,
@@ -122,9 +128,7 @@ class _ZoneSelectorState extends State<ZoneSelector> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      !_hasSelectedOption && !_isExpanded
-                          ? widget.initialLabel ?? context.l10n.zoneName
-                          : safeZones[_selectedIndex],
+                      selectedLabel,
                       maxLines: 1,
                       softWrap: false,
                       overflow: TextOverflow.ellipsis,

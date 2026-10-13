@@ -648,6 +648,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get recentExpenseClaims => 'हाल के खर्च दावे';
 
   @override
+  String get walletEmptyRequest => 'अभी तक कोई अनुरोध दर्ज नहीं हुआ';
+
+  @override
   String get expenseSearchHint => 'रसीद नंबर, नाम या तारीख से खोजें...';
 
   @override
@@ -2478,6 +2481,17 @@ class AppLocalizationsHi extends AppLocalizations {
   String get transferDetailVehicle => 'वाहन';
 
   @override
+  String get transferVehicleInformation => 'वाहन की जानकारी';
+
+  @override
+  String get supervisorTransferDispatchStatus => 'डिस्पैच';
+
+  @override
+  String transferEstimateHours(int count) {
+    return '$count घंटे';
+  }
+
+  @override
   String get transferDetailVehicleNumber => 'GJ-05-AB-1234';
 
   @override
@@ -2548,6 +2562,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get transferVehicleNumberPlateHint => 'वाहन नंबर प्लेट';
 
   @override
+  String get transferVehiclePlateInputHint => 'वाहन नंबर प्लेट दर्ज करें';
+
+  @override
+  String get transferVehicleNumberExample => 'जैसे GJ-05-BX-1234';
+
+  @override
   String get transferDriverDetailRequired => 'ड्राइवर विवरण *';
 
   @override
@@ -2578,6 +2598,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get transferLoadedWeight => 'लोड किया गया वजन';
 
   @override
+  String get transferLoadedWeightRequired => 'लोड किया गया वजन *';
+
+  @override
   String get transferLoadedWeightHint => 'जैसे 1250';
 
   @override
@@ -2585,6 +2608,22 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get transferNumberOfBalesHint => 'जैसे 10';
+
+  @override
+  String get transferBalesRequired => 'गांठें / बोरियाँ *';
+
+  @override
+  String get transferBalesCountHint => 'संख्या, जैसे 12';
+
+  @override
+  String get transferLoadedAtRequired => 'लोड करने का समय *';
+
+  @override
+  String get transferSelectDateTime => 'दिनांक और समय चुनें';
+
+  @override
+  String get transferVehicleWeighbridgePhotoRequired =>
+      'वाहन और वेटब्रिज फोटो *';
 
   @override
   String get transferWeighbridgeSlip => 'वेटब्रिज स्लिप';
@@ -3848,4 +3887,104 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get locationSettingsUnavailable => 'Location settings नहीं खुल सकीं।';
+
+  @override
+  String get supervisorTransferReject => 'अस्वीकार करें';
+
+  @override
+  String get supervisorTransferApprove => 'स्वीकृत करें';
+
+  @override
+  String get supervisorTransferRejectHint => 'अस्वीकृति का कारण दर्ज करें';
+
+  @override
+  String get supervisorTransferFreeToSend => 'भेजने के लिए उपलब्ध';
+
+  @override
+  String get supervisorTransferVehicleDetails => 'वाहन विवरण';
+
+  @override
+  String get supervisorTransferSelectVehicle => 'वाहन चुनें *';
+
+  @override
+  String get supervisorTransferVehicleHint => 'डिस्पैच के लिए वाहन चुनें';
+
+  @override
+  String supervisorTransferCapacity(String capacity) {
+    return 'क्षमता $capacity KG';
+  }
+
+  @override
+  String get supervisorTransferVehicleNumber => 'वाहन नंबर *';
+
+  @override
+  String get supervisorTransferTransporter => 'ट्रांसपोर्टर *';
+
+  @override
+  String get supervisorTransferTransporterHint =>
+      'ट्रांसपोर्टर का नाम दर्ज करें';
+
+  @override
+  String get supervisorTransferTruckFee => 'ट्रक शुल्क (₹) *';
+
+  @override
+  String get supervisorTransferOtherHired => 'अन्य किराये का ट्रक';
+
+  @override
+  String get supervisorTransferHiredTruck => 'किराये का ट्रक';
+
+  @override
+  String get supervisorTransferCompanyTruck => 'कंपनी ट्रक';
+
+  @override
+  String supervisorTransferHiredFrom(String name) {
+    return '$name से किराये पर';
+  }
+
+  @override
+  String get supervisorTransferSelectDestination => 'गंतव्य चुनें';
+
+  @override
+  String get supervisorTransferSelectDestinationRequired => 'गंतव्य चुनें *';
+
+  @override
+  String get supervisorTransferDestinationHint => 'गंतव्य चुनें';
+
+  @override
+  String get supervisorTransferExpectedDateTime =>
+      'ट्रक की अपेक्षित तारीख और समय';
+
+  @override
+  String get supervisorTransferDateOptional =>
+      'ट्रिप बुक न हो तो इसे खाली छोड़ें';
+
+  @override
+  String get supervisorTransferDescription => 'विवरण';
+
+  @override
+  String get supervisorTransferDescriptionHint => 'विवरण जोड़ें';
+
+  @override
+  String get supervisorTransferMaxCharacters => 'अधिकतम 150 अक्षर';
+
+  @override
+  String get supervisorTransferConfirm => 'ट्रांसफर की पुष्टि करें';
+
+  @override
+  String supervisorTransferApprovedTitle(String id) {
+    return '$id स्वीकृत!';
+  }
+
+  @override
+  String supervisorTransferApprovedMessage(
+    String requester,
+    String destination,
+    String vehicle,
+    String expected,
+  ) {
+    return '$requester इसे $destination भेजेंगे। ट्रक $vehicle, अपेक्षित समय $expected।';
+  }
+
+  @override
+  String get supervisorTransferBackToRequests => 'अनुरोधों पर वापस जाएं';
 }

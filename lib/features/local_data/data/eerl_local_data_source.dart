@@ -176,11 +176,11 @@ class EerlLocalDataSource {
           WHERE c.agent_id = ? AND c.center_id = ? AND c.status != 'DRAFT'
             AND c.collected_at >= ?) AS kg,
         (SELECT COUNT(*) FROM ${DatabaseTables.tasks}
-          WHERE assigned_to = ? AND status = 'PENDING') AS tasks,
+          WHERE assigned_to = ? AND center_id = ? AND status = 'PENDING') AS tasks,
         (SELECT COUNT(*) FROM ${DatabaseTables.collections}
-          WHERE agent_id = ? AND status = 'DRAFT') AS drafts,
+          WHERE agent_id = ? AND center_id = ? AND status = 'DRAFT') AS drafts,
         (SELECT COUNT(*) FROM ${DatabaseTables.collections}
-          WHERE agent_id = ? AND status = 'REJECTED') AS to_fix
+          WHERE agent_id = ? AND center_id = ? AND status = 'REJECTED') AS to_fix
     ''',
       [
         userId,
@@ -190,20 +190,32 @@ class EerlLocalDataSource {
         centerId,
         todayStart,
         userId,
+        centerId,
         userId,
+        centerId,
         userId,
+        centerId,
       ],
     );
     return AgentHomeSummaryModel.fromMap(rows.single);
   }
 
   Future<SupervisorHomeSummaryModel> getSupervisorHomeSummary() async {
+    final centerId = await activeCenterId;
+    if (centerId == null) {
+      return const SupervisorHomeSummaryModel(
+        collections: 0,
+        kg: 0,
+        pendingVerification: 0,
+        openTasks: 0,
+      );
+    }
     final todayStart = _startOfIstDayUtc();
     final rows = await _database.rawQuery(
       '''
       SELECT
         (SELECT COUNT(*) FROM ${DatabaseTables.collections} c
-          WHERE c.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})
+          WHERE c.center_id = ?
             AND c.status != 'DRAFT'
             AND c.collected_at >= ?) AS collections,
         (SELECT COALESCE(SUM(CASE WHEN i.unit_code = 'KG'
@@ -211,17 +223,17 @@ class EerlLocalDataSource {
           FROM ${DatabaseTables.collectionItems} ci
           JOIN ${DatabaseTables.collections} c ON c.id = ci.collection_id
           JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
-          WHERE c.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})
+          WHERE c.center_id = ?
             AND c.status != 'DRAFT'
             AND c.collected_at >= ?) AS kg,
         (SELECT COUNT(*) FROM ${DatabaseTables.collections} c
-          WHERE c.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})
+          WHERE c.center_id = ?
             AND c.status = 'SUBMITTED') AS pending_verification,
         (SELECT COUNT(*) FROM ${DatabaseTables.tasks} t
-          WHERE t.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})
+          WHERE t.center_id = ?
             AND t.status = 'PENDING') AS open_tasks
     ''',
-      [todayStart, todayStart],
+      [centerId, todayStart, centerId, todayStart, centerId, centerId],
     );
     return SupervisorHomeSummaryModel.fromMap(rows.single);
   }
@@ -915,13 +927,15 @@ class EerlLocalDataSource {
     String? channel,
     String search = '',
   }) async {
+    final centerId = await activeCenterId;
+    if (centerId == null) return const [];
     final conditions = <String>[
-      'c.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})',
+      'c.center_id = ?',
       pending
           ? "c.status = 'SUBMITTED'"
           : "c.status IN ('APPROVED', 'REJECTED')",
     ];
-    final args = <Object?>[];
+    final args = <Object?>[centerId];
     if (channel != null && channel.isNotEmpty) {
       conditions.add('c.channel = ?');
       args.add(channel);
@@ -948,6 +962,8 @@ class EerlLocalDataSource {
   }
 
   Future<CollectionModel?> getCollection(String id) async {
+    final centerId = await activeCenterId;
+    if (centerId == null) return null;
     final rows = await _database.rawQuery(
       '''
       SELECT c.*, ct.name AS center_name,
@@ -956,11 +972,11 @@ class EerlLocalDataSource {
       FROM ${DatabaseTables.collections} c
       LEFT JOIN ${DatabaseTables.centers} ct ON ct.id = c.center_id
       LEFT JOIN ${DatabaseTables.collectionItems} ci ON ci.collection_id = c.id
-      WHERE c.id = ?
+      WHERE c.id = ? AND c.center_id = ?
       GROUP BY c.id
       LIMIT 1
     ''',
-      [id],
+      [id, centerId],
     );
     return rows.isEmpty ? null : CollectionModel.fromMap(rows.first);
   }
@@ -968,16 +984,19 @@ class EerlLocalDataSource {
   Future<List<CollectionItemModel>> getCollectionItems(
     String collectionId,
   ) async {
+    final centerId = await activeCenterId;
+    if (centerId == null) return const [];
     final rows = await _database.rawQuery(
       '''
       SELECT ci.*, i.name, i.unit_code, i.unit_name,
         i.image_url AS item_image_url
       FROM ${DatabaseTables.collectionItems} ci
       JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
-      WHERE ci.collection_id = ?
+      JOIN ${DatabaseTables.collections} c ON c.id = ci.collection_id
+      WHERE ci.collection_id = ? AND c.center_id = ?
       ORDER BY ci.sort_order, i.name COLLATE NOCASE
     ''',
-      [collectionId],
+      [collectionId, centerId],
     );
     return rows.map(CollectionItemModel.fromMap).toList(growable: false);
   }
@@ -1642,14 +1661,12 @@ class EerlLocalDataSource {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
     final centerId = await activeCenterId;
-    if (!supervisor && centerId == null) return const [];
+    if (centerId == null) return const [];
     final conditions = <String>[
-      supervisor
-          ? 'e.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
-          : 'e.user_id = ? AND e.center_id = ?',
+      supervisor ? 'e.center_id = ?' : 'e.user_id = ? AND e.center_id = ?',
     ];
     final args = <Object?>[
-      if (!supervisor) ...[userId, centerId],
+      if (supervisor) centerId else ...[userId, centerId],
     ];
     if (status != null && status.isNotEmpty) {
       conditions.add('e.status = ?');
@@ -1867,13 +1884,13 @@ class EerlLocalDataSource {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
     final centerId = await activeCenterId;
-    if (!supervisor && centerId == null) return const [];
+    if (centerId == null) return const [];
     final rows = await _database.query(
       DatabaseTables.cashRequests,
       where: supervisor
-          ? 'center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
+          ? 'center_id = ?'
           : 'requested_by = ? AND center_id = ?',
-      whereArgs: supervisor ? null : [userId, centerId],
+      whereArgs: supervisor ? [centerId] : [userId, centerId],
       orderBy: 'created_at DESC',
     );
     return rows.map(CashRequestModel.fromMap).toList(growable: false);
@@ -1968,13 +1985,13 @@ class EerlLocalDataSource {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
     final centerId = await activeCenterId;
-    if (!supervisor && centerId == null) return const [];
+    if (centerId == null) return const [];
     final rows = await _database.query(
       DatabaseTables.categoryRequests,
       where: supervisor
-          ? 'center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
+          ? 'center_id = ?'
           : 'requested_by = ? AND center_id = ?',
-      whereArgs: supervisor ? null : [userId, centerId],
+      whereArgs: supervisor ? [centerId] : [userId, centerId],
       orderBy: 'created_at DESC',
     );
     return rows.map(CategoryRequestModel.fromMap).toList(growable: false);
@@ -2076,12 +2093,39 @@ class EerlLocalDataSource {
   }
 
   Future<List<TransferVehicleModel>> getTransferVehicles() async {
-    final rows = await _database.query(
+    final centerId = await activeCenterId;
+    final vehicleRows = await _database.query(
+      DatabaseTables.vehicles,
+      where: centerId == null
+          ? 'is_active = 1'
+          : 'is_active = 1 AND (center_id = ? OR center_id IS NULL)',
+      whereArgs: centerId == null ? null : [centerId],
+      orderBy: 'plate_number COLLATE NOCASE',
+    );
+    if (vehicleRows.isNotEmpty) {
+      return vehicleRows
+          .map(VehicleModel.fromMap)
+          .map(_transferVehicleFromVehicle)
+          .toList(growable: false);
+    }
+
+    // Keep older bootstraps usable until their configured vehicles are synced
+    // into the main vehicles table.
+    final legacyRows = await _database.query(
       DatabaseTables.transferVehicles,
       orderBy: 'number COLLATE NOCASE',
     );
-    return rows.map(TransferVehicleModel.fromMap).toList(growable: false);
+    return legacyRows.map(TransferVehicleModel.fromMap).toList(growable: false);
   }
+
+  TransferVehicleModel _transferVehicleFromVehicle(VehicleModel vehicle) =>
+      TransferVehicleModel(
+        id: vehicle.id,
+        number: vehicle.plateNumber,
+        ownership: 'COMPANY',
+        vehicleType: vehicle.typeName,
+        capacityKg: vehicle.capacityKg,
+      );
 
   Future<void> approveTransfer({
     required String transferId,
@@ -2115,18 +2159,32 @@ class EerlLocalDataSource {
     TransferVehicleModel? listedVehicle;
     final normalizedVehicleId = transferVehicleId?.trim();
     if (normalizedVehicleId != null && normalizedVehicleId.isNotEmpty) {
-      final rows = await _database.query(
-        DatabaseTables.transferVehicles,
+      final vehicleRows = await _database.query(
+        DatabaseTables.vehicles,
         where: 'id = ?',
         whereArgs: [normalizedVehicleId],
         limit: 1,
       );
-      if (rows.isEmpty) {
+      if (vehicleRows.isNotEmpty) {
+        listedVehicle = _transferVehicleFromVehicle(
+          VehicleModel.fromMap(vehicleRows.single),
+        );
+      } else {
+        final legacyRows = await _database.query(
+          DatabaseTables.transferVehicles,
+          where: 'id = ?',
+          whereArgs: [normalizedVehicleId],
+          limit: 1,
+        );
+        if (legacyRows.isNotEmpty) {
+          listedVehicle = TransferVehicleModel.fromMap(legacyRows.single);
+        }
+      }
+      if (listedVehicle == null) {
         throw const TransferDecisionValidationException(
           'Choose the truck that will take it.',
         );
       }
-      listedVehicle = TransferVehicleModel.fromMap(rows.single);
     }
 
     final normalizedNumber = (listedVehicle?.number ?? vehicleNumber ?? '')
@@ -2383,6 +2441,8 @@ class EerlLocalDataSource {
   }
 
   Future<TransferModel?> getTransfer(String transferId) async {
+    final centerId = await activeCenterId;
+    if (centerId == null) return null;
     final rows = await _database.rawQuery(
       '''
       SELECT t.*, c.name AS center_name, COUNT(ti.id) AS lines,
@@ -2390,25 +2450,28 @@ class EerlLocalDataSource {
       FROM ${DatabaseTables.transfers} t
       LEFT JOIN ${DatabaseTables.centers} c ON c.id = t.center_id
       LEFT JOIN ${DatabaseTables.transferItems} ti ON ti.transfer_id = t.id
-      WHERE t.id = ?
+      WHERE t.id = ? AND t.center_id = ?
       GROUP BY t.id
       LIMIT 1
       ''',
-      [transferId],
+      [transferId, centerId],
     );
     return rows.isEmpty ? null : TransferModel.fromMap(rows.single);
   }
 
   Future<List<TransferItemModel>> getTransferItems(String transferId) async {
+    final centerId = await activeCenterId;
+    if (centerId == null) return const [];
     final rows = await _database.rawQuery(
       '''
       SELECT ti.*, i.name, i.unit_code
       FROM ${DatabaseTables.transferItems} ti
       LEFT JOIN ${DatabaseTables.items} i ON i.id = ti.item_id
-      WHERE ti.transfer_id = ?
+      JOIN ${DatabaseTables.transfers} t ON t.id = ti.transfer_id
+      WHERE ti.transfer_id = ? AND t.center_id = ?
       ORDER BY i.name COLLATE NOCASE
     ''',
-      [transferId],
+      [transferId, centerId],
     );
     return rows.map(TransferItemModel.fromMap).toList(growable: false);
   }
@@ -2416,13 +2479,14 @@ class EerlLocalDataSource {
   Future<TransferDispatchDraftModel> getTransferDispatchDraft(
     String transferId,
   ) async {
+    final centerId = await activeCenterId;
     String? vehicleNumber;
     String? driverName;
     final transferRows = await _database.query(
       DatabaseTables.transfers,
       columns: const ['vehicle_plate', 'planned_vehicle_number', 'driver_name'],
-      where: 'id = ?',
-      whereArgs: [transferId],
+      where: 'id = ? AND center_id = ?',
+      whereArgs: [transferId, centerId],
       limit: 1,
     );
     if (transferRows.isNotEmpty) {
@@ -2752,12 +2816,14 @@ class EerlLocalDataSource {
   }) async {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
+    final centerId = await activeCenterId;
+    if (centerId == null) return const [];
     final conditions = <String>[
-      supervisor
-          ? 'center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
-          : 'assigned_to = ?',
+      supervisor ? 'center_id = ?' : 'assigned_to = ? AND center_id = ?',
     ];
-    final args = <Object?>[if (!supervisor) userId];
+    final args = <Object?>[
+      if (supervisor) centerId else ...[userId, centerId],
+    ];
     if (search.trim().isNotEmpty) {
       conditions.add('(title LIKE ? OR description LIKE ? OR note LIKE ?)');
       final like = '%${search.trim()}%';
@@ -2826,7 +2892,7 @@ class EerlLocalDataSource {
           'owner_table': DatabaseTables.tasks,
           'owner_id': taskId,
           'field': 'completion',
-          'purpose': 'TASK',
+          'purpose': 'TASK_COMPLETION',
           'content_type': 'image/jpeg',
           'local_path': path,
           'status': 'local',
@@ -2881,12 +2947,14 @@ class EerlLocalDataSource {
   }) async {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
+    final centerId = await activeCenterId;
+    if (centerId == null) return const [];
     final conditions = <String>[
-      supervisor
-          ? 'center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
-          : 'created_by = ?',
+      supervisor ? 'center_id = ?' : 'created_by = ? AND center_id = ?',
     ];
-    final args = <Object?>[if (!supervisor) userId];
+    final args = <Object?>[
+      if (supervisor) centerId else ...[userId, centerId],
+    ];
     if (search.trim().isNotEmpty) {
       conditions.add('(body LIKE ? OR created_by_name LIKE ?)');
       final like = '%${search.trim()}%';
@@ -2896,6 +2964,8 @@ class EerlLocalDataSource {
         ? await _database.rawQuery(
             '''
             SELECT r.*,
+              (SELECT value FROM ${DatabaseTables.syncMeta}
+                WHERE key = 'supervisor_name') AS supervisor_name,
               (r.follow_up_at IS NOT NULL
                 AND r.follow_up_at < ?
                 AND UPPER(r.status) IN ('OPEN', 'PENDING')) AS overdue
@@ -2908,12 +2978,14 @@ class EerlLocalDataSource {
             ''',
             [DateTime.now().toUtc().toIso8601String(), ...args],
           )
-        : await _database.query(
-            DatabaseTables.requests,
-            where: conditions.join(' AND '),
-            whereArgs: args,
-            orderBy: 'created_at DESC',
-          );
+        : await _database.rawQuery('''
+            SELECT r.*,
+              (SELECT value FROM ${DatabaseTables.syncMeta}
+                WHERE key = 'supervisor_name') AS supervisor_name
+            FROM ${DatabaseTables.requests} r
+            WHERE ${conditions.join(' AND ')}
+            ORDER BY r.created_at DESC
+            ''', args);
     return rows.map(RequestModel.fromMap).toList(growable: false);
   }
 
@@ -2983,9 +3055,7 @@ class EerlLocalDataSource {
           'owner_table': DatabaseTables.requests,
           'owner_id': requestId,
           'field': 'request',
-          // Request evidence uses the server's TASK upload bucket. The API
-          // accepts the resulting URL in PUT /requests/{id}.
-          'purpose': 'TASK',
+          'purpose': 'REQUEST',
           'content_type': 'image/jpeg',
           'local_path': path,
           'status': 'local',
@@ -3238,6 +3308,8 @@ class EerlLocalDataSource {
   }
 
   Future<List<AgentStatusModel>> getAgentStatus() async {
+    final centerId = await activeCenterId;
+    if (centerId == null) return const [];
     final todayStart = _startOfIstDayUtc();
     final rows = await _database.rawQuery(
       '''
@@ -3251,11 +3323,11 @@ class EerlLocalDataSource {
         ON col.agent_id = cp.user_id AND col.center_id = cp.center_id
         AND col.status != 'DRAFT' AND col.collected_at >= ?
       WHERE cp.is_agent = 1
-        AND cp.center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})
+        AND cp.center_id = ?
       GROUP BY cp.user_id, cp.center_id
       ORDER BY cp.name COLLATE NOCASE
     ''',
-      [todayStart],
+      [todayStart, centerId],
     );
     return rows.map(AgentStatusModel.fromMap).toList(growable: false);
   }

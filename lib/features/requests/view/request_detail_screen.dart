@@ -112,7 +112,7 @@ class _OpenRequestDetails extends StatelessWidget {
       RequestDetailSectionCard(
         title: context.l10n.requestAssignTo,
         child: Text(
-          request.createdByName ?? request.createdBy,
+          _supervisorName,
           style: AppTextStyles.regularB8_12.copyWith(
             color: AppColors.neutral600,
           ),
@@ -146,6 +146,11 @@ class _OpenRequestDetails extends StatelessWidget {
       ),
     ],
   );
+
+  String get _supervisorName {
+    final name = request.supervisorName?.trim();
+    return name == null || name.isEmpty ? '-' : name;
+  }
 }
 
 class _ClosedRequestDetails extends StatelessWidget {

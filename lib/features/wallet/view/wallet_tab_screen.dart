@@ -15,6 +15,7 @@ import '../widgets/expense_claim_card.dart';
 import '../widgets/expense_search_filters.dart';
 import '../widgets/wallet_action_card.dart';
 import '../widgets/wallet_balance_card.dart';
+import '../widgets/wallet_claims_empty_state.dart';
 import '../widgets/wallet_screen_header.dart';
 
 class WalletTabScreen extends StatefulWidget {
@@ -145,9 +146,15 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
                         if (_controller.isLoading && !_controller.hasData)
                           const Center(child: CircularProgressIndicator())
                         else if (_selectedClaimType == 0)
-                          ..._expenseCards(data?.expenses ?? const [])
+                          ..._expenseResults(
+                            context,
+                            data?.expenses ?? const [],
+                          )
                         else
-                          ..._cashCards(data?.cashRequests ?? const []),
+                          ..._cashResults(
+                            context,
+                            data?.cashRequests ?? const [],
+                          ),
                       ],
                     ),
                   ),
@@ -174,37 +181,55 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
     };
   }
 
-  List<Widget> _expenseCards(List<ExpenseModel> values) => [
-    for (final item in values.where(
-      (item) => _matchesDate(item.createdAt),
-    )) ...[
-      ExpenseClaimCard(
-        title: item.categoryName ?? item.categoryId,
-        date: _date(item.createdAt),
-        amount: '₹${item.amount.toStringAsFixed(2)}',
-        statusLabel: item.status,
-        status: _claimStatus(item.status),
-        onTap: () => _openExpenseClaim(item),
-      ),
-      const SizedBox(height: 12),
-    ],
-  ];
+  List<Widget> _expenseResults(
+    BuildContext context,
+    List<ExpenseModel> values,
+  ) {
+    final filtered = values
+        .where((item) => _matchesDate(item.createdAt))
+        .toList(growable: false);
+    if (filtered.isEmpty) {
+      return [WalletClaimsEmptyState(message: context.l10n.walletEmptyRequest)];
+    }
+    return [
+      for (final item in filtered) ...[
+        ExpenseClaimCard(
+          title: item.categoryName ?? item.categoryId,
+          date: _date(item.createdAt),
+          amount: '₹${item.amount.toStringAsFixed(2)}',
+          statusLabel: item.status,
+          status: _claimStatus(item.status),
+          onTap: () => _openExpenseClaim(item),
+        ),
+        const SizedBox(height: 12),
+      ],
+    ];
+  }
 
-  List<Widget> _cashCards(List<CashRequestModel> values) => [
-    for (final item in values.where(
-      (item) => _matchesDate(item.createdAt),
-    )) ...[
-      ExpenseClaimCard(
-        title: item.reason ?? item.id,
-        date: _date(item.createdAt),
-        amount: '₹${item.amount.toStringAsFixed(2)}',
-        statusLabel: item.status,
-        status: _claimStatus(item.status),
-        onTap: () => _openCashRequest(_cashStatus(item.status)),
-      ),
-      const SizedBox(height: 12),
-    ],
-  ];
+  List<Widget> _cashResults(
+    BuildContext context,
+    List<CashRequestModel> values,
+  ) {
+    final filtered = values
+        .where((item) => _matchesDate(item.createdAt))
+        .toList(growable: false);
+    if (filtered.isEmpty) {
+      return [WalletClaimsEmptyState(message: context.l10n.walletEmptyRequest)];
+    }
+    return [
+      for (final item in filtered) ...[
+        ExpenseClaimCard(
+          title: item.reason ?? item.id,
+          date: _date(item.createdAt),
+          amount: '₹${item.amount.toStringAsFixed(2)}',
+          statusLabel: item.status,
+          status: _claimStatus(item.status),
+          onTap: () => _openCashRequest(_cashStatus(item.status)),
+        ),
+        const SizedBox(height: 12),
+      ],
+    ];
+  }
 
   String _date(String value) {
     final date = DateTime.tryParse(value)?.toLocal();

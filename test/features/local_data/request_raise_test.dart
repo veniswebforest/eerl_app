@@ -40,6 +40,7 @@ void main() {
     await database.setSyncMeta('active_center_id', 'center-1');
     await database.setSyncMeta('user_id', 'agent-1');
     await database.setSyncMeta('user_name', 'Agent One');
+    await database.setSyncMeta('supervisor_name', 'Supervisor One');
   });
 
   tearDownAll(() async {
@@ -70,10 +71,13 @@ void main() {
     expect(jsonDecode(stored['photo_urls']! as String), [photoFile.path]);
     expect(stored['sync_state'], 'pending');
 
+    final listedRequest = (await repository.getRequests()).single;
+    expect(listedRequest.supervisorName, 'Supervisor One');
+
     final photo = (await database.query(DatabaseTables.photos)).single;
     expect(photo['owner_table'], DatabaseTables.requests);
     expect(photo['owner_id'], requestId);
-    expect(photo['purpose'], 'TASK');
+    expect(photo['purpose'], 'REQUEST');
 
     final outbox = (await database.query(DatabaseTables.outbox)).single;
     expect(outbox['method'], 'PUT');
@@ -147,7 +151,7 @@ void main() {
 
     expect(sentBatchBody, {
       'photos': [
-        {'purpose': 'TASK', 'contentType': 'image/jpeg', 'sizeBytes': 4},
+        {'purpose': 'REQUEST', 'contentType': 'image/jpeg', 'sizeBytes': 4},
       ],
     });
     expect(sentRequest, isNotNull);
