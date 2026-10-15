@@ -14,6 +14,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onBackTap,
     this.backIconAsset,
     this.titleStyle,
+    this.backButtonRadius = 10,
   });
 
   final String? title;
@@ -22,6 +23,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? onBackTap;
   final String? backIconAsset;
   final TextStyle? titleStyle;
+  final double backButtonRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +53,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     width: 40,
                     decoration: BoxDecoration(
                       color: context.palette.primary,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(backButtonRadius),
                     ),
                     alignment: Alignment.center,
                     child: backIconAsset == null

@@ -900,6 +900,7 @@ class TransferModel {
     this.decidedByName,
     this.approvedAt,
     this.rejectionReason,
+    this.rejectionRemarks,
     this.handedOverAt,
     this.gpsLat,
     this.gpsLng,
@@ -939,6 +940,7 @@ class TransferModel {
   final String? decidedByName;
   final String? approvedAt;
   final String? rejectionReason;
+  final String? rejectionRemarks;
   final String? handedOverAt;
   final double? gpsLat;
   final double? gpsLng;
@@ -978,6 +980,7 @@ class TransferModel {
     decidedByName: map['decided_by_name'] as String?,
     approvedAt: map['approved_at'] as String?,
     rejectionReason: map['rejection_reason'] as String?,
+    rejectionRemarks: map['rejection_remarks'] as String?,
     handedOverAt: map['handed_over_at'] as String?,
     gpsLat: (map['gps_lat'] as num?)?.toDouble(),
     gpsLng: (map['gps_lng'] as num?)?.toDouble(),
@@ -1018,6 +1021,7 @@ class TransferModel {
     'decided_by_name': decidedByName,
     'approved_at': approvedAt,
     'rejection_reason': rejectionReason,
+    'rejection_remarks': rejectionRemarks,
     'handed_over_at': handedOverAt,
     'gps_lat': gpsLat,
     'gps_lng': gpsLng,

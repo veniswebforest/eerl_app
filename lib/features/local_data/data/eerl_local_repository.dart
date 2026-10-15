@@ -185,7 +185,12 @@ class EerlLocalRepository {
   Future<void> rejectTransfer({
     required String transferId,
     required String reason,
-  }) => _local.rejectTransfer(transferId: transferId, reason: reason);
+    String? remarks,
+  }) => _local.rejectTransfer(
+    transferId: transferId,
+    reason: reason,
+    remarks: remarks,
+  );
   Future<String> saveTransferRequest({
     required Map<String, double> itemQuantities,
     required double estimatedExpense,

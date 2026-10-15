@@ -13,7 +13,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 5;
+  static const databaseVersion = 6;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -149,6 +149,12 @@ class AppDatabase {
       });
       _log('Upgraded transfer dispatch-note schema to version 5');
     }
+    if (oldVersion < 6) {
+      await _addMissingColumns(db, DatabaseTables.transfers, const {
+        'rejection_remarks': 'TEXT',
+      });
+      _log('Upgraded transfer rejection remarks schema to version 6');
+    }
   }
 
   Future<void> _onOpen(Database db) async {
@@ -206,6 +212,7 @@ class AppDatabase {
         'transporter_name': 'TEXT',
         'transfer_fee': 'REAL',
         'vehicle_differs': 'INTEGER NOT NULL DEFAULT 0',
+        'rejection_remarks': 'TEXT',
       },
       DatabaseTables.items: {
         'image_url': 'TEXT',

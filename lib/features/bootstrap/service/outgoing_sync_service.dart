@@ -643,6 +643,10 @@ class OutgoingSyncService {
       'weighbridge_photo_urls': jsonEncode(data['weighbridgePhotoUrls']),
     if (data.containsKey('vehicleDiffers'))
       'vehicle_differs': _sqliteValue(data['vehicleDiffers']),
+    if (data.containsKey('rejectionReason'))
+      'rejection_reason': data['rejectionReason'],
+    if (data.containsKey('rejectionRemarks'))
+      'rejection_remarks': data['rejectionRemarks'],
     if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
   };
 
@@ -1012,7 +1016,7 @@ class OutgoingSyncService {
       };
       const batchPath = '/api/v1/mobile/uploads/batch';
       final batchStopwatch = Stopwatch()..start();
-      AppLogger.apiRequest('POST', batchPath, message: 'count=${rows}');
+      AppLogger.apiRequest('POST', batchPath, message: 'count=$rows');
       final response = await _client
           .post(
             Uri.parse('${AppConstants.apiBaseUrl}/mobile/uploads/batch'),

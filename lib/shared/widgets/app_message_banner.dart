@@ -20,6 +20,7 @@ class AppMessageBanner extends StatefulWidget {
     this.backgroundColor,
     this.borderColor,
     this.closeIcon,
+    this.closeButtonKey,
     this.height,
     this.padding = const EdgeInsets.fromLTRB(10, 10, 8, 10),
     this.borderRadius = 12,
@@ -44,6 +45,7 @@ class AppMessageBanner extends StatefulWidget {
   final Color? backgroundColor;
   final Color? borderColor;
   final Widget? closeIcon;
+  final Key? closeButtonKey;
   final double? height;
   final EdgeInsetsGeometry padding;
   final double borderRadius;
@@ -166,7 +168,8 @@ class _AppMessageBannerState extends State<AppMessageBanner> {
                   widget.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: widget.titleStyle ??
+                  style:
+                      widget.titleStyle ??
                       AppTextStyles.semiboldH8_16.copyWith(
                         color: AppColors.neutral950,
                       ),
@@ -177,7 +180,8 @@ class _AppMessageBannerState extends State<AppMessageBanner> {
                     widget.subtitle!,
                     maxLines: widget.subtitleMaxLines,
                     overflow: TextOverflow.ellipsis,
-                    style: widget.subtitleStyle ??
+                    style:
+                        widget.subtitleStyle ??
                         AppTextStyles.regularB7_14.copyWith(
                           color: AppColors.neutral600,
                         ),
@@ -189,10 +193,12 @@ class _AppMessageBannerState extends State<AppMessageBanner> {
           if (widget.onClose != null) ...[
             const SizedBox(width: 4),
             InkWell(
+              key: widget.closeButtonKey,
               onTap: _handleDismiss,
               child: Padding(
                 padding: const EdgeInsets.all(4),
-                child: widget.closeIcon ??
+                child:
+                    widget.closeIcon ??
                     const Icon(
                       Icons.close,
                       size: 18,

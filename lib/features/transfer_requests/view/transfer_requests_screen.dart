@@ -22,11 +22,13 @@ class TransferRequestsScreen extends StatefulWidget {
     this.viewMode = TransferRequestsViewMode.populated,
     this.initialFilter = TransferRequestFilter.all,
     this.transferLoader,
+    this.roleLoader,
   });
 
   final TransferRequestsViewMode viewMode;
   final TransferRequestFilter initialFilter;
   final Future<List<TransferModel>> Function()? transferLoader;
+  final Future<String?> Function()? roleLoader;
 
   @override
   State<TransferRequestsScreen> createState() => _TransferRequestsScreenState();
@@ -38,6 +40,8 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
   String _query = '';
   late final LocalQueryController<List<TransferModel>> _controller;
   int _bootstrapRevision = -1;
+  bool _isSupervisor = false;
+  bool _roleLoaded = false;
 
   @override
   void initState() {
@@ -45,6 +49,19 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
     _controller = LocalQueryController(
       widget.transferLoader ?? EerlLocalRepository.instance.getTransfers,
     )..load();
+    _loadRole();
+  }
+
+  Future<void> _loadRole() async {
+    final role =
+        await (widget.roleLoader?.call() ??
+            EerlLocalRepository.instance.activeRole);
+    if (!mounted) return;
+
+    setState(() {
+      _isSupervisor = role?.toUpperCase().contains('SUPERVISOR') == true;
+      _roleLoaded = true;
+    });
   }
 
   @override
@@ -144,12 +161,14 @@ class _TransferRequestsScreenState extends State<TransferRequestsScreen> {
         title: context.l10n.transferRequests,
         backIconAsset: 'assets/icons/records/back.svg',
       ),
-      floatingActionButton: _TransferAddButton(
-        onTap: () async {
-          await context.push<void>(AppRoutes.createTransferRequest);
-          if (mounted) await _controller.load();
-        },
-      ),
+      floatingActionButton: _roleLoaded && !_isSupervisor
+          ? _TransferAddButton(
+              onTap: () async {
+                await context.push<void>(AppRoutes.createTransferRequest);
+                if (mounted) await _controller.load();
+              },
+            )
+          : null,
       body: SafeArea(
         top: false,
         child: Center(

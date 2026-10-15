@@ -76,6 +76,7 @@ flutter:
     - assets/icons/role_switcher/
     - assets/icons/tasks/
     - assets/icons/supervisor_requests/
+    - assets/icons/transfer_requests/
     - assets/icons/mrf_person/
     - assets/icons/
     - assets/images/ragpicker_directory/

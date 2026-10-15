@@ -9,10 +9,12 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
+import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/transfer_request_detail_state.dart';
 import '../widgets/transfer_request_detail_widgets.dart';
 import 'supervisor_transfer_approval_screen.dart';
+import 'supervisor_transfer_reject_screen.dart';
 import 'transfer_dispatch_flow_screen.dart';
 
 typedef TransferRequestDetailData = ({
@@ -21,6 +23,8 @@ typedef TransferRequestDetailData = ({
 });
 typedef TransferRequestDetailLoader =
     Future<TransferRequestDetailData> Function(String transferId);
+typedef TransferRequestRejectHandler =
+    Future<void> Function(String transferId, String reason, String? remarks);
 
 class TransferRequestDetailScreen extends StatefulWidget {
   const TransferRequestDetailScreen({
@@ -28,11 +32,13 @@ class TransferRequestDetailScreen extends StatefulWidget {
     required this.transferId,
     this.detailLoader,
     this.roleLoader,
+    this.rejectHandler,
   });
 
   final String transferId;
   final TransferRequestDetailLoader? detailLoader;
   final Future<String?> Function()? roleLoader;
+  final TransferRequestRejectHandler? rejectHandler;
 
   @override
   State<TransferRequestDetailScreen> createState() =>
@@ -43,6 +49,10 @@ class _TransferRequestDetailScreenState
     extends State<TransferRequestDetailScreen> {
   bool _dispatchFlowOpen = false;
   bool _approvalFlowOpen = false;
+  bool _rejectionFlowOpen = false;
+  bool _showRejectedBanner = false;
+  String? _rejectionReasonOverride;
+  String? _rejectionRemarksOverride;
   bool _isSupervisor = false;
   bool _roleLoaded = false;
   late final LocalQueryController<TransferRequestDetailData> _controller;
@@ -88,8 +98,14 @@ class _TransferRequestDetailScreenState
 
   @override
   Widget build(BuildContext context) => PopScope(
-    canPop: !_dispatchFlowOpen && !_approvalFlowOpen,
-    child: _approvalFlowOpen
+    canPop: !_dispatchFlowOpen && !_approvalFlowOpen && !_rejectionFlowOpen,
+    child: _rejectionFlowOpen
+        ? SupervisorTransferRejectScreen(
+            onBack: () => setState(() => _rejectionFlowOpen = false),
+            onConfirm: (rejection) =>
+                _rejectTransfer(_controller.data!.transfer!, rejection),
+          )
+        : _approvalFlowOpen
         ? SupervisorTransferApprovalScreen(
             transfer: _controller.data!.transfer!,
             items: _controller.data!.items,
@@ -123,6 +139,8 @@ class _TransferRequestDetailScreenState
                   appBar: CustomAppBar(
                     title: context.l10n.transferDetailTitle,
                     backIconAsset: 'assets/icons/records/back.svg',
+                    titleStyle: AppTextStyles.semiboldH6_20,
+                    backButtonRadius: 12,
                   ),
                   body: Center(
                     child: TextButton(
@@ -134,56 +152,51 @@ class _TransferRequestDetailScreenState
               }
               final transfer = _controller.data?.transfer;
               return _TransferRequestDetailContent(
-                state: _detailState(transfer!.status),
+                state: _rejectionReasonOverride != null
+                    ? TransferRequestDetailState.rejected
+                    : _detailState(transfer!.status),
                 transfer: transfer,
                 items: _controller.data?.items ?? const <TransferItemModel>[],
                 isSupervisor: _isSupervisor,
                 roleLoaded: _roleLoaded,
                 onApprove: () => setState(() => _approvalFlowOpen = true),
-                onReject: () => _rejectTransfer(transfer),
+                onReject: () => setState(() => _rejectionFlowOpen = true),
                 onVehicleArrived: () =>
                     setState(() => _dispatchFlowOpen = true),
+                showRejectedBanner: _showRejectedBanner,
+                onDismissRejectedBanner: () =>
+                    setState(() => _showRejectedBanner = false),
+                rejectionReasonOverride: _rejectionReasonOverride,
+                rejectionRemarksOverride: _rejectionRemarksOverride,
               );
             },
           ),
   );
 
-  Future<void> _rejectTransfer(TransferModel transfer) async {
-    final controller = TextEditingController();
-    final reason = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.transferRejectReasonTitle),
-        content: TextField(
-          key: const Key('transfer-reject-reason'),
-          controller: controller,
-          minLines: 3,
-          maxLines: 5,
-          maxLength: 1000,
-          decoration: InputDecoration(
-            hintText: context.l10n.supervisorTransferRejectHint,
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(context.l10n.supervisorTaskCancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, controller.text),
-            child: Text(context.l10n.supervisorTransferReject),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-    if (reason == null || reason.trim().length < 3) return;
+  Future<void> _rejectTransfer(
+    TransferModel transfer,
+    TransferRejection rejection,
+  ) async {
+    final reason = rejection.reasons.join(', ');
+    if (reason.isEmpty) return;
     try {
-      await EerlLocalRepository.instance.rejectTransfer(
-        transferId: transfer.id,
-        reason: reason,
-      );
+      final handler = widget.rejectHandler;
+      if (handler != null) {
+        await handler(transfer.id, reason, rejection.remarks);
+      } else {
+        await EerlLocalRepository.instance.rejectTransfer(
+          transferId: transfer.id,
+          reason: reason,
+          remarks: rejection.remarks,
+        );
+      }
+      if (!mounted) return;
+      setState(() {
+        _rejectionFlowOpen = false;
+        _showRejectedBanner = true;
+        _rejectionReasonOverride = reason;
+        _rejectionRemarksOverride = rejection.remarks;
+      });
       await _controller.load();
     } on Object catch (error) {
       if (!mounted) return;
@@ -226,6 +239,10 @@ class _TransferRequestDetailContent extends StatelessWidget {
     required this.onApprove,
     required this.onReject,
     required this.onVehicleArrived,
+    required this.showRejectedBanner,
+    required this.onDismissRejectedBanner,
+    this.rejectionReasonOverride,
+    this.rejectionRemarksOverride,
   });
 
   final TransferRequestDetailState state;
@@ -236,6 +253,10 @@ class _TransferRequestDetailContent extends StatelessWidget {
   final VoidCallback onApprove;
   final VoidCallback onReject;
   final VoidCallback onVehicleArrived;
+  final bool showRejectedBanner;
+  final VoidCallback onDismissRejectedBanner;
+  final String? rejectionReasonOverride;
+  final String? rejectionRemarksOverride;
 
   bool get _isRejected => state == TransferRequestDetailState.rejected;
 
@@ -247,145 +268,229 @@ class _TransferRequestDetailContent extends StatelessWidget {
       state == TransferRequestDetailState.vehicleUnavailable;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.backgroundColor,
-    appBar: CustomAppBar(
-      title: context.l10n.transferDetailTitle,
-      backIconAsset: 'assets/icons/records/back.svg',
-    ),
-    bottomNavigationBar:
-        roleLoaded &&
-            isSupervisor &&
-            (transfer?.status.toUpperCase() == 'REQUESTED' ||
-                transfer?.status.toUpperCase() == 'PENDING')
-        ? SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      key: const Key('supervisor-transfer-reject'),
-                      onPressed: onReject,
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        foregroundColor: AppColors.red600,
-                        side: const BorderSide(color: AppColors.red600),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(context.l10n.supervisorTransferReject),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      key: const Key('supervisor-transfer-approve'),
-                      onPressed: onApprove,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        elevation: 0,
-                        backgroundColor: AppColors.primary500,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(context.l10n.supervisorTransferApprove),
-                    ),
-                  ),
-                ],
-              ),
+  Widget build(BuildContext context) {
+    final supervisorCompleted = isSupervisor && _isCompleted;
+    final rejectionReason =
+        rejectionReasonOverride ?? transfer?.rejectionReason;
+    final rejectionRemarks =
+        rejectionRemarksOverride ?? transfer?.rejectionRemarks;
+
+    return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+      appBar: showRejectedBanner
+          ? null
+          : CustomAppBar(
+              title: isSupervisor && _isRejected
+                  ? null
+                  : context.l10n.transferDetailTitle,
+              backIconAsset: 'assets/icons/records/back.svg',
+              titleStyle: AppTextStyles.semiboldH6_20,
+              backButtonRadius: 12,
             ),
-          )
-        : roleLoaded &&
-              !isSupervisor &&
-              transfer?.status.toUpperCase() == 'APPROVED'
-        ? SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
-              child: SizedBox(
-                height: 52,
-                child: ElevatedButton(
-                  key: const Key('transfer-vehicle-arrived'),
-                  onPressed: onVehicleArrived,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary500,
-                    foregroundColor: AppColors.neutral50,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+      bottomNavigationBar:
+          roleLoaded &&
+              isSupervisor &&
+              (transfer?.status.toUpperCase() == 'REQUESTED' ||
+                  transfer?.status.toUpperCase() == 'PENDING')
+          ? SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        key: const Key('supervisor-transfer-reject'),
+                        onPressed: onReject,
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(52),
+                          foregroundColor: AppColors.red600,
+                          side: const BorderSide(color: AppColors.red600),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(context.l10n.supervisorTransferReject),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    context.l10n.transferVehicleArrived,
-                    style: AppTextStyles.semiboldH9_14,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        key: const Key('supervisor-transfer-approve'),
+                        onPressed: onApprove,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(52),
+                          elevation: 0,
+                          backgroundColor: AppColors.primary500,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(context.l10n.supervisorTransferApprove),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : roleLoaded &&
+                !isSupervisor &&
+                transfer?.status.toUpperCase() == 'APPROVED'
+          ? SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+                child: SizedBox(
+                  height: 52,
+                  child: ElevatedButton(
+                    key: const Key('transfer-vehicle-arrived'),
+                    onPressed: onVehicleArrived,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary500,
+                      foregroundColor: AppColors.neutral50,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      context.l10n.transferVehicleArrived,
+                      style: AppTextStyles.semiboldH9_14,
+                    ),
                   ),
                 ),
               ),
+            )
+          : null,
+      body: SafeArea(
+        top: showRejectedBanner,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Stack(
+              children: [
+                ListView(
+                  key: const Key('transfer-request-detail-scroll'),
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    showRejectedBanner ? 82 : 24,
+                    20,
+                    28,
+                  ),
+                  children: [
+                    if (_isRejected && !isSupervisor) ...[
+                      _RejectReasonCard(
+                        reason: rejectionReason,
+                        remarks: rejectionRemarks,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    _RequestIdCard(
+                      value:
+                          transfer?.number ??
+                          transfer?.id ??
+                          context.l10n.transferDetailRequestId,
+                    ),
+                    const SizedBox(height: 16),
+                    _InformationCard(
+                      state: state,
+                      transfer: transfer,
+                      items: items,
+                      isSupervisor: isSupervisor,
+                      isRejected: _isRejected,
+                      isCompleted: _isCompleted,
+                      isLoading: _isLoading,
+                      isVehicleUnavailable: _isVehicleUnavailable,
+                    ),
+                    const SizedBox(height: 16),
+                    if (supervisorCompleted) ...[
+                      _ItemsCard(
+                        items: items,
+                        title: 'Stock in hand at the centre',
+                      ),
+                      const SizedBox(height: 16),
+                      if (transfer != null &&
+                          (transfer!.plannedVehicleNumber != null ||
+                              transfer!.vehiclePlate != null)) ...[
+                        _SupervisorVehicleInformationCard(transfer: transfer!),
+                        const SizedBox(height: 16),
+                      ],
+                      if (transfer != null)
+                        _SupervisorDispatchEvidence(transfer: transfer!),
+                    ] else ...[
+                      if (isSupervisor &&
+                          (transfer?.plannedVehicleNumber != null ||
+                              transfer?.vehiclePlate != null)) ...[
+                        _SupervisorVehicleInformationCard(transfer: transfer!),
+                        const SizedBox(height: 16),
+                      ] else if (transfer?.truckExpectedAt != null ||
+                          transfer?.plannedVehicleNumber != null ||
+                          transfer?.dispatchNote?.trim().isNotEmpty ==
+                              true) ...[
+                        _CollectionManagerCard(transfer: transfer),
+                        const SizedBox(height: 16),
+                      ],
+                      if (!isSupervisor &&
+                          transfer?.status.toUpperCase() == 'DISPATCHED') ...[
+                        _AgentDispatchCard(transfer: transfer!),
+                        const SizedBox(height: 16),
+                      ],
+                      _ItemsCard(items: items),
+                    ],
+                    if (_isRejected && isSupervisor) ...[
+                      const SizedBox(height: 16),
+                      _RejectReasonCard(
+                        reason: rejectionReason,
+                        remarks: rejectionRemarks,
+                      ),
+                    ],
+                    if (!isSupervisor) ...[
+                      const SizedBox(height: 12),
+                      _TimelineCard(state: state, transfer: transfer),
+                    ],
+                  ],
+                ),
+                if (showRejectedBanner)
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    top: 4,
+                    child: AppMessageBanner(
+                      key: const Key('supervisor-transfer-rejected-banner'),
+                      title: 'Request Rejected!',
+                      subtitle:
+                          '${transfer?.number ?? transfer?.id ?? ''} rejected.',
+                      color: AppColors.red500,
+                      backgroundColor: AppColors.red50,
+                      borderColor: AppColors.cool300,
+                      height: 78,
+                      padding: const EdgeInsets.all(16),
+                      leadingGap: 12,
+                      iconBackgroundColor: AppColors.red500,
+                      iconPadding: const EdgeInsets.all(5),
+                      icon: SvgPicture.asset(
+                        'assets/icons/wallet/category_request_rejected_banner.svg',
+                        width: 20,
+                        height: 20,
+                      ),
+                      closeIcon: SvgPicture.asset(
+                        'assets/icons/transfer_requests/reject_close.svg',
+                        width: 20,
+                        height: 20,
+                      ),
+                      closeButtonKey: const Key(
+                        'supervisor-transfer-rejected-banner-close',
+                      ),
+                      onClose: onDismissRejectedBanner,
+                    ),
+                  ),
+              ],
             ),
-          )
-        : null,
-    body: SafeArea(
-      top: false,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: ListView(
-            key: const Key('transfer-request-detail-scroll'),
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-            children: [
-              if (_isRejected) ...[
-                _RejectReasonCard(reason: transfer?.rejectionReason),
-                const SizedBox(height: 12),
-              ],
-              _RequestIdCard(
-                value:
-                    transfer?.number ??
-                    transfer?.id ??
-                    context.l10n.transferDetailRequestId,
-              ),
-              const SizedBox(height: 12),
-              _InformationCard(
-                state: state,
-                transfer: transfer,
-                items: items,
-                isSupervisor: isSupervisor,
-                isRejected: _isRejected,
-                isCompleted: _isCompleted,
-                isLoading: _isLoading,
-                isVehicleUnavailable: _isVehicleUnavailable,
-              ),
-              const SizedBox(height: 12),
-              if (isSupervisor &&
-                  (transfer?.plannedVehicleNumber != null ||
-                      transfer?.vehiclePlate != null)) ...[
-                _SupervisorVehicleInformationCard(transfer: transfer!),
-                const SizedBox(height: 12),
-              ] else if (transfer?.truckExpectedAt != null ||
-                  transfer?.plannedVehicleNumber != null ||
-                  transfer?.dispatchNote?.trim().isNotEmpty == true) ...[
-                _CollectionManagerCard(transfer: transfer),
-                const SizedBox(height: 12),
-              ],
-              if (!isSupervisor &&
-                  transfer?.status.toUpperCase() == 'DISPATCHED') ...[
-                _AgentDispatchCard(transfer: transfer!),
-                const SizedBox(height: 12),
-              ],
-              _ItemsCard(items: items),
-              if (!isSupervisor) ...[
-                const SizedBox(height: 12),
-                _TimelineCard(state: state, transfer: transfer),
-              ],
-            ],
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _RequestIdCard extends StatelessWidget {
@@ -395,23 +500,20 @@ class _RequestIdCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => TransferDetailCard(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+    padding: const EdgeInsets.all(8),
     child: Row(
       children: [
         Container(
           width: 40,
           height: 40,
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primary50,
+            color: AppColors.primary100,
             borderRadius: BorderRadius.circular(10),
           ),
           child: SvgPicture.asset(
-            'assets/icons/home/transfer.svg',
-            colorFilter: const ColorFilter.mode(
-              AppColors.primary500,
-              BlendMode.srcIn,
-            ),
+            'assets/icons/transfer_requests/request_route.svg',
+            key: const Key('transfer-request-route-icon'),
           ),
         ),
         const SizedBox(width: 10),
@@ -431,31 +533,73 @@ class _RequestIdCard extends StatelessWidget {
 }
 
 class _RejectReasonCard extends StatelessWidget {
-  const _RejectReasonCard({this.reason});
+  const _RejectReasonCard({this.reason, this.remarks});
 
   final String? reason;
+  final String? remarks;
 
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(14),
+    padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: AppColors.neutral50,
       border: Border.all(color: AppColors.red500),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(12),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          context.l10n.transferRejectReasonTitle,
-          style: AppTextStyles.semiboldH9_14,
+        Text.rich(
+          TextSpan(
+            children: [
+              const TextSpan(text: 'Reason for '),
+              TextSpan(
+                text: 'Reject',
+                style: AppTextStyles.semiboldH7_18.copyWith(
+                  color: AppColors.red500,
+                ),
+              ),
+            ],
+          ),
+          style: AppTextStyles.semiboldH7_18.copyWith(
+            color: AppColors.neutral950,
+          ),
         ),
         const SizedBox(height: 12),
-        Text(
-          reason?.trim().isNotEmpty == true ? reason! : '-',
-          style: AppTextStyles.regularB8_12,
+        const Divider(height: 1, color: AppColors.cool300),
+        const SizedBox(height: 12),
+        Text.rich(
+          TextSpan(
+            children: [
+              const TextSpan(
+                text: 'Reason : ',
+                style: AppTextStyles.semiboldH9_14,
+              ),
+              TextSpan(text: reason?.trim().isNotEmpty == true ? reason! : '-'),
+            ],
+          ),
+          style: AppTextStyles.mediumSH8_14.copyWith(
+            color: AppColors.neutral950,
+          ),
         ),
+        if (remarks?.trim().isNotEmpty == true) ...[
+          const SizedBox(height: 8),
+          Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(
+                  text: 'Remarks : ',
+                  style: AppTextStyles.semiboldH9_14,
+                ),
+                TextSpan(text: remarks!.trim()),
+              ],
+            ),
+            style: AppTextStyles.mediumSH8_14.copyWith(
+              color: AppColors.neutral950,
+            ),
+          ),
+        ],
       ],
     ),
   );
@@ -491,13 +635,16 @@ class _InformationCard extends StatelessWidget {
     final availableStock =
         transfer?.fixedQty ??
         ((transfer?.totalQty ?? 0) > 0 ? transfer!.totalQty : freeToSend);
+    final showSupervisorTripCost = isSupervisor && (isRejected || isCompleted);
     final rawStatus = transfer?.status.toUpperCase() ?? '';
     final (status, color, background, icon) = isRejected
         ? (
-            context.l10n.transferDetailRejected,
+            isSupervisor
+                ? context.l10n.transferStatusRejected
+                : context.l10n.transferDetailRejected,
             AppColors.red600,
             AppColors.red50,
-            'assets/icons/profile/logout_warning.svg',
+            'assets/icons/transfer_requests/status_rejected.svg',
           )
         : isVehicleUnavailable
         ? (
@@ -510,8 +657,8 @@ class _InformationCard extends StatelessWidget {
         ? (
             context.l10n.transferDetailCompleted,
             AppColors.primary500,
-            AppColors.primary50,
-            'assets/icons/wallet/status_verified.svg',
+            AppColors.primary100,
+            'assets/icons/transfer_requests/status_completed.svg',
           )
         : isLoading
         ? (
@@ -522,10 +669,12 @@ class _InformationCard extends StatelessWidget {
                 : context.l10n.transferDetailWaitingLoading,
             AppColors.secondary500,
             AppColors.secondary50,
-            'assets/icons/home/transfer.svg',
+            'assets/icons/transfer_requests/status_dispatch.svg',
           )
         : (
-            context.l10n.transferDetailWaitingManager,
+            isSupervisor
+                ? context.l10n.transferStatusPending
+                : context.l10n.transferDetailWaitingManager,
             AppColors.yellow600,
             AppColors.yellow50,
             'assets/icons/records/status_pending.svg',
@@ -552,18 +701,19 @@ class _InformationCard extends StatelessWidget {
                       ? context.l10n.transferDetailFromLocationValue
                       : '-'),
             ],
-            showDivider: !isSupervisor,
+            showDivider: !isSupervisor || isRejected,
           ),
-          TransferDetailRow(
-            label: context.l10n.transferDetailToLocation,
-            values: [
-              transfer?.destinationName ??
-                  transfer?.destinationId ??
-                  (transfer == null
-                      ? context.l10n.transferDetailToLocationValue
-                      : '-'),
-            ],
-          ),
+          if (!(isSupervisor && isRejected))
+            TransferDetailRow(
+              label: context.l10n.transferDetailToLocation,
+              values: [
+                transfer?.destinationName ??
+                    transfer?.destinationId ??
+                    (transfer == null
+                        ? context.l10n.transferDetailToLocationValue
+                        : '-'),
+              ],
+            ),
           TransferDetailRow(
             label: context.l10n.transferDetailAvailableStock,
             values: [
@@ -571,12 +721,13 @@ class _InformationCard extends StatelessWidget {
                   ? context.l10n.transferDetailAvailableStockValue
                   : '${availableStock.toStringAsFixed(2)} KG',
             ],
-            showDivider: !isSupervisor,
+            showDivider: !isSupervisor || isCompleted,
           ),
-          TransferDetailRow(
-            label: context.l10n.supervisorTransferFreeToSend,
-            values: ['${freeToSend.toStringAsFixed(2)} KG'],
-          ),
+          if (!(isSupervisor && isCompleted))
+            TransferDetailRow(
+              label: context.l10n.supervisorTransferFreeToSend,
+              values: ['${freeToSend.toStringAsFixed(2)} KG'],
+            ),
           TransferDetailRow(
             label: context.l10n.transferDetailDateTime,
             values: [
@@ -593,7 +744,17 @@ class _InformationCard extends StatelessWidget {
                       ? context.l10n.transferDetailRequestedByValue
                       : '-'),
             ],
+            showDivider: !showSupervisorTripCost,
           ),
+          if (showSupervisorTripCost)
+            TransferDetailRow(
+              label: 'Estimated trip cost',
+              values: [
+                transfer?.estimatedExpense == null
+                    ? '-'
+                    : '₹ ${transfer!.estimatedExpense!.toStringAsFixed(0)}',
+              ],
+            ),
           Text(
             context.l10n.transferDetailRequestStatus,
             style: AppTextStyles.semiboldH9_14.copyWith(
@@ -606,6 +767,9 @@ class _InformationCard extends StatelessWidget {
             color: color,
             background: background,
             icon: icon,
+            iconWidth: isRejected ? 18.1671 : 20,
+            iconHeight: isRejected ? 16.5 : 20,
+            borderRadius: isRejected ? 12 : 8,
           ),
         ],
       ),
@@ -881,10 +1045,175 @@ class _AgentDispatchCard extends StatelessWidget {
   );
 }
 
+class _SupervisorDispatchEvidence extends StatelessWidget {
+  const _SupervisorDispatchEvidence({required this.transfer});
+
+  final TransferModel transfer;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    key: const Key('supervisor-transfer-dispatch-evidence'),
+    children: [
+      _SupervisorEvidenceCard(
+        label: 'Vehicle number',
+        value: transfer.vehiclePlate ?? '-',
+      ),
+      const SizedBox(height: 16),
+      _SupervisorEvidenceCard(
+        label: 'Driver Detail',
+        value: transfer.driverName ?? '-',
+      ),
+      const SizedBox(height: 16),
+      _SupervisorEvidenceCard(
+        label: 'Loaded Weight',
+        value: transfer.dispatchedWeight == null
+            ? '-'
+            : 'KG   ${transfer.dispatchedWeight!.toStringAsFixed(2)}',
+      ),
+      const SizedBox(height: 16),
+      _SupervisorEvidenceCard(
+        label: 'Bales / boris',
+        value: transfer.baleCount?.toString() ?? '-',
+      ),
+      const SizedBox(height: 16),
+      _SupervisorEvidenceCard(
+        label: 'Loaded at',
+        value: transfer.handedOverAt == null
+            ? '-'
+            : _formatTransferDateTime(transfer.handedOverAt!),
+      ),
+      if (transfer.vehiclePhotoUrls.isNotEmpty) ...[
+        const SizedBox(height: 16),
+        _SupervisorVehiclePhotoCard(transfer: transfer),
+      ],
+    ],
+  );
+}
+
+class _SupervisorEvidenceCard extends StatelessWidget {
+  const _SupervisorEvidenceCard({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: AppColors.cool200,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.semiboldH8_16.copyWith(
+            color: AppColors.neutral600,
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Divider(height: 1, color: AppColors.cool400),
+        const SizedBox(height: 12),
+        Text(
+          value,
+          style: AppTextStyles.mediumSH8_14.copyWith(
+            color: AppColors.neutral600,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _SupervisorVehiclePhotoCard extends StatelessWidget {
+  const _SupervisorVehiclePhotoCard({required this.transfer});
+
+  final TransferModel transfer;
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) => FutureBuilder<TransferDispatchDraftModel>(
+    future: EerlLocalRepository.instance.getTransferDispatchDraft(transfer.id),
+    builder: (context, snapshot) {
+      final localById = {
+        for (final photo
+            in snapshot.data?.photos ?? const <TransferDispatchPhotoModel>[])
+          photo.id: photo.localPath,
+      };
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.cool200,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Vehicle Photo',
+              style: AppTextStyles.semiboldH8_16.copyWith(
+                color: AppColors.neutral600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: AppColors.cool400),
+            const SizedBox(height: 12),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final width = (constraints.maxWidth - 8) / 2;
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final value in transfer.vehiclePhotoUrls)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: localById[value] != null
+                            ? Image.file(
+                                File(localById[value]!),
+                                width: width,
+                                height: 92,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) =>
+                                    _evidencePhotoPlaceholder(width),
+                              )
+                            : Image.network(
+                                value,
+                                width: width,
+                                height: 92,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) =>
+                                    _evidencePhotoPlaceholder(width),
+                              ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+
+  Widget _evidencePhotoPlaceholder(double width) => Container(
+    width: width,
+    height: 92,
+    color: AppColors.cool300,
+    alignment: Alignment.center,
+    child: const Icon(Icons.image_outlined, color: AppColors.neutral600),
+  );
+}
+
 class _ItemsCard extends StatelessWidget {
-  const _ItemsCard({required this.items});
+  const _ItemsCard({required this.items, this.title});
 
   final List<TransferItemModel> items;
+  final String? title;
 
   @override
   Widget build(BuildContext context) => TransferDetailCard(
@@ -892,8 +1221,8 @@ class _ItemsCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          context.l10n.transferItemsTitle,
-          style: AppTextStyles.semiboldH8_16.copyWith(
+          title ?? context.l10n.transferItemsTitle,
+          style: AppTextStyles.semiboldH7_18.copyWith(
             color: AppColors.neutral950,
           ),
         ),

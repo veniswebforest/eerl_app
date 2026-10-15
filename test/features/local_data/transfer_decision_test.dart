@@ -141,16 +141,22 @@ void main() {
     await repository.rejectTransfer(
       transferId: 'transfer-1',
       reason: 'No vehicle available.',
+      remarks: 'All yard trucks are out until 2 PM.',
     );
 
     final transfer = (await database.query(DatabaseTables.transfers)).single;
     expect(transfer['status'], 'REJECTED');
     expect(transfer['rejection_reason'], 'No vehicle available.');
+    expect(
+      transfer['rejection_remarks'],
+      'All yard trucks are out until 2 PM.',
+    );
     expect(transfer['sync_state'], 'pending');
     final outbox = (await database.query(DatabaseTables.outbox)).single;
     expect(outbox['path'], '/transfers/transfer-1/reject');
     expect(jsonDecode(outbox['body']! as String), {
       'reason': 'No vehicle available.',
+      'remarks': 'All yard trucks are out until 2 PM.',
     });
   });
 

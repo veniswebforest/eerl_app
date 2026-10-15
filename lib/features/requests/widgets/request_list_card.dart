@@ -36,10 +36,20 @@ class RequestListCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              ClipOval(
+                child: Image.asset(
+                  'assets/images/request_supervisor.png',
+                  key: const Key('request-supervisor-photo'),
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   _supervisorName,
-                  textAlign: TextAlign.center,
+                  // textAlign: TextAlign.center,
                   style: AppTextStyles.semiboldH9_14.copyWith(
                     color: AppColors.neutral950,
                   ),

@@ -2289,11 +2289,18 @@ class EerlLocalDataSource {
   Future<void> rejectTransfer({
     required String transferId,
     required String reason,
+    String? remarks,
   }) async {
     final normalizedReason = reason.trim();
+    final normalizedRemarks = remarks?.trim();
     if (normalizedReason.length < 3 || normalizedReason.length > 1000) {
       throw const TransferDecisionValidationException(
         'Rejection reason must be between 3 and 1000 characters.',
+      );
+    }
+    if ((normalizedRemarks?.length ?? 0) > 150) {
+      throw const TransferDecisionValidationException(
+        'Rejection remarks must be 150 characters or fewer.',
       );
     }
     final profile = await getProfile();
@@ -2304,6 +2311,9 @@ class EerlLocalDataSource {
         {
           'status': 'REJECTED',
           'rejection_reason': normalizedReason,
+          'rejection_remarks': normalizedRemarks?.isEmpty == true
+              ? null
+              : normalizedRemarks,
           'decided_by_name': profile.userName,
           'approved_at': now,
           'sync_state': 'pending',
@@ -2321,7 +2331,11 @@ class EerlLocalDataSource {
         entity: DatabaseTables.transfers,
         entityId: transferId,
         kind: 'reject',
-        body: {'reason': normalizedReason},
+        body: {
+          'reason': normalizedReason,
+          if (normalizedRemarks?.isNotEmpty == true)
+            'remarks': normalizedRemarks,
+        },
         createdAt: now,
       );
     });

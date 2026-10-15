@@ -19,8 +19,8 @@ class TransferDetailCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       boxShadow: const [
         BoxShadow(
-          color: Color(0x14000000),
-          blurRadius: 8,
+          color: Color(0x1F000000),
+          blurRadius: 4,
           offset: Offset(0, 2),
         ),
       ],
@@ -90,34 +90,41 @@ class TransferStatusChip extends StatelessWidget {
     required this.color,
     required this.background,
     required this.icon,
+    this.iconWidth = 20,
+    this.iconHeight = 20,
+    this.borderRadius = 8,
   });
 
   final String label;
   final Color color;
   final Color background;
   final String icon;
+  final double iconWidth;
+  final double iconHeight;
+  final double borderRadius;
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
     decoration: BoxDecoration(
       color: background,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(borderRadius),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         SvgPicture.asset(
           icon,
-          width: 16,
-          height: 16,
+          key: ValueKey(icon),
+          width: iconWidth,
+          height: iconHeight,
           colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
         ),
-        const SizedBox(width: 5),
+        const SizedBox(width: 6),
         Flexible(
           child: Text(
             label,
-            style: AppTextStyles.mediumSH9_12.copyWith(color: color),
+            style: AppTextStyles.semiboldH10_12.copyWith(color: color),
           ),
         ),
       ],

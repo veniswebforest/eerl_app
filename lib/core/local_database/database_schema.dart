@@ -276,6 +276,7 @@ abstract final class DatabaseSchema {
         decided_by_name TEXT,
         approved_at TEXT,
         rejection_reason TEXT,
+        rejection_remarks TEXT,
         handed_over_at TEXT,
         gps_lat REAL,
         gps_lng REAL,

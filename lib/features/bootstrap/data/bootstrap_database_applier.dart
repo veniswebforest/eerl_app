@@ -168,6 +168,7 @@ class BootstrapDatabaseApplier {
       'decided_by_name',
       'approved_at',
       'rejection_reason',
+      'rejection_remarks',
       'handed_over_at',
       'updated_at',
       'sync_state',
