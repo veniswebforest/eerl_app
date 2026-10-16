@@ -1,5 +1,6 @@
+import 'dart:async';
+
 import 'package:eerl_app/core/local_database/app_database.dart';
-import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
@@ -16,9 +17,18 @@ import '../widgets/otp_input.dart';
 import '../widgets/primary_button.dart';
 
 class OtpScreen extends StatefulWidget {
-  const OtpScreen({super.key, required this.phoneNumber});
+  const OtpScreen({
+    super.key,
+    required this.phoneNumber,
+    this.onAuthenticated,
+    this.loadInitialRole,
+    this.startInitialSync,
+  });
 
   final String phoneNumber;
+  final ValueChanged<DashboardUserRole>? onAuthenticated;
+  final Future<DashboardUserRole> Function()? loadInitialRole;
+  final Future<void> Function()? startInitialSync;
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -86,25 +96,17 @@ class _OtpScreenState extends State<OtpScreen>
     if (!mounted) return;
 
     if (success) {
-      final isValidSession = await authProvider.checkSessionValidity();
+      // verifyOtp only succeeds after the API returns and its validated session
+      // is persisted. Navigation must not wait for Bootstrap or image caching.
+      final role = await (widget.loadInitialRole ?? _storedDashboardRole)();
       if (!mounted) return;
-
-      if (isValidSession) {
-        await BootstrapSyncService.instance.triggerBootstrap(
-          trigger: BootstrapTrigger.initialLogin,
-        );
-        if (!mounted) return;
-
-        final role = await _chooseRoleIfRequired();
-        if (!mounted) return;
-        context.go(AppRoutes.home, extra: role);
+      final onAuthenticated = widget.onAuthenticated;
+      if (onAuthenticated != null) {
+        onAuthenticated(role);
       } else {
-        AppSnackbar.error(
-          context,
-          message: 'Session expired or token invalid. Please log in again.',
-        );
-        context.go(AppRoutes.login);
+        context.go(AppRoutes.home, extra: role);
       }
+      _startInitialSyncAfterNavigation();
       return;
     }
 
@@ -114,29 +116,20 @@ class _OtpScreenState extends State<OtpScreen>
     }
   }
 
-  Future<DashboardUserRole> _chooseRoleIfRequired() async {
-    final database = AppDatabase.instance;
-    final roles = await database.query(
-      DatabaseTables.myRoles,
-      columns: const ['role_key'],
-      orderBy: 'role_key',
-    );
-    final storedRole = await database.getSyncMeta('active_role');
-    final firstRoleKey = roles.isEmpty
-        ? null
-        : roles.first['role_key'] as String?;
-    var role = DashboardUserRoleX.fromKey(storedRole ?? firstRoleKey);
-
-    if (roles.length > 1 && mounted) {
-      final selected = await context.push<DashboardUserRole>(
-        AppRoutes.roleSwitcher,
-        extra: role,
+  Future<DashboardUserRole> _storedDashboardRole() async =>
+      DashboardUserRoleX.fromKey(
+        await AppDatabase.instance.getSyncMeta('active_role'),
       );
-      if (selected != null) role = selected;
-    }
 
-    await database.setSyncMeta('active_role', role.syncMetaKey);
-    return role;
+  void _startInitialSyncAfterNavigation() {
+    final startSync =
+        widget.startInitialSync ??
+        () => BootstrapSyncService.instance.triggerBootstrap(
+          trigger: BootstrapTrigger.initialLogin,
+        );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(startSync());
+    });
   }
 
   @override

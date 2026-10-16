@@ -5,8 +5,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../widgets/request_detail_section_card.dart';
 
 class RequestDetailScreen extends StatelessWidget {
@@ -131,17 +132,20 @@ class _OpenRequestDetails extends StatelessWidget {
       const SizedBox(height: 12),
       RequestDetailSectionCard(
         title: context.l10n.requestAttachmentByYou,
-        child: SizedBox(
-          height: 108,
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Text(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (request.photoUrls.isNotEmpty) ...[
+              _RequestPhotoGrid(images: request.photoUrls),
+              const SizedBox(height: 12),
+            ],
+            Text(
               '•  ${request.createdByName ?? request.createdBy}',
               style: AppTextStyles.regularB8_12.copyWith(
                 color: AppColors.neutral600,
               ),
             ),
-          ),
+          ],
         ),
       ),
     ],
@@ -151,6 +155,31 @@ class _OpenRequestDetails extends StatelessWidget {
     final name = request.supervisorName?.trim();
     return name == null || name.isEmpty ? '-' : name;
   }
+}
+
+class _RequestPhotoGrid extends StatelessWidget {
+  const _RequestPhotoGrid({required this.images});
+
+  final List<String> images;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      for (var index = 0; index < images.length; index++) ...[
+        if (index > 0) const SizedBox(width: 10),
+        Expanded(
+          child: ClipRRect(
+            key: ValueKey('request-detail-photo-$index'),
+            borderRadius: BorderRadius.circular(8),
+            child: AspectRatio(
+              aspectRatio: 1.55,
+              child: CachedAppImage(source: images[index], fit: BoxFit.cover),
+            ),
+          ),
+        ),
+      ],
+    ],
+  );
 }
 
 class _ClosedRequestDetails extends StatelessWidget {

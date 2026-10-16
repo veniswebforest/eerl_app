@@ -196,8 +196,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _repository.clearSession();
     await BootstrapSyncService.instance.clearForLogout();
+    await _repository.clearSession();
     reset();
   }
 

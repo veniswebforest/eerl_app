@@ -1,11 +1,16 @@
 import 'dart:convert';
 
+import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -26,6 +31,9 @@ void main() {
   });
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues({
+      AppConstants.accessTokenKey: 'collection-token',
+    });
     await database.clearDatabaseOnLogout();
     await database.insert(DatabaseTables.centers, {
       'id': 'center-1',
@@ -134,4 +142,62 @@ void main() {
       expect(line['amount'], isNull);
     },
   );
+
+  test('sync keeps queued API keys separate from SQLite columns', () async {
+    const collectionId = 'collection-api-keys';
+    await repository.saveCollection(
+      collection: CollectionModel(
+        id: collectionId,
+        centerId: 'center-1',
+        agentId: 'agent-1',
+        agentName: 'Agent One',
+        channel: 'D2D',
+        status: 'DRAFT',
+        handoverPhotoUrls: const [],
+        gpsLat: 21.1702,
+        gpsLng: 72.8311,
+        updatedAt: '2026-10-16T00:00:00.000Z',
+        syncState: 'pending',
+      ),
+      items: const [
+        CollectionItemModel(
+          id: 'line-api-keys',
+          collectionId: collectionId,
+          itemId: 'item-1',
+          qty: 10,
+          verifiedQty: 10,
+          photoUrls: [],
+          sortOrder: 0,
+        ),
+      ],
+      submit: true,
+    );
+
+    final outbox = (await database.query(DatabaseTables.outbox)).single;
+    final exactApiBody = Map<String, dynamic>.from(
+      jsonDecode(outbox['body']! as String) as Map,
+    )..['curlOnlyParameter'] = 'keep-this-key';
+    await database.update(
+      DatabaseTables.outbox,
+      {'body': jsonEncode(exactApiBody)},
+      where: 'seq = ?',
+      whereArgs: [outbox['seq']],
+    );
+
+    late http.Request sent;
+    final service = OutgoingSyncService(
+      database: database,
+      internetAccessChecker: () async => true,
+      client: MockClient((request) async {
+        sent = request;
+        return http.Response('{}', 200);
+      }),
+    );
+
+    await service.drain();
+
+    expect(sent.method, 'PUT');
+    expect(sent.url.path, '/api/v1/mobile/collections/$collectionId');
+    expect(jsonDecode(sent.body), exactApiBody);
+  });
 }

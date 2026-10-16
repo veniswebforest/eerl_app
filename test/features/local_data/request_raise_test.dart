@@ -73,6 +73,7 @@ void main() {
 
     final listedRequest = (await repository.getRequests()).single;
     expect(listedRequest.supervisorName, 'Supervisor One');
+    expect(listedRequest.photoUrls, [photoFile.path]);
 
     final photo = (await database.query(DatabaseTables.photos)).single;
     expect(photo['owner_table'], DatabaseTables.requests);
@@ -138,6 +139,7 @@ void main() {
               'priority': 'LOW',
               'status': 'OPEN',
               'followUpAt': followUpAt.toIso8601String(),
+              'answer': {'notes': null, 'at': null},
               'photoUrls': [remoteUrl],
               'createdAt': '2026-10-12T08:00:00.000Z',
             },
@@ -170,6 +172,8 @@ void main() {
     stored = (await database.query(DatabaseTables.requests)).single;
     expect(stored['number'], 'REQ-001');
     expect(stored['follow_up_at'], followUpAt.toIso8601String());
+    expect(stored['answer'], isNull);
+    expect(stored['answered_at'], isNull);
     expect(jsonDecode(stored['photo_urls']! as String), [remoteUrl]);
     expect(stored['sync_state'], 'synced');
   });

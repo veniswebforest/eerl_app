@@ -42,8 +42,12 @@ void main() {
   test('does not call Bootstrap while a failed outbox row remains', () async {
     await _insertOutbox(database, status: 'failed');
     final gateway = _RecordingGateway();
-    final service = _service(database, gateway, imageDirectory);
-    service.configureOutgoingSync(() async {});
+    final service = _service(
+      database,
+      gateway,
+      imageDirectory,
+      beforeBootstrap: () async {},
+    );
 
     await service.triggerBootstrap(trigger: BootstrapTrigger.localMutation);
 
@@ -55,11 +59,15 @@ void main() {
     await _insertOutbox(database, status: 'queued');
     final events = <String>[];
     final gateway = _RecordingGateway(onFetch: () => events.add('bootstrap'));
-    final service = _service(database, gateway, imageDirectory);
-    service.configureOutgoingSync(() async {
-      events.add('outbox');
-      await database.delete(DatabaseTables.outbox);
-    });
+    final service = _service(
+      database,
+      gateway,
+      imageDirectory,
+      beforeBootstrap: () async {
+        events.add('outbox');
+        await database.delete(DatabaseTables.outbox);
+      },
+    );
 
     await service.triggerBootstrap(trigger: BootstrapTrigger.localMutation);
 
@@ -67,13 +75,54 @@ void main() {
     expect(gateway.fetchCount, 1);
     expect(await database.query(DatabaseTables.outbox), isEmpty);
   });
+
+  test('app open sends every outbox API before Bootstrap', () async {
+    await _insertOutbox(database, status: 'queued');
+    await _insertOutbox(database, status: 'failed');
+    final events = <String>[];
+    final gateway = _RecordingGateway(onFetch: () => events.add('bootstrap'));
+    final service = _service(
+      database,
+      gateway,
+      imageDirectory,
+      beforeBootstrap: () async {
+        final rows = await database.query(
+          DatabaseTables.outbox,
+          orderBy: 'seq ASC',
+        );
+        for (final row in rows) {
+          events.add('outbox');
+          await database.delete(
+            DatabaseTables.outbox,
+            where: 'seq = ?',
+            whereArgs: [row['seq']],
+          );
+        }
+      },
+    );
+
+    await service.triggerBootstrap(trigger: BootstrapTrigger.appOpen);
+
+    expect(events, ['outbox', 'outbox', 'bootstrap']);
+    expect(gateway.fetchCount, 1);
+  });
+
+  test('refuses logout reset while an outbox row remains', () async {
+    await _insertOutbox(database, status: 'failed');
+    final service = _service(database, _RecordingGateway(), imageDirectory);
+
+    await expectLater(service.clearForLogout(), throwsStateError);
+
+    expect(await database.query(DatabaseTables.outbox), hasLength(1));
+  });
 }
 
 BootstrapSyncService _service(
   AppDatabase database,
   BootstrapGateway gateway,
-  Directory imageDirectory,
-) => BootstrapSyncService.forTesting(
+  Directory imageDirectory, {
+  Future<void> Function()? beforeBootstrap,
+}) => BootstrapSyncService.forTesting(
   gateway: gateway,
   database: database,
   itemImageCache: ItemImageCacheService(
@@ -82,6 +131,7 @@ BootstrapSyncService _service(
   ),
   accessTokenProvider: () async => 'test-token',
   internetAccessChecker: () async => true,
+  beforeBootstrap: beforeBootstrap,
 );
 
 Future<void> _insertOutbox(AppDatabase database, {required String status}) =>

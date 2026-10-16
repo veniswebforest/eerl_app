@@ -2992,6 +2992,12 @@ abstract class AppLocalizations {
   /// **'Data Already Synced'**
   String get syncAlreadySyncedTitle;
 
+  /// No description provided for @syncSuccessfulTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Synced Successfully'**
+  String get syncSuccessfulTitle;
+
   /// No description provided for @syncBack.
   ///
   /// In en, this message translates to:
@@ -3007,7 +3013,7 @@ abstract class AppLocalizations {
   /// No description provided for @logoutConfirmationMessage.
   ///
   /// In en, this message translates to:
-  /// **'Any unsynced offline data will remain on this device until your next sign-in.'**
+  /// **'Any pending offline data will be synced before logout.'**
   String get logoutConfirmationMessage;
 
   /// No description provided for @logoutUnsyncedTripsPending.
@@ -3015,6 +3021,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'3 Unsynced Trips Pending'**
   String get logoutUnsyncedTripsPending;
+
+  /// No description provided for @logoutSyncRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending data could not be synced. Please try again before logging out.'**
+  String get logoutSyncRequired;
 
   /// No description provided for @logoutNo.
   ///

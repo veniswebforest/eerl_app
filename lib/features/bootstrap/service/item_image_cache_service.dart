@@ -63,9 +63,19 @@ class ItemImageCacheService {
 
   Future<File?> localFileForUrl(String? url) async {
     if (url == null || url.trim().isEmpty) return null;
+    final normalized = url.trim();
     final directory = await _directoryProvider();
-    final file = File(p.join(directory.path, _fileName(url)));
-    return await file.exists() ? file : null;
+    final file = File(p.join(directory.path, _fileName(normalized)));
+    try {
+      if (!await file.exists()) return null;
+      if (await file.length() > 0) return file;
+      // A process interruption can leave an unusable empty cache entry. It is
+      // not a valid cache hit and must be downloaded again.
+      await file.delete();
+    } on FileSystemException catch (error) {
+      _log('Could not validate cached image: ${error.message}');
+    }
+    return null;
   }
 
   Future<void> clear() async {
@@ -102,7 +112,8 @@ class ItemImageCacheService {
     final directory = await _directoryProvider();
     await directory.create(recursive: true);
     final destination = File(p.join(directory.path, _fileName(url!.trim())));
-    if (await destination.exists()) return destination;
+    final existing = await localFileForUrl(url);
+    if (existing != null) return existing;
 
     final temporary = File('${destination.path}.tmp');
     try {

@@ -1118,7 +1118,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('sync-now-button')));
     await tester.pumpAndSettle();
-    expect(find.text('Data Already Synced'), findsOneWidget);
+    expect(find.text('Data Synced Successfully'), findsOneWidget);
     expect(find.byKey(const ValueKey('sync-back-button')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

@@ -70,4 +70,73 @@ void main() {
     expect(messages.single, isNot(contains('another-secret')));
     expect(messages.single, contains('[REDACTED]'));
   });
+
+  test('prints a copyable cURL with a safe access-token placeholder', () {
+    final messages = <String>[];
+    final wrapWidths = <int?>[];
+    final original = debugPrint;
+    debugPrint = (message, {wrapWidth}) {
+      if (message != null) messages.add(message);
+      wrapWidths.add(wrapWidth);
+    };
+    addTearDown(() => debugPrint = original);
+
+    AppLogger.apiCurl(
+      'PUT',
+      Uri.parse('https://api.example.test/mobile/collections/collection-1'),
+      headers: const {
+        'accept': 'application/json',
+        'Authorization': 'Bearer real-secret-token',
+        'content-type': 'application/json',
+      },
+      body:
+          '{"centerId":"center-1","vehicleId":null,"lines":[{"itemId":"item-1","collectedQty":10}]}',
+    );
+
+    expect(messages, hasLength(1));
+    expect(messages.single, contains('[API][CURL]\ncurl --location --request'));
+    expect(messages.single, contains("'PUT'"));
+    expect(
+      messages.single,
+      contains("'https://api.example.test/mobile/collections/collection-1'"),
+    );
+    expect(
+      messages.single,
+      contains("'Authorization: Bearer YOUR_ACCESS_TOKEN'"),
+    );
+    expect(messages.single, isNot(contains('real-secret-token')));
+    expect(
+      messages.single,
+      allOf(
+        contains('"centerId": "center-1"'),
+        contains('"vehicleId": null'),
+        contains('"itemId": "item-1"'),
+        contains('"collectedQty": 10'),
+      ),
+    );
+    expect(wrapWidths.single, 4000);
+  });
+
+  test('prints and redacts a formatted API response body', () {
+    final messages = <String>[];
+    final original = debugPrint;
+    debugPrint = (message, {wrapWidth}) {
+      if (message != null) messages.add(message);
+    };
+    addTearDown(() => debugPrint = original);
+
+    AppLogger.apiResponse(
+      'POST',
+      Uri.parse('https://api.example.test/mobile/auth/verify-otp'),
+      statusCode: 200,
+      duration: const Duration(milliseconds: 12),
+      body: '{"data":{"accessToken":"secret","name":"Agent"}}',
+    );
+
+    expect(messages.single, contains('[API][RESPONSE] POST'));
+    expect(messages.single, contains('status=200'));
+    expect(messages.single, contains('"name": "Agent"'));
+    expect(messages.single, contains('"accessToken": "[REDACTED]"'));
+    expect(messages.single, isNot(contains('secret')));
+  });
 }

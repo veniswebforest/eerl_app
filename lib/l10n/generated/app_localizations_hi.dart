@@ -1528,6 +1528,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get syncAlreadySyncedTitle => 'डेटा पहले से सिंक है';
 
   @override
+  String get syncSuccessfulTitle => 'डेटा सफलतापूर्वक सिंक हो गया';
+
+  @override
   String get syncBack => 'वापस';
 
   @override
@@ -1535,10 +1538,14 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get logoutConfirmationMessage =>
-      'सिंक न किया गया ऑफ़लाइन डेटा आपके अगले साइन-इन तक इस डिवाइस पर रहेगा।';
+      'लॉग आउट से पहले लंबित ऑफ़लाइन डेटा सिंक किया जाएगा।';
 
   @override
   String get logoutUnsyncedTripsPending => '3 अनसिंक यात्राएँ लंबित';
+
+  @override
+  String get logoutSyncRequired =>
+      'लंबित डेटा सिंक नहीं हो सका। लॉग आउट करने से पहले फिर से प्रयास करें।';
 
   @override
   String get logoutNo => 'नहीं';

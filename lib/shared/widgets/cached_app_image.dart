@@ -5,8 +5,8 @@ import 'package:eerl_app/features/bootstrap/service/item_image_cache_service.dar
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-/// Displays local and bundled images directly. Remote images use the network
-/// while online and the persistent app image cache while offline.
+/// Displays local and bundled images directly. Remote images are downloaded
+/// once into the persistent app cache and rendered from that local file.
 class CachedAppImage extends StatelessWidget {
   const CachedAppImage({
     super.key,
@@ -50,19 +50,7 @@ class CachedAppImage extends StatelessWidget {
     if (!isOffline) {
       return FutureBuilder<File?>(
         future: ItemImageCacheService.instance.cacheFileForUrl(path),
-        builder: (context, snapshot) {
-          final fallback = _fileOrPlaceholder(snapshot.data);
-          return Image.network(
-            path,
-            width: width,
-            height: height,
-            fit: fit,
-            gaplessPlayback: true,
-            loadingBuilder: (context, child, progress) =>
-                progress == null ? child : fallback,
-            errorBuilder: (_, _, _) => fallback,
-          );
-        },
+        builder: (context, snapshot) => _fileOrPlaceholder(snapshot.data),
       );
     }
     return _cachedFile(path);

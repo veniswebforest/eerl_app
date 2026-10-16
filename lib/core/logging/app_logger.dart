@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
 /// Debug-only, category-based application logging.
@@ -30,6 +32,61 @@ abstract final class AppLogger {
         'REQUEST',
         '${method.toUpperCase()} $endpoint${_suffix(message)}',
       );
+
+  /// Prints the final HTTP request as a readable cURL without exposing the
+  /// access token. Headers and body must come from the request being sent so
+  /// the diagnostic cannot silently omit a request parameter.
+  static void apiCurl(
+    String method,
+    Uri url, {
+    Map<String, String> headers = const <String, String>{},
+    String? body,
+  }) {
+    if (!kDebugMode) return;
+    final safeHeaders = <String, String>{
+      for (final entry in headers.entries)
+        entry.key: entry.key.toLowerCase() == 'authorization'
+            ? 'Bearer YOUR_ACCESS_TOKEN'
+            : entry.value,
+    };
+    final parts = <String>[
+      'curl --location --request ${_shellQuote(method.toUpperCase())}',
+      _shellQuote(url.toString()),
+      for (final entry in safeHeaders.entries)
+        '--header ${_shellQuote('${entry.key}: ${entry.value}')}',
+      if (body != null && body.isNotEmpty)
+        '--data-raw ${_shellQuote(_prettyJson(body))}',
+    ];
+    final timestamp = DateTime.now().toUtc().toIso8601String();
+    debugPrint(
+      '[$timestamp][API][CURL]\n${parts.join(' \\\n  ')}',
+      // JSON is pretty-printed above, so every request parameter remains
+      // visible instead of a large single Logcat line being truncated.
+      wrapWidth: 4000,
+    );
+  }
+
+  /// Prints the complete HTTP response paired with the request URL. JSON is
+  /// formatted for copy/debug use and credentials are redacted recursively.
+  static void apiResponse(
+    String method,
+    Uri url, {
+    required int statusCode,
+    required Duration duration,
+    String? body,
+  }) {
+    if (!kDebugMode) return;
+    final timestamp = DateTime.now().toUtc().toIso8601String();
+    final responseBody = body == null || body.isEmpty
+        ? '<empty>'
+        : _prettyJson(body);
+    debugPrint(
+      '[$timestamp][API][RESPONSE] ${method.toUpperCase()} $url | '
+      'status=$statusCode | duration=${duration.inMilliseconds}ms\n'
+      '$responseBody',
+      wrapWidth: 4000,
+    );
+  }
 
   static void apiSuccess(
     String method,
@@ -75,6 +132,44 @@ abstract final class AppLogger {
 
   static String _suffix(String? message) =>
       message == null || message.trim().isEmpty ? '' : ' | $message';
+
+  static String _shellQuote(String value) =>
+      "'${value.replaceAll("'", "'\"'\"'")}'";
+
+  static String _prettyJson(String value) {
+    try {
+      return const JsonEncoder.withIndent(
+        '  ',
+      ).convert(_redactJsonValue(jsonDecode(value)));
+    } on FormatException {
+      return _redact(value);
+    }
+  }
+
+  static Object? _redactJsonValue(Object? value, [String? key]) {
+    if (key != null && _isSensitiveKey(key)) return '[REDACTED]';
+    if (value is Map) {
+      return <String, Object?>{
+        for (final entry in value.entries)
+          entry.key.toString(): _redactJsonValue(
+            entry.value,
+            entry.key.toString(),
+          ),
+      };
+    }
+    if (value is List) {
+      return value.map((item) => _redactJsonValue(item)).toList();
+    }
+    return value;
+  }
+
+  static bool _isSensitiveKey(String key) {
+    final normalized = key.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    return normalized.contains('token') ||
+        normalized == 'authorization' ||
+        normalized == 'password' ||
+        normalized == 'otp';
+  }
 
   static void _write(
     String color,

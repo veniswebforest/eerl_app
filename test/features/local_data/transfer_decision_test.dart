@@ -216,39 +216,37 @@ void main() {
     expect(await database.query(DatabaseTables.outbox), isEmpty);
   });
 
-  test(
-    'refused approval is removed and transfer returns to requested',
-    () async {
-      await repository.approveTransfer(
-        transferId: 'transfer-1',
-        destinationId: 'destination-1',
-        transferVehicleId: 'truck-1',
-        transferFee: 1800,
-      );
-      final service = OutgoingSyncService(
-        database: database,
-        internetAccessChecker: () async => true,
-        client: MockClient(
-          (_) async => http.Response(
-            jsonEncode({
-              'error': {'code': 'VEHICLE_INACTIVE'},
-            }),
-            422,
-          ),
+  test('422 approval refusal stays failed for agent review', () async {
+    await repository.approveTransfer(
+      transferId: 'transfer-1',
+      destinationId: 'destination-1',
+      transferVehicleId: 'truck-1',
+      transferFee: 1800,
+    );
+    final service = OutgoingSyncService(
+      database: database,
+      internetAccessChecker: () async => true,
+      client: MockClient(
+        (_) async => http.Response(
+          jsonEncode({
+            'error': {'code': 'VEHICLE_INACTIVE'},
+          }),
+          422,
         ),
-      );
+      ),
+    );
 
-      await service.drain();
+    await service.drain();
 
-      expect(await database.query(DatabaseTables.outbox), isEmpty);
-      final transfer = (await database.query(DatabaseTables.transfers)).single;
-      expect(transfer['status'], 'REQUESTED');
-      expect(transfer['destination_id'], isNull);
-      expect(transfer['planned_vehicle_number'], isNull);
-      expect(transfer['transfer_fee'], isNull);
-      expect(transfer['sync_state'], 'synced');
-    },
-  );
+    final outbox = (await database.query(DatabaseTables.outbox)).single;
+    expect(outbox['status'], 'failed');
+    expect(outbox['last_error'], 'HTTP 422 VEHICLE_INACTIVE');
+    final transfer = (await database.query(DatabaseTables.transfers)).single;
+    expect(transfer['status'], 'APPROVED');
+    expect(transfer['destination_id'], 'destination-1');
+    expect(transfer['transfer_fee'], 1800.0);
+    expect(transfer['sync_state'], 'failed');
+  });
 }
 
 Future<void> _insertTransfer(

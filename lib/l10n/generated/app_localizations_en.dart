@@ -1528,6 +1528,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncAlreadySyncedTitle => 'Data Already Synced';
 
   @override
+  String get syncSuccessfulTitle => 'Data Synced Successfully';
+
+  @override
   String get syncBack => 'Back';
 
   @override
@@ -1535,10 +1538,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logoutConfirmationMessage =>
-      'Any unsynced offline data will remain on this device until your next sign-in.';
+      'Any pending offline data will be synced before logout.';
 
   @override
   String get logoutUnsyncedTripsPending => '3 Unsynced Trips Pending';
+
+  @override
+  String get logoutSyncRequired =>
+      'Pending data could not be synced. Please try again before logging out.';
 
   @override
   String get logoutNo => 'No';

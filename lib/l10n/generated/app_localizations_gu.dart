@@ -1528,6 +1528,9 @@ class AppLocalizationsGu extends AppLocalizations {
   String get syncAlreadySyncedTitle => 'ડેટા પહેલેથી સિંક છે';
 
   @override
+  String get syncSuccessfulTitle => 'ડેટા સફળતાપૂર્વક સિંક થયો';
+
+  @override
   String get syncBack => 'પાછા';
 
   @override
@@ -1535,10 +1538,14 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get logoutConfirmationMessage =>
-      'સિંક ન થયેલો ઑફલાઇન ડેટા તમારા આગામી સાઇન-ઇન સુધી આ ડિવાઇસ પર રહેશે.';
+      'લૉગ આઉટ પહેલાં બાકી રહેલો ઑફલાઇન ડેટા સિંક કરવામાં આવશે.';
 
   @override
   String get logoutUnsyncedTripsPending => '3 સિંક ન થયેલી ટ્રિપ બાકી';
+
+  @override
+  String get logoutSyncRequired =>
+      'બાકી ડેટા સિંક થઈ શક્યો નથી. લૉગ આઉટ કરતાં પહેલાં ફરી પ્રયાસ કરો.';
 
   @override
   String get logoutNo => 'ના';

@@ -11,6 +11,7 @@ import 'package:eerl_app/features/bootstrap/data/bootstrap_repository.dart';
 import 'package:eerl_app/features/bootstrap/model/bootstrap_response.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_log.dart';
 import 'package:eerl_app/features/bootstrap/service/item_image_cache_service.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:flutter/foundation.dart';
 
 enum BootstrapTrigger {
@@ -32,6 +33,7 @@ class BootstrapSyncService extends ChangeNotifier {
     required this._accessTokenProvider,
     required this._onSessionExpired,
     required this._internetAccessChecker,
+    required this._beforeBootstrap,
   });
 
   factory BootstrapSyncService.forTesting({
@@ -42,6 +44,7 @@ class BootstrapSyncService extends ChangeNotifier {
     required Future<String?> Function() accessTokenProvider,
     Future<void> Function()? onSessionExpired,
     Future<bool> Function()? internetAccessChecker,
+    Future<void> Function()? beforeBootstrap,
   }) {
     final resolvedDatabase = database ?? AppDatabase.instance;
     return BootstrapSyncService._(
@@ -53,6 +56,7 @@ class BootstrapSyncService extends ChangeNotifier {
       accessTokenProvider: accessTokenProvider,
       onSessionExpired: onSessionExpired ?? () async {},
       internetAccessChecker: internetAccessChecker ?? () async => true,
+      beforeBootstrap: beforeBootstrap ?? () async {},
     );
   }
 
@@ -65,6 +69,7 @@ class BootstrapSyncService extends ChangeNotifier {
     onSessionExpired: AuthSessionStorage().clearSession,
     internetAccessChecker:
         InternetConnectivityService.instance.hasInternetAccess,
+    beforeBootstrap: OutgoingSyncService.instance.drainBeforeBootstrap,
   );
 
   static const _maximumPagesPerRun = 100;
@@ -78,8 +83,7 @@ class BootstrapSyncService extends ChangeNotifier {
   // Nullable so a singleton retained across Flutter hot reload can safely
   // fall back when this field did not exist on the original instance.
   final Future<bool> Function()? _internetAccessChecker;
-
-  Future<void> Function()? _beforeBootstrap;
+  final Future<void> Function() _beforeBootstrap;
   Future<void>? _activeRun;
   bool _running = false;
   bool _runAgain = false;
@@ -96,11 +100,6 @@ class BootstrapSyncService extends ChangeNotifier {
   bool get sessionExpired =>
       _lastError is BootstrapApiException &&
       (_lastError as BootstrapApiException).statusCode == 401;
-
-  /// Registers the outbox/photo sender that runs before Bootstrap.
-  void configureOutgoingSync(Future<void> Function()? callback) {
-    _beforeBootstrap = callback;
-  }
 
   Future<void> triggerBootstrap({required BootstrapTrigger trigger}) {
     _log('Trigger received: ${trigger.name}');
@@ -169,8 +168,8 @@ class BootstrapSyncService extends ChangeNotifier {
     }
 
     _log('Authentication ready; authorization will be attached to the request');
-    _log('Bootstrap start: trigger=${trigger.name}');
-    await _beforeBootstrap?.call();
+    _log('Outgoing phase start: trigger=${trigger.name}');
+    await _beforeBootstrap();
     // Bootstrap is the final phase of a sync run. Do not download server
     // state while any local mutation is still retained, including failed or
     // delayed rows; those entries must be retried/resolved first.
@@ -182,6 +181,8 @@ class BootstrapSyncService extends ChangeNotifier {
       );
       return false;
     }
+
+    _log('Bootstrap start: trigger=${trigger.name}');
 
     final itemImagesNeedRefetch =
         await _database.getSyncMeta('item_images_refetch_required') == '1';
@@ -320,7 +321,10 @@ class BootstrapSyncService extends ChangeNotifier {
     return null;
   }
 
-  Future<void> clearForLogout() => _fullUserReset();
+  Future<void> clearForLogout() async {
+    await _requireDrainedOutboxForReset();
+    await _fullUserReset();
+  }
 
   Future<int> _outboxCount({String? where}) async {
     final rows = await _database.rawQuery(

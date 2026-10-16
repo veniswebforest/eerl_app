@@ -60,6 +60,20 @@ class _RequestsScreenState extends State<RequestsScreen> {
     'CLOSED',
   }.contains(item.status.toUpperCase());
 
+  Future<void> _refresh() async {
+    await BootstrapSyncService.instance.triggerBootstrap(
+      trigger: BootstrapTrigger.pullToRefresh,
+    );
+    if (!mounted) return;
+    await _controller.load();
+  }
+
+  Future<void> _openRequest(RequestModel request) async {
+    await context.push(AppRoutes.requestDetail, extra: request);
+    if (!mounted) return;
+    await _controller.load();
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: AppColors.backgroundColor,
@@ -155,23 +169,46 @@ class _RequestsScreenState extends State<RequestsScreen> {
                               child: const Text('Retry'),
                             ),
                           )
-                        : items.isEmpty
-                        ? _RequestEmptyState(
-                            label: context.l10n.requestEmptyMessage,
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                            itemCount: items.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(height: 14),
-                            itemBuilder: (context, index) => RequestListCard(
-                              key: ValueKey(items[index].id),
-                              item: items[index],
-                              onTap: () => context.push(
-                                AppRoutes.requestDetail,
-                                extra: items[index],
-                              ),
-                            ),
+                        : RefreshIndicator(
+                            key: const Key('agent-requests-refresh'),
+                            onRefresh: _refresh,
+                            child: items.isEmpty
+                                ? LayoutBuilder(
+                                    builder: (context, constraints) => ListView(
+                                      physics:
+                                          const AlwaysScrollableScrollPhysics(),
+                                      children: [
+                                        SizedBox(
+                                          height: constraints.maxHeight,
+                                          child: _RequestEmptyState(
+                                            label: context
+                                                .l10n
+                                                .requestEmptyMessage,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : ListView.separated(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.fromLTRB(
+                                      16,
+                                      0,
+                                      16,
+                                      16,
+                                    ),
+                                    itemCount: items.length,
+                                    separatorBuilder: (_, _) =>
+                                        const SizedBox(height: 14),
+                                    itemBuilder: (context, index) =>
+                                        RequestListCard(
+                                          key: ValueKey(items[index].id),
+                                          item: items[index],
+                                          onTap: () =>
+                                              _openRequest(items[index]),
+                                        ),
+                                  ),
                           ),
                   ),
                   Padding(

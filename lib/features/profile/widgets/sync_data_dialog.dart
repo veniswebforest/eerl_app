@@ -10,6 +10,7 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 import '../model/sync_data_status.dart';
 import 'profile_assets.dart';
@@ -39,10 +40,18 @@ class SyncDataDialog extends StatefulWidget {
     super.key,
     this.initialStatus = SyncDataStatus.pending,
     this.pendingCount = 0,
+    this.hasInternetAccess,
+    this.syncPendingEntries,
+    this.loadSyncStatus,
+    this.refreshAfterSync,
   });
 
   final SyncDataStatus initialStatus;
   final int pendingCount;
+  final Future<bool> Function()? hasInternetAccess;
+  final Future<void> Function()? syncPendingEntries;
+  final Future<SyncStatusModel> Function()? loadSyncStatus;
+  final Future<void> Function()? refreshAfterSync;
 
   @override
   State<SyncDataDialog> createState() => _SyncDataDialogState();
@@ -56,8 +65,9 @@ class _SyncDataDialogState extends State<SyncDataDialog> {
 
   Future<void> _syncAll() async {
     if (_syncing) return;
-    final hasInternet = await InternetConnectivityService.instance
-        .hasInternetAccess();
+    final hasInternet =
+        await (widget.hasInternetAccess ??
+            InternetConnectivityService.instance.hasInternetAccess)();
     if (!mounted) return;
     if (!hasInternet) {
       setState(() => _internetUnavailable = true);
@@ -68,26 +78,46 @@ class _SyncDataDialogState extends State<SyncDataDialog> {
       _internetUnavailable = false;
     });
     try {
-      await OutgoingSyncService.instance.retryAllAndDrain();
-      await BootstrapSyncService.instance.triggerBootstrap(
-        trigger: BootstrapTrigger.pullToRefresh,
-      );
-      final status = await EerlLocalRepository.instance.getSyncStatus();
+      await (widget.syncPendingEntries ??
+          OutgoingSyncService.instance.retryAllAndDrain)();
+      final status =
+          await (widget.loadSyncStatus ??
+              EerlLocalRepository.instance.getSyncStatus)();
       if (!mounted) return;
       setState(() {
         _pendingCount = status.outboxCount;
         _status = status.hasOutboxEntries
             ? SyncDataStatus.pending
-            : SyncDataStatus.synced;
+            : SyncDataStatus.success;
       });
+      if (!status.hasOutboxEntries) {
+        unawaited(_refreshInBackground());
+      }
     } finally {
       if (mounted) setState(() => _syncing = false);
+    }
+  }
+
+  Future<void> _refreshInBackground() async {
+    try {
+      await (widget.refreshAfterSync ??
+          () => BootstrapSyncService.instance.triggerBootstrap(
+            trigger: BootstrapTrigger.pullToRefresh,
+          ))();
+    } catch (_) {
+      // The outgoing queue is already drained. A background refresh failure
+      // must not hide the successful sync confirmation from the user.
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isPending = _status == SyncDataStatus.pending;
+    final title = switch (_status) {
+      SyncDataStatus.pending => context.l10n.syncOfflineDataTitle,
+      SyncDataStatus.synced => context.l10n.syncAlreadySyncedTitle,
+      SyncDataStatus.success => context.l10n.syncSuccessfulTitle,
+    };
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 20),
       backgroundColor: AppColors.neutral50,
@@ -108,9 +138,10 @@ class _SyncDataDialogState extends State<SyncDataDialog> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    isPending
-                        ? context.l10n.syncOfflineDataTitle
-                        : context.l10n.syncAlreadySyncedTitle,
+                    title,
+                    key: _status == SyncDataStatus.success
+                        ? const Key('sync-dialog-success')
+                        : null,
                     textAlign: TextAlign.center,
                     style: AppTextStyles.boldH6_20.copyWith(
                       color: AppColors.neutral950,

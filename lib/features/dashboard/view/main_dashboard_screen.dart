@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/features/collection/view/collections_tab_screen.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
@@ -37,6 +38,8 @@ class MainDashboardScreen extends StatefulWidget {
 
 class _MainDashboardScreenState extends State<MainDashboardScreen> {
   late final DashboardNavigationProvider _navigation;
+  int _appliedBootstrapRevision = 0;
+  bool _roleRefreshScheduled = false;
 
   @override
   void initState() {
@@ -80,7 +83,15 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
   ) {
     // Rebuild SQLite-backed tabs after a completed Bootstrap run. Widgets must
     // still query their repositories rather than consume the API response.
-    context.watch<BootstrapSyncService?>()?.revision;
+    final bootstrapRevision = context.watch<BootstrapSyncService?>()?.revision;
+    if (bootstrapRevision != null &&
+        bootstrapRevision > _appliedBootstrapRevision &&
+        !_roleRefreshScheduled) {
+      _roleRefreshScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _refreshRoleAfterBootstrap(bootstrapRevision),
+      );
+    }
     final items = _createItems(context, navigation)
         .where(
           (item) =>
@@ -122,6 +133,17 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
               ),
       ),
     );
+  }
+
+  Future<void> _refreshRoleAfterBootstrap(int revision) async {
+    try {
+      final storedRole = await AppDatabase.instance.getSyncMeta('active_role');
+      if (!mounted) return;
+      _appliedBootstrapRevision = revision;
+      _navigation.updateRoleFromParent(DashboardUserRoleX.fromKey(storedRole));
+    } finally {
+      _roleRefreshScheduled = false;
+    }
   }
 
   List<BottomNavItemModel> _createItems(

@@ -57,19 +57,35 @@ class OutgoingSyncService {
   /// delays and re-queues permanent failures because the user explicitly asked
   /// the app to try all pending data again.
   Future<void> retryAllAndDrain() async {
+    await _retryAllAndDrain(reason: 'MANUAL');
+  }
+
+  /// Pre-Bootstrap drain ignores automatic retry delays so every retained
+  /// local API mutation gets its turn before server state is downloaded.
+  Future<void> drainBeforeBootstrap() async {
+    await _retryAllAndDrain(reason: 'PRE_BOOTSTRAP');
+  }
+
+  Future<void> _retryAllAndDrain({required String reason}) async {
     if (!await _hasInternetAccess()) {
-      _log('MANUAL sync skipped: internet is unavailable');
+      _log('$reason sync skipped: internet is unavailable');
       return;
     }
     final active = _activeDrain;
     if (active != null) await active;
+    final token = await _sessionStorage.getAccessToken();
+    if (token == null || token.trim().isEmpty) {
+      _log('$reason sync skipped: access token not found');
+      return;
+    }
+    await _reconcileKnownFailedConflicts(token);
     final resetCount = await _database.update(DatabaseTables.outbox, {
       'status': 'queued',
       'attempts': 0,
       'last_error': null,
       'next_attempt_at': null,
     }, where: "status IN ('queued', 'failed')");
-    _log('MANUAL sync re-queued $resetCount outbox item(s)');
+    _log('$reason sync re-queued $resetCount outbox item(s)');
     await drain();
   }
 
@@ -83,6 +99,8 @@ class OutgoingSyncService {
       _log('Skipped outgoing sync: access token not found');
       return;
     }
+
+    await _reconcileKnownFailedConflicts(token);
 
     // A failed row must stay part of the outgoing queue. Re-queue it once at
     // the beginning of each drain so a later app-open/reconnect/local mutation
@@ -168,9 +186,8 @@ class OutgoingSyncService {
 
   Future<void> _send(Map<String, Object?> item, String token) async {
     final seq = (item['seq'] as num).toInt();
-    final isCollectionSubmit =
-        item['entity'] == DatabaseTables.collections &&
-        item['kind'] == 'submit';
+    final isCollectionRequest = item['entity'] == DatabaseTables.collections;
+    final isCollectionSubmit = isCollectionRequest && item['kind'] == 'submit';
     final requestMethod = isCollectionSubmit
         ? 'PUT'
         : item['method']! as String;
@@ -238,6 +255,10 @@ class OutgoingSyncService {
           error: code,
         );
       }
+      if (response.statusCode == 409 &&
+          await _handleMovedRecordConflict(item, code, token)) {
+        return;
+      }
       if (isTransfer &&
           (item['kind'] == 'approve' || item['kind'] == 'reject') &&
           response.statusCode == 409 &&
@@ -254,16 +275,6 @@ class OutgoingSyncService {
           response.statusCode == 408 ||
           response.statusCode == 429) {
         await _retry(item, 'HTTP ${response.statusCode}');
-        return;
-      }
-      if (isTransfer &&
-          item['kind'] == 'approve' &&
-          response.statusCode == 422 &&
-          _transferApprovalRefusalCodes.contains(code)) {
-        await _undoTransferApproval(
-          item,
-          'HTTP ${response.statusCode}${code == null ? '' : ' $code'}',
-        );
         return;
       }
       if (isTransfer &&
@@ -345,49 +356,11 @@ class OutgoingSyncService {
     }
     final rows = await _database.query(
       DatabaseTables.collections,
-      columns: const [
-        'center_id',
-        'channel',
-        'vehicle_id',
-        'given_by_name',
-        'mrf_person_id',
-        'ragpicker_id',
-        'paid_by',
-        'gps_lat',
-        'gps_lng',
-      ],
+      columns: const ['gps_lat', 'gps_lng'],
       where: 'id = ?',
       whereArgs: [collectionId],
       limit: 1,
     );
-    final collection = rows.isEmpty ? const <String, Object?>{} : rows.single;
-
-    // Repair older queued payloads too and keep the exact key contract used by
-    // PUT /collections/{id}. Slip number and collection time are managed by
-    // the server and intentionally excluded.
-    resolved.putIfAbsent('centerId', () => collection['center_id']);
-    resolved.putIfAbsent('type', () => collection['channel']);
-    resolved.putIfAbsent('vehicleId', () => collection['vehicle_id']);
-    resolved.putIfAbsent('givenByName', () => collection['given_by_name']);
-    resolved.putIfAbsent('mrfLabourId', () => collection['mrf_person_id']);
-    resolved.putIfAbsent('ragpickerId', () => collection['ragpicker_id']);
-    resolved.putIfAbsent('handoverPhotoUrls', () => <Object?>[]);
-    resolved.putIfAbsent('paidBy', () => collection['paid_by']);
-    final rawLines = resolved['lines'];
-    final lines = rawLines is List
-        ? [
-            for (final rawLine in rawLines)
-              if (rawLine is Map)
-                <String, Object?>{
-                  'itemId': rawLine['itemId'],
-                  'collectedQty': rawLine['collectedQty'],
-                  'verifiedQty': rawLine['verifiedQty'],
-                  'rate': rawLine['rate'],
-                  'amount': rawLine['amount'],
-                  'photoUrls': rawLine['photoUrls'] ?? <Object?>[],
-                },
-          ]
-        : <Object?>[];
 
     final outboxGps = resolved['gps'];
     final outboxLatitude = outboxGps is Map && outboxGps['lat'] is num
@@ -397,45 +370,24 @@ class OutgoingSyncService {
         ? (outboxGps['lng'] as num).toDouble()
         : null;
     if (_isValidGps(outboxLatitude, outboxLongitude)) {
-      return <String, Object?>{
-        'centerId': resolved['centerId'],
-        'type': resolved['type'],
-        'vehicleId': resolved['vehicleId'],
-        'givenByName': resolved['givenByName'],
-        'mrfLabourId': resolved['mrfLabourId'],
-        'ragpickerId': resolved['ragpickerId'],
-        'handoverPhotoUrls': resolved['handoverPhotoUrls'],
-        'paidBy': resolved['paidBy'],
-        'lines': lines,
-        'gps': outboxGps,
-      };
+      return resolved;
     }
     final latitude = rows.isEmpty
         ? null
-        : (collection['gps_lat'] as num?)?.toDouble();
+        : (rows.single['gps_lat'] as num?)?.toDouble();
     final longitude = rows.isEmpty
         ? null
-        : (collection['gps_lng'] as num?)?.toDouble();
+        : (rows.single['gps_lng'] as num?)?.toDouble();
     if (!_isValidGps(latitude, longitude)) {
       throw StateError(
         'Collection $collectionId has no valid GPS in the outbox or local table.',
       );
     }
 
-    // Older queued rows may not contain GPS. Backfill those from the local
-    // collection row, while preserving coordinates already saved in outbox.
-    return <String, Object?>{
-      'centerId': resolved['centerId'],
-      'type': resolved['type'],
-      'vehicleId': resolved['vehicleId'],
-      'givenByName': resolved['givenByName'],
-      'mrfLabourId': resolved['mrfLabourId'],
-      'ragpickerId': resolved['ragpickerId'],
-      'handoverPhotoUrls': resolved['handoverPhotoUrls'],
-      'paidBy': resolved['paidBy'],
-      'lines': lines,
-      'gps': {'lat': latitude, 'lng': longitude},
-    };
+    // Only GPS is repaired from SQLite. Every other request key comes from
+    // the queued API payload and must stay exactly as defined by the API.
+    resolved['gps'] = {'lat': latitude, 'lng': longitude};
+    return resolved;
   }
 
   bool _isValidGps(double? latitude, double? longitude) =>
@@ -709,18 +661,28 @@ class OutgoingSyncService {
     if (data['photoUrls'] is List) 'photo_urls': jsonEncode(data['photoUrls']),
   };
 
-  Map<String, Object?> _requestServerValues(Map<Object?, Object?> data) => {
-    if (data['number'] != null) 'number': data['number'],
-    if (data['centerId'] != null) 'center_id': data['centerId'],
-    if (data['body'] != null) 'body': data['body'],
-    if (data['priority'] != null) 'priority': data['priority'],
-    if (data['status'] != null) 'status': data['status'],
-    if (data.containsKey('followUpAt')) 'follow_up_at': data['followUpAt'],
-    if (data.containsKey('answer')) 'answer': data['answer'],
-    if (data.containsKey('answeredAt')) 'answered_at': data['answeredAt'],
-    if (data['photoUrls'] is List) 'photo_urls': jsonEncode(data['photoUrls']),
-    if (data['createdAt'] != null) 'created_at': data['createdAt'],
-  };
+  Map<String, Object?> _requestServerValues(Map<Object?, Object?> data) {
+    final answer = data['answer'];
+    return <String, Object?>{
+      if (data['number'] != null) 'number': data['number'],
+      if (data['centerId'] != null) 'center_id': data['centerId'],
+      if (data['body'] != null) 'body': data['body'],
+      if (data['priority'] != null) 'priority': data['priority'],
+      if (data['status'] != null) 'status': data['status'],
+      if (data.containsKey('followUpAt')) 'follow_up_at': data['followUpAt'],
+      if (answer is Map && answer.containsKey('notes'))
+        'answer': answer['notes']
+      else if (data.containsKey('answer'))
+        'answer': answer,
+      if (answer is Map && answer.containsKey('at'))
+        'answered_at': answer['at']
+      else if (data.containsKey('answeredAt'))
+        'answered_at': data['answeredAt'],
+      if (data['photoUrls'] is List)
+        'photo_urls': jsonEncode(data['photoUrls']),
+      if (data['createdAt'] != null) 'created_at': data['createdAt'],
+    };
+  }
 
   Future<void> _applyCollectionResponseLines(
     Transaction txn,
@@ -746,6 +708,77 @@ class OutgoingSyncService {
         where: 'collection_id = ? AND item_id = ?',
         whereArgs: [collectionId, rawLine['itemId']],
       );
+    }
+  }
+
+  Future<void> _replaceCollectionResponseLines(
+    Transaction txn,
+    String collectionId,
+    Map<String, Object?> response,
+  ) async {
+    final data = response['data'];
+    if (data is! Map || data['lines'] is! List) return;
+    final lines = (data['lines'] as List).whereType<Map>().toList();
+    final existingRows = await txn.query(
+      DatabaseTables.collectionItems,
+      columns: const ['id', 'item_id'],
+      where: 'collection_id = ?',
+      whereArgs: [collectionId],
+    );
+    final existingIdByItem = <String, String>{
+      for (final row in existingRows)
+        if (row['item_id'] is String && row['id'] is String)
+          row['item_id']! as String: row['id']! as String,
+    };
+    final serverItemIds = lines
+        .map((line) => line['itemId']?.toString())
+        .whereType<String>()
+        .toSet();
+    for (final row in existingRows) {
+      if (serverItemIds.contains(row['item_id'])) continue;
+      await txn.delete(
+        DatabaseTables.collectionItems,
+        where: 'id = ?',
+        whereArgs: [row['id']],
+      );
+    }
+    for (var index = 0; index < lines.length; index++) {
+      final line = lines[index];
+      final itemId = line['itemId']?.toString();
+      if (itemId == null || itemId.isEmpty) continue;
+      final itemExists = Sqflite.firstIntValue(
+        await txn.rawQuery(
+          'SELECT COUNT(*) FROM ${DatabaseTables.items} WHERE id = ?',
+          [itemId],
+        ),
+      );
+      if (itemExists == 0) continue;
+      final values = <String, Object?>{
+        'collection_id': collectionId,
+        'item_id': itemId,
+        'qty': line['collectedQty'] ?? line['verifiedQty'] ?? 0,
+        'verified_qty': line['verifiedQty'],
+        'rate': line['rate'],
+        'amount': line['amount'],
+        'photo_urls': jsonEncode(
+          line['photoUrls'] is List ? line['photoUrls'] : const [],
+        ),
+        'sort_order': line['sortOrder'] ?? index,
+      };
+      final existingId = existingIdByItem[itemId];
+      if (existingId == null) {
+        await txn.insert(DatabaseTables.collectionItems, {
+          'id': '$collectionId:$itemId',
+          ...values,
+        });
+      } else {
+        await txn.update(
+          DatabaseTables.collectionItems,
+          values,
+          where: 'id = ?',
+          whereArgs: [existingId],
+        );
+      }
     }
   }
 
@@ -799,46 +832,531 @@ class OutgoingSyncService {
     AppLogger.syncError('OUTBOX_FAILED', '#${item['seq']}: $error');
   }
 
-  Future<void> _undoTransferApproval(
+  Future<void> _reconcileKnownFailedConflicts(String token) async {
+    final failed = await _database.query(
+      DatabaseTables.outbox,
+      where: "status = 'failed' AND last_error IS NOT NULL",
+      orderBy: 'seq ASC',
+    );
+    for (final row in failed) {
+      final code = _knownMovedConflictCode(row['last_error'] as String?);
+      if (code == null) continue;
+      await _handleMovedRecordConflict(row, code, token);
+    }
+  }
+
+  String? _knownMovedConflictCode(String? lastError) {
+    final normalized = lastError?.toUpperCase() ?? '';
+    for (final code in const [
+      'CANCELLED',
+      'DRAFT_DISCARDED',
+      'ALREADY_SUBMITTED',
+      'REJECTED',
+    ]) {
+      if (normalized.contains('409 $code')) return code;
+    }
+    return null;
+  }
+
+  Future<bool> _handleMovedRecordConflict(
     Map<String, Object?> item,
-    String error,
+    String? rawCode,
+    String token,
   ) async {
+    final code = rawCode?.toUpperCase();
+    final entity = item['entity'];
+    final kind = item['kind'];
+    if (code == 'CANCELLED' &&
+        entity == DatabaseTables.tasks &&
+        kind == 'complete') {
+      await _reconcileCancelledTask(item);
+      return true;
+    }
+    if (code == 'DRAFT_DISCARDED' &&
+        entity == DatabaseTables.collections &&
+        kind == 'draft_save') {
+      await _reconcileDiscardedDraft(item);
+      return true;
+    }
+    if (code == 'ALREADY_SUBMITTED' &&
+        entity == DatabaseTables.collections &&
+        (kind == 'draft_save' || kind == 'discard')) {
+      await _reconcileAlreadySubmittedCollection(item, token);
+      return true;
+    }
+    if (code == 'REJECTED' &&
+        entity == DatabaseTables.transfers &&
+        kind == 'handover') {
+      await _reconcileRejectedTransfer(item, token);
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> _reconcileCancelledTask(Map<String, Object?> item) async {
+    final taskId = item['entity_id']! as String;
+    final localPaths = <String>[];
     await _database.runInTransaction((txn) async {
-      await txn.delete(
-        DatabaseTables.outboxPhotos,
-        where: 'outbox_seq = ?',
-        whereArgs: [item['seq']],
+      localPaths.addAll(
+        await _photoPaths(
+          txn,
+          where: 'owner_table = ? AND owner_id = ?',
+          whereArgs: [DatabaseTables.tasks, taskId],
+        ),
       );
+      await _deleteOutboxItem(txn, (item['seq'] as num).toInt());
       await txn.delete(
+        DatabaseTables.photos,
+        where: 'owner_table = ? AND owner_id = ?',
+        whereArgs: [DatabaseTables.tasks, taskId],
+      );
+      await txn.update(
+        DatabaseTables.tasks,
+        {
+          'status': 'CANCELLED',
+          'completed_at': null,
+          'photo_urls': '[]',
+          'sync_state': 'synced',
+        },
+        where: 'id = ?',
+        whereArgs: [taskId],
+      );
+      await _insertConflictNotification(
+        txn,
+        code: 'CANCELLED',
+        entity: DatabaseTables.tasks,
+        entityId: taskId,
+        title: 'Task cancelled',
+        body: 'Your supervisor called off this task before completion synced.',
+        deepLink: '/tasks',
+      );
+    });
+    await _deleteLocalFiles(localPaths);
+    AppLogger.sync('CONFLICT_RECONCILED', 'task_id=$taskId code=CANCELLED');
+  }
+
+  Future<void> _reconcileDiscardedDraft(Map<String, Object?> item) async {
+    final collectionId = item['entity_id']! as String;
+    final localPaths = <String>[];
+    var deletedDraft = false;
+    await _database.runInTransaction((txn) async {
+      final draftRows = await txn.query(
         DatabaseTables.outbox,
-        where: 'seq = ?',
-        whereArgs: [item['seq']],
+        columns: const ['seq'],
+        where: 'entity = ? AND entity_id = ? AND kind = ?',
+        whereArgs: [DatabaseTables.collections, collectionId, 'draft_save'],
+      );
+      for (final draftRow in draftRows) {
+        await _deleteOutboxItem(txn, (draftRow['seq'] as num).toInt());
+      }
+      final remaining = Sqflite.firstIntValue(
+        await txn.rawQuery(
+          'SELECT COUNT(*) FROM ${DatabaseTables.outbox} '
+          'WHERE entity = ? AND entity_id = ?',
+          [DatabaseTables.collections, collectionId],
+        ),
+      );
+      if (remaining == 0) {
+        localPaths.addAll(await _collectionPhotoPaths(txn, collectionId));
+        await txn.rawDelete(
+          '''
+          DELETE FROM ${DatabaseTables.photos}
+          WHERE (owner_table = ? AND owner_id = ?)
+             OR (owner_table = ? AND owner_id IN (
+               SELECT id FROM ${DatabaseTables.collectionItems}
+               WHERE collection_id = ?
+             ))
+          ''',
+          [
+            DatabaseTables.collections,
+            collectionId,
+            DatabaseTables.collectionItems,
+            collectionId,
+          ],
+        );
+        await txn.delete(
+          DatabaseTables.collectionItems,
+          where: 'collection_id = ?',
+          whereArgs: [collectionId],
+        );
+        await txn.delete(
+          DatabaseTables.collections,
+          where: 'id = ?',
+          whereArgs: [collectionId],
+        );
+        deletedDraft = true;
+      }
+      await _insertConflictNotification(
+        txn,
+        code: 'DRAFT_DISCARDED',
+        entity: DatabaseTables.collections,
+        entityId: collectionId,
+        title: 'Collection draft discarded',
+        body: remaining == 0
+            ? 'The office discarded this draft before it could sync.'
+            : 'The office discarded an older draft save. Your queued submit is still waiting to sync.',
+        deepLink: '/collections',
+      );
+    });
+    await _deleteLocalFiles(localPaths);
+    AppLogger.sync(
+      'CONFLICT_RECONCILED',
+      'collection_id=$collectionId code=DRAFT_DISCARDED '
+          'draft_deleted=$deletedDraft',
+    );
+  }
+
+  Future<void> _reconcileAlreadySubmittedCollection(
+    Map<String, Object?> item,
+    String token,
+  ) async {
+    final collectionId = item['entity_id']! as String;
+    await _database.runInTransaction((txn) async {
+      await _deleteOutboxItem(txn, (item['seq'] as num).toInt());
+      if (!await _hasRemainingOutbox(
+        txn,
+        DatabaseTables.collections,
+        collectionId,
+      )) {
+        await txn.update(
+          DatabaseTables.collections,
+          {'sync_state': 'synced'},
+          where: 'id = ?',
+          whereArgs: [collectionId],
+        );
+      }
+      await _insertConflictNotification(
+        txn,
+        code: 'ALREADY_SUBMITTED',
+        entity: DatabaseTables.collections,
+        entityId: collectionId,
+        title: 'Collection already submitted',
+        body:
+            'This collection moved on while your local write was waiting. The latest server copy will be restored.',
+        deepLink: '/collections',
+      );
+    });
+
+    final response = await _fetchConflictEntity(
+      '/collections/$collectionId',
+      token,
+    );
+    if (response != null) {
+      await _database.runInTransaction((txn) async {
+        if (await _hasRemainingOutbox(
+          txn,
+          DatabaseTables.collections,
+          collectionId,
+        )) {
+          return;
+        }
+        final restored = await _restoreCollectionFromResponse(
+          txn,
+          collectionId,
+          response,
+        );
+        if (restored) {
+          await _replaceCollectionResponseLines(txn, collectionId, response);
+        }
+      });
+    }
+    AppLogger.sync(
+      'CONFLICT_RECONCILED',
+      'collection_id=$collectionId code=ALREADY_SUBMITTED '
+          'server_refreshed=${response != null}',
+    );
+  }
+
+  Future<void> _reconcileRejectedTransfer(
+    Map<String, Object?> item,
+    String token,
+  ) async {
+    final transferId = item['entity_id']! as String;
+    final localPaths = <String>[];
+    await _database.runInTransaction((txn) async {
+      localPaths.addAll(
+        await _photoPaths(
+          txn,
+          where:
+              'owner_table = ? AND owner_id = ? '
+              "AND field IN ('vehicle', 'weighbridge')",
+          whereArgs: [DatabaseTables.transfers, transferId],
+        ),
+      );
+      await _deleteOutboxItem(txn, (item['seq'] as num).toInt());
+      await txn.delete(
+        DatabaseTables.photos,
+        where:
+            'owner_table = ? AND owner_id = ? '
+            "AND field IN ('vehicle', 'weighbridge')",
+        whereArgs: [DatabaseTables.transfers, transferId],
+      );
+      await txn.update(
+        DatabaseTables.transferItems,
+        {'dispatched_qty': null},
+        where: 'transfer_id = ?',
+        whereArgs: [transferId],
       );
       await txn.update(
         DatabaseTables.transfers,
         {
-          'status': 'REQUESTED',
-          'destination_id': null,
-          'destination_name': null,
-          'truck_expected_at': null,
-          'transfer_vehicle_id': null,
-          'planned_vehicle_number': null,
-          'planned_vehicle_ownership': null,
-          'transporter_name': null,
-          'transfer_fee': null,
-          'dispatch_note': null,
-          'decided_by_name': null,
-          'approved_at': null,
+          'status': 'REJECTED',
+          'handed_over_at': null,
+          'vehicle_plate': null,
+          'driver_name': null,
+          'dispatched_weight': null,
+          'bale_count': null,
+          'vehicle_photo_urls': '[]',
+          'weighbridge_photo_urls': '[]',
+          'gps_lat': null,
+          'gps_lng': null,
           'sync_state': 'synced',
         },
         where: 'id = ?',
-        whereArgs: [item['entity_id']],
+        whereArgs: [transferId],
+      );
+      await _insertConflictNotification(
+        txn,
+        code: 'REJECTED',
+        entity: DatabaseTables.transfers,
+        entityId: transferId,
+        title: 'Transfer rejected',
+        body: 'This transfer was rejected before the handover could sync.',
+        deepLink: '/transfers',
       );
     });
-    AppLogger.sync(
-      'APPROVAL_UNDONE',
-      'transfer_id=${item['entity_id']} error=$error',
+    await _deleteLocalFiles(localPaths);
+
+    final response = await _fetchConflictEntity(
+      '/transfers/$transferId',
+      token,
     );
+    if (response != null) {
+      final data = _responseData(response);
+      final rejection = data['rejection'];
+      final decidedBy = rejection is Map ? rejection['by'] : null;
+      await _database.update(
+        DatabaseTables.transfers,
+        {
+          'status': 'REJECTED',
+          if (rejection is Map && rejection.containsKey('reason'))
+            'rejection_reason': rejection['reason'],
+          if (decidedBy is Map && decidedBy.containsKey('name'))
+            'decided_by_name': decidedBy['name'],
+          if (rejection is Map && rejection.containsKey('at'))
+            'approved_at': rejection['at'],
+          'sync_state': 'synced',
+        },
+        where: 'id = ?',
+        whereArgs: [transferId],
+      );
+    }
+    AppLogger.sync(
+      'CONFLICT_RECONCILED',
+      'transfer_id=$transferId code=REJECTED '
+          'server_refreshed=${response != null}',
+    );
+  }
+
+  Future<Map<String, Object?>?> _fetchConflictEntity(
+    String resourcePath,
+    String token,
+  ) async {
+    final logPath = '/api/v1/mobile$resourcePath';
+    final stopwatch = Stopwatch()..start();
+    AppLogger.apiRequest('GET', logPath, message: 'conflictRefresh=true');
+    try {
+      final response = await _client
+          .get(
+            Uri.parse('${AppConstants.apiBaseUrl}/mobile$resourcePath'),
+            headers: {
+              'accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(_timeout);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        AppLogger.apiSuccess(
+          'GET',
+          logPath,
+          statusCode: response.statusCode,
+          duration: stopwatch.elapsed,
+          message: 'conflictRefresh=true',
+        );
+        return _decodeObject(response.body);
+      }
+      AppLogger.apiError(
+        'GET',
+        logPath,
+        statusCode: response.statusCode,
+        duration: stopwatch.elapsed,
+        error: 'conflictRefresh=true',
+      );
+    } catch (error) {
+      AppLogger.apiError(
+        'GET',
+        logPath,
+        duration: stopwatch.elapsed,
+        error: error,
+      );
+    }
+    return null;
+  }
+
+  Map<Object?, Object?> _responseData(Map<String, Object?> response) {
+    final data = response['data'];
+    return data is Map ? data : const <Object?, Object?>{};
+  }
+
+  Future<bool> _restoreCollectionFromResponse(
+    Transaction txn,
+    String collectionId,
+    Map<String, Object?> response,
+  ) async {
+    final data = _responseData(response);
+    final values = _collectionServerValues(data)..['sync_state'] = 'synced';
+    final existing = await txn.query(
+      DatabaseTables.collections,
+      columns: const ['id'],
+      where: 'id = ?',
+      whereArgs: [collectionId],
+      limit: 1,
+    );
+    if (existing.isNotEmpty) {
+      await txn.update(
+        DatabaseTables.collections,
+        values,
+        where: 'id = ?',
+        whereArgs: [collectionId],
+      );
+      return true;
+    }
+
+    final center = data['center'];
+    final agent = data['agent'];
+    final centerId = data['centerId'] ?? (center is Map ? center['id'] : null);
+    final agentId = data['agentId'] ?? (agent is Map ? agent['id'] : null);
+    final agentName =
+        data['agentName'] ?? (agent is Map ? agent['name'] : null);
+    final channel = data['type'] ?? data['channel'];
+    if (centerId == null ||
+        agentId == null ||
+        agentName == null ||
+        channel == null) {
+      AppLogger.syncError(
+        'CONFLICT_REFRESH_INCOMPLETE',
+        'collection_id=$collectionId missing required server fields',
+      );
+      return false;
+    }
+    final centerExists = Sqflite.firstIntValue(
+      await txn.rawQuery(
+        'SELECT COUNT(*) FROM ${DatabaseTables.centers} WHERE id = ?',
+        [centerId],
+      ),
+    );
+    if (centerExists == 0) return false;
+    await txn.insert(DatabaseTables.collections, {
+      'id': collectionId,
+      'center_id': centerId,
+      'agent_id': agentId,
+      'agent_name': agentName,
+      'channel': channel,
+      'status': data['status'] ?? 'SUBMITTED',
+      'handover_photo_urls': '[]',
+      'updated_at':
+          data['updatedAt'] ?? DateTime.now().toUtc().toIso8601String(),
+      'sync_state': 'synced',
+      ...values,
+    });
+    return true;
+  }
+
+  Future<void> _deleteOutboxItem(Transaction txn, int seq) async {
+    await txn.delete(
+      DatabaseTables.outboxPhotos,
+      where: 'outbox_seq = ?',
+      whereArgs: [seq],
+    );
+    await txn.delete(DatabaseTables.outbox, where: 'seq = ?', whereArgs: [seq]);
+  }
+
+  Future<bool> _hasRemainingOutbox(
+    Transaction txn,
+    String entity,
+    String entityId,
+  ) async =>
+      Sqflite.firstIntValue(
+        await txn.rawQuery(
+          'SELECT COUNT(*) FROM ${DatabaseTables.outbox} '
+          'WHERE entity = ? AND entity_id = ?',
+          [entity, entityId],
+        ),
+      ) !=
+      0;
+
+  Future<List<String>> _photoPaths(
+    Transaction txn, {
+    required String where,
+    required List<Object?> whereArgs,
+  }) async => (await txn.query(
+    DatabaseTables.photos,
+    columns: const ['local_path'],
+    where: where,
+    whereArgs: whereArgs,
+  )).map((row) => row['local_path']).whereType<String>().toList();
+
+  Future<List<String>> _collectionPhotoPaths(
+    Transaction txn,
+    String collectionId,
+  ) async => (await txn.rawQuery(
+    '''
+        SELECT local_path FROM ${DatabaseTables.photos}
+        WHERE (owner_table = ? AND owner_id = ?)
+           OR (owner_table = ? AND owner_id IN (
+             SELECT id FROM ${DatabaseTables.collectionItems}
+             WHERE collection_id = ?
+           ))
+        ''',
+    [
+      DatabaseTables.collections,
+      collectionId,
+      DatabaseTables.collectionItems,
+      collectionId,
+    ],
+  )).map((row) => row['local_path']).whereType<String>().toList();
+
+  Future<void> _insertConflictNotification(
+    Transaction txn, {
+    required String code,
+    required String entity,
+    required String entityId,
+    required String title,
+    required String body,
+    required String deepLink,
+  }) => txn.insert(DatabaseTables.notifications, {
+    'id': 'sync-conflict:$code:$entity:$entityId',
+    'type': 'SYNC_CONFLICT',
+    'title': title,
+    'body': body,
+    'deep_link': deepLink,
+    'created_at': DateTime.now().toUtc().toIso8601String(),
+    'sync_state': 'synced',
+  }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+  Future<void> _deleteLocalFiles(Iterable<String> paths) async {
+    for (final path in paths.toSet()) {
+      if (path.trim().isEmpty) continue;
+      try {
+        final file = File(path);
+        if (await file.exists()) await file.delete();
+      } on FileSystemException catch (error) {
+        AppLogger.syncError(
+          'PHOTO_FILE_DELETE',
+          'path=${error.path ?? '[unknown]'} error=${error.message}',
+        );
+      }
+    }
   }
 
   Future<void> _refreshTransferAfterConflict(
@@ -1284,17 +1802,7 @@ class OutgoingSyncService {
   bool _isSuccess(int statusCode, String? code) =>
       (statusCode >= 200 && statusCode < 300) ||
       (statusCode == 409 &&
-          (code == 'NOT_PENDING' ||
-              code == 'ALREADY_CLOSED' ||
-              code == 'ALREADY_DISPATCHED'));
-
-  static const _transferApprovalRefusalCodes = <String>{
-    'OVER_STOCK',
-    'VEHICLE_REQUIRED',
-    'FEE_REQUIRED',
-    'VEHICLE_INACTIVE',
-    'VEHICLE_NOT_FOUND',
-  };
+          (code == 'NOT_PENDING' || code == 'ALREADY_CLOSED'));
 
   static const _tablesWithSyncState = <String>{
     DatabaseTables.centerItems,
