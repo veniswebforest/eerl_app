@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -10,15 +12,20 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 ///  - [_ConfirmState] — asks the user to confirm they want to end the day.
 ///  - [_SuccessState] — shows a success message after confirmation.
 class EndDayConfirmDialog extends StatefulWidget {
-  const EndDayConfirmDialog({super.key});
+  const EndDayConfirmDialog({super.key, required this.onConfirm});
 
-  static Future<bool?> show(BuildContext context) {
+  final Future<void> Function() onConfirm;
+
+  static Future<bool?> show(
+    BuildContext context, {
+    required Future<void> Function() onConfirm,
+  }) {
     return showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.6),
-      builder: (_) => const EndDayConfirmDialog(),
+      builder: (_) => EndDayConfirmDialog(onConfirm: onConfirm),
     );
   }
 
@@ -29,6 +36,9 @@ class EndDayConfirmDialog extends StatefulWidget {
 class _EndDayConfirmDialogState extends State<EndDayConfirmDialog>
     with SingleTickerProviderStateMixin {
   bool _confirmed = false;
+  bool _submitting = false;
+  String? _error;
+  Timer? _dismissTimer;
   late final AnimationController _scaleController;
   late final Animation<double> _scale;
 
@@ -47,19 +57,36 @@ class _EndDayConfirmDialogState extends State<EndDayConfirmDialog>
 
   @override
   void dispose() {
+    _dismissTimer?.cancel();
     _scaleController.dispose();
     super.dispose();
   }
 
-  void _confirm() {
-    setState(() => _confirmed = true);
-    _scaleController.forward();
-    // Auto-dismiss after success banner is shown
-    Future.delayed(const Duration(milliseconds: 1800), () {
-      if (mounted) {
-        Navigator.of(context).pop(true);
-      }
+  Future<void> _confirm() async {
+    if (_submitting) return;
+    setState(() {
+      _submitting = true;
+      _error = null;
     });
+    try {
+      await widget.onConfirm();
+      if (!mounted) return;
+      setState(() {
+        _submitting = false;
+        _confirmed = true;
+      });
+      _scaleController.forward();
+      // Auto-dismiss after the API-backed success banner is shown.
+      _dismissTimer = Timer(const Duration(milliseconds: 1800), () {
+        if (mounted) Navigator.of(context).pop(true);
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _submitting = false;
+        _error = error.toString();
+      });
+    }
   }
 
   @override
@@ -74,6 +101,8 @@ class _EndDayConfirmDialogState extends State<EndDayConfirmDialog>
                 key: const ValueKey('confirm'),
                 onConfirm: _confirm,
                 onCancel: () => Navigator.of(context).pop(),
+                isSubmitting: _submitting,
+                error: _error,
               ),
       ),
     );
@@ -89,10 +118,14 @@ class _ConfirmState extends StatelessWidget {
     super.key,
     required this.onConfirm,
     required this.onCancel,
+    required this.isSubmitting,
+    this.error,
   });
 
-  final VoidCallback onConfirm;
+  final Future<void> Function() onConfirm;
   final VoidCallback onCancel;
+  final bool isSubmitting;
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +186,17 @@ class _ConfirmState extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
+          if (error != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              error!.isEmpty ? l10n.endDayCloseFailed : error!,
+              key: const Key('end-day-close-error'),
+              style: AppTextStyles.mediumSH9_12.copyWith(
+                color: AppColors.red600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
           const SizedBox(height: 28),
 
           // Confirm button
@@ -161,7 +205,7 @@ class _ConfirmState extends StatelessWidget {
             height: 52,
             child: ElevatedButton(
               key: const Key('end-day-confirm-yes'),
-              onPressed: onConfirm,
+              onPressed: isSubmitting ? null : onConfirm,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor: AppColors.primary500,
@@ -170,10 +214,19 @@ class _ConfirmState extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text(
-                l10n.endDayConfirmYes,
-                style: AppTextStyles.semiboldH9_14,
-              ),
+              child: isSubmitting
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      l10n.endDayConfirmYes,
+                      style: AppTextStyles.semiboldH9_14,
+                    ),
             ),
           ),
           const SizedBox(height: 12),
@@ -184,7 +237,7 @@ class _ConfirmState extends StatelessWidget {
             height: 52,
             child: OutlinedButton(
               key: const Key('end-day-confirm-no'),
-              onPressed: onCancel,
+              onPressed: isSubmitting ? null : onCancel,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.neutral700,
                 side: const BorderSide(color: AppColors.neutral200),

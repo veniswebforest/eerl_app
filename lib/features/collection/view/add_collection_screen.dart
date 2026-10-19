@@ -40,7 +40,6 @@ class AddCollectionScreen extends StatefulWidget {
   final bool initialD2dReview;
   final String? initialCollectionId;
 
-
   @override
   State<AddCollectionScreen> createState() => _AddCollectionScreenState();
 }

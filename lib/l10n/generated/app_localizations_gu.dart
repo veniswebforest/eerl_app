@@ -2287,6 +2287,33 @@ class AppLocalizationsGu extends AppLocalizations {
       'તમારો દિવસ સફળતાપૂર્વક બંધ થઈ ગયો. બધો ડેટા સિંક થઈ ગયો.';
 
   @override
+  String get endDayLoadError => 'દિવસ બંધ કરવાની માહિતી લોડ થઈ શકી નથી.';
+
+  @override
+  String get endDayRetry => 'ફરી પ્રયાસ કરો';
+
+  @override
+  String endDayCloseAfterTime(String time) {
+    return 'દિવસ $time પછી બંધ કરી શકાશે.';
+  }
+
+  @override
+  String get endDayCloseBlocked => 'હજુ દિવસ બંધ કરી શકાતો નથી.';
+
+  @override
+  String get endDayCloseFailed => 'દિવસ બંધ થઈ શક્યો નથી. ફરી પ્રયાસ કરો.';
+
+  @override
+  String get endDayInternetTitle => 'ઇન્ટરનેટ કનેક્શન નથી';
+
+  @override
+  String get endDayInternetMessage =>
+      'દિવસની માહિતી લોડ કરવા અને દિવસ બંધ કરવા ઇન્ટરનેટ સાથે કનેક્ટ થાઓ.';
+
+  @override
+  String get endDayInternetOk => 'ઠીક છે';
+
+  @override
   String get requestTitle => 'વિનંતીઓ';
 
   @override

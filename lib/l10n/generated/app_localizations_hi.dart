@@ -2289,6 +2289,34 @@ class AppLocalizationsHi extends AppLocalizations {
       'आपका दिन सफलतापूर्वक बंद हो गया। सभी डेटा सिंक हो गया।';
 
   @override
+  String get endDayLoadError => 'दिन बंद करने की जानकारी लोड नहीं हो सकी।';
+
+  @override
+  String get endDayRetry => 'फिर से प्रयास करें';
+
+  @override
+  String endDayCloseAfterTime(String time) {
+    return 'दिन $time के बाद बंद किया जा सकता है।';
+  }
+
+  @override
+  String get endDayCloseBlocked => 'अभी दिन बंद नहीं किया जा सकता।';
+
+  @override
+  String get endDayCloseFailed =>
+      'दिन बंद नहीं हो सका। कृपया फिर से प्रयास करें।';
+
+  @override
+  String get endDayInternetTitle => 'इंटरनेट कनेक्शन नहीं है';
+
+  @override
+  String get endDayInternetMessage =>
+      'दिन की जानकारी लोड करने और दिन बंद करने के लिए इंटरनेट से कनेक्ट करें।';
+
+  @override
+  String get endDayInternetOk => 'ठीक है';
+
+  @override
   String get requestTitle => 'अनुरोध';
 
   @override

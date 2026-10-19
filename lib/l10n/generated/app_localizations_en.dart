@@ -2289,6 +2289,34 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your day has been closed successfully. All data has been synced.';
 
   @override
+  String get endDayLoadError => 'Unable to load day-close data.';
+
+  @override
+  String get endDayRetry => 'Retry';
+
+  @override
+  String endDayCloseAfterTime(String time) {
+    return 'Day closing is available after $time.';
+  }
+
+  @override
+  String get endDayCloseBlocked => 'The day cannot be closed yet.';
+
+  @override
+  String get endDayCloseFailed =>
+      'The day could not be closed. Please try again.';
+
+  @override
+  String get endDayInternetTitle => 'No Internet Connection';
+
+  @override
+  String get endDayInternetMessage =>
+      'Connect to the internet to load and close your day.';
+
+  @override
+  String get endDayInternetOk => 'OK';
+
+  @override
   String get requestTitle => 'Requests';
 
   @override

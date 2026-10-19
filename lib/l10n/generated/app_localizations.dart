@@ -4426,6 +4426,54 @@ abstract class AppLocalizations {
   /// **'Your day has been closed successfully. All data has been synced.'**
   String get endDaySuccessMessage;
 
+  /// No description provided for @endDayLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load day-close data.'**
+  String get endDayLoadError;
+
+  /// No description provided for @endDayRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get endDayRetry;
+
+  /// No description provided for @endDayCloseAfterTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Day closing is available after {time}.'**
+  String endDayCloseAfterTime(String time);
+
+  /// No description provided for @endDayCloseBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The day cannot be closed yet.'**
+  String get endDayCloseBlocked;
+
+  /// No description provided for @endDayCloseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The day could not be closed. Please try again.'**
+  String get endDayCloseFailed;
+
+  /// No description provided for @endDayInternetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get endDayInternetTitle;
+
+  /// No description provided for @endDayInternetMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to load and close your day.'**
+  String get endDayInternetMessage;
+
+  /// No description provided for @endDayInternetOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get endDayInternetOk;
+
   /// No description provided for @requestTitle.
   ///
   /// In en, this message translates to:
