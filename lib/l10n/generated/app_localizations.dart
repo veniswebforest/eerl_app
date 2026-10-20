@@ -6154,17 +6154,41 @@ abstract class AppLocalizations {
   /// **'RM Detail'**
   String get stockRmDetail;
 
+  /// No description provided for @stockEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No Stock for now'**
+  String get stockEmptyMessage;
+
   /// No description provided for @stockSrmDetail.
   ///
   /// In en, this message translates to:
   /// **'SRM Detail'**
   String get stockSrmDetail;
 
+  /// No description provided for @stockWipDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'WIP Detail'**
+  String get stockWipDetail;
+
+  /// No description provided for @stockFgDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'FG Detail'**
+  String get stockFgDetail;
+
   /// No description provided for @stockCenterValue.
   ///
   /// In en, this message translates to:
   /// **'Stock Center : EERL – Surat South'**
   String get stockCenterValue;
+
+  /// No description provided for @stockCenterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock Center : {name}'**
+  String stockCenterName(String name);
 
   /// No description provided for @stockUpdatedAgo.
   ///

@@ -281,7 +281,8 @@ class _HomeDrawerState extends State<HomeDrawer> {
         key: const Key('drawer-supervisor-expense'),
         label: context.l10n.drawerSupervisorExpense,
         icon: '$_supervisorDrawerIconPath/expense.svg',
-        showBadge: true,
+        showBadge: false,
+
         onTap: () {
           _close(context);
           context.push(AppRoutes.supervisorExpense);
@@ -413,7 +414,7 @@ class _SupervisorExpandableItem extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       decoration: BoxDecoration(
         color: expanded ? const Color(0xFFF2FBF3) : Colors.transparent,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [
@@ -422,7 +423,7 @@ class _SupervisorExpandableItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 6),
               decoration: BoxDecoration(
                 color: expanded ? const Color(0xFFC3EFCB) : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
@@ -802,7 +803,7 @@ class _DrawerItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 10),
         child: Row(
           children: [
             Stack(

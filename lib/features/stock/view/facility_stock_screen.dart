@@ -17,6 +17,7 @@ import '../widgets/stock_stage_card.dart';
 
 class FacilityStockScreen extends StatefulWidget {
   const FacilityStockScreen({super.key});
+
   @override
   State<FacilityStockScreen> createState() => _FacilityStockScreenState();
 }
@@ -24,7 +25,7 @@ class FacilityStockScreen extends StatefulWidget {
 class _FacilityStockScreenState extends State<FacilityStockScreen> {
   String? _centerId;
   late final LocalQueryController<
-    ({List<CenterModel> centers, List<StockModel> stock, SyncStatusModel sync})
+    ({List<CenterModel> centers, List<StockModel> stock})
   >
   _controller;
   int _bootstrapRevision = -1;
@@ -37,12 +38,10 @@ class _FacilityStockScreenState extends State<FacilityStockScreen> {
       final values = await Future.wait([
         EerlLocalRepository.instance.getCenters(),
         EerlLocalRepository.instance.getStock(centerId: _centerId),
-        EerlLocalRepository.instance.getSyncStatus(),
       ]);
       return (
         centers: values[0] as List<CenterModel>,
         stock: values[1] as List<StockModel>,
-        sync: values[2] as SyncStatusModel,
       );
     })..load();
   }
@@ -138,11 +137,6 @@ class _FacilityStockScreenState extends State<FacilityStockScreen> {
                         _controller.load();
                       },
                     ),
-                  const SizedBox(height: 16),
-                  _UpdatedBanner(
-                    label: context.l10n.stockLastUpdated,
-                    value: data?.sync.lastBootstrapAt ?? '-',
-                  ),
                   const SizedBox(height: 24),
                   Text(
                     context.l10n.stockStageOverview,
@@ -202,8 +196,8 @@ class _FacilityStockScreenState extends State<FacilityStockScreen> {
             return StockStageCard(
               code: definition.$1,
               description: definition.$3,
-              weight: '${totals.$1.toStringAsFixed(2)} kg',
-              itemCount: '${totals.$2} items',
+              weight: totals.$1.toInt().toString(),
+              itemCount: '${totals.$2}',
               icon: definition.$4,
               foreground: definition.$5,
               iconBackground: definition.$6,
@@ -218,36 +212,4 @@ class _FacilityStockScreenState extends State<FacilityStockScreen> {
       ],
     ];
   }
-}
-
-class _UpdatedBanner extends StatelessWidget {
-  const _UpdatedBanner({required this.label, required this.value});
-  final String label;
-  final String value;
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 40,
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    decoration: BoxDecoration(
-      color: AppColors.primary50,
-      border: Border.all(color: AppColors.primary500),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Row(
-      children: [
-        const Icon(Icons.circle, size: 10, color: AppColors.primary500),
-        const SizedBox(width: 8),
-        Expanded(child: Text(label, style: AppTextStyles.semiboldH9_14)),
-        Flexible(
-          child: Text(
-            value,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.mediumSH8_14.copyWith(
-              color: AppColors.neutral600,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -7,9 +9,9 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/records/widgets/collection_detail_assets.dart';
 
 class RejectCollectionScreen extends StatefulWidget {
-  const RejectCollectionScreen({super.key, this.collectionId});
+  const RejectCollectionScreen({super.key, this.collectionNumber});
 
-  final String? collectionId;
+  final String? collectionNumber;
 
   @override
   State<RejectCollectionScreen> createState() => _RejectCollectionScreenState();
@@ -58,10 +60,10 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                _CollectionIdCard(
-                  value: widget.collectionId?.startsWith('#') == true
-                      ? widget.collectionId!
-                      : '#${widget.collectionId ?? ''}',
+                _CollectionNumberCard(
+                  value: widget.collectionNumber?.startsWith('#') == true
+                      ? widget.collectionNumber!
+                      : '#${widget.collectionNumber ?? ''}',
                 ),
                 const SizedBox(height: 16),
                 Text.rich(
@@ -212,8 +214,8 @@ class _BackButton extends StatelessWidget {
   );
 }
 
-class _CollectionIdCard extends StatelessWidget {
-  const _CollectionIdCard({required this.value});
+class _CollectionNumberCard extends StatelessWidget {
+  const _CollectionNumberCard({required this.value});
 
   final String value;
 
@@ -224,13 +226,7 @@ class _CollectionIdCard extends StatelessWidget {
     decoration: BoxDecoration(
       color: AppColors.neutral50,
       borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x1F000000),
-          blurRadius: 8,
-          offset: Offset(0, 2),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Row(
       children: [

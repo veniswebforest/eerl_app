@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -42,13 +44,7 @@ class CollectionHistoryCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: pending ? Border.all(color: AppColors.primary400) : null,
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x14000000),
-              blurRadius: 5,
-              offset: Offset(0, 2),
-            ),
-          ],
+          boxShadow: [HomeStyles.cardShadow],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

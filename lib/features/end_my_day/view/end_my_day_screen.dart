@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -8,6 +10,7 @@ import 'package:eerl_app/core/network/internet_connectivity_service.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/auth/data/auth_session_storage.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/end_my_day/data/day_close_remote_service.dart';
 import 'package:eerl_app/features/end_my_day/model/day_close_response.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
@@ -25,6 +28,9 @@ class EndMyDayScreen extends StatefulWidget {
     this.closeDay,
     this.hasInternetAccess,
     this.now,
+    this.syncOutbox,
+    this.pendingOutboxCount,
+    this.connectivityChanges,
   });
 
   final bool isSupervisor;
@@ -32,6 +38,9 @@ class EndMyDayScreen extends StatefulWidget {
   final Future<void> Function(String centerId)? closeDay;
   final Future<bool> Function()? hasInternetAccess;
   final DateTime Function()? now;
+  final Future<void> Function()? syncOutbox;
+  final Future<int> Function()? pendingOutboxCount;
+  final Stream<void>? connectivityChanges;
 
   @override
   State<EndMyDayScreen> createState() => _EndMyDayScreenState();
@@ -39,14 +48,25 @@ class EndMyDayScreen extends StatefulWidget {
 
 class _EndMyDayScreenState extends State<EndMyDayScreen> {
   late Future<DayCloseScreenData> _data;
-  Timer? _sixPmTimer;
+  Timer? _lockTimeTimer;
+  StreamSubscription<void>? _connectivitySubscription;
   bool _internetDialogVisible = false;
+  bool _offline = false;
+  bool _autoRetrying = false;
+  BuildContext? _internetDialogContext;
 
   @override
   void initState() {
     super.initState();
     _data = _load();
-    _scheduleSixPmRefresh();
+    final connectivityChanges =
+        widget.connectivityChanges ??
+        (widget.hasInternetAccess == null
+            ? InternetConnectivityService.instance.connectivityChanges
+            : null);
+    _connectivitySubscription = connectivityChanges?.listen((_) {
+      unawaited(_retryWhenInternetReturns());
+    });
   }
 
   Future<DayCloseScreenData> _load() async {
@@ -54,41 +74,98 @@ class _EndMyDayScreenState extends State<EndMyDayScreen> {
         await (widget.hasInternetAccess ??
             InternetConnectivityService.instance.hasInternetAccess)();
     if (!hasInternet) {
+      _offline = true;
       _queueInternetDialog();
       throw const DayCloseApiException('No internet connection.');
     }
+    _offline = false;
     final customLoader = widget.loadData;
-    if (customLoader != null) return customLoader();
-
-    final centerId = await EerlLocalRepository.instance.activeCenterId;
-    if (centerId == null || centerId.trim().isEmpty) {
-      throw const DayCloseApiException('No collection center is selected.');
+    final repository = EerlLocalRepository.instance;
+    final syncOutbox = widget.syncOutbox;
+    if (syncOutbox != null) {
+      await syncOutbox();
+    } else if (customLoader == null) {
+      await OutgoingSyncService.instance.retryAllAndDrain();
     }
-    final accessToken = await AuthSessionStorage().getAccessToken();
-    if (accessToken == null || accessToken.trim().isEmpty) {
-      throw const DayCloseApiException('Your session is unavailable.');
+    final pendingOutboxCount = widget.pendingOutboxCount != null
+        ? await widget.pendingOutboxCount!()
+        : customLoader == null
+        ? (await repository.getSyncStatus()).outboxCount
+        : 0;
+    if (pendingOutboxCount > 0) {
+      throw DayCloseApiException(
+        '$pendingOutboxCount pending offline entr${pendingOutboxCount == 1 ? 'y' : 'ies'} '
+        'must sync before End My Day can continue.',
+      );
     }
-    final response = await DayCloseRemoteService.instance.fetch(
-      centerId: centerId,
-      accessToken: accessToken,
-    );
-    final syncStatus = await EerlLocalRepository.instance.getSyncStatus();
-    return DayCloseScreenData(
-      dayClose: response.data,
-      pendingSyncCount: syncStatus.outboxCount,
-    );
+    late final DayCloseScreenData data;
+    if (customLoader != null) {
+      data = await customLoader();
+    } else {
+      final centerId = await repository.activeCenterId;
+      if (centerId == null || centerId.trim().isEmpty) {
+        throw const DayCloseApiException('No collection center is selected.');
+      }
+      final center = await repository.getCenter(centerId);
+      final accessToken = await AuthSessionStorage().getAccessToken();
+      if (accessToken == null || accessToken.trim().isEmpty) {
+        throw const DayCloseApiException('Your session is unavailable.');
+      }
+      final response = await DayCloseRemoteService.instance.fetch(
+        centerId: centerId,
+        accessToken: accessToken,
+      );
+      data = DayCloseScreenData(
+        dayClose: response.data,
+        pendingSyncCount: pendingOutboxCount,
+        eodLockTime: center?.eodLockTime,
+      );
+    }
+    if (mounted) _scheduleLockTimeRefresh(data.effectiveLockTime);
+    return data;
   }
 
   DateTime _now() => (widget.now ?? DateTime.now)();
 
-  bool get _isAfterSixPm => _now().hour >= 18;
-
-  void _scheduleSixPmRefresh() {
+  DateTime? _lockDateTime(String lockTime) {
+    final match = RegExp(
+      r'^(\d{1,2}):(\d{2})(?::(\d{2}))?$',
+    ).firstMatch(lockTime.trim());
+    if (match == null) return null;
+    final hour = int.tryParse(match.group(1)!);
+    final minute = int.tryParse(match.group(2)!);
+    final second = int.tryParse(match.group(3) ?? '0');
+    if (hour == null ||
+        minute == null ||
+        second == null ||
+        hour > 23 ||
+        minute > 59 ||
+        second > 59) {
+      return null;
+    }
     final now = _now();
-    final sixPm = DateTime(now.year, now.month, now.day, 18);
-    if (!now.isBefore(sixPm)) return;
-    _sixPmTimer = Timer(sixPm.difference(now), () {
-      if (mounted) _retry();
+    return DateTime(now.year, now.month, now.day, hour, minute, second);
+  }
+
+  bool _isAfterLockTime(String lockTime) {
+    final lockDateTime = _lockDateTime(lockTime);
+    return lockDateTime != null && !_now().isBefore(lockDateTime);
+  }
+
+  String _lockTimeLabel(String lockTime) {
+    final lockDateTime = _lockDateTime(lockTime);
+    return lockDateTime == null
+        ? lockTime
+        : DateFormat('h:mm a').format(lockDateTime);
+  }
+
+  void _scheduleLockTimeRefresh(String lockTime) {
+    _lockTimeTimer?.cancel();
+    final now = _now();
+    final lockDateTime = _lockDateTime(lockTime);
+    if (lockDateTime == null || !now.isBefore(lockDateTime)) return;
+    _lockTimeTimer = Timer(lockDateTime.difference(now), () {
+      if (mounted) setState(() {});
     });
   }
 
@@ -101,21 +178,49 @@ class _EndMyDayScreenState extends State<EndMyDayScreen> {
   Future<void> _showInternetDialog() async {
     if (_internetDialogVisible) return;
     _internetDialogVisible = true;
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        key: const Key('end-day-internet-dialog'),
-        title: Text(context.l10n.endDayInternetTitle),
-        content: Text(context.l10n.endDayInternetMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(context.l10n.endDayInternetOk),
-          ),
-        ],
-      ),
-    );
-    _internetDialogVisible = false;
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) {
+          _internetDialogContext = dialogContext;
+          return AlertDialog(
+            key: const Key('end-day-internet-dialog'),
+            title: Text(context.l10n.endDayInternetTitle),
+            content: Text(context.l10n.endDayInternetMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(context.l10n.endDayInternetOk),
+              ),
+            ],
+          );
+        },
+      );
+    } finally {
+      _internetDialogContext = null;
+      _internetDialogVisible = false;
+    }
+  }
+
+  Future<void> _retryWhenInternetReturns() async {
+    if (!_offline || _autoRetrying || !mounted) return;
+    _autoRetrying = true;
+    try {
+      final hasInternet =
+          await (widget.hasInternetAccess ??
+              InternetConnectivityService.instance.hasInternetAccess)();
+      if (!hasInternet || !mounted) return;
+      _offline = false;
+      final dialogContext = _internetDialogContext;
+      if (dialogContext != null &&
+          dialogContext.mounted &&
+          Navigator.of(dialogContext).canPop()) {
+        Navigator.of(dialogContext).pop();
+      }
+      _retry();
+    } finally {
+      _autoRetrying = false;
+    }
   }
 
   Future<void> _closeDay(String centerId) async {
@@ -131,11 +236,16 @@ class _EndMyDayScreenState extends State<EndMyDayScreen> {
     );
   }
 
-  void _retry() => setState(() => _data = _load());
+  void _retry() {
+    setState(() {
+      _data = _load();
+    });
+  }
 
   @override
   void dispose() {
-    _sixPmTimer?.cancel();
+    _lockTimeTimer?.cancel();
+    unawaited(_connectivitySubscription?.cancel());
     super.dispose();
   }
 
@@ -164,9 +274,11 @@ class _EndMyDayScreenState extends State<EndMyDayScreen> {
               onRetry: _retry,
             );
           }
+          final data = snapshot.data!;
           return _AgentEndDayContent(
-            data: snapshot.data!,
-            isAfterSixPm: _isAfterSixPm,
+            data: data,
+            isAfterLockTime: _isAfterLockTime(data.effectiveLockTime),
+            lockTimeLabel: _lockTimeLabel(data.effectiveLockTime),
             onCloseDay: _closeDay,
           );
         },
@@ -178,12 +290,14 @@ class _EndMyDayScreenState extends State<EndMyDayScreen> {
 class _AgentEndDayContent extends StatelessWidget {
   const _AgentEndDayContent({
     required this.data,
-    required this.isAfterSixPm,
+    required this.isAfterLockTime,
+    required this.lockTimeLabel,
     required this.onCloseDay,
   });
 
   final DayCloseScreenData data;
-  final bool isAfterSixPm;
+  final bool isAfterLockTime;
+  final String lockTimeLabel;
   final Future<void> Function(String centerId) onCloseDay;
 
   static final _currency = NumberFormat.currency(
@@ -211,7 +325,7 @@ class _AgentEndDayContent extends StatelessWidget {
     final l10n = context.l10n;
     final dayClose = data.dayClose;
     final summary = dayClose.summary;
-    final canClose = isAfterSixPm && dayClose.canClose;
+    final canClose = isAfterLockTime && dayClose.canClose;
     final activities = [
       EndDayActivityItem(
         label: l10n.endDayCompletedCollections,
@@ -306,11 +420,11 @@ class _AgentEndDayContent extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          !isAfterSixPm
-                              ? l10n.endDayCloseAfterTime('6:00 PM')
+                          !isAfterLockTime
+                              ? l10n.endDayCloseAfterTime(lockTimeLabel)
                               : dayClose.blockedReason == 'BEFORE_LOCK_TIME' &&
                                     dayClose.lockTime.isNotEmpty
-                              ? l10n.endDayCloseAfterTime(dayClose.lockTime)
+                              ? l10n.endDayCloseAfterTime(lockTimeLabel)
                               : l10n.endDayCloseBlocked,
                           textAlign: TextAlign.center,
                           style: AppTextStyles.mediumSH9_12.copyWith(
@@ -435,13 +549,7 @@ class _ClosingBalanceCard extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x16000000),
-          blurRadius: 8,
-          offset: Offset(0, 3),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Column(
       children: [

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -35,13 +37,7 @@ class D2dVehicleCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(14),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x1A000000),
-                blurRadius: 5,
-                offset: Offset(0, 2),
-              ),
-            ],
+            boxShadow: [HomeStyles.cardShadow],
           ),
           child: Stack(
             children: [

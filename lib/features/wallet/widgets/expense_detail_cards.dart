@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -21,15 +23,7 @@ class ExpenseDetailCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: border == null ? null : Border.all(color: border!),
-        boxShadow: border == null
-            ? const [
-                BoxShadow(
-                  color: Color(0x1F000000),
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
-              ]
-            : null,
+        boxShadow: border == null ? [HomeStyles.cardShadow] : null,
       ),
       child: child,
     );
@@ -49,13 +43,7 @@ class ExpenseReferenceCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1F000000),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
+        boxShadow: [HomeStyles.cardShadow],
       ),
       child: Row(
         children: [

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -348,7 +350,7 @@ class _TaskStatusRow extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(10),
-      boxShadow: const [BoxShadow(color: Color(0x12000000), blurRadius: 5)],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Wrap(
       spacing: 8,

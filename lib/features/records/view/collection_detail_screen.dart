@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -182,13 +184,7 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.neutral50,
                   borderRadius: BorderRadius.circular(12),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x17000000),
-                      blurRadius: 5,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
+                  boxShadow: [HomeStyles.cardShadow],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -601,9 +597,7 @@ class _DraftActions extends StatelessWidget {
 const _detailCardDecoration = BoxDecoration(
   color: AppColors.neutral50,
   borderRadius: BorderRadius.all(Radius.circular(12)),
-  boxShadow: [
-    BoxShadow(color: Color(0x1F000000), blurRadius: 6, offset: Offset(0, 2)),
-  ],
+  boxShadow: [HomeStyles.cardShadow],
 );
 
 class _StatusBanner extends StatelessWidget {

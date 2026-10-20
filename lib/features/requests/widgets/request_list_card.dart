@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
@@ -23,13 +25,7 @@ class RequestListCard extends StatelessWidget {
         color: Colors.white,
         border: Border.all(color: AppColors.cool100),
         borderRadius: BorderRadius.circular(10),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x16000000),
-            blurRadius: 5,
-            offset: Offset(0, 2),
-          ),
-        ],
+        boxShadow: [HomeStyles.cardShadow],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

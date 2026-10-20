@@ -1,4 +1,5 @@
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -31,15 +32,7 @@ class PrimaryButton extends StatelessWidget {
         color: isEnabled && !isLoading
             ? AppColors.primaryLight
             : AppColors.neutral400,
-        boxShadow: isEnabled && !isLoading
-            ? [
-                BoxShadow(
-                  color: AppColors.primaryLight.withValues(alpha: 0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
+        boxShadow: isEnabled && !isLoading ? [HomeStyles.cardShadow] : null,
       ),
       child: Material(
         color: Colors.transparent,

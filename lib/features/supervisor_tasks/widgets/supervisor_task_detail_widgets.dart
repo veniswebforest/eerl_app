@@ -4,6 +4,8 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/supervisor_tasks/model/supervisor_task_detail_status.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_assets.dart';
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class SupervisorTaskStatusCard extends StatelessWidget {
@@ -41,13 +43,7 @@ class SupervisorTaskStatusCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1F000000),
-            offset: Offset(0, 2),
-            blurRadius: 8,
-          ),
-        ],
+        boxShadow: [HomeStyles.cardShadow],
       ),
       child: Align(
         alignment: AlignmentDirectional.centerStart,
@@ -107,15 +103,7 @@ class SupervisorTaskDetailCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: emphasized ? Colors.white : AppColors.cool200,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: emphasized
-            ? const [
-                BoxShadow(
-                  color: Color(0x1F000000),
-                  offset: Offset(0, 2),
-                  blurRadius: 4,
-                ),
-              ]
-            : null,
+        boxShadow: emphasized ? [HomeStyles.cardShadow] : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

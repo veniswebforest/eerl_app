@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
+
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../model/request_list_item.dart';
@@ -25,13 +27,7 @@ class RequestSegmentedControl extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(10),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x16000000),
-          blurRadius: 5,
-          offset: Offset(0, 2),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Row(
       children: [

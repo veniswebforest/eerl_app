@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -1516,7 +1518,6 @@ class _PhotoMaterialCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-
                 SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1720,13 +1721,7 @@ class _ReviewDetailCard extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x1F000000),
-          blurRadius: 4,
-          offset: Offset(0, 2),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1770,13 +1765,7 @@ class _ReviewItemsCard extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x1F000000),
-          blurRadius: 4,
-          offset: Offset(0, 2),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1811,13 +1800,7 @@ class _ReviewVehiclePhotoCard extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x1F000000),
-          blurRadius: 4,
-          offset: Offset(0, 2),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2068,13 +2051,7 @@ class _ReviewTotalsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1F000000),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
+        boxShadow: [HomeStyles.cardShadow],
       ),
       child: Column(
         children: [

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
+
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'collection_assets.dart';
@@ -27,13 +29,7 @@ class StartCollectionCard extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [AppColors.primary100, Colors.white],
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1F000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
+        boxShadow: [HomeStyles.cardShadow],
       ),
       child: Stack(
         alignment: Alignment.topCenter,

@@ -6,6 +6,8 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_assets.dart';
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -21,13 +23,7 @@ class SupervisorRequestStatusCard extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x1F000000),
-          offset: Offset(0, 2),
-          blurRadius: 8,
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Align(
       alignment: AlignmentDirectional.centerStart,
@@ -96,15 +92,7 @@ class SupervisorRequestInfoCard extends StatelessWidget {
     decoration: BoxDecoration(
       color: muted ? AppColors.cool200 : Colors.white,
       borderRadius: BorderRadius.circular(12),
-      boxShadow: muted
-          ? null
-          : const [
-              BoxShadow(
-                color: Color(0x1F000000),
-                offset: Offset(0, 2),
-                blurRadius: 4,
-              ),
-            ],
+      boxShadow: muted ? null : [HomeStyles.cardShadow],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

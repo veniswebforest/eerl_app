@@ -3196,10 +3196,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stockRmDetail => 'RM Detail';
 
   @override
+  String get stockEmptyMessage => 'No Stock for now';
+
+  @override
   String get stockSrmDetail => 'SRM Detail';
 
   @override
+  String get stockWipDetail => 'WIP Detail';
+
+  @override
+  String get stockFgDetail => 'FG Detail';
+
+  @override
   String get stockCenterValue => 'Stock Center : EERL – Surat South';
+
+  @override
+  String stockCenterName(String name) {
+    return 'Stock Center : $name';
+  }
 
   @override
   String get stockUpdatedAgo => '10m ago';

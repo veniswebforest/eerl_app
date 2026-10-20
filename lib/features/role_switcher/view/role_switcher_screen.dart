@@ -55,7 +55,7 @@ class _RoleSwitcherScreenState extends State<RoleSwitcherScreen> {
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
           child: Column(
             children: [
               Row(

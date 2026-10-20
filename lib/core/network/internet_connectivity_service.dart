@@ -17,6 +17,9 @@ class InternetConnectivityService {
       InternetConnectivityService._();
   static const _timeout = Duration(seconds: 4);
 
+  Stream<void> get connectivityChanges =>
+      Connectivity().onConnectivityChanged.map((_) {});
+
   Future<bool> hasInternetAccess() async {
     try {
       final connections = await Connectivity().checkConnectivity();

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -37,13 +39,7 @@ class RecentCollectionCard extends StatelessWidget {
             border: item.status == RecentCollectionStatus.pending
                 ? Border.all(color: AppColors.primary500)
                 : null,
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x1F000000),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              ),
-            ],
+            boxShadow: [HomeStyles.cardShadow],
           ),
           child: Stack(
             children: [

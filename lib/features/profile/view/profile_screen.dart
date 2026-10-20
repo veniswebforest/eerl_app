@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
@@ -264,13 +266,7 @@ class _ProfileHeader extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.neutral50,
                   borderRadius: BorderRadius.circular(24),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x1A000000),
-                      blurRadius: 5,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
+                  boxShadow: [HomeStyles.cardShadow],
                 ),
                 child: Stack(
                   alignment: Alignment.center,
@@ -424,13 +420,7 @@ class _ProfileLanguageSelector extends StatelessWidget {
       arrowHeight: 0,
       contentDxOffset: 0,
       contentDyOffset: 2,
-      shadow: const [
-        BoxShadow(
-          color: Color(0x24000000),
-          blurRadius: 12,
-          offset: Offset(0, 4),
-        ),
-      ],
+      shadow: [HomeStyles.cardShadow],
       bodyBuilder: (popoverContext) => Container(
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.cool400),

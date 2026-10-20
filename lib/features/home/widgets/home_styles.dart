@@ -9,9 +9,9 @@ abstract final class HomeStyles {
     color: AppColors.neutral950,
   );
 
-  static BoxShadow get cardShadow => BoxShadow(
-    color: AppColors.neutral950.withValues(alpha: 0.12),
+  static const BoxShadow cardShadow = BoxShadow(
+    color: Color(0x1F111213),
     blurRadius: 2,
-    offset: const Offset(0, 5),
+    offset: Offset(0, 5),
   );
 }

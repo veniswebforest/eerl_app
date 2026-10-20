@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -87,7 +89,9 @@ class _State extends State<VerificationDetailScreen> {
                   alignment: Alignment.bottomCenter,
                   child: _Actions(
                     saving: reviewing,
-                    onReject: reviewing ? null : _reject,
+                    onReject: reviewing
+                        ? null
+                        : () => _reject(data.collectionNumber),
                     onApprove: reviewing ? null : _approve,
                   ),
                 ),
@@ -100,10 +104,10 @@ class _State extends State<VerificationDetailScreen> {
 
   Future<void> _approve() => _saveReview(approved: true);
 
-  Future<void> _reject() async {
+  Future<void> _reject(String collectionNumber) async {
     final reason = await context.push<String>(
       AppRoutes.rejectCollection,
-      extra: widget.collectionId,
+      extra: collectionNumber,
     );
     if (reason == null || !mounted) return;
     await _saveReview(approved: false, reason: reason);
@@ -182,12 +186,12 @@ class _Content extends StatelessWidget {
                   icon: Icons.cancel_outlined,
                 ),
                 const SizedBox(height: 12),
-                _RejectCard(reason: data.rejectionReason),
+                VerificationRejectReasonCard(reason: data.rejectionReason),
                 const SizedBox(height: 12),
               ],
               CollectionDetailInfoCard(
                 label: context.l10n.collectionDetailId,
-                value: data.id,
+                value: data.collectionNumber,
               ),
               if (!rejected) ...[
                 const SizedBox(height: 10),
@@ -341,8 +345,9 @@ class _Banner extends StatelessWidget {
   );
 }
 
-class _RejectCard extends StatelessWidget {
-  const _RejectCard({required this.reason});
+@visibleForTesting
+class VerificationRejectReasonCard extends StatelessWidget {
+  const VerificationRejectReasonCard({super.key, required this.reason});
   final String reason;
   @override
   Widget build(BuildContext context) => Container(
@@ -364,15 +369,9 @@ class _RejectCard extends StatelessWidget {
         Text('${context.l10n.collectionDetailReasonLabel}:'),
         const SizedBox(height: 3),
         Text(
-          context.l10n.collectionDetailReasonValue,
+          reason.isEmpty ? '-' : reason,
+          key: const Key('verification-rejection-reason-value'),
           style: AppTextStyles.semiboldH8_16,
-        ),
-        const SizedBox(height: 10),
-        Text('${context.l10n.collectionDetailRemarksLabel}:'),
-        const SizedBox(height: 3),
-        Text(
-          reason.isEmpty ? context.l10n.collectionDetailRemarksValue : reason,
-          style: AppTextStyles.regularB7_14,
         ),
       ],
     ),
@@ -423,13 +422,7 @@ class _Actions extends StatelessWidget {
     padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
     decoration: const BoxDecoration(
       color: AppColors.neutral50,
-      boxShadow: [
-        BoxShadow(
-          color: Color(0x1F000000),
-          blurRadius: 12,
-          offset: Offset(0, -3),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Row(
       children: [
@@ -479,7 +472,7 @@ class _Actions extends StatelessWidget {
 
 class _Data {
   const _Data({
-    required this.id,
+    required this.collectionNumber,
     required this.center,
     required this.date,
     required this.channel,
@@ -495,7 +488,7 @@ class _Data {
     required this.status,
     required this.rejectionReason,
   });
-  final String id;
+  final String collectionNumber;
   final String center;
   final String date;
   final String channel;
@@ -571,7 +564,7 @@ class _Data {
       collection?.collectedAt ?? collection?.updatedAt ?? '',
     )?.toLocal();
     return _Data(
-      id:
+      collectionNumber:
           collection?.slipNumber ??
           context.l10n.verificationDetailCollectionIdValue,
       center: collection?.centerName ?? context.l10n.verificationSuratSouth,
@@ -606,7 +599,5 @@ class _Data {
 const _decoration = BoxDecoration(
   color: AppColors.neutral50,
   borderRadius: BorderRadius.all(Radius.circular(12)),
-  boxShadow: [
-    BoxShadow(color: Color(0x17000000), blurRadius: 6, offset: Offset(0, 2)),
-  ],
+  boxShadow: [HomeStyles.cardShadow],
 );

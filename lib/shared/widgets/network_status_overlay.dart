@@ -2,6 +2,8 @@ import 'package:eerl_app/core/providers/network_provider.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:provider/provider.dart';
 
 /// Wraps the application layout to present a top side view overlay banner
@@ -84,13 +86,7 @@ class NetworkStatusOverlay extends StatelessWidget {
         end: Alignment.bottomRight,
       ),
       borderColor: Colors.white.withValues(alpha: 0.2),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.25),
-          blurRadius: 16,
-          offset: const Offset(0, 6),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
       titleStyle: const TextStyle(
         color: Colors.white,
         fontSize: 14,

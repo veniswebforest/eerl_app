@@ -127,6 +127,20 @@ class EerlLocalDataSource {
     return rows.map(CenterModel.fromMap).toList(growable: false);
   }
 
+  Future<CenterModel?> getCenter(String id) async {
+    final rows = await _database.rawQuery(
+      '''
+      SELECT c.*, COALESCE(mc.is_primary, 0) AS is_primary
+      FROM ${DatabaseTables.centers} c
+      LEFT JOIN ${DatabaseTables.myCenters} mc ON mc.center_id = c.id
+      WHERE c.id = ?
+      LIMIT 1
+      ''',
+      [id],
+    );
+    return rows.isEmpty ? null : CenterModel.fromMap(rows.first);
+  }
+
   Future<ProfileModel> getProfile() async {
     final rows = await _database.rawQuery('''
       SELECT
@@ -3230,7 +3244,7 @@ class EerlLocalDataSource {
       args.add(stage);
     }
     final rows = await _database.rawQuery('''
-      SELECT s.*, i.name, i.unit_code, c.name AS center_name
+      SELECT s.*, i.name, i.unit_code, i.image_url, c.name AS center_name
       FROM ${DatabaseTables.stock} s
       JOIN ${DatabaseTables.items} i ON i.id = s.item_id
       JOIN ${DatabaseTables.centers} c ON c.id = s.center_id

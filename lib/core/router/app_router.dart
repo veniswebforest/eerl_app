@@ -342,7 +342,7 @@ class AppRouter {
       path: AppRoutes.rejectCollection,
       parentNavigatorKey: rootNavigatorKey,
       builder: (_, state) =>
-          RejectCollectionScreen(collectionId: state.extra as String?),
+          RejectCollectionScreen(collectionNumber: state.extra as String?),
     ),
     GoRoute(
       path: AppRoutes.supervisorExpense,

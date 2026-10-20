@@ -23,10 +23,6 @@ import 'shared/widgets/network_status_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Open (or create) the local database before the app starts. Sqflite calls
-  // onCreate only when eerl_local.db does not exist; subsequent launches reuse
-  // the same database and do not recreate its tables.
   await AppDatabase.instance.database;
 
   final storedAccessToken = await AuthSessionStorage().getAccessToken();

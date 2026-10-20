@@ -1,5 +1,7 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -67,13 +69,7 @@ class _RequestDetailStatus extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x16000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
+        boxShadow: [HomeStyles.cardShadow],
       ),
       child: Row(
         children: [

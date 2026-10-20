@@ -95,7 +95,13 @@ class StockStageCard extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text: '  $itemCount',
+                    text: ' KG',
+                    style: AppTextStyles.semiboldH9_14.copyWith(
+                      color: AppColors.neutral900,
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' ($itemCount items)',
                     style: AppTextStyles.semiboldH9_14.copyWith(
                       color: foreground,
                     ),

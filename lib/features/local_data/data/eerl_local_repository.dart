@@ -14,6 +14,7 @@ class EerlLocalRepository {
   Future<void> selectCenter(String id) => _local.selectCenter(id);
   Future<List<MyRoleModel>> getRoles() => _local.getRoles();
   Future<List<CenterModel>> getCenters() => _local.getCenters();
+  Future<CenterModel?> getCenter(String id) => _local.getCenter(id);
   Future<ProfileModel> getProfile() => _local.getProfile();
   Future<AgentHomeSummaryModel> getAgentHomeSummary() =>
       _local.getAgentHomeSummary();

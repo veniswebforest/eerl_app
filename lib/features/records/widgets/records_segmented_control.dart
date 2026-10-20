@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
+
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 
@@ -25,13 +27,7 @@ class RecordsSegmentedControl extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.neutral50,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x26000000),
-            blurRadius: 5,
-            offset: Offset(0, 4),
-          ),
-        ],
+        boxShadow: [HomeStyles.cardShadow],
       ),
       child: Row(
         children: [
@@ -73,15 +69,7 @@ class _Segment extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected ? AppColors.primary500 : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: selected
-                ? const [
-                    BoxShadow(
-                      color: Color(0x1F000000),
-                      blurRadius: 5,
-                      offset: Offset(2, 2),
-                    ),
-                  ]
-                : null,
+            boxShadow: selected ? [HomeStyles.cardShadow] : null,
           ),
           child: Text(
             label,

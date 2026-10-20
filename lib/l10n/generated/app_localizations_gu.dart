@@ -3191,10 +3191,24 @@ class AppLocalizationsGu extends AppLocalizations {
   String get stockRmDetail => 'RM વિગતો';
 
   @override
+  String get stockEmptyMessage => 'હમણાં કોઈ સ્ટોક નથી';
+
+  @override
   String get stockSrmDetail => 'SRM વિગતો';
 
   @override
+  String get stockWipDetail => 'WIP વિગતો';
+
+  @override
+  String get stockFgDetail => 'FG વિગતો';
+
+  @override
   String get stockCenterValue => 'સ્ટોક કેન્દ્ર : EERL – સુરત દક્ષિણ';
+
+  @override
+  String stockCenterName(String name) {
+    return 'સ્ટોક કેન્દ્ર : $name';
+  }
 
   @override
   String get stockUpdatedAgo => '10 મિનિટ પહેલાં';

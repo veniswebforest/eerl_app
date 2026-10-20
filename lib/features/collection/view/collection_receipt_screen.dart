@@ -4,6 +4,8 @@ import 'dart:ui' as ui;
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
@@ -408,13 +410,7 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
       color: Colors.white,
       border: Border.all(color: AppColors.cool300),
       borderRadius: BorderRadius.circular(16),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x22000000),
-          blurRadius: 8,
-          offset: Offset(0, 2),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Column(
       children: [

@@ -1403,6 +1403,7 @@ class StockModel {
     this.name,
     this.unitCode,
     this.centerName,
+    this.imageUrl,
   });
   final String id;
   final String centerId;
@@ -1412,6 +1413,7 @@ class StockModel {
   final String? name;
   final String? unitCode;
   final String? centerName;
+  final String? imageUrl;
   factory StockModel.fromMap(DbMap map) => StockModel(
     id: map['id'] as String,
     centerId: map['center_id'] as String,
@@ -1421,6 +1423,7 @@ class StockModel {
     name: map['name'] as String?,
     unitCode: map['unit_code'] as String?,
     centerName: map['center_name'] as String?,
+    imageUrl: map['image_url'] as String?,
   );
   DbMap toMap() => {
     'id': id,

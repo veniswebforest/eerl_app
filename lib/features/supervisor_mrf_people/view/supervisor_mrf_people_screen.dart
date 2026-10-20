@@ -931,13 +931,7 @@ class _LaborCard extends StatelessWidget {
     decoration: BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x1F000000),
-          blurRadius: 5,
-          offset: Offset(0, 2),
-        ),
-      ],
+      boxShadow: [HomeStyles.cardShadow],
     ),
     child: Column(
       children: [
@@ -1303,7 +1297,5 @@ ButtonStyle _buttonStyle(Color background, Color foreground) =>
 BoxDecoration _cardDecoration(double radius) => BoxDecoration(
   color: Colors.white,
   borderRadius: BorderRadius.circular(radius),
-  boxShadow: const [
-    BoxShadow(color: Color(0x1F000000), blurRadius: 5, offset: Offset(0, 2)),
-  ],
+  boxShadow: [HomeStyles.cardShadow],
 );

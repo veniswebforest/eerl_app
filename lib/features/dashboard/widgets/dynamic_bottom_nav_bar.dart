@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -31,13 +33,7 @@ class DynamicBottomNavBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.primary900,
               borderRadius: BorderRadius.circular(32),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.neutral950.withValues(alpha: 0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, -2),
-                ),
-              ],
+              boxShadow: [HomeStyles.cardShadow],
             ),
             child: Row(
               children: List.generate(items.length, (index) {

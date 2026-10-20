@@ -3199,10 +3199,24 @@ class AppLocalizationsHi extends AppLocalizations {
   String get stockRmDetail => 'RM विवरण';
 
   @override
+  String get stockEmptyMessage => 'अभी कोई स्टॉक नहीं है';
+
+  @override
   String get stockSrmDetail => 'SRM विवरण';
 
   @override
+  String get stockWipDetail => 'WIP विवरण';
+
+  @override
+  String get stockFgDetail => 'FG विवरण';
+
+  @override
   String get stockCenterValue => 'स्टॉक केंद्र : EERL – सूरत दक्षिण';
+
+  @override
+  String stockCenterName(String name) {
+    return 'स्टॉक केंद्र : $name';
+  }
 
   @override
   String get stockUpdatedAgo => '10 मिनट पहले';

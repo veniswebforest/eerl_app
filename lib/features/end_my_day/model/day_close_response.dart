@@ -162,10 +162,35 @@ class DayCloseScreenData {
   const DayCloseScreenData({
     required this.dayClose,
     required this.pendingSyncCount,
+    this.eodLockTime,
   });
 
   final DayCloseData dayClose;
   final int pendingSyncCount;
+  final String? eodLockTime;
+
+  String get effectiveLockTime {
+    final centerLockTime = eodLockTime?.trim();
+    if (centerLockTime != null && _validClockTime(centerLockTime)) {
+      return centerLockTime;
+    }
+    final apiLockTime = dayClose.lockTime.trim();
+    return _validClockTime(apiLockTime) ? apiLockTime : '18:00:00';
+  }
+}
+
+bool _validClockTime(String value) {
+  final match = RegExp(r'^(\d{1,2}):(\d{2})(?::(\d{2}))?$').firstMatch(value);
+  if (match == null) return false;
+  final hour = int.tryParse(match.group(1)!);
+  final minute = int.tryParse(match.group(2)!);
+  final second = int.tryParse(match.group(3) ?? '0');
+  return hour != null &&
+      minute != null &&
+      second != null &&
+      hour <= 23 &&
+      minute <= 59 &&
+      second <= 59;
 }
 
 Map<String, dynamic> _map(Object? value) =>

@@ -1,5 +1,7 @@
 import 'package:eerl_app/features/home/widgets/home_assets.dart';
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -30,13 +32,7 @@ class TransferRequestCard extends StatelessWidget {
         border: Border.all(
           color: highlighted ? AppColors.primary500 : AppColors.cool100,
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x16000000),
-            blurRadius: 5,
-            offset: Offset(0, 2),
-          ),
-        ],
+        boxShadow: [HomeStyles.cardShadow],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

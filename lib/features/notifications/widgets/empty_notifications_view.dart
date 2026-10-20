@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -57,9 +59,7 @@ class EmptyNotificationsView extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: AppColors.primary500,
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: const [
-                        BoxShadow(color: Color(0x24000000), blurRadius: 8),
-                      ],
+                      boxShadow: [HomeStyles.cardShadow],
                     ),
                     alignment: Alignment.center,
                     child: SvgPicture.asset(
