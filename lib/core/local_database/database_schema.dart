@@ -170,6 +170,7 @@ abstract final class DatabaseSchema {
         total_amount REAL,
         handover_photo_urls TEXT NOT NULL DEFAULT '[]',
         rejection_reason TEXT,
+        rejection_remarks TEXT,
         verified_by_name TEXT,
         verified_at TEXT,
         gps_lat REAL,
@@ -205,6 +206,7 @@ abstract final class DatabaseSchema {
         receipt_photo_urls TEXT NOT NULL DEFAULT '[]',
         decided_by_name TEXT,
         decision_reason TEXT,
+        decision_remarks TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT,
         sync_state TEXT NOT NULL DEFAULT 'synced'
@@ -222,6 +224,7 @@ abstract final class DatabaseSchema {
         status TEXT NOT NULL,
         decided_by_name TEXT,
         decision_note TEXT,
+        decision_remarks TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT,
         sync_state TEXT NOT NULL DEFAULT 'synced'
@@ -329,6 +332,7 @@ abstract final class DatabaseSchema {
         answer TEXT,
         answered_at TEXT,
         photo_urls TEXT NOT NULL DEFAULT '[]',
+        answer_photo_urls TEXT NOT NULL DEFAULT '[]',
         created_at TEXT NOT NULL,
         sync_state TEXT NOT NULL DEFAULT 'synced'
       )

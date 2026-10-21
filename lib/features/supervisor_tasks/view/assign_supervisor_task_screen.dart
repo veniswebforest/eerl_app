@@ -6,6 +6,9 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_assets.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +42,10 @@ class _AssignSupervisorTaskScreenState
   late bool _agentExpanded;
   late bool _dateExpanded;
   late int _photoCount;
+  bool _isLoadingPeople = true;
+  bool _isSubmitting = false;
+  List<({CenterPersonModel agent, CenterModel center})> _agentOptions =
+      const [];
   int? _selectedAgent;
   String? _selectedDate;
   DateTime? _selectedDateTime;
@@ -49,23 +56,17 @@ class _AssignSupervisorTaskScreenState
   int get _totalPhotos =>
       _capturedPhotos.length + (_capturedPhotos.isEmpty ? _photoCount : 0);
 
-  bool get _canSend =>
-      _selectedAgent != null &&
-      _selectedDate != null &&
-      _titleController.text.trim().isNotEmpty &&
-      _descriptionController.text.trim().isNotEmpty &&
-      _totalPhotos > 0;
-
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController();
     _descriptionController = TextEditingController();
-    _agentExpanded = !_isFilled;
+    _agentExpanded = false;
     _dateExpanded = !_isFilled;
-    _selectedAgent = _isFilled ? 0 : null;
+    _selectedAgent = null;
     _photoCount = _isFilled ? 2 : 0;
     _selectedDateTime = _isFilled ? DateTime(2026, 8, 16, 15, 0) : null;
+    _loadCentersAndAgents();
   }
 
   @override
@@ -100,9 +101,7 @@ class _AssignSupervisorTaskScreenState
       }
     } catch (_) {
       if (mounted) {
-        setState(() {
-          _photoCount = 2;
-        });
+        await _showError(context.l10n.supervisorTaskPhotoError);
       }
     }
   }
@@ -117,12 +116,33 @@ class _AssignSupervisorTaskScreenState
     });
   }
 
-  List<String> _agents(BuildContext context) => [
-    context.l10n.supervisorTaskAgentRahul,
-    context.l10n.supervisorTaskAgentAmit,
-    context.l10n.supervisorTaskAgentSuresh,
-    context.l10n.supervisorTaskAgentMayur,
-  ];
+  Future<void> _loadCentersAndAgents() async {
+    try {
+      final repository = EerlLocalRepository.instance;
+      final centers = await repository.getCenters();
+      final agentsByCenter = await Future.wait(
+        centers.map(
+          (center) =>
+              repository.getCenterPeople(centerId: center.id, agentsOnly: true),
+        ),
+      );
+      final options = <({CenterPersonModel agent, CenterModel center})>[
+        for (var centerIndex = 0; centerIndex < centers.length; centerIndex++)
+          for (final agent in agentsByCenter[centerIndex])
+            (agent: agent, center: centers[centerIndex]),
+      ];
+      if (!mounted) return;
+      setState(() {
+        _agentOptions = options;
+        _selectedAgent = null;
+        _isLoadingPeople = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoadingPeople = false);
+      await _showError(context.l10n.supervisorTaskPeopleLoadError);
+    }
+  }
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -144,12 +164,26 @@ class _AssignSupervisorTaskScreenState
                 _requiredLabel(context.l10n.supervisorTaskAssignTo),
                 const SizedBox(height: 8),
                 _AgentSelector(
-                  agents: _agents(context),
+                  selectorKey: const Key('supervisor-task-agent-selector'),
+                  optionKeyPrefix: 'supervisor-task-agent',
+                  agents: _agentOptions
+                      .map(
+                        (option) =>
+                            '${option.agent.name} (${option.center.name})',
+                      )
+                      .toList(),
                   selectedIndex: _selectedAgent,
                   expanded: _agentExpanded,
-                  hint: context.l10n.supervisorTaskSelectAgent,
-                  onToggle: () =>
-                      setState(() => _agentExpanded = !_agentExpanded),
+                  hint: _isLoadingPeople
+                      ? context.l10n.supervisorTaskLoading
+                      : context.l10n.supervisorTaskSelectAgent,
+                  searchHint: context.l10n.recordsSearchHint,
+                  emptyText: context.l10n.supervisorTaskNoAgents,
+                  onToggle: _isLoadingPeople
+                      ? () {}
+                      : () => setState(() {
+                          _agentExpanded = !_agentExpanded;
+                        }),
                   onSelected: (index) => setState(() {
                     _selectedAgent = index;
                     _agentExpanded = false;
@@ -213,7 +247,7 @@ class _AssignSupervisorTaskScreenState
                 _PhotoCapture(enabled: _totalPhotos < 2, onTap: _capturePhoto),
                 if (_capturedPhotos.isNotEmpty) ...[
                   const SizedBox(height: 8),
-                  Wrap(
+                  Row(
                     children: [
                       for (
                         var index = 0;
@@ -327,7 +361,7 @@ class _AssignSupervisorTaskScreenState
                   height: 52,
                   child: ElevatedButton(
                     key: const Key('supervisor-task-send'),
-                    onPressed: _canSend ? _showTaskSentDialog : null,
+                    onPressed: _isSubmitting ? null : _submitTask,
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       backgroundColor: AppColors.primary500,
@@ -337,10 +371,19 @@ class _AssignSupervisorTaskScreenState
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: Text(
-                      context.l10n.supervisorTaskSend,
-                      style: AppTextStyles.boldH7_16,
-                    ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            context.l10n.supervisorTaskSend,
+                            style: AppTextStyles.boldH7_16,
+                          ),
                   ),
                 ),
               ],
@@ -364,6 +407,71 @@ class _AssignSupervisorTaskScreenState
     style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
   );
 
+  Future<void> _submitTask() async {
+    final agentIndex = _selectedAgent;
+    final dueDate = _selectedDateTime;
+    final title = _titleController.text.trim();
+    final description = _descriptionController.text.trim();
+    if (agentIndex == null || agentIndex >= _agentOptions.length) {
+      await _showError(context.l10n.supervisorTaskAgentRequired);
+      return;
+    }
+    if (title.isEmpty || description.isEmpty) {
+      await _showError(context.l10n.supervisorTaskTextRequired);
+      return;
+    }
+    if (dueDate == null) {
+      await _showError(context.l10n.supervisorTaskDateRequired);
+      return;
+    }
+    if (!dueDate.isAfter(DateTime.now())) {
+      await _showError(context.l10n.supervisorTaskFutureDateRequired);
+      return;
+    }
+    if (_capturedPhotos.isEmpty) {
+      await _showError(context.l10n.supervisorTaskPhotoRequired);
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    try {
+      final selected = _agentOptions[agentIndex];
+      await EerlLocalRepository.instance.assignTask(
+        centerId: selected.center.id,
+        assignedToId: selected.agent.userId,
+        title: title,
+        description: description,
+        priority: _priority.name.toUpperCase(),
+        dueDate: dueDate,
+        photoPaths: _capturedPhotos.map((photo) => photo.path).toList(),
+      );
+      await OutgoingSyncService.instance.drain();
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      await _showTaskSentDialog();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      await _showError(context.l10n.supervisorTaskSaveError);
+    }
+  }
+
+  Future<void> _showError(String message) => showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      key: const Key('supervisor-task-error-dialog'),
+      title: Text(context.l10n.error),
+      content: Text(message),
+      actions: [
+        FilledButton(
+          key: const Key('supervisor-task-error-ok'),
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(context.l10n.supervisorTaskConfirm),
+        ),
+      ],
+    ),
+  );
+
   Future<void> _showTaskSentDialog() => showGeneralDialog<void>(
     context: context,
     barrierDismissible: false,
@@ -385,7 +493,14 @@ class _AssignSupervisorTaskScreenState
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  const Spacer(flex: 3),
+                  Image.asset(
+                    'assets/images/category_request_approved.gif',
+                    key: const Key('supervisor-task-sent-animation'),
+                    width: 130,
+                    height: 130,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 8),
                   Text(
                     context.l10n.supervisorTaskSentTitle,
                     style: AppTextStyles.boldH5_24.copyWith(
@@ -436,119 +551,184 @@ class _AssignSupervisorTaskScreenState
   );
 }
 
-class _AgentSelector extends StatelessWidget {
+class _AgentSelector extends StatefulWidget {
   const _AgentSelector({
+    required this.selectorKey,
+    required this.optionKeyPrefix,
     required this.agents,
     required this.selectedIndex,
     required this.expanded,
     required this.hint,
+    required this.searchHint,
+    required this.emptyText,
     required this.onToggle,
     required this.onSelected,
   });
 
+  final Key selectorKey;
+  final String optionKeyPrefix;
   final List<String> agents;
   final int? selectedIndex;
   final bool expanded;
   final String hint;
+  final String searchHint;
+  final String emptyText;
   final VoidCallback onToggle;
   final ValueChanged<int> onSelected;
 
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          key: const Key('supervisor-task-agent-selector'),
-          onTap: onToggle,
+  State<_AgentSelector> createState() => _AgentSelectorState();
+}
+
+class _AgentSelectorState extends State<_AgentSelector> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void didUpdateWidget(covariant _AgentSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.expanded && oldWidget.expanded) {
+      _searchController.clear();
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final query = _searchController.text.trim().toLowerCase();
+    final visibleIndexes = <int>[
+      for (var index = 0; index < widget.agents.length; index++)
+        if (query.isEmpty || widget.agents[index].toLowerCase().contains(query))
+          index,
+    ];
+    return Column(
+      children: [
+        Material(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          child: Container(
-            height: 55,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: InkWell(
+            key: widget.selectorKey,
+            onTap: widget.onToggle,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              height: 55,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppColors.cool400),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.selectedIndex == null
+                          ? widget.hint
+                          : widget.agents[widget.selectedIndex!],
+                      style: AppTextStyles.regularB7_14.copyWith(
+                        color: widget.selectedIndex == null
+                            ? AppColors.cool500
+                            : AppColors.neutral950,
+                      ),
+                    ),
+                  ),
+                  SvgPicture.asset(
+                    SupervisorTaskAssets.dropdown,
+                    width: 24,
+                    height: 24,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 4),
+        if (widget.expanded)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
+              color: Colors.white,
               border: Border.all(color: AppColors.cool400),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Row(
+            child: Column(
               children: [
-                Expanded(
-                  child: Text(
-                    selectedIndex == null ? hint : agents[selectedIndex!],
-                    style: AppTextStyles.regularB7_14.copyWith(
-                      color: selectedIndex == null
-                          ? AppColors.cool500
-                          : AppColors.neutral950,
+                TextField(
+                  key: ValueKey('${widget.optionKeyPrefix}-search'),
+                  controller: _searchController,
+                  onChanged: (_) => setState(() {}),
+                  style: AppTextStyles.regularB8_12,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    hintText: widget.searchHint,
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: const BorderSide(color: AppColors.cool400),
                     ),
                   ),
                 ),
-                SvgPicture.asset(
-                  SupervisorTaskAssets.dropdown,
-                  width: 24,
-                  height: 24,
-                ),
+                const SizedBox(height: 4),
+                if (visibleIndexes.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      widget.emptyText,
+                      style: AppTextStyles.regularB8_12.copyWith(
+                        color: AppColors.neutral600,
+                      ),
+                    ),
+                  ),
+                for (final index in visibleIndexes)
+                  InkWell(
+                    key: ValueKey('${widget.optionKeyPrefix}-$index'),
+                    onTap: () => widget.onSelected(index),
+                    child: SizedBox(
+                      height: 36,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 14,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.cool500),
+                              color: widget.selectedIndex == index
+                                  ? AppColors.primary500
+                                  : Colors.white,
+                            ),
+                            child: widget.selectedIndex == index
+                                ? const Center(
+                                    child: CircleAvatar(
+                                      radius: 3,
+                                      backgroundColor: Colors.white,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              widget.agents[index],
+                              style: AppTextStyles.regularB8_12.copyWith(
+                                color: AppColors.neutral700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-        ),
-      ),
-      SizedBox(height: 4),
-      if (expanded)
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: AppColors.cool400),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            children: [
-              for (var index = 0; index < agents.length; index++)
-                InkWell(
-                  key: ValueKey('supervisor-task-agent-$index'),
-                  onTap: () => onSelected(index),
-                  child: SizedBox(
-                    height: 36,
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 14,
-                          height: 14,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.cool500),
-                            color: selectedIndex == index
-                                ? AppColors.primary500
-                                : Colors.white,
-                          ),
-                          child: selectedIndex == index
-                              ? const Center(
-                                  child: CircleAvatar(
-                                    radius: 3,
-                                    backgroundColor: Colors.white,
-                                  ),
-                                )
-                              : null,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            agents[index],
-                            style: AppTextStyles.regularB8_12.copyWith(
-                              color: AppColors.neutral700,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-    ],
-  );
+      ],
+    );
+  }
 }
 
 class _PrioritySelector extends StatelessWidget {
@@ -764,7 +944,10 @@ class _DateTimePickerState extends State<_DateTimePicker> {
   @override
   void initState() {
     super.initState();
-    final initial = widget.initialDateTime ?? DateTime.now();
+    final now = DateTime.now();
+    final initial = widget.initialDateTime?.isAfter(now) == true
+        ? widget.initialDateTime!
+        : now.add(const Duration(minutes: 30));
     _selectedDate = DateTime(initial.year, initial.month, initial.day);
     _displayedMonth = DateTime(initial.year, initial.month, 1);
     _selectedTime = widget.initialDateTime != null
@@ -804,6 +987,8 @@ class _DateTimePickerState extends State<_DateTimePicker> {
   }
 
   void _previousMonth() {
+    final now = DateTime.now();
+    if (!_displayedMonth.isAfter(DateTime(now.year, now.month, 1))) return;
     setState(() {
       _displayedMonth = DateTime(
         _displayedMonth.year,
@@ -898,6 +1083,8 @@ class _DateTimePickerState extends State<_DateTimePicker> {
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final weekdays = [
       context.l10n.supervisorTaskSunday,
       context.l10n.supervisorTaskMonday,
@@ -941,11 +1128,19 @@ class _DateTimePickerState extends State<_DateTimePicker> {
               InkWell(
                 key: const Key('supervisor-task-calendar-prev'),
                 borderRadius: BorderRadius.circular(15),
-                onTap: _previousMonth,
-                child: SvgPicture.asset(
-                  SupervisorTaskAssets.calendarRight,
-                  width: 30,
-                  height: 30,
+                onTap: _displayedMonth.isAfter(DateTime(now.year, now.month, 1))
+                    ? _previousMonth
+                    : null,
+                child: Opacity(
+                  opacity:
+                      _displayedMonth.isAfter(DateTime(now.year, now.month, 1))
+                      ? 1
+                      : .35,
+                  child: SvgPicture.asset(
+                    SupervisorTaskAssets.calendarRight,
+                    width: 30,
+                    height: 30,
+                  ),
                 ),
               ),
               const SizedBox(width: 7),
@@ -993,22 +1188,25 @@ class _DateTimePickerState extends State<_DateTimePicker> {
                   _selectedDate.year == item.date.year &&
                   _selectedDate.month == item.date.month &&
                   _selectedDate.day == item.date.day;
+              final isPast = item.date.isBefore(today);
 
               return Center(
                 child: InkWell(
                   borderRadius: BorderRadius.circular(14),
-                  onTap: () {
-                    setState(() {
-                      _selectedDate = item.date;
-                      if (!item.isCurrentMonth) {
-                        _displayedMonth = DateTime(
-                          item.date.year,
-                          item.date.month,
-                          1,
-                        );
-                      }
-                    });
-                  },
+                  onTap: isPast
+                      ? null
+                      : () {
+                          setState(() {
+                            _selectedDate = item.date;
+                            if (!item.isCurrentMonth) {
+                              _displayedMonth = DateTime(
+                                item.date.year,
+                                item.date.month,
+                                1,
+                              );
+                            }
+                          });
+                        },
                   child: Container(
                     width: 28,
                     height: 28,
@@ -1022,7 +1220,9 @@ class _DateTimePickerState extends State<_DateTimePicker> {
                     child: Text(
                       '${item.date.day}',
                       style: AppTextStyles.regularB8_12.copyWith(
-                        color: isSelected
+                        color: isPast
+                            ? AppColors.cool300
+                            : isSelected
                             ? Colors.white
                             : !item.isCurrentMonth
                             ? AppColors.cool500
@@ -1091,16 +1291,24 @@ class _DateTimePickerState extends State<_DateTimePicker> {
               Expanded(
                 child: ElevatedButton(
                   key: const Key('supervisor-task-date-confirm'),
-                  onPressed: () {
-                    final combined = DateTime(
-                      _selectedDate.year,
-                      _selectedDate.month,
-                      _selectedDate.day,
-                      _selectedTime.hour,
-                      _selectedTime.minute,
-                    );
-                    widget.onConfirm(combined);
-                  },
+                  onPressed:
+                      DateTime(
+                        _selectedDate.year,
+                        _selectedDate.month,
+                        _selectedDate.day,
+                        _selectedTime.hour,
+                        _selectedTime.minute,
+                      ).isAfter(now)
+                      ? () => widget.onConfirm(
+                          DateTime(
+                            _selectedDate.year,
+                            _selectedDate.month,
+                            _selectedDate.day,
+                            _selectedTime.hour,
+                            _selectedTime.minute,
+                          ),
+                        )
+                      : null,
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
                     elevation: 0,

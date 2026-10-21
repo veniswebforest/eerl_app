@@ -161,11 +161,20 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.cashRequestDetail,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, state) => CashRequestDetailScreen(
-        status:
-            state.extra as CashRequestDetailStatus? ??
-            CashRequestDetailStatus.pending,
-      ),
+      builder: (_, state) {
+        final extra = state.extra;
+        final request = extra is CashRequestModel ? extra : null;
+        final status = request == null
+            ? extra is CashRequestDetailStatus
+                  ? extra
+                  : CashRequestDetailStatus.pending
+            : switch (request.status.toUpperCase()) {
+                'APPROVED' || 'CREDITED' => CashRequestDetailStatus.approved,
+                'REJECTED' => CashRequestDetailStatus.rejected,
+                _ => CashRequestDetailStatus.pending,
+              };
+        return CashRequestDetailScreen(cashRequest: request, status: status);
+      },
     ),
     GoRoute(
       path: AppRoutes.addCollection,
@@ -271,11 +280,13 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.supervisorTaskDetail,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, state) => SupervisorTaskDetailScreen(
-        status:
-            state.extra as SupervisorTaskDetailStatus? ??
-            SupervisorTaskDetailStatus.inProgress,
-      ),
+      builder: (_, state) => state.extra is TaskModel
+          ? SupervisorTaskDetailScreen(task: state.extra! as TaskModel)
+          : SupervisorTaskDetailScreen(
+              status:
+                  state.extra as SupervisorTaskDetailStatus? ??
+                  SupervisorTaskDetailStatus.inProgress,
+            ),
     ),
     GoRoute(
       path: AppRoutes.requests,
@@ -307,7 +318,9 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.supervisorCompletedRequest,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, _) => const SupervisorCompletedRequestScreen(),
+      builder: (_, state) => SupervisorCompletedRequestScreen(
+        request: state.extra! as RequestModel,
+      ),
     ),
     GoRoute(
       path: AppRoutes.transferRequests,

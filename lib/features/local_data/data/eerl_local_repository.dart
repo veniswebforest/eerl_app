@@ -111,8 +111,11 @@ class EerlLocalRepository {
       _local.getCollectionItems(collectionId);
   Future<void> approveCollection(String collectionId) =>
       _local.approveCollection(collectionId);
-  Future<void> rejectCollection(String collectionId, String reason) =>
-      _local.rejectCollection(collectionId, reason);
+  Future<void> rejectCollection(
+    String collectionId,
+    String reason, {
+    String? remarks,
+  }) => _local.rejectCollection(collectionId, reason, remarks: remarks);
   Future<void> saveCollection({
     required CollectionModel collection,
     required List<CollectionItemModel> items,
@@ -127,8 +130,21 @@ class EerlLocalRepository {
     bool supervisor = false,
     String? status,
   }) => _local.getExpenses(supervisor: supervisor, status: status);
+  Future<ExpenseModel?> getExpense(String expenseId) =>
+      _local.getExpense(expenseId);
   Future<List<String>> getExpenseReceiptSources(String expenseId) =>
       _local.getExpenseReceiptSources(expenseId);
+  Future<void> decideExpense({
+    required String expenseId,
+    required String outcome,
+    String? reason,
+    String? remarks,
+  }) => _local.decideExpense(
+    expenseId: expenseId,
+    outcome: outcome,
+    reason: reason,
+    remarks: remarks,
+  );
   Future<String> saveExpense({
     required String categoryId,
     required double amount,
@@ -144,6 +160,17 @@ class EerlLocalRepository {
   );
   Future<List<CashRequestModel>> getCashRequests({bool supervisor = false}) =>
       _local.getCashRequests(supervisor: supervisor);
+  Future<void> decideCashRequest({
+    required String requestId,
+    required String outcome,
+    String? reason,
+    String? remarks,
+  }) => _local.decideCashRequest(
+    requestId: requestId,
+    outcome: outcome,
+    reason: reason,
+    remarks: remarks,
+  );
   Future<String> saveCashRequest({
     required double amount,
     required String reason,
@@ -151,6 +178,15 @@ class EerlLocalRepository {
   Future<List<CategoryRequestModel>> getCategoryRequests({
     bool supervisor = false,
   }) => _local.getCategoryRequests(supervisor: supervisor);
+  Future<void> decideCategoryRequest({
+    required String requestId,
+    required String outcome,
+    String? reason,
+  }) => _local.decideCategoryRequest(
+    requestId: requestId,
+    outcome: outcome,
+    reason: reason,
+  );
   Future<String> saveCategoryRequest({required String name, String? reason}) =>
       _local.saveCategoryRequest(name: name, reason: reason);
   Future<List<TransferModel>> getTransfers({
@@ -245,15 +281,50 @@ class EerlLocalRepository {
     bool supervisor = false,
     String search = '',
   }) => _local.getTasks(supervisor: supervisor, search: search);
+  Future<TaskModel?> getTask(String taskId) => _local.getTask(taskId);
+  Future<String> assignTask({
+    required String centerId,
+    required String assignedToId,
+    required String title,
+    required String description,
+    required String priority,
+    required DateTime dueDate,
+    required List<String> photoPaths,
+  }) => _local.assignTask(
+    centerId: centerId,
+    assignedToId: assignedToId,
+    title: title,
+    description: description,
+    priority: priority,
+    dueDate: dueDate,
+    photoPaths: photoPaths,
+  );
   Future<void> completeTask({
     required String taskId,
     required String note,
     required List<String> photoPaths,
   }) => _local.completeTask(taskId: taskId, note: note, photoPaths: photoPaths);
+  Future<void> cancelTask(String taskId) => _local.cancelTask(taskId);
   Future<List<RequestModel>> getRequests({
     bool supervisor = false,
     String search = '',
   }) => _local.getRequests(supervisor: supervisor, search: search);
+  Future<void> answerRequest({
+    required String requestId,
+    required String notes,
+  }) => _local.answerRequest(requestId: requestId, notes: notes);
+  Future<String> stageRequestAnswerPhoto({
+    required String requestId,
+    required String path,
+  }) => _local.stageRequestAnswerPhoto(requestId: requestId, path: path);
+  Future<void> removeRequestAnswerPhoto({
+    required String requestId,
+    required String photoId,
+  }) => _local.removeRequestAnswerPhoto(requestId: requestId, photoId: photoId);
+  Future<List<String>> getRequestAnswerPhotoSources(String requestId) =>
+      _local.getRequestAnswerPhotoSources(requestId);
+  Future<List<String>> getRequestPhotoSources(String requestId) =>
+      _local.getRequestPhotoSources(requestId);
   Future<String> raiseRequest({
     required String body,
     required String priority,

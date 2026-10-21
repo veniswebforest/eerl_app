@@ -66,6 +66,15 @@ class ExpenseBalanceUnavailableException implements Exception {
       'available balance ₹${availableBalance.toStringAsFixed(2)}.';
 }
 
+class ExpenseDecisionValidationException implements Exception {
+  const ExpenseDecisionValidationException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class CashRequestBalanceUnavailableException implements Exception {
   const CashRequestBalanceUnavailableException({
     required this.requestedAmount,
@@ -992,7 +1001,22 @@ class EerlLocalDataSource {
     ''',
       [id, centerId],
     );
-    return rows.isEmpty ? null : CollectionModel.fromMap(rows.first);
+    if (rows.isEmpty) return null;
+    final photoRows = await _database.query(
+      DatabaseTables.photos,
+      columns: const ['id', 'local_path', 'remote_url', 'created_at'],
+      where: 'owner_table = ? AND owner_id = ? AND field = ?',
+      whereArgs: [DatabaseTables.collections, id, 'handover'],
+      orderBy: 'created_at ASC',
+    );
+    final sources = _photoSourcesForReferences(
+      _decodeStringList(rows.first['handover_photo_urls']),
+      photoRows,
+    );
+    return CollectionModel.fromMap({
+      ...rows.first,
+      'handover_photo_urls': jsonEncode(sources),
+    });
   }
 
   Future<List<CollectionItemModel>> getCollectionItems(
@@ -1012,21 +1036,93 @@ class EerlLocalDataSource {
     ''',
       [collectionId, centerId],
     );
-    return rows.map(CollectionItemModel.fromMap).toList(growable: false);
+    if (rows.isEmpty) return const [];
+    final itemIds = rows.map((row) => row['id']).whereType<String>().toList();
+    final marks = List.filled(itemIds.length, '?').join(',');
+    final photoRows = await _database.rawQuery(
+      '''
+      SELECT id, owner_id, local_path, remote_url, created_at
+      FROM ${DatabaseTables.photos}
+      WHERE owner_table = ? AND owner_id IN ($marks) AND field = ?
+      ORDER BY created_at ASC
+      ''',
+      [DatabaseTables.collectionItems, ...itemIds, 'item'],
+    );
+    final photosByItem = <String, List<Map<String, Object?>>>{};
+    for (final photo in photoRows) {
+      final ownerId = photo['owner_id'] as String?;
+      if (ownerId != null) {
+        photosByItem.putIfAbsent(ownerId, () => []).add(photo);
+      }
+    }
+    return rows
+        .map((row) {
+          final itemId = row['id'] as String;
+          final sources = _photoSourcesForReferences(
+            _decodeStringList(row['photo_urls']),
+            photosByItem[itemId] ?? const [],
+          );
+          return CollectionItemModel.fromMap({
+            ...row,
+            'photo_urls': jsonEncode(sources),
+          });
+        })
+        .toList(growable: false);
+  }
+
+  List<String> _photoSourcesForReferences(
+    List<String> references,
+    List<Map<String, Object?>> photoRows,
+  ) {
+    final sourceById = <String, String>{};
+    final orderedSources = <String>[];
+    for (final row in photoRows) {
+      final localPath = (row['local_path'] as String?)?.trim();
+      final remoteUrl = (row['remote_url'] as String?)?.trim();
+      final source = localPath?.isNotEmpty == true
+          ? localPath!
+          : remoteUrl?.isNotEmpty == true
+          ? remoteUrl!
+          : null;
+      if (source == null) continue;
+      final photoId = row['id'] as String?;
+      if (photoId != null) sourceById[photoId] = source;
+      if (localPath?.isNotEmpty == true) sourceById[localPath!] = source;
+      if (remoteUrl?.isNotEmpty == true) sourceById[remoteUrl!] = source;
+      orderedSources.add(source);
+    }
+    return <String>{
+      for (final reference in references)
+        if ((sourceById[reference] ?? reference).trim().isNotEmpty)
+          sourceById[reference] ?? reference,
+      ...orderedSources,
+    }.toList(growable: false);
   }
 
   Future<void> approveCollection(String collectionId) =>
       _saveCollectionReview(collectionId: collectionId, approved: true);
 
-  Future<void> rejectCollection(String collectionId, String reason) {
+  Future<void> rejectCollection(
+    String collectionId,
+    String reason, {
+    String? remarks,
+  }) {
     final normalizedReason = reason.trim();
+    final normalizedRemarks = remarks?.trim();
     if (normalizedReason.isEmpty) {
       throw ArgumentError.value(reason, 'reason', 'Reject reason is required.');
+    }
+    if (normalizedReason.length > 1000 ||
+        (normalizedRemarks?.length ?? 0) > 1000) {
+      throw ArgumentError(
+        'Reason and remarks must be 1000 characters or fewer.',
+      );
     }
     return _saveCollectionReview(
       collectionId: collectionId,
       approved: false,
       reason: normalizedReason,
+      remarks: normalizedRemarks,
     );
   }
 
@@ -1034,9 +1130,11 @@ class EerlLocalDataSource {
     required String collectionId,
     required bool approved,
     String? reason,
+    String? remarks,
   }) async {
     final now = DateTime.now().toUtc().toIso8601String();
     final kind = approved ? 'approve' : 'reject';
+    final profile = await getProfile();
     await _database.runInTransaction((txn) async {
       final rows = await txn.query(
         DatabaseTables.collections,
@@ -1059,6 +1157,10 @@ class EerlLocalDataSource {
         {
           'status': approved ? 'APPROVED' : 'REJECTED',
           'rejection_reason': approved ? null : reason,
+          'rejection_remarks': approved || remarks?.isEmpty == true
+              ? null
+              : remarks,
+          'verified_by_name': profile.userName,
           'verified_at': now,
           'updated_at': now,
           'sync_state': 'pending',
@@ -1079,7 +1181,12 @@ class EerlLocalDataSource {
         entity: DatabaseTables.collections,
         entityId: collectionId,
         kind: kind,
-        body: approved ? null : {'reason': reason},
+        body: approved
+            ? null
+            : {
+                'reason': reason,
+                if (remarks?.isNotEmpty == true) 'remarks': remarks,
+              },
         refs: [collectionId],
         createdAt: now,
       );
@@ -1259,6 +1366,7 @@ class EerlLocalDataSource {
         'collected_at': collectedAt,
         'takes_payment': takesPayment == null ? null : (takesPayment ? 1 : 0),
         'rejection_reason': submit ? null : collection.rejectionReason,
+        'rejection_remarks': submit ? null : collection.rejectionRemarks,
         'gps_lat': gpsLat,
         'gps_lng': gpsLng,
         'updated_at': now,
@@ -1691,9 +1799,142 @@ class EerlLocalDataSource {
       FROM ${DatabaseTables.expenses} e
       LEFT JOIN ${DatabaseTables.expenseCategories} ec ON ec.id = e.category_id
       WHERE ${conditions.join(' AND ')}
-      ORDER BY e.created_at DESC
+      ORDER BY CASE
+        WHEN UPPER(e.status) IN ('PENDING', 'WAITING_SUPERVISOR', 'PENDING_REVIEW')
+          THEN 0
+        ELSE 1
+      END, e.created_at DESC
     ''', args);
     return rows.map(ExpenseModel.fromMap).toList(growable: false);
+  }
+
+  Future<ExpenseModel?> getExpense(String expenseId) async {
+    final centerId = await activeCenterId;
+    if (centerId == null) return null;
+    final rows = await _database.rawQuery(
+      '''
+      SELECT e.*, ec.name AS category_name
+      FROM ${DatabaseTables.expenses} e
+      LEFT JOIN ${DatabaseTables.expenseCategories} ec ON ec.id = e.category_id
+      WHERE e.id = ? AND e.center_id = ?
+      LIMIT 1
+    ''',
+      [expenseId, centerId],
+    );
+    return rows.isEmpty ? null : ExpenseModel.fromMap(rows.first);
+  }
+
+  Future<void> decideExpense({
+    required String expenseId,
+    required String outcome,
+    String? reason,
+    String? remarks,
+  }) async {
+    final normalizedId = expenseId.trim();
+    final normalizedOutcome = outcome.trim().toUpperCase();
+    final normalizedReason = reason?.trim();
+    final normalizedRemarks = remarks?.trim();
+    if (normalizedId.isEmpty) {
+      throw const ExpenseDecisionValidationException('Expense is required.');
+    }
+    if (normalizedOutcome != 'APPROVED' && normalizedOutcome != 'REJECTED') {
+      throw const ExpenseDecisionValidationException(
+        'Expense outcome must be APPROVED or REJECTED.',
+      );
+    }
+    if (normalizedOutcome == 'REJECTED' &&
+        (normalizedReason == null || normalizedReason.isEmpty)) {
+      throw const ExpenseDecisionValidationException(
+        'A rejection reason is required.',
+      );
+    }
+    if ((normalizedReason?.length ?? 0) > 1000 ||
+        (normalizedRemarks?.length ?? 0) > 1000) {
+      throw const ExpenseDecisionValidationException(
+        'Reason and remarks must be 1000 characters or fewer.',
+      );
+    }
+
+    final centerId = await activeCenterId;
+    if (centerId == null) {
+      throw const ExpenseDecisionValidationException(
+        'An active center is required.',
+      );
+    }
+    final profile = await getProfile();
+    final now = DateTime.now().toUtc().toIso8601String();
+
+    await _database.runInTransaction((txn) async {
+      final rows = await txn.query(
+        DatabaseTables.expenses,
+        columns: const ['id', 'status'],
+        where: 'id = ? AND center_id = ?',
+        whereArgs: [normalizedId, centerId],
+        limit: 1,
+      );
+      if (rows.isEmpty) {
+        throw const ExpenseDecisionValidationException(
+          'Expense was not found for the active center.',
+        );
+      }
+      final currentStatus = (rows.first['status'] as String).toUpperCase();
+      const pendingStatuses = {
+        'PENDING',
+        'WAITING_SUPERVISOR',
+        'PENDING_REVIEW',
+      };
+      if (!pendingStatuses.contains(currentStatus)) {
+        throw const ExpenseDecisionValidationException(
+          'Only an expense pending review can be decided.',
+        );
+      }
+
+      await txn.update(
+        DatabaseTables.expenses,
+        {
+          'status': normalizedOutcome,
+          'decided_by_name': profile.userName,
+          'decision_reason': normalizedOutcome == 'REJECTED'
+              ? normalizedReason
+              : null,
+          'decision_remarks':
+              normalizedOutcome == 'REJECTED' &&
+                  normalizedRemarks?.isNotEmpty == true
+              ? normalizedRemarks
+              : null,
+          'updated_at': now,
+          'sync_state': 'pending',
+        },
+        where: 'id = ? AND center_id = ?',
+        whereArgs: [normalizedId, centerId],
+      );
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/expenses/$normalizedId/decide',
+        entity: DatabaseTables.expenses,
+        entityId: normalizedId,
+        kind: 'decide',
+        body: <String, Object?>{
+          'outcome': normalizedOutcome,
+          if (normalizedOutcome == 'REJECTED') 'reason': normalizedReason,
+          if (normalizedOutcome == 'REJECTED' &&
+              normalizedRemarks?.isNotEmpty == true)
+            'remarks': normalizedRemarks,
+        },
+        refs: [normalizedId, centerId],
+        createdAt: now,
+      );
+    });
+
+    if (kDebugMode) {
+      AppLogger.sqlite(
+        'COMMIT',
+        'Expense decision stored | expense_id=$normalizedId '
+            'center=$centerId outcome=$normalizedOutcome sync_state=pending '
+            'method=POST path=/expenses/$normalizedId/decide',
+      );
+    }
   }
 
   Future<List<String>> getExpenseReceiptSources(String expenseId) async {
@@ -1910,6 +2151,80 @@ class EerlLocalDataSource {
     return rows.map(CashRequestModel.fromMap).toList(growable: false);
   }
 
+  Future<void> decideCashRequest({
+    required String requestId,
+    required String outcome,
+    String? reason,
+    String? remarks,
+  }) async {
+    final normalizedId = requestId.trim();
+    final normalizedOutcome = outcome.trim().toUpperCase();
+    final normalizedReason = reason?.trim();
+    final normalizedRemarks = remarks?.trim();
+    if (normalizedId.isEmpty ||
+        !const {'APPROVED', 'REJECTED'}.contains(normalizedOutcome)) {
+      throw ArgumentError('A cash request and valid outcome are required.');
+    }
+    if (normalizedOutcome == 'REJECTED' &&
+        (normalizedReason == null || normalizedReason.isEmpty)) {
+      throw ArgumentError.value(reason, 'reason', 'Reject reason is required.');
+    }
+    if ((normalizedReason?.length ?? 0) > 1000 ||
+        (normalizedRemarks?.length ?? 0) > 1000) {
+      throw ArgumentError(
+        'Reason and remarks must be 1000 characters or fewer.',
+      );
+    }
+    final centerId = await activeCenterId;
+    if (centerId == null) throw StateError('An active center is required.');
+    final profile = await getProfile();
+    final now = DateTime.now().toUtc().toIso8601String();
+    await _database.runInTransaction((txn) async {
+      final updated = await txn.update(
+        DatabaseTables.cashRequests,
+        {
+          'status': normalizedOutcome,
+          'decided_by_name': profile.userName,
+          'decision_note': normalizedOutcome == 'REJECTED'
+              ? normalizedReason
+              : null,
+          'decision_remarks':
+              normalizedOutcome == 'REJECTED' &&
+                  normalizedRemarks?.isNotEmpty == true
+              ? normalizedRemarks
+              : null,
+          'updated_at': now,
+          'sync_state': 'pending',
+        },
+        where:
+            "id = ? AND center_id = ? AND UPPER(status) IN ('PENDING', 'WAITING_SUPERVISOR', 'PENDING_REVIEW')",
+        whereArgs: [normalizedId, centerId],
+      );
+      if (updated != 1) {
+        throw StateError(
+          'Only a pending cash request at the active center can be decided.',
+        );
+      }
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/cash-requests/$normalizedId/decide',
+        entity: DatabaseTables.cashRequests,
+        entityId: normalizedId,
+        kind: 'decide',
+        body: {
+          'outcome': normalizedOutcome,
+          if (normalizedOutcome == 'REJECTED') 'reason': normalizedReason,
+          if (normalizedOutcome == 'REJECTED' &&
+              normalizedRemarks?.isNotEmpty == true)
+            'remarks': normalizedRemarks,
+        },
+        refs: [normalizedId, centerId],
+        createdAt: now,
+      );
+    });
+  }
+
   Future<String> saveCashRequest({
     required double amount,
     required String reason,
@@ -2009,6 +2324,73 @@ class EerlLocalDataSource {
       orderBy: 'created_at DESC',
     );
     return rows.map(CategoryRequestModel.fromMap).toList(growable: false);
+  }
+
+  Future<void> decideCategoryRequest({
+    required String requestId,
+    required String outcome,
+    String? reason,
+  }) async {
+    final normalizedId = requestId.trim();
+    final normalizedOutcome = outcome.trim().toUpperCase();
+    final normalizedReason = reason?.trim();
+    if (normalizedId.isEmpty ||
+        !const {'APPROVED', 'REJECTED'}.contains(normalizedOutcome)) {
+      throw ArgumentError(
+        'An expense category request and valid outcome are required.',
+      );
+    }
+    if (normalizedOutcome == 'REJECTED' &&
+        (normalizedReason == null || normalizedReason.isEmpty)) {
+      throw ArgumentError.value(reason, 'reason', 'Reject reason is required.');
+    }
+    if ((normalizedReason?.length ?? 0) > 1000) {
+      throw ArgumentError.value(
+        reason,
+        'reason',
+        'Reject reason must be 1000 characters or fewer.',
+      );
+    }
+    final centerId = await activeCenterId;
+    if (centerId == null) throw StateError('An active center is required.');
+    final profile = await getProfile();
+    final now = DateTime.now().toUtc().toIso8601String();
+    await _database.runInTransaction((txn) async {
+      final updated = await txn.update(
+        DatabaseTables.categoryRequests,
+        {
+          'status': normalizedOutcome,
+          'decided_by_name': profile.userName,
+          'decided_at': now,
+          'decision_reason': normalizedOutcome == 'REJECTED'
+              ? normalizedReason
+              : null,
+          'sync_state': 'pending',
+        },
+        where:
+            "id = ? AND center_id = ? AND UPPER(status) IN ('PENDING', 'OPEN')",
+        whereArgs: [normalizedId, centerId],
+      );
+      if (updated != 1) {
+        throw StateError(
+          'Only a pending category request at the active center can be decided.',
+        );
+      }
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/expense-categories/requests/$normalizedId/decide',
+        entity: DatabaseTables.categoryRequests,
+        entityId: normalizedId,
+        kind: 'decide',
+        body: {
+          'outcome': normalizedOutcome,
+          if (normalizedOutcome == 'REJECTED') 'reason': normalizedReason,
+        },
+        refs: [normalizedId, centerId],
+        createdAt: now,
+      );
+    });
   }
 
   Future<String> saveCategoryRequest({
@@ -2845,12 +3227,14 @@ class EerlLocalDataSource {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
     final centerId = await activeCenterId;
-    if (centerId == null) return const [];
+    if (!supervisor && centerId == null) return const [];
     final conditions = <String>[
-      supervisor ? 'center_id = ?' : 'assigned_to = ? AND center_id = ?',
+      supervisor
+          ? 'center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
+          : 'assigned_to = ? AND center_id = ?',
     ];
     final args = <Object?>[
-      if (supervisor) centerId else ...[userId, centerId],
+      if (!supervisor) ...[userId, centerId],
     ];
     if (search.trim().isNotEmpty) {
       conditions.add('(title LIKE ? OR description LIKE ? OR note LIKE ?)');
@@ -2867,6 +3251,165 @@ class EerlLocalDataSource {
                 "CASE priority WHEN 'HIGH' THEN 0 WHEN 'NORMAL' THEN 1 ELSE 2 END, created_at DESC",
     );
     return rows.map(TaskModel.fromMap).toList(growable: false);
+  }
+
+  Future<TaskModel?> getTask(String taskId) async {
+    final normalizedTaskId = taskId.trim();
+    if (normalizedTaskId.isEmpty) return null;
+    final rows = await _database.rawQuery(
+      '''
+      SELECT t.*, c.name AS center_name
+      FROM ${DatabaseTables.tasks} t
+      LEFT JOIN ${DatabaseTables.centers} c ON c.id = t.center_id
+      WHERE t.id = ?
+      LIMIT 1
+      ''',
+      [normalizedTaskId],
+    );
+    return rows.isEmpty ? null : TaskModel.fromMap(rows.single);
+  }
+
+  Future<String> assignTask({
+    required String centerId,
+    required String assignedToId,
+    required String title,
+    required String description,
+    required String priority,
+    required DateTime dueDate,
+    required List<String> photoPaths,
+  }) async {
+    final normalizedCenterId = centerId.trim();
+    final normalizedAssignedToId = assignedToId.trim();
+    final normalizedTitle = title.trim();
+    final normalizedDescription = description.trim();
+    final normalizedPriority = priority.trim().toUpperCase();
+    final uniquePhotoPaths = photoPaths
+        .map((path) => path.trim())
+        .where((path) => path.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+
+    if (normalizedCenterId.isEmpty) {
+      throw ArgumentError.value(centerId, 'centerId', 'Center is required.');
+    }
+    if (normalizedAssignedToId.isEmpty) {
+      throw ArgumentError.value(
+        assignedToId,
+        'assignedToId',
+        'Agent is required.',
+      );
+    }
+    if (normalizedTitle.isEmpty) {
+      throw ArgumentError.value(title, 'title', 'Title is required.');
+    }
+    if (normalizedDescription.isEmpty) {
+      throw ArgumentError.value(
+        description,
+        'description',
+        'Description is required.',
+      );
+    }
+    if (!const {'LOW', 'NORMAL', 'HIGH'}.contains(normalizedPriority)) {
+      throw ArgumentError.value(
+        priority,
+        'priority',
+        'Priority must be LOW, NORMAL, or HIGH.',
+      );
+    }
+    if (!dueDate.isAfter(DateTime.now())) {
+      throw ArgumentError.value(
+        dueDate,
+        'dueDate',
+        'Due date and time must be in the future.',
+      );
+    }
+    if (uniquePhotoPaths.isEmpty) {
+      throw ArgumentError.value(
+        photoPaths,
+        'photoPaths',
+        'A reference photo is required.',
+      );
+    }
+
+    final userId = await currentUserId;
+    if (userId == null || userId.trim().isEmpty) {
+      throw StateError('A signed-in supervisor is required.');
+    }
+    final profile = await getProfile();
+    final centerRows = await _database.rawQuery(
+      '''
+      SELECT 1
+      FROM ${DatabaseTables.myCenters}
+      WHERE center_id = ?
+      LIMIT 1
+      ''',
+      [normalizedCenterId],
+    );
+    if (centerRows.isEmpty) {
+      throw StateError('The selected center is unavailable.');
+    }
+    final agentRows = await _database.query(
+      DatabaseTables.centerPeople,
+      columns: const ['name'],
+      where: 'center_id = ? AND user_id = ? AND is_agent = 1',
+      whereArgs: [normalizedCenterId, normalizedAssignedToId],
+      limit: 1,
+    );
+    if (agentRows.isEmpty) {
+      throw StateError('The selected agent is unavailable at this center.');
+    }
+
+    final taskId = UuidGenerator.v4();
+    final now = DateTime.now().toUtc().toIso8601String();
+    final dueDateUtc = dueDate.toUtc().toIso8601String();
+    late final int outboxSeq;
+    await _database.runInTransaction((txn) async {
+      await txn.insert(DatabaseTables.tasks, {
+        'id': taskId,
+        'center_id': normalizedCenterId,
+        'assigned_to': normalizedAssignedToId,
+        'assigned_to_name': agentRows.single['name'],
+        'assigned_by': userId,
+        'assigned_by_name': profile.userName,
+        'title': normalizedTitle,
+        'description': normalizedDescription,
+        'priority': normalizedPriority,
+        'status': 'PENDING',
+        'due_at': dueDateUtc,
+        'photo_urls': jsonEncode(uniquePhotoPaths),
+        'created_at': now,
+        'sync_state': 'pending',
+      });
+
+      outboxSeq = await OutboxQueue.enqueue(
+        txn,
+        method: 'PUT',
+        path: '/tasks/$taskId',
+        entity: DatabaseTables.tasks,
+        entityId: taskId,
+        kind: 'assign',
+        body: {
+          'assignedToId': normalizedAssignedToId,
+          'centerId': normalizedCenterId,
+          'title': normalizedTitle,
+          'description': normalizedDescription,
+          'priority': normalizedPriority,
+          'dueDate': dueDateUtc,
+        },
+        refs: [normalizedCenterId, normalizedAssignedToId],
+        createdAt: now,
+      );
+    });
+
+    if (kDebugMode) {
+      AppLogger.sqlite(
+        'COMMIT',
+        'Task assigned | task_id=$taskId center=$normalizedCenterId '
+            'agent=$normalizedAssignedToId due_at=$dueDateUtc '
+            'outbox_seq=$outboxSeq method=PUT path=/tasks/$taskId',
+      );
+    }
+    return taskId;
   }
 
   Future<void> completeTask({
@@ -2969,6 +3512,51 @@ class EerlLocalDataSource {
     }
   }
 
+  Future<void> cancelTask(String taskId) async {
+    final normalizedTaskId = taskId.trim();
+    if (normalizedTaskId.isEmpty) {
+      throw ArgumentError.value(taskId, 'taskId', 'Task is required.');
+    }
+    final now = DateTime.now().toUtc().toIso8601String();
+    late final int outboxSeq;
+    await _database.runInTransaction((txn) async {
+      final updated = await txn.rawUpdate(
+        '''
+        UPDATE ${DatabaseTables.tasks}
+        SET status = 'CANCELLED', sync_state = 'pending'
+        WHERE id = ?
+          AND UPPER(status) = 'PENDING'
+          AND center_id IN (
+            SELECT center_id FROM ${DatabaseTables.myCenters}
+          )
+        ''',
+        [normalizedTaskId],
+      );
+      if (updated != 1) {
+        throw StateError(
+          'Only a pending task at your centers can be cancelled.',
+        );
+      }
+      outboxSeq = await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/tasks/$normalizedTaskId/cancel',
+        entity: DatabaseTables.tasks,
+        entityId: normalizedTaskId,
+        kind: 'cancel',
+        refs: [normalizedTaskId],
+        createdAt: now,
+      );
+    });
+    if (kDebugMode) {
+      AppLogger.sqlite(
+        'COMMIT',
+        'Task cancelled | task_id=$normalizedTaskId outbox_seq=$outboxSeq '
+            'method=POST path=/tasks/$normalizedTaskId/cancel',
+      );
+    }
+  }
+
   Future<List<RequestModel>> getRequests({
     bool supervisor = false,
     String search = '',
@@ -2976,12 +3564,14 @@ class EerlLocalDataSource {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
     final centerId = await activeCenterId;
-    if (centerId == null) return const [];
+    if (!supervisor && centerId == null) return const [];
     final conditions = <String>[
-      supervisor ? 'center_id = ?' : 'created_by = ? AND center_id = ?',
+      supervisor
+          ? 'center_id IN (SELECT center_id FROM ${DatabaseTables.myCenters})'
+          : 'created_by = ? AND center_id = ?',
     ];
     final args = <Object?>[
-      if (supervisor) centerId else ...[userId, centerId],
+      if (!supervisor) ...[userId, centerId],
     ];
     if (search.trim().isNotEmpty) {
       conditions.add('(body LIKE ? OR created_by_name LIKE ?)');
@@ -3015,6 +3605,173 @@ class EerlLocalDataSource {
             ORDER BY r.created_at DESC
             ''', args);
     return rows.map(RequestModel.fromMap).toList(growable: false);
+  }
+
+  Future<void> answerRequest({
+    required String requestId,
+    required String notes,
+  }) async {
+    final normalizedRequestId = requestId.trim();
+    final normalizedNotes = notes.trim();
+    if (normalizedRequestId.isEmpty) {
+      throw ArgumentError.value(requestId, 'requestId', 'Request is required.');
+    }
+    if (normalizedNotes.length < 3) {
+      throw ArgumentError.value(
+        notes,
+        'notes',
+        'Answer notes must be at least 3 characters.',
+      );
+    }
+    final now = DateTime.now().toUtc().toIso8601String();
+    late final int outboxSeq;
+    await _database.runInTransaction((txn) async {
+      final proofRows = await txn.query(
+        DatabaseTables.photos,
+        columns: const ['id'],
+        where: 'owner_table = ? AND owner_id = ? AND field = ?',
+        whereArgs: [DatabaseTables.requests, normalizedRequestId, 'answer'],
+        orderBy: 'created_at ASC',
+      );
+      final proofPhotoIds = proofRows
+          .map((row) => row['id'])
+          .whereType<String>()
+          .toList(growable: false);
+      final updated = await txn.rawUpdate(
+        '''
+        UPDATE ${DatabaseTables.requests}
+        SET status = 'CLOSED', answer = ?, answered_at = ?, sync_state = 'pending'
+        WHERE id = ?
+          AND UPPER(status) = 'OPEN'
+          AND center_id IN (
+            SELECT center_id FROM ${DatabaseTables.myCenters}
+          )
+        ''',
+        [normalizedNotes, now, normalizedRequestId],
+      );
+      if (updated != 1) {
+        throw StateError(
+          'Only an open request at your centers can be answered.',
+        );
+      }
+      outboxSeq = await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/requests/$normalizedRequestId/answer',
+        entity: DatabaseTables.requests,
+        entityId: normalizedRequestId,
+        kind: 'answer',
+        body: {'notes': normalizedNotes, 'photoUrls': proofPhotoIds},
+        refs: [normalizedRequestId],
+        blockingPhotoIds: proofPhotoIds,
+        createdAt: now,
+      );
+    });
+    if (kDebugMode) {
+      AppLogger.sqlite(
+        'COMMIT',
+        'Request answered | request_id=$normalizedRequestId '
+            'outbox_seq=$outboxSeq method=POST '
+            'path=/requests/$normalizedRequestId/answer',
+      );
+    }
+  }
+
+  Future<String> stageRequestAnswerPhoto({
+    required String requestId,
+    required String path,
+  }) async {
+    final normalizedRequestId = requestId.trim();
+    final normalizedPath = path.trim();
+    if (normalizedRequestId.isEmpty || normalizedPath.isEmpty) {
+      throw ArgumentError('Request and proof photo are required.');
+    }
+    final requestRows = await _database.rawQuery(
+      '''
+      SELECT 1
+      FROM ${DatabaseTables.requests}
+      WHERE id = ?
+        AND UPPER(status) IN ('OPEN', 'PENDING')
+        AND center_id IN (
+          SELECT center_id FROM ${DatabaseTables.myCenters}
+        )
+      LIMIT 1
+      ''',
+      [normalizedRequestId],
+    );
+    if (requestRows.isEmpty) {
+      throw StateError('Only an open request at your centers can be answered.');
+    }
+    final photoId = UuidGenerator.v4();
+    final now = DateTime.now().toUtc().toIso8601String();
+    await _database.insert(DatabaseTables.photos, {
+      'id': photoId,
+      'owner_table': DatabaseTables.requests,
+      'owner_id': normalizedRequestId,
+      'field': 'answer',
+      'purpose': 'REQUEST',
+      'content_type': 'image/jpeg',
+      'local_path': normalizedPath,
+      'status': 'local',
+      'size_bytes': await _localFileSize(normalizedPath),
+      'created_at': now,
+    });
+    return photoId;
+  }
+
+  Future<void> removeRequestAnswerPhoto({
+    required String requestId,
+    required String photoId,
+  }) async {
+    await _database.delete(
+      DatabaseTables.photos,
+      where:
+          'id = ? AND owner_table = ? AND owner_id = ? '
+          "AND field = 'answer' AND status = 'local'",
+      whereArgs: [photoId, DatabaseTables.requests, requestId],
+    );
+  }
+
+  Future<List<String>> getRequestAnswerPhotoSources(String requestId) async {
+    final rows = await _database.query(
+      DatabaseTables.requests,
+      columns: const ['answer_photo_urls'],
+      where: 'id = ?',
+      whereArgs: [requestId],
+      limit: 1,
+    );
+    final stored = rows.isEmpty
+        ? const <String>[]
+        : _decodeStringList(rows.single['answer_photo_urls']);
+    final photoRows = await _database.query(
+      DatabaseTables.photos,
+      columns: const ['id', 'local_path', 'remote_url', 'created_at'],
+      where: 'owner_table = ? AND owner_id = ? AND field = ?',
+      whereArgs: [DatabaseTables.requests, requestId, 'answer'],
+      orderBy: 'created_at ASC',
+    );
+    return _photoSourcesForReferences(stored, photoRows);
+  }
+
+  Future<List<String>> getRequestPhotoSources(String requestId) async {
+    final rows = await _database.query(
+      DatabaseTables.requests,
+      columns: const ['photo_urls'],
+      where: 'id = ?',
+      whereArgs: [requestId],
+      limit: 1,
+    );
+    final stored = rows.isEmpty
+        ? const <String>[]
+        : _decodeStringList(rows.single['photo_urls']);
+    final photoRows = await _database.query(
+      DatabaseTables.photos,
+      columns: const ['id', 'local_path', 'remote_url', 'created_at'],
+      where: 'owner_table = ? AND owner_id = ? AND field = ?',
+      whereArgs: [DatabaseTables.requests, requestId, 'request'],
+      orderBy: 'created_at ASC',
+    );
+    return _photoSourcesForReferences(stored, photoRows);
   }
 
   Future<String> raiseRequest({

@@ -5,6 +5,8 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/core/utils/ist_date_time.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_assets.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_detail_widgets.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
@@ -33,12 +35,11 @@ class _SupervisorResolveRequestScreenState
   late final FocusNode _descriptionFocusNode;
   final ImagePicker _imagePicker = ImagePicker();
   final List<XFile> _capturedPhotos = [];
-  late bool _hasPhotos = widget.initialFilled;
+  final List<String> _capturedPhotoIds = [];
   bool _descriptionHasFocus = false;
+  bool _isSubmitting = false;
 
-  bool get _canResolve =>
-      (_capturedPhotos.isNotEmpty || _hasPhotos) &&
-      _descriptionController.text.trim().isNotEmpty;
+  bool get _canResolve => _descriptionController.text.trim().length >= 3;
 
   @override
   void initState() {
@@ -76,30 +77,35 @@ class _SupervisorResolveRequestScreenState
         source: ImageSource.camera,
       );
       if (photo != null && mounted) {
+        final photoId = await EerlLocalRepository.instance
+            .stageRequestAnswerPhoto(
+              requestId: widget.request.id,
+              path: photo.path,
+            );
+        if (!mounted) return;
         setState(() {
           _capturedPhotos.add(photo);
-          _hasPhotos = true;
+          _capturedPhotoIds.add(photoId);
         });
-        return;
       }
-    } catch (_) {}
-    if (mounted) {
-      setState(() {
-        _hasPhotos = true;
-      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.supervisorRequestSaveError)),
+      );
     }
   }
 
-  void _removePhoto(int index) {
+  Future<void> _removePhoto(int index) async {
+    if (index >= _capturedPhotoIds.length) return;
+    await EerlLocalRepository.instance.removeRequestAnswerPhoto(
+      requestId: widget.request.id,
+      photoId: _capturedPhotoIds[index],
+    );
+    if (!mounted) return;
     setState(() {
-      if (_capturedPhotos.isNotEmpty && index < _capturedPhotos.length) {
-        _capturedPhotos.removeAt(index);
-      }
-      if (_capturedPhotos.isEmpty && !widget.initialFilled) {
-        _hasPhotos = false;
-      } else if (_capturedPhotos.isEmpty && widget.initialFilled) {
-        _hasPhotos = false;
-      }
+      _capturedPhotos.removeAt(index);
+      _capturedPhotoIds.removeAt(index);
     });
   }
 
@@ -139,13 +145,19 @@ class _SupervisorResolveRequestScreenState
                         _FollowUpCard(request: widget.request),
                       ],
                       const SizedBox(height: 16),
-                      SupervisorRequestInfoCard(
-                        title: context.l10n.supervisorAgentRequestAttachment,
-                        images: const [
-                          SupervisorRequestAssets.collectionAttachment,
-                          SupervisorRequestAssets.collectionAttachment,
-                        ],
-                        caption: context.l10n.requestAgentName,
+                      FutureBuilder<List<String>>(
+                        future: EerlLocalRepository.instance
+                            .getRequestPhotoSources(widget.request.id),
+                        initialData: widget.request.photoUrls,
+                        builder: (context, snapshot) =>
+                            SupervisorRequestInfoCard(
+                              title:
+                                  context.l10n.supervisorAgentRequestAttachment,
+                              images: snapshot.data ?? const <String>[],
+                              caption:
+                                  widget.request.createdByName ??
+                                  widget.request.createdBy,
+                            ),
                       ),
                       const SizedBox(height: 24),
                       Text(
@@ -156,22 +168,13 @@ class _SupervisorResolveRequestScreenState
                       ),
                       const SizedBox(height: 8),
                       SupervisorRequestCaptureBox(
-                        active: _capturedPhotos.length < 2,
+                        active: true,
                         onTap: _capturePhoto,
                       ),
                       if (_capturedPhotos.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         SupervisorRequestPhotoPair(
                           filePhotos: _capturedPhotos,
-                          onRemove: _removePhoto,
-                        ),
-                      ] else if (_hasPhotos) ...[
-                        const SizedBox(height: 8),
-                        SupervisorRequestPhotoPair(
-                          images: const [
-                            SupervisorRequestAssets.resolutionProof,
-                            SupervisorRequestAssets.resolutionProof,
-                          ],
                           onRemove: _removePhoto,
                         ),
                       ],
@@ -262,7 +265,9 @@ class _SupervisorResolveRequestScreenState
                     height: 52,
                     child: ElevatedButton(
                       key: const Key('supervisor-resolve-request-button'),
-                      onPressed: _canResolve ? _showSuccessDialog : null,
+                      onPressed: _canResolve && !_isSubmitting
+                          ? _resolveRequest
+                          : null,
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
                         disabledBackgroundColor: AppColors.neutral400,
@@ -272,12 +277,21 @@ class _SupervisorResolveRequestScreenState
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
-                        context.l10n.supervisorAgentRequestResolveButton,
-                        style: AppTextStyles.boldH7_16.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              context.l10n.supervisorAgentRequestResolveButton,
+                              style: AppTextStyles.boldH7_16.copyWith(
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -288,6 +302,36 @@ class _SupervisorResolveRequestScreenState
       ),
     ),
   );
+
+  Future<void> _resolveRequest() async {
+    setState(() => _isSubmitting = true);
+    try {
+      await EerlLocalRepository.instance.answerRequest(
+        requestId: widget.request.id,
+        notes: _descriptionController.text,
+      );
+      await OutgoingSyncService.instance.drain();
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      await _showSuccessDialog();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(context.l10n.error),
+          content: Text(context.l10n.supervisorRequestSaveError),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(context.l10n.confirm),
+            ),
+          ],
+        ),
+      );
+    }
+  }
 
   Future<void> _showSuccessDialog() => showGeneralDialog<void>(
     context: context,

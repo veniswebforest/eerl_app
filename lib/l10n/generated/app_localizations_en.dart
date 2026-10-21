@@ -3458,10 +3458,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supervisorCategoryTitle => 'Expense Category Request';
 
   @override
-  String get supervisorCategoryPendingTab => 'Pending (2)';
+  String supervisorCategoryPendingTab(int count) {
+    return 'Pending ($count)';
+  }
 
   @override
-  String get supervisorCategoryClosedTab => 'Closed (4)';
+  String supervisorCategoryClosedTab(int count) {
+    return 'Closed ($count)';
+  }
 
   @override
   String get supervisorCategoryAgent => 'Rahul Patel';
@@ -3560,7 +3564,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supervisorTaskAssignTo => 'Assign To Agent / Zone';
 
   @override
-  String get supervisorTaskSelectAgent => 'Select final outcome';
+  String get supervisorTaskSelectAgent => 'Select agent';
+
+  @override
+  String get supervisorTaskLoading => 'Loading...';
+
+  @override
+  String get supervisorTaskNoCenters => 'No assigned centers found';
+
+  @override
+  String get supervisorTaskNoAgents => 'No agents found at this center';
+
+  @override
+  String get supervisorTaskPeopleLoadError =>
+      'Centers and agents could not be loaded. Please try again.';
+
+  @override
+  String get supervisorTaskCenterRequired => 'Please select a zone/center.';
+
+  @override
+  String get supervisorTaskAgentRequired => 'Please select an agent.';
+
+  @override
+  String get supervisorTaskTextRequired =>
+      'Task title and description are required.';
+
+  @override
+  String get supervisorTaskDateRequired => 'Please select a due date and time.';
+
+  @override
+  String get supervisorTaskFutureDateRequired =>
+      'Due date and time must be in the future.';
+
+  @override
+  String get supervisorTaskPhotoRequired => 'Please attach a reference photo.';
+
+  @override
+  String get supervisorTaskPhotoError =>
+      'The photo could not be captured. Please try again.';
+
+  @override
+  String get supervisorTaskSaveError =>
+      'The task could not be saved. Please try again.';
 
   @override
   String get supervisorTaskPriorityLevel => 'Priority Level';
@@ -3618,7 +3663,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supervisorTaskSentMessage =>
-      'The task assigned by supervisor has been completed.';
+      'The task has been assigned successfully.';
 
   @override
   String get supervisorTaskCalendarMonth => 'August 2026';
@@ -3670,6 +3715,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supervisorTaskCompletedAt => 'Completed: Today, 11:30 AM';
+
+  @override
+  String supervisorTaskCompletedValue(String dateTime) {
+    return 'Completed: $dateTime';
+  }
 
   @override
   String get supervisorTaskCompletionProof => 'Task Completion Proof';
@@ -3724,6 +3774,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Task has been cancelled successfully';
 
   @override
+  String get supervisorTaskCancelError =>
+      'The task could not be cancelled. Please try again.';
+
+  @override
   String get supervisorAgentRequestsTitle => 'Agent Requests';
 
   @override
@@ -3764,6 +3818,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get supervisorAgentRequestSuccessMessage =>
       'Issue closed. Notification sent to the agent.';
+
+  @override
+  String get supervisorRequestSaveError =>
+      'The request answer could not be saved. Please try again.';
 
   @override
   String get supervisorAgentRequestResolveDetails => 'Resolve Request Details';

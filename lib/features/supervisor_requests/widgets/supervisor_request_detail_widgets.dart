@@ -5,6 +5,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_assets.dart';
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
@@ -152,51 +153,45 @@ class SupervisorRequestPhotoPair extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final count = _itemCount;
-    return Row(
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
       children: List.generate(count, (index) {
         final isFile = filePhotos.isNotEmpty;
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsetsDirectional.only(
-              end: index == count - 1 ? 0 : 8,
-            ),
-            child: AspectRatio(
-              aspectRatio: 143.5 / 92,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    if (isFile)
-                      Image.file(
-                        File(filePhotos[index].path),
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => Image.asset(
-                          SupervisorRequestAssets.resolutionProof,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    else
-                      Image.asset(images[index], fit: BoxFit.cover),
-                    if (onRemove != null)
-                      PositionedDirectional(
-                        top: 8,
-                        end: 8,
-                        child: InkWell(
-                          key: ValueKey(
-                            'remove-supervisor-request-photo-$index',
-                          ),
-                          onTap: () => onRemove!(index),
-                          child: SvgPicture.asset(
-                            SupervisorRequestAssets.remove,
-                            width: 24,
-                            height: 24,
-                          ),
-                        ),
+        return SizedBox(
+          width: 143.5,
+          height: 92,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (isFile)
+                  Image.file(
+                    File(filePhotos[index].path),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => const ColoredBox(
+                      color: AppColors.cool200,
+                      child: Icon(Icons.broken_image_outlined),
+                    ),
+                  )
+                else
+                  CachedAppImage(source: images[index], fit: BoxFit.cover),
+                if (onRemove != null)
+                  PositionedDirectional(
+                    top: 8,
+                    end: 8,
+                    child: InkWell(
+                      key: ValueKey('remove-supervisor-request-photo-$index'),
+                      onTap: () => onRemove!(index),
+                      child: SvgPicture.asset(
+                        SupervisorRequestAssets.remove,
+                        width: 24,
+                        height: 24,
                       ),
-                  ],
-                ),
-              ),
+                    ),
+                  ),
+              ],
             ),
           ),
         );

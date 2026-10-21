@@ -92,104 +92,113 @@ class _SupervisorVerificationScreenState
             listenable: _controller,
             builder: (context, _) {
               final entries = _controller.data ?? const <CollectionModel>[];
-              return CustomScrollView(
-                key: const PageStorageKey('supervisor-verification-scroll'),
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                    sliver: SliverToBoxAdapter(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _VerificationHeader(
-                            title: context.l10n.verificationCollectionHistory,
-                            subtitle: context.l10n.verificationSubtitle,
-                          ),
-                          const SizedBox(height: 20),
-                          _VerificationSearchField(
-                            hint: context.l10n.verificationSearchHint,
-                            onChanged: (value) {
-                              _query = value;
-                              _controller.load();
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          VerificationSegmentedControl(
-                            value: _status,
-                            pendingLabel: context.l10n.verificationPending,
-                            processedLabel: context.l10n.verificationProcessed,
-                            onChanged: (value) {
-                              setState(() {
-                                _status = value;
-                                _selectedFilter = 0;
-                              });
-                              _controller.load();
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          VerificationFilterChips(
-                            labels: [
-                              context.l10n.verificationFilterAll,
-                              context.l10n.verificationFilterD2d,
-                              context.l10n.verificationFilterMrf,
-                              context.l10n.verificationFilterRamp,
-                            ],
-                            selectedIndex: _selectedFilter,
-                            onSelected: (index) {
-                              setState(() => _selectedFilter = index);
-                              _controller.load();
-                            },
-                          ),
-                          const SizedBox(height: 18),
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (_controller.isLoading && !_controller.hasData)
-                    const SliverFillRemaining(
-                      child: Center(child: CircularProgressIndicator()),
-                    )
-                  else if (_controller.error != null)
-                    SliverFillRemaining(
-                      child: Center(
-                        child: TextButton(
-                          onPressed: _controller.load,
-                          child: const Text('Retry'),
-                        ),
-                      ),
-                    )
-                  else if (entries.isEmpty)
-                    SliverFillRemaining(
-                      hasScrollBody: false,
-                      child: Center(
-                        child: Text(
-                          context.l10n.verificationEmpty,
-                          style: AppTextStyles.mediumSH8_14.copyWith(
-                            color: AppColors.neutral600,
-                          ),
-                        ),
-                      ),
-                    )
-                  else
+              return RefreshIndicator(
+                key: const Key('verification-pull-to-refresh'),
+                color: AppColors.primary500,
+                onRefresh: _controller.load,
+                child: CustomScrollView(
+                  key: const PageStorageKey('supervisor-verification-scroll'),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 112),
-                      sliver: SliverList.separated(
-                        itemCount: entries.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) => VerificationEntryCard(
-                          key: ValueKey(entries[index].id),
-                          entry: entries[index],
-                          onTap: () async {
-                            await context.push<void>(
-                              AppRoutes.verificationDetail,
-                              extra: entries[index].id,
-                            );
-                            if (mounted) _controller.load();
-                          },
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                      sliver: SliverToBoxAdapter(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _VerificationHeader(
+                              title: context.l10n.verificationCollectionHistory,
+                              subtitle: context.l10n.verificationSubtitle,
+                            ),
+                            const SizedBox(height: 20),
+                            _VerificationSearchField(
+                              hint: context.l10n.verificationSearchHint,
+                              onChanged: (value) {
+                                _query = value;
+                                _controller.load();
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            VerificationSegmentedControl(
+                              value: _status,
+                              pendingLabel: context.l10n.verificationPending,
+                              processedLabel:
+                                  context.l10n.verificationProcessed,
+                              onChanged: (value) {
+                                setState(() {
+                                  _status = value;
+                                  _selectedFilter = 0;
+                                });
+                                _controller.load();
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            VerificationFilterChips(
+                              labels: [
+                                context.l10n.verificationFilterAll,
+                                context.l10n.verificationFilterD2d,
+                                context.l10n.verificationFilterMrf,
+                                context.l10n.verificationFilterRamp,
+                              ],
+                              selectedIndex: _selectedFilter,
+                              onSelected: (index) {
+                                setState(() => _selectedFilter = index);
+                                _controller.load();
+                              },
+                            ),
+                            const SizedBox(height: 18),
+                          ],
                         ),
                       ),
                     ),
-                ],
+                    if (_controller.isLoading && !_controller.hasData)
+                      const SliverFillRemaining(
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_controller.error != null)
+                      SliverFillRemaining(
+                        child: Center(
+                          child: TextButton(
+                            onPressed: _controller.load,
+                            child: const Text('Retry'),
+                          ),
+                        ),
+                      )
+                    else if (entries.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                          child: Text(
+                            context.l10n.verificationEmpty,
+                            style: AppTextStyles.mediumSH8_14.copyWith(
+                              color: AppColors.neutral600,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 112),
+                        sliver: SliverList.separated(
+                          itemCount: entries.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) =>
+                              VerificationEntryCard(
+                                key: ValueKey(entries[index].id),
+                                entry: entries[index],
+                                onTap: () async {
+                                  await context.push<void>(
+                                    AppRoutes.verificationDetail,
+                                    extra: entries[index].id,
+                                  );
+                                  if (mounted) _controller.load();
+                                },
+                              ),
+                        ),
+                      ),
+                  ],
+                ),
               );
             },
           ),

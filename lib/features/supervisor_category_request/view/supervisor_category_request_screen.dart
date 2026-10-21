@@ -1,12 +1,16 @@
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/supervisor_category_request/model/supervisor_category_request.dart';
 import 'package:eerl_app/features/supervisor_category_request/widgets/supervisor_category_request_widgets.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/wallet/widgets/expense_detail_cards.dart';
 import 'package:eerl_app/features/wallet/widgets/wallet_assets.dart';
 import 'package:eerl_app/features/wallet/widgets/wallet_screen_header.dart';
@@ -28,15 +32,25 @@ class SupervisorCategoryRequestScreen extends StatefulWidget {
 class _SupervisorCategoryRequestScreenState
     extends State<SupervisorCategoryRequestScreen> {
   _CategoryRequestPage _page = _CategoryRequestPage.list;
-  SupervisorCategoryRequestStatus _detailStatus =
-      SupervisorCategoryRequestStatus.pending;
+  CategoryRequestModel? _selectedRequest;
   bool _closedTab = false;
   bool _showRejectedBanner = false;
 
-  void _openDetail(SupervisorCategoryRequestStatus status) => setState(() {
-    _detailStatus = status;
+  void _openDetail(CategoryRequestModel request) => setState(() {
+    _selectedRequest = request;
     _page = _CategoryRequestPage.detail;
   });
+
+  Future<void> _decideSelected(String outcome, {String? reason}) async {
+    final request = _selectedRequest;
+    if (request == null) return;
+    await EerlLocalRepository.instance.decideCategoryRequest(
+      requestId: request.id,
+      outcome: outcome,
+      reason: reason,
+    );
+    await OutgoingSyncService.instance.drain();
+  }
 
   void _backToClosedList({bool rejected = false}) => setState(() {
     _closedTab = true;
@@ -63,8 +77,10 @@ class _SupervisorCategoryRequestScreenState
         onOpenDetail: _openDetail,
       ),
       _CategoryRequestPage.detail => _CategoryRequestDetailScreen(
-        status: _detailStatus,
+        request: _selectedRequest!,
         onBack: () => setState(() => _page = _CategoryRequestPage.list),
+        onApprove: () => _decideSelected('APPROVED'),
+        onReject: (reason) => _decideSelected('REJECTED', reason: reason),
         onApproved: () => _backToClosedList(),
         onRejected: () => _backToClosedList(rejected: true),
       ),
@@ -72,7 +88,7 @@ class _SupervisorCategoryRequestScreenState
   );
 }
 
-class _CategoryRequestListScreen extends StatelessWidget {
+class _CategoryRequestListScreen extends StatefulWidget {
   const _CategoryRequestListScreen({
     required this.closedTab,
     required this.showRejectedBanner,
@@ -87,74 +103,126 @@ class _CategoryRequestListScreen extends StatelessWidget {
   final VoidCallback onBack;
   final ValueChanged<bool> onTabChanged;
   final VoidCallback onDismissBanner;
-  final ValueChanged<SupervisorCategoryRequestStatus> onOpenDetail;
+  final ValueChanged<CategoryRequestModel> onOpenDetail;
+
+  @override
+  State<_CategoryRequestListScreen> createState() =>
+      _CategoryRequestListScreenState();
+}
+
+class _CategoryRequestListScreenState
+    extends State<_CategoryRequestListScreen> {
+  List<CategoryRequestModel> _requests = const [];
+  bool _loading = true;
+  Object? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final requests = await EerlLocalRepository.instance.getCategoryRequests(
+        supervisor: true,
+      );
+      if (!mounted) return;
+      setState(() {
+        _requests = requests;
+        _loading = false;
+        _error = null;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = error;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    SupervisorCategoryRequest item(SupervisorCategoryRequestStatus status) =>
-        SupervisorCategoryRequest(
-          agent: l.supervisorCategoryAgent,
-          facility: l.supervisorCategoryFacility,
-          category: l.supervisorCategoryTyreReplacement,
-          description: l.supervisorCategoryDescription,
-          date: l.supervisorCategoryTodayTime,
-          status: status,
-        );
-    final pendingItems = List.generate(
-      3,
-      (_) => item(SupervisorCategoryRequestStatus.pending),
-    );
-    final closedItems = showRejectedBanner
-        ? [
-            item(SupervisorCategoryRequestStatus.rejected),
-            item(SupervisorCategoryRequestStatus.resolved),
-            item(SupervisorCategoryRequestStatus.resolved),
-          ]
-        : [
-            item(SupervisorCategoryRequestStatus.resolved),
-            item(SupervisorCategoryRequestStatus.resolved),
-            item(SupervisorCategoryRequestStatus.rejected),
-          ];
-    final items = closedTab ? closedItems : pendingItems;
+    final pendingCount = _requests
+        .where(
+          (request) =>
+              const {'PENDING', 'OPEN'}.contains(request.status.toUpperCase()),
+        )
+        .length;
+    final closedCount = _requests.length - pendingCount;
+    final entries = _requests
+        .where((request) {
+          final pending = const {
+            'PENDING',
+            'OPEN',
+          }.contains(request.status.toUpperCase());
+          return widget.closedTab ? !pending : pending;
+        })
+        .map((request) => (model: request, item: _presentationItem(request)))
+        .toList(growable: false);
 
-    Widget listContent({required double topPadding}) => ListView(
-      key: const Key('supervisor-category-request-list'),
-      padding: EdgeInsets.fromLTRB(20, topPadding, 20, 32),
-      children: [
-        if (!showRejectedBanner) ...[
-          AppScreenHeader(
-            leading: WalletBackButton(onPressed: onBack),
-            title: l.supervisorCategoryTitle,
+    Widget listContent({required double topPadding}) => RefreshIndicator(
+      key: const Key('supervisor-category-request-refresh'),
+      onRefresh: _loadData,
+      child: ListView(
+        key: const Key('supervisor-category-request-list'),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(20, topPadding, 20, 32),
+        children: [
+          if (!widget.showRejectedBanner) ...[
+            AppScreenHeader(
+              leading: WalletBackButton(onPressed: widget.onBack),
+              title: l.supervisorCategoryTitle,
+            ),
+            const SizedBox(height: 24),
+          ],
+          _CategoryTabs(
+            closed: widget.closedTab,
+            pendingLabel: l.supervisorCategoryPendingTab(pendingCount),
+            closedLabel: l.supervisorCategoryClosedTab(closedCount),
+            onChanged: widget.onTabChanged,
           ),
           const SizedBox(height: 24),
-        ],
-        _CategoryTabs(
-          closed: closedTab,
-          pendingLabel: l.supervisorCategoryPendingTab,
-          closedLabel: l.supervisorCategoryClosedTab,
-          onChanged: onTabChanged,
-        ),
-        const SizedBox(height: 24),
-        for (final entry in items.asMap().entries) ...[
-          SupervisorCategoryRequestCard(
-            item: entry.value,
-            cardKey: ValueKey(
-              'category-request-${entry.value.status.name}-${entry.key}',
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_error != null)
+            Center(
+              child: TextButton(
+                onPressed: _loadData,
+                child: const Text('Try again'),
+              ),
+            )
+          else if (entries.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: Center(child: Text('No category requests found.')),
             ),
-            statusLabel: switch (entry.value.status) {
-              SupervisorCategoryRequestStatus.pending =>
-                l.supervisorCategoryRequestPending,
-              SupervisorCategoryRequestStatus.resolved =>
-                l.supervisorCategoryRequestResolved,
-              SupervisorCategoryRequestStatus.rejected =>
-                l.supervisorCategoryRequestRejected,
-            },
-            onTap: () => onOpenDetail(entry.value.status),
-          ),
-          const SizedBox(height: 12),
+          if (!_loading && _error == null)
+            for (final entry in entries.asMap().entries) ...[
+              SupervisorCategoryRequestCard(
+                item: entry.value.item,
+                cardKey: ValueKey(
+                  'category-request-${entry.value.item.status.name}-${entry.key}',
+                ),
+                statusLabel: switch (entry.value.item.status) {
+                  SupervisorCategoryRequestStatus.pending =>
+                    l.supervisorCategoryRequestPending,
+                  SupervisorCategoryRequestStatus.resolved =>
+                    l.supervisorCategoryRequestResolved,
+                  SupervisorCategoryRequestStatus.rejected =>
+                    l.supervisorCategoryRequestRejected,
+                },
+                onTap: () => widget.onOpenDetail(entry.value.model),
+              ),
+              const SizedBox(height: 12),
+            ],
         ],
-      ],
+      ),
     );
 
     return Scaffold(
@@ -164,7 +232,7 @@ class _CategoryRequestListScreen extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
-            child: showRejectedBanner
+            child: widget.showRejectedBanner
                 ? Stack(
                     children: [
                       listContent(topPadding: 82),
@@ -191,7 +259,7 @@ class _CategoryRequestListScreen extends StatelessWidget {
                             width: 20,
                             height: 20,
                           ),
-                          onClose: onDismissBanner,
+                          onClose: widget.onDismissBanner,
                         ),
                       ),
                     ],
@@ -201,6 +269,30 @@ class _CategoryRequestListScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  SupervisorCategoryRequest _presentationItem(CategoryRequestModel request) {
+    final status = switch (request.status.toUpperCase()) {
+      'REJECTED' => SupervisorCategoryRequestStatus.rejected,
+      'PENDING' || 'OPEN' => SupervisorCategoryRequestStatus.pending,
+      _ => SupervisorCategoryRequestStatus.resolved,
+    };
+    final createdAt = DateTime.tryParse(request.createdAt)?.toLocal();
+    return SupervisorCategoryRequest(
+      agent: _displayValue(request.requestedByName, request.requestedBy),
+      facility: request.centerId,
+      category: request.name,
+      description: _displayValue(request.reason, '—'),
+      date: createdAt == null
+          ? request.createdAt
+          : DateFormat('dd MMM yyyy, hh:mm a').format(createdAt),
+      status: status,
+    );
+  }
+
+  String _displayValue(String? value, String fallback) {
+    final normalized = value?.trim();
+    return normalized?.isNotEmpty == true ? normalized! : fallback;
   }
 }
 
@@ -281,20 +373,29 @@ class _CategoryTab extends StatelessWidget {
 
 class _CategoryRequestDetailScreen extends StatelessWidget {
   const _CategoryRequestDetailScreen({
-    required this.status,
+    required this.request,
     required this.onBack,
+    required this.onApprove,
+    required this.onReject,
     required this.onApproved,
     required this.onRejected,
   });
 
-  final SupervisorCategoryRequestStatus status;
+  final CategoryRequestModel request;
   final VoidCallback onBack;
+  final Future<void> Function() onApprove;
+  final Future<void> Function(String reason) onReject;
   final VoidCallback onApproved;
   final VoidCallback onRejected;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final status = switch (request.status.toUpperCase()) {
+      'REJECTED' => SupervisorCategoryRequestStatus.rejected,
+      'PENDING' || 'OPEN' => SupervisorCategoryRequestStatus.pending,
+      _ => SupervisorCategoryRequestStatus.resolved,
+    };
     final pending = status == SupervisorCategoryRequestStatus.pending;
     final statusLabel = switch (status) {
       SupervisorCategoryRequestStatus.pending =>
@@ -333,12 +434,16 @@ class _CategoryRequestDetailScreen extends StatelessWidget {
                           children: [
                             ExpenseDetailRow(
                               label: l.supervisorCategoryCollectionAgent,
-                              value: l.supervisorCategoryAgent,
+                              value:
+                                  request.requestedByName?.trim().isNotEmpty ==
+                                      true
+                                  ? request.requestedByName!.trim()
+                                  : request.requestedBy,
                             ),
                             const _CategoryDivider(),
                             ExpenseDetailRow(
                               label: l.supervisorCategoryTitle,
-                              value: l.supervisorCategoryTyreReplacement,
+                              value: request.name,
                             ),
                             const _CategoryDivider(),
                             Text(
@@ -364,7 +469,9 @@ class _CategoryRequestDetailScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              l.supervisorCategoryDescription,
+                              request.reason?.trim().isNotEmpty == true
+                                  ? request.reason!.trim()
+                                  : '—',
                               style: AppTextStyles.mediumSH9_12.copyWith(
                                 color: AppColors.neutral900,
                               ),
@@ -402,12 +509,7 @@ class _CategoryRequestDetailScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                '${l.expenseRejectReasonLabel} : ${l.supervisorCategoryRejectReason}',
-                                style: AppTextStyles.mediumSH8_14,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '${l.expenseRejectRemarksLabel} : ${l.supervisorCategoryRejectRemarks}',
+                                '${l.expenseRejectReasonLabel} : ${request.decisionReason?.trim().isNotEmpty == true ? request.decisionReason!.trim() : '—'}',
                                 style: AppTextStyles.mediumSH8_14,
                               ),
                             ],
@@ -483,6 +585,16 @@ class _CategoryRequestDetailScreen extends StatelessWidget {
 
   Future<void> _showApprovedDialog(BuildContext context) async {
     final l = context.l10n;
+    try {
+      await onApprove();
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      return;
+    }
+    if (!context.mounted) return;
     await showDialog<void>(
       context: context,
       barrierColor: const Color(0x99000000),
@@ -538,74 +650,98 @@ class _CategoryRequestDetailScreen extends StatelessWidget {
 
   Future<void> _showRejectDialog(BuildContext context) async {
     final l = context.l10n;
+    final reasonController = TextEditingController();
     await showDialog<void>(
       context: context,
       barrierColor: const Color(0x99000000),
-      builder: (dialogContext) => Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l.supervisorCategoryAreYouSure,
-                style: AppTextStyles.semiboldH6_20,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l.supervisorCategoryRejectConfirmation,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.mediumSH8_14.copyWith(
-                  color: AppColors.neutral700,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => Dialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l.supervisorCategoryAreYouSure,
+                  style: AppTextStyles.semiboldH6_20,
                 ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(dialogContext).pop(),
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        minimumSize: const Size.fromHeight(52),
-                        backgroundColor: AppColors.cool200,
-                        foregroundColor: AppColors.neutral900,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(l.recordsCancel),
-                    ),
+                const SizedBox(height: 12),
+                Text(
+                  l.supervisorCategoryRejectConfirmation,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.mediumSH8_14.copyWith(
+                    color: AppColors.neutral700,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      key: const Key('category-request-confirm-reject'),
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop();
-                        onRejected();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        minimumSize: const Size.fromHeight(52),
-                        backgroundColor: AppColors.red500,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(l.supervisorCategoryYes),
-                    ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  key: const Key('category-request-reject-reason'),
+                  controller: reasonController,
+                  maxLength: 150,
+                  minLines: 2,
+                  maxLines: 4,
+                  onChanged: (_) => setDialogState(() {}),
+                  decoration: InputDecoration(
+                    labelText: l.expenseRejectReasonLabel,
+                    border: const OutlineInputBorder(),
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          minimumSize: const Size.fromHeight(52),
+                          backgroundColor: AppColors.cool200,
+                          foregroundColor: AppColors.neutral900,
+                        ),
+                        child: Text(l.recordsCancel),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        key: const Key('category-request-confirm-reject'),
+                        onPressed: reasonController.text.trim().isEmpty
+                            ? null
+                            : () async {
+                                try {
+                                  await onReject(reasonController.text);
+                                  if (!dialogContext.mounted) return;
+                                  Navigator.of(dialogContext).pop();
+                                  onRejected();
+                                } catch (error) {
+                                  if (!dialogContext.mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(error.toString())),
+                                  );
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          minimumSize: const Size.fromHeight(52),
+                          backgroundColor: AppColors.red500,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text(l.supervisorCategoryYes),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
+    reasonController.dispose();
   }
 }
 

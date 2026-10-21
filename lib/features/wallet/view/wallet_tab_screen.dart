@@ -10,7 +10,6 @@ import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
-import '../model/cash_request_detail_status.dart';
 import '../widgets/expense_claim_card.dart';
 import '../widgets/expense_search_filters.dart';
 import '../widgets/wallet_action_card.dart';
@@ -224,7 +223,7 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
           amount: '₹${item.amount.toStringAsFixed(2)}',
           statusLabel: item.status,
           status: _claimStatus(item.status),
-          onTap: () => _openCashRequest(_cashStatus(item.status)),
+          onTap: () => _openCashRequest(item),
         ),
         const SizedBox(height: 12),
       ],
@@ -245,15 +244,8 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
         _ => ExpenseClaimStatus.pending,
       };
 
-  CashRequestDetailStatus _cashStatus(String value) =>
-      switch (value.toUpperCase()) {
-        'APPROVED' || 'CREDITED' => CashRequestDetailStatus.approved,
-        'REJECTED' => CashRequestDetailStatus.rejected,
-        _ => CashRequestDetailStatus.pending,
-      };
-
   void _openExpenseClaim(ExpenseModel expense) =>
       context.push<void>(AppRoutes.expenseClaimDetail, extra: expense);
-  void _openCashRequest(CashRequestDetailStatus status) =>
-      context.push<void>(AppRoutes.cashRequestDetail, extra: status);
+  void _openCashRequest(CashRequestModel request) =>
+      context.push<void>(AppRoutes.cashRequestDetail, extra: request);
 }

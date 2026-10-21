@@ -13,7 +13,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 6;
+  static const databaseVersion = 8;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -155,6 +155,26 @@ class AppDatabase {
       });
       _log('Upgraded transfer rejection remarks schema to version 6');
     }
+    if (oldVersion < 7) {
+      await _addMissingColumns(db, DatabaseTables.requests, const {
+        'answer_photo_urls': "TEXT NOT NULL DEFAULT '[]'",
+      });
+      _log('Upgraded request answer-proof schema to version 7');
+    }
+    if (oldVersion < 8) {
+      await _addMissingColumns(db, DatabaseTables.collections, const {
+        'rejection_remarks': 'TEXT',
+      });
+      await _addMissingColumns(db, DatabaseTables.expenses, const {
+        'decision_remarks': 'TEXT',
+      });
+      await _addMissingColumns(db, DatabaseTables.cashRequests, const {
+        'decision_remarks': 'TEXT',
+      });
+      _log(
+        'Upgraded collection and expense decision remarks schema to version 8',
+      );
+    }
   }
 
   Future<void> _onOpen(Database db) async {
@@ -185,7 +205,10 @@ class AppDatabase {
       DatabaseTables.vehicles: {'number': 'TEXT'},
       DatabaseTables.mrfPeople: {'number': 'TEXT'},
       DatabaseTables.ragpickers: {'number': 'TEXT'},
-      DatabaseTables.cashRequests: {'number': 'TEXT'},
+      DatabaseTables.cashRequests: {
+        'number': 'TEXT',
+        'decision_remarks': 'TEXT',
+      },
       DatabaseTables.categoryRequests: {
         'number': 'TEXT',
         'requested_by_name': 'TEXT',
@@ -194,8 +217,17 @@ class AppDatabase {
         'decision_reason': 'TEXT',
       },
       DatabaseTables.tasks: {'number': 'TEXT', 'note': 'TEXT'},
-      DatabaseTables.requests: {'number': 'TEXT', 'follow_up_at': 'TEXT'},
-      DatabaseTables.collections: {'gps_lat': 'REAL', 'gps_lng': 'REAL'},
+      DatabaseTables.requests: {
+        'number': 'TEXT',
+        'follow_up_at': 'TEXT',
+        'answer_photo_urls': "TEXT NOT NULL DEFAULT '[]'",
+      },
+      DatabaseTables.expenses: {'decision_remarks': 'TEXT'},
+      DatabaseTables.collections: {
+        'gps_lat': 'REAL',
+        'gps_lng': 'REAL',
+        'rejection_remarks': 'TEXT',
+      },
       DatabaseTables.transfers: {
         'note': 'TEXT',
         'dispatch_note': 'TEXT',

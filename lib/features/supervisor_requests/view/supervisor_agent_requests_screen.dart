@@ -187,7 +187,10 @@ class _SupervisorAgentRequestsScreenState
 
   Future<void> _openRequest(RequestModel request) async {
     if (!const {'OPEN', 'PENDING'}.contains(request.status.toUpperCase())) {
-      await context.push<void>(AppRoutes.supervisorCompletedRequest);
+      await context.push<void>(
+        AppRoutes.supervisorCompletedRequest,
+        extra: request,
+      );
       return;
     }
 
@@ -197,6 +200,7 @@ class _SupervisorAgentRequestsScreenState
     );
     if (mounted && resolved == true) {
       setState(() => _status = SupervisorAgentRequestStatus.resolved);
+      await _load();
     }
   }
 }

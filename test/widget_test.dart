@@ -77,6 +77,9 @@ void main() {
     expect(find.text('Reject Expenses'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
+    await tester.tap(
+      find.byKey(const ValueKey('supervisor-expense-reject-reason-0')),
+    );
     await tester.ensureVisible(
       find.byKey(const Key('supervisor-expense-confirm-rejection')),
     );
@@ -180,6 +183,9 @@ void main() {
 
     expect(find.text('Reject Cash Request'), findsOneWidget);
     expect(find.text('Sufficient Existing Balance'), findsOneWidget);
+    await tester.tap(
+      find.byKey(const ValueKey('supervisor-cash-reject-reason-0')),
+    );
     await tester.tap(
       find.byKey(const Key('supervisor-cash-confirm-rejection')),
     );

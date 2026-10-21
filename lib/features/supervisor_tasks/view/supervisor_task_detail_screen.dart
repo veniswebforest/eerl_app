@@ -3,20 +3,75 @@ import 'dart:ui';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/ist_date_time.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/supervisor_tasks/model/supervisor_task_detail_status.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_assets.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_detail_widgets.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
 import 'package:flutter/material.dart';
 
-class SupervisorTaskDetailScreen extends StatelessWidget {
-  const SupervisorTaskDetailScreen({super.key, required this.status});
+class SupervisorTaskDetailScreen extends StatefulWidget {
+  const SupervisorTaskDetailScreen({
+    super.key,
+    this.status,
+    this.task,
+    this.taskLoader,
+  });
 
-  final SupervisorTaskDetailStatus status;
+  final SupervisorTaskDetailStatus? status;
+  final TaskModel? task;
+  final Future<TaskModel?> Function(String taskId)? taskLoader;
+
+  @override
+  State<SupervisorTaskDetailScreen> createState() =>
+      _SupervisorTaskDetailScreenState();
+}
+
+class _SupervisorTaskDetailScreenState
+    extends State<SupervisorTaskDetailScreen> {
+  TaskModel? _task;
+
+  @override
+  void initState() {
+    super.initState();
+    _task = widget.task;
+    _reloadTask();
+  }
+
+  Future<void> _reloadTask() async {
+    final taskId = widget.task?.id;
+    if (taskId == null) return;
+    final freshTask =
+        await (widget.taskLoader?.call(taskId) ??
+            EerlLocalRepository.instance.getTask(taskId));
+    if (!mounted || freshTask == null) return;
+    setState(() => _task = freshTask);
+  }
+
+  SupervisorTaskDetailStatus get _status {
+    final normalized = _task?.status.toUpperCase();
+    if (const {'PENDING', 'OPEN', 'IN_PROGRESS'}.contains(normalized)) {
+      return SupervisorTaskDetailStatus.inProgress;
+    }
+    if (normalized == 'CANCELLED') return SupervisorTaskDetailStatus.cancelled;
+    if (const {'COMPLETED', 'CLOSED', 'RESOLVED'}.contains(normalized)) {
+      return SupervisorTaskDetailStatus.completed;
+    }
+    return widget.status ?? SupervisorTaskDetailStatus.completed;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isInProgress = status == SupervisorTaskDetailStatus.inProgress;
+    final effectiveStatus = _status;
+    final task = _task;
+    final isInProgress =
+        effectiveStatus == SupervisorTaskDetailStatus.inProgress;
+    final isCompleted = effectiveStatus == SupervisorTaskDetailStatus.completed;
+    final completionImages = _completionImages(task, isCompleted);
+    final attachmentImages = _attachmentImages(task);
 
     return Scaffold(
       key: const Key('supervisor-task-detail-screen'),
@@ -34,65 +89,80 @@ class SupervisorTaskDetailScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
                     children: [
-                      SupervisorTaskStatusCard(status: status),
+                      SupervisorTaskStatusCard(
+                        status: effectiveStatus,
+                        label: _statusLabel(context, task, effectiveStatus),
+                      ),
                       const SizedBox(height: 24),
-                      if (status == SupervisorTaskDetailStatus.completed) ...[
+                      if (isCompleted && completionImages.isNotEmpty) ...[
                         SupervisorTaskDetailCard(
                           title: context.l10n.supervisorTaskCompletionProof,
-                          images: const [
-                            SupervisorTaskAssets.completionProofOne,
-                            SupervisorTaskAssets.completionProofTwo,
-                          ],
-                          caption: context.l10n.supervisorTaskAgentName,
+                          images: completionImages,
+                          caption: _completionOwner(context, task),
                           emphasized: true,
                         ),
                         const SizedBox(height: 16),
+                      ],
+                      if (isCompleted) ...[
                         SupervisorTaskDetailCard(
                           title: context.l10n.supervisorTaskDescriptionLabel,
-                          value:
-                              context.l10n.supervisorTaskCompletionDescription,
-                          caption: context.l10n.supervisorTaskAgentName,
+                          value: task?.note?.trim().isNotEmpty == true
+                              ? task!.note!.trim()
+                              : context
+                                    .l10n
+                                    .supervisorTaskCompletionDescription,
+                          caption: _completionOwner(context, task),
                           emphasized: true,
                         ),
                         const SizedBox(height: 24),
                       ],
-                      Text(
-                        context.l10n.supervisorTaskSentDetails,
-                        style: AppTextStyles.semiboldH9_14.copyWith(
-                          color: AppColors.neutral950,
+                      if (isCompleted) ...[
+                        Text(
+                          context.l10n.supervisorTaskSentDetails,
+                          style: AppTextStyles.semiboldH9_14.copyWith(
+                            color: AppColors.neutral950,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
+                      ],
                       SupervisorTaskDetailCard(
                         title: context.l10n.supervisorTaskAssignToLabel,
-                        value: context.l10n.supervisorTaskAgentRahul,
+                        value:
+                            _assigneeLabel(task) ??
+                            context.l10n.supervisorTaskAgentRahul,
                       ),
                       const SizedBox(height: 16),
                       SupervisorTaskDetailCard(
                         title: context.l10n.supervisorTaskDescriptionLabel,
-                        value: context.l10n.supervisorTaskDetailDescription,
+                        value: task?.description?.trim().isNotEmpty == true
+                            ? task!.description!.trim()
+                            : context.l10n.supervisorTaskDetailDescription,
                       ),
                       const SizedBox(height: 16),
                       SupervisorTaskDetailCard(
                         title: context.l10n.supervisorTaskPriority,
-                        value: context.l10n.supervisorTaskPriorityLow,
+                        value: _priorityLabel(context, task?.priority),
                       ),
                       const SizedBox(height: 16),
                       SupervisorTaskDetailCard(
                         title: context.l10n.supervisorTaskFollowupDateTime,
-                        value: context.l10n.supervisorTaskFilledDate,
+                        value: task?.dueAt?.trim().isNotEmpty == true
+                            ? IstDateTime.formatUtc(
+                                task!.dueAt!,
+                                'dd MMM yyyy, hh:mm a',
+                              )
+                            : context.l10n.supervisorTaskFilledDate,
                       ),
-                      const SizedBox(height: 16),
-                      SupervisorTaskDetailCard(
-                        title: context.l10n.supervisorTaskAttachmentByYou,
-                        images: const [
-                          SupervisorTaskAssets.referencePhoto,
-                          SupervisorTaskAssets.referencePhoto,
-                        ],
-                        caption: context.l10n.supervisorTaskAttachmentOwner,
-                      ),
+                      if (attachmentImages.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        SupervisorTaskDetailCard(
+                          title: context.l10n.supervisorTaskAttachmentByYou,
+                          images: attachmentImages,
+                          caption: _attachmentOwner(context, task),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -128,6 +198,85 @@ class SupervisorTaskDetailScreen extends StatelessWidget {
     );
   }
 
+  String? _assigneeLabel(TaskModel? task) {
+    if (task == null) return null;
+    final agent = task.assignedToName?.trim().isNotEmpty == true
+        ? task.assignedToName!.trim()
+        : task.assignedTo;
+    final center = task.centerName?.trim();
+    return center?.isNotEmpty == true ? '$agent ($center)' : agent;
+  }
+
+  List<String> _completionImages(TaskModel? task, bool isCompleted) {
+    if (!isCompleted) return const [];
+    if (task?.photoUrls.isNotEmpty == true) return task!.photoUrls;
+    return const [
+      SupervisorTaskAssets.completionProofOne,
+      SupervisorTaskAssets.completionProofTwo,
+    ];
+  }
+
+  List<String> _attachmentImages(TaskModel? task) {
+    if (task != null) return task.photoUrls;
+    return const [
+      SupervisorTaskAssets.referencePhoto,
+      SupervisorTaskAssets.referencePhoto,
+    ];
+  }
+
+  String _completionOwner(BuildContext context, TaskModel? task) =>
+      task?.assignedToName?.trim().isNotEmpty == true
+      ? task!.assignedToName!.trim()
+      : task?.assignedTo.trim().isNotEmpty == true
+      ? task!.assignedTo.trim()
+      : context.l10n.supervisorTaskAgentName;
+
+  String _attachmentOwner(BuildContext context, TaskModel? task) =>
+      task?.assignedByName?.trim().isNotEmpty == true
+      ? task!.assignedByName!.trim()
+      : task?.assignedBy.trim().isNotEmpty == true
+      ? task!.assignedBy.trim()
+      : context.l10n.supervisorTaskAttachmentOwner;
+
+  String _priorityLabel(BuildContext context, String? priority) =>
+      switch (priority?.trim().toUpperCase()) {
+        'HIGH' => context.l10n.taskPriorityHigh,
+        'NORMAL' => context.l10n.taskPriorityNormal,
+        _ => context.l10n.taskPriorityLow,
+      };
+
+  String _statusLabel(
+    BuildContext context,
+    TaskModel? task,
+    SupervisorTaskDetailStatus status,
+  ) {
+    if (status == SupervisorTaskDetailStatus.inProgress) {
+      return context.l10n.supervisorTaskInProgress;
+    }
+    if (status == SupervisorTaskDetailStatus.cancelled) {
+      return context.l10n.supervisorTaskCancelled;
+    }
+    final completedAt = task?.completedAt;
+    if (completedAt?.trim().isNotEmpty != true) {
+      return context.l10n.supervisorTaskCompletedAt;
+    }
+    final parsed = DateTime.tryParse(completedAt!);
+    if (parsed == null) {
+      return context.l10n.supervisorTaskCompletedValue(completedAt);
+    }
+    final completed = IstDateTime.fromUtc(parsed);
+    final today = IstDateTime.now();
+    final isToday =
+        completed.year == today.year &&
+        completed.month == today.month &&
+        completed.day == today.day;
+    final value = isToday
+        ? '${context.l10n.filterToday}, '
+              '${IstDateTime.formatUtc(completedAt, 'hh:mm a')}'
+        : IstDateTime.formatUtc(completedAt, 'dd MMM yyyy, hh:mm a');
+    return context.l10n.supervisorTaskCompletedValue(value);
+  }
+
   Future<void> _showCancelDialog(BuildContext context) =>
       showGeneralDialog<void>(
         context: context,
@@ -138,9 +287,33 @@ class SupervisorTaskDetailScreen extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: SupervisorCancelTaskDialog(
             onNo: () => Navigator.of(dialogContext).pop(),
-            onYes: () {
+            onYes: () async {
               Navigator.of(dialogContext).pop();
-              Navigator.of(context).pop(true);
+              final taskId = _task?.id;
+              if (taskId == null) {
+                Navigator.of(context).pop(true);
+                return;
+              }
+              try {
+                await EerlLocalRepository.instance.cancelTask(taskId);
+                await OutgoingSyncService.instance.drain();
+                if (context.mounted) Navigator.of(context).pop(true);
+              } catch (_) {
+                if (!context.mounted) return;
+                await showDialog<void>(
+                  context: context,
+                  builder: (errorContext) => AlertDialog(
+                    title: Text(context.l10n.error),
+                    content: Text(context.l10n.supervisorTaskCancelError),
+                    actions: [
+                      FilledButton(
+                        onPressed: () => Navigator.of(errorContext).pop(),
+                        child: Text(context.l10n.confirm),
+                      ),
+                    ],
+                  ),
+                );
+              }
             },
           ),
         ),

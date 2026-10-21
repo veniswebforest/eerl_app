@@ -3447,10 +3447,14 @@ class AppLocalizationsGu extends AppLocalizations {
   String get supervisorCategoryTitle => 'ખર્ચ કેટેગરી વિનંતી';
 
   @override
-  String get supervisorCategoryPendingTab => 'બાકી (2)';
+  String supervisorCategoryPendingTab(int count) {
+    return 'બાકી ($count)';
+  }
 
   @override
-  String get supervisorCategoryClosedTab => 'બંધ (4)';
+  String supervisorCategoryClosedTab(int count) {
+    return 'બંધ ($count)';
+  }
 
   @override
   String get supervisorCategoryAgent => 'રાહુલ પટેલ';
@@ -3547,7 +3551,47 @@ class AppLocalizationsGu extends AppLocalizations {
   String get supervisorTaskAssignTo => 'એજન્ટ / ઝોનને સોંપો';
 
   @override
-  String get supervisorTaskSelectAgent => 'અંતિમ વિકલ્પ પસંદ કરો';
+  String get supervisorTaskSelectAgent => 'એજન્ટ પસંદ કરો';
+
+  @override
+  String get supervisorTaskLoading => 'લોડ થઈ રહ્યું છે...';
+
+  @override
+  String get supervisorTaskNoCenters => 'સોંપાયેલ કોઈ કેન્દ્ર મળ્યું નથી';
+
+  @override
+  String get supervisorTaskNoAgents => 'આ કેન્દ્રમાં કોઈ એજન્ટ મળ્યો નથી';
+
+  @override
+  String get supervisorTaskPeopleLoadError =>
+      'કેન્દ્રો અને એજન્ટ લોડ થઈ શક્યા નથી. ફરી પ્રયાસ કરો.';
+
+  @override
+  String get supervisorTaskCenterRequired => 'ઝોન/કેન્દ્ર પસંદ કરો.';
+
+  @override
+  String get supervisorTaskAgentRequired => 'એજન્ટ પસંદ કરો.';
+
+  @override
+  String get supervisorTaskTextRequired =>
+      'કાર્યનું શીર્ષક અને વર્ણન જરૂરી છે.';
+
+  @override
+  String get supervisorTaskDateRequired => 'નિયત તારીખ અને સમય પસંદ કરો.';
+
+  @override
+  String get supervisorTaskFutureDateRequired =>
+      'નિયત તારીખ અને સમય ભવિષ્યનો હોવો જોઈએ.';
+
+  @override
+  String get supervisorTaskPhotoRequired => 'સંદર્ભ ફોટો જોડો.';
+
+  @override
+  String get supervisorTaskPhotoError => 'ફોટો લઈ શકાયો નથી. ફરી પ્રયાસ કરો.';
+
+  @override
+  String get supervisorTaskSaveError =>
+      'કાર્ય સાચવી શકાયું નથી. ફરી પ્રયાસ કરો.';
 
   @override
   String get supervisorTaskPriorityLevel => 'પ્રાથમિકતા સ્તર';
@@ -3603,8 +3647,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get supervisorTaskSentTitle => 'કાર્ય મોકલાયું!';
 
   @override
-  String get supervisorTaskSentMessage =>
-      'સુપરવાઇઝર દ્વારા સોંપાયેલ કાર્ય પૂર્ણ થયું છે.';
+  String get supervisorTaskSentMessage => 'કાર્ય સફળતાપૂર્વક સોંપાયું છે.';
 
   @override
   String get supervisorTaskCalendarMonth => 'ઑગસ્ટ 2026';
@@ -3658,6 +3701,11 @@ class AppLocalizationsGu extends AppLocalizations {
   String get supervisorTaskCompletedAt => 'પૂર્ણ: આજે, 11:30 AM';
 
   @override
+  String supervisorTaskCompletedValue(String dateTime) {
+    return 'પૂર્ણ: $dateTime';
+  }
+
+  @override
   String get supervisorTaskCompletionProof => 'કાર્ય પૂર્ણ થયાનો પુરાવો';
 
   @override
@@ -3709,6 +3757,10 @@ class AppLocalizationsGu extends AppLocalizations {
   String get supervisorTaskCancelledSuccess => 'કાર્ય સફળતાપૂર્વક રદ થયું છે';
 
   @override
+  String get supervisorTaskCancelError =>
+      'કાર્ય રદ કરી શકાયું નથી. ફરી પ્રયાસ કરો.';
+
+  @override
   String get supervisorAgentRequestsTitle => 'એજન્ટની વિનંતીઓ';
 
   @override
@@ -3748,6 +3800,10 @@ class AppLocalizationsGu extends AppLocalizations {
   @override
   String get supervisorAgentRequestSuccessMessage =>
       'સમસ્યા બંધ થઈ. એજન્ટને સૂચના મોકલવામાં આવી.';
+
+  @override
+  String get supervisorRequestSaveError =>
+      'વિનંતીનો જવાબ સાચવી શકાયો નથી. ફરી પ્રયાસ કરો.';
 
   @override
   String get supervisorAgentRequestResolveDetails => 'વિનંતી ઉકેલવાની વિગતો';

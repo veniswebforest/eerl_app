@@ -132,7 +132,10 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
               if (collection.status.toUpperCase() == 'REJECTED' &&
                   collection.rejectionReason != null) ...[
                 const SizedBox(height: 10),
-                _RejectReasonCard(reason: collection.rejectionReason!),
+                _RejectReasonCard(
+                  reason: collection.rejectionReason!,
+                  remarks: collection.rejectionRemarks,
+                ),
               ],
               SizedBox(height: isDraft ? 0 : 20),
               CollectionDetailInfoCard(
@@ -637,8 +640,9 @@ class _StatusBanner extends StatelessWidget {
 }
 
 class _RejectReasonCard extends StatelessWidget {
-  const _RejectReasonCard({required this.reason});
+  const _RejectReasonCard({required this.reason, this.remarks});
   final String reason;
+  final String? remarks;
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
@@ -657,6 +661,13 @@ class _RejectReasonCard extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(reason, style: AppTextStyles.mediumSH8_14),
+        if (remarks?.trim().isNotEmpty == true) ...[
+          const SizedBox(height: 8),
+          Text(
+            '${context.l10n.expenseRejectRemarksLabel} : ${remarks!.trim()}',
+            style: AppTextStyles.mediumSH8_14,
+          ),
+        ],
       ],
     ),
   );

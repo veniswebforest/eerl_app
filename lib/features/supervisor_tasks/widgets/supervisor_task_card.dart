@@ -1,7 +1,8 @@
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import 'package:eerl_app/features/supervisor_tasks/model/supervisor_task_item.dart';
+import 'package:eerl_app/core/utils/ist_date_time.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -11,7 +12,7 @@ import 'supervisor_task_assets.dart';
 class SupervisorTaskCard extends StatelessWidget {
   const SupervisorTaskCard({super.key, required this.item, this.onTap});
 
-  final SupervisorTaskItem item;
+  final TaskModel item;
   final VoidCallback? onTap;
 
   @override
@@ -46,7 +47,7 @@ class SupervisorTaskCard extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      context.l10n.supervisorTaskAgentRahul,
+                      item.assignedToName ?? item.assignedTo,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.boldH8_14.copyWith(
@@ -73,14 +74,14 @@ class SupervisorTaskCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.l10n.taskOverviewTitle,
+                      item.title,
                       style: AppTextStyles.semiboldH9_14.copyWith(
                         color: AppColors.neutral950,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      context.l10n.taskDescription,
+                      item.description ?? '',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.mediumSH8_14.copyWith(
@@ -90,7 +91,7 @@ class SupervisorTaskCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (item.hasAttachment) ...[
+              if (item.photoUrls.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -102,7 +103,7 @@ class SupervisorTaskCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        context.l10n.taskPhotoAttached(1),
+                        context.l10n.taskPhotoAttached(item.photoUrls.length),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.mediumSH8_14.copyWith(
@@ -145,35 +146,32 @@ class SupervisorTaskCard extends StatelessWidget {
     ),
   );
 
-  String _time(BuildContext context) => switch (item.timeKey) {
-    'today' => context.l10n.supervisorTaskTodayTime,
-    'yesterday' => context.l10n.supervisorTaskYesterdayTime,
-    'october' => context.l10n.supervisorTaskOctoberTime,
-    _ => context.l10n.supervisorTaskTodayTime,
-  };
+  String _time(BuildContext context) =>
+      IstDateTime.formatUtc(item.dueAt ?? item.createdAt, 'dd MMM, hh:mm a');
 }
 
 class _TaskStatusChip extends StatelessWidget {
   const _TaskStatusChip({required this.status});
 
-  final SupervisorTaskStatus status;
+  final String status;
 
   @override
   Widget build(BuildContext context) {
-    final (label, foreground, background, asset) = switch (status) {
-      SupervisorTaskStatus.pending => (
+    final normalized = status.toUpperCase();
+    final (label, foreground, background, asset) = switch (normalized) {
+      'PENDING' => (
         context.l10n.supervisorTaskPending,
         AppColors.yellow600,
         AppColors.yellow50,
         SupervisorTaskAssets.pending,
       ),
-      SupervisorTaskStatus.resolved => (
+      'COMPLETED' || 'CLOSED' => (
         context.l10n.supervisorTaskResolved,
         AppColors.primary500,
         AppColors.primary50,
         SupervisorTaskAssets.resolved,
       ),
-      SupervisorTaskStatus.cancelled => (
+      _ => (
         context.l10n.supervisorTaskCancelled,
         AppColors.red600,
         AppColors.red50,

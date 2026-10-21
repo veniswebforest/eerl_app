@@ -193,6 +193,14 @@ class _ExpenseClaimDetailScreenState extends State<ExpenseClaimDetailScreen> {
                               label: l10n.expenseRejectReasonLabel,
                               value: expense!.decisionReason!.trim(),
                             ),
+                            if (expense.decisionRemarks?.trim().isNotEmpty ==
+                                true) ...[
+                              const SizedBox(height: 8),
+                              _LabeledParagraph(
+                                label: l10n.expenseRejectRemarksLabel,
+                                value: expense.decisionRemarks!.trim(),
+                              ),
+                            ],
                           ],
                         ),
                       ),

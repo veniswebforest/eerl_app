@@ -18,6 +18,7 @@ import 'package:eerl_app/features/records/widgets/collection_detail_assets.dart'
 import 'package:eerl_app/features/records/widgets/collection_detail_cards.dart';
 import 'package:eerl_app/features/records/widgets/collection_material_card.dart';
 import 'package:eerl_app/features/verification/model/verification_entry.dart';
+import 'package:eerl_app/features/verification/view/reject_collection_screen.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 
@@ -48,9 +49,6 @@ class _State extends State<VerificationDetailScreen> {
     super.initState();
     statusOverride = widget.initialStatus;
     controller = LocalQueryController(() async {
-      if (widget.initialStatus != null) {
-        return (collection: null, items: const <CollectionItemModel>[]);
-      }
       final repository = EerlLocalRepository.instance;
       return (
         collection: await repository.getCollection(widget.collectionId),
@@ -105,15 +103,23 @@ class _State extends State<VerificationDetailScreen> {
   Future<void> _approve() => _saveReview(approved: true);
 
   Future<void> _reject(String collectionNumber) async {
-    final reason = await context.push<String>(
+    final decision = await context.push<CollectionRejectionDecision>(
       AppRoutes.rejectCollection,
       extra: collectionNumber,
     );
-    if (reason == null || !mounted) return;
-    await _saveReview(approved: false, reason: reason);
+    if (decision == null || !mounted) return;
+    await _saveReview(
+      approved: false,
+      reason: decision.reason,
+      remarks: decision.remarks,
+    );
   }
 
-  Future<void> _saveReview({required bool approved, String? reason}) async {
+  Future<void> _saveReview({
+    required bool approved,
+    String? reason,
+    String? remarks,
+  }) async {
     if (reviewing) return;
     setState(() => reviewing = true);
     try {
@@ -121,7 +127,11 @@ class _State extends State<VerificationDetailScreen> {
       if (approved) {
         await repository.approveCollection(widget.collectionId);
       } else {
-        await repository.rejectCollection(widget.collectionId, reason!);
+        await repository.rejectCollection(
+          widget.collectionId,
+          reason!,
+          remarks: remarks,
+        );
       }
       if (!mounted) return;
       setState(() {
@@ -186,20 +196,21 @@ class _Content extends StatelessWidget {
                   icon: Icons.cancel_outlined,
                 ),
                 const SizedBox(height: 12),
-                VerificationRejectReasonCard(reason: data.rejectionReason),
+                VerificationRejectReasonCard(
+                  reason: data.rejectionReason,
+                  remarks: data.rejectionRemarks,
+                ),
                 const SizedBox(height: 12),
               ],
               CollectionDetailInfoCard(
                 label: context.l10n.collectionDetailId,
                 value: data.collectionNumber,
               ),
-              if (!rejected) ...[
-                const SizedBox(height: 10),
-                CollectionDetailInfoCard(
-                  label: context.l10n.verificationDetailCollectionCenter,
-                  value: data.center,
-                ),
-              ],
+              const SizedBox(height: 10),
+              CollectionDetailInfoCard(
+                label: context.l10n.verificationDetailCollectionCenter,
+                value: data.center,
+              ),
               const SizedBox(height: 10),
               CollectionDetailInfoCard(
                 label: context.l10n.collectionDetailDateTime,
@@ -236,8 +247,10 @@ class _Content extends StatelessWidget {
                 value: data.payment,
               ),
               const SizedBox(height: 10),
-              _VehiclePhoto(path: data.vehiclePhoto),
-              const SizedBox(height: 12),
+              if (data.vehiclePhoto != null) ...[
+                _VehiclePhoto(path: data.vehiclePhoto!),
+                const SizedBox(height: 12),
+              ],
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: _decoration,
@@ -254,19 +267,20 @@ class _Content extends StatelessWidget {
                     for (var index = 0; index < data.items.length; index++) ...[
                       CollectionMaterialCard(
                         item: data.items[index],
-                        thumbnailPath: const [
-                          'assets/images/verification/figma/raw_05.png',
-                          'assets/images/verification/figma/raw_02.png',
-                          'assets/images/verification/figma/raw_03.png',
-                        ][index % 3],
-                        collectionWeightLabel: approved
+                        thumbnailPath:
+                            data.items[index].itemImageUrl?.trim().isNotEmpty ==
+                                true
+                            ? data.items[index].itemImageUrl
+                            : _fallbackItemThumbnail(index),
+                        collectionWeightLabel: approved || rejected
                             ? context.l10n.verificationDetailCollectedWeight
                             : context.l10n.verificationDetailCollected,
-                        verifiedWeightLabel: approved
+                        verifiedWeightLabel: approved || rejected
                             ? context.l10n.verificationDetailVerifiedWeight
                             : context.l10n.verificationDetailVerified,
                         rateLabel: context.l10n.collectionDetailRate,
                         totalLabel: context.l10n.collectionDetailMaterialTotal,
+                        matchSummaryDesign: true,
                       ),
                       if (index != data.items.length - 1)
                         const Divider(height: 28, color: AppColors.cool300),
@@ -279,13 +293,14 @@ class _Content extends StatelessWidget {
                 collectionLabel: context.l10n.verificationDetailTotalCollected,
                 verifiedLabel: context.l10n.verificationDetailTotalVerified,
                 comparisonLabel: context.l10n.verificationDetailDifference,
-                comparisonHint: '',
+                comparisonHint: context.l10n.collectionDetailComparisonHint,
                 totalPriceLabel: context.l10n.collectionDetailTotalPrice,
                 collectionValue: '${data.collected.toStringAsFixed(2)} KG',
                 verifiedValue: '${data.verified.toStringAsFixed(2)} KG',
                 comparisonValue:
                     '${(data.verified - data.collected).toStringAsFixed(2)} KG',
-                totalPriceValue: '₹${data.price.toStringAsFixed(2)}',
+                totalPriceValue:
+                    '₹${NumberFormat('#,##0.00').format(data.price)}',
               ),
             ],
           ),
@@ -333,6 +348,7 @@ class _Banner extends StatelessWidget {
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
       color: background,
+      border: Border.all(color: color.withValues(alpha: 0.45)),
       borderRadius: BorderRadius.circular(10),
     ),
     child: Row(
@@ -347,8 +363,13 @@ class _Banner extends StatelessWidget {
 
 @visibleForTesting
 class VerificationRejectReasonCard extends StatelessWidget {
-  const VerificationRejectReasonCard({super.key, required this.reason});
+  const VerificationRejectReasonCard({
+    super.key,
+    required this.reason,
+    this.remarks,
+  });
   final String reason;
+  final String? remarks;
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
@@ -373,6 +394,12 @@ class VerificationRejectReasonCard extends StatelessWidget {
           key: const Key('verification-rejection-reason-value'),
           style: AppTextStyles.semiboldH8_16,
         ),
+        if (remarks?.trim().isNotEmpty == true) ...[
+          const SizedBox(height: 10),
+          Text('${context.l10n.verificationRejectRemarksLabel}:'),
+          const SizedBox(height: 3),
+          Text(remarks!.trim(), style: AppTextStyles.mediumSH8_14),
+        ],
       ],
     ),
   );
@@ -398,8 +425,9 @@ class _VehiclePhoto extends StatelessWidget {
         const SizedBox(height: 10),
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: AspectRatio(
-            aspectRatio: 2.35,
+          child: SizedBox(
+            width: 109,
+            height: 70,
             child: CachedAppImage(source: path, fit: BoxFit.cover),
           ),
         ),
@@ -430,7 +458,7 @@ class _Actions extends StatelessWidget {
           child: SizedBox(
             height: 52,
             child: OutlinedButton(
-              key: const Key('verification-detail-reject'),
+              key: const Key('verification-reject-button'),
               onPressed: onReject,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.red600,
@@ -445,7 +473,7 @@ class _Actions extends StatelessWidget {
           child: SizedBox(
             height: 52,
             child: ElevatedButton(
-              key: const Key('verification-detail-approve'),
+              key: const Key('verification-approve-button'),
               onPressed: onApprove,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
@@ -487,6 +515,7 @@ class _Data {
     required this.price,
     required this.status,
     required this.rejectionReason,
+    required this.rejectionRemarks,
   });
   final String collectionNumber;
   final String center;
@@ -496,59 +525,21 @@ class _Data {
   final String vehicle;
   final String agent;
   final String payment;
-  final String vehiclePhoto;
+  final String? vehiclePhoto;
   final List<CollectionItemModel> items;
   final double collected;
   final double verified;
   final double price;
   final VerificationDetailStatus status;
   final String rejectionReason;
+  final String rejectionRemarks;
 
   factory _Data.fromLocal(
     BuildContext context,
     CollectionModel? collection,
     List<CollectionItemModel> localItems,
   ) {
-    final names = [
-      context.l10n.collectionDetailPetBottles,
-      context.l10n.collectionDetailHdpeRigid,
-      context.l10n.collectionDetailPpHardPlastics,
-    ];
-    final photoSets = [
-      [
-        'assets/images/verification/figma/raw_03.png',
-        'assets/images/verification/figma/raw_07.png',
-      ],
-      [
-        'assets/images/verification/figma/raw_04.png',
-        'assets/images/verification/figma/raw_06.png',
-      ],
-      [
-        'assets/images/verification/figma/raw_06.png',
-        'assets/images/verification/figma/raw_03.png',
-      ],
-    ];
-    final mockQty = [270.0, 270.0, 270.0];
-    final mockVerified = [260.0, 265.0, 265.0];
-    final mockRates = [45.0, 42.0, 48.0];
-    final items = localItems.isEmpty
-        ? List.generate(
-            3,
-            (index) => CollectionItemModel(
-              id: 'mock-$index',
-              collectionId: collection?.id ?? 'mock',
-              itemId: 'mock-$index',
-              name: names[index],
-              qty: mockQty[index],
-              verifiedQty: mockVerified[index],
-              rate: mockRates[index],
-              amount: mockVerified[index] * mockRates[index],
-              photoUrls: photoSets[index],
-              sortOrder: index,
-              unitCode: 'KG',
-            ),
-          )
-        : localItems;
+    final items = localItems;
     final collected = items.fold<double>(0, (sum, item) => sum + item.qty);
     final verified = items.fold<double>(
       0,
@@ -579,9 +570,7 @@ class _Data {
           collection?.vehicleId ?? context.l10n.verificationDetailVehicleValue,
       agent: collection?.agentName ?? context.l10n.verificationRahulPatel,
       payment: collection?.paidBy ?? context.l10n.verificationDetailCash,
-      vehiclePhoto:
-          collection?.handoverPhotoUrls.firstOrNull ??
-          'assets/images/verification/figma/raw_01.png',
+      vehiclePhoto: collection?.handoverPhotoUrls.firstOrNull,
       items: items,
       collected: collection == null || collection.totalQty == 0
           ? collected
@@ -592,6 +581,7 @@ class _Data {
           items.fold<double>(0, (sum, item) => sum + (item.amount ?? 0)),
       status: status,
       rejectionReason: collection?.rejectionReason ?? '',
+      rejectionRemarks: collection?.rejectionRemarks ?? '',
     );
   }
 }
@@ -601,3 +591,7 @@ const _decoration = BoxDecoration(
   borderRadius: BorderRadius.all(Radius.circular(12)),
   boxShadow: [HomeStyles.cardShadow],
 );
+
+String _fallbackItemThumbnail(int index) =>
+    'assets/images/collection_detail/figma/'
+    'raw_${[11, 8, 14][index % 3].toString().padLeft(2, '0')}.png';

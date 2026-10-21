@@ -2,8 +2,8 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import 'package:eerl_app/features/supervisor_tasks/model/supervisor_task_item.dart';
-import 'package:eerl_app/features/supervisor_tasks/model/supervisor_task_detail_status.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_assets.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_card.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
@@ -34,57 +34,50 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
       : TaskListStatus.open;
   late bool _showCancelledBanner = widget.showCancelledBanner;
   String _query = '';
+  bool _loading = true;
+  List<TaskModel> _allTasks = const [];
 
-  static const _openTasks = [
-    SupervisorTaskItem(
-      id: 'open-1',
-      status: SupervisorTaskStatus.pending,
-      timeKey: 'today',
-    ),
-    SupervisorTaskItem(
-      id: 'open-2',
-      status: SupervisorTaskStatus.pending,
-      timeKey: 'yesterday',
-      hasAttachment: false,
-    ),
-    SupervisorTaskItem(
-      id: 'open-3',
-      status: SupervisorTaskStatus.pending,
-      timeKey: 'october',
-      hasAttachment: false,
-    ),
-  ];
+  List<TaskModel> get _visibleTasks {
+    if (widget.showEmptyState) return const [];
+    return _allTasks
+        .where((task) {
+          final isOpen = task.status.toUpperCase() == 'PENDING';
+          return _selectedStatus == TaskListStatus.open ? isOpen : !isOpen;
+        })
+        .toList(growable: false);
+  }
 
-  static const _closedTasks = [
-    SupervisorTaskItem(
-      id: 'closed-1',
-      status: SupervisorTaskStatus.resolved,
-      timeKey: 'today',
-    ),
-    SupervisorTaskItem(
-      id: 'closed-2',
-      status: SupervisorTaskStatus.resolved,
-      timeKey: 'today',
-    ),
-    SupervisorTaskItem(
-      id: 'closed-3',
-      status: SupervisorTaskStatus.cancelled,
-      timeKey: 'today',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
 
-  List<SupervisorTaskItem> get _visibleTasks {
-    if (widget.showEmptyState || _query.trim().isNotEmpty) {
-      return const [];
-    }
-    return _selectedStatus == TaskListStatus.open ? _openTasks : _closedTasks;
+  Future<void> _loadTasks() async {
+    final tasks = await EerlLocalRepository.instance.getTasks(
+      supervisor: true,
+      search: _query,
+    );
+    if (!mounted) return;
+    setState(() {
+      _allTasks = tasks;
+      _loading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final tasks = _visibleTasks;
-    final openCount = widget.showEmptyState ? 0 : 2;
-    final closedCount = widget.showEmptyState ? 0 : 4;
+    final openCount = widget.showEmptyState
+        ? 0
+        : _allTasks
+              .where((task) => task.status.toUpperCase() == 'PENDING')
+              .length;
+    final closedCount = widget.showEmptyState
+        ? 0
+        : _allTasks
+              .where((task) => task.status.toUpperCase() != 'PENDING')
+              .length;
 
     return Scaffold(
       key: const Key('supervisor-tasks-screen'),
@@ -121,8 +114,10 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
                               height: 55,
                               child: TextField(
                                 key: const Key('supervisor-task-search'),
-                                onChanged: (value) =>
-                                    setState(() => _query = value),
+                                onChanged: (value) {
+                                  _query = value;
+                                  _loadTasks();
+                                },
                                 style: AppTextStyles.regularB7_14,
                                 decoration: InputDecoration(
                                   hintText: context.l10n.recordsSearchHint,
@@ -161,7 +156,9 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
                       ),
                       const SizedBox(height: 22),
                       Expanded(
-                        child: tasks.isEmpty
+                        child: _loading
+                            ? const Center(child: CircularProgressIndicator())
+                            : tasks.isEmpty
                             ? const _SupervisorTasksEmptyState()
                             : ListView.separated(
                                 key: const Key('supervisor-task-list'),
@@ -188,9 +185,12 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
                           height: 52,
                           child: ElevatedButton(
                             key: const Key('supervisor-assign-new-task'),
-                            onPressed: () => context.push<void>(
-                              AppRoutes.assignSupervisorTask,
-                            ),
+                            onPressed: () async {
+                              await context.push<void>(
+                                AppRoutes.assignSupervisorTask,
+                              );
+                              await _loadTasks();
+                            },
                             style: ElevatedButton.styleFrom(
                               elevation: 0,
                               backgroundColor: AppColors.primary500,
@@ -259,20 +259,17 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
     );
   }
 
-  Future<void> _openTask(SupervisorTaskItem task) async {
+  Future<void> _openTask(TaskModel task) async {
     final cancelled = await context.push<bool>(
       AppRoutes.supervisorTaskDetail,
-      extra: switch (task.status) {
-        SupervisorTaskStatus.pending => SupervisorTaskDetailStatus.inProgress,
-        SupervisorTaskStatus.resolved => SupervisorTaskDetailStatus.completed,
-        SupervisorTaskStatus.cancelled => SupervisorTaskDetailStatus.cancelled,
-      },
+      extra: task,
     );
     if (!mounted || cancelled != true) return;
     setState(() {
       _selectedStatus = TaskListStatus.closed;
       _showCancelledBanner = true;
     });
+    await _loadTasks();
   }
 }
 

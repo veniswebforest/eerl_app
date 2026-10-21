@@ -1,4 +1,3 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
@@ -8,6 +7,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../widgets/request_detail_section_card.dart';
@@ -159,21 +159,20 @@ class _RequestPhotoGrid extends StatelessWidget {
   final List<String> images;
 
   @override
-  Widget build(BuildContext context) => Row(
+  Widget build(BuildContext context) => Wrap(
+    spacing: 10,
+    runSpacing: 10,
     children: [
-      for (var index = 0; index < images.length; index++) ...[
-        if (index > 0) const SizedBox(width: 10),
-        Expanded(
+      for (var index = 0; index < images.length; index++)
+        SizedBox(
+          key: ValueKey('request-detail-photo-$index'),
+          width: 143.5,
+          height: 92,
           child: ClipRRect(
-            key: ValueKey('request-detail-photo-$index'),
             borderRadius: BorderRadius.circular(8),
-            child: AspectRatio(
-              aspectRatio: 1.55,
-              child: CachedAppImage(source: images[index], fit: BoxFit.cover),
-            ),
+            child: CachedAppImage(source: images[index], fit: BoxFit.cover),
           ),
         ),
-      ],
     ],
   );
 }
@@ -222,44 +221,31 @@ class _ClosedRequestDetails extends StatelessWidget {
           ],
         ),
       ),
-      const SizedBox(height: 20),
-      Text(
-        context.l10n.requestCompletionProof,
-        style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
-      ),
-      const SizedBox(height: 8),
-      DottedBorder(
-        options: RoundedRectDottedBorderOptions(
-          radius: const Radius.circular(8),
-          color: AppColors.cool400,
-          dashPattern: const [5, 4],
+      FutureBuilder<List<String>>(
+        future: EerlLocalRepository.instance.getRequestAnswerPhotoSources(
+          request.id,
         ),
-        child: SizedBox(
-          height: 92,
-          width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SvgPicture.asset(
-                'assets/icons/wallet/expense_camera.svg',
-                width: 24,
-                height: 24,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.requestCapturePhoto,
-                style: AppTextStyles.regularB7_14.copyWith(
-                  color: AppColors.neutral400,
+        initialData: request.answerPhotoUrls,
+        builder: (context, snapshot) {
+          final images = snapshot.data ?? const <String>[];
+          if (images.isEmpty) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.requestCompletionProof,
+                  style: AppTextStyles.mediumSH8_14.copyWith(
+                    color: AppColors.neutral950,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      const SizedBox(height: 8),
-      Text(
-        context.l10n.requestPhotoSupport,
-        style: AppTextStyles.regularB8_12.copyWith(color: AppColors.neutral600),
+                const SizedBox(height: 8),
+                _RequestPhotoGrid(images: images),
+              ],
+            ),
+          );
+        },
       ),
       const SizedBox(height: 24),
       Text(

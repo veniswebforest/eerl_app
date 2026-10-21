@@ -8,6 +8,13 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/records/widgets/collection_detail_assets.dart';
 
+class CollectionRejectionDecision {
+  const CollectionRejectionDecision({required this.reason, this.remarks});
+
+  final String reason;
+  final String? remarks;
+}
+
 class RejectCollectionScreen extends StatefulWidget {
   const RejectCollectionScreen({super.key, this.collectionNumber});
 
@@ -19,10 +26,12 @@ class RejectCollectionScreen extends StatefulWidget {
 
 class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
   final Set<int> _selectedReasons = {};
+  final TextEditingController _otherController = TextEditingController();
   final TextEditingController _remarksController = TextEditingController();
 
   @override
   void dispose() {
+    _otherController.dispose();
     _remarksController.dispose();
     super.dispose();
   }
@@ -94,6 +103,20 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                   ),
                   if (index != reasons.length - 1) const SizedBox(height: 8),
                 ],
+                if (_selectedReasons.contains(reasons.length - 1)) ...[
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    key: const Key('verification-reject-other'),
+                    controller: _otherController,
+                    maxLength: 150,
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: context.l10n.verificationRejectOther,
+                      filled: true,
+                      fillColor: AppColors.neutral50,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 16),
                 Text(
                   context.l10n.verificationRejectRemarksLabel,
@@ -105,6 +128,7 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                 TextFormField(
                   key: const Key('verification-reject-remarks'),
                   controller: _remarksController,
+                  maxLength: 150,
                   minLines: 5,
                   maxLines: 5,
                   style: AppTextStyles.regularB7_14.copyWith(
@@ -138,16 +162,26 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                   height: 52,
                   child: ElevatedButton(
                     key: const Key('verification-confirm-rejection'),
-                    onPressed: _selectedReasons.isEmpty
+                    onPressed:
+                        _selectedReasons.isEmpty ||
+                            (_selectedReasons.contains(reasons.length - 1) &&
+                                _otherController.text.trim().isEmpty)
                         ? null
                         : () {
                             final selected = _selectedReasons.toList()..sort();
-                            final reasonParts = <String>[
-                              for (final index in selected) reasons[index],
-                              if (_remarksController.text.trim().isNotEmpty)
-                                _remarksController.text.trim(),
+                            final reasonParts = [
+                              for (final index in selected)
+                                index == reasons.length - 1
+                                    ? _otherController.text.trim()
+                                    : reasons[index],
                             ];
-                            Navigator.of(context).pop(reasonParts.join('. '));
+                            final remarks = _remarksController.text.trim();
+                            Navigator.of(context).pop(
+                              CollectionRejectionDecision(
+                                reason: reasonParts.join(', '),
+                                remarks: remarks.isEmpty ? null : remarks,
+                              ),
+                            );
                           },
                     style: ElevatedButton.styleFrom(
                       elevation: 0,

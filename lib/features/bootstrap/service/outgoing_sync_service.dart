@@ -266,6 +266,14 @@ class OutgoingSyncService {
         await _refreshTransferAfterConflict(item, token);
         return;
       }
+      if (item['entity'] == DatabaseTables.requests &&
+          item['kind'] == 'answer' &&
+          response.statusCode == 422 &&
+          code == 'INVALID_REQUEST' &&
+          _hasInvalidPhotoUrlDetail(responseBody) &&
+          await _retryRequestAnswerPhotos(item)) {
+        return;
+      }
       if (successful) {
         await _complete(item, responseBody);
         _log('DONE #$seq status=${response.statusCode}');
@@ -528,7 +536,6 @@ class OutgoingSyncService {
     final mrfLabour = handover is Map ? handover['mrfLabour'] : null;
     final ragpicker = handover is Map ? handover['ragpicker'] : null;
     final reviewBy = review is Map ? review['by'] : null;
-    final gps = data['gps'];
     return <String, Object?>{
       if (data['status'] != null) 'status': data['status'],
       if (data['slipNumber'] != null) 'slip_number': data['slipNumber'],
@@ -552,13 +559,11 @@ class OutgoingSyncService {
         'total_amount': totals['amount'],
       if (review is Map && review['reason'] != null)
         'rejection_reason': review['reason'],
+      if (review is Map && review.containsKey('remarks'))
+        'rejection_remarks': review['remarks'],
       if (reviewBy is Map && reviewBy['name'] != null)
         'verified_by_name': reviewBy['name'],
       if (review is Map && review['at'] != null) 'verified_at': review['at'],
-      if (gps is Map && gps['lat'] is num)
-        'gps_lat': (gps['lat'] as num).toDouble(),
-      if (gps is Map && gps['lng'] is num)
-        'gps_lng': (gps['lng'] as num).toDouble(),
     };
   }
 
@@ -611,16 +616,36 @@ class OutgoingSyncService {
       'receipt_photo_urls': jsonEncode(data['photoUrls']),
     if (data['createdAt'] != null) 'created_at': data['createdAt'],
     if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
+    if (data['decision'] is Map &&
+        (data['decision'] as Map)['by'] is Map &&
+        ((data['decision'] as Map)['by'] as Map)['name'] != null)
+      'decided_by_name': ((data['decision'] as Map)['by'] as Map)['name'],
+    if (data['decision'] is Map &&
+        (data['decision'] as Map).containsKey('reason'))
+      'decision_reason': (data['decision'] as Map)['reason'],
+    if (data['decision'] is Map &&
+        (data['decision'] as Map).containsKey('remarks'))
+      'decision_remarks': (data['decision'] as Map)['remarks'],
   };
 
-  Map<String, Object?> _cashRequestServerValues(Map<Object?, Object?> data) => {
-    if (data['number'] != null) 'number': data['number'],
-    if (data['amount'] != null) 'amount': data['amount'],
-    if (data['reason'] != null) 'reason': data['reason'],
-    if (data['status'] != null) 'status': data['status'],
-    if (data['createdAt'] != null) 'created_at': data['createdAt'],
-    if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
-  };
+  Map<String, Object?> _cashRequestServerValues(Map<Object?, Object?> data) {
+    final decision = data['decision'];
+    final decidedBy = decision is Map ? decision['by'] : null;
+    return {
+      if (data['number'] != null) 'number': data['number'],
+      if (data['amount'] != null) 'amount': data['amount'],
+      if (data['reason'] != null) 'reason': data['reason'],
+      if (data['status'] != null) 'status': data['status'],
+      if (decidedBy is Map && decidedBy['name'] != null)
+        'decided_by_name': decidedBy['name'],
+      if (decision is Map && decision.containsKey('reason'))
+        'decision_note': decision['reason'],
+      if (decision is Map && decision.containsKey('remarks'))
+        'decision_remarks': decision['remarks'],
+      if (data['createdAt'] != null) 'created_at': data['createdAt'],
+      if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
+    };
+  }
 
   Map<String, Object?> _categoryRequestServerValues(
     Map<Object?, Object?> data,
@@ -680,6 +705,8 @@ class OutgoingSyncService {
         'answered_at': data['answeredAt'],
       if (data['photoUrls'] is List)
         'photo_urls': jsonEncode(data['photoUrls']),
+      if (answer is Map && answer['photoUrls'] is List)
+        'answer_photo_urls': jsonEncode(answer['photoUrls']),
       if (data['createdAt'] != null) 'created_at': data['createdAt'],
     };
   }
@@ -830,6 +857,65 @@ class OutgoingSyncService {
       }
     });
     AppLogger.syncError('OUTBOX_FAILED', '#${item['seq']}: $error');
+  }
+
+  bool _hasInvalidPhotoUrlDetail(Map<String, Object?> response) {
+    final error = response['error'];
+    if (error is! Map || error['details'] is! List) return false;
+    return (error['details'] as List).whereType<Map>().any(
+      (detail) => detail['field']?.toString().startsWith('photoUrls.') == true,
+    );
+  }
+
+  Future<bool> _retryRequestAnswerPhotos(Map<String, Object?> item) async {
+    final attempts = (item['attempts'] as num?)?.toInt() ?? 0;
+    if (attempts >= 1) return false;
+    final seq = (item['seq'] as num).toInt();
+    var retried = false;
+    await _database.runInTransaction((txn) async {
+      final rows = await txn.rawQuery(
+        '''
+        SELECT p.id
+        FROM ${DatabaseTables.photos} p
+        JOIN ${DatabaseTables.outboxPhotos} op ON op.photo_id = p.id
+        WHERE op.outbox_seq = ?
+        ORDER BY p.created_at ASC
+        ''',
+        [seq],
+      );
+      final photoIds = rows
+          .map((row) => row['id'])
+          .whereType<String>()
+          .toList(growable: false);
+      if (photoIds.isEmpty) return;
+      final marks = List.filled(photoIds.length, '?').join(',');
+      await txn.rawUpdate('''
+        UPDATE ${DatabaseTables.photos}
+        SET status = 'failed', remote_url = NULL, uploaded_at = NULL
+        WHERE id IN ($marks)
+        ''', photoIds);
+      final decoded = jsonDecode(item['body']! as String);
+      if (decoded is Map) {
+        final body = Map<String, Object?>.from(decoded);
+        body['photoUrls'] = photoIds;
+        await txn.update(
+          DatabaseTables.outbox,
+          {
+            'body': jsonEncode(body),
+            'status': 'queued',
+            'attempts': attempts + 1,
+            'last_error': 'HTTP 422 INVALID_REQUEST photoUrls',
+            'next_attempt_at': null,
+          },
+          where: 'seq = ?',
+          whereArgs: [seq],
+        );
+        retried = true;
+      }
+    });
+    if (!retried) return false;
+    _log('REQUEST ANSWER #$seq proof photos queued for one re-upload');
+    return true;
   }
 
   Future<void> _reconcileKnownFailedConflicts(String token) async {
@@ -1623,6 +1709,7 @@ class OutgoingSyncService {
           localPath: localPath,
           ownerTable: source['owner_table']! as String,
           ownerId: source['owner_id']! as String,
+          photoField: source['field']! as String,
         );
         await _imageCache.storeLocalFileForUrl(fileUrl, file);
         uploadedCount++;
@@ -1648,7 +1735,7 @@ class OutgoingSyncService {
   Future<void> _repairUploadedPhotoReferences() async {
     final rows = await _database.rawQuery('''
       SELECT DISTINCT p.id, p.remote_url, p.local_path,
-        p.owner_table, p.owner_id
+        p.owner_table, p.owner_id, p.field
       FROM ${DatabaseTables.photos} p
       JOIN ${DatabaseTables.outboxPhotos} op ON op.photo_id = p.id
       JOIN ${DatabaseTables.outbox} o ON o.seq = op.outbox_seq
@@ -1663,6 +1750,7 @@ class OutgoingSyncService {
         localPath: row['local_path'] as String? ?? '',
         ownerTable: row['owner_table']! as String,
         ownerId: row['owner_id']! as String,
+        photoField: row['field']! as String,
       );
     }
     if (rows.isNotEmpty) {
@@ -1685,6 +1773,7 @@ class OutgoingSyncService {
     required String localPath,
     required String ownerTable,
     required String ownerId,
+    required String photoField,
   }) async {
     await _database.runInTransaction((txn) async {
       await txn.update(
@@ -1725,15 +1814,19 @@ class OutgoingSyncService {
           ownerTable != DatabaseTables.tasks) {
         return;
       }
+      final ownerPhotoColumn =
+          ownerTable == DatabaseTables.requests && photoField == 'answer'
+          ? 'answer_photo_urls'
+          : 'photo_urls';
       final ownerRows = await txn.query(
         ownerTable,
-        columns: const ['photo_urls'],
+        columns: [ownerPhotoColumn],
         where: 'id = ?',
         whereArgs: [ownerId],
         limit: 1,
       );
       if (ownerRows.isEmpty) return;
-      final rawUrls = ownerRows.single['photo_urls'] as String?;
+      final rawUrls = ownerRows.single[ownerPhotoColumn] as String?;
       final decodedUrls = rawUrls == null || rawUrls.trim().isEmpty
           ? <Object?>[]
           : jsonDecode(rawUrls);
@@ -1750,7 +1843,7 @@ class OutgoingSyncService {
       if (!replaced && !urls.contains(fileUrl)) urls.add(fileUrl);
       await txn.update(
         ownerTable,
-        {'photo_urls': jsonEncode(urls)},
+        {ownerPhotoColumn: jsonEncode(urls)},
         where: 'id = ?',
         whereArgs: [ownerId],
       );
@@ -1792,7 +1885,8 @@ class OutgoingSyncService {
     if (error is Map) {
       final details = error['details'];
       if (details is List && details.isNotEmpty && details.first is Map) {
-        return (details.first as Map)['code']?.toString();
+        return (details.first as Map)['code']?.toString() ??
+            error['code']?.toString();
       }
       return error['code']?.toString();
     }

@@ -519,6 +519,7 @@ class CollectionModel {
     this.totalAmount,
     required this.handoverPhotoUrls,
     this.rejectionReason,
+    this.rejectionRemarks,
     this.verifiedByName,
     this.verifiedAt,
     this.gpsLat,
@@ -547,6 +548,7 @@ class CollectionModel {
   final double? totalAmount;
   final List<String> handoverPhotoUrls;
   final String? rejectionReason;
+  final String? rejectionRemarks;
   final String? verifiedByName;
   final String? verifiedAt;
   final double? gpsLat;
@@ -577,6 +579,7 @@ class CollectionModel {
     totalAmount: (map['total_amount'] as num?)?.toDouble(),
     handoverPhotoUrls: _strings(map['handover_photo_urls']),
     rejectionReason: map['rejection_reason'] as String?,
+    rejectionRemarks: map['rejection_remarks'] as String?,
     verifiedByName: map['verified_by_name'] as String?,
     verifiedAt: map['verified_at'] as String?,
     gpsLat: (map['gps_lat'] as num?)?.toDouble(),
@@ -606,6 +609,7 @@ class CollectionModel {
     'total_amount': totalAmount,
     'handover_photo_urls': _jsonStrings(handoverPhotoUrls),
     'rejection_reason': rejectionReason,
+    'rejection_remarks': rejectionRemarks,
     'verified_by_name': verifiedByName,
     'verified_at': verifiedAt,
     'gps_lat': gpsLat,
@@ -686,6 +690,7 @@ class ExpenseModel {
     required this.receiptPhotoUrls,
     this.decidedByName,
     this.decisionReason,
+    this.decisionRemarks,
     required this.createdAt,
     this.updatedAt,
     required this.syncState,
@@ -703,6 +708,7 @@ class ExpenseModel {
   final List<String> receiptPhotoUrls;
   final String? decidedByName;
   final String? decisionReason;
+  final String? decisionRemarks;
   final String createdAt;
   final String? updatedAt;
   final String syncState;
@@ -720,6 +726,7 @@ class ExpenseModel {
     receiptPhotoUrls: _strings(map['receipt_photo_urls']),
     decidedByName: map['decided_by_name'] as String?,
     decisionReason: map['decision_reason'] as String?,
+    decisionRemarks: map['decision_remarks'] as String?,
     createdAt: map['created_at'] as String,
     updatedAt: map['updated_at'] as String?,
     syncState: map['sync_state'] as String,
@@ -738,6 +745,7 @@ class ExpenseModel {
     'receipt_photo_urls': _jsonStrings(receiptPhotoUrls),
     'decided_by_name': decidedByName,
     'decision_reason': decisionReason,
+    'decision_remarks': decisionRemarks,
     'created_at': createdAt,
     'updated_at': updatedAt,
     'sync_state': syncState,
@@ -756,6 +764,7 @@ class CashRequestModel {
     required this.status,
     this.decidedByName,
     this.decisionNote,
+    this.decisionRemarks,
     required this.createdAt,
     this.updatedAt,
     required this.syncState,
@@ -770,6 +779,7 @@ class CashRequestModel {
   final String status;
   final String? decidedByName;
   final String? decisionNote;
+  final String? decisionRemarks;
   final String createdAt;
   final String? updatedAt;
   final String syncState;
@@ -784,6 +794,7 @@ class CashRequestModel {
     status: map['status'] as String,
     decidedByName: map['decided_by_name'] as String?,
     decisionNote: map['decision_note'] as String?,
+    decisionRemarks: map['decision_remarks'] as String?,
     createdAt: map['created_at'] as String,
     updatedAt: map['updated_at'] as String?,
     syncState: map['sync_state'] as String,
@@ -799,6 +810,7 @@ class CashRequestModel {
     'status': status,
     'decided_by_name': decidedByName,
     'decision_note': decisionNote,
+    'decision_remarks': decisionRemarks,
     'created_at': createdAt,
     'updated_at': updatedAt,
     'sync_state': syncState,
@@ -1110,6 +1122,7 @@ class TaskModel {
     required this.id,
     this.number,
     this.centerId,
+    this.centerName,
     required this.assignedTo,
     this.assignedToName,
     required this.assignedBy,
@@ -1128,6 +1141,7 @@ class TaskModel {
   final String id;
   final String? number;
   final String? centerId;
+  final String? centerName;
   final String assignedTo;
   final String? assignedToName;
   final String assignedBy;
@@ -1146,6 +1160,7 @@ class TaskModel {
     id: map['id'] as String,
     number: map['number'] as String?,
     centerId: map['center_id'] as String?,
+    centerName: map['center_name'] as String?,
     assignedTo: map['assigned_to'] as String,
     assignedToName: map['assigned_to_name'] as String?,
     assignedBy: map['assigned_by'] as String,
@@ -1198,6 +1213,7 @@ class RequestModel {
     this.answer,
     this.answeredAt,
     required this.photoUrls,
+    this.answerPhotoUrls = const [],
     required this.createdAt,
     required this.syncState,
   });
@@ -1215,6 +1231,7 @@ class RequestModel {
   final String? answer;
   final String? answeredAt;
   final List<String> photoUrls;
+  final List<String> answerPhotoUrls;
   final String createdAt;
   final String syncState;
   factory RequestModel.fromMap(DbMap map) => RequestModel(
@@ -1232,6 +1249,7 @@ class RequestModel {
     answer: map['answer'] as String?,
     answeredAt: map['answered_at'] as String?,
     photoUrls: _strings(map['photo_urls']),
+    answerPhotoUrls: _strings(map['answer_photo_urls']),
     createdAt: map['created_at'] as String,
     syncState: map['sync_state'] as String,
   );
@@ -1248,6 +1266,7 @@ class RequestModel {
     'answer': answer,
     'answered_at': answeredAt,
     'photo_urls': _jsonStrings(photoUrls),
+    'answer_photo_urls': _jsonStrings(answerPhotoUrls),
     'created_at': createdAt,
     'sync_state': syncState,
   };

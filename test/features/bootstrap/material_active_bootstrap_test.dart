@@ -93,6 +93,62 @@ void main() {
             },
           ],
         },
+        'expense_categories': {
+          'replace': [
+            {
+              'id': 'fuel',
+              'center_id': 'center-1',
+              'name': 'Fuel',
+              'is_active': 1,
+            },
+          ],
+        },
+        'collections': {
+          'upserts': [
+            {
+              'id': 'collection-1',
+              'center_id': 'center-1',
+              'agent_id': 'agent-1',
+              'agent_name': 'Agent One',
+              'channel': 'D2D',
+              'status': 'REJECTED',
+              'handover_photo_urls': '[]',
+              'rejection_reason': 'Weight Mismatch',
+              'rejection_remarks': 'Scale was not calibrated.',
+              'updated_at': '2026-10-21T08:00:00.000Z',
+            },
+          ],
+        },
+        'expenses': {
+          'upserts': [
+            {
+              'id': 'expense-1',
+              'center_id': 'center-1',
+              'user_id': 'agent-1',
+              'category_id': 'fuel',
+              'amount': 500,
+              'status': 'REJECTED',
+              'receipt_photo_urls': '[]',
+              'decision_reason': 'Invalid bill',
+              'decision_remarks': 'Bill is from last month.',
+              'created_at': '2026-10-21T08:00:00.000Z',
+            },
+          ],
+        },
+        'cash_requests': {
+          'upserts': [
+            {
+              'id': 'cash-1',
+              'center_id': 'center-1',
+              'requested_by': 'agent-1',
+              'amount': 12000,
+              'status': 'REJECTED',
+              'decision_note': 'Sufficient Existing Balance',
+              'decision_remarks': 'Already has an advance.',
+              'created_at': '2026-10-21T08:00:00.000Z',
+            },
+          ],
+        },
         'requests': {
           'upserts': [
             {
@@ -105,6 +161,8 @@ void main() {
               'status': 'OPEN',
               'follow_up_at': '2000-01-01T09:30:00.000Z',
               'photo_urls': '[]',
+              'answer_photo_urls':
+                  '["https://example.test/supervisor-proof.jpg"]',
               'created_at': '2000-01-01T08:00:00.000Z',
             },
           ],
@@ -138,5 +196,26 @@ void main() {
     final requests = await repository.getRequests(supervisor: true);
     expect(requests.single.followUpAt, '2000-01-01T09:30:00.000Z');
     expect(requests.single.overdue, isTrue);
+    expect(requests.single.answerPhotoUrls, [
+      'https://example.test/supervisor-proof.jpg',
+    ]);
+    expect(
+      (await database.query(
+        DatabaseTables.collections,
+      )).single['rejection_remarks'],
+      'Scale was not calibrated.',
+    );
+    expect(
+      (await database.query(
+        DatabaseTables.expenses,
+      )).single['decision_remarks'],
+      'Bill is from last month.',
+    );
+    expect(
+      (await database.query(
+        DatabaseTables.cashRequests,
+      )).single['decision_remarks'],
+      'Already has an advance.',
+    );
   });
 }

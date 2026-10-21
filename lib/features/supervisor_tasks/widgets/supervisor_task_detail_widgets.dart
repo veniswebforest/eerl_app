@@ -3,19 +3,20 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/supervisor_tasks/model/supervisor_task_detail_status.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_assets.dart';
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import 'package:flutter/material.dart';
-
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class SupervisorTaskStatusCard extends StatelessWidget {
-  const SupervisorTaskStatusCard({super.key, required this.status});
+  const SupervisorTaskStatusCard({super.key, required this.status, this.label});
 
   final SupervisorTaskDetailStatus status;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
-    final (label, foreground, background, asset) = switch (status) {
+    final (defaultLabel, foreground, background, asset) = switch (status) {
       SupervisorTaskDetailStatus.inProgress => (
         context.l10n.supervisorTaskInProgress,
         AppColors.yellow600,
@@ -50,18 +51,20 @@ class SupervisorTaskStatusCard extends StatelessWidget {
         child: Container(
           height: 32,
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.circular(8),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(asset, width: 20, height: 20),
+              SvgPicture.asset(
+                asset,
+                colorFilter: ColorFilter.mode(foreground, BlendMode.srcIn),
+                width: 20,
+                height: 20,
+              ),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
-                  label,
+                  label ?? defaultLabel,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.semiboldH10_12.copyWith(
@@ -95,6 +98,7 @@ class SupervisorTaskDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visibleImages = images.take(2).toList(growable: false);
     final foreground = emphasized ? AppColors.neutral950 : AppColors.neutral600;
 
     return Container(
@@ -125,20 +129,23 @@ class SupervisorTaskDetailCard extends StatelessWidget {
                       .copyWith(color: foreground),
             ),
           ],
-          if (images.isNotEmpty) ...[
+          if (visibleImages.isNotEmpty) ...[
             const SizedBox(height: 12),
             Row(
-              children: List.generate(images.length, (index) {
+              children: List.generate(visibleImages.length, (index) {
                 return Expanded(
                   child: Padding(
                     padding: EdgeInsetsDirectional.only(
-                      end: index == images.length - 1 ? 0 : 8,
+                      end: index == visibleImages.length - 1 ? 0 : 8,
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
                       child: AspectRatio(
                         aspectRatio: 143.5 / 92,
-                        child: Image.asset(images[index], fit: BoxFit.cover),
+                        child: CachedAppImage(
+                          source: visibleImages[index],
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),

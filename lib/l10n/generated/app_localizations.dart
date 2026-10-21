@@ -6655,14 +6655,14 @@ abstract class AppLocalizations {
   /// No description provided for @supervisorCategoryPendingTab.
   ///
   /// In en, this message translates to:
-  /// **'Pending (2)'**
-  String get supervisorCategoryPendingTab;
+  /// **'Pending ({count})'**
+  String supervisorCategoryPendingTab(int count);
 
   /// No description provided for @supervisorCategoryClosedTab.
   ///
   /// In en, this message translates to:
-  /// **'Closed (4)'**
-  String get supervisorCategoryClosedTab;
+  /// **'Closed ({count})'**
+  String supervisorCategoryClosedTab(int count);
 
   /// No description provided for @supervisorCategoryAgent.
   ///
@@ -6847,8 +6847,80 @@ abstract class AppLocalizations {
   /// No description provided for @supervisorTaskSelectAgent.
   ///
   /// In en, this message translates to:
-  /// **'Select final outcome'**
+  /// **'Select agent'**
   String get supervisorTaskSelectAgent;
+
+  /// No description provided for @supervisorTaskLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get supervisorTaskLoading;
+
+  /// No description provided for @supervisorTaskNoCenters.
+  ///
+  /// In en, this message translates to:
+  /// **'No assigned centers found'**
+  String get supervisorTaskNoCenters;
+
+  /// No description provided for @supervisorTaskNoAgents.
+  ///
+  /// In en, this message translates to:
+  /// **'No agents found at this center'**
+  String get supervisorTaskNoAgents;
+
+  /// No description provided for @supervisorTaskPeopleLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Centers and agents could not be loaded. Please try again.'**
+  String get supervisorTaskPeopleLoadError;
+
+  /// No description provided for @supervisorTaskCenterRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a zone/center.'**
+  String get supervisorTaskCenterRequired;
+
+  /// No description provided for @supervisorTaskAgentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an agent.'**
+  String get supervisorTaskAgentRequired;
+
+  /// No description provided for @supervisorTaskTextRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Task title and description are required.'**
+  String get supervisorTaskTextRequired;
+
+  /// No description provided for @supervisorTaskDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a due date and time.'**
+  String get supervisorTaskDateRequired;
+
+  /// No description provided for @supervisorTaskFutureDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date and time must be in the future.'**
+  String get supervisorTaskFutureDateRequired;
+
+  /// No description provided for @supervisorTaskPhotoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please attach a reference photo.'**
+  String get supervisorTaskPhotoRequired;
+
+  /// No description provided for @supervisorTaskPhotoError.
+  ///
+  /// In en, this message translates to:
+  /// **'The photo could not be captured. Please try again.'**
+  String get supervisorTaskPhotoError;
+
+  /// No description provided for @supervisorTaskSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'The task could not be saved. Please try again.'**
+  String get supervisorTaskSaveError;
 
   /// No description provided for @supervisorTaskPriorityLevel.
   ///
@@ -6955,7 +7027,7 @@ abstract class AppLocalizations {
   /// No description provided for @supervisorTaskSentMessage.
   ///
   /// In en, this message translates to:
-  /// **'The task assigned by supervisor has been completed.'**
+  /// **'The task has been assigned successfully.'**
   String get supervisorTaskSentMessage;
 
   /// No description provided for @supervisorTaskCalendarMonth.
@@ -7060,6 +7132,12 @@ abstract class AppLocalizations {
   /// **'Completed: Today, 11:30 AM'**
   String get supervisorTaskCompletedAt;
 
+  /// No description provided for @supervisorTaskCompletedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed: {dateTime}'**
+  String supervisorTaskCompletedValue(String dateTime);
+
   /// No description provided for @supervisorTaskCompletionProof.
   ///
   /// In en, this message translates to:
@@ -7156,6 +7234,12 @@ abstract class AppLocalizations {
   /// **'Task has been cancelled successfully'**
   String get supervisorTaskCancelledSuccess;
 
+  /// No description provided for @supervisorTaskCancelError.
+  ///
+  /// In en, this message translates to:
+  /// **'The task could not be cancelled. Please try again.'**
+  String get supervisorTaskCancelError;
+
   /// No description provided for @supervisorAgentRequestsTitle.
   ///
   /// In en, this message translates to:
@@ -7233,6 +7317,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Issue closed. Notification sent to the agent.'**
   String get supervisorAgentRequestSuccessMessage;
+
+  /// No description provided for @supervisorRequestSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'The request answer could not be saved. Please try again.'**
+  String get supervisorRequestSaveError;
 
   /// No description provided for @supervisorAgentRequestResolveDetails.
   ///

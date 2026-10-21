@@ -141,7 +141,7 @@ class SupervisorAgentRequestCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      item.createdAt,
+                      _formatCreatedAt(item.createdAt),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
@@ -161,6 +161,13 @@ class SupervisorAgentRequestCard extends StatelessWidget {
 
   String _formatFollowUp(String value) {
     return IstDateTime.formatUtc(value, 'dd MMM, h:mm a');
+  }
+
+  String _formatCreatedAt(String value) {
+    final parsed = DateTime.tryParse(value);
+    return parsed == null
+        ? value
+        : IstDateTime.formatUtc(value, 'dd MMM yyyy, h:mm a');
   }
 }
 

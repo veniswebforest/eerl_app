@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/wallet/model/cash_request_detail_status.dart';
 import 'package:eerl_app/features/wallet/widgets/cash_request_detail_status_chip.dart';
 import 'package:eerl_app/features/wallet/widgets/expense_detail_cards.dart';
@@ -10,21 +12,34 @@ import 'package:eerl_app/features/wallet/widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 
 class CashRequestDetailScreen extends StatelessWidget {
-  const CashRequestDetailScreen({super.key, required this.status});
+  const CashRequestDetailScreen({
+    super.key,
+    required this.status,
+    this.cashRequest,
+  });
 
   final CashRequestDetailStatus status;
+  final CashRequestModel? cashRequest;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final reference = switch (status) {
+    final fallbackReference = switch (status) {
       CashRequestDetailStatus.pending => l10n.cashDetailPendingReference,
       CashRequestDetailStatus.approved => l10n.cashDetailApprovedReference,
       CashRequestDetailStatus.rejected => l10n.cashDetailRejectedReference,
     };
-    final category = status == CashRequestDetailStatus.pending
+    final fallbackCategory = status == CashRequestDetailStatus.pending
         ? l10n.cashReasonEmergencyFuel
         : l10n.cashReasonDailyAdvance;
+    final reference = _valueOrFallback(
+      cashRequest?.number,
+      fallback: cashRequest?.id ?? fallbackReference,
+    );
+    final category = _valueOrFallback(
+      cashRequest?.reason,
+      fallback: fallbackCategory,
+    );
     final statusLabel = switch (status) {
       CashRequestDetailStatus.pending => l10n.cashDetailWaitingApproval,
       CashRequestDetailStatus.approved => l10n.cashDetailApprovedSupervisor,
@@ -70,12 +85,30 @@ class CashRequestDetailScreen extends StatelessWidget {
                           const _DetailDivider(),
                           ExpenseDetailRow(
                             label: l10n.expenseDetailAmount,
-                            value: l10n.cashDetailAmountValue,
+                            value: cashRequest == null
+                                ? l10n.cashDetailAmountValue
+                                : NumberFormat.currency(
+                                    locale: 'en_IN',
+                                    symbol: '₹',
+                                    decimalDigits: 2,
+                                  ).format(cashRequest!.amount),
                           ),
                           const _DetailDivider(),
+                          if (cashRequest != null) ...[
+                            ExpenseDetailRow(
+                              label: l10n.expenseRequestedBy,
+                              value: _valueOrFallback(
+                                cashRequest?.requestedByName,
+                                fallback: cashRequest?.requestedBy,
+                              ),
+                            ),
+                            const _DetailDivider(),
+                          ],
                           ExpenseDetailRow(
                             label: l10n.expenseDateTime,
-                            value: l10n.cashDetailDateTimeValue,
+                            value: cashRequest == null
+                                ? l10n.cashDetailDateTimeValue
+                                : _formattedDate(cashRequest?.createdAt),
                           ),
                           const _DetailDivider(),
                           Text(
@@ -114,7 +147,10 @@ class CashRequestDetailScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            l10n.expenseDetailDescription,
+                            _valueOrFallback(
+                              cashRequest?.reason,
+                              fallback: l10n.expenseDetailDescription,
+                            ),
                             style: AppTextStyles.mediumSH9_12.copyWith(
                               color: AppColors.neutral900,
                             ),
@@ -140,13 +176,24 @@ class CashRequestDetailScreen extends StatelessWidget {
                             const SizedBox(height: 12),
                             _LabeledParagraph(
                               label: l10n.expenseRejectReasonLabel,
-                              value: l10n.cashDetailRejectReason,
+                              value: _valueOrFallback(
+                                cashRequest?.decisionNote,
+                                fallback: l10n.cashDetailRejectReason,
+                              ),
                             ),
-                            const SizedBox(height: 8),
-                            _LabeledParagraph(
-                              label: l10n.expenseRejectRemarksLabel,
-                              value: l10n.cashDetailRejectRemarks,
-                            ),
+                            if (cashRequest == null ||
+                                cashRequest?.decisionRemarks
+                                        ?.trim()
+                                        .isNotEmpty ==
+                                    true) ...[
+                              const SizedBox(height: 8),
+                              _LabeledParagraph(
+                                label: l10n.expenseRejectRemarksLabel,
+                                value: cashRequest == null
+                                    ? l10n.cashDetailRejectRemarks
+                                    : cashRequest!.decisionRemarks!.trim(),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -159,6 +206,19 @@ class CashRequestDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _valueOrFallback(String? value, {String? fallback}) {
+    final normalized = value?.trim();
+    if (normalized?.isNotEmpty == true) return normalized!;
+    final normalizedFallback = fallback?.trim();
+    return normalizedFallback?.isNotEmpty == true ? normalizedFallback! : '—';
+  }
+
+  String _formattedDate(String? value) {
+    final date = value == null ? null : DateTime.tryParse(value)?.toLocal();
+    if (date == null) return _valueOrFallback(value);
+    return DateFormat('dd MMM yyyy, hh:mm a').format(date);
   }
 }
 
