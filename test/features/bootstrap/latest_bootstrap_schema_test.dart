@@ -85,6 +85,8 @@ void main() {
               'transporter_name': 'Shree Ram Transport',
               'transfer_fee': 1800,
               'dispatch_note': 'Load the dry bales first.',
+              'rejection_reason': 'No Vehicle Available',
+              'rejection_remarks': 'The truck is booked till Friday.',
               'vehicle_differs': 0,
               'requested_by': 'agent-1',
               'requested_by_name': 'Agent One',
@@ -115,7 +117,76 @@ void main() {
     expect(transfer['planned_vehicle_number'], 'GJ-05-EE-1001');
     expect(transfer['transfer_fee'], 1800.0);
     expect(transfer['dispatch_note'], 'Load the dry bales first.');
+    expect(transfer['rejection_reason'], 'No Vehicle Available');
+    expect(transfer['rejection_remarks'], 'The truck is booked till Friday.');
     expect(transfer['vehicle_differs'], 0);
     expect(await database.getSyncMeta('cursor'), 'latest-1');
+
+    await database.update(
+      DatabaseTables.transfers,
+      const {'sync_state': 'failed'},
+      where: 'id = ?',
+      whereArgs: const ['transfer-1'],
+    );
+
+    await BootstrapDatabaseApplier(database: database).apply(
+      BootstrapData.fromJson({
+        'cursor': 'latest-2',
+        'hasMore': false,
+        'full': false,
+        'tables': {
+          'transfer_vehicles': {
+            'replace': [
+              {
+                'id': 'truck-2',
+                'number': 'GJ-05-EE-2002',
+                'ownership': 'COMPANY',
+              },
+            ],
+          },
+          'transfers': {
+            'upserts': [
+              {
+                'id': 'transfer-2',
+                'center_id': 'center-1',
+                'type': 'STOCK_TRANSFER',
+                'status': 'APPROVED',
+                'destination_id': 'destination-1',
+                'destination_name': 'Recycler One',
+                'transfer_vehicle_id': 'truck-retired-on-server',
+                'planned_vehicle_number': 'GJ-05-EE-3003',
+                'planned_vehicle_ownership': 'HIRED',
+                'requested_by': 'agent-1',
+                'requested_by_name': 'Agent One',
+                'requested_at': '2026-10-08T09:00:00.000Z',
+              },
+            ],
+          },
+        },
+      }),
+    );
+
+    final refreshedVehicles = await database.query(
+      DatabaseTables.transferVehicles,
+    );
+    expect(refreshedVehicles.map((row) => row['id']), ['truck-2']);
+    final refreshedTransfer = (await database.query(
+      DatabaseTables.transfers,
+      where: 'id = ?',
+      whereArgs: const ['transfer-1'],
+    )).single;
+    expect(refreshedTransfer['transfer_vehicle_id'], isNull);
+    expect(refreshedTransfer['planned_vehicle_number'], 'GJ-05-EE-1001');
+    expect(refreshedTransfer['planned_vehicle_ownership'], 'HIRED');
+    expect(refreshedTransfer['sync_state'], 'failed');
+    final serverTransfer = (await database.query(
+      DatabaseTables.transfers,
+      where: 'id = ?',
+      whereArgs: const ['transfer-2'],
+    )).single;
+    expect(serverTransfer['transfer_vehicle_id'], isNull);
+    expect(serverTransfer['planned_vehicle_number'], 'GJ-05-EE-3003');
+    expect(serverTransfer['sync_state'], 'synced');
+    expect(await database.getSyncMeta('cursor'), 'latest-2');
   });
 }

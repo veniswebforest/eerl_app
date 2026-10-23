@@ -506,6 +506,9 @@ class OutgoingSyncService {
     if (table == DatabaseTables.ragpickers) {
       return _ragpickerServerValues(data);
     }
+    if (table == DatabaseTables.mrfPeople) {
+      return _mrfPersonServerValues(data);
+    }
     if (table == DatabaseTables.tasks) {
       return _taskServerValues(data);
     }
@@ -567,45 +570,75 @@ class OutgoingSyncService {
     };
   }
 
-  Map<String, Object?> _transferServerValues(Map<Object?, Object?> data) => {
-    if (data['dispatch'] is Map &&
-        (data['dispatch'] as Map).containsKey('note'))
-      'dispatch_note': (data['dispatch'] as Map)['note'],
-    if (data.containsKey('dispatchNote')) 'dispatch_note': data['dispatchNote'],
-    if (data['status'] != null) 'status': data['status'],
-    if (data['number'] != null) 'number': data['number'],
-    if (data['destinationId'] != null) 'destination_id': data['destinationId'],
-    if (data['destinationName'] != null)
-      'destination_name': data['destinationName'],
-    if (data['truckExpectedAt'] != null)
-      'truck_expected_at': data['truckExpectedAt'],
-    if (data.containsKey('transferVehicleId'))
-      'transfer_vehicle_id': data['transferVehicleId'],
-    if (data.containsKey('plannedVehicleNumber'))
-      'planned_vehicle_number': data['plannedVehicleNumber'],
-    if (data.containsKey('plannedVehicleOwnership'))
-      'planned_vehicle_ownership': data['plannedVehicleOwnership'],
-    if (data.containsKey('transporterName'))
-      'transporter_name': data['transporterName'],
-    if (data.containsKey('transferFee')) 'transfer_fee': data['transferFee'],
-    if (data['vehicleNumber'] != null) 'vehicle_plate': data['vehicleNumber'],
-    if (data['driverName'] != null) 'driver_name': data['driverName'],
-    if (data['handedOverAt'] != null) 'handed_over_at': data['handedOverAt'],
-    if (data['dispatchedWeight'] != null)
-      'dispatched_weight': data['dispatchedWeight'],
-    if (data.containsKey('baleCount')) 'bale_count': data['baleCount'],
-    if (data['vehiclePhotoUrls'] is List)
-      'vehicle_photo_urls': jsonEncode(data['vehiclePhotoUrls']),
-    if (data['weighbridgePhotoUrls'] is List)
-      'weighbridge_photo_urls': jsonEncode(data['weighbridgePhotoUrls']),
-    if (data.containsKey('vehicleDiffers'))
-      'vehicle_differs': _sqliteValue(data['vehicleDiffers']),
-    if (data.containsKey('rejectionReason'))
-      'rejection_reason': data['rejectionReason'],
-    if (data.containsKey('rejectionRemarks'))
-      'rejection_remarks': data['rejectionRemarks'],
-    if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
-  };
+  Map<String, Object?> _mrfPersonServerValues(Map<Object?, Object?> data) {
+    final nested = data['mrfPerson'] ?? data['person'] ?? data['mrf_person'];
+    final candidate = nested is Map ? nested : data;
+    return <String, Object?>{
+      if (candidate['number'] != null) 'number': candidate['number'],
+      if (candidate['centerId'] != null) 'center_id': candidate['centerId'],
+      if (candidate['name'] != null) 'name': candidate['name'],
+      if (candidate.containsKey('phone')) 'phone': candidate['phone'],
+      if (candidate.containsKey('idNumber')) 'id_number': candidate['idNumber'],
+      if (candidate.containsKey('photoUrl')) 'photo_url': candidate['photoUrl'],
+      if (candidate['isActive'] != null)
+        'is_active': _sqliteValue(candidate['isActive']),
+      if (candidate['role'] != null) 'role': candidate['role'],
+    };
+  }
+
+  Map<String, Object?> _transferServerValues(Map<Object?, Object?> data) {
+    final rejection = data['rejection'];
+    final decidedBy = rejection is Map ? rejection['by'] : null;
+    return {
+      if (data['dispatch'] is Map &&
+          (data['dispatch'] as Map).containsKey('note'))
+        'dispatch_note': (data['dispatch'] as Map)['note'],
+      if (data.containsKey('dispatchNote'))
+        'dispatch_note': data['dispatchNote'],
+      if (data['status'] != null) 'status': data['status'],
+      if (data['number'] != null) 'number': data['number'],
+      if (data['destinationId'] != null)
+        'destination_id': data['destinationId'],
+      if (data['destinationName'] != null)
+        'destination_name': data['destinationName'],
+      if (data['truckExpectedAt'] != null)
+        'truck_expected_at': data['truckExpectedAt'],
+      if (data.containsKey('transferVehicleId'))
+        'transfer_vehicle_id': data['transferVehicleId'],
+      if (data.containsKey('plannedVehicleNumber'))
+        'planned_vehicle_number': data['plannedVehicleNumber'],
+      if (data.containsKey('plannedVehicleOwnership'))
+        'planned_vehicle_ownership': data['plannedVehicleOwnership'],
+      if (data.containsKey('transporterName'))
+        'transporter_name': data['transporterName'],
+      if (data.containsKey('transferFee')) 'transfer_fee': data['transferFee'],
+      if (data['vehicleNumber'] != null) 'vehicle_plate': data['vehicleNumber'],
+      if (data['driverName'] != null) 'driver_name': data['driverName'],
+      if (data['handedOverAt'] != null) 'handed_over_at': data['handedOverAt'],
+      if (data['dispatchedWeight'] != null)
+        'dispatched_weight': data['dispatchedWeight'],
+      if (data.containsKey('baleCount')) 'bale_count': data['baleCount'],
+      if (data['vehiclePhotoUrls'] is List)
+        'vehicle_photo_urls': jsonEncode(data['vehiclePhotoUrls']),
+      if (data['weighbridgePhotoUrls'] is List)
+        'weighbridge_photo_urls': jsonEncode(data['weighbridgePhotoUrls']),
+      if (data.containsKey('vehicleDiffers'))
+        'vehicle_differs': _sqliteValue(data['vehicleDiffers']),
+      if (rejection is Map && rejection.containsKey('reason'))
+        'rejection_reason': rejection['reason'],
+      if (rejection is Map && rejection.containsKey('remarks'))
+        'rejection_remarks': rejection['remarks'],
+      if (decidedBy is Map && decidedBy.containsKey('name'))
+        'decided_by_name': decidedBy['name'],
+      if (rejection is Map && rejection.containsKey('at'))
+        'approved_at': rejection['at'],
+      if (data.containsKey('rejectionReason'))
+        'rejection_reason': data['rejectionReason'],
+      if (data.containsKey('rejectionRemarks'))
+        'rejection_remarks': data['rejectionRemarks'],
+      if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
+    };
+  }
 
   Map<String, Object?> _expenseServerValues(Map<Object?, Object?> data) => {
     if (data['status'] != null) 'status': data['status'],
@@ -1227,6 +1260,8 @@ class OutgoingSyncService {
           'status': 'REJECTED',
           if (rejection is Map && rejection.containsKey('reason'))
             'rejection_reason': rejection['reason'],
+          if (rejection is Map && rejection.containsKey('remarks'))
+            'rejection_remarks': rejection['remarks'],
           if (decidedBy is Map && decidedBy.containsKey('name'))
             'decided_by_name': decidedBy['name'],
           if (rejection is Map && rejection.containsKey('at'))
@@ -1235,6 +1270,24 @@ class OutgoingSyncService {
         },
         where: 'id = ?',
         whereArgs: [transferId],
+      );
+      final reason = rejection is Map ? rejection['reason']?.toString() : null;
+      final remarks = rejection is Map
+          ? rejection['remarks']?.toString().trim()
+          : null;
+      await _database.update(
+        DatabaseTables.notifications,
+        {
+          'title': 'Transfer refused',
+          'body': [
+            if (reason?.trim().isNotEmpty == true) reason!.trim(),
+            if (remarks?.isNotEmpty == true) 'Remarks: $remarks',
+          ].join('\n'),
+        },
+        where: 'id = ?',
+        whereArgs: [
+          'sync-conflict:REJECTED:${DatabaseTables.transfers}:$transferId',
+        ],
       );
     }
     AppLogger.sync(

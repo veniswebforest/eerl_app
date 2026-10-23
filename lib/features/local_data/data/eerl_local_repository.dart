@@ -14,6 +14,8 @@ class EerlLocalRepository {
   Future<void> selectCenter(String id) => _local.selectCenter(id);
   Future<List<MyRoleModel>> getRoles() => _local.getRoles();
   Future<List<CenterModel>> getCenters() => _local.getCenters();
+  Future<List<CenterModel>> getMrfCenters() => _local.getMrfCenters();
+  Future<List<CenterModel>> getAllCenters() => _local.getAllCenters();
   Future<CenterModel?> getCenter(String id) => _local.getCenter(id);
   Future<ProfileModel> getProfile() => _local.getProfile();
   Future<AgentHomeSummaryModel> getAgentHomeSummary() =>
@@ -59,11 +61,26 @@ class EerlLocalRepository {
     String? centerId,
     String? role,
     bool activeOnly = true,
+    bool? isActive,
+    bool allCenters = false,
   }) => _local.getMrfPeople(
     centerId: centerId,
     role: role,
     activeOnly: activeOnly,
+    isActive: isActive,
+    allCenters: allCenters,
   );
+  Future<MrfPersonModel?> getOtherActiveMrfSupervisor({
+    required String centerId,
+    required String personId,
+  }) => _local.getOtherActiveMrfSupervisor(
+    centerId: centerId,
+    personId: personId,
+  );
+  Future<void> saveMrfPerson(MrfPersonModel person, {required bool isNew}) =>
+      _local.saveMrfPerson(person, isNew: isNew);
+  Future<void> setMrfPersonActive(MrfPersonModel person, bool active) =>
+      _local.setMrfPersonActive(person, active);
   Future<List<RagpickerModel>> getRagpickers({
     String? centerId,
     String search = '',

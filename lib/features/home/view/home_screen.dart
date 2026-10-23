@@ -163,7 +163,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           pendingCount: status!.outboxCount,
                                         )
                                       : null,
-                                  subtitle: isSupervisor
+                                  subtitle: hasOutbox
+                                      ? context.l10n.syncPendingItems(
+                                          status!.outboxCount,
+                                        )
+                                      : isSupervisor
                                       ? context.l10n.supervisorLastSynced
                                       : null,
                                 ),

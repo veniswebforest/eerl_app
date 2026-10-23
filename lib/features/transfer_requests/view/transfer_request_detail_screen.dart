@@ -9,6 +9,7 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/transfer_request_detail_state.dart';
@@ -189,6 +190,7 @@ class _TransferRequestDetailScreenState
           reason: reason,
           remarks: rejection.remarks,
         );
+        await OutgoingSyncService.instance.drain();
       }
       if (!mounted) return;
       setState(() {

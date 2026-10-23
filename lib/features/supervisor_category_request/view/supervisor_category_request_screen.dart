@@ -17,7 +17,7 @@ import 'package:eerl_app/features/wallet/widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 
-enum _CategoryRequestPage { list, detail }
+enum _CategoryRequestPage { list, detail, reject }
 
 class SupervisorCategoryRequestScreen extends StatefulWidget {
   const SupervisorCategoryRequestScreen({super.key, required this.onBack});
@@ -62,7 +62,12 @@ class _SupervisorCategoryRequestScreenState
   Widget build(BuildContext context) => PopScope(
     canPop: _page == _CategoryRequestPage.list,
     onPopInvokedWithResult: (didPop, _) {
-      if (!didPop) setState(() => _page = _CategoryRequestPage.list);
+      if (didPop) return;
+      setState(() {
+        _page = _page == _CategoryRequestPage.reject
+            ? _CategoryRequestPage.detail
+            : _CategoryRequestPage.list;
+      });
     },
     child: switch (_page) {
       _CategoryRequestPage.list => _CategoryRequestListScreen(
@@ -80,9 +85,16 @@ class _SupervisorCategoryRequestScreenState
         request: _selectedRequest!,
         onBack: () => setState(() => _page = _CategoryRequestPage.list),
         onApprove: () => _decideSelected('APPROVED'),
-        onReject: (reason) => _decideSelected('REJECTED', reason: reason),
+        onReject: () => setState(() => _page = _CategoryRequestPage.reject),
         onApproved: () => _backToClosedList(),
-        onRejected: () => _backToClosedList(rejected: true),
+      ),
+      _CategoryRequestPage.reject => _CategoryRequestRejectScreen(
+        onBack: () => setState(() => _page = _CategoryRequestPage.detail),
+        onConfirm: (reason) async {
+          await _decideSelected('REJECTED', reason: reason);
+          if (!mounted) return;
+          _backToClosedList(rejected: true);
+        },
       ),
     },
   );
@@ -378,15 +390,13 @@ class _CategoryRequestDetailScreen extends StatelessWidget {
     required this.onApprove,
     required this.onReject,
     required this.onApproved,
-    required this.onRejected,
   });
 
   final CategoryRequestModel request;
   final VoidCallback onBack;
   final Future<void> Function() onApprove;
-  final Future<void> Function(String reason) onReject;
+  final VoidCallback onReject;
   final VoidCallback onApproved;
-  final VoidCallback onRejected;
 
   @override
   Widget build(BuildContext context) {
@@ -537,7 +547,7 @@ class _CategoryRequestDetailScreen extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton(
                             key: const Key('category-request-reject'),
-                            onPressed: () => _showRejectDialog(context),
+                            onPressed: onReject,
                             style: OutlinedButton.styleFrom(
                               minimumSize: const Size.fromHeight(52),
                               side: const BorderSide(color: AppColors.red500),
@@ -647,101 +657,179 @@ class _CategoryRequestDetailScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Future<void> _showRejectDialog(BuildContext context) async {
+class _CategoryRequestRejectScreen extends StatefulWidget {
+  const _CategoryRequestRejectScreen({
+    required this.onBack,
+    required this.onConfirm,
+  });
+
+  final VoidCallback onBack;
+  final Future<void> Function(String reason) onConfirm;
+
+  @override
+  State<_CategoryRequestRejectScreen> createState() =>
+      _CategoryRequestRejectScreenState();
+}
+
+class _CategoryRequestRejectScreenState
+    extends State<_CategoryRequestRejectScreen> {
+  final TextEditingController _reasonController = TextEditingController();
+  bool _submitting = false;
+
+  @override
+  void dispose() {
+    _reasonController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _confirm() async {
+    final reason = _reasonController.text.trim();
+    if (reason.isEmpty || _submitting) return;
+    setState(() => _submitting = true);
+    try {
+      await widget.onConfirm(reason);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = context.l10n;
-    final reasonController = TextEditingController();
-    await showDialog<void>(
-      context: context,
-      barrierColor: const Color(0x99000000),
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (dialogContext, setDialogState) => Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  l.supervisorCategoryAreYouSure,
-                  style: AppTextStyles.semiboldH6_20,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  l.supervisorCategoryRejectConfirmation,
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.mediumSH8_14.copyWith(
-                    color: AppColors.neutral700,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  key: const Key('category-request-reject-reason'),
-                  controller: reasonController,
-                  maxLength: 150,
-                  minLines: 2,
-                  maxLines: 4,
-                  onChanged: (_) => setDialogState(() {}),
-                  decoration: InputDecoration(
-                    labelText: l.expenseRejectReasonLabel,
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(),
-                        style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          minimumSize: const Size.fromHeight(52),
-                          backgroundColor: AppColors.cool200,
-                          foregroundColor: AppColors.neutral900,
+    return Scaffold(
+      key: const Key('category-request-reject-screen'),
+      backgroundColor: AppColors.backgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      WalletBackButton(onPressed: widget.onBack),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          l.supervisorCategoryRejectScreenTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.semiboldH6_20,
                         ),
-                        child: Text(l.recordsCancel),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: l.supervisorExpenseReasonForRejection,
+                                  style: AppTextStyles.mediumSH8_14,
+                                ),
+                                TextSpan(
+                                  text: ' *',
+                                  style: AppTextStyles.mediumSH8_14.copyWith(
+                                    color: AppColors.red500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            key: const Key('category-request-reject-reason'),
+                            controller: _reasonController,
+                            maxLength: 150,
+                            minLines: 5,
+                            maxLines: 5,
+                            onChanged: (_) => setState(() {}),
+                            style: AppTextStyles.mediumSH8_14,
+                            decoration: InputDecoration(
+                              hintText: l.expenseRejectReasonLabel,
+                              hintStyle: AppTextStyles.mediumSH8_14.copyWith(
+                                color: AppColors.neutral400,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              counterStyle: AppTextStyles.regularB8_12.copyWith(
+                                color: AppColors.neutral500,
+                              ),
+                              contentPadding: const EdgeInsets.all(14),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.cool400,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.cool400,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primary500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        key: const Key('category-request-confirm-reject'),
-                        onPressed: reasonController.text.trim().isEmpty
-                            ? null
-                            : () async {
-                                try {
-                                  await onReject(reasonController.text);
-                                  if (!dialogContext.mounted) return;
-                                  Navigator.of(dialogContext).pop();
-                                  onRejected();
-                                } catch (error) {
-                                  if (!dialogContext.mounted) return;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(error.toString())),
-                                  );
-                                }
-                              },
-                        style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          minimumSize: const Size.fromHeight(52),
-                          backgroundColor: AppColors.red500,
-                          foregroundColor: Colors.white,
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      key: const Key('category-request-confirm-reject'),
+                      onPressed:
+                          _reasonController.text.trim().isEmpty || _submitting
+                          ? null
+                          : _confirm,
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: AppColors.red500,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(l.supervisorCategoryYes),
                       ),
+                      child: _submitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              l.verificationRejectConfirm,
+                              style: AppTextStyles.boldH7_16,
+                            ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
-    reasonController.dispose();
   }
 }
 

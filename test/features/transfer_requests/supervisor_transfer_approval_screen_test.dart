@@ -66,6 +66,7 @@ void main() {
           items: items,
           vehicles: vehicles,
           destinations: const [
+            DestinationModel(id: 'center-1', name: 'Center One'),
             DestinationModel(
               id: 'destination-1',
               name: 'Bhatar Recycling Plant',
@@ -132,6 +133,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Bhatar Recycling Plant'), findsOneWidget);
+    expect(find.text('Center One'), findsNothing);
 
     await tester.tap(
       find.byKey(
@@ -145,14 +147,9 @@ void main() {
     );
     expect(confirmAfterSelection.onPressed, isNotNull);
 
-    await tester.tap(
-      find.byKey(const Key('supervisor-transfer-date-time')),
-    );
+    await tester.tap(find.byKey(const Key('supervisor-transfer-date-time')));
     await tester.pumpAndSettle();
-    expect(
-      find.byKey(const Key('transfer-calendar-confirm')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('transfer-calendar-confirm')), findsOneWidget);
   });
 
   testWidgets('shows the complete Other Hired Truck section', (tester) async {

@@ -5,6 +5,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/transfer_requests/widgets/transfer_dispatch_date_time_picker.dart';
 import 'package:eerl_app/features/transfer_requests/widgets/transfer_request_detail_widgets.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
@@ -62,7 +63,12 @@ class _SupervisorTransferApprovalScreenState
 
   Future<_ApprovalOptions> _loadOptions() async {
     if (widget.vehicles != null && widget.destinations != null) {
-      return (vehicles: widget.vehicles!, destinations: widget.destinations!);
+      return (
+        vehicles: widget.vehicles!,
+        destinations: widget.destinations!
+            .where((destination) => destination.id != widget.transfer.centerId)
+            .toList(growable: false),
+      );
     }
     final values = await Future.wait<Object?>([
       EerlLocalRepository.instance.getTransferVehicles(),
@@ -70,7 +76,9 @@ class _SupervisorTransferApprovalScreenState
     ]);
     return (
       vehicles: values[0]! as List<TransferVehicleModel>,
-      destinations: values[1]! as List<DestinationModel>,
+      destinations: (values[1]! as List<DestinationModel>)
+          .where((destination) => destination.id != widget.transfer.centerId)
+          .toList(growable: false),
     );
   }
 
@@ -326,6 +334,7 @@ class _SupervisorTransferApprovalScreenState
       if (_calendarExpanded)
         TransferDispatchDateTimePicker(
           initialDateTime: _expectedAt,
+          minimumDateTime: DateTime.now(),
           onCancel: () => setState(() => _calendarExpanded = false),
           onConfirm: (value) => setState(() {
             _expectedAt = value;
@@ -478,6 +487,7 @@ class _SupervisorTransferApprovalScreenState
         vehicleArrivalTime: _expectedAt,
         note: _description.text,
       );
+      await OutgoingSyncService.instance.drain();
       if (!mounted) return;
       await showDialog<void>(
         context: context,

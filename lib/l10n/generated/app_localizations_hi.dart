@@ -3502,6 +3502,10 @@ class AppLocalizationsHi extends AppLocalizations {
       'व्यय अनुरोध सफलतापूर्वक अस्वीकृत हुआ';
 
   @override
+  String get supervisorCategoryRejectScreenTitle =>
+      'श्रेणी अनुरोध अस्वीकार करें';
+
+  @override
   String get supervisorCategoryRejectReason =>
       'अमान्य / अस्पष्ट अनुरोध उद्देश्य';
 
@@ -3838,6 +3842,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get supervisorMrfSearch => 'यहाँ खोजें...';
+
+  @override
+  String get supervisorMrfEmptyTeam => 'कोई टीम सदस्य पंजीकृत नहीं है';
 
   @override
   String get supervisorMrfAddNewPerson => 'नया व्यक्ति जोड़ें';

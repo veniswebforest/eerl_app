@@ -136,6 +136,21 @@ class EerlLocalDataSource {
     return rows.map(CenterModel.fromMap).toList(growable: false);
   }
 
+  Future<List<CenterModel>> getMrfCenters() async {
+    final rows = await _database.rawQuery('''
+      SELECT DISTINCT c.*
+      FROM ${DatabaseTables.centers} c
+      JOIN ${DatabaseTables.mrfPeople} p ON p.center_id = c.id
+      ORDER BY c.name COLLATE NOCASE
+    ''');
+    return rows.map(CenterModel.fromMap).toList(growable: false);
+  }
+
+  Future<List<CenterModel>> getAllCenters() async => (await _database.query(
+    DatabaseTables.centers,
+    orderBy: 'name COLLATE NOCASE',
+  )).map(CenterModel.fromMap).toList(growable: false);
+
   Future<CenterModel?> getCenter(String id) async {
     final rows = await _database.rawQuery(
       '''
@@ -673,12 +688,23 @@ class EerlLocalDataSource {
     String? centerId,
     String? role,
     bool activeOnly = true,
+    bool? isActive,
+    bool allCenters = false,
   }) async {
-    final resolvedCenter = centerId ?? await activeCenterId;
-    if (resolvedCenter == null) return const [];
-    final conditions = <String>['center_id = ?'];
-    final args = <Object?>[resolvedCenter];
-    if (activeOnly) conditions.add('is_active = 1');
+    final conditions = <String>[];
+    final args = <Object?>[];
+    if (!allCenters) {
+      final resolvedCenter = centerId ?? await activeCenterId;
+      if (resolvedCenter == null) return const [];
+      conditions.add('center_id = ?');
+      args.add(resolvedCenter);
+    }
+    if (isActive != null) {
+      conditions.add('is_active = ?');
+      args.add(isActive ? 1 : 0);
+    } else if (activeOnly) {
+      conditions.add('is_active = 1');
+    }
     if (role != null && role.isNotEmpty) {
       conditions.add('role = ?');
       args.add(role);
@@ -687,9 +713,187 @@ class EerlLocalDataSource {
       DatabaseTables.mrfPeople,
       where: conditions.join(' AND '),
       whereArgs: args,
-      orderBy: 'name COLLATE NOCASE',
+      orderBy:
+          '${allCenters ? 'center_id, ' : ''}'
+          "CASE UPPER(role) WHEN 'SUPERVISOR' THEN 0 ELSE 1 END, "
+          'name COLLATE NOCASE',
     );
     return rows.map(MrfPersonModel.fromMap).toList(growable: false);
+  }
+
+  Future<MrfPersonModel?> getOtherActiveMrfSupervisor({
+    required String centerId,
+    required String personId,
+  }) async {
+    final rows = await _database.query(
+      DatabaseTables.mrfPeople,
+      columns: const [
+        'id',
+        'number',
+        'center_id',
+        'name',
+        'phone',
+        'id_number',
+        'photo_url',
+        'is_active',
+        'role',
+        'sync_state',
+      ],
+      where:
+          "center_id = ? AND UPPER(role) = 'SUPERVISOR' "
+          'AND is_active = 1 AND id <> ?',
+      whereArgs: [centerId, personId],
+      orderBy: 'name COLLATE NOCASE',
+      limit: 1,
+    );
+    return rows.isEmpty ? null : MrfPersonModel.fromMap(rows.single);
+  }
+
+  Future<void> saveMrfPerson(
+    MrfPersonModel person, {
+    required bool isNew,
+  }) async {
+    final normalizedName = person.name.trim();
+    if (normalizedName.isEmpty) {
+      throw ArgumentError.value(person.name, 'name', 'Full name is required.');
+    }
+    final normalizedCenterId = person.centerId.trim();
+    if (normalizedCenterId.isEmpty) {
+      throw ArgumentError.value(
+        person.centerId,
+        'centerId',
+        'Center is required.',
+      );
+    }
+    final normalizedPhone = _normalizeIndianPhone(person.phone);
+    final normalizedRole = person.role.trim().toUpperCase() == 'SUPERVISOR'
+        ? 'SUPERVISOR'
+        : 'LABOUR';
+    final normalizedIdNumber = person.idNumber?.trim();
+    final normalizedPhotoUrl = person.photoUrl?.trim();
+    if (normalizedRole == 'SUPERVISOR' && person.isActive) {
+      final conflict = await getOtherActiveMrfSupervisor(
+        centerId: normalizedCenterId,
+        personId: person.id,
+      );
+      if (conflict != null) {
+        throw StateError(
+          '${conflict.name} is already the active MRF supervisor for this center.',
+        );
+      }
+    }
+
+    final personBody = <String, Object?>{
+      'name': normalizedName,
+      'phone': normalizedPhone,
+      if (normalizedIdNumber?.isNotEmpty == true)
+        'idNumber': normalizedIdNumber,
+      if (normalizedPhotoUrl?.isNotEmpty == true)
+        'photoUrl': normalizedPhotoUrl,
+      'role': normalizedRole,
+    };
+    final now = DateTime.now().toUtc().toIso8601String();
+    await _database.transaction((txn) async {
+      final center = await txn.query(
+        DatabaseTables.centers,
+        columns: const ['id'],
+        where: 'id = ?',
+        whereArgs: [normalizedCenterId],
+        limit: 1,
+      );
+      if (center.isEmpty) {
+        throw StateError('The selected center is not available locally.');
+      }
+      final queuedUpserts = await txn.query(
+        DatabaseTables.outbox,
+        columns: const ['method'],
+        where:
+            "entity = ? AND entity_id = ? AND kind = 'upsert' "
+            "AND status = 'queued'",
+        whereArgs: [DatabaseTables.mrfPeople, person.id],
+        limit: 1,
+      );
+      final queuedPut =
+          queuedUpserts.isNotEmpty && queuedUpserts.single['method'] == 'PUT';
+      final body = <String, Object?>{
+        if (isNew || queuedPut) 'centerId': normalizedCenterId,
+        ...personBody,
+      };
+      await _upsertById(txn, DatabaseTables.mrfPeople, {
+        ...person.toMap(),
+        'center_id': normalizedCenterId,
+        'name': normalizedName,
+        'phone': normalizedPhone,
+        'id_number': normalizedIdNumber?.isEmpty == true
+            ? null
+            : normalizedIdNumber,
+        'photo_url': normalizedPhotoUrl?.isEmpty == true
+            ? null
+            : normalizedPhotoUrl,
+        'role': normalizedRole,
+        'sync_state': 'pending',
+      });
+      final updated = await OutboxQueue.updateQueued(
+        txn,
+        entity: DatabaseTables.mrfPeople,
+        entityId: person.id,
+        kind: 'upsert',
+        body: body,
+        refs: [normalizedCenterId],
+      );
+      if (updated == 0) {
+        await OutboxQueue.enqueue(
+          txn,
+          method: isNew ? 'PUT' : 'PATCH',
+          path: '/mrf-people/${person.id}',
+          body: body,
+          entity: DatabaseTables.mrfPeople,
+          entityId: person.id,
+          kind: 'upsert',
+          refs: [normalizedCenterId],
+          createdAt: now,
+        );
+      }
+    });
+  }
+
+  Future<void> setMrfPersonActive(MrfPersonModel person, bool active) async {
+    final now = DateTime.now().toUtc().toIso8601String();
+    await _database.transaction((txn) async {
+      final changed = await txn.update(
+        DatabaseTables.mrfPeople,
+        {'is_active': active ? 1 : 0, 'sync_state': 'pending'},
+        where: 'id = ?',
+        whereArgs: [person.id],
+      );
+      if (changed != 1) {
+        throw StateError('MRF person is not available locally.');
+      }
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'POST',
+        path: '/mrf-people/${person.id}/status',
+        body: {'isActive': active},
+        entity: DatabaseTables.mrfPeople,
+        entityId: person.id,
+        kind: 'status',
+        refs: [person.centerId],
+        createdAt: now,
+      );
+    });
+  }
+
+  String _normalizeIndianPhone(String? phone) {
+    final digits = (phone ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length == 10) return digits;
+    if (digits.length == 12 && digits.startsWith('91')) {
+      return digits.substring(2);
+    }
+    throw ArgumentError.value(
+      phone,
+      'phone',
+      'Enter a valid 10-digit mobile number.',
+    );
   }
 
   Future<List<RagpickerModel>> getRagpickers({
@@ -890,11 +1094,16 @@ class EerlLocalDataSource {
     return rows.map(CenterPersonModel.fromMap).toList(growable: false);
   }
 
-  Future<List<DestinationModel>> getDestinations() async =>
-      (await _database.query(
-        DatabaseTables.destinations,
-        orderBy: 'name',
-      )).map(DestinationModel.fromMap).toList(growable: false);
+  Future<List<DestinationModel>> getDestinations() async {
+    final centerId = await activeCenterId;
+    final rows = await _database.query(
+      DatabaseTables.destinations,
+      where: centerId == null ? null : 'id <> ?',
+      whereArgs: centerId == null ? null : [centerId],
+      orderBy: 'name COLLATE NOCASE',
+    );
+    return rows.map(DestinationModel.fromMap).toList(growable: false);
+  }
 
   Future<List<CollectionModel>> getAgentCollections({
     String? centerId,
@@ -2489,39 +2698,12 @@ class EerlLocalDataSource {
   }
 
   Future<List<TransferVehicleModel>> getTransferVehicles() async {
-    final centerId = await activeCenterId;
-    final vehicleRows = await _database.query(
-      DatabaseTables.vehicles,
-      where: centerId == null
-          ? 'is_active = 1'
-          : 'is_active = 1 AND (center_id = ? OR center_id IS NULL)',
-      whereArgs: centerId == null ? null : [centerId],
-      orderBy: 'plate_number COLLATE NOCASE',
-    );
-    if (vehicleRows.isNotEmpty) {
-      return vehicleRows
-          .map(VehicleModel.fromMap)
-          .map(_transferVehicleFromVehicle)
-          .toList(growable: false);
-    }
-
-    // Keep older bootstraps usable until their configured vehicles are synced
-    // into the main vehicles table.
-    final legacyRows = await _database.query(
+    final rows = await _database.query(
       DatabaseTables.transferVehicles,
       orderBy: 'number COLLATE NOCASE',
     );
-    return legacyRows.map(TransferVehicleModel.fromMap).toList(growable: false);
+    return rows.map(TransferVehicleModel.fromMap).toList(growable: false);
   }
-
-  TransferVehicleModel _transferVehicleFromVehicle(VehicleModel vehicle) =>
-      TransferVehicleModel(
-        id: vehicle.id,
-        number: vehicle.plateNumber,
-        ownership: 'COMPANY',
-        vehicleType: vehicle.typeName,
-        capacityKg: vehicle.capacityKg,
-      );
 
   Future<void> approveTransfer({
     required String transferId,
@@ -2537,6 +2719,12 @@ class EerlLocalDataSource {
     if (normalizedDestinationId.isEmpty) {
       throw const TransferDecisionValidationException(
         'Choose where the material is going.',
+      );
+    }
+    final centerId = await activeCenterId;
+    if (centerId != null && normalizedDestinationId == centerId) {
+      throw const TransferDecisionValidationException(
+        'Choose a destination other than the current center.',
       );
     }
 
@@ -2556,25 +2744,13 @@ class EerlLocalDataSource {
     final normalizedVehicleId = transferVehicleId?.trim();
     if (normalizedVehicleId != null && normalizedVehicleId.isNotEmpty) {
       final vehicleRows = await _database.query(
-        DatabaseTables.vehicles,
+        DatabaseTables.transferVehicles,
         where: 'id = ?',
         whereArgs: [normalizedVehicleId],
         limit: 1,
       );
       if (vehicleRows.isNotEmpty) {
-        listedVehicle = _transferVehicleFromVehicle(
-          VehicleModel.fromMap(vehicleRows.single),
-        );
-      } else {
-        final legacyRows = await _database.query(
-          DatabaseTables.transferVehicles,
-          where: 'id = ?',
-          whereArgs: [normalizedVehicleId],
-          limit: 1,
-        );
-        if (legacyRows.isNotEmpty) {
-          listedVehicle = TransferVehicleModel.fromMap(legacyRows.single);
-        }
+        listedVehicle = TransferVehicleModel.fromMap(vehicleRows.single);
       }
       if (listedVehicle == null) {
         throw const TransferDecisionValidationException(
@@ -2614,6 +2790,18 @@ class EerlLocalDataSource {
         'Note must be 150 characters or fewer.',
       );
     }
+    if (vehicleArrivalTime != null &&
+        vehicleArrivalTime.isBefore(DateTime.now())) {
+      throw const TransferDecisionValidationException(
+        'Vehicle arrival date and time cannot be in the past.',
+      );
+    }
+    if (ownership != 'COMPANY' &&
+        (normalizedTransporter == null || normalizedTransporter.isEmpty)) {
+      throw const TransferDecisionValidationException(
+        'Enter the transporter name for this hired truck.',
+      );
+    }
 
     final profile = await getProfile();
     final now = DateTime.now().toUtc().toIso8601String();
@@ -2632,9 +2820,9 @@ class EerlLocalDataSource {
           };
     final body = <String, Object?>{
       'destinationFacilityId': normalizedDestinationId,
-      'vehicleArrivalTime': arrival,
+      'vehicleArrivalTime': ?arrival,
       'vehicle': vehicleBody,
-      'note': normalizedNote?.isEmpty == true ? null : normalizedNote,
+      if (normalizedNote?.isNotEmpty == true) 'note': normalizedNote,
     };
 
     await _database.runInTransaction((txn) async {
@@ -2694,9 +2882,9 @@ class EerlLocalDataSource {
         'Rejection reason must be between 3 and 1000 characters.',
       );
     }
-    if ((normalizedRemarks?.length ?? 0) > 150) {
+    if ((normalizedRemarks?.length ?? 0) > 1000) {
       throw const TransferDecisionValidationException(
-        'Rejection remarks must be 150 characters or fewer.',
+        'Rejection remarks must be 1000 characters or fewer.',
       );
     }
     final profile = await getProfile();
@@ -2729,8 +2917,9 @@ class EerlLocalDataSource {
         kind: 'reject',
         body: {
           'reason': normalizedReason,
-          if (normalizedRemarks?.isNotEmpty == true)
-            'remarks': normalizedRemarks,
+          'remarks': normalizedRemarks?.isEmpty == true
+              ? null
+              : normalizedRemarks,
         },
         createdAt: now,
       );

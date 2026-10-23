@@ -6730,6 +6730,12 @@ abstract class AppLocalizations {
   /// **'Expense request rejected successfully'**
   String get supervisorCategoryRejectedBannerMessage;
 
+  /// No description provided for @supervisorCategoryRejectScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject Category Request'**
+  String get supervisorCategoryRejectScreenTitle;
+
   /// No description provided for @supervisorCategoryRejectReason.
   ///
   /// In en, this message translates to:
@@ -7360,6 +7366,12 @@ abstract class AppLocalizations {
   /// **'Search Here...'**
   String get supervisorMrfSearch;
 
+  /// No description provided for @supervisorMrfEmptyTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'No Team Members Registered'**
+  String get supervisorMrfEmptyTeam;
+
   /// No description provided for @supervisorMrfAddNewPerson.
   ///
   /// In en, this message translates to:
@@ -7429,7 +7441,7 @@ abstract class AppLocalizations {
   /// No description provided for @supervisorMrfLaborAssigned.
   ///
   /// In en, this message translates to:
-  /// **'{count} Labors assigned'**
+  /// **'{count, plural, =1 {1 Labour assigned} other {{count} Labours assigned}}'**
   String supervisorMrfLaborAssigned(int count);
 
   /// No description provided for @supervisorMrfFullNamePlain.

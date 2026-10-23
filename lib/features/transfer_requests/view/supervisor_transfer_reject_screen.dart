@@ -6,6 +6,8 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 
 typedef TransferRejection = ({List<String> reasons, String? remarks});
+typedef TransferRejectConfirmHandler =
+    Future<void> Function(TransferRejection rejection);
 
 class SupervisorTransferRejectScreen extends StatefulWidget {
   const SupervisorTransferRejectScreen({
@@ -15,7 +17,7 @@ class SupervisorTransferRejectScreen extends StatefulWidget {
   });
 
   final VoidCallback onBack;
-  final ValueChanged<TransferRejection> onConfirm;
+  final TransferRejectConfirmHandler onConfirm;
 
   @override
   State<SupervisorTransferRejectScreen> createState() =>
@@ -33,6 +35,7 @@ class _SupervisorTransferRejectScreenState
 
   final Set<int> _selected = <int>{};
   final TextEditingController _remarksController = TextEditingController();
+  bool _submitting = false;
 
   @override
   void dispose() {
@@ -40,13 +43,18 @@ class _SupervisorTransferRejectScreenState
     super.dispose();
   }
 
-  void _confirm() {
+  Future<void> _confirm() async {
     final indexes = _selected.toList()..sort();
     final remarks = _remarksController.text.trim();
-    widget.onConfirm((
-      reasons: [for (final index in indexes) _reasons[index]],
-      remarks: remarks.isEmpty ? null : remarks,
-    ));
+    setState(() => _submitting = true);
+    try {
+      await widget.onConfirm((
+        reasons: [for (final index in indexes) _reasons[index]],
+        remarks: remarks.isEmpty ? null : remarks,
+      ));
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   @override
@@ -67,7 +75,7 @@ class _SupervisorTransferRejectScreenState
           height: 52,
           child: ElevatedButton(
             key: const Key('supervisor-transfer-confirm-rejection'),
-            onPressed: _selected.isEmpty ? null : _confirm,
+            onPressed: _selected.isEmpty || _submitting ? null : _confirm,
             style: ElevatedButton.styleFrom(
               elevation: 0,
               disabledBackgroundColor: AppColors.red200,
@@ -77,10 +85,16 @@ class _SupervisorTransferRejectScreenState
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text(
-              'Confirm Rejection',
-              style: AppTextStyles.boldH7_16,
-            ),
+            child: _submitting
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text(
+                    'Confirm Rejection',
+                    style: AppTextStyles.boldH7_16,
+                  ),
           ),
         ),
       ),
@@ -134,12 +148,12 @@ class _SupervisorTransferRejectScreenState
                 controller: _remarksController,
                 minLines: 5,
                 maxLines: 5,
-                maxLength: 150,
+                maxLength: 1000,
                 style: AppTextStyles.regularB7_14.copyWith(
                   color: AppColors.neutral950,
                 ),
                 decoration: InputDecoration(
-                  counterText: 'Max 150 Characters',
+                  counterText: 'Max 1000 Characters',
                   counterStyle: AppTextStyles.regularB8_12.copyWith(
                     color: AppColors.neutral400,
                   ),

@@ -1,4 +1,8 @@
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/core/utils/uuid_generator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -9,13 +13,23 @@ import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import '../model/supervisor_mrf_people_view.dart';
 import '../widgets/supervisor_mrf_people_assets.dart';
 
+typedef SupervisorMrfTeamData = ({
+  List<CenterModel> centers,
+  List<MrfPersonModel> active,
+  List<MrfPersonModel> inactive,
+});
+
 class SupervisorMrfPeopleScreen extends StatefulWidget {
   const SupervisorMrfPeopleScreen({
     super.key,
     this.initialView = SupervisorMrfPeopleView.list,
+    this.repository,
+    this.teamLoader,
   });
 
   final SupervisorMrfPeopleView initialView;
+  final EerlLocalRepository? repository;
+  final Future<SupervisorMrfTeamData> Function()? teamLoader;
 
   @override
   State<SupervisorMrfPeopleScreen> createState() =>
@@ -23,6 +37,8 @@ class SupervisorMrfPeopleScreen extends StatefulWidget {
 }
 
 class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
+  EerlLocalRepository get _repository =>
+      widget.repository ?? EerlLocalRepository.instance;
   late SupervisorMrfPeopleView _view = widget.initialView;
   final _searchController = TextEditingController();
   final _nameController = TextEditingController();
@@ -30,6 +46,13 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
   final List<_LaborControllers> _labors = [];
   int _selectedCenter = -1;
   bool _centersOpen = false;
+  List<MrfPersonModel> _activePeople = const [];
+  List<MrfPersonModel> _inactivePeople = const [];
+  MrfPersonModel? _selectedPerson;
+  List<CenterModel> _centers = const [];
+  bool _loading = true;
+  bool _isSaving = false;
+  String? _loadError;
 
   bool get _isForm => switch (_view) {
     SupervisorMrfPeopleView.addEmpty ||
@@ -37,16 +60,6 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
     SupervisorMrfPeopleView.addFilled => true,
     _ => false,
   };
-
-  bool get _canSave =>
-      _nameController.text.trim().isNotEmpty &&
-      _phoneController.text.trim().isNotEmpty &&
-      _selectedCenter >= 0 &&
-      _labors.every(
-        (labor) =>
-            labor.name.text.trim().isNotEmpty &&
-            labor.phone.text.trim().isNotEmpty,
-      );
 
   @override
   void initState() {
@@ -57,6 +70,56 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
       _prefillForm();
       _centersOpen = true;
     }
+    _loadPeople();
+  }
+
+  Future<void> _loadPeople() async {
+    if (mounted) {
+      setState(() {
+        _loading = true;
+        _loadError = null;
+      });
+    }
+    try {
+      final customLoader = widget.teamLoader;
+      if (customLoader != null) {
+        final team = await customLoader();
+        if (!mounted) return;
+        _applyLoadedTeam(team);
+        return;
+      }
+      final values = await Future.wait<Object?>([
+        _repository.getAllCenters(),
+        _repository.getMrfPeople(isActive: true, allCenters: true),
+        _repository.getMrfPeople(isActive: false, allCenters: true),
+      ]);
+      if (!mounted) return;
+      final active = values[1]! as List<MrfPersonModel>;
+      final inactive = values[2]! as List<MrfPersonModel>;
+      _applyLoadedTeam((
+        centers: values[0]! as List<CenterModel>,
+        active: active,
+        inactive: inactive,
+      ));
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loadError = error.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  void _applyLoadedTeam(SupervisorMrfTeamData team) {
+    setState(() {
+      _centers = team.centers;
+      _activePeople = team.active;
+      _inactivePeople = team.inactive;
+      if (_view == SupervisorMrfPeopleView.details && _selectedPerson == null) {
+        _selectedPerson = team.active.isEmpty ? null : team.active.first;
+      }
+      _loading = false;
+    });
   }
 
   @override
@@ -70,8 +133,14 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
     super.dispose();
   }
 
-  void _addLabor({String name = '', String phone = ''}) {
-    _labors.add(_LaborControllers(name: name, phone: phone));
+  void _addLabor({
+    String name = '',
+    String phone = '',
+    MrfPersonModel? existing,
+  }) {
+    _labors.add(
+      _LaborControllers(name: name, phone: phone, existing: existing),
+    );
     if (mounted) setState(() {});
   }
 
@@ -101,23 +170,195 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
     });
   }
 
+  void _openEditForm() {
+    final person = _selectedPerson!;
+    final team = person.isActive ? _activePeople : _inactivePeople;
+    _nameController.text = person.name;
+    _phoneController.text = person.phone ?? '';
+    for (final labor in _labors) {
+      labor.dispose();
+    }
+    _labors.clear();
+    for (final labor in team.where(
+      (member) => member.centerId == person.centerId && !_isSupervisor(member),
+    )) {
+      _labors.add(
+        _LaborControllers(
+          name: labor.name,
+          phone: labor.phone ?? '',
+          existing: labor,
+        ),
+      );
+    }
+    setState(() {
+      _selectedCenter = _centers.indexWhere(
+        (center) => center.id == person.centerId,
+      );
+      _centersOpen = false;
+      _view = SupervisorMrfPeopleView.addFilled;
+    });
+  }
+
+  Future<void> _saveForm() async {
+    final error = _formValidationError();
+    if (error != null) {
+      await _showError(error);
+      return;
+    }
+    final existingSupervisor = _selectedPerson;
+    final selectedCenter = existingSupervisor == null
+        ? _centers[_selectedCenter]
+        : _centers.firstWhere(
+            (center) => center.id == existingSupervisor.centerId,
+          );
+    final originalTeam = existingSupervisor == null
+        ? const <MrfPersonModel>[]
+        : (existingSupervisor.isActive ? _activePeople : _inactivePeople)
+              .where((person) => person.centerId == existingSupervisor.centerId)
+              .toList(growable: false);
+    final supervisor = MrfPersonModel(
+      id: existingSupervisor?.id ?? UuidGenerator.v4(),
+      number: existingSupervisor?.number,
+      centerId: selectedCenter.id,
+      name: _nameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      idNumber: existingSupervisor?.idNumber,
+      photoUrl: existingSupervisor?.photoUrl,
+      isActive: true,
+      role: 'SUPERVISOR',
+      syncState: 'pending',
+    );
+
+    setState(() => _isSaving = true);
+    try {
+      await _repository.saveMrfPerson(
+        supervisor,
+        isNew: existingSupervisor == null,
+      );
+      final retainedLaborIds = <String>{};
+      for (final labor in _labors) {
+        final existing = labor.existing;
+        final id = existing?.id ?? UuidGenerator.v4();
+        retainedLaborIds.add(id);
+        await _repository.saveMrfPerson(
+          MrfPersonModel(
+            id: id,
+            number: existing?.number,
+            centerId: selectedCenter.id,
+            name: labor.name.text.trim(),
+            phone: labor.phone.text.trim(),
+            idNumber: existing?.idNumber,
+            photoUrl: existing?.photoUrl,
+            isActive: true,
+            role: 'LABOUR',
+            syncState: 'pending',
+          ),
+          isNew: existing == null,
+        );
+      }
+      for (final removed in originalTeam.where(
+        (person) =>
+            !_isSupervisor(person) && !retainedLaborIds.contains(person.id),
+      )) {
+        await _repository.setMrfPersonActive(removed, false);
+      }
+      await OutgoingSyncService.instance.drain();
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+        _selectedPerson = null;
+        _view = SupervisorMrfPeopleView.added;
+      });
+      await _loadPeople();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      await _showError(_readableError(error));
+    }
+  }
+
+  String? _formValidationError() {
+    if (_nameController.text.trim().isEmpty) return 'Full name is required.';
+    if (!_isValidPhone(_phoneController.text)) {
+      return 'Enter a valid 10-digit supervisor mobile number.';
+    }
+    if (_selectedPerson == null &&
+        (_selectedCenter < 0 || _selectedCenter >= _centers.length)) {
+      return 'Select a center.';
+    }
+    for (var index = 0; index < _labors.length; index++) {
+      final labor = _labors[index];
+      if (labor.name.text.trim().isEmpty) {
+        return 'Labor ${index + 1} full name is required.';
+      }
+      if (!_isValidPhone(labor.phone.text)) {
+        return 'Enter a valid 10-digit mobile number for Labor ${index + 1}.';
+      }
+    }
+    return null;
+  }
+
+  bool _isValidPhone(String value) {
+    final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+    return digits.length == 10 ||
+        (digits.length == 12 && digits.startsWith('91'));
+  }
+
+  String _readableError(Object error) {
+    if (error is ArgumentError) return error.message?.toString() ?? '$error';
+    return error.toString().replaceFirst('Bad state: ', '');
+  }
+
+  Future<void> _showError(String message) => showDialog<void>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      key: const Key('supervisor-mrf-error-dialog'),
+      title: Text(context.l10n.error),
+      content: Text(message),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.of(dialogContext).pop(),
+          child: Text(context.l10n.confirm),
+        ),
+      ],
+    ),
+  );
+
   @override
   Widget build(BuildContext context) => PopScope(
-    canPop: !_isForm && _view != SupervisorMrfPeopleView.details,
+    canPop: !_isForm && _selectedPerson == null,
     onPopInvokedWithResult: (didPop, _) {
-      if (!didPop) setState(() => _view = SupervisorMrfPeopleView.list);
+      if (!didPop) {
+        setState(() {
+          _selectedPerson = null;
+          _view = SupervisorMrfPeopleView.list;
+        });
+      }
     },
     child: _isForm
         ? _buildForm(context)
-        : _view == SupervisorMrfPeopleView.details
+        : _selectedPerson != null
         ? _buildDetails(context)
         : _buildList(context),
   );
 
   Widget _buildList(BuildContext context) {
     final query = _searchController.text.trim().toLowerCase();
-    final items = _listItems(context)
-        .where((item) => item.name.toLowerCase().contains(query))
+    final allTeams = _teamsFor(_activePeople);
+    final teams = allTeams
+        .where((team) {
+          if (query.isEmpty) return true;
+          final centerName = _centerName(
+            team.supervisor.centerId,
+          ).toLowerCase();
+          return centerName.contains(query) ||
+              team.members.any(
+                (item) =>
+                    item.name.toLowerCase().contains(query) ||
+                    (item.phone ?? '').toLowerCase().contains(query) ||
+                    (item.number ?? '').toLowerCase().contains(query),
+              );
+        })
         .toList(growable: false);
     final banner = _view == SupervisorMrfPeopleView.removed
         ? _MrfBannerData(
@@ -151,60 +392,89 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
             child: Column(
               children: [
                 Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                    children: [
-                      if (banner != null)
-                        AppMessageBanner(
-                          key: const Key('supervisor-mrf-banner'),
-                          title: banner.title,
-                          subtitle: banner.subtitle,
-                          color: banner.color,
-                          backgroundColor: banner.backgroundColor,
-                          borderColor: AppColors.cool300,
-                          iconBackgroundColor: banner.color,
-                          iconPadding: const EdgeInsets.all(5),
-                          icon: banner.icon,
-                          padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
-                          onClose: () => setState(
-                            () => _view = SupervisorMrfPeopleView.list,
-                          ),
-                        )
-                      else
-                        Row(
-                          children: [
-                            _BackButton(
-                              onTap: () => Navigator.of(context).maybePop(),
+                  child: RefreshIndicator(
+                    onRefresh: _loadPeople,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                      children: [
+                        if (banner != null)
+                          AppMessageBanner(
+                            key: const Key('supervisor-mrf-banner'),
+                            title: banner.title,
+                            subtitle: banner.subtitle,
+                            color: banner.color,
+                            backgroundColor: banner.backgroundColor,
+                            borderColor: AppColors.cool300,
+                            iconBackgroundColor: banner.color,
+                            iconPadding: const EdgeInsets.all(5),
+                            icon: banner.icon,
+                            padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
+                            onClose: () => setState(
+                              () => _view = SupervisorMrfPeopleView.list,
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Text(
-                                context.l10n.supervisorMrfTitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTextStyles.semiboldH6_20,
+                          )
+                        else
+                          Row(
+                            children: [
+                              _BackButton(
+                                onTap: () => Navigator.of(context).maybePop(),
                               ),
-                            ),
-                          ],
-                        ),
-                      const SizedBox(height: 24),
-                      _SearchField(
-                        controller: _searchController,
-                        hint: context.l10n.supervisorMrfSearch,
-                        onChanged: (_) => setState(() {}),
-                      ),
-                      const SizedBox(height: 24),
-                      for (var index = 0; index < items.length; index++) ...[
-                        _PersonCard(
-                          item: items[index],
-                          onTap: () => setState(
-                            () => _view = SupervisorMrfPeopleView.details,
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  context.l10n.supervisorMrfTitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.semiboldH6_20,
+                                ),
+                              ),
+                            ],
                           ),
+                        const SizedBox(height: 24),
+                        _SearchField(
+                          controller: _searchController,
+                          hint: context.l10n.supervisorMrfSearch,
+                          onChanged: (_) => setState(() {}),
                         ),
-                        if (index != items.length - 1)
-                          const SizedBox(height: 12),
+                        const SizedBox(height: 24),
+                        if (_loading)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 64),
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        else if (_loadError != null)
+                          _MrfLoadError(onRetry: _loadPeople)
+                        else if (allTeams.isEmpty)
+                          const _MrfTeamEmptyState()
+                        else if (teams.isEmpty)
+                          _MrfEmptyState(message: context.l10n.personNotFound)
+                        else
+                          for (
+                            var index = 0;
+                            index < teams.length;
+                            index++
+                          ) ...[
+                            _PersonCard(
+                              item: _MrfPersonItem(
+                                person: teams[index].supervisor,
+                                center: _centerName(
+                                  teams[index].supervisor.centerId,
+                                ),
+                                labor: context.l10n.supervisorMrfLaborAssigned(
+                                  teams[index].labors.length,
+                                ),
+                              ),
+                              onTap: () => setState(() {
+                                _selectedPerson = teams[index].supervisor;
+                                _view = SupervisorMrfPeopleView.details;
+                              }),
+                            ),
+                            if (index != teams.length - 1)
+                              const SizedBox(height: 12),
+                          ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
                 _FullWidthAction(
@@ -219,54 +489,15 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
     );
   }
 
-  List<_MrfPersonItem> _listItems(BuildContext context) {
-    if (_view == SupervisorMrfPeopleView.added ||
-        _view == SupervisorMrfPeopleView.removed) {
-      return [
-        _MrfPersonItem(
-          context.l10n.supervisorMrfPersonManohar,
-          context.l10n.supervisorMrfLocationKargil,
-        ),
-        _MrfPersonItem(
-          context.l10n.supervisorMrfPersonRamesh,
-          context.l10n.supervisorMrfLocationMagdalla,
-        ),
-        _MrfPersonItem(
-          context.l10n.supervisorMrfPersonRamesh,
-          context.l10n.supervisorMrfLocationSilver,
-        ),
-        _MrfPersonItem(
-          context.l10n.supervisorMrfPersonSureshSharma,
-          context.l10n.supervisorMrfLocationSardar,
-        ),
-      ];
-    }
-    return [
-      _MrfPersonItem(
-        context.l10n.supervisorMrfPersonChunilal,
-        context.l10n.supervisorMrfCenterSurat,
-        labor: context.l10n.supervisorMrfLaborAssigned(2),
-      ),
-      _MrfPersonItem(
-        context.l10n.supervisorMrfPersonRamesh,
-        context.l10n.supervisorMrfCenterSuratEast,
-        labor: context.l10n.supervisorMrfLaborAssigned(3),
-      ),
-      _MrfPersonItem(
-        context.l10n.supervisorMrfPersonSuresh,
-        context.l10n.supervisorMrfCenterSuratWest,
-        labor: context.l10n.supervisorMrfLaborAssigned(1),
-      ),
-    ];
-  }
-
   Widget _buildForm(BuildContext context) {
-    final centers = [
-      context.l10n.supervisorMrfCenterSurat,
-      context.l10n.supervisorMrfCenterSuratEast,
-      context.l10n.supervisorMrfCenterSuratWest,
-      context.l10n.supervisorMrfCenterSuratSouth,
-    ];
+    final centers = _centers.isEmpty
+        ? [
+            context.l10n.supervisorMrfCenterSurat,
+            context.l10n.supervisorMrfCenterSuratEast,
+            context.l10n.supervisorMrfCenterSuratWest,
+            context.l10n.supervisorMrfCenterSuratSouth,
+          ]
+        : _centers.map((center) => center.name).toList(growable: false);
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
@@ -283,9 +514,10 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: _BackButton(
-                          onTap: () => setState(
-                            () => _view = SupervisorMrfPeopleView.list,
-                          ),
+                          onTap: () => setState(() {
+                            _selectedPerson = null;
+                            _view = SupervisorMrfPeopleView.list;
+                          }),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -361,11 +593,12 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
                 _FormActions(
                   cancelLabel: context.l10n.cancel,
                   saveLabel: context.l10n.supervisorMrfSave,
-                  canSave: _canSave,
-                  onCancel: () =>
-                      setState(() => _view = SupervisorMrfPeopleView.list),
-                  onSave: () =>
-                      setState(() => _view = SupervisorMrfPeopleView.added),
+                  canSave: !_isSaving,
+                  onCancel: () => setState(() {
+                    _selectedPerson = null;
+                    _view = SupervisorMrfPeopleView.list;
+                  }),
+                  onSave: _saveForm,
                 ),
               ],
             ),
@@ -375,78 +608,88 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
     );
   }
 
-  Widget _buildDetails(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.backgroundColor,
-    body: SafeArea(
-      bottom: false,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: _BackButton(
-                        onTap: () => setState(
-                          () => _view = SupervisorMrfPeopleView.list,
+  Widget _buildDetails(BuildContext context) {
+    final person = _selectedPerson!;
+    final team = person.isActive ? _activePeople : _inactivePeople;
+    final labors = team
+        .where(
+          (member) =>
+              member.centerId == person.centerId && !_isSupervisor(member),
+        )
+        .toList(growable: false);
+    final registration = person.number?.trim().isNotEmpty == true
+        ? person.number!
+        : person.id;
+    return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
+      body: SafeArea(
+        bottom: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 640),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: _BackButton(
+                          onTap: () => setState(() {
+                            _selectedPerson = null;
+                            _view = SupervisorMrfPeopleView.list;
+                          }),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    _RegistrationCard(
-                      id: context.l10n.supervisorMrfRegistrationId,
-                    ),
-                    const SizedBox(height: 16),
-                    _DetailsCard(
-                      rows: [
-                        (
-                          context.l10n.supervisorMrfFullNamePlain,
-                          context.l10n.supervisorMrfPersonChunilal,
-                        ),
-                        (
-                          context.l10n.supervisorMrfMobileNumberPlain,
-                          '1234567890',
-                        ),
-                        (
-                          context.l10n.supervisorMrfAssignedCenter,
-                          context.l10n.supervisorMrfCenterSurat,
+                      const SizedBox(height: 24),
+                      _RegistrationCard(id: '#$registration'),
+                      const SizedBox(height: 16),
+                      _DetailsCard(
+                        rows: [
+                          (
+                            context.l10n.supervisorMrfFullNamePlain,
+                            person.name,
+                          ),
+                          (
+                            context.l10n.supervisorMrfMobileNumberPlain,
+                            _valueOrDash(person.phone),
+                          ),
+                          (
+                            context.l10n.supervisorMrfAssignedCenter,
+                            _centerName(person.centerId),
+                          ),
+                        ],
+                      ),
+                      for (var index = 0; index < labors.length; index++) ...[
+                        const SizedBox(height: 16),
+                        _LaborDetailsCard(
+                          title: context.l10n.supervisorMrfLaborNumber(
+                            index + 1,
+                          ),
+                          nameLabel: context.l10n.supervisorMrfFullNamePlain,
+                          name: labors[index].name,
+                          phoneLabel:
+                              context.l10n.supervisorMrfMobileNumberPlain,
+                          phone: _valueOrDash(labors[index].phone),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 16),
-                    _LaborDetailsCard(
-                      title: context.l10n.supervisorMrfLaborNumber(1),
-                      nameLabel: context.l10n.supervisorMrfFullNamePlain,
-                      name: context.l10n.supervisorMrfLaborHaresh,
-                      phoneLabel: context.l10n.supervisorMrfMobileNumberPlain,
-                      phone: '0987654321',
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              _DetailActions(
-                removeLabel: context.l10n.supervisorMrfRemovePerson,
-                editLabel: context.l10n.edit,
-                onRemove: () => _showRemoveDialog(context),
-                onEdit: () {
-                  for (final labor in _labors) {
-                    labor.dispose();
-                  }
-                  _labors.clear();
-                  _prefillForm();
-                  setState(() => _view = SupervisorMrfPeopleView.addFilled);
-                },
-              ),
-            ],
+                _DetailActions(
+                  removeLabel: context.l10n.supervisorMrfRemovePerson,
+                  editLabel: context.l10n.edit,
+                  onRemove: () => _showRemoveDialog(context),
+                  onEdit: _openEditForm,
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
   Future<void> _showRemoveDialog(BuildContext context) async {
     final remove = await showDialog<bool>(
@@ -460,16 +703,86 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
       ),
     );
     if (remove == true && mounted) {
-      setState(() => _view = SupervisorMrfPeopleView.removed);
+      final person = _selectedPerson!;
+      setState(() => _isSaving = true);
+      try {
+        await _repository.setMrfPersonActive(person, false);
+        await OutgoingSyncService.instance.drain();
+        if (!mounted) return;
+        setState(() {
+          _isSaving = false;
+          _selectedPerson = null;
+          _view = SupervisorMrfPeopleView.removed;
+        });
+        await _loadPeople();
+      } catch (error) {
+        if (!mounted) return;
+        setState(() => _isSaving = false);
+        await _showError(_readableError(error));
+      }
     }
+  }
+
+  String _valueOrDash(String? value) {
+    final normalized = value?.trim() ?? '';
+    return normalized.isEmpty ? '-' : normalized;
+  }
+
+  bool _isSupervisor(MrfPersonModel person) =>
+      person.role.trim().toUpperCase() == 'SUPERVISOR';
+
+  MrfPersonModel? _supervisorIn(List<MrfPersonModel> people) {
+    for (final person in people) {
+      if (_isSupervisor(person)) return person;
+    }
+    return null;
+  }
+
+  String _centerName(String centerId) {
+    for (final center in _centers) {
+      if (center.id == centerId) return center.name;
+    }
+    return centerId;
+  }
+
+  List<_MrfTeam> _teamsFor(List<MrfPersonModel> people) {
+    final byCenter = <String, List<MrfPersonModel>>{};
+    for (final person in people) {
+      byCenter.putIfAbsent(person.centerId, () => []).add(person);
+    }
+    final teams = <_MrfTeam>[];
+    for (final members in byCenter.values) {
+      final supervisor = _supervisorIn(members);
+      if (supervisor != null) {
+        teams.add(_MrfTeam(supervisor: supervisor, members: members));
+      }
+    }
+    teams.sort(
+      (left, right) => _centerName(left.supervisor.centerId)
+          .toLowerCase()
+          .compareTo(_centerName(right.supervisor.centerId).toLowerCase()),
+    );
+    return teams;
   }
 }
 
+class _MrfTeam {
+  const _MrfTeam({required this.supervisor, required this.members});
+
+  final MrfPersonModel supervisor;
+  final List<MrfPersonModel> members;
+
+  List<MrfPersonModel> get labors => members
+      .where((person) => person.role.trim().toUpperCase() != 'SUPERVISOR')
+      .toList(growable: false);
+}
+
 class _LaborControllers {
-  _LaborControllers({String name = '', String phone = ''})
+  _LaborControllers({String name = '', String phone = '', this.existing})
     : name = TextEditingController(text: name),
       phone = TextEditingController(text: phone);
 
+  final MrfPersonModel? existing;
   final TextEditingController name;
   final TextEditingController phone;
 
@@ -480,11 +793,17 @@ class _LaborControllers {
 }
 
 class _MrfPersonItem {
-  const _MrfPersonItem(this.name, this.center, {this.labor});
+  const _MrfPersonItem({
+    required this.person,
+    required this.center,
+    required this.labor,
+  });
 
-  final String name;
+  final MrfPersonModel person;
   final String center;
-  final String? labor;
+  final String labor;
+
+  String get name => person.name;
 }
 
 class _MrfBannerData {
@@ -575,6 +894,72 @@ class _SearchField extends StatelessWidget {
   );
 }
 
+class _MrfEmptyState extends StatelessWidget {
+  const _MrfEmptyState({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 64),
+    child: Center(
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.cool600),
+      ),
+    ),
+  );
+}
+
+class _MrfTeamEmptyState extends StatelessWidget {
+  const _MrfTeamEmptyState();
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 140),
+    child: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            SupervisorMrfPeopleAssets.emptyTeam,
+            key: const Key('supervisor-mrf-empty-illustration'),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            context.l10n.supervisorMrfEmptyTeam,
+            key: const Key('supervisor-mrf-empty-label'),
+            textAlign: TextAlign.center,
+            style: AppTextStyles.semiboldH8_16.copyWith(
+              color: AppColors.neutral400,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _MrfLoadError extends StatelessWidget {
+  const _MrfLoadError({required this.onRetry});
+
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 48),
+    child: Center(
+      child: IconButton(
+        key: const Key('supervisor-mrf-retry'),
+        onPressed: onRetry,
+        tooltip: 'Retry',
+        icon: const Icon(Icons.refresh, color: AppColors.primary500),
+      ),
+    ),
+  );
+}
+
 class _PersonCard extends StatelessWidget {
   const _PersonCard({required this.item, required this.onTap});
 
@@ -591,11 +976,17 @@ class _PersonCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: Container(
         width: double.infinity,
-        constraints: BoxConstraints(minHeight: item.labor == null ? 88 : 120),
+        constraints: const BoxConstraints(minHeight: 120),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [HomeStyles.cardShadow],
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x1F000000),
+              blurRadius: 2.5,
+              offset: Offset(0, 2),
+            ),
+          ],
           color: Colors.white,
         ),
         child: Stack(
@@ -603,17 +994,21 @@ class _PersonCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.name, style: AppTextStyles.semiboldH7_18),
+                Text(
+                  item.name,
+                  style: AppTextStyles.semiboldH7_18.copyWith(
+                    color: AppColors.neutral950,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 _IconText(
                   icon: SupervisorMrfPeopleAssets.location,
                   text: item.center,
                 ),
-                if (item.labor != null)
-                  _IconText(
-                    icon: SupervisorMrfPeopleAssets.labor,
-                    text: item.labor!,
-                  ),
+                _IconText(
+                  icon: SupervisorMrfPeopleAssets.labor,
+                  text: item.labor,
+                ),
               ],
             ),
             Positioned(
@@ -653,7 +1048,7 @@ class _IconText extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppTextStyles.regularB7_14.copyWith(
-            color: AppColors.neutral700,
+            color: AppColors.neutral950,
           ),
         ),
       ),
@@ -1075,7 +1470,14 @@ class _RegistrationCard extends StatelessWidget {
           child: SvgPicture.asset(SupervisorMrfPeopleAssets.profile),
         ),
         const SizedBox(width: 10),
-        Text(id, style: AppTextStyles.semiboldH8_16),
+        Expanded(
+          child: Text(
+            id,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.semiboldH8_16,
+          ),
+        ),
       ],
     ),
   );
@@ -1196,7 +1598,7 @@ class _DetailActions extends StatelessWidget {
             child: ElevatedButton(
               key: const Key('supervisor-mrf-remove-person'),
               onPressed: onRemove,
-              style: _buttonStyle(AppColors.red500, Colors.white),
+              style: _buttonStyle(Colors.white, AppColors.red500),
               child: Text(removeLabel),
             ),
           ),
@@ -1289,8 +1691,12 @@ ButtonStyle _buttonStyle(Color background, Color foreground) =>
     ElevatedButton.styleFrom(
       backgroundColor: background,
       foregroundColor: foreground,
+      padding: EdgeInsetsGeometry.symmetric(vertical: 10, horizontal: 10),
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: foreground),
+      ),
       textStyle: AppTextStyles.boldH7_16,
     );
 

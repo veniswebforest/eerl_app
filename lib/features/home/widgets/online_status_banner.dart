@@ -61,7 +61,7 @@ class OnlineStatusBanner extends StatelessWidget {
                   Text(
                     subtitle ??
                         (pendingCount > 0
-                            ? context.l10n.pendingCollections(pendingCount)
+                            ? context.l10n.syncPendingItems(pendingCount)
                             : context.l10n.syncAlreadySyncedTitle),
                     style: AppTextStyles.mediumSH8_14.copyWith(
                       color: AppColors.neutral600,

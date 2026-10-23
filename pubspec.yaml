@@ -82,6 +82,7 @@ flutter:
     - assets/images/ragpicker_directory/
     - assets/images/tasks/
     - assets/images/supervisor_requests/
+    - assets/images/mrf_people/
     - assets/lottie/
 
   fonts:

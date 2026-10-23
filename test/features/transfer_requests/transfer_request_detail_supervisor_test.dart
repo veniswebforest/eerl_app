@@ -64,6 +64,10 @@ void main() {
     expect(find.text('Insufficient Yard Capacity'), findsOneWidget);
     expect(find.text('Incorrect Material'), findsOneWidget);
     expect(find.text('Other'), findsOneWidget);
+    final remarksField = tester.widget<TextField>(
+      find.byKey(const Key('supervisor-transfer-reject-remarks')),
+    );
+    expect(remarksField.maxLength, 1000);
 
     await tester.tap(
       find.byKey(const ValueKey('supervisor-transfer-reject-reason-0')),

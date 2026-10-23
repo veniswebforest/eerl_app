@@ -3492,6 +3492,9 @@ class AppLocalizationsGu extends AppLocalizations {
       'ખર્ચ વિનંતી સફળતાપૂર્વક નકારાઈ';
 
   @override
+  String get supervisorCategoryRejectScreenTitle => 'કેટેગરી વિનંતી નકારો';
+
+  @override
   String get supervisorCategoryRejectReason => 'અમાન્ય / અસ્પષ્ટ વિનંતી હેતુ';
 
   @override
@@ -3825,6 +3828,9 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get supervisorMrfSearch => 'અહીં શોધો...';
+
+  @override
+  String get supervisorMrfEmptyTeam => 'કોઈ ટીમ સભ્ય નોંધાયેલ નથી';
 
   @override
   String get supervisorMrfAddNewPerson => 'નવી વ્યક્તિ ઉમેરો';

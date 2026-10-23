@@ -449,6 +449,9 @@ class BootstrapDatabaseApplier {
     for (final table in _referenceWithoutSyncState) {
       final change = tables[table];
       if (change == null || !change.hasReplace) continue;
+      if (table == DatabaseTables.transferVehicles) {
+        await _detachRetiredTransferVehicles(txn, change.replace);
+      }
       await txn.delete(table);
       final batch = txn.batch();
       for (final row in change.replace) {
@@ -477,6 +480,38 @@ class BootstrapDatabaseApplier {
       _log(
         '$table protected reference replace: ${change.replace.length} '
         'server rows; pending/failed rows preserved',
+      );
+    }
+  }
+
+  /// A transfer keeps the selected vehicle's number, ownership and
+  /// transporter as snapshot columns. The bootstrap vehicle list, however,
+  /// only contains vehicles that are currently selectable. Clear the optional
+  /// relation before replacing that list so a historical or locally failed
+  /// transfer cannot make the page fail its deferred foreign-key check.
+  Future<void> _detachRetiredTransferVehicles(
+    Transaction txn,
+    List<Map<String, Object?>> incomingVehicles,
+  ) async {
+    final incomingIds = incomingVehicles
+        .map((row) => row['id'])
+        .whereType<String>()
+        .where((id) => id.isNotEmpty)
+        .toList(growable: false);
+    final where = incomingIds.isEmpty
+        ? 'transfer_vehicle_id IS NOT NULL'
+        : 'transfer_vehicle_id IS NOT NULL AND transfer_vehicle_id NOT IN '
+              '(${List.filled(incomingIds.length, '?').join(', ')})';
+    final changed = await txn.update(
+      DatabaseTables.transfers,
+      const <String, Object?>{'transfer_vehicle_id': null},
+      where: where,
+      whereArgs: incomingIds,
+    );
+    if (changed > 0) {
+      _log(
+        'Detached $changed transfer(s) from retired transfer vehicles; '
+        'planned vehicle snapshot preserved',
       );
     }
   }
@@ -530,6 +565,25 @@ class BootstrapDatabaseApplier {
     // Old Bootstrap pages can still contain this legacy transfer field. It is
     // deliberately ignored: dispatch now has two field-specific photo lists.
     if (table == DatabaseTables.transfers) values.remove('photo_urls');
+    if (table == DatabaseTables.transfers) {
+      final transferVehicleId = values['transfer_vehicle_id'];
+      if (transferVehicleId is String && transferVehicleId.isNotEmpty) {
+        final vehicle = await txn.query(
+          DatabaseTables.transferVehicles,
+          columns: const ['id'],
+          where: 'id = ?',
+          whereArgs: [transferVehicleId],
+          limit: 1,
+        );
+        if (vehicle.isEmpty) {
+          values['transfer_vehicle_id'] = null;
+          BootstrapLog.warning(
+            'Transfer ${values['id']} references unavailable transfer vehicle '
+            '$transferVehicleId; snapshot fields were kept',
+          );
+        }
+      }
+    }
     final allowedColumns = _recordColumns[table]!;
     final unknownColumns = values.keys
         .where((column) => !allowedColumns.contains(column))

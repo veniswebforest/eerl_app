@@ -10,4 +10,5 @@ class SupervisorMrfPeopleAssets {
   static const delete = 'assets/icons/mrf_person/delete.svg';
   static const profile = 'assets/icons/ragpicker_profile.svg';
   static const removed = 'assets/icons/tasks/cancel_banner.svg';
+  static const emptyTeam = 'assets/images/mrf_people/empty_team.svg';
 }

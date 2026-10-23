@@ -3504,6 +3504,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Expense request rejected successfully';
 
   @override
+  String get supervisorCategoryRejectScreenTitle => 'Reject Category Request';
+
+  @override
   String get supervisorCategoryRejectReason =>
       'Invalid / Unclear Request Purpose';
 
@@ -3845,6 +3848,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supervisorMrfSearch => 'Search Here...';
 
   @override
+  String get supervisorMrfEmptyTeam => 'No Team Members Registered';
+
+  @override
   String get supervisorMrfAddNewPerson => 'Add New Person';
 
   @override
@@ -3882,7 +3888,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String supervisorMrfLaborAssigned(int count) {
-    return '$count Labors assigned';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Labours assigned',
+      one: '1 Labour assigned',
+    );
+    return '$_temp0';
   }
 
   @override

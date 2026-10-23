@@ -382,6 +382,7 @@ void main() {
               'status': 'REJECTED',
               'rejection': {
                 'reason': 'Dispatch was cancelled by the office.',
+                'remarks': 'The receiving plant is closed today.',
                 'by': {'name': 'Supervisor One'},
                 'at': '2026-10-16T07:00:00.000Z',
               },
@@ -408,8 +409,21 @@ void main() {
       transfer['rejection_reason'],
       'Dispatch was cancelled by the office.',
     );
+    expect(
+      transfer['rejection_remarks'],
+      'The receiving plant is closed today.',
+    );
     expect(transfer['decided_by_name'], 'Supervisor One');
     expect(transfer['approved_at'], '2026-10-16T07:00:00.000Z');
+    final notification = (await database.query(
+      DatabaseTables.notifications,
+    )).single;
+    expect(notification['title'], 'Transfer refused');
+    expect(
+      notification['body'],
+      'Dispatch was cancelled by the office.\n'
+      'Remarks: The receiving plant is closed today.',
+    );
     final line = (await database.query(DatabaseTables.transferItems)).single;
     expect(line['dispatched_qty'], isNull);
   });

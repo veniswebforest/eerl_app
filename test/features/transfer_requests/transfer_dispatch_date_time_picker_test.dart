@@ -33,4 +33,44 @@ void main() {
 
     expect(confirmed, initial);
   });
+
+  testWidgets('does not allow dates or times before the minimum', (
+    tester,
+  ) async {
+    DateTime? confirmed;
+    final minimum = DateTime(2026, 10, 23, 15, 31);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: TransferDispatchDateTimePicker(
+              initialDateTime: DateTime(2026, 10, 22, 9),
+              minimumDateTime: minimum,
+              onCancel: () {},
+              onConfirm: (value) => confirmed = value,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final previous = tester.widget<InkWell>(
+      find.descendant(
+        of: find.byKey(const Key('transfer-calendar-previous')),
+        matching: find.byType(InkWell),
+      ),
+    );
+    expect(previous.onTap, isNull);
+
+    await tester.tap(find.text('22').first);
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('transfer-calendar-confirm')));
+    await tester.pump();
+
+    expect(confirmed, DateTime(2026, 10, 23, 15, 31));
+  });
 }
