@@ -17,6 +17,8 @@ import 'package:eerl_app/features/wallet/widgets/expense_detail_cards.dart';
 import 'package:eerl_app/features/wallet/widgets/wallet_assets.dart';
 import 'package:eerl_app/features/wallet/widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 
 enum _ExpensePage {
@@ -41,12 +43,10 @@ class _SupervisorExpenseModuleScreenState
   _ExpensePage _page = _ExpensePage.list;
   ExpenseModel? _selectedExpense;
   CashRequestModel? _selectedCashRequest;
-  bool? _toastApproved;
 
   void _openDetail(ExpenseModel expense) => setState(() {
     _selectedExpense = expense;
     _page = _ExpensePage.expenseDetail;
-    _toastApproved = null;
   });
 
   Future<void> _decideExpense(
@@ -68,8 +68,21 @@ class _SupervisorExpenseModuleScreenState
   void _openCashDetail(CashRequestModel request) => setState(() {
     _selectedCashRequest = request;
     _page = _ExpensePage.cashDetail;
-    _toastApproved = null;
   });
+
+  void _showDecisionNotification(bool approved) => AppTopNotification.show(
+    context,
+    key: const Key('supervisor-expense-toast'),
+    title: approved
+        ? context.l10n.supervisorExpenseApprovedTitle
+        : context.l10n.supervisorExpenseRejectedTitle,
+    subtitle: approved
+        ? context.l10n.supervisorExpenseApprovedMessage
+        : context.l10n.supervisorExpenseRejectedMessage,
+    tone: approved
+        ? AppTopNotificationTone.success
+        : AppTopNotificationTone.error,
+  );
 
   Future<void> _decideCashRequest(
     String outcome, {
@@ -99,8 +112,6 @@ class _SupervisorExpenseModuleScreenState
         onCashTap: _openCashDetail,
         onCategoryRequests: () =>
             setState(() => _page = _ExpensePage.categoryRequests),
-        toastApproved: _toastApproved,
-        onDismissToast: () => setState(() => _toastApproved = null),
       ),
       _ExpensePage.expenseDetail => _ExpenseDetailScreen(
         expenseId: _selectedExpense!.id,
@@ -108,10 +119,8 @@ class _SupervisorExpenseModuleScreenState
         onApprove: () async {
           await _decideExpense('APPROVED');
           if (!mounted) return;
-          setState(() {
-            _toastApproved = true;
-            _page = _ExpensePage.list;
-          });
+          setState(() => _page = _ExpensePage.list);
+          _showDecisionNotification(true);
         },
         onReject: () => setState(() => _page = _ExpensePage.expenseReject),
       ),
@@ -125,10 +134,8 @@ class _SupervisorExpenseModuleScreenState
             remarks: decision.remarks,
           );
           if (!mounted) return;
-          setState(() {
-            _toastApproved = false;
-            _page = _ExpensePage.list;
-          });
+          setState(() => _page = _ExpensePage.list);
+          _showDecisionNotification(false);
         },
       ),
       _ExpensePage.cashDetail => _CashRequestDetailScreen(
@@ -137,10 +144,8 @@ class _SupervisorExpenseModuleScreenState
         onApprove: () async {
           await _decideCashRequest('APPROVED');
           if (!mounted) return;
-          setState(() {
-            _toastApproved = true;
-            _page = _ExpensePage.list;
-          });
+          setState(() => _page = _ExpensePage.list);
+          _showDecisionNotification(true);
         },
         onReject: () => setState(() => _page = _ExpensePage.cashReject),
       ),
@@ -154,10 +159,8 @@ class _SupervisorExpenseModuleScreenState
             remarks: decision.remarks,
           );
           if (!mounted) return;
-          setState(() {
-            _toastApproved = false;
-            _page = _ExpensePage.list;
-          });
+          setState(() => _page = _ExpensePage.list);
+          _showDecisionNotification(false);
         },
       ),
       _ExpensePage.categoryRequests => SupervisorCategoryRequestScreen(
@@ -180,15 +183,11 @@ class _ExpenseListScreen extends StatefulWidget {
     required this.onTap,
     required this.onCashTap,
     required this.onCategoryRequests,
-    required this.toastApproved,
-    required this.onDismissToast,
   });
 
   final ValueChanged<ExpenseModel> onTap;
   final ValueChanged<CashRequestModel> onCashTap;
   final VoidCallback onCategoryRequests;
-  final bool? toastApproved;
-  final VoidCallback onDismissToast;
 
   @override
   State<_ExpenseListScreen> createState() => _ExpenseListScreenState();
@@ -300,51 +299,25 @@ class _ExpenseListScreenState extends State<_ExpenseListScreen> {
                   32,
                 ),
                 children: [
-                  if (widget.toastApproved == null) ...[
-                    AppScreenHeader(
-                      leading: WalletBackButton(
-                        onPressed: () => Navigator.of(context).maybePop(),
-                      ),
-                      title: l.supervisorApprovalsClaims,
+                  AppScreenHeader(
+                    leading: WalletBackButton(
+                      onPressed: () => Navigator.of(context).maybePop(),
                     ),
-                    const SizedBox(height: 16),
-                    _ExpenseSegmentedControl(
-                      selectedIndex: _type,
-                      expenseLabel: l.expenseTypeExpense,
-                      cashRequestLabel: l.expenseTypeCashRequest,
-                      onSelected: (value) => setState(() => _type = value),
-                    ),
-                    const SizedBox(height: 16),
-                    _ExpenseSearchField(
-                      hint: l.supervisorExpenseSearchHint,
-                      onChanged: (value) =>
-                          setState(() => _search = value.trim().toLowerCase()),
-                    ),
-                  ] else ...[
-                    SupervisorExpenseToast(
-                      approved: widget.toastApproved!,
-                      title: widget.toastApproved!
-                          ? l.supervisorExpenseApprovedTitle
-                          : l.supervisorExpenseRejectedTitle,
-                      message: widget.toastApproved!
-                          ? l.supervisorExpenseApprovedMessage
-                          : l.supervisorExpenseRejectedMessage,
-                      onClose: widget.onDismissToast,
-                    ),
-                    const SizedBox(height: 12),
-                    _ExpenseSearchField(
-                      hint: l.supervisorExpenseSearchHint,
-                      onChanged: (value) =>
-                          setState(() => _search = value.trim().toLowerCase()),
-                    ),
-                    const SizedBox(height: 16),
-                    _ExpenseSegmentedControl(
-                      selectedIndex: _type,
-                      expenseLabel: l.expenseTypeExpense,
-                      cashRequestLabel: l.expenseTypeCashRequest,
-                      onSelected: (value) => setState(() => _type = value),
-                    ),
-                  ],
+                    title: l.supervisorApprovalsClaims,
+                  ),
+                  const SizedBox(height: 16),
+                  _ExpenseSegmentedControl(
+                    selectedIndex: _type,
+                    expenseLabel: l.expenseTypeExpense,
+                    cashRequestLabel: l.expenseTypeCashRequest,
+                    onSelected: (value) => setState(() => _type = value),
+                  ),
+                  const SizedBox(height: 16),
+                  _ExpenseSearchField(
+                    hint: l.supervisorExpenseSearchHint,
+                    onChanged: (value) =>
+                        setState(() => _search = value.trim().toLowerCase()),
+                  ),
                   const SizedBox(height: 12),
                   _ExpenseFilters(
                     labels: [l.filterAll, l.filterPending, l.filterClosed],
@@ -360,15 +333,13 @@ class _ExpenseListScreenState extends State<_ExpenseListScreen> {
                   else if (_error != null)
                     _ExpenseLoadError(onRetry: _loadData)
                   else if (_type == 0) ...[
-                    if (widget.toastApproved == null) ...[
-                      _CategoryRequestsCard(
-                        title: l.supervisorExpenseNewCategories,
-                        subtitle: l.supervisorExpenseReviewCategories,
-                        buttonLabel: l.supervisorExpenseViewRequests,
-                        onPressed: widget.onCategoryRequests,
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                    _CategoryRequestsCard(
+                      title: l.supervisorExpenseNewCategories,
+                      subtitle: l.supervisorExpenseReviewCategories,
+                      buttonLabel: l.supervisorExpenseViewRequests,
+                      onPressed: widget.onCategoryRequests,
+                    ),
+                    const SizedBox(height: 16),
                     if (shown.isEmpty) const _ExpenseEmptyState(),
                     for (final entry in shown) ...[
                       SupervisorExpenseCard(
@@ -716,9 +687,7 @@ class _ExpenseDetailScreenState extends State<_ExpenseDetailScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _submitting = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      AppSnackbar.error(context, message: error.toString());
     }
   }
 
@@ -1262,9 +1231,7 @@ class _RejectExpenseScreenState extends State<_RejectExpenseScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _submitting = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      AppSnackbar.error(context, message: error.toString());
     }
   }
 

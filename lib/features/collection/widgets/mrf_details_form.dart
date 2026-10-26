@@ -6,20 +6,21 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 class MrfDetailsForm extends StatefulWidget {
   const MrfDetailsForm({
     super.key,
     required this.people,
-    required this.selectedLabor,
+    required this.selectedLaborId,
     required this.onLaborSelected,
     this.supervisorName,
     this.supervisorPhone,
   });
 
-  final List<String> people;
-  final String? selectedLabor;
-  final ValueChanged<String> onLaborSelected;
+  final List<MrfPersonModel> people;
+  final String? selectedLaborId;
+  final ValueChanged<MrfPersonModel> onLaborSelected;
   final String? supervisorName;
   final String? supervisorPhone;
 
@@ -67,10 +68,15 @@ class _MrfDetailsFormState extends State<MrfDetailsForm> {
   }
 
   Widget _laborSelector(BuildContext context) {
+    final selectedLabor = widget.people.cast<MrfPersonModel?>().firstWhere(
+      (person) => person?.id == widget.selectedLaborId,
+      orElse: () => null,
+    );
     final people = widget.people
         .where(
-          (person) =>
-              person.toLowerCase().contains(_search.text.trim().toLowerCase()),
+          (person) => person.name.toLowerCase().contains(
+            _search.text.trim().toLowerCase(),
+          ),
         )
         .toList();
     return Column(
@@ -95,10 +101,10 @@ class _MrfDetailsFormState extends State<MrfDetailsForm> {
                 children: [
                   Expanded(
                     child: Text(
-                      widget.selectedLabor ??
+                      selectedLabor?.name ??
                           context.l10n.collectionSelectPerson,
                       style: AppTextStyles.regularB7_14.copyWith(
-                        color: widget.selectedLabor == null
+                        color: selectedLabor == null
                             ? AppColors.cool400
                             : AppColors.neutral900,
                       ),
@@ -161,12 +167,16 @@ class _MrfDetailsFormState extends State<MrfDetailsForm> {
                       itemCount: people.length,
                       itemBuilder: (context, index) {
                         final person = people[index];
-                        final selected = widget.selectedLabor == person;
+                        final selected = widget.selectedLaborId == person.id;
                         return InkWell(
-                          key: ValueKey('mrf-labor-$person'),
+                          key: ValueKey('mrf-labor-${person.id}'),
                           onTap: () {
                             FocusScope.of(context).unfocus();
                             widget.onLaborSelected(person);
+                            setState(() {
+                              _open = false;
+                              _search.clear();
+                            });
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -199,7 +209,7 @@ class _MrfDetailsFormState extends State<MrfDetailsForm> {
                                 const SizedBox(width: 10),
                                 Expanded(
                                   child: Text(
-                                    person,
+                                    person.name,
                                     style: AppTextStyles.regularB7_14,
                                   ),
                                 ),

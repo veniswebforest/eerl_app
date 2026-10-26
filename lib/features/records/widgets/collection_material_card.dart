@@ -5,6 +5,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:eerl_app/shared/widgets/app_required_text.dart';
 
 class CollectionMaterialCard extends StatelessWidget {
   const CollectionMaterialCard({
@@ -161,7 +162,7 @@ class _WeightBox extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(
+      AppRequiredText(
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

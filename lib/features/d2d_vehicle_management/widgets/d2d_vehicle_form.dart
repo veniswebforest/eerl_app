@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/vehicle_registration_number.dart';
 import 'package:eerl_app/shared/widgets/app_labeled_dropdown.dart';
 import 'package:eerl_app/shared/widgets/app_square_back_button.dart';
 
@@ -14,6 +15,7 @@ class D2dVehicleForm extends StatelessWidget {
     required this.centerOptions,
     required this.selectedCenter,
     required this.centerExpanded,
+    required this.driverNameController,
     required this.onCenterToggle,
     required this.onCenterSelected,
     required this.onBack,
@@ -26,6 +28,7 @@ class D2dVehicleForm extends StatelessWidget {
   final List<String> centerOptions;
   final int selectedCenter;
   final bool centerExpanded;
+  final TextEditingController driverNameController;
   final VoidCallback onCenterToggle;
   final ValueChanged<int> onCenterSelected;
   final VoidCallback onBack;
@@ -62,20 +65,22 @@ class D2dVehicleForm extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    AppLabeledDropdown(
-                      label: context.l10n.d2dSelectCollectionCenter,
-                      hint: context.l10n.d2dSelectCenter,
-                      options: centerOptions,
-                      selectedIndex: selectedCenter,
-                      expanded: centerExpanded,
-                      requiredField: true,
-                      selectorKey: const Key('d2d-form-center-selector'),
-                      optionsKey: const Key('d2d-form-center-options'),
-                      optionKeyPrefix: 'd2d-form-center',
-                      onToggle: onCenterToggle,
-                      onSelected: onCenterSelected,
-                    ),
-                    const SizedBox(height: 16),
+                    if (!editing) ...[
+                      AppLabeledDropdown(
+                        label: context.l10n.d2dSelectCollectionCenter,
+                        hint: context.l10n.d2dSelectCenter,
+                        options: centerOptions,
+                        selectedIndex: selectedCenter,
+                        expanded: centerExpanded,
+                        requiredField: true,
+                        selectorKey: const Key('d2d-form-center-selector'),
+                        optionsKey: const Key('d2d-form-center-options'),
+                        optionKeyPrefix: 'd2d-form-center',
+                        onToggle: onCenterToggle,
+                        onSelected: onCenterSelected,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     Text.rich(
                       TextSpan(
                         text: context.l10n.d2dVehicleNumber,
@@ -97,6 +102,10 @@ class D2dVehicleForm extends StatelessWidget {
                         key: const Key('d2d-vehicle-number-field'),
                         controller: numberController,
                         textCapitalization: TextCapitalization.characters,
+                        keyboardType: TextInputType.text,
+                        inputFormatters: const [
+                          VehicleRegistrationInputFormatter(),
+                        ],
                         style: AppTextStyles.regularB7_14.copyWith(
                           color: AppColors.neutral950,
                         ),
@@ -130,6 +139,48 @@ class D2dVehicleForm extends StatelessWidget {
                       context.l10n.d2dVehicleNumberExample,
                       style: AppTextStyles.regularB8_12.copyWith(
                         color: AppColors.neutral600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      context.l10n.d2dDriverName,
+                      style: AppTextStyles.mediumSH8_14.copyWith(
+                        color: AppColors.neutral950,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 55,
+                      child: TextField(
+                        key: const Key('d2d-driver-name-field'),
+                        controller: driverNameController,
+                        textCapitalization: TextCapitalization.words,
+                        style: AppTextStyles.regularB7_14.copyWith(
+                          color: AppColors.neutral950,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: context.l10n.d2dDriverNameHint,
+                          hintStyle: AppTextStyles.regularB7_14.copyWith(
+                            color: AppColors.neutral500,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: AppColors.cool400,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(
+                              color: AppColors.primary500,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                       ),
                     ),
                   ],

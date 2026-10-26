@@ -85,7 +85,6 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       externalIcon: HelpSupportAssets.externalBlue,
                       accentColor: AppColors.secondary500,
                       iconBackgroundColor: AppColors.secondary100,
-                      onTap: () {},
                     ),
                     const SizedBox(height: 12),
                     SupportContactCard(
@@ -96,7 +95,6 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       externalIcon: HelpSupportAssets.externalGreen,
                       accentColor: AppColors.primary500,
                       iconBackgroundColor: AppColors.primary50,
-                      onTap: () {},
                     ),
                     const SizedBox(height: 24),
                     Text(

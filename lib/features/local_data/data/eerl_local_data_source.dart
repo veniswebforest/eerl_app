@@ -7,6 +7,7 @@ import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/core/local_database/outbox_queue.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/utils/uuid_generator.dart';
+import 'package:eerl_app/core/utils/vehicle_registration_number.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
@@ -126,7 +127,9 @@ class EerlLocalDataSource {
     orderBy: 'role_name',
   )).map(MyRoleModel.fromMap).toList(growable: false);
 
-  Future<List<CenterModel>> getCenters() async {
+  Future<List<CenterModel>> getCenters() => getMyCenters();
+
+  Future<List<CenterModel>> getMyCenters() async {
     final rows = await _database.rawQuery('''
       SELECT c.*, mc.is_primary
       FROM ${DatabaseTables.myCenters} mc
@@ -192,9 +195,9 @@ class EerlLocalDataSource {
     final centerId = await activeCenterId;
     if (userId == null || centerId == null) {
       return const AgentHomeSummaryModel(
-        collections: 0,
-        kg: 0,
-        tasks: 0,
+        verifiedEntries: 0,
+        collectedKg: 0,
+        transferRequests: 0,
         drafts: 0,
         toFix: 0,
       );
@@ -204,17 +207,19 @@ class EerlLocalDataSource {
       '''
       SELECT
         (SELECT COUNT(*) FROM ${DatabaseTables.collections}
-          WHERE agent_id = ? AND center_id = ? AND status != 'DRAFT'
-            AND collected_at >= ?) AS collections,
+          WHERE agent_id = ? AND center_id = ?
+            AND UPPER(status) IN ('VERIFIED', 'APPROVED')
+            AND collected_at >= ?) AS verified_entries,
         (SELECT COALESCE(SUM(CASE WHEN i.unit_code = 'KG'
           THEN COALESCE(ci.verified_qty, ci.qty) ELSE 0 END), 0)
           FROM ${DatabaseTables.collectionItems} ci
           JOIN ${DatabaseTables.collections} c ON c.id = ci.collection_id
           JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
           WHERE c.agent_id = ? AND c.center_id = ? AND c.status != 'DRAFT'
-            AND c.collected_at >= ?) AS kg,
-        (SELECT COUNT(*) FROM ${DatabaseTables.tasks}
-          WHERE assigned_to = ? AND center_id = ? AND status = 'PENDING') AS tasks,
+            AND c.collected_at >= ?) AS collected_kg,
+        (SELECT COUNT(*) FROM ${DatabaseTables.transfers}
+          WHERE requested_by = ? AND center_id = ?
+            AND requested_at >= ?) AS transfer_requests,
         (SELECT COUNT(*) FROM ${DatabaseTables.collections}
           WHERE agent_id = ? AND center_id = ? AND status = 'DRAFT') AS drafts,
         (SELECT COUNT(*) FROM ${DatabaseTables.collections}
@@ -229,6 +234,7 @@ class EerlLocalDataSource {
         todayStart,
         userId,
         centerId,
+        todayStart,
         userId,
         centerId,
         userId,
@@ -242,36 +248,47 @@ class EerlLocalDataSource {
     final centerId = await activeCenterId;
     if (centerId == null) {
       return const SupervisorHomeSummaryModel(
-        collections: 0,
-        kg: 0,
-        pendingVerification: 0,
-        openTasks: 0,
+        activeAgents: 0,
+        transfersDone: 0,
+        totalTransfers: 0,
+        stockKg: 0,
+        pendingExpenses: 0,
       );
     }
     final todayStart = _startOfIstDayUtc();
     final rows = await _database.rawQuery(
       '''
       SELECT
-        (SELECT COUNT(*) FROM ${DatabaseTables.collections} c
-          WHERE c.center_id = ?
-            AND c.status != 'DRAFT'
-            AND c.collected_at >= ?) AS collections,
-        (SELECT COALESCE(SUM(CASE WHEN i.unit_code = 'KG'
-          THEN COALESCE(ci.verified_qty, ci.qty) ELSE 0 END), 0)
-          FROM ${DatabaseTables.collectionItems} ci
-          JOIN ${DatabaseTables.collections} c ON c.id = ci.collection_id
-          JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
-          WHERE c.center_id = ?
-            AND c.status != 'DRAFT'
-            AND c.collected_at >= ?) AS kg,
-        (SELECT COUNT(*) FROM ${DatabaseTables.collections} c
-          WHERE c.center_id = ?
-            AND c.status = 'SUBMITTED') AS pending_verification,
-        (SELECT COUNT(*) FROM ${DatabaseTables.tasks} t
-          WHERE t.center_id = ?
-            AND t.status = 'PENDING') AS open_tasks
+        (SELECT COUNT(DISTINCT p.user_id)
+          FROM ${DatabaseTables.centerPeople} p
+          WHERE p.center_id = ? AND p.is_agent = 1) AS active_agents,
+        (SELECT COUNT(*) FROM ${DatabaseTables.transfers} t
+          WHERE t.center_id = ? AND t.requested_at >= ?
+            AND UPPER(t.status) IN
+              ('DISPATCHED', 'COMPLETED', 'CLOSED', 'HANDED_OVER'))
+          AS transfers_done,
+        (SELECT COUNT(*) FROM ${DatabaseTables.transfers} t
+          WHERE t.center_id = ? AND t.requested_at >= ?
+            AND UPPER(t.status) != 'CANCELLED') AS total_transfers,
+        (SELECT COALESCE(SUM(CASE WHEN UPPER(i.unit_code) = 'KG'
+          THEN s.qty ELSE 0 END), 0)
+          FROM ${DatabaseTables.stock} s
+          JOIN ${DatabaseTables.items} i ON i.id = s.item_id
+          WHERE s.center_id = ?) AS stock_kg,
+        (SELECT COUNT(*) FROM ${DatabaseTables.expenses} e
+          WHERE e.center_id = ? AND UPPER(e.status) IN
+            ('PENDING', 'WAITING_SUPERVISOR', 'PENDING_REVIEW'))
+          AS pending_expenses
     ''',
-      [centerId, todayStart, centerId, todayStart, centerId, centerId],
+      [
+        centerId,
+        centerId,
+        todayStart,
+        centerId,
+        todayStart,
+        centerId,
+        centerId,
+      ],
     );
     return SupervisorHomeSummaryModel.fromMap(rows.single);
   }
@@ -562,22 +579,113 @@ class EerlLocalDataSource {
     return rows.map(VehicleModel.fromMap).toList(growable: false);
   }
 
-  Future<List<VehicleTypeModel>> getVehicleTypes() async =>
-      (await _database.query(
-        DatabaseTables.vehicleTypes,
-        orderBy: 'name COLLATE NOCASE',
-      )).map(VehicleTypeModel.fromMap).toList(growable: false);
-
   Future<void> saveVehicle(VehicleModel vehicle, {required bool isNew}) async {
+    final plateNumber = VehicleRegistrationNumber.normalize(
+      vehicle.plateNumber,
+    );
+    if (plateNumber == null) {
+      throw ArgumentError.value(
+        vehicle.plateNumber,
+        'plateNumber',
+        'Enter the vehicle number in the format GJ-05-BX-1234.',
+      );
+    }
+    if (isNew && vehicle.centerId?.trim().isNotEmpty != true) {
+      throw ArgumentError.value(
+        vehicle.centerId,
+        'centerId',
+        'Collection center is required.',
+      );
+    }
     final now = DateTime.now().toUtc().toIso8601String();
-    final body = <String, Object?>{...vehicle.toMap()}..remove('sync_state');
-    final refs = <String>[
-      if (vehicle.centerId != null) vehicle.centerId!,
-      vehicle.typeId,
-    ];
+    final driverName = vehicle.driverName?.trim();
+    final normalizedDriverName = driverName?.isEmpty == true
+        ? null
+        : driverName;
+    final refs = <String>[if (vehicle.centerId != null) vehicle.centerId!];
     await _database.transaction((txn) async {
+      final duplicateRows = await txn.rawQuery(
+        '''
+        SELECT id
+        FROM ${DatabaseTables.vehicles}
+        WHERE REPLACE(REPLACE(UPPER(plate_number), '-', ''), ' ', '') =
+              REPLACE(REPLACE(UPPER(?), '-', ''), ' ', '')
+          AND id <> ?
+        LIMIT 1
+        ''',
+        [plateNumber, vehicle.id],
+      );
+      if (duplicateRows.isNotEmpty) {
+        throw DuplicateVehicleRegistrationException(plateNumber);
+      }
+      final storedRows = await txn.query(
+        DatabaseTables.vehicles,
+        where: 'id = ?',
+        whereArgs: [vehicle.id],
+        limit: 1,
+      );
+      final stored = storedRows.isEmpty ? null : storedRows.single;
+      final queuedUpserts = await txn.query(
+        DatabaseTables.outbox,
+        columns: const ['method', 'body'],
+        where:
+            "entity = ? AND entity_id = ? AND kind = 'upsert' "
+            "AND status = 'queued'",
+        whereArgs: [DatabaseTables.vehicles, vehicle.id],
+        limit: 1,
+      );
+      final queuedPut =
+          queuedUpserts.isNotEmpty && queuedUpserts.single['method'] == 'PUT';
+      final storedDriver = stored?['driver_name']?.toString().trim();
+      final normalizedStoredDriver = storedDriver?.isEmpty == true
+          ? null
+          : storedDriver;
+      final keepsExistingDriver =
+          !isNew && !queuedPut && normalizedDriverName == null;
+      final effectiveDriverName = keepsExistingDriver
+          ? normalizedStoredDriver
+          : normalizedDriverName;
+      var body = <String, Object?>{};
+      if (isNew || queuedPut) {
+        body.addAll({
+          'centerId': vehicle.centerId,
+          'plateNumber': plateNumber,
+          'driverName': ?normalizedDriverName,
+        });
+      } else {
+        if (stored == null || stored['plate_number'] != plateNumber) {
+          body['plateNumber'] = plateNumber;
+        }
+        if (normalizedDriverName != null &&
+            (stored == null ||
+                normalizedStoredDriver != normalizedDriverName)) {
+          body['driverName'] = normalizedDriverName;
+        }
+        if (queuedUpserts.isNotEmpty) {
+          final rawQueuedBody = queuedUpserts.single['body'] as String?;
+          final decodedQueuedBody = rawQueuedBody == null
+              ? null
+              : jsonDecode(rawQueuedBody);
+          if (decodedQueuedBody is Map) {
+            final cumulativeBody = Map<String, Object?>.from(decodedQueuedBody);
+            if (cumulativeBody.containsKey('plateNumber')) {
+              cumulativeBody['plateNumber'] = plateNumber;
+            }
+            if (normalizedDriverName != null &&
+                cumulativeBody.containsKey('driverName')) {
+              cumulativeBody['driverName'] = normalizedDriverName;
+            }
+            cumulativeBody.addAll(body);
+            body = cumulativeBody;
+          }
+        }
+      }
+
+      if (body.isEmpty) return;
       await _upsertById(txn, DatabaseTables.vehicles, {
         ...vehicle.toMap(),
+        'plate_number': plateNumber,
+        'driver_name': effectiveDriverName,
         'sync_state': 'pending',
       });
 
@@ -614,7 +722,6 @@ class EerlLocalDataSource {
           'id',
           'center_id',
           'plate_number',
-          'type_id',
           'is_active',
           'sync_state',
         ],
@@ -646,7 +753,7 @@ class EerlLocalDataSource {
         'COMMIT',
         'Vehicle stored | '
             'vehicle_id=$vehicleId center=${vehicle['center_id']} '
-            'plate=${vehicle['plate_number']} type_id=${vehicle['type_id']} '
+            'plate=${vehicle['plate_number']} '
             'is_active=${vehicle['is_active']} '
             'sync_state=${vehicle['sync_state']} '
             'outbox_seq=${queued['seq']} method=${queued['method']} '
@@ -675,7 +782,7 @@ class EerlLocalDataSource {
         txn,
         method: 'POST',
         path: '/vehicles/${vehicle.id}/status',
-        body: {'is_active': active},
+        body: {'isActive': active},
         entity: DatabaseTables.vehicles,
         entityId: vehicle.id,
         kind: 'status',
@@ -885,14 +992,16 @@ class EerlLocalDataSource {
 
   String _normalizeIndianPhone(String? phone) {
     final digits = (phone ?? '').replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.length == 10) return digits;
-    if (digits.length == 12 && digits.startsWith('91')) {
-      return digits.substring(2);
+    final normalized = digits.length == 12 && digits.startsWith('91')
+        ? digits.substring(2)
+        : digits;
+    if (RegExp(r'^[6-9][0-9]{9}$').hasMatch(normalized)) {
+      return normalized;
     }
     throw ArgumentError.value(
       phone,
       'phone',
-      'Enter a valid 10-digit mobile number.',
+      'Enter a valid 10-digit Indian mobile number.',
     );
   }
 
@@ -1415,6 +1524,14 @@ class EerlLocalDataSource {
     required List<CollectionItemModel> items,
     required bool submit,
   }) async {
+    final channel = collection.channel.trim().toUpperCase();
+    if (!const {'D2D', 'MRF', 'RAMP'}.contains(channel)) {
+      throw ArgumentError.value(
+        collection.channel,
+        'collection.channel',
+        'Collection type must be D2D, MRF, or RAMP.',
+      );
+    }
     if (items.isEmpty) {
       throw ArgumentError.value(
         items,
@@ -1428,6 +1545,9 @@ class EerlLocalDataSource {
       }
       if (submit && (item.verifiedQty == null || item.verifiedQty! <= 0)) {
         throw ArgumentError('Verified quantity is required before submission.');
+      }
+      if (submit && item.photoUrls.isEmpty) {
+        throw ArgumentError('An item photo is required before submission.');
       }
     }
     final now = DateTime.now().toUtc().toIso8601String();
@@ -1477,22 +1597,85 @@ class EerlLocalDataSource {
         DatabaseTables.centerChannels,
         columns: const ['takes_payment'],
         where: 'center_id = ? AND channel = ?',
-        whereArgs: [collection.centerId, collection.channel],
+        whereArgs: [collection.centerId, channel],
         limit: 1,
       );
       final takesPayment = channelRows.isEmpty
           ? collection.takesPayment
           : channelRows.single['takes_payment'] == 1;
-      if (submit && collection.channel.toUpperCase() == 'MRF') {
+      if (submit && channel == 'D2D') {
+        final vehicleId = collection.vehicleId?.trim();
+        if (vehicleId == null || vehicleId.isEmpty) {
+          throw StateError('A D2D vehicle is required.');
+        }
+        final vehicles = await txn.query(
+          DatabaseTables.vehicles,
+          columns: const ['id'],
+          where:
+              'id = ? AND is_active = 1 AND (center_id = ? OR center_id IS NULL)',
+          whereArgs: [vehicleId, collection.centerId],
+          limit: 1,
+        );
+        if (vehicles.isEmpty) {
+          throw StateError('The selected D2D vehicle is unavailable.');
+        }
+        if (collection.givenByName?.trim().isEmpty != false) {
+          throw StateError(
+            'The person handing over the collection is required.',
+          );
+        }
+      }
+      if (submit && channel == 'MRF') {
         final supervisors = await txn.query(
           DatabaseTables.mrfPeople,
           columns: const ['id'],
-          where: "id = ? AND role = 'SUPERVISOR' AND is_active = 1",
-          whereArgs: [collection.mrfPersonId],
+          where:
+              "center_id = ? AND UPPER(role) = 'SUPERVISOR' AND is_active = 1",
+          whereArgs: [collection.centerId],
           limit: 1,
         );
         if (supervisors.isEmpty) {
           throw StateError('An active MRF supervisor is required.');
+        }
+        final labourId = collection.mrfPersonId?.trim();
+        if (labourId == null || labourId.isEmpty) {
+          throw StateError('An MRF labour person is required.');
+        }
+        final labours = await txn.query(
+          DatabaseTables.mrfPeople,
+          columns: const ['id'],
+          where:
+              "id = ? AND center_id = ? AND UPPER(role) = 'LABOUR' AND is_active = 1",
+          whereArgs: [labourId, collection.centerId],
+          limit: 1,
+        );
+        if (labours.isEmpty) {
+          throw StateError('The selected MRF labour person is unavailable.');
+        }
+      }
+      if (submit && channel == 'RAMP') {
+        final ragpickerId = collection.ragpickerId?.trim();
+        if (ragpickerId == null || ragpickerId.isEmpty) {
+          throw StateError('A ragpicker is required.');
+        }
+        final ragpickers = await txn.query(
+          DatabaseTables.ragpickers,
+          columns: const ['id'],
+          where: 'id = ? AND center_id = ? AND is_active = 1',
+          whereArgs: [ragpickerId, collection.centerId],
+          limit: 1,
+        );
+        if (ragpickers.isEmpty) {
+          throw StateError('The selected ragpicker is unavailable.');
+        }
+      }
+      if (submit && (channel == 'D2D' || channel == 'RAMP')) {
+        if (collection.handoverPhotoUrls.isEmpty) {
+          throw StateError('A handover photo is required.');
+        }
+        final paidBy = collection.paidBy?.trim().toUpperCase();
+        if (paidBy != 'CASH' && paidBy != 'UPI') {
+          throw StateError('Select a valid payment mode.');
         }
       }
       final existing = await txn.query(
@@ -1570,6 +1753,7 @@ class EerlLocalDataSource {
 
       final collectionRow = <String, Object?>{
         ...collection.toMap(),
+        'channel': channel,
         'status': submit ? 'SUBMITTED' : 'DRAFT',
         'slip_number': slipNumber,
         'collected_at': collectedAt,
@@ -1756,7 +1940,7 @@ class EerlLocalDataSource {
         );
         await txn.update(
           DatabaseTables.outbox,
-          {'method': 'PUT', 'path': '/collections/$savedCollectionId'},
+          {'method': 'POST', 'path': '/collections/$savedCollectionId/submit'},
           where:
               "entity = ? AND entity_id = ? AND kind = 'submit' "
               "AND status = 'queued'",
@@ -1768,8 +1952,10 @@ class EerlLocalDataSource {
 
       await OutboxQueue.enqueue(
         txn,
-        method: 'PUT',
-        path: '/collections/$savedCollectionId',
+        method: submit ? 'POST' : 'PUT',
+        path: submit
+            ? '/collections/$savedCollectionId/submit'
+            : '/collections/$savedCollectionId',
         body: body,
         entity: DatabaseTables.collections,
         entityId: savedCollectionId,
@@ -1784,7 +1970,7 @@ class EerlLocalDataSource {
       await _debugLogCollectionCommit(
         collectionId: collection.id,
         centerId: collection.centerId,
-        channel: collection.channel,
+        channel: channel,
         expectedItemIds: savedItemIds,
       );
     }
@@ -1892,14 +2078,20 @@ class EerlLocalDataSource {
     return <String, Object?>{
       'centerId': collectionRow['center_id'],
       'type': collectionRow['channel'],
-      // Keep this map identical to PUT /collections/{id}. Nullable fields
-      // must remain present, while slip metadata is local/server-managed.
-      'vehicleId': vehicleId,
-      'givenByName': givenByName,
-      'mrfLabourId': mrfLabourId,
-      'ragpickerId': ragpickerId,
-      'handoverPhotoUrls': handoverPhotoIds,
-      'paidBy': paidBy,
+      'slipNumber': collectionRow['slip_number'],
+      'collectedAt': collectionRow['collected_at'],
+      if (collectionRow['channel'] == 'D2D') ...{
+        'vehicleId': vehicleId,
+        'givenByName': givenByName,
+        'handoverPhotoUrls': handoverPhotoIds,
+        'paidBy': paidBy,
+      },
+      if (collectionRow['channel'] == 'MRF') 'mrfLabourId': mrfLabourId,
+      if (collectionRow['channel'] == 'RAMP') ...{
+        'ragpickerId': ragpickerId,
+        'handoverPhotoUrls': handoverPhotoIds,
+        'paidBy': paidBy,
+      },
       'lines': [
         for (final item in items)
           {
@@ -4281,9 +4473,7 @@ class EerlLocalDataSource {
     return (rows.single['qty_free'] as num?)?.toDouble() ?? 0;
   }
 
-  Future<List<AgentStatusModel>> getAgentStatus() async {
-    final centerId = await activeCenterId;
-    if (centerId == null) return const [];
+  Future<List<AgentStatusModel>> getAgentStatus({String? centerId}) async {
     final todayStart = _startOfIstDayUtc();
     final rows = await _database.rawQuery(
       '''
@@ -4297,11 +4487,11 @@ class EerlLocalDataSource {
         ON col.agent_id = cp.user_id AND col.center_id = cp.center_id
         AND col.status != 'DRAFT' AND col.collected_at >= ?
       WHERE cp.is_agent = 1
-        AND cp.center_id = ?
+        AND (? IS NULL OR cp.center_id = ?)
       GROUP BY cp.user_id, cp.center_id
-      ORDER BY cp.name COLLATE NOCASE
+      ORDER BY c.name COLLATE NOCASE, cp.name COLLATE NOCASE
     ''',
-      [todayStart, centerId],
+      [todayStart, centerId, centerId],
     );
     return rows.map(AgentStatusModel.fromMap).toList(growable: false);
   }

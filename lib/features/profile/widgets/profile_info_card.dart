@@ -13,6 +13,7 @@ class ProfileInfoItem {
     required this.value,
     this.trailingIcon,
     this.onTap,
+    this.iconColor,
   });
 
   final String icon;
@@ -20,6 +21,7 @@ class ProfileInfoItem {
   final String value;
   final String? trailingIcon;
   final VoidCallback? onTap;
+  final Color? iconColor;
 }
 
 class ProfileInfoCard extends StatelessWidget {
@@ -73,7 +75,14 @@ class _ProfileInfoRow extends StatelessWidget {
               color: AppColors.primary50,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: SvgPicture.asset(item.icon, width: 24, height: 24),
+            child: SvgPicture.asset(
+              item.icon,
+              width: 24,
+              height: 24,
+              colorFilter: item.iconColor != null
+                  ? ColorFilter.mode(item.iconColor!, BlendMode.srcIn)
+                  : null,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

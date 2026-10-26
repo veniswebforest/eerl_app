@@ -11,7 +11,7 @@ class ProfileActionCard extends StatelessWidget {
     required this.arrowIcon,
     required this.title,
     required this.subtitle,
-    required this.onTap,
+    this.onTap,
     this.destructive = false,
   });
 
@@ -19,7 +19,7 @@ class ProfileActionCard extends StatelessWidget {
   final String arrowIcon;
   final String title;
   final String subtitle;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool destructive;
 
   @override
@@ -68,7 +68,8 @@ class ProfileActionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              SvgPicture.asset(arrowIcon, width: 24, height: 24),
+              if (onTap != null)
+                SvgPicture.asset(arrowIcon, width: 24, height: 24),
             ],
           ),
         ),

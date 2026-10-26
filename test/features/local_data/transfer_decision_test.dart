@@ -92,18 +92,11 @@ void main() {
   );
 
   test('vehicle dropdown only reads bootstrap transfer vehicles', () async {
-    await database.insert(DatabaseTables.vehicleTypes, {
-      'id': 'type-truck',
-      'name': 'Pickup Truck',
-    });
     await database.insert(DatabaseTables.vehicles, {
       'id': 'configured-truck-1',
       'number': 'VH-001',
       'center_id': 'center-1',
       'plate_number': 'GJ-05-AB-4321',
-      'type_id': 'type-truck',
-      'type_name': 'Pickup Truck',
-      'capacity_kg': 3500,
       'driver_name': 'Ketan Patel',
       'is_active': 1,
       'sync_state': 'synced',

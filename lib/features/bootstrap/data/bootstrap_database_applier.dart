@@ -18,7 +18,6 @@ class BootstrapDatabaseApplier {
     DatabaseTables.centers,
     DatabaseTables.items,
     DatabaseTables.centerChannels,
-    DatabaseTables.vehicleTypes,
     DatabaseTables.expenseCategories,
     DatabaseTables.centerPeople,
     DatabaseTables.destinations,
@@ -471,10 +470,17 @@ class BootstrapDatabaseApplier {
       );
       final batch = txn.batch();
       for (final row in change.replace) {
-        batch.insert(table, <String, Object?>{
-          ...row,
-          'sync_state': 'synced',
-        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+        final values = <String, Object?>{...row, 'sync_state': 'synced'};
+        if (table == DatabaseTables.vehicles) {
+          values.remove('capacity_kg');
+          values.remove('type_id');
+          values.remove('type_name');
+        }
+        batch.insert(
+          table,
+          values,
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
       }
       await batch.commit(noResult: true);
       _log(

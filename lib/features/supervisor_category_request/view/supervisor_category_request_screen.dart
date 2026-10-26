@@ -1,6 +1,5 @@
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -12,10 +11,10 @@ import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/wallet/widgets/expense_detail_cards.dart';
-import 'package:eerl_app/features/wallet/widgets/wallet_assets.dart';
 import 'package:eerl_app/features/wallet/widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
-import 'package:eerl_app/shared/widgets/app_message_banner.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 
 enum _CategoryRequestPage { list, detail, reject }
 
@@ -34,7 +33,6 @@ class _SupervisorCategoryRequestScreenState
   _CategoryRequestPage _page = _CategoryRequestPage.list;
   CategoryRequestModel? _selectedRequest;
   bool _closedTab = false;
-  bool _showRejectedBanner = false;
 
   void _openDetail(CategoryRequestModel request) => setState(() {
     _selectedRequest = request;
@@ -52,11 +50,21 @@ class _SupervisorCategoryRequestScreenState
     await OutgoingSyncService.instance.drain();
   }
 
-  void _backToClosedList({bool rejected = false}) => setState(() {
-    _closedTab = true;
-    _showRejectedBanner = rejected;
-    _page = _CategoryRequestPage.list;
-  });
+  void _backToClosedList({bool rejected = false}) {
+    setState(() {
+      _closedTab = true;
+      _page = _CategoryRequestPage.list;
+    });
+    if (rejected) {
+      AppTopNotification.show(
+        context,
+        key: const Key('supervisor-category-rejected-notification'),
+        title: context.l10n.supervisorCategoryRejectedBannerTitle,
+        subtitle: context.l10n.supervisorCategoryRejectedBannerMessage,
+        tone: AppTopNotificationTone.error,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) => PopScope(
@@ -72,13 +80,10 @@ class _SupervisorCategoryRequestScreenState
     child: switch (_page) {
       _CategoryRequestPage.list => _CategoryRequestListScreen(
         closedTab: _closedTab,
-        showRejectedBanner: _showRejectedBanner,
         onBack: widget.onBack,
         onTabChanged: (closed) => setState(() {
           _closedTab = closed;
-          _showRejectedBanner = false;
         }),
-        onDismissBanner: () => setState(() => _showRejectedBanner = false),
         onOpenDetail: _openDetail,
       ),
       _CategoryRequestPage.detail => _CategoryRequestDetailScreen(
@@ -103,18 +108,14 @@ class _SupervisorCategoryRequestScreenState
 class _CategoryRequestListScreen extends StatefulWidget {
   const _CategoryRequestListScreen({
     required this.closedTab,
-    required this.showRejectedBanner,
     required this.onBack,
     required this.onTabChanged,
-    required this.onDismissBanner,
     required this.onOpenDetail,
   });
 
   final bool closedTab;
-  final bool showRejectedBanner;
   final VoidCallback onBack;
   final ValueChanged<bool> onTabChanged;
-  final VoidCallback onDismissBanner;
   final ValueChanged<CategoryRequestModel> onOpenDetail;
 
   @override
@@ -183,13 +184,11 @@ class _CategoryRequestListScreenState
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(20, topPadding, 20, 32),
         children: [
-          if (!widget.showRejectedBanner) ...[
-            AppScreenHeader(
-              leading: WalletBackButton(onPressed: widget.onBack),
-              title: l.supervisorCategoryTitle,
-            ),
-            const SizedBox(height: 24),
-          ],
+          AppScreenHeader(
+            leading: WalletBackButton(onPressed: widget.onBack),
+            title: l.supervisorCategoryTitle,
+          ),
+          const SizedBox(height: 24),
           _CategoryTabs(
             closed: widget.closedTab,
             pendingLabel: l.supervisorCategoryPendingTab(pendingCount),
@@ -244,39 +243,7 @@ class _CategoryRequestListScreenState
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
-            child: widget.showRejectedBanner
-                ? Stack(
-                    children: [
-                      listContent(topPadding: 82),
-                      Positioned(
-                        left: 20,
-                        right: 20,
-                        top: AppScreenHeaderMetrics.topInset,
-                        child: AppMessageBanner(
-                          title: l.supervisorCategoryRejectedBannerTitle,
-                          subtitle: l.supervisorCategoryRejectedBannerMessage,
-                          color: AppColors.red500,
-                          backgroundColor: AppColors.red50,
-                          borderColor: AppColors.cool400,
-                          height: 78,
-                          iconBackgroundColor: AppColors.red600,
-                          iconPadding: const EdgeInsets.all(6),
-                          icon: SvgPicture.asset(
-                            WalletAssets.categoryRequestRejectedBanner,
-                            width: 18,
-                            height: 18,
-                          ),
-                          closeIcon: SvgPicture.asset(
-                            WalletAssets.categoryRequestClose,
-                            width: 20,
-                            height: 20,
-                          ),
-                          onClose: widget.onDismissBanner,
-                        ),
-                      ),
-                    ],
-                  )
-                : listContent(topPadding: AppScreenHeaderMetrics.topInset),
+            child: listContent(topPadding: AppScreenHeaderMetrics.topInset),
           ),
         ),
       ),
@@ -599,9 +566,7 @@ class _CategoryRequestDetailScreen extends StatelessWidget {
       await onApprove();
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      AppSnackbar.error(context, message: error.toString());
       return;
     }
     if (!context.mounted) return;
@@ -693,9 +658,7 @@ class _CategoryRequestRejectScreenState
     } catch (error) {
       if (!mounted) return;
       setState(() => _submitting = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      AppSnackbar.error(context, message: error.toString());
     }
   }
 

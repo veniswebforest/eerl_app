@@ -9,7 +9,7 @@ import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_card.
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
 import 'package:eerl_app/features/tasks/model/task_list_item.dart';
 import 'package:eerl_app/features/tasks/widgets/task_segmented_control.dart';
-import 'package:eerl_app/shared/widgets/app_message_banner.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +32,6 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
   late TaskListStatus _selectedStatus = widget.showCancelledBanner
       ? TaskListStatus.closed
       : TaskListStatus.open;
-  late bool _showCancelledBanner = widget.showCancelledBanner;
   String _query = '';
   bool _loading = true;
   List<TaskModel> _allTasks = const [];
@@ -51,7 +50,20 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
   void initState() {
     super.initState();
     _loadTasks();
+    if (widget.showCancelledBanner) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showCancelledNotification();
+      });
+    }
   }
+
+  void _showCancelledNotification() => AppTopNotification.show(
+    context,
+    key: const Key('supervisor-task-cancelled-banner'),
+    title: context.l10n.supervisorTaskCancelled,
+    subtitle: context.l10n.supervisorTaskCancelledSuccess,
+    tone: AppTopNotificationTone.error,
+  );
 
   Future<void> _loadTasks() async {
     final tasks = await EerlLocalRepository.instance.getTasks(
@@ -82,15 +94,13 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
     return Scaffold(
       key: const Key('supervisor-tasks-screen'),
       backgroundColor: Colors.white,
-      appBar: _showCancelledBanner
-          ? null
-          : SupervisorTaskHeader(title: context.l10n.supervisorTaskTitle),
+      appBar: SupervisorTaskHeader(title: context.l10n.supervisorTaskTitle),
       body: SafeArea(
-        top: _showCancelledBanner,
+        top: false,
         child: Stack(
           children: [
             Padding(
-              padding: EdgeInsets.only(top: _showCancelledBanner ? 76 : 0),
+              padding: EdgeInsets.zero,
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 600),
@@ -211,48 +221,6 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
                 ),
               ),
             ),
-            if (_showCancelledBanner)
-              Positioned(
-                top: 18,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: AppMessageBanner(
-                        key: const Key('supervisor-task-cancelled-banner'),
-                        title: context.l10n.supervisorTaskCancelled,
-                        subtitle: context.l10n.supervisorTaskCancelledSuccess,
-                        color: AppColors.red500,
-                        backgroundColor: AppColors.red50,
-                        borderColor: AppColors.cool300,
-                        borderRadius: 12,
-                        padding: const EdgeInsets.all(16),
-                        leadingGap: 12,
-                        iconBackgroundColor: AppColors.red500,
-                        iconPadding: const EdgeInsets.all(5),
-                        icon: SvgPicture.asset(
-                          SupervisorTaskAssets.cancelBanner,
-                          width: 20,
-                          height: 20,
-                        ),
-                        closeIcon: SvgPicture.asset(
-                          SupervisorTaskAssets.close,
-                          width: 20,
-                          height: 20,
-                        ),
-                        onClose: () =>
-                            setState(() => _showCancelledBanner = false),
-                        subtitleStyle: AppTextStyles.mediumSH8_14.copyWith(
-                          color: AppColors.neutral600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
       ),
@@ -267,8 +235,8 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
     if (!mounted || cancelled != true) return;
     setState(() {
       _selectedStatus = TaskListStatus.closed;
-      _showCancelledBanner = true;
     });
+    _showCancelledNotification();
     await _loadTasks();
   }
 }

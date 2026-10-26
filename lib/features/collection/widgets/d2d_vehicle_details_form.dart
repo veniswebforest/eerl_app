@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/home/widgets/home_styles.dart';
 
 class D2dVehicleDetailsForm extends StatefulWidget {
   const D2dVehicleDetailsForm({
@@ -21,6 +22,8 @@ class D2dVehicleDetailsForm extends StatefulWidget {
     required this.onCapturePhoto,
     required this.onRemovePhoto,
     required this.onPreviewPhoto,
+    this.supervisorName,
+    this.supervisorPhone,
   });
 
   final List<String> vehicleNumbers;
@@ -32,6 +35,8 @@ class D2dVehicleDetailsForm extends StatefulWidget {
   final VoidCallback onCapturePhoto;
   final VoidCallback onRemovePhoto;
   final VoidCallback onPreviewPhoto;
+  final String? supervisorName;
+  final String? supervisorPhone;
 
   @override
   State<D2dVehicleDetailsForm> createState() => _D2dVehicleDetailsFormState();
@@ -64,6 +69,33 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
     _vehicleController.dispose();
     _givenByController.dispose();
     super.dispose();
+  }
+
+  void _showSupervisor() {
+    FocusScope.of(context).unfocus();
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.collectionContactSupervisor,
+                style: AppTextStyles.semiboldH7_18,
+              ),
+              const SizedBox(height: 16),
+              _SupervisorContactCard(
+                fullName: widget.supervisorName?.trim() ?? '',
+                mobileNumber: widget.supervisorPhone?.trim() ?? '',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -131,11 +163,12 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
         if (_isVehicleListOpen) ...[
           const SizedBox(height: 4),
           if (noVehicleFound)
-            _NoVehicleFoundCard(onContactSupervisor: () {})
+            _NoVehicleFoundCard(onContactSupervisor: _showSupervisor)
           else
             _VehicleDropdown(
               vehicles: filteredVehicles,
               selectedVehicle: widget.selectedVehicle,
+              onContactSupervisor: _showSupervisor,
               onSelected: (vehicle) {
                 _vehicleController.text = vehicle;
                 widget.onVehicleSelected(vehicle);
@@ -293,11 +326,13 @@ class _VehicleDropdown extends StatelessWidget {
     required this.vehicles,
     required this.selectedVehicle,
     required this.onSelected,
+    required this.onContactSupervisor,
   });
 
   final List<String> vehicles;
   final String? selectedVehicle;
   final ValueChanged<String> onSelected;
+  final VoidCallback onContactSupervisor;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -361,7 +396,7 @@ class _VehicleDropdown extends StatelessWidget {
         ),
         _ContactSupervisorButton(
           label: context.l10n.collectionContactSupervisorIfNotFound,
-          onPressed: () {},
+          onPressed: onContactSupervisor,
         ),
       ],
     ),
@@ -397,10 +432,10 @@ class _NoVehicleFoundCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        // _ContactSupervisorButton(
-        //   label: context.l10n.collectionContactSupervisor,
-        //   onPressed: onContactSupervisor,
-        // ),
+        _ContactSupervisorButton(
+          label: context.l10n.collectionContactSupervisor,
+          onPressed: onContactSupervisor,
+        ),
       ],
     ),
   );
@@ -437,5 +472,84 @@ class _ContactSupervisorButton extends StatelessWidget {
       ),
       label: Text(label, overflow: TextOverflow.ellipsis),
     ),
+  );
+}
+
+class _SupervisorContactCard extends StatelessWidget {
+  const _SupervisorContactCard({
+    required this.fullName,
+    required this.mobileNumber,
+  });
+
+  final String fullName;
+  final String mobileNumber;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const Key('d2d-supervisor-details'),
+    width: double.infinity,
+    padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+    decoration: BoxDecoration(
+      color: AppColors.cool200,
+      borderRadius: BorderRadius.circular(10),
+      boxShadow: [HomeStyles.cardShadow],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SupervisorDetailLine(
+          label: context.l10n.collectionFullName,
+          value: fullName.isEmpty ? '-' : fullName,
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 10),
+          child: Divider(height: 1, color: AppColors.cool400),
+        ),
+        _SupervisorDetailLine(
+          label: context.l10n.collectionMobileNumber,
+          value: mobileNumber.isEmpty ? '-' : mobileNumber,
+        ),
+      ],
+    ),
+  );
+}
+
+class _SupervisorDetailLine extends StatelessWidget {
+  const _SupervisorDetailLine({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: AppTextStyles.regularB8_12.copyWith(color: AppColors.neutral700),
+      ),
+      const SizedBox(height: 5),
+      Row(
+        children: [
+          Container(
+            width: 4,
+            height: 4,
+            decoration: const BoxDecoration(
+              color: AppColors.neutral900,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.semiboldH9_14,
+            ),
+          ),
+        ],
+      ),
+    ],
   );
 }

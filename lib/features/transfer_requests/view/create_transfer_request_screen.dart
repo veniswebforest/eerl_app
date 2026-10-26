@@ -7,12 +7,14 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_required_text.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import '../model/create_transfer_request_view.dart';
 import '../widgets/transfer_material_card.dart';
 import '../widgets/transfer_request_success_dialog.dart';
@@ -131,22 +133,13 @@ class _CreateTransferRequestScreenState
       AppLogger.diagnostic('TRANSFER_VALIDATION', error.toString());
       await _controller.load();
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.fixed,
-          content: Text(context.l10n.transferStockValidation),
-        ),
-      );
+      AppSnackbar.error(context, message: context.l10n.transferStockValidation);
     } catch (error) {
       if (!mounted) return;
       AppLogger.error('TRANSFER_SAVE', error.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          behavior: SnackBarBehavior.fixed,
-          content: Text(
-            'Transfer request could not be saved. Please try again.',
-          ),
-        ),
+      AppSnackbar.error(
+        context,
+        message: 'Transfer request could not be saved. Please try again.',
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -303,7 +296,7 @@ class _TransferRequestFields extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(
+      AppRequiredText(
         context.l10n.transferEstimatedExpenseLabel,
         style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
       ),
@@ -395,7 +388,7 @@ class _QuantityField extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(
+      AppRequiredText(
         context.l10n.transferTotalKgLabel,
         style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
       ),

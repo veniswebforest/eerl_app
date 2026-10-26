@@ -12,11 +12,13 @@ import 'package:intl/intl.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_required_text.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import '../widgets/transfer_dispatch_date_time_picker.dart';
 
 class TransferDispatchFlowScreen extends StatefulWidget {
@@ -211,7 +213,7 @@ class _TransferDispatchFlowScreenState
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 24),
-              Text(
+              AppRequiredText(
                 context.l10n.transferLoadedWeightRequired,
                 style: AppTextStyles.mediumSH8_14,
               ),
@@ -243,7 +245,7 @@ class _TransferDispatchFlowScreenState
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 24),
-              Text(
+              AppRequiredText(
                 context.l10n.transferLoadedAtRequired,
                 style: AppTextStyles.mediumSH8_14,
               ),
@@ -307,9 +309,7 @@ class _TransferDispatchFlowScreenState
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      AppSnackbar.error(context, message: error.toString());
       setState(() => _saving = false);
       return;
     }
@@ -556,7 +556,7 @@ class _DispatchField extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       if (showLabel) ...[
-        Text(label, style: AppTextStyles.mediumSH8_14),
+        AppRequiredText(label, style: AppTextStyles.mediumSH8_14),
         const SizedBox(height: 8),
       ],
       SizedBox(
@@ -619,7 +619,7 @@ class _PhotoField extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: AppTextStyles.mediumSH8_14),
+      AppRequiredText(label, style: AppTextStyles.mediumSH8_14),
       const SizedBox(height: 8),
       DottedBorder(
         options: RoundedRectDottedBorderOptions(

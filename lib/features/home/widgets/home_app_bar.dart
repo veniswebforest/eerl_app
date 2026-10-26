@@ -26,8 +26,8 @@ class HomeAppBar extends StatelessWidget {
     final locale = Localizations.localeOf(context).toString();
     final today = DateFormat('EEE, dd MMM yyyy', locale).format(DateTime.now());
 
-    return SizedBox(
-      height: 45,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 45),
       child: Row(
         children: [
           Builder(
@@ -41,6 +41,7 @@ class HomeAppBar extends StatelessWidget {
           const SizedBox(width: 16),
           Expanded(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

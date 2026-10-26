@@ -11,14 +11,14 @@ import 'home_styles.dart';
 class QuickActions extends StatelessWidget {
   const QuickActions({
     super.key,
-    this.onAddCollectionTap,
-    this.onTasksTap,
-    this.onLogExpenseTap,
+    required this.onAddCollectionTap,
+    required this.onTasksTap,
+    required this.onLogExpenseTap,
   });
 
-  final VoidCallback? onAddCollectionTap;
-  final VoidCallback? onTasksTap;
-  final VoidCallback? onLogExpenseTap;
+  final VoidCallback onAddCollectionTap;
+  final VoidCallback onTasksTap;
+  final VoidCallback onLogExpenseTap;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class QuickActions extends StatelessWidget {
           title: context.l10n.startCollection,
           subtitle: context.l10n.recordWeightProof,
           buttonLabel: context.l10n.addCollection,
-          onTap: onAddCollectionTap ?? () {},
+          onTap: onAddCollectionTap,
         ),
         const SizedBox(height: 16),
         QuickActionCard(
@@ -47,7 +47,7 @@ class QuickActions extends StatelessWidget {
           subtitle: context.l10n.homePendingTaskSubtitle,
           buttonLabel: context.l10n.viewTask,
           badge: '3',
-          onTap: onTasksTap ?? () {},
+          onTap: onTasksTap,
         ),
         const SizedBox(height: 16),
         QuickActionCard(
@@ -58,7 +58,7 @@ class QuickActions extends StatelessWidget {
           title: context.l10n.walletLogExpense,
           subtitle: context.l10n.trackFieldSpending,
           buttonLabel: context.l10n.logExpense,
-          onTap: onLogExpenseTap ?? () {},
+          onTap: onLogExpenseTap,
         ),
       ],
     );

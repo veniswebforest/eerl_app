@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/location/device_location_service.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -16,12 +17,14 @@ import 'package:eerl_app/core/utils/uuid_generator.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/ragpicker_directory/widgets/ragpicker_status_confirmation_dialog.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import '../model/collection_entry_state.dart';
 import '../widgets/collection_step_indicator.dart';
-import '../widgets/collection_success_dialog.dart';
 import '../widgets/d2d_collection_photos_step.dart';
 import '../widgets/d2d_vehicle_details_form.dart';
 import '../widgets/d2d_waste_items_step.dart';
+import '../widgets/add_new_ragpicker_bottom_sheet.dart';
 import '../widgets/mrf_details_form.dart';
 import '../widgets/ramp_details_form.dart';
 import 'package:go_router/go_router.dart';
@@ -62,8 +65,10 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   String? _vehicleNumber;
   String _givenBy = '';
   String? _personName;
+  String? _ragpickerId;
   String? _mrfAgentName;
   String? _mrfLabor;
+  String? _mrfLaborId;
   D2dPaymentMode _d2dPaymentMode = D2dPaymentMode.cash;
   List<VehicleModel> _vehicles = const [];
   List<MrfPersonModel> _mrfPeople = const [];
@@ -81,10 +86,18 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   List<String> get _personNamesList =>
       _ragpickers.map((item) => item.name).toList(growable: false);
 
-  List<String> get _mrfPersonNames => _mrfPeople
-      .where((item) => item.role.toUpperCase() == 'LABOUR')
-      .map((item) => item.name)
-      .toList(growable: false);
+  List<MrfPersonModel> get _mrfLabours {
+    final supervisor = _mrfSupervisor;
+    if (supervisor == null) return const [];
+    return _mrfPeople
+        .where(
+          (item) =>
+              item.isActive &&
+              item.centerId == supervisor.centerId &&
+              item.role.toUpperCase() == 'LABOUR',
+        )
+        .toList(growable: false);
+  }
 
   MrfPersonModel? get _mrfSupervisor {
     for (final person in _mrfPeople) {
@@ -164,10 +177,12 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         .map((vehicle) => vehicle.plateNumber)
         .firstOrNull;
     _givenBy = collection.givenByName ?? '';
+    _mrfLaborId = collection.mrfPersonId;
     _mrfLabor = _mrfPeople
         .where((person) => person.id == collection.mrfPersonId)
         .map((person) => person.name)
         .firstOrNull;
+    _ragpickerId = collection.ragpickerId;
     _personName = _ragpickers
         .where((person) => person.id == collection.ragpickerId)
         .map((person) => person.name)
@@ -286,6 +301,8 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         onGivenByChanged: (value) => setState(() => _givenBy = value),
         onCapturePhoto: _pickVehicleImage,
         onRemovePhoto: () => setState(() => _photos.remove(-1)),
+        supervisorName: _mrfSupervisor?.name,
+        supervisorPhone: _mrfSupervisor?.phone,
         onPreviewPhoto: () {
           final image = (_photos[-1]?.isNotEmpty ?? false)
               ? _photos[-1]!.first
@@ -296,9 +313,12 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     }
     if (_type == CollectionType.mrfStation) {
       return MrfDetailsForm(
-        people: _mrfPersonNames,
-        selectedLabor: _mrfLabor,
-        onLaborSelected: (person) => setState(() => _mrfLabor = person),
+        people: _mrfLabours,
+        selectedLaborId: _mrfLaborId,
+        onLaborSelected: (person) => setState(() {
+          _mrfLaborId = person.id;
+          _mrfLabor = person.name;
+        }),
         supervisorName: _mrfSupervisor?.name,
         supervisorPhone: _mrfSupervisor?.phone,
       );
@@ -336,20 +356,19 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
           ),
           const SizedBox(height: 24),
           RampDetailsForm(
-            personNames: _personNamesList,
-            selectedPerson: _personName,
+            people: _ragpickers,
+            selectedPersonId: _ragpickerId,
             photo: (_photos[99]?.isNotEmpty ?? false)
                 ? _photos[99]!.first
                 : null,
             onPersonSelected: (person) => setState(() {
-              _personName = person;
+              _ragpickerId = person.id;
+              _personName = person.name;
             }),
-            onAddNewPerson: (newPerson) => setState(() {
-              if (!_personNamesList.contains(newPerson)) {
-                _personNamesList.add(newPerson);
-              }
-              _personName = newPerson;
-            }),
+            onAddNewPerson: _addRampRagpicker,
+            onDeactivatePerson: (person) {
+              unawaited(_deactivateRampRagpicker(person));
+            },
             onCapturePhoto: () async {
               try {
                 final image = await ImageCompressor.pickAndCompress(
@@ -528,6 +547,10 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
             _selected.clear();
             _itemsOpen = false;
             _mrfAgentName = _mrfSupervisor?.name;
+            _mrfLaborId = null;
+            _mrfLabor = null;
+            _ragpickerId = null;
+            _personName = null;
             _typeOpen = false;
             _conditionalFieldOpen = false;
           });
@@ -915,9 +938,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
               _givenBy.trim().isNotEmpty &&
               (_photos[-1]?.isNotEmpty ?? false)
         : _type == CollectionType.mrfStation
-        ? _mrfLabor != null
+        ? _mrfSupervisor != null && _mrfLaborId != null
         : _type == CollectionType.ramp
-        ? _personName != null && (_photos[99]?.isNotEmpty ?? false)
+        ? _ragpickerId != null && (_photos[99]?.isNotEmpty ?? false)
         : (_type != null && _hasConditionalSelection && _selected.isNotEmpty);
     return SizedBox(
       width: double.infinity,
@@ -966,6 +989,96 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
 
   Future<void> _submit() => _saveCollection(submit: true);
 
+  Future<void> _deactivateRampRagpicker(RagpickerModel person) async {
+    final confirmed = await RagpickerStatusConfirmationDialog.show(
+      context: context,
+      title: context.l10n.ragpickerConfirmationTitle,
+      message: context.l10n.ragpickerDeactivateConfirmation,
+      cancelLabel: context.l10n.cancel,
+      confirmLabel: context.l10n.ragpickerYes,
+      confirmColor: AppColors.red500,
+    );
+    if (!mounted || !confirmed) return;
+
+    try {
+      await EerlLocalRepository.instance.setRagpickerActive(person, false);
+      unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+      if (!mounted) return;
+      setState(() {
+        _ragpickers = _ragpickers
+            .where((item) => item.id != person.id)
+            .toList(growable: false);
+        if (_ragpickerId == person.id) {
+          _ragpickerId = null;
+          _personName = null;
+        }
+      });
+      AppTopNotification.show(
+        context,
+        key: const Key('ramp-ragpicker-status-notification'),
+        title: context.l10n.ragpickerDeactivatedSuccess,
+        subtitle: context.l10n.ragpickerDeactivatedSubtitle,
+        tone: AppTopNotificationTone.error,
+      );
+    } catch (error) {
+      AppLogger.error('RAMP_RAGPICKER_DEACTIVATE', error.toString());
+      if (!mounted) return;
+      AppTopNotification.show(
+        context,
+        key: const Key('ramp-ragpicker-status-error-notification'),
+        title: context.l10n.error,
+        subtitle: context.l10n.ragpickerStatusChangeFailed,
+        tone: AppTopNotificationTone.error,
+      );
+    }
+  }
+
+  Future<void> _addRampRagpicker(NewRagpickerInput input) async {
+    final centerId = _centerId;
+    if (centerId == null) {
+      _showSubmitError(context.l10n.collectionDetailsNotReady);
+      throw StateError('Active center is not available.');
+    }
+    final person = RagpickerModel(
+      id: UuidGenerator.v4(),
+      centerId: centerId,
+      name: input.name,
+      phone: input.phone,
+      idNumber: input.idNumber,
+      isActive: true,
+      syncState: 'pending',
+    );
+    try {
+      await EerlLocalRepository.instance.saveRagpicker(
+        person,
+        localPhotoPath: input.localPhotoPath,
+      );
+      unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+      if (!mounted) return;
+      setState(() {
+        _ragpickers = [..._ragpickers, person];
+        _ragpickerId = person.id;
+        _personName = person.name;
+      });
+    } catch (error) {
+      AppLogger.error('RAMP_RAGPICKER_ADD', error.toString());
+      if (mounted) {
+        _showSubmitError(context.l10n.collectionSaveFailed);
+      }
+      rethrow;
+    }
+  }
+
+  void _showSubmitError(String message) {
+    AppTopNotification.show(
+      context,
+      key: const Key('collection-submit-error-notification'),
+      title: context.l10n.error,
+      subtitle: message,
+      tone: AppTopNotificationTone.error,
+    );
+  }
+
   Future<void> _saveCollection({required bool submit}) async {
     if (_saving) return;
     final centerId = _centerId;
@@ -975,16 +1088,15 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         userId == null ||
         profile == null ||
         _type == null) {
+      if (submit) {
+        _showSubmitError(context.l10n.collectionDetailsNotReady);
+      }
       return;
     }
     if (submit &&
         _type == CollectionType.mrfStation &&
         _mrfSupervisor == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('An active MRF supervisor is required before submit.'),
-        ),
-      );
+      _showSubmitError(context.l10n.collectionSupervisorRequired);
       return;
     }
     DeviceCoordinates? submissionCoordinates;
@@ -995,9 +1107,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       if (!mounted) return;
       if (submissionCoordinates == null) {
         setState(() => _saving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.collectionLocationRequired)),
-        );
+        _showSubmitError(context.l10n.collectionLocationRequired);
         return;
       }
     }
@@ -1006,16 +1116,6 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     VehicleModel? vehicle;
     for (final value in _vehicles) {
       if (value.plateNumber == _vehicleNumber) vehicle = value;
-    }
-    RagpickerModel? ragpicker;
-    for (final value in _ragpickers) {
-      if (value.name == _personName) ragpicker = value;
-    }
-    MrfPersonModel? mrfLabor;
-    for (final value in _mrfPeople) {
-      if (value.role.toUpperCase() == 'LABOUR' && value.name == _mrfLabor) {
-        mrfLabor = value;
-      }
     }
     final now = DateTime.now().toUtc().toIso8601String();
     final items = <CollectionItemModel>[];
@@ -1062,8 +1162,8 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
           status: submit ? 'SUBMITTED' : 'DRAFT',
           collectedAt: submit ? now : null,
           vehicleId: vehicle?.id,
-          mrfPersonId: _type == CollectionType.mrfStation ? mrfLabor?.id : null,
-          ragpickerId: ragpicker?.id,
+          mrfPersonId: _type == CollectionType.mrfStation ? _mrfLaborId : null,
+          ragpickerId: _type == CollectionType.ramp ? _ragpickerId : null,
           givenByName: switch (_type) {
             CollectionType.d2d => _givenBy,
             CollectionType.mrfStation || CollectionType.ramp || null => null,
@@ -1090,10 +1190,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       }
     } catch (error) {
       if (!mounted) return;
+      AppLogger.error('COLLECTION_SAVE', error.toString());
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Collection was not saved: $error')),
-      );
+      _showSubmitError(context.l10n.collectionSaveFailed);
       return;
     }
     if (!mounted) return;
@@ -1102,20 +1201,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       Navigator.of(context).pop(CollectionRouteResult.draftSaved);
       return;
     }
-    await showDialog<void>(
-      context: context,
-      barrierColor: Colors.black54,
-      builder: (dialogContext) => CollectionSuccessDialog(
-        onPreview: () {
-          Navigator.of(dialogContext).pop();
-          context.push<void>(AppRoutes.collectionReceipt, extra: id);
-        },
-        onAddNew: () {
-          Navigator.of(dialogContext).pop();
-          Navigator.of(context).pop(CollectionRouteResult.openCollections);
-        },
-      ),
-    );
+    context.pushReplacement(AppRoutes.collectionReceipt, extra: id);
   }
 
   Future<void> _pickImage(int itemId) async {
@@ -1208,8 +1294,8 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
 
   bool get _hasConditionalSelection => switch (_type) {
     CollectionType.d2d => _vehicleNumber != null,
-    CollectionType.mrfStation => _mrfAgentName != null,
-    CollectionType.ramp => _personName != null,
+    CollectionType.mrfStation => _mrfSupervisor != null && _mrfLaborId != null,
+    CollectionType.ramp => _ragpickerId != null,
     null => false,
   };
 

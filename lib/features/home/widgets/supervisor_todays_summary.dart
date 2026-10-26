@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'home_assets.dart';
 import 'home_styles.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
@@ -20,6 +21,7 @@ class SupervisorTodaysSummary extends StatefulWidget {
 
 class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
   bool _isVisible = true;
+  int _bootstrapRevision = -1;
   late final LocalQueryController<SupervisorHomeSummaryModel> _controller;
 
   @override
@@ -28,16 +30,20 @@ class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
     _controller = LocalQueryController(
       EerlLocalRepository.instance.getSupervisorHomeSummary,
     )..load();
-    _controller.addListener(_refresh);
+    _bootstrapRevision = BootstrapSyncService.instance.revision;
+    BootstrapSyncService.instance.addListener(_reloadAfterBootstrap);
   }
 
-  void _refresh() {
-    if (mounted) setState(() {});
+  void _reloadAfterBootstrap() {
+    final revision = BootstrapSyncService.instance.revision;
+    if (revision == _bootstrapRevision) return;
+    _bootstrapRevision = revision;
+    _controller.load();
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_refresh);
+    BootstrapSyncService.instance.removeListener(_reloadAfterBootstrap);
     _controller.dispose();
     super.dispose();
   }
@@ -50,7 +56,7 @@ class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
         icon: HomeAssets.supervisorActiveAgents,
         iconBackground: AppColors.secondary100,
         label: context.l10n.supervisorActiveAgents,
-        value: TextSpan(text: '${summary?.collections ?? 0}'),
+        value: TextSpan(text: '${summary?.activeAgents ?? 0}'),
         valueColor: AppColors.secondary500,
       ),
       _SupervisorSummaryItem(
@@ -60,11 +66,11 @@ class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
         value: TextSpan(
           children: [
             TextSpan(
-              text: '${summary?.pendingVerification ?? 0}',
+              text: '${summary?.transfersDone ?? 0}',
               style: TextStyle(color: AppColors.orchid),
             ),
             TextSpan(
-              text: '/${summary?.collections ?? 0}',
+              text: '/${summary?.totalTransfers ?? 0}',
               style: TextStyle(color: AppColors.neutral700),
             ),
           ],
@@ -75,14 +81,16 @@ class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
         icon: HomeAssets.supervisorTotalStocks,
         iconBackground: AppColors.purpleLight,
         label: context.l10n.supervisorTotalStocks,
-        value: TextSpan(text: '${(summary?.kg ?? 0).toStringAsFixed(2)} KG'),
+        value: TextSpan(
+          text: '${(summary?.stockKg ?? 0).toStringAsFixed(2)} KG',
+        ),
         valueColor: AppColors.purple,
       ),
       _SupervisorSummaryItem(
         icon: HomeAssets.supervisorPendingExpenses,
         iconBackground: AppColors.yellow50,
         label: context.l10n.supervisorPendingExpenses,
-        value: TextSpan(text: '${summary?.openTasks ?? 0}'),
+        value: TextSpan(text: '${summary?.pendingExpenses ?? 0}'),
         valueColor: AppColors.yellow600,
       ),
     ];

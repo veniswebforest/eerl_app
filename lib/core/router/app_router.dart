@@ -192,6 +192,11 @@ class AppRouter {
       },
     ),
     GoRoute(
+      path: AppRoutes.collectionRecords,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (_, _) => const MainDashboardScreen(initialPageKey: 'records'),
+    ),
+    GoRoute(
       path: AppRoutes.collectionDetail,
       parentNavigatorKey: rootNavigatorKey,
       builder: (_, state) =>
@@ -324,6 +329,11 @@ class AppRouter {
     ),
     GoRoute(
       path: AppRoutes.transferRequests,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (_, _) => const TransferRequestsScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.transferNotifications,
       parentNavigatorKey: rootNavigatorKey,
       builder: (_, _) => const TransferRequestsScreen(),
     ),

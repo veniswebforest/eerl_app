@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_required_text.dart';
 
 class RagpickerFormField extends StatelessWidget {
   const RagpickerFormField({
@@ -27,7 +28,7 @@ class RagpickerFormField extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: AppTextStyles.mediumSH8_14),
+      AppRequiredText(label, style: AppTextStyles.mediumSH8_14),
       const SizedBox(height: 8),
       TextField(
         controller: controller,

@@ -9,6 +9,7 @@ import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/transfer_requests/widgets/transfer_dispatch_date_time_picker.dart';
 import 'package:eerl_app/features/transfer_requests/widgets/transfer_request_detail_widgets.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -503,9 +504,7 @@ class _SupervisorTransferApprovalScreenState
       if (mounted) widget.onApproved();
     } on Object catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      AppSnackbar.error(context, message: error.toString());
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

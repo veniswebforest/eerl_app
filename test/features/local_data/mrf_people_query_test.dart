@@ -6,6 +6,7 @@ import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/supervisor_mrf_people/model/supervisor_mrf_people_view.dart';
 import 'package:eerl_app/features/supervisor_mrf_people/view/supervisor_mrf_people_screen.dart';
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -211,6 +212,35 @@ void main() {
       expect(queued.last['method'], 'POST');
       expect(queued.last['path'], '/mrf-people/labor-a/status');
       expect(statusBody, {'isActive': false});
+    },
+  );
+
+  test(
+    'invalid MRF mobile is rejected before SQLite and outbox writes',
+    () async {
+      final peopleBefore = await database.query(DatabaseTables.mrfPeople);
+
+      await expectLater(
+        local.saveMrfPerson(
+          const MrfPersonModel(
+            id: 'invalid-mobile-person',
+            centerId: 'center-1',
+            name: 'Invalid Mobile',
+            phone: '1234567890',
+            isActive: true,
+            role: 'LABOUR',
+            syncState: 'pending',
+          ),
+          isNew: true,
+        ),
+        throwsArgumentError,
+      );
+
+      expect(
+        await database.query(DatabaseTables.mrfPeople),
+        hasLength(peopleBefore.length),
+      );
+      expect(await database.query(DatabaseTables.outbox), isEmpty);
     },
   );
 
@@ -440,6 +470,49 @@ void main() {
       const Size(335, 52),
     );
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('invalid mobile shows an error toast before saving locally', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: SupervisorMrfPeopleScreen(
+          initialView: SupervisorMrfPeopleView.addEmpty,
+          teamLoader: () async => (
+            centers: const [CenterModel(id: 'center-1', name: 'Active Center')],
+            active: const <MrfPersonModel>[],
+            inactive: const <MrfPersonModel>[],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    for (var attempt = 0; attempt < 20; attempt++) {
+      if (find.byKey(const Key('supervisor-mrf-save')).evaluate().isNotEmpty) {
+        break;
+      }
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    await tester.enterText(find.byType(TextField).at(0), 'Invalid Mobile');
+    await tester.enterText(find.byType(TextField).at(1), '1234567890');
+    await tester.tap(find.byKey(const Key('supervisor-mrf-save')));
+    await tester.pump();
+
+    expect(
+      find.text('Enter a valid 10-digit supervisor mobile number.'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('supervisor-mrf-error-dialog')), findsNothing);
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump(const Duration(seconds: 5));
   });
 }
 

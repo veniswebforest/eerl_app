@@ -5,7 +5,6 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/supervisor_expense/model/supervisor_expense_item.dart';
 import 'package:eerl_app/features/wallet/widgets/wallet_assets.dart';
-import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 
 import '../../home/widgets/home_styles.dart';
 
@@ -150,36 +149,4 @@ class SupervisorExpenseCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class SupervisorExpenseToast extends StatelessWidget {
-  const SupervisorExpenseToast({
-    super.key,
-    required this.approved,
-    required this.title,
-    required this.message,
-    required this.onClose,
-  });
-  final bool approved;
-  final String title;
-  final String message;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) => AppMessageBanner(
-    key: const Key('supervisor-expense-toast'),
-    title: title,
-    subtitle: message,
-    color: approved ? AppColors.primary500 : AppColors.red500,
-    backgroundColor: approved ? AppColors.primary50 : AppColors.red50,
-    borderColor: AppColors.cool400,
-    iconBackgroundColor: approved ? AppColors.primary500 : AppColors.red500,
-    iconPadding: const EdgeInsets.all(5),
-    icon: Icon(
-      approved ? Icons.check_rounded : Icons.block_rounded,
-      color: Colors.white,
-      size: 20,
-    ),
-    onClose: onClose,
-  );
 }

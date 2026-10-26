@@ -246,24 +246,12 @@ class CenterItemModel {
   };
 }
 
-class VehicleTypeModel {
-  const VehicleTypeModel({required this.id, required this.name});
-  final String id;
-  final String name;
-  factory VehicleTypeModel.fromMap(DbMap map) =>
-      VehicleTypeModel(id: map['id'] as String, name: map['name'] as String);
-  DbMap toMap() => {'id': id, 'name': name};
-}
-
 class VehicleModel {
   const VehicleModel({
     required this.id,
     this.number,
     this.centerId,
     required this.plateNumber,
-    required this.typeId,
-    required this.typeName,
-    this.capacityKg,
     this.driverName,
     required this.isActive,
     required this.syncState,
@@ -272,9 +260,6 @@ class VehicleModel {
   final String? number;
   final String? centerId;
   final String plateNumber;
-  final String typeId;
-  final String typeName;
-  final double? capacityKg;
   final String? driverName;
   final bool isActive;
   final String syncState;
@@ -283,9 +268,6 @@ class VehicleModel {
     number: map['number'] as String?,
     centerId: map['center_id'] as String?,
     plateNumber: map['plate_number'] as String,
-    typeId: map['type_id'] as String,
-    typeName: map['type_name'] as String,
-    capacityKg: (map['capacity_kg'] as num?)?.toDouble(),
     driverName: map['driver_name'] as String?,
     isActive: _bool(map['is_active']),
     syncState: map['sync_state'] as String,
@@ -295,9 +277,6 @@ class VehicleModel {
     'number': number,
     'center_id': centerId,
     'plate_number': plateNumber,
-    'type_id': typeId,
-    'type_name': typeName,
-    'capacity_kg': capacityKg,
     'driver_name': driverName,
     'is_active': isActive ? 1 : 0,
     'sync_state': syncState,
@@ -1455,21 +1434,21 @@ class StockModel {
 
 class AgentHomeSummaryModel {
   const AgentHomeSummaryModel({
-    required this.collections,
-    required this.kg,
-    required this.tasks,
+    required this.verifiedEntries,
+    required this.collectedKg,
+    required this.transferRequests,
     required this.drafts,
     required this.toFix,
   });
-  final int collections;
-  final double kg;
-  final int tasks;
+  final int verifiedEntries;
+  final double collectedKg;
+  final int transferRequests;
   final int drafts;
   final int toFix;
   factory AgentHomeSummaryModel.fromMap(DbMap map) => AgentHomeSummaryModel(
-    collections: _int(map['collections']),
-    kg: _double(map['kg']),
-    tasks: _int(map['tasks']),
+    verifiedEntries: _int(map['verified_entries']),
+    collectedKg: _double(map['collected_kg']),
+    transferRequests: _int(map['transfer_requests']),
     drafts: _int(map['drafts']),
     toFix: _int(map['to_fix']),
   );
@@ -1477,21 +1456,24 @@ class AgentHomeSummaryModel {
 
 class SupervisorHomeSummaryModel {
   const SupervisorHomeSummaryModel({
-    required this.collections,
-    required this.kg,
-    required this.pendingVerification,
-    required this.openTasks,
+    required this.activeAgents,
+    required this.transfersDone,
+    required this.totalTransfers,
+    required this.stockKg,
+    required this.pendingExpenses,
   });
-  final int collections;
-  final double kg;
-  final int pendingVerification;
-  final int openTasks;
+  final int activeAgents;
+  final int transfersDone;
+  final int totalTransfers;
+  final double stockKg;
+  final int pendingExpenses;
   factory SupervisorHomeSummaryModel.fromMap(DbMap map) =>
       SupervisorHomeSummaryModel(
-        collections: _int(map['collections']),
-        kg: _double(map['kg']),
-        pendingVerification: _int(map['pending_verification']),
-        openTasks: _int(map['open_tasks']),
+        activeAgents: _int(map['active_agents']),
+        transfersDone: _int(map['transfers_done']),
+        totalTransfers: _int(map['total_transfers']),
+        stockKg: _double(map['stock_kg']),
+        pendingExpenses: _int(map['pending_expenses']),
       );
 }
 

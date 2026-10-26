@@ -44,13 +44,27 @@ class AgentStatusCard extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                item.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.regularB7_14.copyWith(
-                  color: AppColors.neutral950,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.regularB7_14.copyWith(
+                      color: AppColors.neutral950,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    item.phone,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.regularB8_12.copyWith(
+                      color: AppColors.neutral600,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: 8),
@@ -74,7 +88,7 @@ class AgentStatusCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  '${item.centerName} • ${item.collectionsToday} collections • ${item.waitingReview} waiting',
+                  item.centerName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.semiboldH9_14.copyWith(

@@ -868,6 +868,32 @@ class AppLocalizationsHi extends AppLocalizations {
   String get d2dVehicleNumberExample => 'उदा. GJ-05-BX-1234';
 
   @override
+  String get d2dInvalidVehicleNumberTitle => 'अमान्य वाहन नंबर';
+
+  @override
+  String get d2dInvalidVehicleNumberMessage =>
+      'वाहन नंबर GJ-05-BX-1234 प्रारूप में दर्ज करें।';
+
+  @override
+  String get d2dDuplicateVehicleNumberTitle => 'वाहन नंबर पहले से उपयोग में है';
+
+  @override
+  String get d2dDuplicateVehicleNumberMessage =>
+      'इस नंबर वाला D2D वाहन पहले से मौजूद है।';
+
+  @override
+  String get d2dVehicleType => 'वाहन का प्रकार';
+
+  @override
+  String get d2dSelectVehicleType => 'वाहन का प्रकार चुनें';
+
+  @override
+  String get d2dDriverName => 'ड्राइवर का नाम';
+
+  @override
+  String get d2dDriverNameHint => 'ड्राइवर का नाम दर्ज करें';
+
+  @override
   String get d2dSave => 'सहेजें';
 
   @override
@@ -2919,6 +2945,10 @@ class AppLocalizationsHi extends AppLocalizations {
       'रैगपिकर प्रोफ़ाइल निष्क्रिय की गई।';
 
   @override
+  String get ragpickerStatusChangeFailed =>
+      'रैगपिकर की स्थिति अपडेट नहीं हो सकी। कृपया फिर से प्रयास करें।';
+
+  @override
   String get ragpickerAssignTargetAgentCenter =>
       'लक्षित एजेंट / केंद्र असाइन करें';
 
@@ -3991,6 +4021,18 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get collectionLocationRequired =>
       'Collection submit करने के लिए location आवश्यक है। Location चालू करके अनुमति दें और फिर प्रयास करें।';
+
+  @override
+  String get collectionDetailsNotReady =>
+      'कलेक्शन की जानकारी अभी तैयार नहीं है। कृपया फिर से प्रयास करें।';
+
+  @override
+  String get collectionSupervisorRequired =>
+      'Submit करने से पहले एक सक्रिय MRF सुपरवाइज़र आवश्यक है।';
+
+  @override
+  String get collectionSaveFailed =>
+      'कलेक्शन सहेजा नहीं जा सका। कृपया फिर से प्रयास करें।';
 
   @override
   String get locationNotNow => 'अभी नहीं';

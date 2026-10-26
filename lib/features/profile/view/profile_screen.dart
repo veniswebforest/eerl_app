@@ -12,6 +12,7 @@ import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import 'package:go_router/go_router.dart';
 import '../../home/widgets/home_assets.dart';
@@ -21,6 +22,9 @@ import '../widgets/profile_info_card.dart';
 import '../widgets/assigned_centers_dialog.dart';
 import '../widgets/logout_confirmation_dialog.dart';
 import '../widgets/sync_data_dialog.dart';
+import 'package:intl/intl.dart';
+import 'package:eerl_app/core/utils/ist_date_time.dart';
+import 'package:eerl_app/features/auth/data/auth_session_storage.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
@@ -51,15 +55,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
               EerlLocalRepository.instance.getProfile(),
               EerlLocalRepository.instance.getCenters(),
               EerlLocalRepository.instance.getRoles(),
+              AuthSessionStorage().getSessionExpiresAt(),
             ]);
+            var profile = values[0] as ProfileModel;
+            final authSessionExpiresAt = values[3] as DateTime?;
+            if ((profile.sessionExpiresAt == null ||
+                    profile.sessionExpiresAt!.trim().isEmpty) &&
+                authSessionExpiresAt != null) {
+              profile = ProfileModel(
+                userName: profile.userName,
+                userPhone: profile.userPhone,
+                userPhotoUrl: profile.userPhotoUrl,
+                supervisorName: profile.supervisorName,
+                supervisorPhone: profile.supervisorPhone,
+                sessionExpiresAt: authSessionExpiresAt.toIso8601String(),
+              );
+            }
             return (
-              profile: values[0] as ProfileModel,
+              profile: profile,
               centers: values[1] as List<CenterModel>,
               roles: values[2] as List<MyRoleModel>,
             );
           })
           ..addListener(_refresh)
           ..load();
+  }
+
+  String _formatSessionExpiry(String? value) {
+    if (value == null || value.trim().isEmpty) return '';
+    final trimmed = value.trim();
+    final parsed = DateTime.tryParse(trimmed);
+    if (parsed == null) return value;
+    final displayDate = parsed.isUtc ? IstDateTime.fromUtc(parsed) : parsed;
+    return DateFormat('dd MMM yyyy, hh:mm a').format(displayDate);
   }
 
   void _refresh() {
@@ -158,11 +186,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               icon: ProfileAssets.role,
                               label: l10n.profileRole,
                               value: roleName,
+                              iconColor: AppColors.primary500,
                             ),
                             ProfileInfoItem(
                               icon: ProfileAssets.sessionExpiry,
                               label: l10n.profileSessionExpires,
-                              value: profile?.sessionExpiresAt ?? '',
+                              value: _formatSessionExpiry(
+                                profile?.sessionExpiresAt,
+                              ),
                             ),
                           ],
                         ),
@@ -205,7 +236,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           title: l10n.profileDeleteAccount,
                           subtitle: l10n.profileDeleteAccountSubtitle,
                           destructive: true,
-                          onTap: () {},
                         ),
                       ],
                     ),
@@ -583,33 +613,17 @@ class _AppLockToggleCard extends StatelessWidget {
                 if (appLockProvider == null) return;
                 final success = await appLockProvider.setLockEnabled(value);
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 if (!success && value) {
                   final errorMsg =
                       appLockProvider.lastErrorMessage ??
                       'Authentication failed. App lock not enabled.';
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(errorMsg),
-                      backgroundColor: AppColors.red600,
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 4),
-                    ),
-                  );
+                  AppSnackbar.error(context, message: errorMsg);
                 } else if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        value
-                            ? 'App lock enabled successfully'
-                            : 'App lock disabled',
-                      ),
-                      backgroundColor: value
-                          ? AppColors.primary600
-                          : AppColors.neutral700,
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 2),
-                    ),
+                  AppSnackbar.success(
+                    context,
+                    message: value
+                        ? 'App lock enabled successfully'
+                        : 'App lock disabled',
                   );
                 }
               },

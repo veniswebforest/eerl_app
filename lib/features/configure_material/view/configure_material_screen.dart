@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import 'package:eerl_app/shared/widgets/app_message_banner.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../widgets/configurable_material_tile.dart';
@@ -23,7 +23,6 @@ class ConfigureMaterialScreen extends StatefulWidget {
 class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
   bool _showPlastic = true;
   bool _typeDropdownOpen = true;
-  bool _saved = false;
   bool _hasChanges = false;
   bool _loading = true;
   bool _saving = false;
@@ -90,17 +89,10 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
                   padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
                   sliver: SliverList.list(
                     children: [
-                      if (_saved) ...[
-                        _SuccessBanner(
-                          onClose: () => setState(() => _saved = false),
-                        ),
-                        const SizedBox(height: 16),
-                      ] else ...[
-                        _BackButton(
-                          onTap: () => Navigator.of(context).maybePop(),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
+                      _BackButton(
+                        onTap: () => Navigator.of(context).maybePop(),
+                      ),
+                      const SizedBox(height: 24),
                       Text(
                         context.l10n.configureMaterialsTitle,
                         style: AppTextStyles.semiboldH6_20,
@@ -143,7 +135,6 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
                           onSelected: (type) {
                             setState(() {
                               _collectionType = type;
-                              _saved = false;
                             });
                             _loadItems();
                           },
@@ -267,7 +258,6 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
         sortOrder: item.sortOrder,
       );
       _hasChanges = true;
-      _saved = false;
     });
   }
 
@@ -277,7 +267,6 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
       final item = list.removeAt(oldIndex);
       list.insert(newIndex, item);
       _hasChanges = true;
-      _saved = false;
     });
   }
 
@@ -292,10 +281,15 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
       if (!mounted) return;
       setState(() {
         _typeDropdownOpen = false;
-        _saved = true;
         _hasChanges = false;
         _saving = false;
       });
+      AppTopNotification.show(
+        context,
+        key: const Key('configure-material-saved-notification'),
+        title: context.l10n.configureSequenceSaved,
+        tone: AppTopNotificationTone.success,
+      );
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -329,33 +323,6 @@ class _BackButton extends StatelessWidget {
         child: SvgPicture.asset('assets/icons/records/back.svg'),
       ),
     ),
-  );
-}
-
-class _SuccessBanner extends StatelessWidget {
-  const _SuccessBanner({required this.onClose});
-
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) => AppMessageBanner(
-    height: 45,
-    padding: const EdgeInsets.symmetric(horizontal: 12),
-    borderRadius: 10,
-    title: context.l10n.configureSequenceSaved,
-    color: AppColors.primary500,
-    backgroundColor: AppColors.primary50,
-    borderColor: AppColors.primary200,
-    titleStyle: AppTextStyles.mediumSH9_12.copyWith(
-      color: AppColors.primary500,
-    ),
-    icon: const Icon(Icons.check_circle, size: 20, color: AppColors.primary500),
-    closeIcon: SvgPicture.asset(
-      'assets/icons/profile/sync_close.svg',
-      width: 20,
-      height: 20,
-    ),
-    onClose: onClose,
   );
 }
 

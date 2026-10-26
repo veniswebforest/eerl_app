@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
@@ -13,7 +15,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 8;
+  static const databaseVersion = 10;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -63,8 +65,19 @@ class AppDatabase {
   }
 
   Future<void> _onConfigure(Database db) async {
-    await db.execute('PRAGMA foreign_keys = ON');
-    _log('Database configured with foreign keys enabled');
+    final versionRows = await db.rawQuery('PRAGMA user_version');
+    final currentVersion = Sqflite.firstIntValue(versionRows) ?? 0;
+    final rebuildingLegacySchema =
+        currentVersion > 0 && currentVersion < databaseVersion;
+    await db.execute(
+      'PRAGMA foreign_keys = ${rebuildingLegacySchema ? 'OFF' : 'ON'}',
+    );
+    _log(
+      rebuildingLegacySchema
+          ? 'Foreign keys temporarily disabled for schema migration '
+                '$currentVersion -> $databaseVersion'
+          : 'Database configured with foreign keys enabled',
+    );
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -175,10 +188,94 @@ class AppDatabase {
         'Upgraded collection and expense decision remarks schema to version 8',
       );
     }
+    if (oldVersion < 10) {
+      await _rebuildVehiclesWithoutType(db);
+      _log('Removed D2D vehicle type and capacity schema in version 10');
+    }
+  }
+
+  Future<void> _rebuildVehiclesWithoutType(Database db) async {
+    final columns = await db.rawQuery(
+      'PRAGMA table_info("${DatabaseTables.vehicles}")',
+    );
+    if (columns.isEmpty) {
+      await db.execute('DROP TABLE IF EXISTS vehicle_types');
+      return;
+    }
+    await db.execute('PRAGMA defer_foreign_keys = ON');
+    await db.execute('''
+      CREATE TABLE vehicles_new (
+        id TEXT PRIMARY KEY,
+        number TEXT,
+        center_id TEXT REFERENCES ${DatabaseTables.centers} (id),
+        plate_number TEXT NOT NULL,
+        driver_name TEXT,
+        is_active INTEGER NOT NULL,
+        sync_state TEXT NOT NULL DEFAULT 'synced'
+      )
+    ''');
+    await db.execute('''
+      INSERT INTO vehicles_new (
+        id, number, center_id, plate_number, driver_name, is_active, sync_state
+      )
+      SELECT
+        id, number, center_id, plate_number, driver_name, is_active, sync_state
+      FROM ${DatabaseTables.vehicles}
+    ''');
+    await db.execute('DROP TABLE ${DatabaseTables.vehicles}');
+    await db.execute(
+      'ALTER TABLE vehicles_new RENAME TO ${DatabaseTables.vehicles}',
+    );
+    await db.execute(
+      'CREATE INDEX ix_vehicles_center ON '
+      '${DatabaseTables.vehicles} (center_id, is_active)',
+    );
+    await db.execute('DROP TABLE IF EXISTS vehicle_types');
+    await _sanitizeQueuedVehicleWrites(db);
+  }
+
+  Future<void> _sanitizeQueuedVehicleWrites(Database db) async {
+    final outboxExists = await db.rawQuery(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+      [DatabaseTables.outbox],
+    );
+    if (outboxExists.isEmpty) return;
+
+    final writes = await db.query(
+      DatabaseTables.outbox,
+      columns: const ['seq', 'body'],
+      where: "entity = ? AND kind = 'upsert'",
+      whereArgs: const [DatabaseTables.vehicles],
+    );
+    for (final write in writes) {
+      final rawBody = write['body'] as String?;
+      if (rawBody == null) continue;
+      final decoded = jsonDecode(rawBody);
+      if (decoded is! Map) continue;
+      final body = Map<String, Object?>.from(decoded);
+      final removedType = body.containsKey('typeId');
+      final removedCapacity = body.containsKey('capacityKg');
+      if (!removedType && !removedCapacity) continue;
+      body.remove('typeId');
+      body.remove('capacityKg');
+      await db.update(
+        DatabaseTables.outbox,
+        {'body': jsonEncode(body)},
+        where: 'seq = ?',
+        whereArgs: [write['seq']],
+      );
+    }
   }
 
   Future<void> _onOpen(Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON');
     await _ensureVersionOneSchema(db);
+    final foreignKeyErrors = await db.rawQuery('PRAGMA foreign_key_check');
+    if (foreignKeyErrors.isNotEmpty) {
+      throw StateError(
+        'Database contains ${foreignKeyErrors.length} foreign-key violation(s).',
+      );
+    }
   }
 
   Future<void> ensureCurrentSchema() async {
@@ -417,7 +514,6 @@ class AppDatabase {
         DatabaseTables.centerPeople,
         DatabaseTables.myCenters,
         DatabaseTables.centerChannels,
-        DatabaseTables.vehicleTypes,
         DatabaseTables.destinations,
         DatabaseTables.notifications,
         DatabaseTables.items,
@@ -472,7 +568,6 @@ class AppDatabase {
         DatabaseTables.centerPeople,
         DatabaseTables.myCenters,
         DatabaseTables.centerChannels,
-        DatabaseTables.vehicleTypes,
         DatabaseTables.destinations,
         DatabaseTables.notifications,
         DatabaseTables.items,

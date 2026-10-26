@@ -8,16 +8,33 @@ import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_required_text.dart';
+import 'package:eerl_app/shared/widgets/app_mobile_number_field.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+
+class NewRagpickerInput {
+  const NewRagpickerInput({
+    required this.name,
+    required this.phone,
+    this.idNumber,
+    this.localPhotoPath,
+  });
+
+  final String name;
+  final String phone;
+  final String? idNumber;
+  final String? localPhotoPath;
+}
 
 class AddNewRagpickerBottomSheet extends StatefulWidget {
   const AddNewRagpickerBottomSheet({super.key, required this.onSave});
 
-  final ValueChanged<String> onSave;
+  final Future<void> Function(NewRagpickerInput) onSave;
 
   static Future<void> show(
     BuildContext context, {
-    required ValueChanged<String> onSave,
+    required Future<void> Function(NewRagpickerInput) onSave,
   }) {
     return showDialog<void>(
       context: context,
@@ -49,6 +66,7 @@ class _AddNewRagpickerBottomSheetState
   final TextEditingController _aadharController = TextEditingController();
   XFile? _photo;
   final ImagePicker _imagePicker = ImagePicker();
+  bool _saving = false;
 
   @override
   void dispose() {
@@ -70,11 +88,33 @@ class _AddNewRagpickerBottomSheetState
     } catch (_) {}
   }
 
-  void _handleSave() {
+  Future<void> _handleSave() async {
     final name = _fullNameController.text.trim();
-    if (name.isNotEmpty) {
-      widget.onSave(name);
-      Navigator.pop(context);
+    final phone = _mobileController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (name.isEmpty) {
+      AppSnackbar.error(context, message: context.l10n.ragpickerNameRequired);
+      return;
+    }
+    if (!RegExp(r'^[6-9][0-9]{9}$').hasMatch(phone)) {
+      AppSnackbar.error(context, message: context.l10n.invalidMobileNumber);
+      return;
+    }
+    if (_saving) return;
+    setState(() => _saving = true);
+    try {
+      await widget.onSave(
+        NewRagpickerInput(
+          name: name,
+          phone: phone,
+          idNumber: _aadharController.text.trim().isEmpty
+              ? null
+              : _aadharController.text.trim(),
+          localPhotoPath: _photo?.path,
+        ),
+      );
+      if (mounted) Navigator.pop(context);
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -109,33 +149,9 @@ class _AddNewRagpickerBottomSheetState
             // Mobile Number *
             _buildLabel(l10n.mobileNumberRequired),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Container(
-                  width: 55,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    color: AppColors.neutral50,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.cool400),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '+91',
-                    style: AppTextStyles.mediumSH7_16.copyWith(
-                      color: AppColors.neutral950,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: _buildTextField(
-                    controller: _mobileController,
-                    hintText: l10n.enterMobileNumber,
-                    keyboardType: TextInputType.phone,
-                  ),
-                ),
-              ],
+            AppMobileNumberField(
+              controller: _mobileController,
+              hintText: l10n.enterMobileNumber,
             ),
             const SizedBox(height: 24),
 
@@ -191,7 +207,7 @@ class _AddNewRagpickerBottomSheetState
                   child: SizedBox(
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: _handleSave,
+                      onPressed: _saving ? null : _handleSave,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary500,
                         elevation: 0,
@@ -242,7 +258,7 @@ class _AddNewRagpickerBottomSheetState
   }
 
   Widget _buildLabel(String text) {
-    return Text(
+    return AppRequiredText(
       text,
       style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
     );

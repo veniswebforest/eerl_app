@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -142,8 +143,9 @@ class _State extends State<VerificationDetailScreen> {
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
     } on Object catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Collection review was not saved: $error')),
+      AppSnackbar.error(
+        context,
+        message: 'Collection review was not saved: $error',
       );
     } finally {
       if (mounted) setState(() => reviewing = false);

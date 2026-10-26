@@ -10,7 +10,8 @@ import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
-import 'package:eerl_app/shared/widgets/app_message_banner.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import '../model/transfer_request_detail_state.dart';
 import '../widgets/transfer_request_detail_widgets.dart';
@@ -51,7 +52,6 @@ class _TransferRequestDetailScreenState
   bool _dispatchFlowOpen = false;
   bool _approvalFlowOpen = false;
   bool _rejectionFlowOpen = false;
-  bool _showRejectedBanner = false;
   String? _rejectionReasonOverride;
   String? _rejectionRemarksOverride;
   bool _isSupervisor = false;
@@ -164,9 +164,6 @@ class _TransferRequestDetailScreenState
                 onReject: () => setState(() => _rejectionFlowOpen = true),
                 onVehicleArrived: () =>
                     setState(() => _dispatchFlowOpen = true),
-                showRejectedBanner: _showRejectedBanner,
-                onDismissRejectedBanner: () =>
-                    setState(() => _showRejectedBanner = false),
                 rejectionReasonOverride: _rejectionReasonOverride,
                 rejectionRemarksOverride: _rejectionRemarksOverride,
               );
@@ -195,16 +192,21 @@ class _TransferRequestDetailScreenState
       if (!mounted) return;
       setState(() {
         _rejectionFlowOpen = false;
-        _showRejectedBanner = true;
         _rejectionReasonOverride = reason;
         _rejectionRemarksOverride = rejection.remarks;
       });
+      AppTopNotification.show(
+        context,
+        key: const Key('supervisor-transfer-rejected-banner'),
+        closeButtonKey: const Key('supervisor-transfer-rejected-banner-close'),
+        title: 'Request Rejected!',
+        subtitle: '${transfer.number ?? transfer.id} rejected.',
+        tone: AppTopNotificationTone.error,
+      );
       await _controller.load();
     } on Object catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.toString())));
+      AppSnackbar.error(context, message: error.toString());
     }
   }
 
@@ -241,8 +243,6 @@ class _TransferRequestDetailContent extends StatelessWidget {
     required this.onApprove,
     required this.onReject,
     required this.onVehicleArrived,
-    required this.showRejectedBanner,
-    required this.onDismissRejectedBanner,
     this.rejectionReasonOverride,
     this.rejectionRemarksOverride,
   });
@@ -255,8 +255,6 @@ class _TransferRequestDetailContent extends StatelessWidget {
   final VoidCallback onApprove;
   final VoidCallback onReject;
   final VoidCallback onVehicleArrived;
-  final bool showRejectedBanner;
-  final VoidCallback onDismissRejectedBanner;
   final String? rejectionReasonOverride;
   final String? rejectionRemarksOverride;
 
@@ -279,16 +277,14 @@ class _TransferRequestDetailContent extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      appBar: showRejectedBanner
-          ? null
-          : CustomAppBar(
-              title: isSupervisor && _isRejected
-                  ? null
-                  : context.l10n.transferDetailTitle,
-              backIconAsset: 'assets/icons/records/back.svg',
-              titleStyle: AppTextStyles.semiboldH6_20,
-              backButtonRadius: 12,
-            ),
+      appBar: CustomAppBar(
+        title: isSupervisor && _isRejected
+            ? null
+            : context.l10n.transferDetailTitle,
+        backIconAsset: 'assets/icons/records/back.svg',
+        titleStyle: AppTextStyles.semiboldH6_20,
+        backButtonRadius: 12,
+      ),
       bottomNavigationBar:
           roleLoaded &&
               isSupervisor &&
@@ -365,7 +361,6 @@ class _TransferRequestDetailContent extends StatelessWidget {
             )
           : null,
       body: SafeArea(
-        top: showRejectedBanner,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
@@ -373,12 +368,7 @@ class _TransferRequestDetailContent extends StatelessWidget {
               children: [
                 ListView(
                   key: const Key('transfer-request-detail-scroll'),
-                  padding: EdgeInsets.fromLTRB(
-                    20,
-                    showRejectedBanner ? 82 : 24,
-                    20,
-                    28,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
                   children: [
                     if (_isRejected && !isSupervisor) ...[
                       _RejectReasonCard(
@@ -452,40 +442,6 @@ class _TransferRequestDetailContent extends StatelessWidget {
                     ],
                   ],
                 ),
-                if (showRejectedBanner)
-                  Positioned(
-                    left: 20,
-                    right: 20,
-                    top: 4,
-                    child: AppMessageBanner(
-                      key: const Key('supervisor-transfer-rejected-banner'),
-                      title: 'Request Rejected!',
-                      subtitle:
-                          '${transfer?.number ?? transfer?.id ?? ''} rejected.',
-                      color: AppColors.red500,
-                      backgroundColor: AppColors.red50,
-                      borderColor: AppColors.cool300,
-                      height: 78,
-                      padding: const EdgeInsets.all(16),
-                      leadingGap: 12,
-                      iconBackgroundColor: AppColors.red500,
-                      iconPadding: const EdgeInsets.all(5),
-                      icon: SvgPicture.asset(
-                        'assets/icons/wallet/category_request_rejected_banner.svg',
-                        width: 20,
-                        height: 20,
-                      ),
-                      closeIcon: SvgPicture.asset(
-                        'assets/icons/transfer_requests/reject_close.svg',
-                        width: 20,
-                        height: 20,
-                      ),
-                      closeButtonKey: const Key(
-                        'supervisor-transfer-rejected-banner-close',
-                      ),
-                      onClose: onDismissRejectedBanner,
-                    ),
-                  ),
               ],
             ),
           ),

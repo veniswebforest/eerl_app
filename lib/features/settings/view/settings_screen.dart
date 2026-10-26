@@ -47,12 +47,7 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.notifications_outlined,
             title: l10n.notifications,
             subtitle: l10n.notificationsDesc,
-            trailing: Switch(
-              value: true,
-              onChanged: (_) {
-                // Placeholder
-              },
-            ),
+            trailing: Switch(value: true, onChanged: null),
           ),
 
           const SizedBox(height: 24),
@@ -66,13 +61,11 @@ class SettingsScreen extends StatelessWidget {
           _SettingsTile(
             icon: Icons.privacy_tip_outlined,
             title: l10n.privacyPolicy,
-            onTap: () {},
           ),
           const SizedBox(height: 8),
           _SettingsTile(
             icon: Icons.description_outlined,
             title: l10n.termsOfService,
-            onTap: () {},
           ),
           const SizedBox(height: 8),
           _SettingsTile(

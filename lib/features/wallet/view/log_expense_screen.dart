@@ -18,6 +18,7 @@ import '../widgets/receipt_upload_section.dart';
 import '../widgets/request_new_expense_category_dialog.dart';
 import '../widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:go_router/go_router.dart';
 
 typedef ExpenseSaver =
@@ -149,9 +150,7 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
     } catch (error) {
       AppLogger.error('EXPENSE_SAVE', error.toString());
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        AppSnackbar.error(context, message: error.toString());
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -216,14 +215,11 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
                                   const RequestNewExpenseCategoryDialog(),
                             );
                             if (saved == true && context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    context
-                                        .l10n
-                                        .expenseCategoryRequestSavedForSync,
-                                  ),
-                                ),
+                              AppSnackbar.success(
+                                context,
+                                message: context
+                                    .l10n
+                                    .expenseCategoryRequestSavedForSync,
                               );
                             }
                           },

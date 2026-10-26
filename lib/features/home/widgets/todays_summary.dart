@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'home_assets.dart';
 import 'home_styles.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
@@ -22,6 +23,7 @@ class TodaysSummary extends StatefulWidget {
 
 class _TodaysSummaryState extends State<TodaysSummary> {
   bool _isSummaryVisible = true;
+  int _bootstrapRevision = -1;
   late final LocalQueryController<
     ({AgentHomeSummaryModel summary, WalletSummaryModel wallet})
   >
@@ -40,10 +42,20 @@ class _TodaysSummaryState extends State<TodaysSummary> {
         wallet: values[1] as WalletSummaryModel,
       );
     })..load();
+    _bootstrapRevision = BootstrapSyncService.instance.revision;
+    BootstrapSyncService.instance.addListener(_reloadAfterBootstrap);
+  }
+
+  void _reloadAfterBootstrap() {
+    final revision = BootstrapSyncService.instance.revision;
+    if (revision == _bootstrapRevision) return;
+    _bootstrapRevision = revision;
+    _controller.load();
   }
 
   @override
   void dispose() {
+    BootstrapSyncService.instance.removeListener(_reloadAfterBootstrap);
     _controller.dispose();
     super.dispose();
   }
@@ -128,7 +140,7 @@ class _TodaysSummaryState extends State<TodaysSummary> {
                                         iconBg: AppColors.orchidLight,
                                         label: context.l10n.collectedToday,
                                         value: context.l10n.weightKg(
-                                          (summary?.kg ?? 0).round(),
+                                          (summary?.collectedKg ?? 0).round(),
                                         ),
                                         valueColor: AppColors.orchid,
                                       ),
@@ -137,7 +149,8 @@ class _TodaysSummaryState extends State<TodaysSummary> {
                                         iconColor: AppColors.primary500,
                                         iconBg: AppColors.primary100,
                                         label: context.l10n.verifiedEntries,
-                                        value: '${summary?.collections ?? 0}',
+                                        value:
+                                            '${summary?.verifiedEntries ?? 0}',
                                         valueColor: AppColors.primary500,
                                       ),
                                       SummaryCard(
@@ -145,7 +158,8 @@ class _TodaysSummaryState extends State<TodaysSummary> {
                                         iconColor: AppColors.purple,
                                         iconBg: AppColors.purpleLight,
                                         label: context.l10n.transferRequests,
-                                        value: '${summary?.tasks ?? 0}',
+                                        value:
+                                            '${summary?.transferRequests ?? 0}',
                                         valueColor: AppColors.purple,
                                       ),
                                       SummaryCard(

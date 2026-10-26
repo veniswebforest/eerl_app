@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:eerl_app/shared/widgets/app_required_text.dart';
 
 class RagpickerPhotoSection extends StatelessWidget {
   const RagpickerPhotoSection({
@@ -30,7 +31,7 @@ class RagpickerPhotoSection extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: AppTextStyles.mediumSH8_14),
+      AppRequiredText(label, style: AppTextStyles.mediumSH8_14),
       const SizedBox(height: 8),
       GestureDetector(
         key: const Key('ragpicker-photo-capture'),

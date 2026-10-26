@@ -24,6 +24,7 @@ class AppRoutes {
   static const String expenseClaimDetail = '/wallet/expense-claim';
   static const String cashRequestDetail = '/wallet/cash-request';
   static const String addCollection = '/collections/add';
+  static const String collectionRecords = '/collections';
   static const String collectionDetail = '/collections/detail';
   static const String collectionReceipt = '/collections/receipt';
   static const String collectionImagePreview = '/collections/image-preview';
@@ -47,6 +48,7 @@ class AppRoutes {
   static const String supervisorCompletedRequest =
       '/supervisor/requests/completed';
   static const String transferRequests = '/transfer-requests';
+  static const String transferNotifications = '/transfers';
   static const String createTransferRequest = '/transfer-requests/create';
   static const String transferRequestDetail = '/transfer-requests/detail';
   static const String stockDetail = '/stock/detail';

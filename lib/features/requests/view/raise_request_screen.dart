@@ -12,11 +12,13 @@ import 'package:intl/intl.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_required_text.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/core/utils/ist_date_time.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 
 enum RaiseRequestViewMode { empty, filled }
 
@@ -82,8 +84,9 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
       time.minute,
     );
     if (!selected.isAfter(IstDateTime.now())) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.requestFollowupFutureError)),
+      AppSnackbar.error(
+        context,
+        message: context.l10n.requestFollowupFutureError,
       );
       return;
     }
@@ -124,9 +127,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
       await _showRequestSentDialog();
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(context.l10n.requestSubmitFailed)));
+      AppSnackbar.error(context, message: context.l10n.requestSubmitFailed);
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -152,7 +153,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                   children: [
                     const _SupervisorCard(),
                     const SizedBox(height: 24),
-                    Text(
+                    AppRequiredText(
                       context.l10n.requestPriorityLevel,
                       style: AppTextStyles.mediumSH8_14,
                     ),
@@ -162,7 +163,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                       onChanged: (value) => setState(() => _priority = value),
                     ),
                     const SizedBox(height: 24),
-                    Text(
+                    AppRequiredText(
                       context.l10n.requestFollowupDateTime,
                       style: AppTextStyles.mediumSH8_14,
                     ),
@@ -212,7 +213,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
+                    AppRequiredText(
                       context.l10n.requestDescriptionLabel,
                       style: AppTextStyles.mediumSH8_14,
                     ),
@@ -263,7 +264,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text(
+                    AppRequiredText(
                       context.l10n.requestAddPhoto,
                       style: AppTextStyles.mediumSH8_14,
                     ),

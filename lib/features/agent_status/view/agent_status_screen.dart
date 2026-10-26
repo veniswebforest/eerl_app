@@ -70,7 +70,7 @@ class _AgentStatusScreenState extends State<AgentStatusScreen> {
                   }
                   final agent = agents[index - 1];
                   return AgentStatusCard(
-                    key: ValueKey(agent.userId),
+                    key: ValueKey('${agent.userId}:${agent.centerName}'),
                     item: agent,
                     activeLabel: context.l10n.ragpickerActive,
                     offlineLabel: context.l10n.agentStatusOffline,

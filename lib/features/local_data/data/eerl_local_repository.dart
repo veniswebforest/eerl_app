@@ -14,6 +14,7 @@ class EerlLocalRepository {
   Future<void> selectCenter(String id) => _local.selectCenter(id);
   Future<List<MyRoleModel>> getRoles() => _local.getRoles();
   Future<List<CenterModel>> getCenters() => _local.getCenters();
+  Future<List<CenterModel>> getMyCenters() => _local.getMyCenters();
   Future<List<CenterModel>> getMrfCenters() => _local.getMrfCenters();
   Future<List<CenterModel>> getAllCenters() => _local.getAllCenters();
   Future<CenterModel?> getCenter(String id) => _local.getCenter(id);
@@ -52,7 +53,6 @@ class EerlLocalRepository {
     String? centerId,
     bool activeOnly = true,
   }) => _local.getVehicles(centerId: centerId, activeOnly: activeOnly);
-  Future<List<VehicleTypeModel>> getVehicleTypes() => _local.getVehicleTypes();
   Future<void> saveVehicle(VehicleModel vehicle, {required bool isNew}) =>
       _local.saveVehicle(vehicle, isNew: isNew);
   Future<void> setVehicleActive(VehicleModel vehicle, bool active) =>
@@ -367,7 +367,8 @@ class EerlLocalRepository {
       _local.getStock(centerId: centerId, stage: stage);
   Future<List<StockModel>> getTransferStockInHand({String? centerId}) =>
       _local.getTransferStockInHand(centerId: centerId);
-  Future<List<AgentStatusModel>> getAgentStatus() => _local.getAgentStatus();
+  Future<List<AgentStatusModel>> getAgentStatus({String? centerId}) =>
+      _local.getAgentStatus(centerId: centerId);
   Future<SyncStatusModel> getSyncStatus() => _local.getSyncStatus();
   Future<List<FailedOutboxItemModel>> getFailedOutboxItems() =>
       _local.getFailedOutboxItems();

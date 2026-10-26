@@ -4,6 +4,7 @@ import 'package:eerl_app/core/location/device_location_service.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/core/router/app_route_data.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
@@ -227,16 +228,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           _CenteredHomeContent(
                             child: isSupervisor
                                 ? SupervisorQuickActions(
-                                    onAssignTaskTap: () => context.push(
-                                      AppRoutes.assignSupervisorTask,
-                                    ),
+                                    onAssignTaskTap: () async {
+                                      await context.push(
+                                        AppRoutes.assignSupervisorTask,
+                                      );
+                                    },
                                     onAgentsStatusTap: () =>
                                         context.push(AppRoutes.agentStatus),
                                     onCheckStockTap: () => navigation
                                         .selectPage('supervisor-stock'),
-                                    onApprovalsTap: () => context.push(
-                                      AppRoutes.supervisorExpense,
-                                    ),
+                                    onApprovalsTap: () async {
+                                      await context.push(
+                                        AppRoutes.supervisorExpense,
+                                      );
+                                    },
                                   )
                                 : QuickActions(
                                     onAddCollectionTap: () =>
@@ -248,15 +253,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   ),
                           ),
 
-                          const SizedBox(height: 24),
-                          _CenteredHomeContent(
-                            child: DayClosure(
-                              onEndMyDayTap: () => context.push(
-                                AppRoutes.endMyDay,
-                                extra: isSupervisor,
+                          if (!isSupervisor) ...[
+                            const SizedBox(height: 24),
+                            _CenteredHomeContent(
+                              child: DayClosure(
+                                onEndMyDayTap: () => context.push(
+                                  AppRoutes.endMyDay,
+                                  extra: false,
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ),
@@ -291,15 +298,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         );
       case HomeLocationState.permissionDenied:
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.locationPermissionDenied)),
+          AppSnackbar.error(
+            context,
+            message: context.l10n.locationPermissionDenied,
           );
         }
       case HomeLocationState.unavailable:
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.locationUnavailable)),
-          );
+          AppSnackbar.error(context, message: context.l10n.locationUnavailable);
         }
       case HomeLocationState.ready:
         break;
@@ -334,8 +340,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final opened = await openSettings();
     if (!opened && mounted) {
       _waitingForLocationSettings = false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.locationSettingsUnavailable)),
+      AppSnackbar.error(
+        context,
+        message: context.l10n.locationSettingsUnavailable,
       );
     }
   }

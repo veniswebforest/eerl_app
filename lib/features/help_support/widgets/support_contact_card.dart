@@ -71,8 +71,10 @@ class SupportContactCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 4),
-              SvgPicture.asset(externalIcon, width: 12, height: 12),
+              if (onTap != null) ...[
+                const SizedBox(width: 4),
+                SvgPicture.asset(externalIcon, width: 12, height: 12),
+              ],
             ],
           ),
         ),

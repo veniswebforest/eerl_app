@@ -189,10 +189,10 @@ class OutgoingSyncService {
     final isCollectionRequest = item['entity'] == DatabaseTables.collections;
     final isCollectionSubmit = isCollectionRequest && item['kind'] == 'submit';
     final requestMethod = isCollectionSubmit
-        ? 'PUT'
+        ? 'POST'
         : item['method']! as String;
     final requestPath = isCollectionSubmit
-        ? '/collections/${item['entity_id']}'
+        ? '/collections/${item['entity_id']}/submit'
         : item['path']! as String;
     final stopwatch = Stopwatch();
     var apiSuccessLogged = false;
@@ -509,6 +509,9 @@ class OutgoingSyncService {
     if (table == DatabaseTables.mrfPeople) {
       return _mrfPersonServerValues(data);
     }
+    if (table == DatabaseTables.vehicles) {
+      return _vehicleServerValues(data);
+    }
     if (table == DatabaseTables.tasks) {
       return _taskServerValues(data);
     }
@@ -583,6 +586,21 @@ class OutgoingSyncService {
       if (candidate['isActive'] != null)
         'is_active': _sqliteValue(candidate['isActive']),
       if (candidate['role'] != null) 'role': candidate['role'],
+    };
+  }
+
+  Map<String, Object?> _vehicleServerValues(Map<Object?, Object?> data) {
+    final nested = data['vehicle'];
+    final candidate = nested is Map ? nested : data;
+    return <String, Object?>{
+      if (candidate['number'] != null) 'number': candidate['number'],
+      if (candidate['centerId'] != null) 'center_id': candidate['centerId'],
+      if (candidate['plateNumber'] != null)
+        'plate_number': candidate['plateNumber'],
+      if (candidate.containsKey('driverName'))
+        'driver_name': candidate['driverName'],
+      if (candidate.containsKey('isActive'))
+        'is_active': _sqliteValue(candidate['isActive']),
     };
   }
 

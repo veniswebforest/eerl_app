@@ -8,27 +8,30 @@ import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'add_new_ragpicker_bottom_sheet.dart';
 
 /// Ramp-specific fields from the first collection step.
 class RampDetailsForm extends StatefulWidget {
   const RampDetailsForm({
     super.key,
-    required this.personNames,
-    required this.selectedPerson,
+    required this.people,
+    required this.selectedPersonId,
     required this.photo,
     required this.onPersonSelected,
     required this.onAddNewPerson,
+    required this.onDeactivatePerson,
     required this.onCapturePhoto,
     required this.onRemovePhoto,
     required this.onPreviewPhoto,
   });
 
-  final List<String> personNames;
-  final String? selectedPerson;
+  final List<RagpickerModel> people;
+  final String? selectedPersonId;
   final XFile? photo;
-  final ValueChanged<String?> onPersonSelected;
-  final ValueChanged<String> onAddNewPerson;
+  final ValueChanged<RagpickerModel> onPersonSelected;
+  final Future<void> Function(NewRagpickerInput) onAddNewPerson;
+  final ValueChanged<RagpickerModel> onDeactivatePerson;
   final VoidCallback onCapturePhoto;
   final VoidCallback onRemovePhoto;
   final VoidCallback onPreviewPhoto;
@@ -50,8 +53,8 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
   @override
   Widget build(BuildContext context) {
     final query = _personSearchController.text.trim().toLowerCase();
-    final filteredPeople = widget.personNames
-        .where((person) => person.toLowerCase().contains(query))
+    final filteredPeople = widget.people
+        .where((person) => person.name.toLowerCase().contains(query))
         .toList();
     final noResults =
         _isPersonDropdownOpen && query.isNotEmpty && filteredPeople.isEmpty;
@@ -92,7 +95,11 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
   );
 
   Widget _buildClosedSelector() {
-    final placeholder = widget.selectedPerson == null;
+    final selectedPerson = widget.people.cast<RagpickerModel?>().firstWhere(
+      (person) => person?.id == widget.selectedPersonId,
+      orElse: () => null,
+    );
+    final placeholder = selectedPerson == null;
     return InkWell(
       key: const Key('ramp-person-selector'),
       onTap: () => setState(() {
@@ -112,7 +119,7 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
           children: [
             Expanded(
               child: Text(
-                widget.selectedPerson ?? context.l10n.collectionSelectPerson,
+                selectedPerson?.name ?? context.l10n.collectionSelectPerson,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.regularB7_14.copyWith(
@@ -177,7 +184,7 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
     ),
   );
 
-  Widget _buildPersonList(List<String> people) => Container(
+  Widget _buildPersonList(List<RagpickerModel> people) => Container(
     constraints: const BoxConstraints(maxHeight: 224),
     decoration: BoxDecoration(
       color: AppColors.neutral50,
@@ -195,21 +202,22 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
           onTap: () {
             widget.onPersonSelected(person);
             setState(() {
+              _isPersonDropdownOpen = false;
               _personSearchController.clear();
             });
           },
           child: Container(
-            color: widget.selectedPerson == person
+            color: widget.selectedPersonId == person.id
                 ? AppColors.red100
                 : Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: [
-                _radio(widget.selectedPerson == person),
+                _radio(widget.selectedPersonId == person.id),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    person,
+                    person.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.regularB7_14.copyWith(
@@ -217,10 +225,14 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
                     ),
                   ),
                 ),
-                PopupMenuButton<void>(
-                  key: Key('ramp-edit-person-$index'),
+                PopupMenuButton<_RampPersonAction>(
+                  key: ValueKey('ramp-edit-person-${person.id}'),
                   padding: EdgeInsets.zero,
-
+                  onSelected: (action) {
+                    if (action == _RampPersonAction.deactivate) {
+                      widget.onDeactivatePerson(person);
+                    }
+                  },
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                   constraints: const BoxConstraints(),
                   menuPadding: EdgeInsets.zero,
@@ -230,7 +242,9 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
                   ),
                   position: PopupMenuPosition.over,
                   itemBuilder: (context) => [
-                    PopupMenuItem<void>(
+                    PopupMenuItem<_RampPersonAction>(
+                      key: ValueKey('ramp-deactivate-person-${person.id}'),
+                      value: _RampPersonAction.deactivate,
                       height: 44,
                       child: Text(
                         context.l10n.deactivate,
@@ -416,3 +430,5 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
     ),
   );
 }
+
+enum _RampPersonAction { deactivate }

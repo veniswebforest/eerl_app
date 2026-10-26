@@ -70,20 +70,11 @@ abstract final class DatabaseSchema {
       )
     ''',
     '''
-      CREATE TABLE ${DatabaseTables.vehicleTypes} (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL
-      )
-    ''',
-    '''
       CREATE TABLE ${DatabaseTables.vehicles} (
         id TEXT PRIMARY KEY,
         number TEXT,
         center_id TEXT REFERENCES ${DatabaseTables.centers} (id),
         plate_number TEXT NOT NULL,
-        type_id TEXT NOT NULL REFERENCES ${DatabaseTables.vehicleTypes} (id),
-        type_name TEXT NOT NULL,
-        capacity_kg REAL,
         driver_name TEXT,
         is_active INTEGER NOT NULL,
         sync_state TEXT NOT NULL DEFAULT 'synced'

@@ -6,7 +6,6 @@ abstract final class DatabaseTables {
   static const items = 'items';
   static const centerChannels = 'center_channels';
   static const centerItems = 'center_items';
-  static const vehicleTypes = 'vehicle_types';
   static const vehicles = 'vehicles';
   static const mrfPeople = 'mrf_people';
   static const ragpickers = 'ragpickers';
@@ -40,7 +39,6 @@ abstract final class DatabaseTables {
     items,
     centerChannels,
     centerItems,
-    vehicleTypes,
     vehicles,
     mrfPeople,
     ragpickers,

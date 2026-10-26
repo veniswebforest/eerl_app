@@ -11,8 +11,11 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/uuid_generator.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
-import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import 'package:eerl_app/shared/widgets/app_square_back_button.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
+import 'package:eerl_app/shared/widgets/app_required_text.dart';
+import 'package:eerl_app/shared/widgets/app_mobile_number_field.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../model/ragpicker_directory_item.dart';
@@ -62,8 +65,6 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   String? _nameError;
   String? _photoSource;
   bool _saving = false;
-  bool _showStatusSuccess = false;
-  bool _successIsReactivation = false;
   bool _centerExpanded = false;
   bool _formZoneExpanded = false;
   late int _selectedCenter = _status == RagpickerStatus.deactivated ? 0 : -1;
@@ -91,7 +92,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   Future<void> _load({String? centerId}) async {
     setState(() => _loading = true);
     final repository = EerlLocalRepository.instance;
-    final centers = await repository.getCenters();
+    final centers = await repository.getMyCenters();
     var selected = centerId ?? await repository.activeCenterId;
     if (selected == null && centers.isNotEmpty) selected = centers.first.id;
     final items = selected == null
@@ -142,7 +143,6 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
       if (didPop) return;
       setState(() {
         _selectedItem = null;
-        _showStatusSuccess = false;
         _view = RagpickerDirectoryView.activeList;
       });
     },
@@ -189,9 +189,20 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
         isActive: !currentlyActive,
         syncState: 'pending',
       );
-      _showStatusSuccess = true;
-      _successIsReactivation = !currentlyActive;
     });
+    AppTopNotification.show(
+      context,
+      key: const Key('ragpicker-status-notification'),
+      title: currentlyActive
+          ? context.l10n.ragpickerDeactivatedSuccess
+          : context.l10n.ragpickerReactivatedSuccess,
+      subtitle: currentlyActive
+          ? context.l10n.ragpickerDeactivatedSubtitle
+          : context.l10n.ragpickerReactivatedSubtitle,
+      tone: currentlyActive
+          ? AppTopNotificationTone.error
+          : AppTopNotificationTone.success,
+    );
     await _load(centerId: item.centerId);
   }
 
@@ -273,8 +284,6 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                                 _view = value == RagpickerStatus.active
                                     ? RagpickerDirectoryView.activeList
                                     : RagpickerDirectoryView.deactivatedList;
-                                _selectedCenter =
-                                    value == RagpickerStatus.active ? -1 : 0;
                                 _centerExpanded = false;
                               }),
                             ),
@@ -387,8 +396,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
 
   Widget _buildDetails() {
     final item = _selectedItem!;
-    final active =
-        item.isActive && (!_showStatusSuccess || _successIsReactivation);
+    final active = item.isActive;
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
@@ -401,21 +409,10 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: _FigmaBackButton(
-                    onTap: () => setState(() {
-                      _selectedItem = null;
-                      _showStatusSuccess = false;
-                    }),
+                    onTap: () => setState(() => _selectedItem = null),
                   ),
                 ),
                 const SizedBox(height: 24),
-                if (_showStatusSuccess)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                    child: _SuccessBanner(
-                      reactivated: _successIsReactivation,
-                      onClose: () => setState(() => _showStatusSuccess = false),
-                    ),
-                  ),
                 Expanded(
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
@@ -451,9 +448,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                   onEdit: active
                       ? () => setState(() {
                           _nameController.text = item.name;
-                          _phoneController.text = (item.phone ?? '')
-                              .replaceAll('+91 ', '')
-                              .replaceAll(' ', '');
+                          _phoneController.text = _editablePhone(item.phone);
                           _identityController.text = item.idNumber ?? '';
                           _nameError = null;
                           _photoSource = item.photoUrl;
@@ -592,9 +587,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
     }
     final existing = _editingItem;
     if (phone.isNotEmpty && phone.length != 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.ragpickerInvalidMobile)),
-      );
+      AppSnackbar.error(context, message: context.l10n.ragpickerInvalidMobile);
       return;
     }
     if (_centers.isEmpty) return;
@@ -607,9 +600,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
     }
     if (!mounted) return;
     if (centerIndex < 0 || centerIndex >= _centers.length) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Select a center.')));
+      AppSnackbar.error(context, message: 'Select a center.');
       return;
     }
     final photoSource = _photoSource?.trim();
@@ -648,9 +639,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
     } catch (error) {
       AppLogger.error('RAGPICKER_SAVE', error.toString());
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        AppSnackbar.error(context, message: error.toString());
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -659,6 +648,14 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
 
   String _normalizeRagpickerName(String value) =>
       value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+  String _editablePhone(String? value) {
+    final digits = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length == 12 && digits.startsWith('91')) {
+      return digits.substring(2);
+    }
+    return digits.length <= 10 ? digits : digits.substring(digits.length - 10);
+  }
 
   String? _nameValidationError(String value, {required bool showRequired}) {
     final name = value.trim();
@@ -735,50 +732,13 @@ class _MobileField extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: AppTextStyles.mediumSH8_14),
+      AppRequiredText(label, style: AppTextStyles.mediumSH8_14),
       const SizedBox(height: 8),
-      Row(
-        children: [
-          Container(
-            width: 55,
-            height: 55,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: AppColors.cool400),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text('+91', style: AppTextStyles.mediumSH8_14),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: SizedBox(
-              height: 55,
-              child: TextField(
-                controller: controller,
-                keyboardType: TextInputType.phone,
-                style: AppTextStyles.regularB7_14,
-                decoration: InputDecoration(
-                  hintText: hint,
-                  hintStyle: AppTextStyles.regularB7_14.copyWith(
-                    color: AppColors.cool500,
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: AppColors.cool400),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: AppColors.primary500),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+      AppMobileNumberField(
+        controller: controller,
+        hintText: hint,
+        countryCodeKey: const Key('ragpicker-country-code-box'),
+        phoneFieldKey: const Key('ragpicker-mobile-number-field'),
       ),
     ],
   );
@@ -931,46 +891,5 @@ class _DetailActions extends StatelessWidget {
         ],
       ],
     ),
-  );
-}
-
-class _SuccessBanner extends StatelessWidget {
-  const _SuccessBanner({required this.reactivated, required this.onClose});
-
-  final bool reactivated;
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context) => AppMessageBanner(
-    key: ValueKey(
-      reactivated
-          ? 'ragpicker-reactivated-banner'
-          : 'ragpicker-deactivated-banner',
-    ),
-    padding: const EdgeInsets.all(12),
-    title: reactivated
-        ? context.l10n.ragpickerReactivatedSuccess
-        : context.l10n.ragpickerDeactivatedSuccess,
-    subtitle: reactivated
-        ? context.l10n.ragpickerReactivatedSubtitle
-        : context.l10n.ragpickerDeactivatedSubtitle,
-    color: reactivated ? AppColors.primary500 : AppColors.red500,
-    backgroundColor: reactivated ? AppColors.primary50 : AppColors.red50,
-    borderColor: AppColors.cool400,
-    autoDismiss: false,
-    subtitleStyle: AppTextStyles.regularB7_14.copyWith(
-      color: AppColors.neutral500,
-    ),
-    iconBackgroundColor: reactivated ? AppColors.primary500 : AppColors.red500,
-    iconPadding: const EdgeInsets.all(5),
-    icon: reactivated
-        ? const Icon(Icons.check, size: 18, color: Colors.white)
-        : SvgPicture.asset(
-            'assets/icons/ragpicker_deactivated.svg',
-            width: 22,
-            height: 22,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
-    onClose: onClose,
   );
 }

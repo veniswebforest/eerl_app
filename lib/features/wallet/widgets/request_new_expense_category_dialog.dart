@@ -8,6 +8,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'log_expense_field.dart';
 
 class RequestNewExpenseCategoryDialog extends StatefulWidget {
@@ -67,8 +68,9 @@ class _RequestNewExpenseCategoryDialogState
     } catch (error) {
       AppLogger.error('EXPENSE_CATEGORY_SAVE', error.toString());
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.expenseCategoryRequestSaveFailed)),
+      AppSnackbar.error(
+        context,
+        message: context.l10n.expenseCategoryRequestSaveFailed,
       );
       setState(() => _saving = false);
     }

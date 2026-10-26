@@ -1732,6 +1732,54 @@ abstract class AppLocalizations {
   /// **'e.g. GJ-05-BX-1234'**
   String get d2dVehicleNumberExample;
 
+  /// No description provided for @d2dInvalidVehicleNumberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid Vehicle Number'**
+  String get d2dInvalidVehicleNumberTitle;
+
+  /// No description provided for @d2dInvalidVehicleNumberMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the vehicle number in the format GJ-05-BX-1234.'**
+  String get d2dInvalidVehicleNumberMessage;
+
+  /// No description provided for @d2dDuplicateVehicleNumberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Number Already Used'**
+  String get d2dDuplicateVehicleNumberTitle;
+
+  /// No description provided for @d2dDuplicateVehicleNumberMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A D2D vehicle with this number already exists.'**
+  String get d2dDuplicateVehicleNumberMessage;
+
+  /// No description provided for @d2dVehicleType.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Type'**
+  String get d2dVehicleType;
+
+  /// No description provided for @d2dSelectVehicleType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Vehicle Type'**
+  String get d2dSelectVehicleType;
+
+  /// No description provided for @d2dDriverName.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Name'**
+  String get d2dDriverName;
+
+  /// No description provided for @d2dDriverNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Driver Name'**
+  String get d2dDriverNameHint;
+
   /// No description provided for @d2dSave.
   ///
   /// In en, this message translates to:
@@ -5602,6 +5650,12 @@ abstract class AppLocalizations {
   /// **'Ragpicker profile deactivated.'**
   String get ragpickerDeactivatedSubtitle;
 
+  /// No description provided for @ragpickerStatusChangeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Ragpicker status could not be updated. Please try again.'**
+  String get ragpickerStatusChangeFailed;
+
   /// No description provided for @ragpickerAssignTargetAgentCenter.
   ///
   /// In en, this message translates to:
@@ -7641,6 +7695,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location is required to submit a collection. Turn on location and allow access, then try again.'**
   String get collectionLocationRequired;
+
+  /// No description provided for @collectionDetailsNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection details are not ready yet. Please try again.'**
+  String get collectionDetailsNotReady;
+
+  /// No description provided for @collectionSupervisorRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'An active MRF supervisor is required before submitting.'**
+  String get collectionSupervisorRequired;
+
+  /// No description provided for @collectionSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection could not be saved. Please try again.'**
+  String get collectionSaveFailed;
 
   /// No description provided for @locationNotNow.
   ///

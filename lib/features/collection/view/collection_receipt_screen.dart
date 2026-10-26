@@ -15,6 +15,7 @@ import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
@@ -166,8 +167,9 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
       await operation();
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.collectionSlipActionError)),
+        AppSnackbar.error(
+          context,
+          message: context.l10n.collectionSlipActionError,
         );
       }
     } finally {

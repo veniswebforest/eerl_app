@@ -46,12 +46,14 @@ void main() {
       'agent_number': 7,
       'slip_last_count': 0,
     });
-    await database.insert(DatabaseTables.centerChannels, {
-      'center_id': 'center-1',
-      'channel': 'D2D',
-      'show_price': 1,
-      'takes_payment': 0,
-    });
+    for (final channel in const ['D2D', 'MRF', 'RAMP']) {
+      await database.insert(DatabaseTables.centerChannels, {
+        'center_id': 'center-1',
+        'channel': channel,
+        'show_price': 1,
+        'takes_payment': channel == 'MRF' ? 0 : 1,
+      });
+    }
     await database.insert(DatabaseTables.items, {
       'id': 'item-1',
       'name': 'PET Bottles',
@@ -59,6 +61,37 @@ void main() {
       'material_type': 'PLASTIC',
       'unit_code': 'KG',
       'unit_name': 'Kilogram',
+    });
+    await database.insert(DatabaseTables.vehicles, {
+      'id': 'vehicle-1',
+      'center_id': 'center-1',
+      'plate_number': 'GJ-05-BX-1234',
+      'driver_name': 'Kiran Rathod',
+      'is_active': 1,
+      'sync_state': 'synced',
+    });
+    await database.insert(DatabaseTables.mrfPeople, {
+      'id': 'supervisor-1',
+      'center_id': 'center-1',
+      'name': 'MRF Supervisor',
+      'is_active': 1,
+      'role': 'SUPERVISOR',
+      'sync_state': 'synced',
+    });
+    await database.insert(DatabaseTables.mrfPeople, {
+      'id': 'labour-1',
+      'center_id': 'center-1',
+      'name': 'MRF Labour',
+      'is_active': 1,
+      'role': 'LABOUR',
+      'sync_state': 'synced',
+    });
+    await database.insert(DatabaseTables.ragpickers, {
+      'id': 'ragpicker-1',
+      'center_id': 'center-1',
+      'name': 'Ramp Ragpicker',
+      'is_active': 1,
+      'sync_state': 'synced',
     });
   });
 
@@ -68,121 +101,229 @@ void main() {
     await deleteDatabase(databasePath);
   });
 
-  test(
-    'keeps every collection submit key when optional values are null',
-    () async {
-      const collectionId = 'collection-1';
-      await repository.saveCollection(
-        collection: CollectionModel(
-          id: collectionId,
-          centerId: 'center-1',
-          agentId: 'agent-1',
-          agentName: 'Agent One',
-          channel: 'D2D',
-          status: 'DRAFT',
-          handoverPhotoUrls: const [],
-          gpsLat: 21.1702,
-          gpsLng: 72.8311,
-          updatedAt: '2026-10-09T00:00:00.000Z',
-          syncState: 'pending',
-        ),
-        items: const [
-          CollectionItemModel(
-            id: 'line-1',
-            collectionId: collectionId,
-            itemId: 'item-1',
-            qty: 10,
-            verifiedQty: 10,
-            photoUrls: [],
-            sortOrder: 0,
-          ),
-        ],
-        submit: true,
-      );
-
-      final outbox = (await database.query(DatabaseTables.outbox)).single;
-      final body =
-          jsonDecode(outbox['body']! as String) as Map<String, dynamic>;
-      expect(
-        body.keys,
-        unorderedEquals(<String>[
-          'centerId',
-          'type',
-          'vehicleId',
-          'givenByName',
-          'mrfLabourId',
-          'ragpickerId',
-          'handoverPhotoUrls',
-          'paidBy',
-          'lines',
-          'gps',
-        ]),
-      );
-      expect(outbox['method'], 'PUT');
-      expect(outbox['path'], '/collections/collection-1');
-      expect(body['vehicleId'], isNull);
-      expect(body['givenByName'], isNull);
-      expect(body['mrfLabourId'], isNull);
-      expect(body['ragpickerId'], isNull);
-      expect(body['paidBy'], isNull);
-
-      final line = (body['lines'] as List).single as Map<String, dynamic>;
-      expect(
-        line.keys,
-        containsAll(<String>[
-          'itemId',
-          'collectedQty',
-          'verifiedQty',
-          'rate',
-          'amount',
-          'photoUrls',
-        ]),
-      );
-      expect(line['rate'], isNull);
-      expect(line['amount'], isNull);
-    },
+  CollectionItemModel line(String collectionId) => CollectionItemModel(
+    id: 'line-$collectionId',
+    collectionId: collectionId,
+    itemId: 'item-1',
+    qty: 10,
+    verifiedQty: 9.5,
+    rate: 4,
+    amount: 38,
+    photoUrls: const ['/tmp/item.jpg'],
+    sortOrder: 0,
   );
 
-  test('sync keeps queued API keys separate from SQLite columns', () async {
-    const collectionId = 'collection-api-keys';
+  Future<Map<String, dynamic>> queuedBody(String collectionId) async {
+    final outbox = (await database.query(
+      DatabaseTables.outbox,
+      where: 'entity_id = ?',
+      whereArgs: [collectionId],
+    )).single;
+    expect(outbox['method'], 'POST');
+    expect(outbox['path'], '/collections/$collectionId/submit');
+    return jsonDecode(outbox['body']! as String) as Map<String, dynamic>;
+  }
+
+  test('D2D saves locally then queues the complete submit contract', () async {
+    const id = 'collection-d2d';
     await repository.saveCollection(
-      collection: CollectionModel(
-        id: collectionId,
+      collection: const CollectionModel(
+        id: id,
         centerId: 'center-1',
         agentId: 'agent-1',
         agentName: 'Agent One',
         channel: 'D2D',
-        status: 'DRAFT',
-        handoverPhotoUrls: const [],
+        status: 'SUBMITTED',
+        collectedAt: '2026-09-30T03:35:00.000Z',
+        vehicleId: 'vehicle-1',
+        givenByName: 'Kiran Rathod',
+        paidBy: 'CASH',
+        handoverPhotoUrls: ['/tmp/handover.jpg'],
         gpsLat: 21.1702,
         gpsLng: 72.8311,
-        updatedAt: '2026-10-16T00:00:00.000Z',
+        updatedAt: '2026-09-30T03:35:00.000Z',
         syncState: 'pending',
       ),
-      items: const [
-        CollectionItemModel(
-          id: 'line-api-keys',
-          collectionId: collectionId,
-          itemId: 'item-1',
-          qty: 10,
-          verifiedQty: 10,
-          photoUrls: [],
-          sortOrder: 0,
-        ),
-      ],
+      items: [line(id)],
       submit: true,
     );
 
-    final outbox = (await database.query(DatabaseTables.outbox)).single;
-    final exactApiBody = Map<String, dynamic>.from(
-      jsonDecode(outbox['body']! as String) as Map,
-    )..['curlOnlyParameter'] = 'keep-this-key';
-    await database.update(
-      DatabaseTables.outbox,
-      {'body': jsonEncode(exactApiBody)},
-      where: 'seq = ?',
-      whereArgs: [outbox['seq']],
+    final row = (await database.query(
+      DatabaseTables.collections,
+      where: 'id = ?',
+      whereArgs: [id],
+    )).single;
+    expect(row['vehicle_id'], 'vehicle-1');
+    expect(row['sync_state'], 'pending');
+
+    final body = await queuedBody(id);
+    expect(
+      body.keys,
+      unorderedEquals(const [
+        'centerId',
+        'type',
+        'slipNumber',
+        'collectedAt',
+        'vehicleId',
+        'givenByName',
+        'handoverPhotoUrls',
+        'paidBy',
+        'lines',
+        'gps',
+      ]),
     );
+    expect(body['type'], 'D2D');
+    expect(body['vehicleId'], 'vehicle-1');
+    expect(body['givenByName'], 'Kiran Rathod');
+    expect(body['paidBy'], 'CASH');
+    expect(body['slipNumber'], matches(RegExp(r'^CTR-[0-9]{6}-07-001$')));
+    expect((body['handoverPhotoUrls'] as List), hasLength(1));
+  });
+
+  test('MRF queues labour id from mrf_people, not supervisor id', () async {
+    const id = 'collection-mrf';
+    await repository.saveCollection(
+      collection: const CollectionModel(
+        id: id,
+        centerId: 'center-1',
+        agentId: 'agent-1',
+        agentName: 'Agent One',
+        channel: 'MRF',
+        status: 'SUBMITTED',
+        collectedAt: '2026-09-29T10:50:00.000Z',
+        mrfPersonId: 'labour-1',
+        handoverPhotoUrls: [],
+        gpsLat: 21.1702,
+        gpsLng: 72.8311,
+        updatedAt: '2026-09-29T10:50:00.000Z',
+        syncState: 'pending',
+      ),
+      items: [line(id)],
+      submit: true,
+    );
+
+    final body = await queuedBody(id);
+    expect(
+      body.keys,
+      unorderedEquals(const [
+        'centerId',
+        'type',
+        'slipNumber',
+        'collectedAt',
+        'mrfLabourId',
+        'lines',
+        'gps',
+      ]),
+    );
+    expect(body['mrfLabourId'], 'labour-1');
+    expect(body.containsKey('paidBy'), isFalse);
+    expect(body.containsKey('handoverPhotoUrls'), isFalse);
+  });
+
+  test('invalid MRF person rolls back local row and outbox together', () async {
+    const id = 'collection-invalid-mrf';
+    await expectLater(
+      repository.saveCollection(
+        collection: const CollectionModel(
+          id: id,
+          centerId: 'center-1',
+          agentId: 'agent-1',
+          agentName: 'Agent One',
+          channel: 'MRF',
+          status: 'SUBMITTED',
+          mrfPersonId: 'supervisor-1',
+          handoverPhotoUrls: [],
+          gpsLat: 21.1702,
+          gpsLng: 72.8311,
+          updatedAt: '2026-09-29T10:50:00.000Z',
+          syncState: 'pending',
+        ),
+        items: [line(id)],
+        submit: true,
+      ),
+      throwsA(isA<StateError>()),
+    );
+    expect(
+      await database.query(
+        DatabaseTables.collections,
+        where: 'id = ?',
+        whereArgs: [id],
+      ),
+      isEmpty,
+    );
+    expect(
+      await database.query(
+        DatabaseTables.outbox,
+        where: 'entity_id = ?',
+        whereArgs: [id],
+      ),
+      isEmpty,
+    );
+  });
+
+  test('RAMP queues ragpicker id and handover/payment fields', () async {
+    const id = 'collection-ramp';
+    await repository.saveCollection(
+      collection: const CollectionModel(
+        id: id,
+        centerId: 'center-1',
+        agentId: 'agent-1',
+        agentName: 'Agent One',
+        channel: 'RAMP',
+        status: 'SUBMITTED',
+        collectedAt: '2026-09-30T05:00:00.000Z',
+        ragpickerId: 'ragpicker-1',
+        handedOverBy: 'Ramp Ragpicker',
+        paidBy: 'CASH',
+        handoverPhotoUrls: ['/tmp/ramp-handover.jpg'],
+        gpsLat: 21.1702,
+        gpsLng: 72.8311,
+        updatedAt: '2026-09-30T05:00:00.000Z',
+        syncState: 'pending',
+      ),
+      items: [line(id)],
+      submit: true,
+    );
+
+    final body = await queuedBody(id);
+    expect(
+      body.keys,
+      unorderedEquals(const [
+        'centerId',
+        'type',
+        'slipNumber',
+        'collectedAt',
+        'ragpickerId',
+        'handoverPhotoUrls',
+        'paidBy',
+        'lines',
+        'gps',
+      ]),
+    );
+    expect(body['ragpickerId'], 'ragpicker-1');
+    expect(body['paidBy'], 'CASH');
+    expect((body['handoverPhotoUrls'] as List), hasLength(1));
+  });
+
+  test('sync repairs a legacy collection submit method and path', () async {
+    const id = 'legacy-submit';
+    const body = {
+      'centerId': 'center-1',
+      'type': 'MRF',
+      'gps': {'lat': 21.1702, 'lng': 72.8311},
+    };
+    await database.insert(DatabaseTables.outbox, {
+      'method': 'PUT',
+      'path': '/collections/$id',
+      'body': jsonEncode(body),
+      'entity': DatabaseTables.collections,
+      'entity_id': id,
+      'kind': 'submit',
+      'refs': '[]',
+      'status': 'queued',
+      'attempts': 0,
+      'created_at': '2026-10-26T00:00:00.000Z',
+    });
 
     late http.Request sent;
     final service = OutgoingSyncService(
@@ -193,11 +334,10 @@ void main() {
         return http.Response('{}', 200);
       }),
     );
-
     await service.drain();
 
-    expect(sent.method, 'PUT');
-    expect(sent.url.path, '/api/v1/mobile/collections/$collectionId');
-    expect(jsonDecode(sent.body), exactApiBody);
+    expect(sent.method, 'POST');
+    expect(sent.url.path, '/api/v1/mobile/collections/$id/submit');
+    expect(jsonDecode(sent.body), body);
   });
 }

@@ -869,6 +869,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get d2dVehicleNumberExample => 'e.g. GJ-05-BX-1234';
 
   @override
+  String get d2dInvalidVehicleNumberTitle => 'Invalid Vehicle Number';
+
+  @override
+  String get d2dInvalidVehicleNumberMessage =>
+      'Enter the vehicle number in the format GJ-05-BX-1234.';
+
+  @override
+  String get d2dDuplicateVehicleNumberTitle => 'Vehicle Number Already Used';
+
+  @override
+  String get d2dDuplicateVehicleNumberMessage =>
+      'A D2D vehicle with this number already exists.';
+
+  @override
+  String get d2dVehicleType => 'Vehicle Type';
+
+  @override
+  String get d2dSelectVehicleType => 'Select Vehicle Type';
+
+  @override
+  String get d2dDriverName => 'Driver Name';
+
+  @override
+  String get d2dDriverNameHint => 'Enter Driver Name';
+
+  @override
   String get d2dSave => 'Save';
 
   @override
@@ -2918,6 +2944,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ragpickerDeactivatedSubtitle => 'Ragpicker profile deactivated.';
 
   @override
+  String get ragpickerStatusChangeFailed =>
+      'Ragpicker status could not be updated. Please try again.';
+
+  @override
   String get ragpickerAssignTargetAgentCenter => 'Assign Target Agent / Center';
 
   @override
@@ -4001,6 +4031,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get collectionLocationRequired =>
       'Location is required to submit a collection. Turn on location and allow access, then try again.';
+
+  @override
+  String get collectionDetailsNotReady =>
+      'Collection details are not ready yet. Please try again.';
+
+  @override
+  String get collectionSupervisorRequired =>
+      'An active MRF supervisor is required before submitting.';
+
+  @override
+  String get collectionSaveFailed =>
+      'Collection could not be saved. Please try again.';
 
   @override
   String get locationNotNow => 'Not now';

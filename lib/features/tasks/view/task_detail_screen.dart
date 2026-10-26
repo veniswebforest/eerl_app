@@ -12,10 +12,12 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_required_text.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../widgets/task_information_card.dart';
 import '../widgets/task_photo_grid.dart';
@@ -98,9 +100,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     } catch (error) {
       AppLogger.error('TASK_COMPLETE', error.toString());
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        AppSnackbar.error(context, message: error.toString());
       }
     } finally {
       if (mounted) setState(() => _isCompleting = false);
@@ -289,7 +289,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     ),
   );
 
-  Widget _sectionLabel(String label) => Text(
+  Widget _sectionLabel(String label) => AppRequiredText(
     label,
     style: AppTextStyles.semiboldH9_14.copyWith(color: AppColors.neutral950),
   );

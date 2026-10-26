@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
@@ -9,6 +10,7 @@ import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/empty_notifications_view.dart';
 import '../widgets/notification_list_card.dart';
 
@@ -119,13 +121,13 @@ class _NotificationList extends StatelessWidget {
         if (today.isNotEmpty) ...[
           _sectionLabel(context.l10n.notificationToday),
           const SizedBox(height: 10),
-          _card(today),
+          _card(context, today),
           const SizedBox(height: 24),
         ],
         if (earlier.isNotEmpty) ...[
           _sectionLabel(context.l10n.notificationEarlier),
           const SizedBox(height: 10),
-          _card(earlier),
+          _card(context, earlier),
         ],
       ],
     );
@@ -136,16 +138,25 @@ class _NotificationList extends StatelessWidget {
     style: AppTextStyles.semiboldH9_14.copyWith(color: AppColors.neutral950),
   );
 
-  Widget _card(List<NotificationModel> items) => NotificationListCard(
-    items: items,
-    timeFor: _formatTime,
-    onTap: (item) async {
-      if (item.readAt == null) {
-        await EerlLocalRepository.instance.markNotificationRead(item.id);
-        onChanged();
-      }
-    },
-  );
+  Widget _card(BuildContext context, List<NotificationModel> items) =>
+      NotificationListCard(
+        items: items,
+        timeFor: _formatTime,
+        onTap: (item) async {
+          if (item.readAt == null) {
+            await EerlLocalRepository.instance.markNotificationRead(item.id);
+            onChanged();
+          }
+          if (!context.mounted) return;
+          final destination = switch (item.deepLink?.trim()) {
+            AppRoutes.tasks => AppRoutes.tasks,
+            AppRoutes.collectionRecords => AppRoutes.collectionRecords,
+            AppRoutes.transferNotifications => AppRoutes.transferNotifications,
+            _ => null,
+          };
+          if (destination != null) context.push(destination);
+        },
+      );
 
   String _formatTime(String value) {
     final parsed = DateTime.tryParse(value)?.toLocal();

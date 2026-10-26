@@ -5,16 +5,18 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/uuid_generator.dart';
+import 'package:eerl_app/core/utils/vehicle_registration_number.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/shared/widgets/app_confirmation_dialog.dart';
 import 'package:eerl_app/shared/widgets/app_labeled_dropdown.dart';
 import 'package:eerl_app/shared/widgets/app_square_back_button.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../model/d2d_vehicle_item.dart';
 import '../widgets/d2d_vehicle_card.dart';
 import '../widgets/d2d_vehicle_details_card.dart';
 import '../widgets/d2d_vehicle_form.dart';
-import '../widgets/d2d_vehicle_message_banner.dart';
 import '../widgets/d2d_vehicle_segmented_control.dart';
 
 class D2dVehicleManagementScreen extends StatefulWidget {
@@ -29,9 +31,9 @@ class _D2dVehicleManagementScreenState
     extends State<D2dVehicleManagementScreen> {
   final _searchController = TextEditingController();
   final _vehicleNumberController = TextEditingController();
+  final _driverNameController = TextEditingController();
   List<VehicleModel> _vehicles = const [];
   List<CenterModel> _centers = const [];
-  List<VehicleTypeModel> _vehicleTypes = const [];
   bool _loading = true;
   D2dVehicleStatus _status = D2dVehicleStatus.active;
   VehicleModel? _selectedVehicle;
@@ -41,8 +43,6 @@ class _D2dVehicleManagementScreenState
   bool _editingForm = false;
   int _formCenter = -1;
   bool _formCenterExpanded = false;
-  bool _showBanner = false;
-  bool _bannerIsDeactivated = false;
   String _query = '';
 
   List<VehicleModel> get _visibleVehicles {
@@ -68,12 +68,7 @@ class _D2dVehicleManagementScreenState
   Future<void> _load({String? centerId}) async {
     setState(() => _loading = true);
     final repository = EerlLocalRepository.instance;
-    final results = await Future.wait([
-      repository.getCenters(),
-      repository.getVehicleTypes(),
-    ]);
-    final centers = results[0] as List<CenterModel>;
-    final types = results[1] as List<VehicleTypeModel>;
+    final centers = await repository.getCenters();
     var selected = centerId;
     selected ??= await repository.activeCenterId;
     if (selected == null && centers.isNotEmpty) selected = centers.first.id;
@@ -83,7 +78,6 @@ class _D2dVehicleManagementScreenState
     if (!mounted) return;
     setState(() {
       _centers = centers;
-      _vehicleTypes = types;
       _selectedCenter = centers.indexWhere((center) => center.id == selected);
       _vehicles = vehicles;
       _loading = false;
@@ -94,6 +88,7 @@ class _D2dVehicleManagementScreenState
   void dispose() {
     _searchController.dispose();
     _vehicleNumberController.dispose();
+    _driverNameController.dispose();
     super.dispose();
   }
 
@@ -128,48 +123,80 @@ class _D2dVehicleManagementScreenState
   }
 
   void _openForm({required bool editing}) {
+    final existing = editing ? _selectedVehicle : null;
     setState(() {
       _editingForm = editing;
       _showForm = true;
-      _formCenter = -1;
+      _formCenter = existing == null
+          ? _selectedCenter
+          : _centers.indexWhere((center) => center.id == existing.centerId);
       _formCenterExpanded = false;
-      _vehicleNumberController.text = editing
-          ? _selectedVehicle?.plateNumber ?? ''
-          : '';
+      _vehicleNumberController.text = existing?.plateNumber ?? '';
+      _driverNameController.text = existing?.driverName ?? '';
     });
   }
 
   Future<void> _saveForm() async {
-    final plate = _vehicleNumberController.text.trim();
-    if (plate.isEmpty || _centers.isEmpty || _vehicleTypes.isEmpty) return;
+    final plate = VehicleRegistrationNumber.normalize(
+      _vehicleNumberController.text,
+    );
+    if (plate == null) {
+      AppTopNotification.show(
+        context,
+        title: context.l10n.d2dInvalidVehicleNumberTitle,
+        subtitle: context.l10n.d2dInvalidVehicleNumberMessage,
+        tone: AppTopNotificationTone.error,
+      );
+      return;
+    }
+    _vehicleNumberController.value = TextEditingValue(
+      text: plate,
+      selection: TextSelection.collapsed(offset: plate.length),
+    );
+    if (_centers.isEmpty) return;
     final centerIndex = _formCenter >= 0 ? _formCenter : _selectedCenter;
     if (centerIndex < 0 || centerIndex >= _centers.length) return;
     final existing = _selectedVehicle;
-    final type = _vehicleTypes.first;
-    await EerlLocalRepository.instance.saveVehicle(
-      VehicleModel(
-        id: existing?.id ?? UuidGenerator.v4(),
-        number: existing?.number,
-        centerId: _centers[centerIndex].id,
-        plateNumber: plate,
-        typeId: existing?.typeId ?? type.id,
-        typeName: existing?.typeName ?? type.name,
-        capacityKg: existing?.capacityKg,
-        driverName: existing?.driverName,
-        isActive: true,
-        syncState: 'pending',
-      ),
-      isNew: !_editingForm,
-    );
+    final centerId = existing?.centerId ?? _centers[centerIndex].id;
+    final driverName = _driverNameController.text.trim();
+    try {
+      await EerlLocalRepository.instance.saveVehicle(
+        VehicleModel(
+          id: existing?.id ?? UuidGenerator.v4(),
+          number: existing?.number,
+          centerId: centerId,
+          plateNumber: plate,
+          driverName: driverName.isEmpty ? null : driverName,
+          isActive: true,
+          syncState: 'pending',
+        ),
+        isNew: !_editingForm,
+      );
+    } on DuplicateVehicleRegistrationException {
+      if (!mounted) return;
+      AppTopNotification.show(
+        context,
+        title: context.l10n.d2dDuplicateVehicleNumberTitle,
+        subtitle: context.l10n.d2dDuplicateVehicleNumberMessage,
+        tone: AppTopNotificationTone.error,
+      );
+      return;
+    }
+    await OutgoingSyncService.instance.drain();
     if (!mounted) return;
     setState(() {
       _showForm = false;
       _selectedVehicle = null;
       _status = D2dVehicleStatus.active;
-      _showBanner = true;
-      _bannerIsDeactivated = false;
     });
-    await _load(centerId: _centers[centerIndex].id);
+    AppTopNotification.show(
+      context,
+      key: const Key('d2d-vehicle-saved-banner'),
+      title: context.l10n.d2dVehicleSaved,
+      subtitle: context.l10n.d2dVehicleSavedSubtitle,
+      tone: AppTopNotificationTone.success,
+    );
+    await _load(centerId: centerId);
   }
 
   Future<void> _confirmStatusChange(bool currentlyActive) async {
@@ -193,15 +220,27 @@ class _D2dVehicleManagementScreenState
       vehicle,
       !currentlyActive,
     );
+    await OutgoingSyncService.instance.drain();
     if (!mounted) return;
     setState(() {
       _selectedVehicle = null;
       _status = currentlyActive
           ? D2dVehicleStatus.deactivated
           : D2dVehicleStatus.active;
-      _showBanner = true;
-      _bannerIsDeactivated = currentlyActive;
     });
+    AppTopNotification.show(
+      context,
+      key: const Key('d2d-vehicle-status-banner'),
+      title: currentlyActive
+          ? context.l10n.d2dVehicleDeactivatedSuccess
+          : context.l10n.d2dVehicleSaved,
+      subtitle: currentlyActive
+          ? context.l10n.d2dVehicleDeactivatedSubtitle
+          : context.l10n.d2dVehicleSavedSubtitle,
+      tone: currentlyActive
+          ? AppTopNotificationTone.error
+          : AppTopNotificationTone.success,
+    );
     await _load(centerId: vehicle.centerId);
   }
 
@@ -225,23 +264,14 @@ class _D2dVehicleManagementScreenState
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         sliver: SliverList.list(
                           children: [
-                            if (_showBanner) ...[
-                              D2dVehicleMessageBanner(
-                                deactivated: _bannerIsDeactivated,
-                                onClose: () =>
-                                    setState(() => _showBanner = false),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: AppSquareBackButton(
+                                key: const Key('d2d-vehicle-back-button'),
+                                onTap: () => Navigator.of(context).maybePop(),
                               ),
-                              const SizedBox(height: 8),
-                            ] else ...[
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: AppSquareBackButton(
-                                  key: const Key('d2d-vehicle-back-button'),
-                                  onTap: () => Navigator.of(context).maybePop(),
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                            ],
+                            ),
+                            const SizedBox(height: 24),
                             Text(
                               context.l10n.d2dVehicleManagementTitle,
                               style: AppTextStyles.semiboldH6_20.copyWith(
@@ -403,6 +433,7 @@ class _D2dVehicleManagementScreenState
     centerOptions: _centerOptions,
     selectedCenter: _formCenter,
     centerExpanded: _formCenterExpanded,
+    driverNameController: _driverNameController,
     onCenterToggle: () =>
         setState(() => _formCenterExpanded = !_formCenterExpanded),
     onCenterSelected: (index) => setState(() {

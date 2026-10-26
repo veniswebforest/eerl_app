@@ -79,6 +79,24 @@ void main() {
     expect(await database.query(DatabaseTables.outboxPhotos), hasLength(1));
   });
 
+  test('ragpicker center dropdown source contains only my_centers', () async {
+    await database.insert(DatabaseTables.centers, {
+      'id': 'center-2',
+      'name': 'Other Center',
+    });
+    await database.insert(DatabaseTables.myCenters, {
+      'center_id': 'center-1',
+      'is_primary': 1,
+      'slip_last_count': 0,
+    });
+
+    final centers = await repository.getMyCenters();
+
+    expect(centers.map((center) => center.id), ['center-1']);
+    expect(centers.single.name, 'Center One');
+    expect(centers.single.isPrimary, isTrue);
+  });
+
   test(
     'allows saving a ragpicker without the optional mobile number',
     () async {

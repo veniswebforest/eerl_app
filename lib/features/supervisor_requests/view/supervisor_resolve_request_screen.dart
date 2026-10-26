@@ -11,6 +11,7 @@ import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_detail_widgets.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -90,8 +91,9 @@ class _SupervisorResolveRequestScreenState
       }
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.supervisorRequestSaveError)),
+      AppSnackbar.error(
+        context,
+        message: context.l10n.supervisorRequestSaveError,
       );
     }
   }

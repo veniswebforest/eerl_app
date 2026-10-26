@@ -9,7 +9,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
-import 'package:eerl_app/shared/widgets/app_message_banner.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/app_mobile_number_field.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import '../model/supervisor_mrf_people_view.dart';
 import '../widgets/supervisor_mrf_people_assets.dart';
 
@@ -84,7 +86,7 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
       final customLoader = widget.teamLoader;
       if (customLoader != null) {
         final team = await customLoader();
-        if (!mounted) return;
+        if (!context.mounted) return;
         _applyLoadedTeam(team);
         return;
       }
@@ -151,9 +153,9 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
 
   void _prefillForm() {
     _nameController.text = 'Chunilal Yadav';
-    _phoneController.text = '1234567890';
+    _phoneController.text = '9234567890';
     _selectedCenter = 0;
-    _addLabor(name: 'Haresh Matiya', phone: '0987654321');
+    _addLabor(name: 'Haresh Matiya', phone: '9876543210');
   }
 
   void _openAddForm() {
@@ -174,7 +176,7 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
     final person = _selectedPerson!;
     final team = person.isActive ? _activePeople : _inactivePeople;
     _nameController.text = person.name;
-    _phoneController.text = person.phone ?? '';
+    _phoneController.text = _editablePhone(person.phone);
     for (final labor in _labors) {
       labor.dispose();
     }
@@ -185,7 +187,7 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
       _labors.add(
         _LaborControllers(
           name: labor.name,
-          phone: labor.phone ?? '',
+          phone: _editablePhone(labor.phone),
           existing: labor,
         ),
       );
@@ -202,7 +204,7 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
   Future<void> _saveForm() async {
     final error = _formValidationError();
     if (error != null) {
-      await _showError(error);
+      AppSnackbar.error(context, message: error);
       return;
     }
     final existingSupervisor = _selectedPerson;
@@ -267,8 +269,15 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
       setState(() {
         _isSaving = false;
         _selectedPerson = null;
-        _view = SupervisorMrfPeopleView.added;
+        _view = SupervisorMrfPeopleView.list;
       });
+      AppTopNotification.show(
+        context,
+        key: const Key('supervisor-mrf-banner'),
+        title: context.l10n.supervisorMrfAddedTitle,
+        subtitle: context.l10n.supervisorMrfAddedSubtitle,
+        tone: AppTopNotificationTone.success,
+      );
       await _loadPeople();
     } catch (error) {
       if (!mounted) return;
@@ -299,9 +308,15 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
   }
 
   bool _isValidPhone(String value) {
-    final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
-    return digits.length == 10 ||
-        (digits.length == 12 && digits.startsWith('91'));
+    return RegExp(r'^[6-9][0-9]{9}$').hasMatch(value.trim());
+  }
+
+  String _editablePhone(String? value) {
+    final digits = (value ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.length == 12 && digits.startsWith('91')) {
+      return digits.substring(2);
+    }
+    return digits;
   }
 
   String _readableError(Object error) {
@@ -360,28 +375,6 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
               );
         })
         .toList(growable: false);
-    final banner = _view == SupervisorMrfPeopleView.removed
-        ? _MrfBannerData(
-            title: context.l10n.supervisorMrfRemovedTitle,
-            subtitle: context.l10n.supervisorMrfRemovedSubtitle,
-            color: AppColors.red500,
-            backgroundColor: AppColors.red50,
-            icon: SvgPicture.asset(
-              SupervisorMrfPeopleAssets.removed,
-              width: 20,
-              height: 20,
-            ),
-          )
-        : _view == SupervisorMrfPeopleView.added
-        ? _MrfBannerData(
-            title: context.l10n.supervisorMrfAddedTitle,
-            subtitle: context.l10n.supervisorMrfAddedSubtitle,
-            color: AppColors.primary400,
-            backgroundColor: AppColors.primary50,
-            icon: const Icon(Icons.check, size: 20, color: Colors.white),
-          )
-        : null;
-
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       body: SafeArea(
@@ -398,39 +391,22 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                       children: [
-                        if (banner != null)
-                          AppMessageBanner(
-                            key: const Key('supervisor-mrf-banner'),
-                            title: banner.title,
-                            subtitle: banner.subtitle,
-                            color: banner.color,
-                            backgroundColor: banner.backgroundColor,
-                            borderColor: AppColors.cool300,
-                            iconBackgroundColor: banner.color,
-                            iconPadding: const EdgeInsets.all(5),
-                            icon: banner.icon,
-                            padding: const EdgeInsets.fromLTRB(14, 10, 10, 10),
-                            onClose: () => setState(
-                              () => _view = SupervisorMrfPeopleView.list,
+                        Row(
+                          children: [
+                            _BackButton(
+                              onTap: () => Navigator.of(context).maybePop(),
                             ),
-                          )
-                        else
-                          Row(
-                            children: [
-                              _BackButton(
-                                onTap: () => Navigator.of(context).maybePop(),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                context.l10n.supervisorMrfTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTextStyles.semiboldH6_20,
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Text(
-                                  context.l10n.supervisorMrfTitle,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.semiboldH6_20,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 24),
                         _SearchField(
                           controller: _searchController,
@@ -708,12 +684,19 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
       try {
         await _repository.setMrfPersonActive(person, false);
         await OutgoingSyncService.instance.drain();
-        if (!mounted) return;
+        if (!context.mounted) return;
         setState(() {
           _isSaving = false;
           _selectedPerson = null;
-          _view = SupervisorMrfPeopleView.removed;
+          _view = SupervisorMrfPeopleView.list;
         });
+        AppTopNotification.show(
+          context,
+          key: const Key('supervisor-mrf-banner'),
+          title: context.l10n.supervisorMrfRemovedTitle,
+          subtitle: context.l10n.supervisorMrfRemovedSubtitle,
+          tone: AppTopNotificationTone.error,
+        );
         await _loadPeople();
       } catch (error) {
         if (!mounted) return;
@@ -804,22 +787,6 @@ class _MrfPersonItem {
   final String labor;
 
   String get name => person.name;
-}
-
-class _MrfBannerData {
-  const _MrfBannerData({
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.backgroundColor,
-    required this.icon,
-  });
-
-  final String title;
-  final String subtitle;
-  final Color color;
-  final Color backgroundColor;
-  final Widget icon;
 }
 
 class _BackButton extends StatelessWidget {
@@ -1119,29 +1086,10 @@ class _PhoneField extends StatelessWidget {
     children: [
       _RequiredLabel(label),
       const SizedBox(height: 8),
-      Row(
-        children: [
-          Container(
-            width: 55,
-            height: 55,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: AppColors.cool400),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text('+91', style: AppTextStyles.mediumSH8_14),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: _TextBox(
-              controller: controller,
-              hint: hint,
-              keyboardType: TextInputType.phone,
-              onChanged: onChanged,
-            ),
-          ),
-        ],
+      AppMobileNumberField(
+        controller: controller,
+        hintText: hint,
+        onChanged: onChanged,
       ),
     ],
   );
@@ -1152,20 +1100,17 @@ class _TextBox extends StatelessWidget {
     required this.controller,
     required this.hint,
     required this.onChanged,
-    this.keyboardType,
   });
 
   final TextEditingController controller;
   final String hint;
   final ValueChanged<String> onChanged;
-  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) => SizedBox(
     height: 55,
     child: TextField(
       controller: controller,
-      keyboardType: keyboardType,
       onChanged: onChanged,
       style: AppTextStyles.regularB7_14,
       decoration: InputDecoration(

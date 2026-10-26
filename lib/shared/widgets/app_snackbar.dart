@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
+
 /// Helper for showing consistently themed snackbars.
 class AppSnackbar {
   AppSnackbar._();
@@ -8,60 +10,42 @@ class AppSnackbar {
   static void show(
     BuildContext context, {
     required String message,
-    Duration duration = const Duration(seconds: 3),
+    Duration duration = const Duration(seconds: 2),
     SnackBarAction? action,
   }) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text(message), duration: duration, action: action),
-      );
+    AppTopNotification.show(
+      context,
+      title: message,
+      duration: duration,
+      tone: AppTopNotificationTone.info,
+    );
   }
 
   /// Show a success snackbar.
   static void success(
     BuildContext context, {
     required String message,
-    Duration duration = const Duration(seconds: 3),
+    Duration duration = const Duration(seconds: 2),
   }) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white, size: 20),
-              const SizedBox(width: 12),
-              Expanded(child: Text(message)),
-            ],
-          ),
-          duration: duration,
-          backgroundColor: const Color(0xFF2E7D32),
-        ),
-      );
+    AppTopNotification.show(
+      context,
+      title: message,
+      duration: duration,
+      tone: AppTopNotificationTone.success,
+    );
   }
 
   /// Show an error snackbar.
   static void error(
     BuildContext context, {
     required String message,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = const Duration(seconds: 2),
   }) {
-    final theme = Theme.of(context);
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error_outline, color: Colors.white, size: 20),
-              const SizedBox(width: 12),
-              Expanded(child: Text(message)),
-            ],
-          ),
-          duration: duration,
-          backgroundColor: theme.colorScheme.error,
-        ),
-      );
+    AppTopNotification.show(
+      context,
+      title: message,
+      duration: duration,
+      tone: AppTopNotificationTone.error,
+    );
   }
 }
