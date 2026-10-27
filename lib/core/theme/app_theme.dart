@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app_colors.dart';
+import 'app_dimensions.dart';
 import 'app_text_styles.dart';
 
 /// Provides complete [ThemeData] instances for light and dark modes.
@@ -30,7 +31,7 @@ class AppTheme {
 
       // ── AppBar ──────────────────────────────────────────────────
       appBarTheme: AppBarTheme(
-        toolbarHeight: 45,
+        toolbarHeight: AppScreenHeaderMetrics.height,
         elevation: 0,
         scrolledUnderElevation: 1,
         centerTitle: true,
@@ -278,7 +279,7 @@ class AppTheme {
 
       // ── AppBar ──────────────────────────────────────────────────
       appBarTheme: AppBarTheme(
-        toolbarHeight: 45,
+        toolbarHeight: AppScreenHeaderMetrics.height,
         elevation: 0,
         scrolledUnderElevation: 1,
         centerTitle: true,

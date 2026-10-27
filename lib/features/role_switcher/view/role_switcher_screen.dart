@@ -22,7 +22,11 @@ class RoleSwitcherScreen extends StatefulWidget {
 class _RoleSwitcherScreenState extends State<RoleSwitcherScreen> {
   late DashboardUserRole _selectedRole = widget.initialRole;
   late final LocalQueryController<
-    ({List<MyRoleModel> roles, List<CenterModel> centers})
+    ({
+      List<MyRoleModel> roles,
+      List<CenterModel> centers,
+      Map<String, int> unreadCounts,
+    })
   >
   _controller;
 
@@ -33,10 +37,12 @@ class _RoleSwitcherScreenState extends State<RoleSwitcherScreen> {
       final values = await Future.wait([
         EerlLocalRepository.instance.getRoles(),
         EerlLocalRepository.instance.getCenters(),
+        EerlLocalRepository.instance.getOtherRoleUnreadNotificationCounts(),
       ]);
       return (
         roles: values[0] as List<MyRoleModel>,
         centers: values[1] as List<CenterModel>,
+        unreadCounts: values[2] as Map<String, int>,
       );
     })..load();
   }
@@ -111,6 +117,8 @@ class _RoleSwitcherScreenState extends State<RoleSwitcherScreen> {
                               ? RoleSwitcherAssets.supervisor
                               : RoleSwitcherAssets.agent,
                           selected: _selectedRole == role,
+                          unreadCount:
+                              data?.unreadCounts[roles[index].roleKey] ?? 0,
                           onTap: () => setState(() => _selectedRole = role),
                         );
                       },
@@ -166,6 +174,7 @@ class _RoleOptionCard extends StatelessWidget {
     required this.zone,
     required this.icon,
     required this.selected,
+    required this.unreadCount,
     required this.onTap,
   });
 
@@ -173,6 +182,7 @@ class _RoleOptionCard extends StatelessWidget {
   final String zone;
   final String icon;
   final bool selected;
+  final int unreadCount;
   final VoidCallback onTap;
 
   @override
@@ -232,6 +242,28 @@ class _RoleOptionCard extends StatelessWidget {
                             ),
                           ),
                         ),
+                        if (unreadCount > 0) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            key: ValueKey('role-unread-count-$title'),
+                            constraints: const BoxConstraints(minWidth: 24),
+                            height: 24,
+                            padding: const EdgeInsets.symmetric(horizontal: 7),
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                              color: AppColors.red500,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              unreadCount > 99 ? '99+' : '$unreadCount',
+                              style: AppTextStyles.mediumSH9_12.copyWith(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(width: 30),
                       ],
                     ),

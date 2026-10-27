@@ -10,6 +10,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/providers/app_lock_provider.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/features/auth/data/auth_session_storage.dart';
 import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
@@ -41,6 +42,15 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _checkAuthAndNavigate() async {
     if (!mounted) return;
+    final token = await AuthSessionStorage().getAccessToken();
+    // ignore: avoid_print
+    print('════════════════════════════════════════════════════════════════');
+    // ignore: avoid_print
+    print('🔑 [APP_OPEN][SPLASH] ACCESS_TOKEN: ${token ?? 'not_found'}');
+    // ignore: avoid_print
+    print('════════════════════════════════════════════════════════════════');
+    if (!mounted) return;
+
     final authProvider = context.read<AuthProvider>();
     final isValidSession = await authProvider.checkSessionValidity();
     if (!mounted) return;

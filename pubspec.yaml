@@ -42,8 +42,9 @@ dependencies:
   path: ^1.9.1
   geolocator: ^14.1.1
   share_plus: ^13.3.1
-  printing: ^5.15.1
-  pdf: ^3.13.1
+  print_bluetooth_thermal: ^1.2.5
+  esc_pos_utils_plus: ^2.0.4
+  image: ^4.10.1
 
 dev_dependencies:
   flutter_test:

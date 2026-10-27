@@ -4,6 +4,7 @@ import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -124,6 +125,18 @@ void main() {
     return jsonDecode(outbox['body']! as String) as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> queuedDraftBody(String collectionId) async {
+    final outbox = (await database.query(
+      DatabaseTables.outbox,
+      where: 'entity_id = ?',
+      whereArgs: [collectionId],
+    )).single;
+    expect(outbox['method'], 'PUT');
+    expect(outbox['path'], '/collections/$collectionId');
+    expect(outbox['kind'], 'draft_save');
+    return jsonDecode(outbox['body']! as String) as Map<String, dynamic>;
+  }
+
   test('D2D saves locally then queues the complete submit contract', () async {
     const id = 'collection-d2d';
     await repository.saveCollection(
@@ -179,6 +192,273 @@ void main() {
     expect(body['slipNumber'], matches(RegExp(r'^CTR-[0-9]{6}-07-001$')));
     expect((body['handoverPhotoUrls'] as List), hasLength(1));
   });
+
+  test('D2D draft queues and syncs the exact PUT contract', () async {
+    const id = 'draft-d2d';
+    await repository.saveCollection(
+      collection: const CollectionModel(
+        id: id,
+        centerId: 'center-1',
+        agentId: 'agent-1',
+        agentName: 'Agent One',
+        channel: 'D2D',
+        status: 'DRAFT',
+        vehicleId: 'vehicle-1',
+        givenByName: 'Kiran Rathod',
+        paidBy: 'CASH',
+        handoverPhotoUrls: ['/tmp/draft-handover.jpg'],
+        gpsLat: 21.1702,
+        gpsLng: 72.8311,
+        updatedAt: '2026-10-27T04:00:00.000Z',
+        syncState: 'pending',
+      ),
+      items: [line(id)],
+      submit: false,
+    );
+
+    final queued = await queuedDraftBody(id);
+    expect(
+      queued.keys,
+      unorderedEquals(const [
+        'centerId',
+        'type',
+        'vehicleId',
+        'givenByName',
+        'handoverPhotoUrls',
+        'paidBy',
+        'lines',
+        'gps',
+      ]),
+    );
+    expect(queued['type'], 'D2D');
+    expect(queued['vehicleId'], 'vehicle-1');
+    expect(queued['givenByName'], 'Kiran Rathod');
+    expect(queued['paidBy'], 'CASH');
+    expect(queued['gps'], {'lat': 21.1702, 'lng': 72.8311});
+    expect(await database.query(DatabaseTables.outboxPhotos), hasLength(2));
+
+    const handoverUrl = 'https://example.test/draft-handover.jpg';
+    const itemUrl = 'https://example.test/draft-item.jpg';
+    final photos = await database.query(DatabaseTables.photos);
+    for (final photo in photos) {
+      await database.update(
+        DatabaseTables.photos,
+        {
+          'status': 'uploaded',
+          'remote_url': photo['field'] == 'handover' ? handoverUrl : itemUrl,
+        },
+        where: 'id = ?',
+        whereArgs: [photo['id']],
+      );
+    }
+
+    late http.Request sent;
+    final service = OutgoingSyncService(
+      database: database,
+      internetAccessChecker: () async => true,
+      client: MockClient((request) async {
+        sent = request;
+        return http.Response('{}', 200);
+      }),
+    );
+    await service.drain();
+
+    expect(sent.method, 'PUT');
+    expect(sent.url.path, '/api/v1/mobile/collections/$id');
+    expect(jsonDecode(sent.body), {
+      'centerId': 'center-1',
+      'type': 'D2D',
+      'vehicleId': 'vehicle-1',
+      'givenByName': 'Kiran Rathod',
+      'handoverPhotoUrls': [handoverUrl],
+      'paidBy': 'CASH',
+      'lines': [
+        {
+          'itemId': 'item-1',
+          'collectedQty': 10.0,
+          'verifiedQty': 9.5,
+          'rate': 4.0,
+          'amount': 38.0,
+          'photoUrls': [itemUrl],
+        },
+      ],
+      'gps': {'lat': 21.1702, 'lng': 72.8311},
+    });
+    expect(await database.query(DatabaseTables.outbox), isEmpty);
+    final stored = (await database.query(
+      DatabaseTables.collections,
+      where: 'id = ?',
+      whereArgs: const [id],
+    )).single;
+    expect(stored['status'], 'DRAFT');
+    expect(stored['sync_state'], 'synced');
+  });
+
+  test('MRF draft queues the exact PUT contract', () async {
+    const id = 'draft-mrf';
+    await repository.saveCollection(
+      collection: const CollectionModel(
+        id: id,
+        centerId: 'center-1',
+        agentId: 'agent-1',
+        agentName: 'Agent One',
+        channel: 'MRF',
+        status: 'DRAFT',
+        mrfPersonId: 'labour-1',
+        handoverPhotoUrls: [],
+        gpsLat: 21.1702,
+        gpsLng: 72.8311,
+        updatedAt: '2026-10-27T04:00:00.000Z',
+        syncState: 'pending',
+      ),
+      items: [line(id)],
+      submit: false,
+    );
+
+    final body = await queuedDraftBody(id);
+    expect(
+      body.keys,
+      unorderedEquals(const [
+        'centerId',
+        'type',
+        'mrfLabourId',
+        'lines',
+        'gps',
+      ]),
+    );
+    expect(body['mrfLabourId'], 'labour-1');
+    expect(body['gps'], {'lat': 21.1702, 'lng': 72.8311});
+    expect(await database.query(DatabaseTables.outboxPhotos), hasLength(1));
+  });
+
+  test('RAMP draft queues the exact PUT contract', () async {
+    const id = 'draft-ramp';
+    await repository.saveCollection(
+      collection: const CollectionModel(
+        id: id,
+        centerId: 'center-1',
+        agentId: 'agent-1',
+        agentName: 'Agent One',
+        channel: 'RAMP',
+        status: 'DRAFT',
+        ragpickerId: 'ragpicker-1',
+        paidBy: 'UPI',
+        handoverPhotoUrls: ['/tmp/ramp-draft-handover.jpg'],
+        gpsLat: 21.1702,
+        gpsLng: 72.8311,
+        updatedAt: '2026-10-27T04:00:00.000Z',
+        syncState: 'pending',
+      ),
+      items: [line(id)],
+      submit: false,
+    );
+
+    final body = await queuedDraftBody(id);
+    expect(
+      body.keys,
+      unorderedEquals(const [
+        'centerId',
+        'type',
+        'ragpickerId',
+        'handoverPhotoUrls',
+        'paidBy',
+        'lines',
+        'gps',
+      ]),
+    );
+    expect(body['ragpickerId'], 'ragpicker-1');
+    expect(body['paidBy'], 'UPI');
+    expect(body['gps'], {'lat': 21.1702, 'lng': 72.8311});
+    expect(await database.query(DatabaseTables.outboxPhotos), hasLength(2));
+  });
+
+  test(
+    'second submit of the same collection changes neither local data nor outbox',
+    () async {
+      const id = 'collection-no-duplicate';
+      const collection = CollectionModel(
+        id: id,
+        centerId: 'center-1',
+        agentId: 'agent-1',
+        agentName: 'Agent One',
+        channel: 'D2D',
+        status: 'SUBMITTED',
+        collectedAt: '2026-10-27T03:35:00.000Z',
+        vehicleId: 'vehicle-1',
+        givenByName: 'Kiran Rathod',
+        paidBy: 'CASH',
+        handoverPhotoUrls: ['/tmp/handover.jpg'],
+        gpsLat: 21.1702,
+        gpsLng: 72.8311,
+        updatedAt: '2026-10-27T03:35:00.000Z',
+        syncState: 'pending',
+      );
+
+      await repository.saveCollection(
+        collection: collection,
+        items: [line(id)],
+        submit: true,
+      );
+      final collectionBefore = (await database.query(
+        DatabaseTables.collections,
+        where: 'id = ?',
+        whereArgs: const [id],
+      )).single;
+      final outboxBefore = (await database.query(
+        DatabaseTables.outbox,
+        where: 'entity_id = ?',
+        whereArgs: const [id],
+      )).single;
+      final photosBefore = await database.query(
+        DatabaseTables.photos,
+        orderBy: 'id',
+      );
+
+      await expectLater(
+        repository.saveCollection(
+          collection: collection,
+          items: [line(id)],
+          submit: true,
+        ),
+        throwsA(isA<CollectionAlreadySubmittedException>()),
+      );
+      await expectLater(
+        repository.saveCollection(
+          collection: collection,
+          items: [line(id)],
+          submit: false,
+        ),
+        throwsA(isA<CollectionAlreadySubmittedException>()),
+      );
+
+      expect(
+        await database.query(
+          DatabaseTables.collections,
+          where: 'id = ?',
+          whereArgs: const [id],
+        ),
+        [collectionBefore],
+      );
+      expect(
+        await database.query(
+          DatabaseTables.outbox,
+          where: 'entity_id = ?',
+          whereArgs: const [id],
+        ),
+        [outboxBefore],
+      );
+      expect(
+        await database.query(DatabaseTables.photos, orderBy: 'id'),
+        photosBefore,
+      );
+      final center = (await database.query(
+        DatabaseTables.myCenters,
+        where: 'center_id = ?',
+        whereArgs: const ['center-1'],
+      )).single;
+      expect(center['slip_last_count'], 1);
+    },
+  );
 
   test('MRF queues labour id from mrf_people, not supervisor id', () async {
     const id = 'collection-mrf';

@@ -361,6 +361,12 @@ class EerlLocalRepository {
       _local.getDayCloses(centerId: centerId);
   Future<List<NotificationModel>> getNotifications() =>
       _local.getNotifications();
+  Future<NotificationModel?> getNotification(String id) =>
+      _local.getNotification(id);
+  Future<int> getActiveRoleUnreadNotificationCount() =>
+      _local.getActiveRoleUnreadNotificationCount();
+  Future<Map<String, int>> getOtherRoleUnreadNotificationCounts() =>
+      _local.getOtherRoleUnreadNotificationCounts();
   Future<void> markNotificationRead(String id) =>
       _local.markNotificationRead(id);
   Future<List<StockModel>> getStock({String? centerId, String? stage}) =>

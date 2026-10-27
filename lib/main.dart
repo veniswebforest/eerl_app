@@ -26,10 +26,16 @@ void main() async {
   await AppDatabase.instance.database;
 
   final storedAccessToken = await AuthSessionStorage().getAccessToken();
+  // ignore: avoid_print
+  print('════════════════════════════════════════════════════════════════');
+  // ignore: avoid_print
+  print('🔑 [APP_OPEN] ACCESS_TOKEN: ${storedAccessToken ?? 'not_found'}');
+  // ignore: avoid_print
+  print('════════════════════════════════════════════════════════════════');
   if (kDebugMode) {
     debugPrint(
       '[APP_OPEN][ACCESS_TOKEN] ${storedAccessToken ?? 'not_found'}',
-      wrapWidth: 1024,
+      wrapWidth: 4096,
     );
   }
   AppLogger.diagnostic(
@@ -106,6 +112,15 @@ class _EerlAppState extends State<EerlApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      unawaited(() async {
+        final token = await AuthSessionStorage().getAccessToken();
+        // ignore: avoid_print
+        print('════════════════════════════════════════════════════════════════');
+        // ignore: avoid_print
+        print('🔑 [APP_RESUMED] ACCESS_TOKEN: ${token ?? 'not_found'}');
+        // ignore: avoid_print
+        print('════════════════════════════════════════════════════════════════');
+      }());
       unawaited(
         BootstrapSyncService.instance.triggerBootstrap(
           trigger: BootstrapTrigger.appResume,

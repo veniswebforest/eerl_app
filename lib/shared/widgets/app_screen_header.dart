@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/core/theme/app_dimensions.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 
-/// Shared dimensions used by every in-page screen header.
-abstract final class AppScreenHeaderMetrics {
-  static const double height = 45;
-  static const double topInset = 0;
-  static const double horizontalInset = 20;
-  static const double iconSize = 24;
-  static const double actionSize = 45;
-}
+export 'package:eerl_app/core/theme/app_dimensions.dart';
 
 /// A fixed-height header that prevents title and action alignment from
 /// changing while navigating between screens.

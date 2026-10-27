@@ -175,6 +175,7 @@ class _TodaysSummaryState extends State<TodaysSummary> {
                                               .toStringAsFixed(2),
                                         ),
                                         valueColor: AppColors.secondary500,
+                                        onTap: widget.onWalletTap,
                                       ),
                                     ]
                                     .map(
@@ -220,41 +221,70 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minHeight: 122),
-      padding: const EdgeInsets.all(16),
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: AppColors.neutral50,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [HomeStyles.cardShadow],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(8),
+      child: Material(
+        color: AppColors.neutral50,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: SizedBox(
+            height: 144,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: iconBg,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: SvgPicture.asset(iconAsset, width: 24, height: 24),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 38,
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.semiboldH9_14.copyWith(
+                          color: AppColors.neutral900,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        value,
+                        maxLines: 1,
+                        style: AppTextStyles.semiboldH6_20.copyWith(
+                          color: valueColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: SvgPicture.asset(iconAsset, width: 24, height: 24),
           ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: AppTextStyles.semiboldH9_14.copyWith(
-              color: AppColors.neutral900,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: AppTextStyles.semiboldH6_20.copyWith(color: valueColor),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -9,13 +10,11 @@ import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:eerl_app/core/services/bluetooth_thermal_printer_service.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
-import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
@@ -35,6 +34,8 @@ class CollectionReceiptScreen extends StatefulWidget {
 class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
   final GlobalKey _receiptBoundaryKey = GlobalKey();
   _ReceiptAction? _activeAction;
+  bool _printerConnected = false;
+  String? _printerName;
 
   late final LocalQueryController<
     ({
@@ -48,6 +49,7 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
   @override
   void initState() {
     super.initState();
+    unawaited(_refreshPrinterStatus());
     _controller = LocalQueryController(() async {
       final repository = EerlLocalRepository.instance;
       final collection = await repository.getCollection(widget.collectionId);
@@ -138,24 +140,150 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
 
   Future<void> _printReceipt(CollectionModel collection) =>
       _runReceiptAction(_ReceiptAction.print, () async {
+        if (!await _ensureBluetoothPrinter()) return;
         final imageBytes = await _captureReceiptImage();
-        await Printing.layoutPdf(
-          name: '${_receiptFileName(collection)}.pdf',
-          onLayout: (PdfPageFormat format) async {
-            final document = pw.Document();
-            final image = pw.MemoryImage(imageBytes);
-            document.addPage(
-              pw.Page(
-                pageFormat: format,
-                margin: const pw.EdgeInsets.all(12),
-                build: (_) =>
-                    pw.Center(child: pw.Image(image, fit: pw.BoxFit.contain)),
-              ),
-            );
-            return document.save();
-          },
+        final printed = await BluetoothThermalPrinterService.instance.printPng(
+          imageBytes,
         );
+        if (!printed) {
+          if (mounted) {
+            _showError(
+              title: context.l10n.collectionPrinterPrintFailedTitle,
+              subtitle: context.l10n.collectionPrinterPrintFailed,
+            );
+          }
+          return;
+        }
+        await _refreshPrinterStatus();
       });
+
+  Future<void> _refreshPrinterStatus() async {
+    try {
+      final service = BluetoothThermalPrinterService.instance;
+      final connected = await service.isConnected;
+      final savedPrinter = await service.savedPrinter;
+      if (!mounted) return;
+      setState(() {
+        _printerConnected = connected;
+        _printerName = connected ? savedPrinter?.name : null;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _printerConnected = false;
+        _printerName = null;
+      });
+    }
+  }
+
+  Future<bool> _ensureBluetoothPrinter() async {
+    final service = BluetoothThermalPrinterService.instance;
+    final permissionGranted = await service.requestPermission();
+    if (!permissionGranted) {
+      if (mounted) {
+        _showError(
+          title: context.l10n.collectionBluetoothPermissionTitle,
+          subtitle: context.l10n.collectionBluetoothPermissionRequired,
+        );
+      }
+      return false;
+    }
+    if (!await service.isBluetoothEnabled) {
+      if (mounted) {
+        _showError(
+          title: context.l10n.collectionBluetoothDisabledTitle,
+          subtitle: context.l10n.collectionBluetoothDisabled,
+        );
+      }
+      return false;
+    }
+    if (await service.isConnected || await service.reconnectSavedPrinter()) {
+      await _refreshPrinterStatus();
+      return true;
+    }
+
+    final printers = await service.pairedPrinters();
+    if (!mounted) return false;
+    if (printers.isEmpty) {
+      _showError(
+        title: context.l10n.collectionNoPairedPrintersTitle,
+        subtitle: context.l10n.collectionNoPairedPrinters,
+      );
+      return false;
+    }
+    final selected = await _showPrinterPicker(printers);
+    if (selected == null || !mounted) return false;
+    final connected = await service.connect(selected);
+    if (!mounted) return false;
+    if (!connected) {
+      _showError(
+        title: context.l10n.collectionPrinterConnectionFailedTitle,
+        subtitle: context.l10n.collectionPrinterConnectionFailed,
+      );
+      return false;
+    }
+    setState(() {
+      _printerConnected = true;
+      _printerName = selected.name;
+    });
+    return true;
+  }
+
+  Future<BluetoothThermalPrinter?> _showPrinterPicker(
+    List<BluetoothThermalPrinter> printers,
+  ) => showModalBottomSheet<BluetoothThermalPrinter>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.l10n.collectionSelectBluetoothPrinter,
+              style: AppTextStyles.semiboldH7_18,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              context.l10n.collectionPairedPrintersHint,
+              style: AppTextStyles.regularB8_12.copyWith(
+                color: AppColors.neutral600,
+              ),
+            ),
+            const SizedBox(height: 14),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 320),
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: printers.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final printer = printers[index];
+                  return ListTile(
+                    key: ValueKey('bluetooth-printer-${printer.address}'),
+                    contentPadding: EdgeInsets.zero,
+                    leading: const CircleAvatar(
+                      backgroundColor: AppColors.primary50,
+                      child: Icon(
+                        Icons.print_rounded,
+                        color: AppColors.primary500,
+                      ),
+                    ),
+                    title: Text(printer.name),
+                    subtitle: Text(printer.address),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => Navigator.of(sheetContext).pop(printer),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 
   Future<void> _runReceiptAction(
     _ReceiptAction action,
@@ -167,14 +295,24 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
       await operation();
     } catch (_) {
       if (mounted) {
-        AppSnackbar.error(
-          context,
-          message: context.l10n.collectionSlipActionError,
+        _showError(
+          title: context.l10n.collectionSlipActionErrorTitle,
+          subtitle: context.l10n.collectionSlipActionError,
         );
       }
     } finally {
       if (mounted) setState(() => _activeAction = null);
     }
+  }
+
+  void _showError({required String title, required String subtitle}) {
+    AppTopNotification.show(
+      context,
+      key: const Key('collection-printer-error-notification'),
+      title: title,
+      subtitle: subtitle,
+      tone: AppTopNotificationTone.error,
+    );
   }
 
   String _receiptFileName(CollectionModel collection) {
@@ -377,13 +515,23 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
         Expanded(
           child: Text.rich(
             TextSpan(
-              children: [
-                TextSpan(
-                  text: '${context.l10n.collectionPrinterReady}: ',
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-                TextSpan(text: context.l10n.collectionPrinterConnected),
-              ],
+              children: _printerConnected
+                  ? [
+                      TextSpan(
+                        text: '${context.l10n.collectionPrinterReady}: ',
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                      TextSpan(
+                        text:
+                            _printerName ??
+                            context.l10n.collectionPrinterConnected,
+                      ),
+                    ]
+                  : [
+                      TextSpan(
+                        text: context.l10n.collectionPrinterDisconnected,
+                      ),
+                    ],
             ),
             style: _receiptText(size: 10, color: AppColors.neutral950),
           ),

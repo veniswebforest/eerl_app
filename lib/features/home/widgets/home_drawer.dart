@@ -1,14 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/profile/widgets/logout_confirmation_dialog.dart';
 import 'package:eerl_app/features/verification/model/verification_entry.dart';
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'home_assets.dart';
@@ -20,7 +27,14 @@ enum HomeDrawerRole { collectionAgent, supervisor }
 
 /// Role-aware navigation drawer based on Figma nodes 5114:3146 and 5114:3594.
 class HomeDrawer extends StatefulWidget {
-  const HomeDrawer({super.key});
+  const HomeDrawer({
+    super.key,
+    @visibleForTesting this.profileOverride,
+    @visibleForTesting this.rolesOverride,
+  });
+
+  final ProfileModel? profileOverride;
+  final List<MyRoleModel>? rolesOverride;
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -30,6 +44,53 @@ class _HomeDrawerState extends State<HomeDrawer> {
   bool _tasksExpanded = false;
   bool _supervisorVerificationExpanded = false;
   bool _supervisorTasksExpanded = false;
+  ProfileModel? _profile;
+  List<MyRoleModel> _roles = const [];
+  int _profileLoadGeneration = 0;
+  int _bootstrapRevision = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _profile = widget.profileOverride;
+    _roles = widget.rolesOverride ?? const [];
+    _bootstrapRevision = BootstrapSyncService.instance.revision;
+    if (widget.profileOverride == null || widget.rolesOverride == null) {
+      unawaited(_loadProfile());
+    }
+    BootstrapSyncService.instance.addListener(_reloadAfterBootstrap);
+  }
+
+  Future<void> _loadProfile() async {
+    final generation = ++_profileLoadGeneration;
+    try {
+      final profile = await EerlLocalRepository.instance.getProfile();
+      final roles = await EerlLocalRepository.instance.getRoles();
+      if (!mounted || generation != _profileLoadGeneration) return;
+      setState(() {
+        _profile = profile;
+        _roles = roles;
+      });
+    } catch (error) {
+      AppLogger.error('DRAWER_PROFILE', error.toString());
+      // The localized role fallback and initials keep the drawer usable while
+      // bootstrap/profile data is not available yet.
+    }
+  }
+
+  void _reloadAfterBootstrap() {
+    if (widget.profileOverride != null && widget.rolesOverride != null) return;
+    final revision = BootstrapSyncService.instance.revision;
+    if (revision == _bootstrapRevision) return;
+    _bootstrapRevision = revision;
+    unawaited(_loadProfile());
+  }
+
+  @override
+  void dispose() {
+    BootstrapSyncService.instance.removeListener(_reloadAfterBootstrap);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +98,18 @@ class _HomeDrawerState extends State<HomeDrawer> {
     final role = navigation.activeRole == DashboardUserRole.supervisor
         ? HomeDrawerRole.supervisor
         : HomeDrawerRole.collectionAgent;
-    final roleTitle = role == HomeDrawerRole.supervisor
+    final roleKeys = role == HomeDrawerRole.supervisor
+        ? const {'SUPERVISOR'}
+        : const {'AGENT', 'COLLECTION_AGENT'};
+    final matchingRoles = _roles.where(
+      (item) => roleKeys.contains(item.roleKey.trim().toUpperCase()),
+    );
+    final storedRoleTitle = matchingRoles.isNotEmpty
+        ? matchingRoles.first.roleName.trim()
+        : '';
+    final roleTitle = storedRoleTitle.isNotEmpty
+        ? storedRoleTitle
+        : role == HomeDrawerRole.supervisor
         ? context.l10n.roleCollectionSupervisor
         : context.l10n.drawerUserRole;
 
@@ -48,7 +120,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
       backgroundColor: Colors.white,
       child: Column(
         children: [
-          _ProfileHeader(roleTitle: roleTitle, role: role),
+          _ProfileHeader(profile: _profile, roleTitle: roleTitle, role: role),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -108,7 +180,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                             _DrawerItem(
                               key: const Key('drawer-ragpicker-directory'),
                               label: context.l10n.drawerRagpickerDirectory,
-                              icon: 'assets/icons/profile/role.svg',
+                              icon: '$_supervisorDrawerIconPath/ragpicker.svg',
                               onTap: () {
                                 _close(context);
                                 context.push(AppRoutes.ragpickerDirectory);
@@ -373,12 +445,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
       ),
     ];
 
-    return [
-      for (var index = 0; index < items.length; index++) ...[
-        items[index],
-        if (index != items.length - 1) const SizedBox(height: 12),
-      ],
-    ];
+    return items;
   }
 
   void _showLogoutDialog(BuildContext context) => showDialog<void>(
@@ -423,7 +490,7 @@ class _SupervisorExpandableItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: expanded ? const Color(0xFFC3EFCB) : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
@@ -578,7 +645,7 @@ class _DrawerExpandableItem extends StatelessWidget {
                 color: expanded ? AppColors.primary200 : Colors.transparent,
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
                 children: [
                   SizedBox(
@@ -687,13 +754,20 @@ class _DrawerChildItem extends StatelessWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({this.roleTitle, required this.role});
+  const _ProfileHeader({
+    required this.profile,
+    required this.roleTitle,
+    required this.role,
+  });
 
-  final String? roleTitle;
+  final ProfileModel? profile;
+  final String roleTitle;
   final HomeDrawerRole role;
 
   @override
   Widget build(BuildContext context) {
+    final name = profile?.userName?.trim() ?? '';
+    final initial = name.isEmpty ? '?' : name.characters.first.toUpperCase();
     return SizedBox(
       width: double.infinity,
       height: 134,
@@ -711,64 +785,61 @@ class _ProfileHeader extends StatelessWidget {
             top: 62,
             child: Row(
               children: [
-                if (role == HomeDrawerRole.supervisor)
-                  ClipOval(
-                    child: SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: Stack(
-                        clipBehavior: Clip.hardEdge,
-                        children: [
-                          Positioned(
-                            left: -5.78,
-                            top: -5.13,
-                            width: 59.57,
-                            height: 63.20,
-                            child: Image.asset(
-                              'assets/images/home_drawer_bhavesh_shah.png',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                else
-                  ClipOval(
-                    child: Image.asset(
-                      'assets/images/home_drawer_rahul_patel.png',
+                CircleAvatar(
+                  key: const Key('drawer-profile-image'),
+                  radius: 24,
+                  backgroundColor: AppColors.primary100,
+                  child: ClipOval(
+                    child: CachedAppImage(
+                      source: profile?.userPhotoUrl,
                       width: 48,
                       height: 48,
                       fit: BoxFit.cover,
+                      placeholder: Center(
+                        child: Text(
+                          initial,
+                          style: AppTextStyles.semiboldH7_18.copyWith(
+                            color: AppColors.primary500,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
+                ),
                 const SizedBox(width: 12),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      role == HomeDrawerRole.supervisor
-                          ? context.l10n.drawerSupervisorUserName
-                          : context.l10n.drawerUserName,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        height: 22 / 18,
-                        fontWeight: FontWeight.w600,
+                SizedBox(
+                  width: 202,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        key: const Key('drawer-profile-name'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          height: 22 / 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      roleTitle ?? context.l10n.drawerUserRole,
-                      style: TextStyle(
-                        color: Color(0xFF5FC974),
-                        fontSize: 12,
-                        height: 16 / 12,
-                        fontWeight: FontWeight.w600,
+                      const SizedBox(height: 2),
+                      Text(
+                        roleTitle,
+                        key: const Key('drawer-profile-role'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Color(0xFF5FC974),
+                          fontSize: 12,
+                          height: 16 / 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -803,13 +874,20 @@ class _DrawerItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Row(
           children: [
             Stack(
               clipBehavior: Clip.none,
               children: [
-                SizedBox(width: 24, height: 24, child: SvgPicture.asset(icon)),
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: SvgPicture.asset(
+                    icon,
+                    key: ValueKey('drawer-item-icon-$icon'),
+                  ),
+                ),
                 if (showBadge)
                   Positioned(
                     left: 16,

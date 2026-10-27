@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
@@ -101,6 +102,17 @@ class _NotificationTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (item.otherRole &&
+                      item.forRoleName?.trim().isNotEmpty == true) ...[
+                    Text(
+                      context.l10n.notificationForRole(item.forRoleName!),
+                      key: ValueKey('notification-role-${item.id}'),
+                      style: AppTextStyles.mediumSH9_12.copyWith(
+                        color: AppColors.secondary700,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                  ],
                   Text(
                     item.title,
                     style: AppTextStyles.semiboldH8_16.copyWith(

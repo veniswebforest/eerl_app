@@ -1,5 +1,6 @@
 import 'package:eerl_app/features/home/widgets/home_app_bar.dart';
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
+import 'package:eerl_app/core/theme/app_dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -36,7 +37,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(
       tester.getSize(find.byType(HomeAppBar)).height,
-      greaterThanOrEqualTo(45),
+      greaterThanOrEqualTo(AppScreenHeaderMetrics.height),
     );
   });
 
@@ -66,5 +67,26 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('notification bell shows the active-role unread count', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(
+          drawer: Drawer(),
+          body: HomeAppBar(notificationUnreadCount: 4),
+        ),
+      ),
+    );
+
+    expect(
+      find.byKey(const Key('home-notification-unread-count')),
+      findsOneWidget,
+    );
+    expect(find.text('4'), findsOneWidget);
   });
 }

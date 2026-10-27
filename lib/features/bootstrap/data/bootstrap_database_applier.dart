@@ -227,6 +227,8 @@ class BootstrapDatabaseApplier {
       'title',
       'body',
       'deep_link',
+      'role',
+      'center_id',
       'created_at',
       'read_at',
       'sync_state',

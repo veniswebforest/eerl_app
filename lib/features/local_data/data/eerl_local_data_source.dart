@@ -19,6 +19,13 @@ class CollectionLocationUnavailableException implements Exception {
   String toString() => 'A valid location is required to submit a collection.';
 }
 
+class CollectionAlreadySubmittedException implements Exception {
+  const CollectionAlreadySubmittedException();
+
+  @override
+  String toString() => 'This collection has already been submitted.';
+}
+
 class TransferStockUnavailableException implements Exception {
   const TransferStockUnavailableException({
     required this.itemId,
@@ -1560,6 +1567,11 @@ class EerlLocalDataSource {
             limit: 1,
           )
         : const <Map<String, Object?>>[];
+    if (submit &&
+        locationRows.isNotEmpty &&
+        !_canSubmitCollectionStatus(locationRows.single['status'])) {
+      throw const CollectionAlreadySubmittedException();
+    }
     final resubmittingRejected =
         locationRows.isNotEmpty && locationRows.single['status'] == 'REJECTED';
     final existingLocation = locationRows.isEmpty ? null : locationRows.single;
@@ -1593,6 +1605,25 @@ class EerlLocalDataSource {
       photoSizes[path] = await _localFileSize(path);
     }
     await _database.transaction((txn) async {
+      final existing = await txn.query(
+        DatabaseTables.collections,
+        columns: const [
+          'status',
+          'slip_number',
+          'collected_at',
+          'gps_lat',
+          'gps_lng',
+        ],
+        where: 'id = ?',
+        whereArgs: [collection.id],
+        limit: 1,
+      );
+      final existingRow = existing.isEmpty ? null : existing.single;
+      if (existingRow != null &&
+          !_canSubmitCollectionStatus(existingRow['status'])) {
+        throw const CollectionAlreadySubmittedException();
+      }
+
       final channelRows = await txn.query(
         DatabaseTables.centerChannels,
         columns: const ['takes_payment'],
@@ -1678,20 +1709,6 @@ class EerlLocalDataSource {
           throw StateError('Select a valid payment mode.');
         }
       }
-      final existing = await txn.query(
-        DatabaseTables.collections,
-        columns: const [
-          'status',
-          'slip_number',
-          'collected_at',
-          'gps_lat',
-          'gps_lng',
-        ],
-        where: 'id = ?',
-        whereArgs: [collection.id],
-        limit: 1,
-      );
-      final existingRow = existing.isEmpty ? null : existing.single;
       final isResubmission = existingRow?['status'] == 'REJECTED';
       var slipNumber =
           collection.slipNumber ?? existingRow?['slip_number'] as String?;
@@ -1702,13 +1719,15 @@ class EerlLocalDataSource {
                 ? (existingRow?['gps_lat'] as num?)?.toDouble() ??
                       capturedGps?.latitude
                 : capturedGps?.latitude)
-          : (existingRow?['gps_lat'] as num?)?.toDouble();
+          : suppliedGps?.latitude ??
+                (existingRow?['gps_lat'] as num?)?.toDouble();
       final gpsLng = submit
           ? (isResubmission
                 ? (existingRow?['gps_lng'] as num?)?.toDouble() ??
                       capturedGps?.longitude
                 : capturedGps?.longitude)
-          : (existingRow?['gps_lng'] as num?)?.toDouble();
+          : suppliedGps?.longitude ??
+                (existingRow?['gps_lng'] as num?)?.toDouble();
 
       if (submit && !isResubmission && slipNumber == null) {
         final centerRows = await txn.rawQuery(
@@ -1908,6 +1927,7 @@ class EerlLocalDataSource {
           kind: 'draft_save',
           body: body,
           refs: photoIds,
+          blockingPhotoIds: photoIds,
         );
         await _deleteUnreferencedPhotoRows(txn, previousPhotoIds);
         return;
@@ -1961,7 +1981,7 @@ class EerlLocalDataSource {
         entityId: savedCollectionId,
         kind: submit ? 'submit' : 'draft_save',
         refs: photoIds,
-        blockingPhotoIds: submit ? photoIds : const <String>[],
+        blockingPhotoIds: photoIds,
         createdAt: now,
       );
       await _deleteUnreferencedPhotoRows(txn, previousPhotoIds);
@@ -1974,6 +1994,11 @@ class EerlLocalDataSource {
         expectedItemIds: savedItemIds,
       );
     }
+  }
+
+  bool _canSubmitCollectionStatus(Object? status) {
+    final normalized = status?.toString().trim().toUpperCase();
+    return normalized == 'DRAFT' || normalized == 'REJECTED';
   }
 
   Future<void> _debugLogCollectionCommit({
@@ -2122,14 +2147,44 @@ class EerlLocalDataSource {
     required List<String> handoverPhotoIds,
     required List<Map<String, Object?>> items,
   }) {
-    final body = <String, Object?>{
-      ...collectionRow,
-      'handover_photo_urls': handoverPhotoIds,
-      'items': items,
+    final vehicleId = collectionRow['vehicle_id'];
+    final givenByName = collectionRow['given_by_name'];
+    final mrfLabourId = collectionRow['mrf_person_id'];
+    final ragpickerId = collectionRow['ragpicker_id'];
+    final paidBy = collectionRow['paid_by'];
+    final gpsLat = (collectionRow['gps_lat'] as num?)?.toDouble();
+    final gpsLng = (collectionRow['gps_lng'] as num?)?.toDouble();
+    if (!_isValidGps(gpsLat, gpsLng)) {
+      throw const CollectionLocationUnavailableException();
+    }
+    return <String, Object?>{
+      'centerId': collectionRow['center_id'],
+      'type': collectionRow['channel'],
+      if (collectionRow['channel'] == 'D2D') ...{
+        'vehicleId': vehicleId,
+        'givenByName': givenByName,
+        'handoverPhotoUrls': handoverPhotoIds,
+        'paidBy': paidBy,
+      },
+      if (collectionRow['channel'] == 'MRF') 'mrfLabourId': mrfLabourId,
+      if (collectionRow['channel'] == 'RAMP') ...{
+        'ragpickerId': ragpickerId,
+        'handoverPhotoUrls': handoverPhotoIds,
+        'paidBy': paidBy,
+      },
+      'lines': [
+        for (final item in items)
+          {
+            'itemId': item['item_id'],
+            'collectedQty': item['qty'],
+            'verifiedQty': item['verified_qty'],
+            'rate': item['rate'],
+            'amount': item['amount'],
+            'photoUrls': item['photo_urls'],
+          },
+      ],
+      'gps': {'lat': gpsLat, 'lng': gpsLng},
     };
-    body.remove('gps_lat');
-    body.remove('gps_lng');
-    return body;
   }
 
   Future<void> _deleteUnreferencedPhotoRows(
@@ -4345,11 +4400,67 @@ class EerlLocalDataSource {
     return rows.map(DayCloseModel.fromMap).toList(growable: false);
   }
 
-  Future<List<NotificationModel>> getNotifications() async =>
-      (await _database.query(
-        DatabaseTables.notifications,
-        orderBy: 'created_at DESC',
-      )).map(NotificationModel.fromMap).toList(growable: false);
+  Future<List<NotificationModel>> getNotifications() async {
+    final role = await activeRole;
+    final rows = await _database.rawQuery(
+      '''
+      SELECT n.*, r.role_name AS for_role_name,
+        CASE WHEN n.role IS NULL OR n.role = ? THEN 0 ELSE 1 END AS other_role
+      FROM ${DatabaseTables.notifications} n
+      LEFT JOIN ${DatabaseTables.myRoles} r ON r.role_key = n.role
+      ORDER BY other_role, n.created_at DESC
+    ''',
+      [role],
+    );
+    return rows.map(NotificationModel.fromMap).toList(growable: false);
+  }
+
+  Future<NotificationModel?> getNotification(String id) async {
+    final role = await activeRole;
+    final rows = await _database.rawQuery(
+      '''
+      SELECT n.*, r.role_name AS for_role_name,
+        CASE WHEN n.role IS NULL OR n.role = ? THEN 0 ELSE 1 END AS other_role
+      FROM ${DatabaseTables.notifications} n
+      LEFT JOIN ${DatabaseTables.myRoles} r ON r.role_key = n.role
+      WHERE n.id = ?
+      LIMIT 1
+    ''',
+      [role, id],
+    );
+    return rows.isEmpty ? null : NotificationModel.fromMap(rows.single);
+  }
+
+  Future<int> getActiveRoleUnreadNotificationCount() async {
+    final role = await activeRole;
+    final rows = await _database.rawQuery(
+      '''
+      SELECT COUNT(*)
+      FROM ${DatabaseTables.notifications}
+      WHERE read_at IS NULL AND (role IS NULL OR role = ?)
+    ''',
+      [role],
+    );
+    return Sqflite.firstIntValue(rows) ?? 0;
+  }
+
+  Future<Map<String, int>> getOtherRoleUnreadNotificationCounts() async {
+    final role = await activeRole;
+    final rows = await _database.rawQuery(
+      '''
+      SELECT role, COUNT(*) AS unread
+      FROM ${DatabaseTables.notifications}
+      WHERE read_at IS NULL AND role IS NOT NULL AND role <> ?
+      GROUP BY role
+    ''',
+      [role],
+    );
+    return {
+      for (final row in rows)
+        if (row['role'] case final String roleKey)
+          roleKey: (row['unread'] as num?)?.toInt() ?? 0,
+    };
+  }
 
   Future<void> markNotificationRead(String id) =>
       _database.runInTransaction((txn) async {

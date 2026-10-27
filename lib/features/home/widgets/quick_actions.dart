@@ -4,21 +4,64 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 import 'home_assets.dart';
 import 'home_styles.dart';
 
 /// Quick Actions section with Start Collection and Wallet & Log Expense cards.
-class QuickActions extends StatelessWidget {
+class QuickActions extends StatefulWidget {
   const QuickActions({
     super.key,
     required this.onAddCollectionTap,
     required this.onTasksTap,
     required this.onLogExpenseTap,
+    this.taskLoader,
   });
 
   final VoidCallback onAddCollectionTap;
-  final VoidCallback onTasksTap;
+  final Future<void> Function() onTasksTap;
   final VoidCallback onLogExpenseTap;
+  final Future<List<TaskModel>> Function()? taskLoader;
+
+  @override
+  State<QuickActions> createState() => _QuickActionsState();
+}
+
+class _QuickActionsState extends State<QuickActions> {
+  late final LocalQueryController<List<TaskModel>> _tasksController;
+  int _bootstrapRevision = -1;
+
+  @override
+  void initState() {
+    super.initState();
+    _tasksController = LocalQueryController(
+      widget.taskLoader ?? () => EerlLocalRepository.instance.getTasks(),
+    )..load();
+    _bootstrapRevision = BootstrapSyncService.instance.revision;
+    BootstrapSyncService.instance.addListener(_reloadAfterBootstrap);
+  }
+
+  void _reloadAfterBootstrap() {
+    final revision = BootstrapSyncService.instance.revision;
+    if (revision == _bootstrapRevision) return;
+    _bootstrapRevision = revision;
+    _tasksController.load();
+  }
+
+  Future<void> _openTasks() async {
+    await widget.onTasksTap();
+    await _tasksController.load();
+  }
+
+  @override
+  void dispose() {
+    BootstrapSyncService.instance.removeListener(_reloadAfterBootstrap);
+    _tasksController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,19 +78,33 @@ class QuickActions extends StatelessWidget {
           title: context.l10n.startCollection,
           subtitle: context.l10n.recordWeightProof,
           buttonLabel: context.l10n.addCollection,
-          onTap: onAddCollectionTap,
+          onTap: widget.onAddCollectionTap,
         ),
         const SizedBox(height: 16),
-        QuickActionCard(
-          key: const Key('home-pending-task-card'),
-          iconAsset: 'assets/icons/profile/sync_pending_collection.svg',
-          iconColor: AppColors.yellow600,
-          iconBg: AppColors.yellow50,
-          title: context.l10n.homePendingTask,
-          subtitle: context.l10n.homePendingTaskSubtitle,
-          buttonLabel: context.l10n.viewTask,
-          badge: '3',
-          onTap: onTasksTap,
+        ListenableBuilder(
+          listenable: _tasksController,
+          builder: (context, _) {
+            final pendingCount = _tasksController.data
+                ?.where(
+                  (task) => const {
+                    'OPEN',
+                    'PENDING',
+                  }.contains(task.status.trim().toUpperCase()),
+                )
+                .length;
+            return QuickActionCard(
+              key: const Key('home-pending-task-card'),
+              iconAsset: 'assets/icons/profile/sync_pending_collection.svg',
+              iconColor: AppColors.yellow600,
+              iconBg: AppColors.yellow50,
+              title: context.l10n.homePendingTask,
+              subtitle: context.l10n.homePendingTaskSubtitle,
+              buttonLabel: context.l10n.viewTask,
+              badge: pendingCount?.toString(),
+              badgeKey: const Key('agent-pending-task-count'),
+              onTap: _openTasks,
+            );
+          },
         ),
         const SizedBox(height: 16),
         QuickActionCard(
@@ -58,7 +115,7 @@ class QuickActions extends StatelessWidget {
           title: context.l10n.walletLogExpense,
           subtitle: context.l10n.trackFieldSpending,
           buttonLabel: context.l10n.logExpense,
-          onTap: onLogExpenseTap,
+          onTap: widget.onLogExpenseTap,
         ),
       ],
     );
@@ -78,6 +135,7 @@ class QuickActionCard extends StatelessWidget {
     required this.buttonLabel,
     required this.onTap,
     this.badge,
+    this.badgeKey,
     this.titleStyle,
     this.subtitleStyle,
     this.iconWidth = 24,
@@ -94,6 +152,7 @@ class QuickActionCard extends StatelessWidget {
   final String buttonLabel;
   final VoidCallback onTap;
   final String? badge;
+  final Key? badgeKey;
   final TextStyle? titleStyle;
   final TextStyle? subtitleStyle;
   final double iconWidth;
@@ -165,6 +224,7 @@ class QuickActionCard extends StatelessWidget {
       if (badge != null) ...[
         const SizedBox(width: 8),
         Container(
+          key: badgeKey,
           width: 28,
           height: 28,
           alignment: Alignment.center,

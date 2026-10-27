@@ -94,6 +94,21 @@ void main() {
             },
           ],
         },
+        'notifications': {
+          'upserts': [
+            {
+              'id': 'notification-1',
+              'type': 'TASK_ASSIGNED',
+              'title': 'New task',
+              'body': 'Check the material bay.',
+              'deep_link': '/tasks',
+              'role': 'AGENT',
+              'center_id': 'center-1',
+              'created_at': '2026-10-20T09:30:00.000Z',
+              'read_at': null,
+            },
+          ],
+        },
       },
     });
 
@@ -120,6 +135,11 @@ void main() {
     expect(transfer['rejection_reason'], 'No Vehicle Available');
     expect(transfer['rejection_remarks'], 'The truck is booked till Friday.');
     expect(transfer['vehicle_differs'], 0);
+    final notification = (await database.query(
+      DatabaseTables.notifications,
+    )).single;
+    expect(notification['role'], 'AGENT');
+    expect(notification['center_id'], 'center-1');
     expect(await database.getSyncMeta('cursor'), 'latest-1');
 
     await database.update(

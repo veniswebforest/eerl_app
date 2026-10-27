@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/core/theme/app_dimensions.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'home_assets.dart';
@@ -15,11 +16,13 @@ class HomeAppBar extends StatelessWidget {
     this.onNotificationTap,
     this.onWalletTap,
     this.showWalletAction = true,
+    this.notificationUnreadCount = 0,
   });
 
   final VoidCallback? onNotificationTap;
   final VoidCallback? onWalletTap;
   final bool showWalletAction;
+  final int notificationUnreadCount;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +30,9 @@ class HomeAppBar extends StatelessWidget {
     final today = DateFormat('EEE, dd MMM yyyy', locale).format(DateTime.now());
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 45),
+      constraints: const BoxConstraints(
+        minHeight: AppScreenHeaderMetrics.height,
+      ),
       child: Row(
         children: [
           Builder(
@@ -93,10 +98,39 @@ class HomeAppBar extends StatelessWidget {
             key: const Key('home-notification-button'),
             onTap: onNotificationTap,
             borderRadius: BorderRadius.circular(24),
-            child: SvgPicture.asset(
-              HomeAssets.notification,
-              width: 45,
-              height: 45,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                SvgPicture.asset(
+                  HomeAssets.notification,
+                  width: 45,
+                  height: 45,
+                ),
+                if (notificationUnreadCount > 0)
+                  Positioned(
+                    right: -2,
+                    top: -3,
+                    child: Container(
+                      key: const Key('home-notification-unread-count'),
+                      constraints: const BoxConstraints(minWidth: 20),
+                      height: 20,
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        color: AppColors.red500,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Text(
+                        notificationUnreadCount > 99
+                            ? '99+'
+                            : '$notificationUnreadCount',
+                        style: AppTextStyles.mediumSH9_12.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ],

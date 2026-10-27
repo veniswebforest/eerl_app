@@ -1,4 +1,5 @@
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/core/theme/app_dimensions.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -17,11 +18,12 @@ class SupervisorTaskHeader extends StatelessWidget
   final String backAsset;
 
   @override
-  Size get preferredSize => const Size.fromHeight(68);
+  Size get preferredSize =>
+      const Size.fromHeight(AppScreenHeaderMetrics.height);
 
   @override
   Widget build(BuildContext context) => AppBar(
-    toolbarHeight: 68,
+    toolbarHeight: AppScreenHeaderMetrics.height,
     elevation: 0,
     centerTitle: false,
     scrolledUnderElevation: 0,

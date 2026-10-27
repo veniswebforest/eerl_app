@@ -94,6 +94,55 @@ void main() {
     expect(VehicleRegistrationNumber.normalize('GJ-05-1234'), isNull);
   });
 
+  test('D2D selector reads active vehicles from the vehicles table', () async {
+    await database.insert(DatabaseTables.centers, {
+      'id': 'center-2',
+      'name': 'Center Two',
+    });
+    for (final row in <Map<String, Object?>>[
+      {
+        'id': 'center-vehicle',
+        'center_id': 'center-1',
+        'plate_number': 'GJ-05-AA-1001',
+        'is_active': 1,
+        'sync_state': 'synced',
+      },
+      {
+        'id': 'shared-vehicle',
+        'center_id': null,
+        'plate_number': 'GJ-05-AA-1002',
+        'is_active': 1,
+        'sync_state': 'synced',
+      },
+      {
+        'id': 'inactive-vehicle',
+        'center_id': 'center-1',
+        'plate_number': 'GJ-05-AA-1003',
+        'is_active': 0,
+        'sync_state': 'synced',
+      },
+      {
+        'id': 'other-center-vehicle',
+        'center_id': 'center-2',
+        'plate_number': 'GJ-05-AA-1004',
+        'is_active': 1,
+        'sync_state': 'synced',
+      },
+    ]) {
+      await database.insert(DatabaseTables.vehicles, row);
+    }
+
+    final vehicles = await local.getVehicles(
+      centerId: 'center-1',
+      activeOnly: true,
+    );
+
+    expect(vehicles.map((vehicle) => vehicle.plateNumber), [
+      'GJ-05-AA-1001',
+      'GJ-05-AA-1002',
+    ]);
+  });
+
   test('invalid vehicle number is rejected before SQLite and outbox', () async {
     const vehicle = VehicleModel(
       id: 'invalid-vehicle',

@@ -598,6 +598,12 @@ abstract class AppLocalizations {
   /// **'Welcome back'**
   String get welcomeBack;
 
+  /// No description provided for @homeInitialDataSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Data syncing…'**
+  String get homeInitialDataSyncing;
+
   /// No description provided for @homeDateZone.
   ///
   /// In en, this message translates to:
@@ -2806,6 +2812,24 @@ abstract class AppLocalizations {
   /// **'Sync your offline data'**
   String get profileSyncSubtitle;
 
+  /// No description provided for @profileExportOutbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Outbox'**
+  String get profileExportOutbox;
+
+  /// No description provided for @profileExportOutboxSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Export only pending outbox table rows as a TXT file'**
+  String get profileExportOutboxSubtitle;
+
+  /// No description provided for @profileExportOutboxFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Outbox data could not be exported. Please try again.'**
+  String get profileExportOutboxFailed;
+
   /// No description provided for @profileAccount.
   ///
   /// In en, this message translates to:
@@ -3718,6 +3742,84 @@ abstract class AppLocalizations {
   /// **'Bluetooth thermal printer connected.'**
   String get collectionPrinterConnected;
 
+  /// No description provided for @collectionPrinterDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Print Slip to connect a Bluetooth printer.'**
+  String get collectionPrinterDisconnected;
+
+  /// No description provided for @collectionBluetoothPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth permission needed'**
+  String get collectionBluetoothPermissionTitle;
+
+  /// No description provided for @collectionSelectBluetoothPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Bluetooth printer'**
+  String get collectionSelectBluetoothPrinter;
+
+  /// No description provided for @collectionPairedPrintersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a printer already paired in your phone\'s Bluetooth settings.'**
+  String get collectionPairedPrintersHint;
+
+  /// No description provided for @collectionBluetoothPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth permission is required to print the slip.'**
+  String get collectionBluetoothPermissionRequired;
+
+  /// No description provided for @collectionBluetoothDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on Bluetooth and try again.'**
+  String get collectionBluetoothDisabled;
+
+  /// No description provided for @collectionBluetoothDisabledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth is turned off'**
+  String get collectionBluetoothDisabledTitle;
+
+  /// No description provided for @collectionNoPairedPrinters.
+  ///
+  /// In en, this message translates to:
+  /// **'No paired Bluetooth printer found. Pair the thermal printer in phone settings first.'**
+  String get collectionNoPairedPrinters;
+
+  /// No description provided for @collectionNoPairedPrintersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No paired printer found'**
+  String get collectionNoPairedPrintersTitle;
+
+  /// No description provided for @collectionPrinterConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to the selected Bluetooth printer.'**
+  String get collectionPrinterConnectionFailed;
+
+  /// No description provided for @collectionPrinterConnectionFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer connection failed'**
+  String get collectionPrinterConnectionFailedTitle;
+
+  /// No description provided for @collectionPrinterPrintFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The Bluetooth printer did not accept the slip. Check the connection and try again.'**
+  String get collectionPrinterPrintFailed;
+
+  /// No description provided for @collectionPrinterPrintFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Slip printing failed'**
+  String get collectionPrinterPrintFailedTitle;
+
   /// No description provided for @collectionReceiptDateTime.
   ///
   /// In en, this message translates to:
@@ -3789,6 +3891,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not prepare the slip. Please try again.'**
   String get collectionSlipActionError;
+
+  /// No description provided for @collectionSlipActionErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Slip action failed'**
+  String get collectionSlipActionErrorTitle;
 
   /// No description provided for @collectionPetReceiptDetail.
   ///
@@ -3921,6 +4029,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notifications'**
   String get notificationTitle;
+
+  /// No description provided for @notificationForRole.
+  ///
+  /// In en, this message translates to:
+  /// **'For your {roleName} role'**
+  String notificationForRole(String roleName);
+
+  /// No description provided for @notificationSwitchRoleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch role?'**
+  String get notificationSwitchRoleTitle;
+
+  /// No description provided for @notificationSwitchRoleMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This notification is for your {roleName} role. Switch roles to open it?'**
+  String notificationSwitchRoleMessage(String roleName);
 
   /// No description provided for @notificationToday.
   ///
@@ -7693,7 +7819,7 @@ abstract class AppLocalizations {
   /// No description provided for @collectionLocationRequired.
   ///
   /// In en, this message translates to:
-  /// **'Location is required to submit a collection. Turn on location and allow access, then try again.'**
+  /// **'Location is required to save or submit a collection. Turn on location and allow access, then try again.'**
   String get collectionLocationRequired;
 
   /// No description provided for @collectionDetailsNotReady.
@@ -7713,6 +7839,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Collection could not be saved. Please try again.'**
   String get collectionSaveFailed;
+
+  /// No description provided for @collectionDraftSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft Saved!'**
+  String get collectionDraftSaved;
+
+  /// No description provided for @collectionDraftSavedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection draft saved successfully. It will sync automatically.'**
+  String get collectionDraftSavedSubtitle;
+
+  /// No description provided for @collectionAlreadySubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'This collection has already been submitted. A duplicate entry was not created.'**
+  String get collectionAlreadySubmitted;
 
   /// No description provided for @locationNotNow.
   ///

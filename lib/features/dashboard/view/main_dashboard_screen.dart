@@ -26,11 +26,13 @@ class MainDashboardScreen extends StatefulWidget {
     this.userRole = DashboardUserRole.collectionAgent,
     this.permissions = const <String>{},
     this.initialPageKey = 'home',
+    this.showInitialLoginLoader = false,
   });
 
   final DashboardUserRole userRole;
   final Set<String> permissions;
   final String initialPageKey;
+  final bool showInitialLoginLoader;
 
   @override
   State<MainDashboardScreen> createState() => _MainDashboardScreenState();
@@ -119,7 +121,20 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         extendBody: true,
         body: IndexedStack(
           index: safeSelectedIndex,
-          children: items.map((item) => item.page).toList(growable: false),
+          children: items
+              .map(
+                (item) => item.pageKey == 'home'
+                    // Home owns the first-login loader lifecycle, so preserve
+                    // its state when the Bootstrap revision changes.
+                    ? item.page
+                    : KeyedSubtree(
+                        key: ValueKey(
+                          '${item.pageKey}-bootstrap-${bootstrapRevision ?? 0}',
+                        ),
+                        child: item.page,
+                      ),
+              )
+              .toList(growable: false),
         ),
         bottomNavigationBar: navigation.isDrawerOpen
             ? null
@@ -172,7 +187,7 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         unselectedIcon: navigation.activeRole == DashboardUserRole.supervisor
             ? HomeAssets.supervisorNavHome
             : '$_navIconPath/nav_home.svg',
-        page: const HomeScreen(),
+        page: HomeScreen(showInitialLoginLoader: widget.showInitialLoginLoader),
         pageKey: 'home',
         roles: allRoles,
         permission: 'dashboard.view',

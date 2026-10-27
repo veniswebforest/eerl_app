@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
@@ -6,6 +8,7 @@ import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/providers/app_lock_provider.dart';
 import 'package:eerl_app/core/providers/locale_provider.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
@@ -13,9 +16,12 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../home/widgets/home_assets.dart';
+import '../service/outbox_export_service.dart';
 import '../widgets/profile_action_card.dart';
 import '../widgets/profile_assets.dart';
 import '../widgets/profile_info_card.dart';
@@ -43,6 +49,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ({ProfileModel profile, List<CenterModel> centers, List<MyRoleModel> roles})
   >
   _controller;
+  final OutboxExportService _outboxExportService = OutboxExportService();
+  bool _exportingOutbox = false;
 
   bool get isSupervisor => widget.isSupervisor;
 
@@ -92,6 +100,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _refresh() {
     if (mounted) setState(() {});
+  }
+
+  Future<void> _exportOutbox(BuildContext shareContext) async {
+    if (_exportingOutbox) return;
+    setState(() => _exportingOutbox = true);
+    try {
+      final bytes = await _outboxExportService.buildTextExport();
+      if (!mounted || !shareContext.mounted) return;
+      final renderBox = shareContext.findRenderObject();
+      final shareOrigin = renderBox is RenderBox && renderBox.hasSize
+          ? renderBox.localToGlobal(Offset.zero) & renderBox.size
+          : null;
+      final timestamp = DateTime.now().toUtc().toIso8601String().replaceAll(
+        RegExp(r'[:.]'),
+        '-',
+      );
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile.fromData(bytes, mimeType: 'text/plain')],
+          fileNameOverrides: ['eerl_outbox_$timestamp.txt'],
+          title: context.l10n.profileExportOutbox,
+          subject: context.l10n.profileExportOutbox,
+          sharePositionOrigin: shareOrigin,
+        ),
+      );
+    } catch (error) {
+      AppLogger.error('OUTBOX_EXPORT', error.toString());
+      if (!mounted) return;
+      AppTopNotification.show(
+        context,
+        key: const Key('profile-export-outbox-error'),
+        title: context.l10n.error,
+        subtitle: context.l10n.profileExportOutboxFailed,
+        tone: AppTopNotificationTone.error,
+      );
+    } finally {
+      if (mounted) setState(() => _exportingOutbox = false);
+    }
   }
 
   @override
@@ -207,6 +253,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           title: l10n.profileSyncData,
                           subtitle: l10n.profileSyncSubtitle,
                           onTap: () => showSyncDataDialog(context),
+                        ),
+                        const SizedBox(height: 12),
+                        Builder(
+                          builder: (shareContext) => ProfileActionCard(
+                            key: const Key('profile-export-outbox'),
+                            icon: ProfileAssets.syncData,
+                            arrowIcon: ProfileAssets.arrowRight,
+                            title: l10n.profileExportOutbox,
+                            subtitle: l10n.profileExportOutboxSubtitle,
+                            onTap: _exportingOutbox
+                                ? null
+                                : () => unawaited(_exportOutbox(shareContext)),
+                          ),
                         ),
                         if (!isSupervisor) ...[
                           const SizedBox(height: 12),

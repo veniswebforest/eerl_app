@@ -6,6 +6,7 @@ import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
+import 'package:eerl_app/features/collection/widgets/collection_draft_saved_notification.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
@@ -274,6 +275,7 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
     switch (result) {
       case CollectionRouteResult.draftSaved:
         setState(() => _view = RecordsViewFlag.drafts);
+        showCollectionDraftSavedNotification(context);
       case CollectionRouteResult.openCollections:
         context.read<DashboardNavigationProvider>().selectPage('collections');
       case null:

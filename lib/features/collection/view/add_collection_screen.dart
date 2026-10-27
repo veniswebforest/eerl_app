@@ -15,12 +15,14 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/core/utils/uuid_generator.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/ragpicker_directory/widgets/ragpicker_status_confirmation_dialog.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import '../model/collection_entry_state.dart';
 import '../widgets/collection_step_indicator.dart';
+import '../widgets/collection_success_dialog.dart';
 import '../widgets/d2d_collection_photos_step.dart';
 import '../widgets/d2d_vehicle_details_form.dart';
 import '../widgets/d2d_waste_items_step.dart';
@@ -79,6 +81,8 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   String? _userId;
   String? _draftId;
   bool _saving = false;
+  late int _bootstrapRevision;
+  late final Future<DeviceCoordinates?> _submissionCoordinatesPrefetch;
 
   List<String> get _vehicleNumbers =>
       _vehicles.map((item) => item.plateNumber).toList(growable: false);
@@ -111,6 +115,12 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   @override
   void initState() {
     super.initState();
+    _bootstrapRevision = BootstrapSyncService.instance.revision;
+    BootstrapSyncService.instance.addListener(_reloadVehiclesAfterBootstrap);
+    // Start a location fix while the user fills the form. Saving can then use
+    // the already-completed fix instead of making the success UI wait for GPS.
+    _submissionCoordinatesPrefetch = DeviceLocationService.instance
+        .bestAvailableCoordinates();
     _step = widget.initialStep;
     _d2dReview = widget.initialD2dReview;
     _type = widget.initialType;
@@ -120,6 +130,12 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     }
     _selected.addAll(widget.initialSelectedItems);
     _loadReferenceData();
+  }
+
+  @override
+  void dispose() {
+    BootstrapSyncService.instance.removeListener(_reloadVehiclesAfterBootstrap);
+    super.dispose();
   }
 
   List<String> _itemNames(BuildContext c) =>
@@ -135,8 +151,24 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   Future<void> _loadReferenceData() async {
     final repository = EerlLocalRepository.instance;
     final centerId = await repository.activeCenterId;
+    // Vehicles are loaded independently from the rest of the form references.
+    // A failure in an unrelated MRF/ragpicker query must not hide valid D2D
+    // vehicles already stored in SQLite.
+    final vehicles = await repository.getVehicles(
+      centerId: centerId,
+      activeOnly: true,
+    );
+    if (!mounted) return;
+    setState(() {
+      _centerId = centerId;
+      _vehicles = vehicles;
+      if (_vehicleNumber != null &&
+          !_vehicles.any((vehicle) => vehicle.plateNumber == _vehicleNumber)) {
+        _vehicleNumber = null;
+      }
+    });
+
     final values = await Future.wait([
-      repository.getVehicles(centerId: centerId),
       repository.getMrfPeople(centerId: centerId),
       repository.getRagpickers(centerId: centerId, activeOnly: true),
       repository.getCollectionMaterials(centerId: centerId, channel: _channel),
@@ -150,19 +182,44 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     if (!mounted) return;
     setState(() {
       _centerId = centerId;
-      _vehicles = values[0] as List<VehicleModel>;
-      _mrfPeople = values[1] as List<MrfPersonModel>;
-      _ragpickers = values[2] as List<RagpickerModel>;
-      _materials = values[3] as List<ItemModel>;
-      _profile = values[4] as ProfileModel;
-      _userId = values[5] as String?;
+      _vehicles = vehicles;
+      _mrfPeople = values[0] as List<MrfPersonModel>;
+      _ragpickers = values[1] as List<RagpickerModel>;
+      _materials = values[2] as List<ItemModel>;
+      _profile = values[3] as ProfileModel;
+      _userId = values[4] as String?;
       _mrfAgentName = _mrfSupervisor?.name;
       _selected.removeWhere((index) => index >= _materials.length);
       if (widget.initialCollectionId != null) {
         _restoreDraft(
-          values[6] as CollectionModel?,
-          values[7] as List<CollectionItemModel>,
+          values[5] as CollectionModel?,
+          values[6] as List<CollectionItemModel>,
         );
+      }
+    });
+  }
+
+  void _reloadVehiclesAfterBootstrap() {
+    final revision = BootstrapSyncService.instance.revision;
+    if (revision == _bootstrapRevision) return;
+    _bootstrapRevision = revision;
+    unawaited(_reloadVehiclesFromTable());
+  }
+
+  Future<void> _reloadVehiclesFromTable() async {
+    final repository = EerlLocalRepository.instance;
+    final centerId = await repository.activeCenterId;
+    final vehicles = await repository.getVehicles(
+      centerId: centerId,
+      activeOnly: true,
+    );
+    if (!mounted) return;
+    setState(() {
+      _centerId = centerId;
+      _vehicles = vehicles;
+      if (_vehicleNumber != null &&
+          !_vehicles.any((vehicle) => vehicle.plateNumber == _vehicleNumber)) {
+        _vehicleNumber = null;
       }
     });
   }
@@ -1079,6 +1136,38 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     );
   }
 
+  void _startCollectionSyncAfterUiFrame() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+    });
+  }
+
+  void _showSubmitSuccessAfterClosingPage({
+    required NavigatorState navigator,
+    required String collectionId,
+  }) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!navigator.mounted) return;
+      unawaited(
+        showDialog<void>(
+          context: navigator.context,
+          barrierColor: Colors.black54,
+          builder: (dialogContext) => CollectionSuccessDialog(
+            onPreview: () {
+              Navigator.of(dialogContext).pop();
+              navigator.context.push<void>(
+                AppRoutes.collectionReceipt,
+                extra: collectionId,
+              );
+            },
+            onAddNew: () => Navigator.of(dialogContext).pop(),
+          ),
+        ),
+      );
+      _startCollectionSyncAfterUiFrame();
+    });
+  }
+
   Future<void> _saveCollection({required bool submit}) async {
     if (_saving) return;
     final centerId = _centerId;
@@ -1099,17 +1188,17 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       _showSubmitError(context.l10n.collectionSupervisorRequired);
       return;
     }
-    DeviceCoordinates? submissionCoordinates;
-    if (submit) {
-      setState(() => _saving = true);
-      submissionCoordinates = await DeviceLocationService.instance
-          .bestAvailableCoordinates(requestPermission: true);
-      if (!mounted) return;
-      if (submissionCoordinates == null) {
-        setState(() => _saving = false);
-        _showSubmitError(context.l10n.collectionLocationRequired);
-        return;
-      }
+    setState(() => _saving = true);
+    final submissionCoordinates =
+        await _submissionCoordinatesPrefetch ??
+        await DeviceLocationService.instance.bestAvailableCoordinates(
+          requestPermission: true,
+        );
+    if (!mounted) return;
+    if (submissionCoordinates == null) {
+      setState(() => _saving = false);
+      _showSubmitError(context.l10n.collectionLocationRequired);
+      return;
     }
     final id = _draftId ?? UuidGenerator.v4();
     _draftId = id;
@@ -1150,7 +1239,6 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         (_photos[_type == CollectionType.ramp ? 99 : -1] ?? const <XFile>[])
             .map((photo) => photo.path)
             .toList(growable: false);
-    if (!submit) setState(() => _saving = true);
     try {
       await EerlLocalRepository.instance.saveCollection(
         collection: CollectionModel(
@@ -1177,17 +1265,20 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
             (total, item) => total + (item.amount ?? 0),
           ),
           handoverPhotoUrls: handoverPhotos,
-          gpsLat: submissionCoordinates?.latitude,
-          gpsLng: submissionCoordinates?.longitude,
+          gpsLat: submissionCoordinates.latitude,
+          gpsLng: submissionCoordinates.longitude,
           updatedAt: now,
           syncState: 'pending',
         ),
         items: items,
         submit: submit,
       );
-      if (submit) {
-        unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
-      }
+    } on CollectionAlreadySubmittedException catch (error) {
+      if (!mounted) return;
+      AppLogger.error('COLLECTION_SAVE', error.toString());
+      setState(() => _saving = false);
+      _showSubmitError(context.l10n.collectionAlreadySubmitted);
+      return;
     } catch (error) {
       if (!mounted) return;
       AppLogger.error('COLLECTION_SAVE', error.toString());
@@ -1199,9 +1290,12 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     setState(() => _saving = false);
     if (!submit) {
       Navigator.of(context).pop(CollectionRouteResult.draftSaved);
+      _startCollectionSyncAfterUiFrame();
       return;
     }
-    context.pushReplacement(AppRoutes.collectionReceipt, extra: id);
+    final navigator = Navigator.of(context);
+    navigator.pop(CollectionRouteResult.openCollections);
+    _showSubmitSuccessAfterClosingPage(navigator: navigator, collectionId: id);
   }
 
   Future<void> _pickImage(int itemId) async {

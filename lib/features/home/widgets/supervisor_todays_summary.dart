@@ -50,126 +50,127 @@ class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
 
   @override
   Widget build(BuildContext context) {
-    final summary = _controller.data;
-    final items = [
-      _SupervisorSummaryItem(
-        icon: HomeAssets.supervisorActiveAgents,
-        iconBackground: AppColors.secondary100,
-        label: context.l10n.supervisorActiveAgents,
-        value: TextSpan(text: '${summary?.activeAgents ?? 0}'),
-        valueColor: AppColors.secondary500,
-      ),
-      _SupervisorSummaryItem(
-        icon: HomeAssets.supervisorTransportsDone,
-        iconBackground: AppColors.orchidLight,
-        label: context.l10n.supervisorTransportsDone,
-        value: TextSpan(
-          children: [
-            TextSpan(
-              text: '${summary?.transfersDone ?? 0}',
-              style: TextStyle(color: AppColors.orchid),
-            ),
-            TextSpan(
-              text: '/${summary?.totalTransfers ?? 0}',
-              style: TextStyle(color: AppColors.neutral700),
-            ),
-          ],
-        ),
-        valueColor: AppColors.orchid,
-      ),
-      _SupervisorSummaryItem(
-        icon: HomeAssets.supervisorTotalStocks,
-        iconBackground: AppColors.purpleLight,
-        label: context.l10n.supervisorTotalStocks,
-        value: TextSpan(
-          text: '${(summary?.stockKg ?? 0).toStringAsFixed(2)} KG',
-        ),
-        valueColor: AppColors.purple,
-      ),
-      _SupervisorSummaryItem(
-        icon: HomeAssets.supervisorPendingExpenses,
-        iconBackground: AppColors.yellow50,
-        label: context.l10n.supervisorPendingExpenses,
-        value: TextSpan(text: '${summary?.pendingExpenses ?? 0}'),
-        valueColor: AppColors.yellow600,
-      ),
-    ];
-
     return ListenableBuilder(
       listenable: _controller,
-      builder: (context, _) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  context.l10n.todaysSummary,
-                  style: HomeStyles.sectionTitle,
+      builder: (context, _) {
+        final summary = _controller.data;
+        final items = [
+          _SupervisorSummaryItem(
+            icon: HomeAssets.supervisorActiveAgents,
+            iconBackground: AppColors.secondary100,
+            label: context.l10n.supervisorActiveAgents,
+            value: TextSpan(text: '${summary?.activeAgents ?? 0}'),
+            valueColor: AppColors.secondary500,
+          ),
+          _SupervisorSummaryItem(
+            icon: HomeAssets.supervisorTransportsDone,
+            iconBackground: AppColors.orchidLight,
+            label: context.l10n.supervisorTransportsDone,
+            value: TextSpan(
+              children: [
+                TextSpan(
+                  text: '${summary?.transfersDone ?? 0}',
+                  style: TextStyle(color: AppColors.orchid),
                 ),
-              ),
-              Semantics(
-                button: true,
-                toggled: _isVisible,
-                label: _isVisible
-                    ? context.l10n.hideTodaysSummary
-                    : context.l10n.showTodaysSummary,
-                child: Tooltip(
-                  message: _isVisible
+                TextSpan(
+                  text: '/${summary?.totalTransfers ?? 0}',
+                  style: TextStyle(color: AppColors.neutral700),
+                ),
+              ],
+            ),
+            valueColor: AppColors.orchid,
+          ),
+          _SupervisorSummaryItem(
+            icon: HomeAssets.supervisorTotalStocks,
+            iconBackground: AppColors.purpleLight,
+            label: context.l10n.supervisorTotalStocks,
+            value: TextSpan(
+              text: '${(summary?.stockKg ?? 0).toStringAsFixed(2)} KG',
+            ),
+            valueColor: AppColors.purple,
+          ),
+          _SupervisorSummaryItem(
+            icon: HomeAssets.supervisorPendingExpenses,
+            iconBackground: AppColors.yellow50,
+            label: context.l10n.supervisorPendingExpenses,
+            value: TextSpan(text: '${summary?.pendingExpenses ?? 0}'),
+            valueColor: AppColors.yellow600,
+          ),
+        ];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.l10n.todaysSummary,
+                    style: HomeStyles.sectionTitle,
+                  ),
+                ),
+                Semantics(
+                  button: true,
+                  toggled: _isVisible,
+                  label: _isVisible
                       ? context.l10n.hideTodaysSummary
                       : context.l10n.showTodaysSummary,
-                  child: InkWell(
-                    key: const Key('supervisor-toggle-todays-summary'),
-                    onTap: () => setState(() => _isVisible = !_isVisible),
-                    borderRadius: BorderRadius.circular(20),
-                    child: SvgPicture.asset(
-                      _isVisible
-                          ? HomeAssets.supervisorSummaryEye
-                          : HomeAssets.summaryHide,
-                      key: ValueKey(
+                  child: Tooltip(
+                    message: _isVisible
+                        ? context.l10n.hideTodaysSummary
+                        : context.l10n.showTodaysSummary,
+                    child: InkWell(
+                      key: const Key('supervisor-toggle-todays-summary'),
+                      onTap: () => setState(() => _isVisible = !_isVisible),
+                      borderRadius: BorderRadius.circular(20),
+                      child: SvgPicture.asset(
                         _isVisible
-                            ? 'supervisor-summary-visible-icon'
-                            : 'supervisor-summary-hidden-icon',
+                            ? HomeAssets.supervisorSummaryEye
+                            : HomeAssets.summaryHide,
+                        key: ValueKey(
+                          _isVisible
+                              ? 'supervisor-summary-visible-icon'
+                              : 'supervisor-summary-hidden-icon',
+                        ),
+                        width: 28,
+                        height: 28,
                       ),
-                      width: 28,
-                      height: 28,
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 220),
-            alignment: Alignment.topCenter,
-            child: _isVisible
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final columns = constraints.maxWidth < 320 ? 1 : 2;
-                        final width =
-                            (constraints.maxWidth - (columns - 1) * 8) /
-                            columns;
-                        return Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: items
-                              .map(
-                                (item) => SizedBox(
-                                  width: width,
-                                  child: _SupervisorSummaryCard(item: item),
-                                ),
-                              )
-                              .toList(),
-                        );
-                      },
-                    ),
-                  )
-                : const SizedBox(width: double.infinity),
-          ),
-        ],
-      ),
+              ],
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              alignment: Alignment.topCenter,
+              child: _isVisible
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final columns = constraints.maxWidth < 320 ? 1 : 2;
+                          final width =
+                              (constraints.maxWidth - (columns - 1) * 8) /
+                              columns;
+                          return Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: items
+                                .map(
+                                  (item) => SizedBox(
+                                    width: width,
+                                    child: _SupervisorSummaryCard(item: item),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        },
+                      ),
+                    )
+                  : const SizedBox(width: double.infinity),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -198,52 +199,53 @@ class _SupervisorSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 122,
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      height: 144,
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.neutral50,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [HomeStyles.cardShadow],
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned(
-            left: 0,
-            top: 0,
-            child: Container(
-              width: 40,
-              height: 40,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: item.iconBackground,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SvgPicture.asset(item.icon),
+          Container(
+            width: 40,
+            height: 40,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: item.iconBackground,
+              borderRadius: BorderRadius.circular(8),
             ),
+            child: SvgPicture.asset(item.icon),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 48,
-            child: Text(
-              item.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.semiboldH9_14.copyWith(
-                color: AppColors.neutral900,
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 38,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                item.label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.semiboldH9_14.copyWith(
+                  color: AppColors.neutral900,
+                ),
               ),
             ),
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 70,
-            child: Text.rich(
-              item.value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.semiboldH6_20.copyWith(
-                color: item.valueColor,
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text.rich(
+                item.value,
+                maxLines: 1,
+                style: AppTextStyles.semiboldH6_20.copyWith(
+                  color: item.valueColor,
+                ),
               ),
             ),
           ),

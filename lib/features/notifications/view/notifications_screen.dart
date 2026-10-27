@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
@@ -15,9 +19,14 @@ import '../widgets/empty_notifications_view.dart';
 import '../widgets/notification_list_card.dart';
 
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({super.key, this.hasNotifications = true});
+  const NotificationsScreen({
+    super.key,
+    this.hasNotifications = true,
+    this.initialNotificationId,
+  });
 
   final bool hasNotifications;
+  final String? initialNotificationId;
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
@@ -26,6 +35,7 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   late final LocalQueryController<List<NotificationModel>> _controller;
   int _bootstrapRevision = -1;
+  DashboardUserRole? _switchedRole;
 
   @override
   void initState() {
@@ -33,6 +43,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     _controller = LocalQueryController(
       EerlLocalRepository.instance.getNotifications,
     )..load();
+    if (widget.initialNotificationId?.trim().isNotEmpty == true) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(_handleInitialPushTap(widget.initialNotificationId!.trim()));
+      });
+    }
   }
 
   @override
@@ -80,23 +95,89 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       title: context.l10n.notificationEmptyTitle,
                       message: context.l10n.notificationEmptyMessage,
                     )
-                  : _NotificationList(
-                      items: items,
-                      onChanged: _controller.load,
-                    );
+                  : _NotificationList(items: items, onTap: _openNotification);
             },
           ),
         ),
       ),
     ),
   );
+
+  Future<void> _handleInitialPushTap(String notificationId) async {
+    await BootstrapSyncService.instance.triggerBootstrap(
+      trigger: BootstrapTrigger.pullToRefresh,
+    );
+    final item = await EerlLocalRepository.instance.getNotification(
+      notificationId,
+    );
+    await _controller.load();
+    if (!mounted || item == null) return;
+    await _openNotification(item);
+  }
+
+  Future<void> _openNotification(NotificationModel item) async {
+    if (item.otherRole && !await _confirmRoleSwitch(item)) return;
+    if (item.readAt == null) {
+      await EerlLocalRepository.instance.markNotificationRead(item.id);
+      unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+      await _controller.load();
+    }
+    if (!mounted) return;
+    final destination = item.deepLink?.trim();
+    final switchedRole = _switchedRole;
+    _switchedRole = null;
+    if (switchedRole != null) {
+      final router = GoRouter.of(context);
+      router.go(AppRoutes.home, extra: switchedRole);
+      if (destination != null && destination.startsWith('/')) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          router.push(destination);
+        });
+      }
+      return;
+    }
+    if (destination != null && destination.startsWith('/')) {
+      context.push(destination);
+    }
+  }
+
+  Future<bool> _confirmRoleSwitch(NotificationModel item) async {
+    final roleKey = item.role?.trim().toUpperCase();
+    if (roleKey == null || roleKey.isEmpty) return true;
+    final roleName = item.forRoleName?.trim().isNotEmpty == true
+        ? item.forRoleName!.trim()
+        : roleKey;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.notificationSwitchRoleTitle),
+        content: Text(context.l10n.notificationSwitchRoleMessage(roleName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(context.l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(context.l10n.roleSwitchAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return false;
+    final role = DashboardUserRoleX.fromKey(roleKey);
+    await AppDatabase.instance.setSyncMeta('active_role', role.syncMetaKey);
+    if (!mounted) return false;
+    _switchedRole = role;
+    return true;
+  }
 }
 
 class _NotificationList extends StatelessWidget {
-  const _NotificationList({required this.items, required this.onChanged});
+  const _NotificationList({required this.items, required this.onTap});
 
   final List<NotificationModel> items;
-  final VoidCallback onChanged;
+  final ValueChanged<NotificationModel> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -139,24 +220,7 @@ class _NotificationList extends StatelessWidget {
   );
 
   Widget _card(BuildContext context, List<NotificationModel> items) =>
-      NotificationListCard(
-        items: items,
-        timeFor: _formatTime,
-        onTap: (item) async {
-          if (item.readAt == null) {
-            await EerlLocalRepository.instance.markNotificationRead(item.id);
-            onChanged();
-          }
-          if (!context.mounted) return;
-          final destination = switch (item.deepLink?.trim()) {
-            AppRoutes.tasks => AppRoutes.tasks,
-            AppRoutes.collectionRecords => AppRoutes.collectionRecords,
-            AppRoutes.transferNotifications => AppRoutes.transferNotifications,
-            _ => null,
-          };
-          if (destination != null) context.push(destination);
-        },
-      );
+      NotificationListCard(items: items, timeFor: _formatTime, onTap: onTap);
 
   String _formatTime(String value) {
     final parsed = DateTime.tryParse(value)?.toLocal();

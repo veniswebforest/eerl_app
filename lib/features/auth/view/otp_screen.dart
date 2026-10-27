@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
+import 'package:eerl_app/core/router/app_route_data.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import '../widgets/otp_input.dart';
 import '../widgets/primary_button.dart';
@@ -103,10 +104,13 @@ class _OtpScreenState extends State<OtpScreen>
       final onAuthenticated = widget.onAuthenticated;
       if (onAuthenticated != null) {
         onAuthenticated(role);
+        _startInitialSyncAfterNavigation();
       } else {
-        context.go(AppRoutes.home, extra: role);
+        context.go(
+          AppRoutes.home,
+          extra: HomeRouteData(role: role, showInitialLoginLoader: true),
+        );
       }
-      _startInitialSyncAfterNavigation();
       return;
     }
 

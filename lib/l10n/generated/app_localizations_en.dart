@@ -267,6 +267,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeBack => 'Welcome back';
 
   @override
+  String get homeInitialDataSyncing => 'Data syncing…';
+
+  @override
   String get homeDateZone => 'Wed, 22 Jul · Surat Zone';
 
   @override
@@ -1432,6 +1435,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSyncSubtitle => 'Sync your offline data';
 
   @override
+  String get profileExportOutbox => 'Export Outbox';
+
+  @override
+  String get profileExportOutboxSubtitle =>
+      'Export only pending outbox table rows as a TXT file';
+
+  @override
+  String get profileExportOutboxFailed =>
+      'Outbox data could not be exported. Please try again.';
+
+  @override
   String get profileAccount => 'Account';
 
   @override
@@ -1915,6 +1929,53 @@ class AppLocalizationsEn extends AppLocalizations {
       'Bluetooth thermal printer connected.';
 
   @override
+  String get collectionPrinterDisconnected =>
+      'Tap Print Slip to connect a Bluetooth printer.';
+
+  @override
+  String get collectionBluetoothPermissionTitle =>
+      'Bluetooth permission needed';
+
+  @override
+  String get collectionSelectBluetoothPrinter => 'Select Bluetooth printer';
+
+  @override
+  String get collectionPairedPrintersHint =>
+      'Select a printer already paired in your phone\'s Bluetooth settings.';
+
+  @override
+  String get collectionBluetoothPermissionRequired =>
+      'Bluetooth permission is required to print the slip.';
+
+  @override
+  String get collectionBluetoothDisabled => 'Turn on Bluetooth and try again.';
+
+  @override
+  String get collectionBluetoothDisabledTitle => 'Bluetooth is turned off';
+
+  @override
+  String get collectionNoPairedPrinters =>
+      'No paired Bluetooth printer found. Pair the thermal printer in phone settings first.';
+
+  @override
+  String get collectionNoPairedPrintersTitle => 'No paired printer found';
+
+  @override
+  String get collectionPrinterConnectionFailed =>
+      'Could not connect to the selected Bluetooth printer.';
+
+  @override
+  String get collectionPrinterConnectionFailedTitle =>
+      'Printer connection failed';
+
+  @override
+  String get collectionPrinterPrintFailed =>
+      'The Bluetooth printer did not accept the slip. Check the connection and try again.';
+
+  @override
+  String get collectionPrinterPrintFailedTitle => 'Slip printing failed';
+
+  @override
   String get collectionReceiptDateTime => 'Date & Time';
 
   @override
@@ -1952,6 +2013,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get collectionSlipActionError =>
       'Could not prepare the slip. Please try again.';
+
+  @override
+  String get collectionSlipActionErrorTitle => 'Slip action failed';
 
   @override
   String get collectionPetReceiptDetail => '120 KG × ₹12.00/KG';
@@ -2021,6 +2085,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationTitle => 'Notifications';
+
+  @override
+  String notificationForRole(String roleName) {
+    return 'For your $roleName role';
+  }
+
+  @override
+  String get notificationSwitchRoleTitle => 'Switch role?';
+
+  @override
+  String notificationSwitchRoleMessage(String roleName) {
+    return 'This notification is for your $roleName role. Switch roles to open it?';
+  }
 
   @override
   String get notificationToday => 'Today,';
@@ -4030,7 +4107,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionLocationRequired =>
-      'Location is required to submit a collection. Turn on location and allow access, then try again.';
+      'Location is required to save or submit a collection. Turn on location and allow access, then try again.';
 
   @override
   String get collectionDetailsNotReady =>
@@ -4043,6 +4120,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get collectionSaveFailed =>
       'Collection could not be saved. Please try again.';
+
+  @override
+  String get collectionDraftSaved => 'Draft Saved!';
+
+  @override
+  String get collectionDraftSavedSubtitle =>
+      'Collection draft saved successfully. It will sync automatically.';
+
+  @override
+  String get collectionAlreadySubmitted =>
+      'This collection has already been submitted. A duplicate entry was not created.';
 
   @override
   String get locationNotNow => 'Not now';

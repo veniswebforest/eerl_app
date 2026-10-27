@@ -90,13 +90,19 @@ class AppRouter {
       path: AppRoutes.home,
       name: 'home',
       parentNavigatorKey: rootNavigatorKey,
-      builder: (context, state) =>
-          homeBuilder?.call(context) ??
-          MainDashboardScreen(
-            userRole:
-                state.extra as DashboardUserRole? ??
-                DashboardUserRole.collectionAgent,
-          ),
+      builder: (context, state) {
+        final extra = state.extra;
+        final data = extra is HomeRouteData ? extra : null;
+        return homeBuilder?.call(context) ??
+            MainDashboardScreen(
+              userRole:
+                  data?.role ??
+                  (extra is DashboardUserRole
+                      ? extra
+                      : DashboardUserRole.collectionAgent),
+              showInitialLoginLoader: data?.showInitialLoginLoader ?? false,
+            );
+      },
     ),
 
     // ── Feature routes ──────────────────────────────────────────
@@ -250,7 +256,9 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.notifications,
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, _) => const NotificationsScreen(),
+      builder: (_, state) => NotificationsScreen(
+        initialNotificationId: state.uri.queryParameters['notificationId'],
+      ),
     ),
     GoRoute(
       path: AppRoutes.endMyDay,

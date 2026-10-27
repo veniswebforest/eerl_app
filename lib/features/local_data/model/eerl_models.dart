@@ -1336,6 +1336,10 @@ class NotificationModel {
     required this.title,
     this.body,
     this.deepLink,
+    this.role,
+    this.centerId,
+    this.forRoleName,
+    this.otherRole = false,
     required this.createdAt,
     this.readAt,
     required this.syncState,
@@ -1345,6 +1349,10 @@ class NotificationModel {
   final String title;
   final String? body;
   final String? deepLink;
+  final String? role;
+  final String? centerId;
+  final String? forRoleName;
+  final bool otherRole;
   final String createdAt;
   final String? readAt;
   final String syncState;
@@ -1354,6 +1362,10 @@ class NotificationModel {
     title: map['title'] as String,
     body: map['body'] as String?,
     deepLink: map['deep_link'] as String?,
+    role: map['role'] as String?,
+    centerId: map['center_id'] as String?,
+    forRoleName: map['for_role_name'] as String?,
+    otherRole: (map['other_role'] as num?)?.toInt() == 1,
     createdAt: map['created_at'] as String,
     readAt: map['read_at'] as String?,
     syncState: map['sync_state'] as String,
@@ -1364,6 +1376,8 @@ class NotificationModel {
     'title': title,
     'body': body,
     'deep_link': deepLink,
+    'role': role,
+    'center_id': centerId,
     'created_at': createdAt,
     'read_at': readAt,
     'sync_state': syncState,

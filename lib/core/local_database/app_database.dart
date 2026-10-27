@@ -15,7 +15,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 10;
+  static const databaseVersion = 11;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -192,6 +192,58 @@ class AppDatabase {
       await _rebuildVehiclesWithoutType(db);
       _log('Removed D2D vehicle type and capacity schema in version 10');
     }
+    if (oldVersion < 11) {
+      await _rebuildNotificationsWithRoleScope(db);
+      _log('Added notification role and optional center scope in version 11');
+    }
+  }
+
+  Future<void> _rebuildNotificationsWithRoleScope(Database db) async {
+    final columns = await db.rawQuery(
+      'PRAGMA table_info("${DatabaseTables.notifications}")',
+    );
+    if (columns.isEmpty) return;
+    final names = columns.map((row) => row['name']).toSet();
+    final roleExpression = names.contains('role') ? 'role' : 'NULL';
+    final centerExpression = names.contains('center_id') ? 'center_id' : 'NULL';
+
+    await db.execute('PRAGMA defer_foreign_keys = ON');
+    await db.execute('''
+      CREATE TABLE notifications_new (
+        id TEXT PRIMARY KEY,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        body TEXT,
+        deep_link TEXT,
+        role TEXT,
+        center_id TEXT REFERENCES ${DatabaseTables.centers} (id),
+        created_at TEXT NOT NULL,
+        read_at TEXT,
+        sync_state TEXT NOT NULL DEFAULT 'synced'
+      )
+    ''');
+    await db.execute('''
+      INSERT INTO notifications_new (
+        id, type, title, body, deep_link, role, center_id,
+        created_at, read_at, sync_state
+      )
+      SELECT
+        id, type, title, body, deep_link, $roleExpression, $centerExpression,
+        created_at, read_at, sync_state
+      FROM ${DatabaseTables.notifications}
+    ''');
+    await db.execute('DROP TABLE ${DatabaseTables.notifications}');
+    await db.execute(
+      'ALTER TABLE notifications_new RENAME TO ${DatabaseTables.notifications}',
+    );
+    await db.execute(
+      'CREATE INDEX ix_notifications_time ON '
+      '${DatabaseTables.notifications} (created_at)',
+    );
+    await db.execute(
+      'CREATE INDEX ix_notifications_role ON '
+      '${DatabaseTables.notifications} (role, created_at)',
+    );
   }
 
   Future<void> _rebuildVehiclesWithoutType(Database db) async {
@@ -270,11 +322,49 @@ class AppDatabase {
   Future<void> _onOpen(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
     await _ensureVersionOneSchema(db);
+    await _removeOrphanedOutboxPhotoLinks(db);
     final foreignKeyErrors = await db.rawQuery('PRAGMA foreign_key_check');
     if (foreignKeyErrors.isNotEmpty) {
       throw StateError(
         'Database contains ${foreignKeyErrors.length} foreign-key violation(s).',
       );
+    }
+  }
+
+  /// Link rows do not contain user data by themselves. If a previous queue
+  /// cleanup was interrupted after deleting its parent row, remove only the
+  /// unusable links so a recoverable queue inconsistency cannot block startup.
+  Future<void> _removeOrphanedOutboxPhotoLinks(Database db) async {
+    final requiredTables = await db.rawQuery(
+      '''
+      SELECT name
+      FROM sqlite_master
+      WHERE type = 'table' AND name IN (?, ?, ?)
+    ''',
+      [
+        DatabaseTables.outboxPhotos,
+        DatabaseTables.outbox,
+        DatabaseTables.photos,
+      ],
+    );
+    if (requiredTables.length != 3) return;
+    final removed = await db.rawDelete('''
+      DELETE FROM ${DatabaseTables.outboxPhotos}
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM ${DatabaseTables.outbox}
+        WHERE ${DatabaseTables.outbox}.seq =
+              ${DatabaseTables.outboxPhotos}.outbox_seq
+      )
+      OR NOT EXISTS (
+        SELECT 1
+        FROM ${DatabaseTables.photos}
+        WHERE ${DatabaseTables.photos}.id =
+              ${DatabaseTables.outboxPhotos}.photo_id
+      )
+    ''');
+    if (removed > 0) {
+      _log('Removed $removed orphaned outbox photo link(s) during startup');
     }
   }
 
@@ -347,6 +437,7 @@ class AppDatabase {
         'image_url': 'TEXT',
         'is_active': 'INTEGER NOT NULL DEFAULT 1',
       },
+      DatabaseTables.notifications: {'role': 'TEXT', 'center_id': 'TEXT'},
     };
 
     for (final tableEntry in additiveColumns.entries) {

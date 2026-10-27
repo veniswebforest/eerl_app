@@ -266,6 +266,9 @@ class AppLocalizationsGu extends AppLocalizations {
   String get welcomeBack => 'ફરી સ્વાગત છે';
 
   @override
+  String get homeInitialDataSyncing => 'ડેટા સિંક થઈ રહ્યો છે…';
+
+  @override
   String get homeDateZone => 'બુધ, 22 જુલાઈ · સુરત ઝોન';
 
   @override
@@ -1431,6 +1434,17 @@ class AppLocalizationsGu extends AppLocalizations {
   String get profileSyncSubtitle => 'તમારો ઑફલાઇન ડેટા સિંક કરો';
 
   @override
+  String get profileExportOutbox => 'Outbox Export કરો';
+
+  @override
+  String get profileExportOutboxSubtitle =>
+      'ફક્ત outbox table ની pending rows TXT file તરીકે export કરો';
+
+  @override
+  String get profileExportOutboxFailed =>
+      'Outbox data export થઈ શક્યો નથી. કૃપા કરીને ફરી પ્રયાસ કરો.';
+
+  @override
   String get profileAccount => 'એકાઉન્ટ';
 
   @override
@@ -1915,6 +1929,54 @@ class AppLocalizationsGu extends AppLocalizations {
       'Bluetooth થર્મલ પ્રિન્ટર જોડાયેલું છે.';
 
   @override
+  String get collectionPrinterDisconnected =>
+      'Bluetooth પ્રિન્ટર જોડવા માટે સ્લિપ પ્રિન્ટ કરો પર ટેપ કરો.';
+
+  @override
+  String get collectionBluetoothPermissionTitle =>
+      'Bluetooth permission જરૂરી છે';
+
+  @override
+  String get collectionSelectBluetoothPrinter => 'Bluetooth પ્રિન્ટર પસંદ કરો';
+
+  @override
+  String get collectionPairedPrintersHint =>
+      'ફોનના Bluetooth સેટિંગમાં પહેલેથી pair કરેલું પ્રિન્ટર પસંદ કરો.';
+
+  @override
+  String get collectionBluetoothPermissionRequired =>
+      'સ્લિપ પ્રિન્ટ કરવા માટે Bluetooth permission જરૂરી છે.';
+
+  @override
+  String get collectionBluetoothDisabled =>
+      'Bluetooth ચાલુ કરીને ફરી પ્રયાસ કરો.';
+
+  @override
+  String get collectionBluetoothDisabledTitle => 'Bluetooth બંધ છે';
+
+  @override
+  String get collectionNoPairedPrinters =>
+      'કોઈ paired Bluetooth પ્રિન્ટર મળ્યું નથી. પહેલાં ફોન સેટિંગમાં થર્મલ પ્રિન્ટર pair કરો.';
+
+  @override
+  String get collectionNoPairedPrintersTitle => 'Paired પ્રિન્ટર મળ્યું નથી';
+
+  @override
+  String get collectionPrinterConnectionFailed =>
+      'પસંદ કરેલા Bluetooth પ્રિન્ટર સાથે જોડાણ થઈ શક્યું નથી.';
+
+  @override
+  String get collectionPrinterConnectionFailedTitle =>
+      'પ્રિન્ટર જોડાણ નિષ્ફળ થયું';
+
+  @override
+  String get collectionPrinterPrintFailed =>
+      'Bluetooth પ્રિન્ટરે સ્લિપ સ્વીકારી નથી. જોડાણ ચકાસીને ફરી પ્રયાસ કરો.';
+
+  @override
+  String get collectionPrinterPrintFailedTitle => 'સ્લિપ પ્રિન્ટ થઈ નથી';
+
+  @override
   String get collectionReceiptDateTime => 'તારીખ અને સમય';
 
   @override
@@ -1952,6 +2014,9 @@ class AppLocalizationsGu extends AppLocalizations {
   @override
   String get collectionSlipActionError =>
       'સ્લિપ તૈયાર થઈ શકી નથી. કૃપા કરીને ફરી પ્રયાસ કરો.';
+
+  @override
+  String get collectionSlipActionErrorTitle => 'સ્લિપ પ્રક્રિયા નિષ્ફળ થઈ';
 
   @override
   String get collectionPetReceiptDetail => '120 KG × ₹12.00/KG';
@@ -2021,6 +2086,19 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get notificationTitle => 'સૂચનાઓ';
+
+  @override
+  String notificationForRole(String roleName) {
+    return 'તમારી $roleName ભૂમિકા માટે';
+  }
+
+  @override
+  String get notificationSwitchRoleTitle => 'ભૂમિકા બદલવી છે?';
+
+  @override
+  String notificationSwitchRoleMessage(String roleName) {
+    return 'આ સૂચના તમારી $roleName ભૂમિકા માટે છે. તેને ખોલવા ભૂમિકા બદલશો?';
+  }
 
   @override
   String get notificationToday => 'આજે,';
@@ -4006,7 +4084,7 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get collectionLocationRequired =>
-      'Collection submit કરવા માટે location જરૂરી છે. Location ચાલુ કરીને પરવાનગી આપો અને ફરી પ્રયાસ કરો.';
+      'Collection save અથવા submit કરવા માટે location જરૂરી છે. Location ચાલુ કરીને પરવાનગી આપો અને ફરી પ્રયાસ કરો.';
 
   @override
   String get collectionDetailsNotReady =>
@@ -4019,6 +4097,17 @@ class AppLocalizationsGu extends AppLocalizations {
   @override
   String get collectionSaveFailed =>
       'સંગ્રહ સાચવી શકાયો નથી. કૃપા કરીને ફરી પ્રયાસ કરો.';
+
+  @override
+  String get collectionDraftSaved => 'ડ્રાફ્ટ સેવ થયો!';
+
+  @override
+  String get collectionDraftSavedSubtitle =>
+      'કલેક્શન ડ્રાફ્ટ સફળતાપૂર્વક સેવ થયો. તે આપમેળે સિંક થશે.';
+
+  @override
+  String get collectionAlreadySubmitted =>
+      'આ સંગ્રહ પહેલેથી સબમિટ થઈ ગયો છે. ડુપ્લિકેટ એન્ટ્રી બનાવવામાં આવી નથી.';
 
   @override
   String get locationNotNow => 'હમણાં નહીં';
