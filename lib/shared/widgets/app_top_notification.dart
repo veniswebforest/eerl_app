@@ -15,7 +15,7 @@ abstract final class AppTopNotification {
   static void show(
     BuildContext context, {
     required String title,
-    String? subtitle,
+    required String subtitle,
     AppTopNotificationTone tone = AppTopNotificationTone.info,
     Duration duration = const Duration(seconds: 2),
     Key? key,
@@ -65,7 +65,7 @@ class _AppTopNotificationEntry extends StatefulWidget {
 
   final Key? notificationKey;
   final String title;
-  final String? subtitle;
+  final String subtitle;
   final AppTopNotificationTone tone;
   final Duration duration;
   final Widget? icon;

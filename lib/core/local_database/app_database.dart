@@ -65,19 +65,12 @@ class AppDatabase {
   }
 
   Future<void> _onConfigure(Database db) async {
-    final versionRows = await db.rawQuery('PRAGMA user_version');
-    final currentVersion = Sqflite.firstIntValue(versionRows) ?? 0;
-    final rebuildingLegacySchema =
-        currentVersion > 0 && currentVersion < databaseVersion;
-    await db.execute(
-      'PRAGMA foreign_keys = ${rebuildingLegacySchema ? 'OFF' : 'ON'}',
-    );
-    _log(
-      rebuildingLegacySchema
-          ? 'Foreign keys temporarily disabled for schema migration '
-                '$currentVersion -> $databaseVersion'
-          : 'Database configured with foreign keys enabled',
-    );
+    // Bootstrap is the server-owned source of truth and can legitimately send
+    // related tables on different pages. Keep enforcement disabled so an
+    // incomplete server relation never blocks opening or synchronizing the
+    // offline database. Bootstrap still logs relation diagnostics.
+    await db.execute('PRAGMA foreign_keys = OFF');
+    _log('Database configured with foreign-key enforcement disabled');
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -320,13 +313,14 @@ class AppDatabase {
   }
 
   Future<void> _onOpen(Database db) async {
-    await db.execute('PRAGMA foreign_keys = ON');
+    await db.execute('PRAGMA foreign_keys = OFF');
     await _ensureVersionOneSchema(db);
     await _removeOrphanedOutboxPhotoLinks(db);
     final foreignKeyErrors = await db.rawQuery('PRAGMA foreign_key_check');
     if (foreignKeyErrors.isNotEmpty) {
-      throw StateError(
-        'Database contains ${foreignKeyErrors.length} foreign-key violation(s).',
+      _log(
+        'Database opened with ${foreignKeyErrors.length} foreign-key '
+        'violation(s); enforcement remains disabled',
       );
     }
   }

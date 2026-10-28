@@ -91,7 +91,8 @@ class _OtpScreenState extends State<OtpScreen>
     authProvider.setOtp(otp);
   }
 
-  void _onVerify() async {
+  Future<void> _onVerify() async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.verifyOtp();
     if (!mounted) return;
@@ -120,6 +121,21 @@ class _OtpScreenState extends State<OtpScreen>
     }
   }
 
+  Future<void> _onResend() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.resendOtp();
+    if (!mounted) return;
+    if (success) {
+      AppSnackbar.success(context, message: context.l10n.otpResentSuccess);
+      return;
+    }
+    final message = authProvider.errorMessage;
+    if (message != null && message.isNotEmpty) {
+      AppSnackbar.error(context, message: message);
+    }
+  }
+
   Future<DashboardUserRole> _storedDashboardRole() async =>
       DashboardUserRoleX.fromKey(
         await AppDatabase.instance.getSyncMeta('active_role'),
@@ -145,6 +161,7 @@ class _OtpScreenState extends State<OtpScreen>
     final isOtpComplete = authProvider.isOtpComplete;
     final hasError = authProvider.hasOtpError;
     final isLoading = authProvider.isLoading;
+    final isResending = authProvider.isResending;
     final isVerified = authProvider.isVerified;
     final resendSeconds = authProvider.resendSeconds;
 
@@ -163,54 +180,58 @@ class _OtpScreenState extends State<OtpScreen>
               child: Column(
                 children: [
                   // ── Scrollable Content ──────────────────────────
-                  SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 48),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 48),
 
-                        Text(
-                          l10n.otpTitle,
-                          style: AppTextStyles.boldH5_24.copyWith(
-                            color: context.palette.primary900,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.otpDescription(_maskedPhone),
-                          textAlign: TextAlign.center,
-                          style: AppTextStyles.regularB7_14.copyWith(
-                            color: context.palette.neutral950,
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // OTP Input
-                        OtpInput(
-                          hasError: hasError,
-                          isVerified: isVerified,
-                          onCompleted: _onOtpCompleted,
-                          onChanged: _onOtpChanged,
-                          initialOtp: authProvider.otp,
-                        ),
-
-                        // Error Message
-                        if (hasError)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Text(
-                              l10n.invalidOtp,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: context.palette.error,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          Text(
+                            l10n.otpTitle,
+                            style: AppTextStyles.boldH5_24.copyWith(
+                              color: context.palette.primary900,
                             ),
                           ),
-                        const SizedBox(height: 32),
-                      ],
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.otpDescription(_maskedPhone),
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.regularB7_14.copyWith(
+                              color: context.palette.neutral950,
+                            ),
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // OTP Input
+                          OtpInput(
+                            hasError: hasError,
+                            isVerified: isVerified,
+                            onCompleted: _onOtpCompleted,
+                            onChanged: _onOtpChanged,
+                            initialOtp: authProvider.otp,
+                          ),
+
+                          // Error Message
+                          if (hasError)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Text(
+                                l10n.invalidOtp,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: context.palette.error,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
                     ),
                   ),
 
@@ -227,7 +248,7 @@ class _OtpScreenState extends State<OtpScreen>
                               !isLoading &&
                               !isVerified &&
                               !hasError,
-                          isLoading: isLoading,
+                          isLoading: isLoading && !isResending,
                           onPressed: _onVerify,
                         ),
                         const SizedBox(height: 16),
@@ -241,8 +262,9 @@ class _OtpScreenState extends State<OtpScreen>
                             ),
                           )
                         else
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text(
                                 l10n.didntGetOtp,
@@ -254,8 +276,12 @@ class _OtpScreenState extends State<OtpScreen>
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              GestureDetector(
-                                onTap: authProvider.resendOtp,
+                              InkWell(
+                                key: const Key('otp-resend-button'),
+                                onTap: resendSeconds == 0 && !isLoading
+                                    ? _onResend
+                                    : null,
+                                borderRadius: BorderRadius.circular(6),
                                 child: Text(
                                   resendSeconds > 0
                                       ? l10n.resendOtpCountdown(

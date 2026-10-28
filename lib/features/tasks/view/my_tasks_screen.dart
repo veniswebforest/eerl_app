@@ -50,8 +50,7 @@ class _MyTasksScreenState extends State<MyTasksScreen> {
     super.dispose();
   }
 
-  bool _closed(TaskModel item) =>
-      const {'COMPLETED', 'CLOSED'}.contains(item.status.toUpperCase());
+  bool _closed(TaskModel item) => isClosedTaskStatus(item.status);
 
   Future<void> _refresh() async {
     await BootstrapSyncService.instance.triggerBootstrap(

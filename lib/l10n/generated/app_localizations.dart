@@ -478,6 +478,18 @@ abstract class AppLocalizations {
   /// **'Error'**
   String get error;
 
+  /// No description provided for @toastSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get toastSuccessTitle;
+
+  /// No description provided for @toastInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get toastInfoTitle;
+
   /// 404 error title
   ///
   /// In en, this message translates to:
@@ -585,6 +597,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resend'**
   String get resendOtp;
+
+  /// No description provided for @otpResentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'A new login code has been sent.'**
+  String get otpResentSuccess;
 
   /// Verify button text
   ///

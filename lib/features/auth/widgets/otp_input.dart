@@ -53,9 +53,17 @@ class _OtpInputState extends State<OtpInput> {
   @override
   void didUpdateWidget(covariant OtpInput oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.initialOtp != oldWidget.initialOtp &&
-        _isValidOtp(widget.initialOtp)) {
-      _populateControllers(widget.initialOtp!);
+    if (widget.initialOtp != oldWidget.initialOtp) {
+      if (_isValidOtp(widget.initialOtp)) {
+        _populateControllers(widget.initialOtp!);
+      } else if (widget.initialOtp?.isEmpty == true) {
+        for (final controller in _controllers) {
+          controller.clear();
+        }
+        if (_focusNodes.every((node) => !node.hasFocus)) {
+          _focusNodes.first.requestFocus();
+        }
+      }
     }
   }
 
@@ -113,90 +121,104 @@ class _OtpInputState extends State<OtpInput> {
     final palette = context.palette;
     final isComplete = _otp.length == widget.length;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(widget.length, (index) {
-        final isFocused = _focusNodes[index].hasFocus;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final spacing = constraints.maxWidth < 340 ? 6.0 : 10.0;
+        return Row(
+          children: List.generate(widget.length, (index) {
+            final isFocused = _focusNodes[index].hasFocus;
 
-        Color borderColor;
-        if (widget.hasError) {
-          borderColor = palette.error;
-        } else if (widget.isVerified || isComplete) {
-          borderColor = palette.success;
-        } else if (isFocused) {
-          borderColor = palette.primary;
-        } else {
-          borderColor = palette.border;
-        }
+            final Color borderColor;
+            if (widget.hasError) {
+              borderColor = palette.error;
+            } else if (widget.isVerified || isComplete) {
+              borderColor = palette.success;
+            } else if (isFocused) {
+              borderColor = palette.primary;
+            } else {
+              borderColor = palette.border;
+            }
 
-        Color textColor;
-        if (widget.isVerified) {
-          textColor = palette.success;
-        } else if (widget.hasError) {
-          textColor = palette.error;
-        } else {
-          textColor = palette.textPrimary;
-        }
+            final Color textColor;
+            if (widget.isVerified) {
+              textColor = palette.success;
+            } else if (widget.hasError) {
+              textColor = palette.error;
+            } else {
+              textColor = palette.textPrimary;
+            }
 
-        return Flexible(
-          child: Container(
-            height: 56,
-            margin: EdgeInsets.only(right: index < widget.length - 1 ? 12 : 0),
-            child: KeyboardListener(
-              focusNode: FocusNode(),
-              onKeyEvent: (event) => _onKeyEvent(index, event),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: borderColor,
-                    width: (widget.isVerified || widget.hasError || isFocused)
-                        ? 1.3
-                        : 1,
-                  ),
-                  color: palette.surface,
+            return Expanded(
+              child: Container(
+                key: Key('otp-digit-container-$index'),
+                height: 56,
+                margin: EdgeInsets.only(
+                  right: index < widget.length - 1 ? spacing : 0,
                 ),
-                child: Center(
-                  child: TextField(
-                    controller: _controllers[index],
-                    focusNode: _focusNodes[index],
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    maxLength: 1,
-                    onChanged: (value) => _onChanged(index, value),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: textColor,
+                child: Focus(
+                  onKeyEvent: (_, event) {
+                    _onKeyEvent(index, event);
+                    return KeyEventResult.ignored;
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: borderColor,
+                        width:
+                            (widget.isVerified || widget.hasError || isFocused)
+                            ? 1.3
+                            : 1,
+                      ),
+                      color: palette.surface,
                     ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(1),
-                    ],
-                    decoration: const InputDecoration(
-                      counterText: '',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                        borderSide: BorderSide(color: Colors.transparent),
+                    child: TextField(
+                      key: Key('otp-digit-$index'),
+                      controller: _controllers[index],
+                      focusNode: _focusNodes[index],
+                      autofocus:
+                          index == 0 && (widget.initialOtp?.isEmpty ?? true),
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      textInputAction: index == widget.length - 1
+                          ? TextInputAction.done
+                          : TextInputAction.next,
+                      autofillHints: index == 0
+                          ? const [AutofillHints.oneTimeCode]
+                          : null,
+                      maxLength: 1,
+                      onChanged: (value) => _onChanged(index, value),
+                      onSubmitted: (_) {
+                        if (index == widget.length - 1) {
+                          _focusNodes[index].unfocus();
+                        }
+                      },
+                      cursorColor: palette.primary,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                        borderSide: BorderSide(color: Colors.transparent),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(1),
+                      ],
+                      decoration: const InputDecoration(
+                        counterText: '',
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      contentPadding: EdgeInsets.zero,
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
 }

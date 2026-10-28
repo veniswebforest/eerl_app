@@ -1,5 +1,14 @@
 enum TaskListStatus { open, closed }
 
+bool isClosedTaskStatus(String status) => const {
+  'COMPLETED',
+  'CLOSED',
+  'CANCELLED',
+}.contains(status.trim().toUpperCase());
+
+bool isCancelledTaskStatus(String status) =>
+    status.trim().toUpperCase() == 'CANCELLED';
+
 enum TaskPriority { high, normal, low }
 
 class TaskListItem {

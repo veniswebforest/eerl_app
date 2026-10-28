@@ -193,6 +193,8 @@
   "@ok": { "description": "OK button text" },
 
   "error": "Error",
+  "toastSuccessTitle": "Success",
+  "toastInfoTitle": "Information",
   "@error": { "description": "Error title" },
 
   "pageNotFound": "Page Not Found",
@@ -253,6 +255,7 @@
 
   "resendOtp": "Resend",
   "@resendOtp": { "description": "Resend OTP button text" },
+  "otpResentSuccess": "A new login code has been sent.",
 
   "verifyBtn": "Verify",
   "@verifyBtn": { "description": "Verify button text" },

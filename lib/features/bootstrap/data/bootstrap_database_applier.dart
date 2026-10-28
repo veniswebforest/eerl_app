@@ -239,10 +239,9 @@ class BootstrapDatabaseApplier {
     _log('BEGIN page transaction for cursor=${data.cursor}');
     try {
       await _database.runInTransaction((txn) async {
-        // Bootstrap can replace reference parents before recreating them in
-        // the same page. Defer validation until commit, when the complete
-        // parent/child graph has been applied.
-        await txn.execute('PRAGMA defer_foreign_keys = ON');
+        // Validate the row shape before changing any local table. Foreign-key
+        // enforcement is intentionally disabled at the connection level.
+        await _validateIncomingRows(txn, data.tables);
         await _applyMe(txn, data.me);
         await _applyReferenceTables(txn, data.tables);
         await _applyRecordUpserts(txn, data.tables);
@@ -250,6 +249,9 @@ class BootstrapDatabaseApplier {
         await _applyNormalDeletes(txn, data.tables);
         await _applyParentDeletes(txn, data.tables);
         await _savePageMeta(txn, data);
+        // Missing relations are diagnostic only: report exact details without
+        // blocking a server-owned Bootstrap page from being committed.
+        await _logForeignKeyViolations(txn);
       });
     } catch (error) {
       _log('Page transaction rolled back: $error');
@@ -260,6 +262,184 @@ class BootstrapDatabaseApplier {
     if (kDebugMode) {
       await _logCommittedPage(data);
     }
+  }
+
+  Future<void> _validateIncomingRows(
+    Transaction txn,
+    Map<String, BootstrapTableChange> tables,
+  ) async {
+    for (final table in _bootstrapTableNames) {
+      final change = tables[table];
+      if (change == null) continue;
+      final usesReplace =
+          _referenceWithoutSyncState.contains(table) ||
+          _referenceWithSyncState.contains(table);
+      final rows = usesReplace ? change.replace : change.upserts;
+      if (rows.isEmpty) continue;
+
+      final schema = await txn.rawQuery('PRAGMA table_info("$table")');
+      final columns = <String, Map<String, Object?>>{
+        for (final column in schema) column['name'].toString(): column,
+      };
+      for (final serverRow in rows) {
+        final row = _normalizedRowForValidation(table, serverRow);
+        final rowKey = _rowKeyDescription(row, fallback: '<key unavailable>');
+        for (final column in row.keys) {
+          if (!columns.containsKey(column)) {
+            _throwDataError(
+              table: table,
+              rowKey: rowKey,
+              column: column,
+              problem: 'UNKNOWN_COLUMN',
+              value: row[column],
+            );
+          }
+        }
+        for (final entry in columns.entries) {
+          final definition = entry.value;
+          final isRequired =
+              (definition['notnull'] as num?)?.toInt() == 1 ||
+              ((definition['pk'] as num?)?.toInt() ?? 0) != 0;
+          if (!isRequired) continue;
+          final isPresent = row.containsKey(entry.key);
+          if (isPresent && row[entry.key] == null) {
+            _throwDataError(
+              table: table,
+              rowKey: rowKey,
+              column: entry.key,
+              problem: 'REQUIRED_VALUE_IS_NULL',
+            );
+          }
+          if (!isPresent && definition['dflt_value'] == null) {
+            _throwDataError(
+              table: table,
+              rowKey: rowKey,
+              column: entry.key,
+              problem: 'REQUIRED_COLUMN_MISSING',
+            );
+          }
+        }
+      }
+    }
+  }
+
+  Map<String, Object?> _normalizedRowForValidation(
+    String table,
+    Map<String, Object?> serverRow,
+  ) {
+    final row = <String, Object?>{...serverRow};
+    if (_referenceWithSyncState.contains(table) ||
+        _recordWithSyncState.contains(table)) {
+      row['sync_state'] = 'synced';
+    }
+    if (table == DatabaseTables.vehicles) {
+      row.remove('capacity_kg');
+      row.remove('type_id');
+      row.remove('type_name');
+    }
+    if (table == DatabaseTables.transfers) row.remove('photo_urls');
+    return row;
+  }
+
+  Never _throwDataError({
+    required String table,
+    required String rowKey,
+    required String column,
+    required String problem,
+    Object? value,
+  }) {
+    final description =
+        'table=$table | row=$rowKey | column=$column | '
+        'value=${_logValue(value)} | problem=$problem';
+    BootstrapLog.database('DATA_ERROR $description');
+    throw BootstrapDataException(description);
+  }
+
+  Future<void> _logForeignKeyViolations(Transaction txn) async {
+    final violations = await txn.rawQuery('PRAGMA foreign_key_check');
+    if (violations.isEmpty) return;
+
+    final descriptions = <String>[];
+    for (final violation in violations.take(20)) {
+      final table = violation['table']?.toString() ?? '<unknown-table>';
+      final parent = violation['parent']?.toString() ?? '<unknown-parent>';
+      final rowId = violation['rowid'];
+      final foreignKeyId = (violation['fkid'] as num?)?.toInt();
+      final foreignKeys = await txn.rawQuery(
+        'PRAGMA foreign_key_list("$table")',
+      );
+      final matchingKeys = foreignKeys
+          .where((row) {
+            return (row['id'] as num?)?.toInt() == foreignKeyId;
+          })
+          .toList(growable: false);
+
+      Map<String, Object?>? badRow;
+      if (rowId != null) {
+        final rows = await txn.rawQuery(
+          'SELECT * FROM "$table" WHERE rowid = ? LIMIT 1',
+          [rowId],
+        );
+        if (rows.isNotEmpty) badRow = rows.single;
+      }
+
+      final rowKey = _rowKeyDescription(badRow, fallback: 'rowid=$rowId');
+      final relationships = matchingKeys.isEmpty
+          ? 'foreign_key_id=$foreignKeyId -> table=$parent'
+          : matchingKeys
+                .map((key) {
+                  final column = key['from']?.toString() ?? '<unknown-column>';
+                  final parentColumn =
+                      key['to']?.toString() ?? '<unknown-column>';
+                  final value = _logValue(badRow?[column]);
+                  return 'column=$column value=$value -> $parent.$parentColumn';
+                })
+                .join(', ');
+      final description =
+          'table=$table | row=$rowKey | problem=FOREIGN_KEY_REFERENCE_MISSING | '
+          '$relationships';
+      descriptions.add(description);
+      BootstrapLog.database('DATA_WARNING $description');
+    }
+
+    final hiddenCount = violations.length - descriptions.length;
+    final summary = StringBuffer(
+      'Bootstrap page has ${violations.length} foreign-key violation(s): '
+      '${descriptions.join(' ; ')}',
+    );
+    if (hiddenCount > 0) {
+      summary.write(' ; and $hiddenCount more violation(s)');
+    }
+    BootstrapLog.warning('$summary; page will still be committed');
+  }
+
+  static String _rowKeyDescription(
+    Map<String, Object?>? row, {
+    required String fallback,
+  }) {
+    if (row == null) return fallback;
+    const preferredKeys = <String>[
+      'id',
+      'user_id',
+      'collection_id',
+      'transfer_id',
+      'center_id',
+      'key',
+    ];
+    final values = <String>[];
+    for (final key in preferredKeys) {
+      final value = row[key];
+      if (value == null) continue;
+      values.add('$key=${_logValue(value)}');
+      if (key == 'id') break;
+    }
+    return values.isEmpty ? fallback : values.join(',');
+  }
+
+  static String _logValue(Object? value) {
+    if (value == null) return '<null>';
+    final text = value.toString().replaceAll(RegExp(r'[\r\n]+'), ' ');
+    return text.length <= 120 ? text : '${text.substring(0, 117)}...';
   }
 
   /// Re-reads committed data from SQLite so this log confirms persisted data,
@@ -597,12 +777,20 @@ class BootstrapDatabaseApplier {
         .where((column) => !allowedColumns.contains(column))
         .toList(growable: false);
     if (unknownColumns.isNotEmpty) {
-      throw FormatException(
-        'Unsupported $table columns: ${unknownColumns.join(', ')}',
+      _throwDataError(
+        table: table,
+        rowKey: _rowKeyDescription(values, fallback: '<key unavailable>'),
+        column: unknownColumns.join(','),
+        problem: 'UNSUPPORTED_RECORD_COLUMN',
       );
     }
     if (!values.containsKey('id')) {
-      throw FormatException('$table upsert is missing id');
+      _throwDataError(
+        table: table,
+        rowKey: '<key unavailable>',
+        column: 'id',
+        problem: 'REQUIRED_COLUMN_MISSING',
+      );
     }
 
     final columns = values.keys.toList(growable: false);
@@ -882,4 +1070,13 @@ class BootstrapDatabaseApplier {
   static void _log(String message) {
     BootstrapLog.database(message);
   }
+}
+
+class BootstrapDataException implements Exception {
+  const BootstrapDataException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'BootstrapDataException: $message';
 }

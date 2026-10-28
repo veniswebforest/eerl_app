@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 
 /// Helper for showing consistently themed snackbars.
@@ -15,7 +16,8 @@ class AppSnackbar {
   }) {
     AppTopNotification.show(
       context,
-      title: message,
+      title: context.l10n.toastInfoTitle,
+      subtitle: message,
       duration: duration,
       tone: AppTopNotificationTone.info,
     );
@@ -29,7 +31,8 @@ class AppSnackbar {
   }) {
     AppTopNotification.show(
       context,
-      title: message,
+      title: context.l10n.toastSuccessTitle,
+      subtitle: message,
       duration: duration,
       tone: AppTopNotificationTone.success,
     );
@@ -43,7 +46,8 @@ class AppSnackbar {
   }) {
     AppTopNotification.show(
       context,
-      title: message,
+      title: context.l10n.error,
+      subtitle: message,
       duration: duration,
       tone: AppTopNotificationTone.error,
     );

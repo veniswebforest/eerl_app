@@ -19,6 +19,7 @@ class AuthProvider extends ChangeNotifier {
   String _phoneNumber = '';
   String _otp = '';
   bool _isLoading = false;
+  bool _isResending = false;
   bool _hasLoginError = false;
   bool _hasOtpError = false;
   bool _isVerified = false;
@@ -35,6 +36,7 @@ class AuthProvider extends ChangeNotifier {
   String get phoneNumber => _phoneNumber;
   String get otp => _otp;
   bool get isLoading => _isLoading;
+  bool get isResending => _isResending;
   bool get hasLoginError => _hasLoginError;
   bool get hasOtpError => _hasOtpError;
   bool get isVerified => _isVerified;
@@ -102,6 +104,7 @@ class AuthProvider extends ChangeNotifier {
     }
 
     _isLoading = true;
+    _isResending = false;
     _hasLoginError = false;
     _errorMessage = null;
     notifyListeners();
@@ -150,6 +153,7 @@ class AuthProvider extends ChangeNotifier {
     }
 
     _isLoading = true;
+    _isResending = false;
     _hasOtpError = false;
     _isVerified = false;
     _errorMessage = null;
@@ -178,10 +182,46 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  void resendOtp() {
-    if (_resendSeconds > 0) return;
+  Future<bool> resendOtp() async {
+    if (_resendSeconds > 0 || _isLoading) return false;
+    if (!isPhoneValid) {
+      _errorMessage = 'Enter a valid 10-digit Indian mobile number.';
+      notifyListeners();
+      return false;
+    }
+
+    _isLoading = true;
+    _isResending = true;
     _hasOtpError = false;
-    startResendTimer();
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await _repository.sendOtp(_phoneNumber);
+      _sendOtpResponse = response;
+      _otp = '';
+      _hasOtpError = false;
+      _isVerified = false;
+      _verifyOtpResponse = null;
+      final expirySeconds = response.expiresInSeconds;
+      startResendTimer(
+        seconds: expirySeconds != null && expirySeconds > 0
+            ? expirySeconds
+            : 30,
+      );
+      return true;
+    } on AuthApiException catch (error) {
+      _errorMessage = error.message;
+      return false;
+    } catch (error) {
+      _errorMessage = 'Unable to resend the login code. Please try again.';
+      AppLogger.error('AUTH', 'Resend OTP failed: $error');
+      return false;
+    } finally {
+      _isLoading = false;
+      _isResending = false;
+      notifyListeners();
+    }
   }
 
   /// Checks if stored session has non-null/non-empty access token and unexpired sessionExpiresAt.
@@ -217,6 +257,7 @@ class AuthProvider extends ChangeNotifier {
     _phoneNumber = '';
     _otp = '';
     _isLoading = false;
+    _isResending = false;
     _hasLoginError = false;
     _hasOtpError = false;
     _isVerified = false;

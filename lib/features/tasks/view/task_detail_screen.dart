@@ -19,6 +19,7 @@ import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/tasks/model/task_list_item.dart';
 import '../widgets/task_information_card.dart';
 import '../widgets/task_photo_grid.dart';
 
@@ -82,8 +83,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     }
   }
 
-  bool get _isClosed =>
-      const {'COMPLETED', 'CLOSED'}.contains(widget.task.status.toUpperCase());
+  bool get _isClosed => isClosedTaskStatus(widget.task.status);
 
   Future<void> _completeTask() async {
     if (!_canComplete || _isCompleting) return;
@@ -96,6 +96,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       );
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
       if (!mounted) return;
+      // The user-facing save is complete once the task and its outbox item are
+      // committed locally. Do not keep the button loader running while the
+      // background photo upload/API sync or the success dialog is active.
+      setState(() => _isCompleting = false);
       await _showCompletedDialog();
     } catch (error) {
       AppLogger.error('TASK_COMPLETE', error.toString());
@@ -103,7 +107,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         AppSnackbar.error(context, message: error.toString());
       }
     } finally {
-      if (mounted) setState(() => _isCompleting = false);
+      if (mounted && _isCompleting) {
+        setState(() => _isCompleting = false);
+      }
     }
   }
 
@@ -356,7 +362,14 @@ class _TaskStatusRow extends StatelessWidget {
       spacing: 8,
       runSpacing: 8,
       children: [
-        if (const {'COMPLETED', 'CLOSED'}.contains(task.status.toUpperCase()))
+        if (isCancelledTaskStatus(task.status))
+          _DetailChip(
+            icon: Icons.cancel_outlined,
+            label: context.l10n.supervisorTaskCancelled,
+            color: AppColors.red600,
+            background: AppColors.red50,
+          )
+        else if (isClosedTaskStatus(task.status))
           _DetailChip(
             icon: Icons.check_circle_outline_rounded,
             label: _completedLabel(context),

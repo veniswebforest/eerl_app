@@ -126,6 +126,8 @@
   "ok": "ठीक है",
 
   "error": "त्रुटि",
+  "toastSuccessTitle": "सफलता",
+  "toastInfoTitle": "जानकारी",
 
   "pageNotFound": "पृष्ठ नहीं मिला",
 
@@ -162,6 +164,7 @@
   "didntGetOtp": "क्या आपको OTP नहीं मिला?",
 
   "resendOtp": "पुनः भेजें",
+  "otpResentSuccess": "नया लॉगिन कोड फिर से भेज दिया गया है।",
 
   "verifyBtn": "सत्यापित करें",
 

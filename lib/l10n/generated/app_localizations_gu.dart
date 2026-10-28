@@ -203,6 +203,12 @@ class AppLocalizationsGu extends AppLocalizations {
   String get error => 'ભૂલ';
 
   @override
+  String get toastSuccessTitle => 'સફળતા';
+
+  @override
+  String get toastInfoTitle => 'માહિતી';
+
+  @override
   String get pageNotFound => 'પેજ મળ્યું નથી';
 
   @override
@@ -258,6 +264,9 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get resendOtp => 'ફરી મોકલો';
+
+  @override
+  String get otpResentSuccess => 'નવો લૉગિન કોડ ફરી મોકલવામાં આવ્યો છે.';
 
   @override
   String get verifyBtn => 'ચકાસો';

@@ -203,6 +203,12 @@ class AppLocalizationsHi extends AppLocalizations {
   String get error => 'त्रुटि';
 
   @override
+  String get toastSuccessTitle => 'सफलता';
+
+  @override
+  String get toastInfoTitle => 'जानकारी';
+
+  @override
   String get pageNotFound => 'पृष्ठ नहीं मिला';
 
   @override
@@ -258,6 +264,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get resendOtp => 'पुनः भेजें';
+
+  @override
+  String get otpResentSuccess => 'नया लॉगिन कोड फिर से भेज दिया गया है।';
 
   @override
   String get verifyBtn => 'सत्यापित करें';

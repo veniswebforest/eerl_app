@@ -204,6 +204,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get error => 'Error';
 
   @override
+  String get toastSuccessTitle => 'Success';
+
+  @override
+  String get toastInfoTitle => 'Information';
+
+  @override
   String get pageNotFound => 'Page Not Found';
 
   @override
@@ -259,6 +265,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resendOtp => 'Resend';
+
+  @override
+  String get otpResentSuccess => 'A new login code has been sent.';
 
   @override
   String get verifyBtn => 'Verify';

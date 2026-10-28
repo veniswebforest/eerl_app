@@ -287,7 +287,8 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
       AppTopNotification.show(
         context,
         key: const Key('configure-material-saved-notification'),
-        title: context.l10n.configureSequenceSaved,
+        title: context.l10n.toastSuccessTitle,
+        subtitle: context.l10n.configureSequenceSaved,
         tone: AppTopNotificationTone.success,
       );
     } catch (error) {

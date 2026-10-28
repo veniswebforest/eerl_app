@@ -7,6 +7,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import '../../home/widgets/home_styles.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/features/tasks/model/task_list_item.dart';
 
 class TaskListCard extends StatelessWidget {
   const TaskListCard({super.key, required this.item, this.onTap});
@@ -105,10 +106,16 @@ class TaskListCard extends StatelessWidget {
                       ? Align(
                           alignment: Alignment.centerLeft,
                           child: _StatusChip(
-                            icon: Icons.check_circle_outline_rounded,
+                            icon: _isCancelled
+                                ? Icons.cancel_outlined
+                                : Icons.check_circle_outline_rounded,
                             label: _scheduleLabel(context),
-                            foreground: AppColors.primary500,
-                            background: AppColors.primary50,
+                            foreground: _isCancelled
+                                ? AppColors.red600
+                                : AppColors.primary500,
+                            background: _isCancelled
+                                ? AppColors.red50
+                                : AppColors.primary50,
                           ),
                         )
                       : Wrap(
@@ -144,8 +151,9 @@ class TaskListCard extends StatelessWidget {
     ),
   );
 
-  bool get _isClosed =>
-      const {'COMPLETED', 'CLOSED'}.contains(item.status.toUpperCase());
+  bool get _isClosed => isClosedTaskStatus(item.status);
+
+  bool get _isCancelled => isCancelledTaskStatus(item.status);
 
   Widget _priorityChip(BuildContext context) =>
       switch (item.priority.toUpperCase()) {
@@ -170,6 +178,7 @@ class TaskListCard extends StatelessWidget {
       };
 
   String _scheduleLabel(BuildContext context) {
+    if (_isCancelled) return context.l10n.supervisorTaskCancelled;
     if (_isClosed) {
       return context.l10n.taskCompletedTime.split(':').first.trim();
     }
@@ -186,6 +195,7 @@ class TaskListCard extends StatelessWidget {
   }
 
   String _timeLabel(BuildContext context) {
+    if (_isCancelled) return '';
     final raw = _isClosed ? item.completedAt : item.dueAt;
     final value = DateTime.tryParse(raw ?? '')?.toLocal();
     return value == null ? '' : DateFormat('hh:mm a').format(value);

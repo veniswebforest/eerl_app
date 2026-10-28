@@ -1,5 +1,6 @@
 import 'package:eerl_app/features/collection/widgets/collection_draft_saved_notification.dart';
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -86,5 +87,33 @@ void main() {
       find.byKey(const Key('collection-draft-saved-notification')),
       findsNothing,
     );
+  });
+
+  testWidgets('snackbar helper always displays title and subtitle', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: ElevatedButton(
+              onPressed: () => AppSnackbar.error(
+                context,
+                message: 'Unable to save the task.',
+              ),
+              child: const Text('Show error'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show error'));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Error'), findsOneWidget);
+    expect(find.text('Unable to save the task.'), findsOneWidget);
   });
 }
