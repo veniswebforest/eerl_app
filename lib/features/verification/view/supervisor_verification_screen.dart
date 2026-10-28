@@ -30,6 +30,7 @@ class _SupervisorVerificationScreenState
     extends State<SupervisorVerificationScreen> {
   late VerificationListStatus _status = widget.initialStatus;
   int _selectedFilter = 0;
+  _VerificationDateFilter _dateFilter = _VerificationDateFilter.today;
   String _query = '';
   late final LocalQueryController<List<CollectionModel>> _controller;
   int _bootstrapRevision = -1;
@@ -91,7 +92,9 @@ class _SupervisorVerificationScreenState
           child: ListenableBuilder(
             listenable: _controller,
             builder: (context, _) {
-              final entries = _controller.data ?? const <CollectionModel>[];
+              final entries = (_controller.data ?? const <CollectionModel>[])
+                  .where(_matchesDate)
+                  .toList(growable: false);
               return RefreshIndicator(
                 key: const Key('verification-pull-to-refresh'),
                 color: AppColors.primary500,
@@ -109,6 +112,7 @@ class _SupervisorVerificationScreenState
                             _VerificationHeader(
                               title: context.l10n.verificationCollectionHistory,
                               subtitle: context.l10n.verificationSubtitle,
+                              onFilter: _showDateFilter,
                             ),
                             const SizedBox(height: 20),
                             _VerificationSearchField(
@@ -206,12 +210,47 @@ class _SupervisorVerificationScreenState
       ),
     ),
   );
+
+  bool _matchesDate(CollectionModel item) {
+    final value = DateTime.tryParse(
+      item.collectedAt ?? item.updatedAt,
+    )?.toLocal();
+    if (value == null) return true;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final day = DateTime(value.year, value.month, value.day);
+    return switch (_dateFilter) {
+      _VerificationDateFilter.today => day == today,
+      _VerificationDateFilter.yesterday =>
+        day == today.subtract(const Duration(days: 1)),
+      _VerificationDateFilter.lastSevenDays =>
+        !day.isBefore(today.subtract(const Duration(days: 6))) &&
+            !day.isAfter(today),
+    };
+  }
+
+  Future<void> _showDateFilter() async {
+    final selected = await showModalBottomSheet<_VerificationDateFilter>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.56),
+      builder: (context) => _VerificationDateFilterSheet(selected: _dateFilter),
+    );
+    if (selected != null && mounted) {
+      setState(() => _dateFilter = selected);
+    }
+  }
 }
 
 class _VerificationHeader extends StatelessWidget {
-  const _VerificationHeader({required this.title, required this.subtitle});
+  const _VerificationHeader({
+    required this.title,
+    required this.subtitle,
+    required this.onFilter,
+  });
   final String title;
   final String subtitle;
+  final VoidCallback onFilter;
   @override
   Widget build(BuildContext context) => Row(
     children: [
@@ -236,12 +275,116 @@ class _VerificationHeader extends StatelessWidget {
         ),
       ),
       const SizedBox(width: 24),
-      SvgPicture.asset(
-        'assets/icons/records/filter.svg',
-        width: 28,
-        height: 28,
+      IconButton(
+        key: const Key('verification-date-filter'),
+        onPressed: onFilter,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+        icon: SvgPicture.asset(
+          'assets/icons/records/filter.svg',
+          width: 28,
+          height: 28,
+        ),
       ),
     ],
+  );
+}
+
+enum _VerificationDateFilter { today, yesterday, lastSevenDays }
+
+class _VerificationDateFilterSheet extends StatelessWidget {
+  const _VerificationDateFilterSheet({required this.selected});
+
+  final _VerificationDateFilter selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final labels = <_VerificationDateFilter, String>{
+      _VerificationDateFilter.today: context.l10n.recordsFilterToday,
+      _VerificationDateFilter.yesterday: context.l10n.recordsFilterYesterday,
+      _VerificationDateFilter.lastSevenDays:
+          context.l10n.recordsFilterLastSevenDays,
+    };
+    return SafeArea(
+      top: false,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+        decoration: const BoxDecoration(
+          color: AppColors.neutral50,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.l10n.recordsFilterByDate,
+                    style: AppTextStyles.semiboldH6_20.copyWith(
+                      color: AppColors.neutral950,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  key: const Key('verification-filter-close'),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints.tightFor(
+                    width: 32,
+                    height: 32,
+                  ),
+                  icon: const Icon(Icons.close, size: 28),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            for (final value in _VerificationDateFilter.values)
+              InkWell(
+                key: Key('verification-date-${value.name}'),
+                onTap: () => Navigator.pop(context, value),
+                borderRadius: BorderRadius.circular(6),
+                child: Container(
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: value == selected
+                        ? AppColors.primary50
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    children: [
+                      _VerificationRadio(selected: value == selected),
+                      const SizedBox(width: 12),
+                      Text(labels[value]!, style: AppTextStyles.regularB7_14),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VerificationRadio extends StatelessWidget {
+  const _VerificationRadio({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 18,
+    height: 18,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      border: Border.all(
+        color: selected ? AppColors.primary500 : AppColors.cool500,
+        width: selected ? 5 : 1.5,
+      ),
+    ),
   );
 }
 

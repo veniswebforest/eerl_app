@@ -1120,7 +1120,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     } catch (error) {
       AppLogger.error('RAMP_RAGPICKER_ADD', error.toString());
       if (mounted) {
-        _showSubmitError(context.l10n.collectionSaveFailed);
+        _showSubmitError(error.toString());
       }
       rethrow;
     }
@@ -1283,7 +1283,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       if (!mounted) return;
       AppLogger.error('COLLECTION_SAVE', error.toString());
       setState(() => _saving = false);
-      _showSubmitError(context.l10n.collectionSaveFailed);
+      _showSubmitError(error.toString());
       return;
     }
     if (!mounted) return;

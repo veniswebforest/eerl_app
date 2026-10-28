@@ -3,6 +3,8 @@ import 'package:lottie/lottie.dart';
 
 import 'package:eerl_app/core/constants/app_constants.dart';
 
+import '../../core/theme/app_colors.dart';
+
 class LoadingWidget extends StatelessWidget {
   final bool isLoading;
   final String? message;
@@ -41,13 +43,13 @@ class LoadingWidget extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
             ],
             if (subtitle?.trim().isNotEmpty == true) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 340),
                 child: Padding(
@@ -58,8 +60,9 @@ class LoadingWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 13,
-                      height: 1.5,
-                      color: CupertinoColors.systemGrey,
+                      height: 1.5,                    fontWeight: FontWeight.w500,
+
+                      // color: AppColors.cool900,
                     ),
                   ),
                 ),

@@ -423,20 +423,20 @@ void main() {
     expect(transfer['sync_state'], 'synced');
   });
 
-  test('approval note is limited to 150 characters', () async {
+  test('approval note is limited to 255 characters', () async {
     await expectLater(
       repository.approveTransfer(
         transferId: 'transfer-1',
         destinationId: 'destination-1',
         transferVehicleId: 'truck-1',
         transferFee: 1800,
-        note: List.filled(151, 'x').join(),
+        note: List.filled(256, 'x').join(),
       ),
       throwsA(
         isA<TransferDecisionValidationException>().having(
           (error) => error.message,
           'message',
-          'Note must be 150 characters or fewer.',
+          'Note must be 255 characters or fewer.',
         ),
       ),
     );

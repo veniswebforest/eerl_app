@@ -1487,6 +1487,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get collectionDetailApproved => 'सत्यापित और स्वीकृत';
 
   @override
+  String get collectionApprovalSuccess => 'संग्रह सफलतापूर्वक स्वीकृत हुआ।';
+
+  @override
   String get collectionDetailReasonForReject => 'अस्वीकृति का कारण';
 
   @override

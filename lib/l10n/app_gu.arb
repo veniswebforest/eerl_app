@@ -486,6 +486,7 @@
   "profileLanguageHindiShort": "HIN",
   "collectionDetailPending": "સુપરવાઇઝર ચકાસણી બાકી",
   "collectionDetailApproved": "ચકાસાયેલ અને મંજૂર",
+  "collectionApprovalSuccess": "કલેક્શન સફળતાપૂર્વક મંજૂર થયું.",
   "collectionDetailReasonForReject": "નકારવાનું કારણ",
   "collectionDetailReasonLabel": "કારણ",
   "collectionDetailReasonValue": "વાહન ઉપલબ્ધ નથી",

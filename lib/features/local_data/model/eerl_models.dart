@@ -489,6 +489,7 @@ class CollectionModel {
     this.slipNumber,
     this.collectedAt,
     this.vehicleId,
+    this.vehiclePlateNumber,
     this.mrfPersonId,
     this.ragpickerId,
     this.givenByName,
@@ -518,6 +519,7 @@ class CollectionModel {
   final String? slipNumber;
   final String? collectedAt;
   final String? vehicleId;
+  final String? vehiclePlateNumber;
   final String? mrfPersonId;
   final String? ragpickerId;
   final String? givenByName;
@@ -547,6 +549,7 @@ class CollectionModel {
     slipNumber: map['slip_number'] as String?,
     collectedAt: map['collected_at'] as String?,
     vehicleId: map['vehicle_id'] as String?,
+    vehiclePlateNumber: map['vehicle_plate_number'] as String?,
     mrfPersonId: map['mrf_person_id'] as String?,
     ragpickerId: map['ragpicker_id'] as String?,
     givenByName: map['given_by_name'] as String?,

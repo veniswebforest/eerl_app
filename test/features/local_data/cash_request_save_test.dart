@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
-import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
@@ -85,16 +84,13 @@ void main() {
     expect(await database.query(DatabaseTables.outbox), isEmpty);
   });
 
-  test('amount above cash balance creates no request or outbox row', () async {
-    await expectLater(
-      repository.saveCashRequest(
-        amount: 2000.01,
-        reason: 'More than available balance',
-      ),
-      throwsA(isA<CashRequestBalanceUnavailableException>()),
+  test('cash request is not limited by the current wallet balance', () async {
+    await repository.saveCashRequest(
+      amount: 2000.01,
+      reason: 'Requesting additional center cash',
     );
-    expect(await database.query(DatabaseTables.cashRequests), isEmpty);
-    expect(await database.query(DatabaseTables.outbox), isEmpty);
+    expect(await database.query(DatabaseTables.cashRequests), hasLength(1));
+    expect(await database.query(DatabaseTables.outbox), hasLength(1));
   });
 
   test('amount equal to cash balance is allowed', () async {

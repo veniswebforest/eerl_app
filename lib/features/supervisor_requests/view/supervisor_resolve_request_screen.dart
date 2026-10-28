@@ -316,22 +316,10 @@ class _SupervisorResolveRequestScreenState
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       await _showSuccessDialog();
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      await showDialog<void>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(context.l10n.error),
-          content: Text(context.l10n.supervisorRequestSaveError),
-          actions: [
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(context.l10n.confirm),
-            ),
-          ],
-        ),
-      );
+      AppSnackbar.error(context, message: error.toString());
     }
   }
 

@@ -1486,6 +1486,9 @@ class AppLocalizationsGu extends AppLocalizations {
   String get collectionDetailApproved => 'ચકાસાયેલ અને મંજૂર';
 
   @override
+  String get collectionApprovalSuccess => 'કલેક્શન સફળતાપૂર્વક મંજૂર થયું.';
+
+  @override
   String get collectionDetailReasonForReject => 'નકારવાનું કારણ';
 
   @override

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:eerl_app/core/location/device_location_service.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:eerl_app/core/local_database/outbox_queue.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/utils/uuid_generator.dart';
@@ -45,6 +46,7 @@ class TransferStockUnavailableException implements Exception {
 
 class TransferDispatchValidationException implements Exception {
   const TransferDispatchValidationException(this.message);
+
   final String message;
 
   @override
@@ -53,6 +55,7 @@ class TransferDispatchValidationException implements Exception {
 
 class TransferDecisionValidationException implements Exception {
   const TransferDecisionValidationException(this.message);
+
   final String message;
 
   @override
@@ -398,24 +401,43 @@ class EerlLocalDataSource {
     if (resolvedCenter == null) {
       throw StateError('No active center is available.');
     }
+    final normalizedChannel = channel.trim().toUpperCase();
+    final normalizedTab = tab.trim().toUpperCase();
+    if (!const {'MRF', 'D2D', 'RAMP'}.contains(normalizedChannel)) {
+      throw const LocalWriteValidationException(
+        'Choose a valid collection channel.',
+        field: 'collectionChannel',
+      );
+    }
+    if (!const {'PLASTIC', 'NON_PLASTIC'}.contains(normalizedTab)) {
+      throw const LocalWriteValidationException(
+        'Choose the Plastic or Non-Plastic tab.',
+        field: 'tab',
+      );
+    }
+    if (items.isEmpty) {
+      throw const LocalWriteValidationException(
+        'Add at least one material before saving.',
+        field: 'items',
+      );
+    }
     final itemIds = items.map((item) => item.id).toList(growable: false);
     if (itemIds.toSet().length != itemIds.length) {
       throw ArgumentError('Material configuration contains duplicate items.');
     }
     final now = DateTime.now().toUtc().toIso8601String();
-    final entityId = '$resolvedCenter:$channel:$tab';
+    final entityId = '$resolvedCenter:$normalizedChannel:$normalizedTab';
     final refs = <String>[resolvedCenter, ...itemIds];
     final body = <String, Object?>{
       'centerId': resolvedCenter,
-      'collectionChannel': channel,
-      'tab': tab,
+      'collectionChannel': normalizedChannel,
+      'tab': normalizedTab,
       'items': [
         for (var index = 0; index < items.length; index++)
           {
             'itemId': items[index].id,
             'isSelected': items[index].isSelected == true,
             'sortOrder': index,
-            'rate': items[index].rate,
           },
       ],
     };
@@ -426,8 +448,10 @@ class EerlLocalDataSource {
         final sourceItemCount = Sqflite.firstIntValue(
           await txn.rawQuery(
             'SELECT COUNT(*) FROM ${DatabaseTables.items} '
-            'WHERE id IN ($placeholders) AND is_active = 1',
-            itemIds,
+            'WHERE id IN ($placeholders) AND is_active = 1 '
+            "AND CASE WHEN ? = 'PLASTIC' THEN material_type = 'PLASTIC' "
+            "ELSE material_type IN ('NON_PLASTIC', 'MIXED') END",
+            [...itemIds, normalizedTab],
           ),
         );
         if (sourceItemCount != itemIds.length) {
@@ -442,7 +466,7 @@ class EerlLocalDataSource {
         final item = items[index];
         await txn.insert(DatabaseTables.centerItems, {
           'center_id': resolvedCenter,
-          'channel': channel,
+          'channel': normalizedChannel,
           'item_id': item.id,
           'is_selected': item.isSelected == true ? 1 : 0,
           'sort_order': index,
@@ -459,12 +483,12 @@ class EerlLocalDataSource {
           DatabaseTables.centerItems,
           values,
           where: 'center_id = ? AND channel = ? AND item_id = ?',
-          whereArgs: [resolvedCenter, channel, item.id],
+          whereArgs: [resolvedCenter, normalizedChannel, item.id],
         );
         if (changed != 1) {
           throw StateError(
             'Material configuration could not be stored for '
-            '$resolvedCenter/$channel/${item.id}.',
+            '$resolvedCenter/$normalizedChannel/${item.id}.',
           );
         }
       }
@@ -494,8 +518,8 @@ class EerlLocalDataSource {
     if (kDebugMode) {
       await _debugLogMaterialConfigCommit(
         centerId: resolvedCenter,
-        channel: channel,
-        tab: tab,
+        channel: normalizedChannel,
+        tab: normalizedTab,
         itemIds: itemIds,
       );
     }
@@ -609,6 +633,12 @@ class EerlLocalDataSource {
     final normalizedDriverName = driverName?.isEmpty == true
         ? null
         : driverName;
+    if ((normalizedDriverName?.length ?? 0) > 100) {
+      throw const LocalWriteValidationException(
+        'Driver name must be 100 characters or fewer.',
+        field: 'driverName',
+      );
+    }
     final refs = <String>[if (vehicle.centerId != null) vehicle.centerId!];
     await _database.transaction((txn) async {
       final duplicateRows = await txn.rawQuery(
@@ -868,8 +898,11 @@ class EerlLocalDataSource {
     required bool isNew,
   }) async {
     final normalizedName = person.name.trim();
-    if (normalizedName.isEmpty) {
-      throw ArgumentError.value(person.name, 'name', 'Full name is required.');
+    if (normalizedName.length < 2 || normalizedName.length > 255) {
+      throw const LocalWriteValidationException(
+        'Full name must be between 2 and 255 characters.',
+        field: 'name',
+      );
     }
     final normalizedCenterId = person.centerId.trim();
     if (normalizedCenterId.isEmpty) {
@@ -885,6 +918,12 @@ class EerlLocalDataSource {
         : 'LABOUR';
     final normalizedIdNumber = person.idNumber?.trim();
     final normalizedPhotoUrl = person.photoUrl?.trim();
+    if ((normalizedIdNumber?.length ?? 0) > 100) {
+      throw const LocalWriteValidationException(
+        'ID number must be 100 characters or fewer.',
+        field: 'idNumber',
+      );
+    }
     if (normalizedRole == 'SUPERVISOR' && person.isActive) {
       final conflict = await getOtherActiveMrfSupervisor(
         centerId: normalizedCenterId,
@@ -917,6 +956,19 @@ class EerlLocalDataSource {
       );
       if (center.isEmpty) {
         throw StateError('The selected center is not available locally.');
+      }
+      final duplicateName = await txn.query(
+        DatabaseTables.mrfPeople,
+        columns: const ['id'],
+        where: 'center_id = ? AND LOWER(TRIM(name)) = LOWER(?) AND id <> ?',
+        whereArgs: [normalizedCenterId, normalizedName, person.id],
+        limit: 1,
+      );
+      if (duplicateName.isNotEmpty) {
+        throw const LocalWriteValidationException(
+          'An MRF person with this name already exists at this center.',
+          field: 'name',
+        );
       }
       final queuedUpserts = await txn.query(
         DatabaseTables.outbox,
@@ -974,6 +1026,22 @@ class EerlLocalDataSource {
   Future<void> setMrfPersonActive(MrfPersonModel person, bool active) async {
     final now = DateTime.now().toUtc().toIso8601String();
     await _database.transaction((txn) async {
+      if (active && person.role.trim().toUpperCase() == 'SUPERVISOR') {
+        final conflicts = await txn.query(
+          DatabaseTables.mrfPeople,
+          columns: const ['id'],
+          where:
+              "center_id = ? AND UPPER(role) = 'SUPERVISOR' AND is_active = 1 AND id <> ?",
+          whereArgs: [person.centerId, person.id],
+          limit: 1,
+        );
+        if (conflicts.isNotEmpty) {
+          throw const LocalWriteValidationException(
+            'This center already has an active MRF supervisor.',
+            field: 'isActive',
+          );
+        }
+      }
       final changed = await txn.update(
         DatabaseTables.mrfPeople,
         {'is_active': active ? 1 : 0, 'sync_state': 'pending'},
@@ -1041,26 +1109,32 @@ class EerlLocalDataSource {
     String? localPhotoPath,
   }) async {
     final normalizedName = ragpicker.name.trim();
-    if (normalizedName.isEmpty) {
-      throw ArgumentError.value(ragpicker.name, 'name', 'Name is required.');
+    if (normalizedName.length < 2 || normalizedName.length > 255) {
+      throw const LocalWriteValidationException(
+        'Name must be between 2 and 255 characters.',
+        field: 'name',
+      );
     }
     final phoneDigits = (ragpicker.phone ?? '').replaceAll(
       RegExp(r'[^0-9]'),
       '',
     );
-    final normalizedPhone = phoneDigits.isEmpty
-        ? null
-        : phoneDigits.length > 10
+    final normalizedPhone = phoneDigits.length > 10
         ? phoneDigits.substring(phoneDigits.length - 10)
         : phoneDigits;
-    if (normalizedPhone != null && normalizedPhone.length != 10) {
-      throw ArgumentError.value(
-        ragpicker.phone,
-        'phone',
-        'Enter a valid 10-digit mobile number.',
+    if (!RegExp(r'^[6-9][0-9]{9}$').hasMatch(normalizedPhone)) {
+      throw const LocalWriteValidationException(
+        'Enter a valid 10-digit Indian mobile number.',
+        field: 'phone',
       );
     }
     final normalizedIdNumber = ragpicker.idNumber?.trim();
+    if ((normalizedIdNumber?.length ?? 0) > 100) {
+      throw const LocalWriteValidationException(
+        'ID number must be 100 characters or fewer.',
+        field: 'idNumber',
+      );
+    }
     final normalizedPhotoPath = localPhotoPath?.trim();
     final hasNewPhoto = normalizedPhotoPath?.isNotEmpty == true;
     final now = DateTime.now().toUtc().toIso8601String();
@@ -1079,6 +1153,19 @@ class EerlLocalDataSource {
     };
     var outboxSeq = -1;
     await _database.transaction((txn) async {
+      final duplicateName = await txn.query(
+        DatabaseTables.ragpickers,
+        columns: const ['id'],
+        where: 'center_id = ? AND LOWER(TRIM(name)) = LOWER(?) AND id <> ?',
+        whereArgs: [ragpicker.centerId, normalizedName, ragpicker.id],
+        limit: 1,
+      );
+      if (duplicateName.isNotEmpty) {
+        throw const LocalWriteValidationException(
+          'A ragpicker with this name already exists at this center.',
+          field: 'name',
+        );
+      }
       if (photoId != null) {
         await txn.insert(DatabaseTables.photos, {
           'id': photoId,
@@ -1162,6 +1249,21 @@ class EerlLocalDataSource {
   Future<void> setRagpickerActive(RagpickerModel ragpicker, bool active) async {
     final now = DateTime.now().toUtc().toIso8601String();
     await _database.transaction((txn) async {
+      if (!active) {
+        final openCollections = await txn.query(
+          DatabaseTables.collections,
+          columns: const ['id'],
+          where: "ragpicker_id = ? AND UPPER(status) IN ('DRAFT', 'SUBMITTED')",
+          whereArgs: [ragpicker.id],
+          limit: 1,
+        );
+        if (openCollections.isNotEmpty) {
+          throw const LocalWriteValidationException(
+            'This ragpicker has an open collection and cannot be deactivated yet.',
+            field: 'isActive',
+          );
+        }
+      }
       await txn.update(
         DatabaseTables.ragpickers,
         {'is_active': active ? 1 : 0, 'sync_state': 'pending'},
@@ -1315,10 +1417,12 @@ class EerlLocalDataSource {
     final rows = await _database.rawQuery(
       '''
       SELECT c.*, ct.name AS center_name,
+        v.plate_number AS vehicle_plate_number,
         COALESCE(SUM(ci.qty), 0) AS total_qty,
         COUNT(ci.id) AS item_count
       FROM ${DatabaseTables.collections} c
       LEFT JOIN ${DatabaseTables.centers} ct ON ct.id = c.center_id
+      LEFT JOIN ${DatabaseTables.vehicles} v ON v.id = c.vehicle_id
       LEFT JOIN ${DatabaseTables.collectionItems} ci ON ci.collection_id = c.id
       WHERE c.id = ? AND c.center_id = ?
       GROUP BY c.id
@@ -1539,22 +1643,60 @@ class EerlLocalDataSource {
         'Collection type must be D2D, MRF, or RAMP.',
       );
     }
-    if (items.isEmpty) {
+    if (submit && items.isEmpty) {
       throw ArgumentError.value(
         items,
         'items',
         'At least one item is required.',
       );
     }
+    if (items.length > 100) {
+      throw const LocalWriteValidationException(
+        'A collection can contain up to 100 material lines.',
+        field: 'lines',
+      );
+    }
+    if (collection.handoverPhotoUrls.length > 10) {
+      throw const LocalWriteValidationException(
+        'You can add up to 10 handover photos.',
+        field: 'handoverPhotoUrls',
+      );
+    }
+    final submittedItemIds = <String>{};
     for (final item in items) {
-      if (item.collectionId != collection.id || item.qty <= 0) {
+      if (item.collectionId != collection.id ||
+          !item.qty.isFinite ||
+          item.qty < (submit ? 0.0000001 : 0) ||
+          item.qty > 999999.999 ||
+          !_hasAtMostDecimalPlaces(item.qty, 3)) {
         throw ArgumentError('Collection item identity or quantity is invalid.');
       }
-      if (submit && (item.verifiedQty == null || item.verifiedQty! <= 0)) {
+      if (!submittedItemIds.add(item.itemId)) {
+        throw const LocalWriteValidationException(
+          'Each material can be added only once.',
+          field: 'lines.itemId',
+        );
+      }
+      if (submit &&
+          (item.verifiedQty == null ||
+              !item.verifiedQty!.isFinite ||
+              item.verifiedQty! < 0 ||
+              item.verifiedQty! > 999999.999 ||
+              !_hasAtMostDecimalPlaces(item.verifiedQty!, 3))) {
         throw ArgumentError('Verified quantity is required before submission.');
       }
-      if (submit && item.photoUrls.isEmpty) {
+      if (submit && (item.photoUrls.isEmpty || item.photoUrls.length > 10)) {
         throw ArgumentError('An item photo is required before submission.');
+      }
+      if (item.rate != null &&
+          (!item.rate!.isFinite ||
+              item.rate! < 0 ||
+              item.rate! > 99999999.99 ||
+              !_hasAtMostDecimalPlaces(item.rate!, 2))) {
+        throw const LocalWriteValidationException(
+          'Material rate must be a valid amount with up to 2 decimal places.',
+          field: 'lines.rate',
+        );
       }
     }
     final now = DateTime.now().toUtc().toIso8601String();
@@ -1626,7 +1768,7 @@ class EerlLocalDataSource {
 
       final channelRows = await txn.query(
         DatabaseTables.centerChannels,
-        columns: const ['takes_payment'],
+        columns: const ['takes_payment', 'show_price'],
         where: 'center_id = ? AND channel = ?',
         whereArgs: [collection.centerId, channel],
         limit: 1,
@@ -1634,6 +1776,8 @@ class EerlLocalDataSource {
       final takesPayment = channelRows.isEmpty
           ? collection.takesPayment
           : channelRows.single['takes_payment'] == 1;
+      final showPrice =
+          channelRows.isNotEmpty && channelRows.single['show_price'] == 1;
       if (submit && channel == 'D2D') {
         final vehicleId = collection.vehicleId?.trim();
         if (vehicleId == null || vehicleId.isEmpty) {
@@ -1642,8 +1786,7 @@ class EerlLocalDataSource {
         final vehicles = await txn.query(
           DatabaseTables.vehicles,
           columns: const ['id'],
-          where:
-              'id = ? AND is_active = 1 AND (center_id = ? OR center_id IS NULL)',
+          where: 'id = ? AND (center_id = ? OR center_id IS NULL)',
           whereArgs: [vehicleId, collection.centerId],
           limit: 1,
         );
@@ -1675,8 +1818,7 @@ class EerlLocalDataSource {
         final labours = await txn.query(
           DatabaseTables.mrfPeople,
           columns: const ['id'],
-          where:
-              "id = ? AND center_id = ? AND UPPER(role) = 'LABOUR' AND is_active = 1",
+          where: "id = ? AND center_id = ? AND UPPER(role) = 'LABOUR'",
           whereArgs: [labourId, collection.centerId],
           limit: 1,
         );
@@ -1692,7 +1834,7 @@ class EerlLocalDataSource {
         final ragpickers = await txn.query(
           DatabaseTables.ragpickers,
           columns: const ['id'],
-          where: 'id = ? AND center_id = ? AND is_active = 1',
+          where: 'id = ? AND center_id = ?',
           whereArgs: [ragpickerId, collection.centerId],
           limit: 1,
         );
@@ -1700,13 +1842,35 @@ class EerlLocalDataSource {
           throw StateError('The selected ragpicker is unavailable.');
         }
       }
-      if (submit && (channel == 'D2D' || channel == 'RAMP')) {
+      if (submit && channel == 'RAMP') {
         if (collection.handoverPhotoUrls.isEmpty) {
           throw StateError('A handover photo is required.');
         }
+      }
+      if (submit) {
         final paidBy = collection.paidBy?.trim().toUpperCase();
-        if (paidBy != 'CASH' && paidBy != 'UPI') {
+        if (takesPayment == true && paidBy != 'CASH' && paidBy != 'UPI') {
           throw StateError('Select a valid payment mode.');
+        }
+        if (takesPayment != true && paidBy != null && paidBy.isNotEmpty) {
+          throw const LocalWriteValidationException(
+            'Payment mode is not used for this collection type at this center.',
+            field: 'paidBy',
+          );
+        }
+        for (final item in items) {
+          if (showPrice && item.rate == null) {
+            throw const LocalWriteValidationException(
+              'A rate is required for every material when prices are enabled.',
+              field: 'lines.rate',
+            );
+          }
+          if (!showPrice && item.rate != null) {
+            throw const LocalWriteValidationException(
+              'Rates must be empty because prices are hidden at this center.',
+              field: 'lines.rate',
+            );
+          }
         }
       }
       final isResubmission = existingRow?['status'] == 'REJECTED';
@@ -1756,6 +1920,12 @@ class EerlLocalDataSource {
         final agentNumber = (center['agent_number'] as num?)?.toInt();
         if (code == null || code.isEmpty || agentNumber == null) {
           throw StateError('Center code or agent number is missing.');
+        }
+        if (agentNumber < 1 || agentNumber > 99 || nextCount > 999) {
+          throw const LocalWriteValidationException(
+            'A collection slip number cannot be created for this center today.',
+            field: 'slipNumber',
+          );
         }
         final compactDate =
             '${today.substring(2, 4)}${today.substring(5, 7)}${today.substring(8, 10)}';
@@ -2079,6 +2249,12 @@ class EerlLocalDataSource {
     if (path.trim().isEmpty) return null;
     try {
       final size = await File(path).length();
+      if (size > 5 * 1024 * 1024) {
+        throw const LocalWriteValidationException(
+          'Each photo must be 5 MB or smaller.',
+          field: 'photo',
+        );
+      }
       return size > 0 ? size : null;
     } on FileSystemException {
       return null;
@@ -2108,15 +2284,11 @@ class EerlLocalDataSource {
       if (collectionRow['channel'] == 'D2D') ...{
         'vehicleId': vehicleId,
         'givenByName': givenByName,
-        'handoverPhotoUrls': handoverPhotoIds,
-        'paidBy': paidBy,
       },
       if (collectionRow['channel'] == 'MRF') 'mrfLabourId': mrfLabourId,
-      if (collectionRow['channel'] == 'RAMP') ...{
-        'ragpickerId': ragpickerId,
-        'handoverPhotoUrls': handoverPhotoIds,
-        'paidBy': paidBy,
-      },
+      if (collectionRow['channel'] == 'RAMP') 'ragpickerId': ragpickerId,
+      if (handoverPhotoIds.isNotEmpty) 'handoverPhotoUrls': handoverPhotoIds,
+      'paidBy': ?paidBy,
       'lines': [
         for (final item in items)
           {
@@ -2142,6 +2314,12 @@ class EerlLocalDataSource {
       longitude >= -180 &&
       longitude <= 180;
 
+  bool _hasAtMostDecimalPlaces(num value, int places) {
+    final factor = places == 2 ? 100.0 : 1000.0;
+    final scaled = value.toDouble() * factor;
+    return (scaled - scaled.round()).abs() <= 0.000001;
+  }
+
   Map<String, Object?> _collectionDraftBody({
     required Map<String, Object?> collectionRow,
     required List<String> handoverPhotoIds,
@@ -2154,24 +2332,17 @@ class EerlLocalDataSource {
     final paidBy = collectionRow['paid_by'];
     final gpsLat = (collectionRow['gps_lat'] as num?)?.toDouble();
     final gpsLng = (collectionRow['gps_lng'] as num?)?.toDouble();
-    if (!_isValidGps(gpsLat, gpsLng)) {
-      throw const CollectionLocationUnavailableException();
-    }
     return <String, Object?>{
       'centerId': collectionRow['center_id'],
       'type': collectionRow['channel'],
       if (collectionRow['channel'] == 'D2D') ...{
         'vehicleId': vehicleId,
         'givenByName': givenByName,
-        'handoverPhotoUrls': handoverPhotoIds,
-        'paidBy': paidBy,
       },
       if (collectionRow['channel'] == 'MRF') 'mrfLabourId': mrfLabourId,
-      if (collectionRow['channel'] == 'RAMP') ...{
-        'ragpickerId': ragpickerId,
-        'handoverPhotoUrls': handoverPhotoIds,
-        'paidBy': paidBy,
-      },
+      if (collectionRow['channel'] == 'RAMP') 'ragpickerId': ragpickerId,
+      if (handoverPhotoIds.isNotEmpty) 'handoverPhotoUrls': handoverPhotoIds,
+      'paidBy': ?paidBy,
       'lines': [
         for (final item in items)
           {
@@ -2183,7 +2354,7 @@ class EerlLocalDataSource {
             'photoUrls': item['photo_urls'],
           },
       ],
-      'gps': {'lat': gpsLat, 'lng': gpsLng},
+      if (_isValidGps(gpsLat, gpsLng)) 'gps': {'lat': gpsLat, 'lng': gpsLng},
     };
   }
 
@@ -2454,18 +2625,14 @@ class EerlLocalDataSource {
         'Category is required.',
       );
     }
-    if (!amount.isFinite || amount <= 0) {
+    if (!amount.isFinite ||
+        amount <= 0 ||
+        amount > 9999999 ||
+        !_hasAtMostDecimalPlaces(amount, 2)) {
       throw ArgumentError.value(
         amount,
         'amount',
-        'Amount must be greater than zero.',
-      );
-    }
-    if (receiptPaths.isEmpty) {
-      throw ArgumentError.value(
-        receiptPaths,
-        'receiptPaths',
-        'A receipt is required.',
+        'Amount must be greater than zero, within ₹99,99,999, and use up to 2 decimal places.',
       );
     }
 
@@ -2497,17 +2664,37 @@ class EerlLocalDataSource {
     final profile = await getProfile();
     final normalizedNote = note?.trim();
     final normalizedCollectionId = collectionId?.trim();
+    if ((normalizedNote?.length ?? 0) > 255) {
+      throw const LocalWriteValidationException(
+        'Expense note must be 255 characters or fewer.',
+        field: 'note',
+      );
+    }
     final uniqueReceiptPaths = receiptPaths
         .map((path) => path.trim())
         .where((path) => path.isNotEmpty)
         .toSet()
         .toList(growable: false);
-    if (uniqueReceiptPaths.isEmpty) {
-      throw ArgumentError.value(
-        receiptPaths,
-        'receiptPaths',
-        'A receipt is required.',
+    if (uniqueReceiptPaths.length > 5) {
+      throw const LocalWriteValidationException(
+        'You can add up to 5 receipt photos.',
+        field: 'photoUrls',
       );
+    }
+    if (normalizedCollectionId?.isNotEmpty == true) {
+      final collectionRows = await _database.query(
+        DatabaseTables.collections,
+        columns: const ['id'],
+        where: 'id = ? AND center_id = ?',
+        whereArgs: [normalizedCollectionId, centerId],
+        limit: 1,
+      );
+      if (collectionRows.isEmpty) {
+        throw const LocalWriteValidationException(
+          'The selected collection does not belong to this center.',
+          field: 'collectionId',
+        );
+      }
     }
     final photoSizes = <String, int?>{
       for (final path in uniqueReceiptPaths) path: await _localFileSize(path),
@@ -2685,37 +2872,28 @@ class EerlLocalDataSource {
     required double amount,
     required String reason,
   }) async {
-    if (!amount.isFinite || amount <= 0) {
+    if (!amount.isFinite ||
+        amount <= 0 ||
+        amount > 9999999 ||
+        !_hasAtMostDecimalPlaces(amount, 2)) {
       throw ArgumentError.value(
         amount,
         'amount',
-        'Requested amount must be greater than zero.',
+        'Requested amount must be greater than zero, within ₹99,99,999, and use up to 2 decimal places.',
       );
     }
     final normalizedReason = reason.trim();
-    if (normalizedReason.isEmpty) {
-      throw ArgumentError.value(reason, 'reason', 'Reason is required.');
+    if (normalizedReason.length > 255) {
+      throw const LocalWriteValidationException(
+        'Reason must be 255 characters or fewer.',
+        field: 'reason',
+      );
     }
 
     final centerId = await activeCenterId;
     final userId = await currentUserId;
     if (centerId == null || userId == null) {
       throw StateError('Active center and signed-in user are required.');
-    }
-    final wallet = await getWalletSummary(centerId: centerId);
-    if (amount > wallet.balanceNow) {
-      if (kDebugMode) {
-        AppLogger.diagnostic(
-          'CASH_REQUEST_VALIDATION',
-          'Blocked | '
-              'center=$centerId amount=$amount available=${wallet.balanceNow} '
-              'sqlite_write=false outbox_write=false',
-        );
-      }
-      throw CashRequestBalanceUnavailableException(
-        requestedAmount: amount,
-        availableBalance: wallet.balanceNow,
-      );
     }
     final profile = await getProfile();
     final requestId = UuidGenerator.v4();
@@ -2729,7 +2907,7 @@ class EerlLocalDataSource {
         'requested_by': userId,
         'requested_by_name': profile.userName,
         'amount': amount,
-        'reason': normalizedReason,
+        'reason': normalizedReason.isEmpty ? null : normalizedReason,
         'status': 'PENDING',
         'created_at': now,
         'updated_at': now,
@@ -2745,7 +2923,7 @@ class EerlLocalDataSource {
         body: {
           'centerId': centerId,
           'amount': amount,
-          'reason': normalizedReason,
+          if (normalizedReason.isNotEmpty) 'reason': normalizedReason,
         },
         refs: [centerId],
         createdAt: now,
@@ -2854,8 +3032,11 @@ class EerlLocalDataSource {
     String? reason,
   }) async {
     final normalizedName = name.trim();
-    if (normalizedName.isEmpty) {
-      throw ArgumentError.value(name, 'name', 'Category name is required.');
+    if (normalizedName.length < 2 || normalizedName.length > 100) {
+      throw const LocalWriteValidationException(
+        'Category name must be between 2 and 100 characters.',
+        field: 'name',
+      );
     }
     final centerId = await activeCenterId;
     final userId = await currentUserId;
@@ -2867,6 +3048,12 @@ class EerlLocalDataSource {
     final requestId = UuidGenerator.v4();
     final now = DateTime.now().toUtc().toIso8601String();
     final normalizedReason = reason?.trim();
+    if ((normalizedReason?.length ?? 0) > 255) {
+      throw const LocalWriteValidationException(
+        'Reason must be 255 characters or fewer.',
+        field: 'reason',
+      );
+    }
     final body = <String, Object?>{
       'centerId': centerId,
       'name': normalizedName,
@@ -2874,6 +3061,33 @@ class EerlLocalDataSource {
     };
 
     await _database.runInTransaction((txn) async {
+      final categories = await txn.query(
+        DatabaseTables.expenseCategories,
+        columns: const ['id'],
+        where: 'center_id = ? AND LOWER(TRIM(name)) = LOWER(?)',
+        whereArgs: [centerId, normalizedName],
+        limit: 1,
+      );
+      if (categories.isNotEmpty) {
+        throw const LocalWriteValidationException(
+          'This expense category already exists at the center.',
+          field: 'name',
+        );
+      }
+      final pending = await txn.query(
+        DatabaseTables.categoryRequests,
+        columns: const ['id'],
+        where:
+            "center_id = ? AND LOWER(TRIM(name)) = LOWER(?) AND UPPER(status) IN ('PENDING', 'OPEN')",
+        whereArgs: [centerId, normalizedName],
+        limit: 1,
+      );
+      if (pending.isNotEmpty) {
+        throw const LocalWriteValidationException(
+          'A request for this category is already pending.',
+          field: 'name',
+        );
+      }
       await txn.insert(DatabaseTables.categoryRequests, {
         'id': requestId,
         'center_id': centerId,
@@ -3032,9 +3246,9 @@ class EerlLocalDataSource {
       );
     }
     final normalizedNote = note?.trim();
-    if ((normalizedNote?.length ?? 0) > 150) {
+    if ((normalizedNote?.length ?? 0) > 255) {
       throw const TransferDecisionValidationException(
-        'Note must be 150 characters or fewer.',
+        'Note must be 255 characters or fewer.',
       );
     }
     if (vehicleArrivalTime != null &&
@@ -3190,10 +3404,23 @@ class EerlLocalDataSource {
     if (normalizedItems.isEmpty) {
       throw ArgumentError('At least one transfer item is required.');
     }
-    if (normalizedItems.length != 1) {
-      throw ArgumentError('Exactly one transfer item is required.');
+    if (normalizedItems.length > 50) {
+      throw ArgumentError('A transfer can contain up to 50 items.');
     }
-    if (!estimatedExpense.isFinite || estimatedExpense < 0) {
+    for (final entry in normalizedItems.entries) {
+      if (!entry.value.isFinite ||
+          entry.value <= 0 ||
+          entry.value > 999999.999 ||
+          !_hasAtMostDecimalPlaces(entry.value, 3)) {
+        throw const LocalWriteValidationException(
+          'Each transfer quantity must be greater than zero and use up to 3 decimal places.',
+          field: 'items.quantity',
+        );
+      }
+    }
+    if (!estimatedExpense.isFinite ||
+        estimatedExpense < 0 ||
+        estimatedExpense > 9999999) {
       throw ArgumentError.value(
         estimatedExpense,
         'estimatedExpense',
@@ -3211,6 +3438,12 @@ class EerlLocalDataSource {
     final transferId = UuidGenerator.v4();
     final now = DateTime.now().toUtc().toIso8601String();
     final normalizedNote = note?.trim();
+    if ((normalizedNote?.length ?? 0) > 255) {
+      throw const LocalWriteValidationException(
+        'Transfer note must be 255 characters or fewer.',
+        field: 'note',
+      );
+    }
     final totalQty = normalizedItems.values.fold<double>(0, (a, b) => a + b);
     final body = <String, Object?>{
       'centerId': centerId,
@@ -3368,7 +3601,10 @@ class EerlLocalDataSource {
   }) async {
     final plate = vehicleNumber.trim();
     final driver = driverName.trim();
-    if (plate.length < 4 || plate.length > 20 || driver.isEmpty) {
+    if (plate.length < 4 ||
+        plate.length > 20 ||
+        driver.isEmpty ||
+        driver.length > 255) {
       throw const TransferDispatchValidationException(
         'Enter a valid vehicle number and driver name.',
       );
@@ -3380,9 +3616,9 @@ class EerlLocalDataSource {
       whereArgs: [DatabaseTables.transfers, transferId, 'vehicle'],
       orderBy: 'created_at, id',
     );
-    if (vehiclePhotos.isEmpty || vehiclePhotos.length > 5) {
+    if (vehiclePhotos.isEmpty || vehiclePhotos.length > 10) {
       throw const TransferDispatchValidationException(
-        'Add between 1 and 5 vehicle photos.',
+        'Add between 1 and 10 vehicle photos.',
       );
     }
     final updated = await _database.update(
@@ -3419,6 +3655,7 @@ class EerlLocalDataSource {
     required String field,
     required String localPath,
   }) async {
+    final sizeBytes = await _localFileSize(localPath);
     if (field != 'vehicle' && field != 'weighbridge') {
       throw ArgumentError.value(
         field,
@@ -3431,9 +3668,9 @@ class EerlLocalDataSource {
       'WHERE owner_table = ? AND owner_id = ? AND field = ?',
       [DatabaseTables.transfers, transferId, field],
     );
-    if (((existing.single['total'] as num?)?.toInt() ?? 0) >= 5) {
+    if (((existing.single['total'] as num?)?.toInt() ?? 0) >= 10) {
       throw const TransferDispatchValidationException(
-        'A maximum of 5 photos is allowed.',
+        'A maximum of 10 photos is allowed.',
       );
     }
     final id = UuidGenerator.v4();
@@ -3446,6 +3683,7 @@ class EerlLocalDataSource {
       'content_type': 'image/jpeg',
       'local_path': localPath,
       'status': 'local',
+      'size_bytes': sizeBytes,
       'created_at': DateTime.now().toUtc().toIso8601String(),
     });
     if (kDebugMode) {
@@ -3486,12 +3724,15 @@ class EerlLocalDataSource {
         'Vehicle number must be 4 to 20 characters.',
       );
     }
-    if (driver.isEmpty) {
+    if (driver.isEmpty || driver.length > 255) {
       throw const TransferDispatchValidationException(
-        'Driver name is required.',
+        'Driver name is required and must be 255 characters or fewer.',
       );
     }
-    if (!dispatchedWeight.isFinite || dispatchedWeight <= 0) {
+    if (!dispatchedWeight.isFinite ||
+        dispatchedWeight <= 0 ||
+        dispatchedWeight > 999999.999 ||
+        !_hasAtMostDecimalPlaces(dispatchedWeight, 3)) {
       throw const TransferDispatchValidationException(
         'Loaded weight must be more than zero.',
       );
@@ -3570,14 +3811,14 @@ class EerlLocalDataSource {
         .where((row) => row['field'] == 'weighbridge')
         .map((row) => row['id']! as String)
         .toList(growable: false);
-    if (vehiclePhotoIds.isEmpty || vehiclePhotoIds.length > 5) {
+    if (vehiclePhotoIds.isEmpty || vehiclePhotoIds.length > 10) {
       throw const TransferDispatchValidationException(
-        'Add between 1 and 5 vehicle photos.',
+        'Add between 1 and 10 vehicle photos.',
       );
     }
-    if (weighbridgePhotoIds.length > 5) {
+    if (weighbridgePhotoIds.length > 10) {
       throw const TransferDispatchValidationException(
-        'A maximum of 5 weighbridge photos is allowed.',
+        'A maximum of 10 weighbridge photos is allowed.',
       );
     }
 
@@ -3735,14 +3976,16 @@ class EerlLocalDataSource {
         'Agent is required.',
       );
     }
-    if (normalizedTitle.isEmpty) {
-      throw ArgumentError.value(title, 'title', 'Title is required.');
+    if (normalizedTitle.length < 3 || normalizedTitle.length > 255) {
+      throw const LocalWriteValidationException(
+        'Task title must be between 3 and 255 characters.',
+        field: 'title',
+      );
     }
-    if (normalizedDescription.isEmpty) {
-      throw ArgumentError.value(
-        description,
-        'description',
-        'Description is required.',
+    if (normalizedDescription.length > 2000) {
+      throw const LocalWriteValidationException(
+        'Task description must be 2000 characters or fewer.',
+        field: 'description',
       );
     }
     if (!const {'LOW', 'NORMAL', 'HIGH'}.contains(normalizedPriority)) {
@@ -3854,19 +4097,21 @@ class EerlLocalDataSource {
     required List<String> photoPaths,
   }) async {
     final normalizedNote = note.trim();
-    if (normalizedNote.isEmpty) {
-      throw ArgumentError.value(note, 'note', 'Completion note is required.');
+    if (normalizedNote.length > 255) {
+      throw const LocalWriteValidationException(
+        'Completion note must be 255 characters or fewer.',
+        field: 'note',
+      );
     }
     final uniquePhotoPaths = photoPaths
         .map((path) => path.trim())
         .where((path) => path.isNotEmpty)
         .toSet()
         .toList(growable: false);
-    if (uniquePhotoPaths.isEmpty) {
-      throw ArgumentError.value(
-        photoPaths,
-        'photoPaths',
-        'Completion proof is required.',
+    if (uniquePhotoPaths.length > 5) {
+      throw const LocalWriteValidationException(
+        'You can add up to 5 completion photos.',
+        field: 'photoUrls',
       );
     }
 
@@ -4052,11 +4297,11 @@ class EerlLocalDataSource {
     if (normalizedRequestId.isEmpty) {
       throw ArgumentError.value(requestId, 'requestId', 'Request is required.');
     }
-    if (normalizedNotes.length < 3) {
+    if (normalizedNotes.length < 3 || normalizedNotes.length > 2000) {
       throw ArgumentError.value(
         notes,
         'notes',
-        'Answer notes must be at least 3 characters.',
+        'Answer notes must be between 3 and 2000 characters.',
       );
     }
     final now = DateTime.now().toUtc().toIso8601String();
@@ -4217,11 +4462,10 @@ class EerlLocalDataSource {
     required List<String> photoPaths,
   }) async {
     final normalizedBody = body.trim();
-    if (normalizedBody.isEmpty) {
-      throw ArgumentError.value(
-        body,
-        'body',
-        'Request description is required.',
+    if (normalizedBody.length < 3 || normalizedBody.length > 2000) {
+      throw const LocalWriteValidationException(
+        'Request description must be between 3 and 2000 characters.',
+        field: 'body',
       );
     }
     final normalizedPriority = priority.trim().toUpperCase();
@@ -4244,11 +4488,10 @@ class EerlLocalDataSource {
         .where((path) => path.isNotEmpty)
         .toSet()
         .toList(growable: false);
-    if (uniquePhotoPaths.isEmpty) {
-      throw ArgumentError.value(
-        photoPaths,
-        'photoPaths',
-        'A photo is required.',
+    if (uniquePhotoPaths.length > 5) {
+      throw const LocalWriteValidationException(
+        'You can add up to 5 request photos.',
+        field: 'photoUrls',
       );
     }
 

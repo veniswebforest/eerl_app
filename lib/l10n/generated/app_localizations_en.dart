@@ -280,7 +280,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeInitialDataSyncingSubtitle =>
-      'We’re updating your latest data for offline use. After this, you can keep working without internet, and your changes will sync automatically when you’re back online.';
+      'Setting up the app for offline use. This only takes this long the first time';
 
   @override
   String get homeDateZone => 'Wed, 22 Jul · Surat Zone';
@@ -1484,6 +1484,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionDetailApproved => 'Verified & Approved';
+
+  @override
+  String get collectionApprovalSuccess => 'Collection approved successfully.';
 
   @override
   String get collectionDetailReasonForReject => 'Reason for Reject';

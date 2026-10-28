@@ -181,6 +181,15 @@ class _D2dVehicleManagementScreenState
         tone: AppTopNotificationTone.error,
       );
       return;
+    } catch (error) {
+      if (!mounted) return;
+      AppTopNotification.show(
+        context,
+        title: context.l10n.error,
+        subtitle: error.toString(),
+        tone: AppTopNotificationTone.error,
+      );
+      return;
     }
     await OutgoingSyncService.instance.drain();
     if (!mounted) return;

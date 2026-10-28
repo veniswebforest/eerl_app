@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
@@ -97,10 +98,9 @@ void main() {
     expect(centers.single.isPrimary, isTrue);
   });
 
-  test(
-    'allows saving a ragpicker without the optional mobile number',
-    () async {
-      await repository.saveRagpicker(
+  test('requires a mobile number before writing a ragpicker', () async {
+    await expectLater(
+      repository.saveRagpicker(
         const RagpickerModel(
           id: 'ragpicker-no-phone',
           centerId: 'center-1',
@@ -108,25 +108,13 @@ void main() {
           isActive: true,
           syncState: 'pending',
         ),
-      );
+      ),
+      throwsA(isA<LocalWriteValidationException>()),
+    );
 
-      final ragpicker = (await database.query(
-        DatabaseTables.ragpickers,
-        where: 'id = ?',
-        whereArgs: ['ragpicker-no-phone'],
-      )).single;
-      expect(ragpicker['phone'], isNull);
-
-      final outbox = (await database.query(DatabaseTables.outbox)).single;
-      expect(jsonDecode(outbox['body']! as String), {
-        'centerId': 'center-1',
-        'name': 'Ramesh Yadav',
-        'phone': null,
-        'idNumber': null,
-        'photoUrl': null,
-      });
-    },
-  );
+    expect(await database.query(DatabaseTables.ragpickers), isEmpty);
+    expect(await database.query(DatabaseTables.outbox), isEmpty);
+  });
 
   test('replaces photo UUID with URL and applies server response', () async {
     await _save(repository);

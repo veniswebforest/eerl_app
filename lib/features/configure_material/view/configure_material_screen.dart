@@ -5,6 +5,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import '../widgets/configurable_material_tile.dart';
@@ -297,6 +298,7 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
         _error = error;
         _saving = false;
       });
+      AppSnackbar.error(context, message: error.toString());
     }
   }
 }

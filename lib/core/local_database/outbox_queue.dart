@@ -4,6 +4,7 @@ import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'database_tables.dart';
+import 'mobile_write_validator.dart';
 
 /// Generic transaction-scoped writer for every locally-created API mutation.
 ///
@@ -30,6 +31,12 @@ abstract final class OutboxQueue {
       path: path,
       entity: entity,
       entityId: entityId,
+    );
+    await MobileWriteValidator.validate(
+      txn,
+      method: normalizedMethod,
+      path: path,
+      body: body,
     );
     final refList = refs.toList(growable: false);
     final photoIds = blockingPhotoIds.toSet().toList(growable: false);
@@ -85,10 +92,18 @@ abstract final class OutboxQueue {
   }) async {
     final queuedRows = await txn.query(
       DatabaseTables.outbox,
-      columns: const ['seq'],
+      columns: const ['seq', 'method', 'path'],
       where: "entity = ? AND entity_id = ? AND kind = ? AND status = 'queued'",
       whereArgs: [entity, entityId, kind],
     );
+    for (final row in queuedRows) {
+      await MobileWriteValidator.validate(
+        txn,
+        method: row['method']! as String,
+        path: row['path']! as String,
+        body: body,
+      );
+    }
     final updated = await txn.update(
       DatabaseTables.outbox,
       {

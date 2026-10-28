@@ -625,7 +625,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeInitialDataSyncingSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'We’re updating your latest data for offline use. After this, you can keep working without internet, and your changes will sync automatically when you’re back online.'**
+  /// **'Setting up the app for offline use. This only takes this long the first time'**
   String get homeInitialDataSyncingSubtitle;
 
   /// No description provided for @homeDateZone.
@@ -2907,6 +2907,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verified & Approved'**
   String get collectionDetailApproved;
+
+  /// No description provided for @collectionApprovalSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection approved successfully.'**
+  String get collectionApprovalSuccess;
 
   /// No description provided for @collectionDetailReasonForReject.
   ///

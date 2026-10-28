@@ -140,6 +140,12 @@ class _State extends State<VerificationDetailScreen> {
             ? VerificationDetailStatus.approved
             : VerificationDetailStatus.rejected;
       });
+      if (approved) {
+        AppSnackbar.success(
+          context,
+          message: context.l10n.collectionApprovalSuccess,
+        );
+      }
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
     } on Object catch (error) {
       if (!mounted) return;
@@ -569,7 +575,8 @@ class _Data {
           collection?.givenByName ??
           context.l10n.verificationDetailGivenByValue,
       vehicle:
-          collection?.vehicleId ?? context.l10n.verificationDetailVehicleValue,
+          collection?.vehiclePlateNumber ??
+          context.l10n.verificationDetailVehicleValue,
       agent: collection?.agentName ?? context.l10n.verificationRahulPatel,
       payment: collection?.paidBy ?? context.l10n.verificationDetailCash,
       vehiclePhoto: collection?.handoverPhotoUrls.firstOrNull,

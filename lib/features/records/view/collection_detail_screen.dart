@@ -17,6 +17,7 @@ import 'package:eerl_app/features/local_data/presentation/local_query_controller
 import 'package:eerl_app/features/bootstrap/service/item_image_cache_service.dart';
 import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import '../widgets/collection_detail_assets.dart';
 import '../widgets/collection_detail_cards.dart';
@@ -272,19 +273,24 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
     List<CollectionItemModel> items, {
     required bool submit,
   }) async {
-    await EerlLocalRepository.instance.saveCollection(
-      collection: collection,
-      items: items,
-      submit: submit,
-    );
-    if (!mounted) return;
-    if (submit) {
-      context.pushReplacement(
-        AppRoutes.collectionReceipt,
-        extra: collection.id,
+    try {
+      await EerlLocalRepository.instance.saveCollection(
+        collection: collection,
+        items: items,
+        submit: submit,
       );
-    } else {
-      Navigator.of(context).maybePop();
+      if (!mounted) return;
+      if (submit) {
+        context.pushReplacement(
+          AppRoutes.collectionReceipt,
+          extra: collection.id,
+        );
+      } else {
+        Navigator.of(context).maybePop();
+      }
+    } catch (error) {
+      if (!mounted) return;
+      AppSnackbar.error(context, message: error.toString());
     }
   }
 

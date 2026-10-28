@@ -125,9 +125,9 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
       if (!mounted) return;
       await _showRequestSentDialog();
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
-      AppSnackbar.error(context, message: context.l10n.requestSubmitFailed);
+      AppSnackbar.error(context, message: error.toString());
     } finally {
       if (mounted) setState(() => _submitting = false);
     }

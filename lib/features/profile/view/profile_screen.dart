@@ -267,10 +267,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 : () => unawaited(_exportOutbox(shareContext)),
                           ),
                         ),
-                        if (!isSupervisor) ...[
-                          const SizedBox(height: 12),
-                          const _AppLockToggleCard(),
-                        ],
+                        const SizedBox(height: 12),
+                        const _AppLockToggleCard(),
                         const SizedBox(height: 18),
                         _SectionTitle(l10n.profileAccount),
                         const SizedBox(height: 12),

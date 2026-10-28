@@ -11,6 +11,7 @@ import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_assets.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
+import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
@@ -449,10 +450,10 @@ class _AssignSupervisorTaskScreenState
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       await _showTaskSentDialog();
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      await _showError(context.l10n.supervisorTaskSaveError);
+      AppSnackbar.error(context, message: error.toString());
     }
   }
 

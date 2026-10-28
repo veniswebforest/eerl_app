@@ -171,7 +171,7 @@ class _OtpInputState extends State<OtpInput> {
                             ? 1.3
                             : 1,
                       ),
-                      color: palette.surface,
+                      // color: palette.surface,
                     ),
                     child: TextField(
                       key: Key('otp-digit-$index'),
@@ -204,7 +204,7 @@ class _OtpInputState extends State<OtpInput> {
                         FilteringTextInputFormatter.digitsOnly,
                         LengthLimitingTextInputFormatter(1),
                       ],
-                      decoration: const InputDecoration(
+                      decoration: const InputDecoration(filled: false,
                         counterText: '',
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,

@@ -569,6 +569,7 @@
   "profileLanguageHindiShort": "HIN",
   "collectionDetailPending": "पर्यवेक्षक सत्यापन लंबित",
   "collectionDetailApproved": "सत्यापित और स्वीकृत",
+  "collectionApprovalSuccess": "संग्रह सफलतापूर्वक स्वीकृत हुआ।",
   "collectionDetailReasonForReject": "अस्वीकृति का कारण",
   "collectionDetailReasonLabel": "कारण",
   "collectionDetailReasonValue": "वाहन उपलब्ध नहीं है",

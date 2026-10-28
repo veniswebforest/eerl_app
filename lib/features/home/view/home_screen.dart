@@ -209,17 +209,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 },
                               ),
                               const SizedBox(height: 12),
-                              FutureBuilder<String>(
-                                future: _activeCenterName(),
-                                builder: (context, snapshot) => RoleSwitchCard(
-                                  onSwitchRoleTap: () =>
-                                      _switchRole(context, navigation),
-                                  roleTitle: roleTitle,
-                                  zoneName: snapshot.data ?? '',
-                                  roleIcon: isSupervisor
-                                      ? RoleSwitcherAssets.supervisor
-                                      : RoleSwitcherAssets.agent,
-                                ),
+                              FutureBuilder<
+                                ({String centerName, bool canSwitchRole})
+                              >(
+                                future: _homeRoleContext(),
+                                builder: (context, snapshot) {
+                                  final canSwitchRole =
+                                      snapshot.data?.canSwitchRole == true;
+                                  return RoleSwitchCard(
+                                    canSwitchRole: canSwitchRole,
+                                    onSwitchRoleTap: canSwitchRole
+                                        ? () => _switchRole(context, navigation)
+                                        : null,
+                                    roleTitle: roleTitle,
+                                    zoneName: snapshot.data?.centerName ?? '',
+                                    roleIcon: isSupervisor
+                                        ? RoleSwitcherAssets.supervisor
+                                        : RoleSwitcherAssets.agent,
+                                  );
+                                },
                               ),
                               const SizedBox(height: 24),
                               _CenteredHomeContent(
@@ -429,6 +437,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (center.id == centerId) return center.name;
     }
     return centers.isEmpty ? '' : centers.first.name;
+  }
+
+  Future<({String centerName, bool canSwitchRole})> _homeRoleContext() async {
+    final repository = EerlLocalRepository.instance;
+    final roles = await repository.getRoles();
+    return (
+      centerName: await _activeCenterName(),
+      canSwitchRole: roles.length > 1,
+    );
   }
 
   Future<void> _switchRole(

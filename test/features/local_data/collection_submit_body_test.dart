@@ -168,6 +168,8 @@ void main() {
     )).single;
     expect(row['vehicle_id'], 'vehicle-1');
     expect(row['sync_state'], 'pending');
+    final savedCollection = await repository.getCollection(id);
+    expect(savedCollection?.vehiclePlateNumber, 'GJ-05-BX-1234');
 
     final body = await queuedBody(id);
     expect(
