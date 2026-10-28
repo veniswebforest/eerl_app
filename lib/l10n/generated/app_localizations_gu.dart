@@ -275,7 +275,11 @@ class AppLocalizationsGu extends AppLocalizations {
   String get welcomeBack => 'ફરી સ્વાગત છે';
 
   @override
-  String get homeInitialDataSyncing => 'ડેટા સિંક થઈ રહ્યો છે…';
+  String get homeInitialDataSyncing => 'ડેટા સિંક થઈ રહ્યો છે...';
+
+  @override
+  String get homeInitialDataSyncingSubtitle =>
+      'ઑફલાઇન ઉપયોગ માટે તમારો નવીનતમ ડેટા અપડેટ થઈ રહ્યો છે. આ પૂર્ણ થયા પછી તમે ઇન્ટરનેટ વગર પણ કામ ચાલુ રાખી શકો છો, અને ફરી ઑનલાઇન થતાં તમારા ફેરફારો આપમેળે સિંક થશે.';
 
   @override
   String get homeDateZone => 'બુધ, 22 જુલાઈ · સુરત ઝોન';

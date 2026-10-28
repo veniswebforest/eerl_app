@@ -619,8 +619,14 @@ abstract class AppLocalizations {
   /// No description provided for @homeInitialDataSyncing.
   ///
   /// In en, this message translates to:
-  /// **'Data syncing…'**
+  /// **'Syncing data...'**
   String get homeInitialDataSyncing;
+
+  /// No description provided for @homeInitialDataSyncingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We’re updating your latest data for offline use. After this, you can keep working without internet, and your changes will sync automatically when you’re back online.'**
+  String get homeInitialDataSyncingSubtitle;
 
   /// No description provided for @homeDateZone.
   ///

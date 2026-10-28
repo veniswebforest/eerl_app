@@ -39,8 +39,13 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const Key('home-initial-login-loader')), findsOneWidget);
-    expect(find.text('Data syncing…'), findsOneWidget);
+    expect(find.text('Syncing data...'), findsOneWidget);
     expect(find.byKey(const Key('loading-widget-message')), findsOneWidget);
+    expect(find.byKey(const Key('loading-widget-subtitle')), findsOneWidget);
+    expect(
+      find.textContaining('your changes will sync automatically'),
+      findsOneWidget,
+    );
     final overlay = tester.widget<ColoredBox>(
       find.byKey(const Key('home-initial-login-loader-overlay')),
     );

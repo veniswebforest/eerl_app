@@ -261,7 +261,8 @@
   "@verifyBtn": { "description": "Verify button text" },
 
   "welcomeBack": "Welcome back",
-  "homeInitialDataSyncing": "Data syncing…",
+  "homeInitialDataSyncing": "Syncing data...",
+  "homeInitialDataSyncingSubtitle": "We’re updating your latest data for offline use. After this, you can keep working without internet, and your changes will sync automatically when you’re back online.",
   "homeDateZone": "Wed, 22 Jul · Surat Zone",
   "zoneName": "EERL - Surat Zone",
   "onlineStatus": "You’re Online",

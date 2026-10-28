@@ -136,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         SliverPadding(
                           padding: EdgeInsets.fromLTRB(
                             horizontalPadding,
-                            AppScreenHeaderMetrics.topInset+8,
+                            AppScreenHeaderMetrics.topInset + 8,
                             horizontalPadding,
                             0,
                           ),
@@ -321,6 +321,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child: LoadingWidget(
                       isLoading: true,
                       message: context.l10n.homeInitialDataSyncing,
+                      subtitle: context.l10n.homeInitialDataSyncingSubtitle,
                     ),
                   ),
                 ),

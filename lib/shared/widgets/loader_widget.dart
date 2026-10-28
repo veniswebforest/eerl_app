@@ -6,7 +6,14 @@ import 'package:eerl_app/core/constants/app_constants.dart';
 class LoadingWidget extends StatelessWidget {
   final bool isLoading;
   final String? message;
-  const LoadingWidget({super.key, required this.isLoading, this.message});
+  final String? subtitle;
+
+  const LoadingWidget({
+    super.key,
+    required this.isLoading,
+    this.message,
+    this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +33,35 @@ class LoadingWidget extends StatelessWidget {
             ),
             if (message?.trim().isNotEmpty == true) ...[
               const SizedBox(height: 16),
-              Text(
-                message!,
-                key: const Key('loading-widget-message'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  message!,
+                  key: const Key('loading-widget-message'),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+            if (subtitle?.trim().isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 340),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    subtitle!,
+                    key: const Key('loading-widget-subtitle'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: CupertinoColors.systemGrey,
+                    ),
+                  ),
                 ),
               ),
             ],

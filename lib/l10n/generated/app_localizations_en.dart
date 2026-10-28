@@ -276,7 +276,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeBack => 'Welcome back';
 
   @override
-  String get homeInitialDataSyncing => 'Data syncing…';
+  String get homeInitialDataSyncing => 'Syncing data...';
+
+  @override
+  String get homeInitialDataSyncingSubtitle =>
+      'We’re updating your latest data for offline use. After this, you can keep working without internet, and your changes will sync automatically when you’re back online.';
 
   @override
   String get homeDateZone => 'Wed, 22 Jul · Surat Zone';

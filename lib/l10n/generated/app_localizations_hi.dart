@@ -275,7 +275,11 @@ class AppLocalizationsHi extends AppLocalizations {
   String get welcomeBack => 'वापसी पर स्वागत है';
 
   @override
-  String get homeInitialDataSyncing => 'डेटा सिंक हो रहा है…';
+  String get homeInitialDataSyncing => 'डेटा सिंक हो रहा है...';
+
+  @override
+  String get homeInitialDataSyncingSubtitle =>
+      'ऑफ़लाइन उपयोग के लिए आपका नवीनतम डेटा अपडेट हो रहा है। इसके बाद आप इंटरनेट के बिना भी काम जारी रख सकते हैं, और दोबारा ऑनलाइन होने पर आपके बदलाव अपने-आप सिंक हो जाएंगे।';
 
   @override
   String get homeDateZone => 'बुध, 22 जुलाई · सूरत ज़ोन';
