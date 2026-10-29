@@ -32,6 +32,7 @@ class EndDayActivityCard extends StatelessWidget {
       children: [
         for (var index = 0; index < items.length; index++) ...[
           ConstrainedBox(
+
             constraints: const BoxConstraints(minHeight: 46),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
