@@ -44,6 +44,13 @@ class _TodaysSummaryState extends State<TodaysSummary> {
     })..load();
     _bootstrapRevision = BootstrapSyncService.instance.revision;
     BootstrapSyncService.instance.addListener(_reloadAfterBootstrap);
+    EerlLocalRepository.instance.activeCenterNotifier.addListener(
+      _reloadAfterCenterChange,
+    );
+  }
+
+  void _reloadAfterCenterChange() {
+    if (mounted) _controller.load();
   }
 
   void _reloadAfterBootstrap() {
@@ -55,6 +62,9 @@ class _TodaysSummaryState extends State<TodaysSummary> {
 
   @override
   void dispose() {
+    EerlLocalRepository.instance.activeCenterNotifier.removeListener(
+      _reloadAfterCenterChange,
+    );
     BootstrapSyncService.instance.removeListener(_reloadAfterBootstrap);
     _controller.dispose();
     super.dispose();
@@ -67,6 +77,13 @@ class _TodaysSummaryState extends State<TodaysSummary> {
       builder: (context, _) {
         final summary = _controller.data?.summary;
         final wallet = _controller.data?.wallet;
+        final kgCount = (summary?.collectedKg ?? 0).round();
+        final pcsVal = summary?.collectedPcs ?? 0;
+        final pcsCount = pcsVal % 1 == 0
+            ? pcsVal.toInt().toString()
+            : pcsVal.toStringAsFixed(1);
+        final collectedValue =
+            '${context.l10n.weightKg(kgCount)} / $pcsCount ${context.l10n.collectionUnitPcs}';
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -139,9 +156,7 @@ class _TodaysSummaryState extends State<TodaysSummary> {
                                         iconColor: AppColors.orchid,
                                         iconBg: AppColors.orchidLight,
                                         label: context.l10n.collectedToday,
-                                        value: context.l10n.weightKg(
-                                          (summary?.collectedKg ?? 0).round(),
-                                        ),
+                                        value: collectedValue,
                                         valueColor: AppColors.orchid,
                                       ),
                                       SummaryCard(
@@ -234,7 +249,7 @@ class SummaryCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: SizedBox(
-            height: 144,
+            height: 125,
             child: Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
@@ -252,7 +267,7 @@ class SummaryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
-                    height: 38,
+                    // height: 38,
                     child: Align(
                       alignment: Alignment.topLeft,
                       child: Text(
@@ -274,7 +289,7 @@ class SummaryCard extends StatelessWidget {
                       child: Text(
                         value,
                         maxLines: 1,
-                        style: AppTextStyles.semiboldH6_20.copyWith(
+                        style: AppTextStyles.semiboldH7_18.copyWith(
                           color: valueColor,
                         ),
                       ),

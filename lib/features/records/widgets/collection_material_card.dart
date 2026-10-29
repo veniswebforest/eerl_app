@@ -90,9 +90,11 @@ class CollectionMaterialCard extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                matchSummaryDesign
-                    ? '$rateLabel ₹${item.rate?.toStringAsFixed(2) ?? '-'}/$_rateUnit'
-                    : '$rateLabel ${item.rate?.toStringAsFixed(2) ?? '-'}',
+                item.rate == null
+                    ? '$rateLabel -'
+                    : matchSummaryDesign
+                    ? '$rateLabel ₹${item.rate!.toStringAsFixed(2)}/$_rateUnit'
+                    : '$rateLabel ${item.rate!.toStringAsFixed(2)}',
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.mediumSH9_12.copyWith(
                   color: AppColors.neutral950,
@@ -102,9 +104,11 @@ class CollectionMaterialCard extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                matchSummaryDesign
-                    ? '$totalLabel ₹${item.amount == null ? '-' : NumberFormat('#,##0.00').format(item.amount)}'
-                    : '$totalLabel ${item.amount?.toStringAsFixed(2) ?? '-'}',
+                item.amount == null
+                    ? '$totalLabel -'
+                    : matchSummaryDesign
+                    ? '$totalLabel ₹${NumberFormat('#,##0.00').format(item.amount)}'
+                    : '$totalLabel ${item.amount!.toStringAsFixed(2)}',
                 textAlign: TextAlign.end,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.mediumSH9_12.copyWith(

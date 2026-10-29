@@ -207,6 +207,7 @@ class EerlLocalDataSource {
       return const AgentHomeSummaryModel(
         verifiedEntries: 0,
         collectedKg: 0,
+        collectedPcs: 0,
         transferRequests: 0,
         drafts: 0,
         toFix: 0,
@@ -220,13 +221,20 @@ class EerlLocalDataSource {
           WHERE agent_id = ? AND center_id = ?
             AND UPPER(status) IN ('VERIFIED', 'APPROVED')
             AND collected_at >= ?) AS verified_entries,
-        (SELECT COALESCE(SUM(CASE WHEN i.unit_code = 'KG'
-          THEN COALESCE(ci.verified_qty, ci.qty) ELSE 0 END), 0)
+        (SELECT COALESCE(SUM(CASE WHEN UPPER(COALESCE(i.unit_code, 'KG')) = 'PCS'
+          THEN 0 ELSE COALESCE(ci.verified_qty, ci.qty) END), 0)
           FROM ${DatabaseTables.collectionItems} ci
           JOIN ${DatabaseTables.collections} c ON c.id = ci.collection_id
           JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
           WHERE c.agent_id = ? AND c.center_id = ? AND c.status != 'DRAFT'
             AND c.collected_at >= ?) AS collected_kg,
+        (SELECT COALESCE(SUM(CASE WHEN UPPER(COALESCE(i.unit_code, 'KG')) = 'PCS'
+          THEN COALESCE(ci.verified_qty, ci.qty) ELSE 0 END), 0)
+          FROM ${DatabaseTables.collectionItems} ci
+          JOIN ${DatabaseTables.collections} c ON c.id = ci.collection_id
+          JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
+          WHERE c.agent_id = ? AND c.center_id = ? AND c.status != 'DRAFT'
+            AND c.collected_at >= ?) AS collected_pcs,
         (SELECT COUNT(*) FROM ${DatabaseTables.transfers}
           WHERE requested_by = ? AND center_id = ?
             AND requested_at >= ?) AS transfer_requests,
@@ -247,6 +255,9 @@ class EerlLocalDataSource {
         todayStart,
         userId,
         centerId,
+        todayStart,
+        userId,
+        centerId,
         userId,
         centerId,
       ],
@@ -254,9 +265,11 @@ class EerlLocalDataSource {
     return AgentHomeSummaryModel.fromMap(rows.single);
   }
 
-  Future<SupervisorHomeSummaryModel> getSupervisorHomeSummary() async {
-    final centerId = await activeCenterId;
-    if (centerId == null) {
+  Future<SupervisorHomeSummaryModel> getSupervisorHomeSummary({
+    String? centerId,
+  }) async {
+    final resolvedCenter = centerId ?? await activeCenterId;
+    if (resolvedCenter == null) {
       return const SupervisorHomeSummaryModel(
         activeAgents: 0,
         transfersDone: 0,
@@ -269,9 +282,14 @@ class EerlLocalDataSource {
     final rows = await _database.rawQuery(
       '''
       SELECT
-        (SELECT COUNT(DISTINCT p.user_id)
-          FROM ${DatabaseTables.centerPeople} p
-          WHERE p.center_id = ? AND p.is_agent = 1) AS active_agents,
+        (SELECT COUNT(DISTINCT cp.user_id)
+          FROM ${DatabaseTables.centerPeople} cp
+          JOIN ${DatabaseTables.collections} col
+            ON col.agent_id = cp.user_id
+           AND col.center_id = cp.center_id
+           AND col.status != 'DRAFT'
+           AND col.collected_at >= ?
+          WHERE cp.center_id = ? AND cp.is_agent = 1) AS active_agents,
         (SELECT COUNT(*) FROM ${DatabaseTables.transfers} t
           WHERE t.center_id = ? AND t.requested_at >= ?
             AND UPPER(t.status) IN
@@ -291,13 +309,14 @@ class EerlLocalDataSource {
           AS pending_expenses
     ''',
       [
-        centerId,
-        centerId,
         todayStart,
-        centerId,
+        resolvedCenter,
+        resolvedCenter,
         todayStart,
-        centerId,
-        centerId,
+        resolvedCenter,
+        todayStart,
+        resolvedCenter,
+        resolvedCenter,
       ],
     );
     return SupervisorHomeSummaryModel.fromMap(rows.single);
@@ -1347,16 +1366,24 @@ class EerlLocalDataSource {
       args.add(channel);
     }
     if (search.trim().isNotEmpty) {
-      conditions.add('(c.slip_number LIKE ? OR c.agent_name LIKE ?)');
       final like = '%${search.trim()}%';
-      args.addAll([like, like]);
+      conditions.add(
+        '(c.slip_number LIKE ? OR c.agent_name LIKE ? OR c.channel LIKE ? OR c.given_by_name LIKE ? OR c.handed_over_by LIKE ? OR EXISTS (SELECT 1 FROM ${DatabaseTables.vehicles} v WHERE v.id = c.vehicle_id AND v.plate_number LIKE ?) OR EXISTS (SELECT 1 FROM ${DatabaseTables.ragpickers} r WHERE r.id = c.ragpicker_id AND r.name LIKE ?) OR EXISTS (SELECT 1 FROM ${DatabaseTables.mrfPeople} m WHERE m.id = c.mrf_person_id AND m.name LIKE ?) OR EXISTS (SELECT 1 FROM ${DatabaseTables.collectionItems} ci2 JOIN ${DatabaseTables.items} itm ON itm.id = ci2.item_id WHERE ci2.collection_id = c.id AND itm.name LIKE ?))',
+      );
+      args.addAll([like, like, like, like, like, like, like, like, like]);
     }
     final rows = await _database.rawQuery('''
       SELECT c.*,
-        COALESCE(SUM(ci.qty), 0) AS total_qty,
+        COALESCE(ch.show_price, 0) AS show_price,
+        COALESCE(SUM(COALESCE(ci.verified_qty, ci.qty)), 0) AS total_qty,
+        COALESCE(SUM(CASE WHEN UPPER(COALESCE(itm.unit_code, 'KG')) = 'PCS' THEN 0 ELSE COALESCE(ci.verified_qty, ci.qty) END), 0) AS total_kg,
+        COALESCE(SUM(CASE WHEN UPPER(COALESCE(itm.unit_code, 'KG')) = 'PCS' THEN COALESCE(ci.verified_qty, ci.qty) ELSE 0 END), 0) AS total_pcs,
         COUNT(ci.id) AS item_count
       FROM ${DatabaseTables.collections} c
+      LEFT JOIN ${DatabaseTables.centerChannels} ch
+        ON ch.center_id = c.center_id AND ch.channel = c.channel
       LEFT JOIN ${DatabaseTables.collectionItems} ci ON ci.collection_id = c.id
+      LEFT JOIN ${DatabaseTables.items} itm ON itm.id = ci.item_id
       WHERE ${conditions.join(' AND ')}
       GROUP BY c.id
       ORDER BY ${drafts ? 'c.updated_at' : 'c.collected_at'} DESC
@@ -1399,11 +1426,17 @@ class EerlLocalDataSource {
     }
     final rows = await _database.rawQuery('''
       SELECT c.*, ct.name AS center_name,
-        COALESCE(SUM(ci.qty), 0) AS total_qty,
+        COALESCE(ch.show_price, 0) AS show_price,
+        COALESCE(SUM(COALESCE(ci.verified_qty, ci.qty)), 0) AS total_qty,
+        COALESCE(SUM(CASE WHEN UPPER(COALESCE(itm.unit_code, 'KG')) = 'PCS' THEN 0 ELSE COALESCE(ci.verified_qty, ci.qty) END), 0) AS total_kg,
+        COALESCE(SUM(CASE WHEN UPPER(COALESCE(itm.unit_code, 'KG')) = 'PCS' THEN COALESCE(ci.verified_qty, ci.qty) ELSE 0 END), 0) AS total_pcs,
         COUNT(ci.id) AS item_count
       FROM ${DatabaseTables.collections} c
       JOIN ${DatabaseTables.centers} ct ON ct.id = c.center_id
+      LEFT JOIN ${DatabaseTables.centerChannels} ch
+        ON ch.center_id = c.center_id AND ch.channel = c.channel
       LEFT JOIN ${DatabaseTables.collectionItems} ci ON ci.collection_id = c.id
+      LEFT JOIN ${DatabaseTables.items} itm ON itm.id = ci.item_id
       WHERE ${conditions.join(' AND ')}
       GROUP BY c.id
       ORDER BY c.collected_at DESC
@@ -1418,12 +1451,18 @@ class EerlLocalDataSource {
       '''
       SELECT c.*, ct.name AS center_name,
         v.plate_number AS vehicle_plate_number,
-        COALESCE(SUM(ci.qty), 0) AS total_qty,
+        COALESCE(ch.show_price, 0) AS show_price,
+        COALESCE(SUM(COALESCE(ci.verified_qty, ci.qty)), 0) AS total_qty,
+        COALESCE(SUM(CASE WHEN UPPER(COALESCE(itm.unit_code, 'KG')) = 'PCS' THEN 0 ELSE COALESCE(ci.verified_qty, ci.qty) END), 0) AS total_kg,
+        COALESCE(SUM(CASE WHEN UPPER(COALESCE(itm.unit_code, 'KG')) = 'PCS' THEN COALESCE(ci.verified_qty, ci.qty) ELSE 0 END), 0) AS total_pcs,
         COUNT(ci.id) AS item_count
       FROM ${DatabaseTables.collections} c
       LEFT JOIN ${DatabaseTables.centers} ct ON ct.id = c.center_id
       LEFT JOIN ${DatabaseTables.vehicles} v ON v.id = c.vehicle_id
+      LEFT JOIN ${DatabaseTables.centerChannels} ch
+        ON ch.center_id = c.center_id AND ch.channel = c.channel
       LEFT JOIN ${DatabaseTables.collectionItems} ci ON ci.collection_id = c.id
+      LEFT JOIN ${DatabaseTables.items} itm ON itm.id = ci.item_id
       WHERE c.id = ? AND c.center_id = ?
       GROUP BY c.id
       LIMIT 1
@@ -1456,10 +1495,13 @@ class EerlLocalDataSource {
     final rows = await _database.rawQuery(
       '''
       SELECT ci.*, i.name, i.unit_code, i.unit_name,
-        i.image_url AS item_image_url
+        i.image_url AS item_image_url,
+        COALESCE(ch.show_price, 0) AS show_price
       FROM ${DatabaseTables.collectionItems} ci
       JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
       JOIN ${DatabaseTables.collections} c ON c.id = ci.collection_id
+      LEFT JOIN ${DatabaseTables.centerChannels} ch
+        ON ch.center_id = c.center_id AND ch.channel = c.channel
       WHERE ci.collection_id = ? AND c.center_id = ?
       ORDER BY ci.sort_order, i.name COLLATE NOCASE
     ''',
@@ -1493,6 +1535,8 @@ class EerlLocalDataSource {
           );
           return CollectionItemModel.fromMap({
             ...row,
+            if (row['show_price'] != 1) 'rate': null,
+            if (row['show_price'] != 1) 'amount': null,
             'photo_urls': jsonEncode(sources),
           });
         })
@@ -4286,6 +4330,23 @@ class EerlLocalDataSource {
             ORDER BY r.created_at DESC
             ''', args);
     return rows.map(RequestModel.fromMap).toList(growable: false);
+  }
+
+  Future<RequestModel?> getRequest(String requestId) async {
+    final normalizedRequestId = requestId.trim();
+    if (normalizedRequestId.isEmpty) return null;
+    final rows = await _database.rawQuery(
+      '''
+      SELECT r.*,
+        (SELECT value FROM ${DatabaseTables.syncMeta}
+          WHERE key = 'supervisor_name') AS supervisor_name
+      FROM ${DatabaseTables.requests} r
+      WHERE r.id = ?
+      LIMIT 1
+      ''',
+      [normalizedRequestId],
+    );
+    return rows.isEmpty ? null : RequestModel.fromMap(rows.single);
   }
 
   Future<void> answerRequest({

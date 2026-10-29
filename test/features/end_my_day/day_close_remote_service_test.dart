@@ -66,6 +66,75 @@ void main() {
     expect(response.data.summary.expenses.amount, 50);
   });
 
+  test('parses real backend response with nested unit object and verifiedQty', () async {
+    final service = DayCloseRemoteService(
+      client: MockClient((request) async {
+        return http.Response(
+          jsonEncode({
+            'data': {
+              'centerId': '107f30ce-f001-4471-9e91-c2fb71d0c924',
+              'date': '2026-10-29',
+              'lockTime': null,
+              'canClose': false,
+              'blockedReason': 'OPEN_DRAFTS',
+              'openDrafts': 8,
+              'summary': {
+                'wallet': {
+                  'opening': -2531.2,
+                  'topUps': 501150,
+                  'collectionPayments': 8332,
+                  'expenses': 2489,
+                  'closing': 487797.8,
+                },
+                'collections': {
+                  'total': 11,
+                  'pendingReview': 10,
+                  'rejected': 2,
+                  'byUnit': [
+                    {
+                      'unit': {'code': 'KG', 'name': 'Kilogram'},
+                      'verifiedQty': 484,
+                    },
+                    {
+                      'unit': {'code': 'PCS', 'name': 'Pieces'},
+                      'verifiedQty': 88,
+                    },
+                  ],
+                },
+                'expenses': {'count': 6, 'amount': 2489},
+              },
+              'closedAt': null,
+              'closedBy': null,
+              'shareText': null,
+            },
+          }),
+          200,
+          headers: const {'content-type': 'application/json'},
+        );
+      }),
+    );
+
+    final response = await service.fetch(
+      centerId: '107f30ce-f001-4471-9e91-c2fb71d0c924',
+      accessToken: 'session-token',
+    );
+
+    expect(response.data.centerId, '107f30ce-f001-4471-9e91-c2fb71d0c924');
+    expect(response.data.lockTime, isNull);
+    expect(response.data.canClose, false);
+    expect(response.data.blockedReason, 'OPEN_DRAFTS');
+    expect(response.data.openDrafts, 8);
+    expect(response.data.summary.wallet.opening, -2531.2);
+    expect(response.data.summary.wallet.closing, 487797.8);
+    expect(response.data.summary.collections.total, 11);
+    expect(response.data.summary.collections.rejected, 2);
+    expect(response.data.summary.collections.byUnit.length, 2);
+    expect(response.data.summary.collections.byUnit[0].unit, 'KG');
+    expect(response.data.summary.collections.byUnit[0].effectiveQuantity, 484);
+    expect(response.data.summary.collections.byUnit[1].unit, 'PCS');
+    expect(response.data.summary.collections.byUnit[1].effectiveQuantity, 88);
+  });
+
   test('closes selected center with POST and an empty body', () async {
     final service = DayCloseRemoteService(
       client: MockClient((request) async {

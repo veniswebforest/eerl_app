@@ -496,6 +496,7 @@ class CollectionModel {
     this.handedOverBy,
     this.paidBy,
     this.takesPayment,
+    this.showPrice = true,
     this.totalAmount,
     required this.handoverPhotoUrls,
     this.rejectionReason,
@@ -507,6 +508,8 @@ class CollectionModel {
     required this.updatedAt,
     required this.syncState,
     this.totalQty = 0,
+    this.totalKg = 0,
+    this.totalPcs = 0,
     this.itemCount = 0,
     this.centerName,
   });
@@ -526,6 +529,7 @@ class CollectionModel {
   final String? handedOverBy;
   final String? paidBy;
   final bool? takesPayment;
+  final bool showPrice;
   final double? totalAmount;
   final List<String> handoverPhotoUrls;
   final String? rejectionReason;
@@ -537,8 +541,32 @@ class CollectionModel {
   final String updatedAt;
   final String syncState;
   final double totalQty;
+  final double totalKg;
+  final double totalPcs;
   final int itemCount;
   final String? centerName;
+
+  String get formattedQuantity {
+    final effectiveKg =
+        totalKg > 0 ? totalKg : (totalPcs == 0 ? totalQty : 0.0);
+    final hasKg = effectiveKg > 0;
+    final hasPcs = totalPcs > 0;
+    final kgStr = '${effectiveKg.toStringAsFixed(2)}kg';
+    final pcsFormatted = totalPcs % 1 == 0
+        ? totalPcs.toInt().toString()
+        : totalPcs.toStringAsFixed(2);
+    final pcsStr = '${pcsFormatted}pcs';
+
+    if (hasKg && hasPcs) {
+      return '$kgStr / $pcsStr';
+    } else if (hasPcs) {
+      return pcsStr;
+    } else if (hasKg) {
+      return kgStr;
+    }
+    return '0.00kg';
+  }
+
   factory CollectionModel.fromMap(DbMap map) => CollectionModel(
     id: map['id'] as String,
     centerId: map['center_id'] as String,
@@ -558,6 +586,7 @@ class CollectionModel {
     takesPayment: map['takes_payment'] == null
         ? null
         : _bool(map['takes_payment']),
+    showPrice: map['show_price'] == null ? true : _bool(map['show_price']),
     totalAmount: (map['total_amount'] as num?)?.toDouble(),
     handoverPhotoUrls: _strings(map['handover_photo_urls']),
     rejectionReason: map['rejection_reason'] as String?,
@@ -569,6 +598,10 @@ class CollectionModel {
     updatedAt: map['updated_at'] as String,
     syncState: map['sync_state'] as String,
     totalQty: _double(map['total_qty']),
+    totalKg: map.containsKey('total_kg')
+        ? _double(map['total_kg'])
+        : (map.containsKey('total_pcs') ? 0.0 : _double(map['total_qty'])),
+    totalPcs: _double(map['total_pcs']),
     itemCount: _int(map['item_count']),
     centerName: map['center_name'] as String?,
   );
@@ -1453,18 +1486,21 @@ class AgentHomeSummaryModel {
   const AgentHomeSummaryModel({
     required this.verifiedEntries,
     required this.collectedKg,
+    this.collectedPcs = 0,
     required this.transferRequests,
     required this.drafts,
     required this.toFix,
   });
   final int verifiedEntries;
   final double collectedKg;
+  final double collectedPcs;
   final int transferRequests;
   final int drafts;
   final int toFix;
   factory AgentHomeSummaryModel.fromMap(DbMap map) => AgentHomeSummaryModel(
     verifiedEntries: _int(map['verified_entries']),
     collectedKg: _double(map['collected_kg']),
+    collectedPcs: _double(map['collected_pcs']),
     transferRequests: _int(map['transfer_requests']),
     drafts: _int(map['drafts']),
     toFix: _int(map['to_fix']),

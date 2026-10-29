@@ -13,6 +13,7 @@ import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/shared/widgets/app_square_back_button.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/shared/widgets/app_required_text.dart';
 import 'package:eerl_app/shared/widgets/app_mobile_number_field.dart';
@@ -45,6 +46,7 @@ class RagpickerDirectoryScreen extends StatefulWidget {
 }
 
 class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
+  static const _cameraRecoveryId = 'ragpicker.directory.form';
   late RagpickerDirectoryView _view = widget.initialView;
   late RagpickerStatus _status = switch (widget.initialView) {
     RagpickerDirectoryView.deactivatedList ||
@@ -87,6 +89,16 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   void initState() {
     super.initState();
     _load();
+    _restoreCameraResult();
+  }
+
+  Future<void> _restoreCameraResult() async {
+    final photo = await ImageCompressor.claimRecoveredImage(_cameraRecoveryId);
+    if (photo == null || !mounted) return;
+    setState(() {
+      _photoSource = photo.path;
+      _view = RagpickerDirectoryView.addEmpty;
+    });
   }
 
   Future<void> _load({String? centerId}) async {
@@ -569,9 +581,11 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   );
 
   Future<void> _capturePhoto() async {
-    final photo = await ImageCompressor.pickAndCompress(
+    final photo = await InAppCameraScreen.capture(
+      context,
       picker: _imagePicker,
-      source: ImageSource.camera,
+      recoveryId: _cameraRecoveryId,
+      title: 'Capture Ragpicker Photo',
     );
     if (photo == null || !mounted) return;
     setState(() => _photoSource = photo.path);

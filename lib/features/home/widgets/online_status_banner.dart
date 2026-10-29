@@ -14,11 +14,13 @@ class OnlineStatusBanner extends StatelessWidget {
     this.onSyncNowTap,
     this.subtitle,
     this.pendingCount = 0,
+    this.isOffline = false,
   });
 
   final VoidCallback? onSyncNowTap;
   final String? subtitle;
   final int pendingCount;
+  final bool isOffline;
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +40,17 @@ class OnlineStatusBanner extends StatelessWidget {
               width: 40,
               height: 40,
               padding: const EdgeInsets.all(8),
-              decoration: const BoxDecoration(
-                color: AppColors.primary50,
+              decoration: BoxDecoration(
+                color: isOffline ? AppColors.red50 : AppColors.primary50,
                 shape: BoxShape.circle,
               ),
-              child: SvgPicture.asset(HomeAssets.online, width: 24, height: 24),
+              child: isOffline
+                  ? const Icon(
+                      Icons.wifi_off_rounded,
+                      color: AppColors.red600,
+                      size: 24,
+                    )
+                  : SvgPicture.asset(HomeAssets.online, width: 24, height: 24),
             ),
             const SizedBox(width: 12),
 
@@ -52,17 +60,25 @@ class OnlineStatusBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.l10n.onlineStatus,
+                    isOffline
+                        ? context.l10n.offlineStatus
+                        : context.l10n.onlineStatus,
                     style: AppTextStyles.semiboldH8_16.copyWith(
-                      color: AppColors.primary500,
+                      color: isOffline
+                          ? AppColors.red600
+                          : AppColors.primary500,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    subtitle ??
-                        (pendingCount > 0
-                            ? context.l10n.syncPendingItems(pendingCount)
-                            : context.l10n.syncAlreadySyncedTitle),
+                    isOffline
+                        ? pendingCount > 0
+                              ? context.l10n.syncPendingItems(pendingCount)
+                              : context.l10n.offlineStatusSubtitle
+                        : subtitle ??
+                              (pendingCount > 0
+                                  ? context.l10n.syncPendingItems(pendingCount)
+                                  : context.l10n.syncAlreadySyncedTitle),
                     style: AppTextStyles.mediumSH8_14.copyWith(
                       color: AppColors.neutral600,
                     ),
@@ -73,7 +89,7 @@ class OnlineStatusBanner extends StatelessWidget {
 
             // No outbox rows means there is nothing to upload, so the action
             // is removed rather than displayed as a disabled button.
-            if (onSyncNowTap != null)
+            if (!isOffline && onSyncNowTap != null)
               ElevatedButton(
                 key: const Key('home-sync-now-button'),
                 onPressed: onSyncNowTap,

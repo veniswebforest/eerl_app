@@ -10,10 +10,16 @@ import '../../home/widgets/home_styles.dart';
 import 'supervisor_task_assets.dart';
 
 class SupervisorTaskCard extends StatelessWidget {
-  const SupervisorTaskCard({super.key, required this.item, this.onTap});
+  const SupervisorTaskCard({
+    super.key,
+    required this.item,
+    this.onTap,
+    this.showClosedTimestamp = false,
+  });
 
   final TaskModel item;
   final VoidCallback? onTap;
+  final bool showClosedTimestamp;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -129,6 +135,7 @@ class SupervisorTaskCard extends StatelessWidget {
                     flex: 2,
                     child: Text(
                       _time(context),
+                      key: ValueKey('supervisor-task-time-${item.id}'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
@@ -146,8 +153,12 @@ class SupervisorTaskCard extends StatelessWidget {
     ),
   );
 
-  String _time(BuildContext context) =>
-      IstDateTime.formatUtc(item.dueAt ?? item.createdAt, 'dd MMM, hh:mm a');
+  String _time(BuildContext context) {
+    final value = showClosedTimestamp
+        ? item.completedAt ?? item.createdAt
+        : item.dueAt ?? item.createdAt;
+    return IstDateTime.formatUtc(value, 'dd MMM, hh:mm a');
+  }
 }
 
 class _TaskStatusChip extends StatelessWidget {

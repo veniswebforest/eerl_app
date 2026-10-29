@@ -22,28 +22,36 @@ class SupervisorEndDayActivityCard extends StatelessWidget {
     child: Column(
       children: [
         for (var index = 0; index < items.length; index++) ...[
-          SizedBox(
-            height: 42,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    items[index].label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.semiboldH9_14.copyWith(
-                      color: AppColors.neutral600,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 42),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      items[index].label,
+                      style: AppTextStyles.semiboldH9_14.copyWith(
+                        color: AppColors.neutral600,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  items[index].value,
-                  style: AppTextStyles.semiboldH9_14.copyWith(
-                    color: items[index].valueColor,
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        items[index].value,
+                        textAlign: TextAlign.end,
+                        style: AppTextStyles.semiboldH9_14.copyWith(
+                          color: items[index].valueColor,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           if (index != items.length - 1)

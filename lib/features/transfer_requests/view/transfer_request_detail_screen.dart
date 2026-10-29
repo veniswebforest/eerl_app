@@ -13,6 +13,7 @@ import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import '../model/transfer_request_detail_state.dart';
 import '../widgets/transfer_request_detail_widgets.dart';
 import 'supervisor_transfer_approval_screen.dart';
@@ -593,7 +594,8 @@ class _InformationCard extends StatelessWidget {
     final availableStock =
         transfer?.fixedQty ??
         ((transfer?.totalQty ?? 0) > 0 ? transfer!.totalQty : freeToSend);
-    final showSupervisorTripCost = isSupervisor && (isRejected || isCompleted);
+    final showEstimatedExpense =
+        !isSupervisor || transfer?.estimatedExpense != null;
     final rawStatus = transfer?.status.toUpperCase() ?? '';
     final (status, color, background, icon) = isRejected
         ? (
@@ -681,7 +683,7 @@ class _InformationCard extends StatelessWidget {
             ],
             showDivider: !isSupervisor || isCompleted,
           ),
-          if (!(isSupervisor && isCompleted))
+          if (isSupervisor && !isCompleted)
             TransferDetailRow(
               label: context.l10n.supervisorTransferFreeToSend,
               values: ['${freeToSend.toStringAsFixed(2)} KG'],
@@ -702,15 +704,19 @@ class _InformationCard extends StatelessWidget {
                       ? context.l10n.transferDetailRequestedByValue
                       : '-'),
             ],
-            showDivider: !showSupervisorTripCost,
+            showDivider: showEstimatedExpense,
           ),
-          if (showSupervisorTripCost)
+          if (showEstimatedExpense)
             TransferDetailRow(
-              label: 'Estimated trip cost',
+              label: isSupervisor
+                  ? 'Estimated trip cost'
+                  : context.l10n.transferDetailEstimatedExpense,
               values: [
-                transfer?.estimatedExpense == null
-                    ? '-'
-                    : '₹ ${transfer!.estimatedExpense!.toStringAsFixed(0)}',
+                transfer == null
+                    ? context.l10n.transferDetailEstimatedExpenseValue
+                    : (transfer?.estimatedExpense == null
+                        ? '-'
+                        : '₹ ${transfer!.estimatedExpense! % 1 == 0 ? transfer!.estimatedExpense!.toStringAsFixed(0) : transfer!.estimatedExpense!.toStringAsFixed(2)}'),
               ],
             ),
           Text(
@@ -888,10 +894,16 @@ class _DispatchPhotos extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _photoGroup('Vehicle photos', transfer.vehiclePhotoUrls, localById),
+          _photoGroup(
+            context,
+            'Vehicle photos',
+            transfer.vehiclePhotoUrls,
+            localById,
+          ),
           if (transfer.weighbridgePhotoUrls.isNotEmpty) ...[
             const SizedBox(height: 12),
             _photoGroup(
+              context,
               'Weighbridge photos',
               transfer.weighbridgePhotoUrls,
               localById,
@@ -903,6 +915,7 @@ class _DispatchPhotos extends StatelessWidget {
   );
 
   Widget _photoGroup(
+    BuildContext context,
     String label,
     List<String> values,
     Map<String, TransferDispatchPhotoModel> localById,
@@ -916,30 +929,38 @@ class _DispatchPhotos extends StatelessWidget {
         runSpacing: 8,
         children: [
           for (final value in values)
-            _photo(value, localById[value]?.localPath),
+            _photo(context, value, localById[value]?.localPath),
         ],
       ),
     ],
   );
 
-  Widget _photo(String value, String? localPath) => ClipRRect(
-    borderRadius: BorderRadius.circular(6),
-    child: localPath != null
-        ? Image.file(
-            File(localPath),
-            width: 76,
-            height: 58,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => _photoPlaceholder(),
-          )
-        : Image.network(
-            value,
-            width: 76,
-            height: 58,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => _photoPlaceholder(),
+  Widget _photo(BuildContext context, String value, String? localPath) =>
+      ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: Material(
+          color: AppColors.cool200,
+          child: InkWell(
+            onTap: () =>
+                AppImagePreviewDialog.showSource(context, localPath ?? value),
+            child: localPath != null
+                ? Image.file(
+                    File(localPath),
+                    width: 76,
+                    height: 58,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => _photoPlaceholder(),
+                  )
+                : Image.network(
+                    value,
+                    width: 76,
+                    height: 58,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => _photoPlaceholder(),
+                  ),
           ),
-  );
+        ),
+      );
 
   Widget _photoPlaceholder() => Container(
     width: 76,
@@ -1130,23 +1151,32 @@ class _SupervisorVehiclePhotoCard extends StatelessWidget {
                     for (final value in transfer.vehiclePhotoUrls)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(6),
-                        child: localById[value] != null
-                            ? Image.file(
-                                File(localById[value]!),
-                                width: width,
-                                height: 92,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) =>
-                                    _evidencePhotoPlaceholder(width),
-                              )
-                            : Image.network(
-                                value,
-                                width: width,
-                                height: 92,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) =>
-                                    _evidencePhotoPlaceholder(width),
-                              ),
+                        child: Material(
+                          color: AppColors.cool300,
+                          child: InkWell(
+                            onTap: () => AppImagePreviewDialog.showSource(
+                              context,
+                              localById[value] ?? value,
+                            ),
+                            child: localById[value] != null
+                                ? Image.file(
+                                    File(localById[value]!),
+                                    width: width,
+                                    height: 92,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) =>
+                                        _evidencePhotoPlaceholder(width),
+                                  )
+                                : Image.network(
+                                    value,
+                                    width: width,
+                                    height: 92,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, _, _) =>
+                                        _evidencePhotoPlaceholder(width),
+                                  ),
+                          ),
+                        ),
                       ),
                   ],
                 );

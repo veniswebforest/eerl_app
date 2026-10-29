@@ -1,4 +1,5 @@
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import 'package:flutter/material.dart';
 
 class TaskPhotoGrid extends StatelessWidget {
@@ -14,43 +15,60 @@ class TaskPhotoGrid extends StatelessWidget {
   final ValueChanged<int>? onRemove;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      for (var index = 0; index < images.length; index++) ...[
-        if (index > 0) const SizedBox(width: 10),
-        Expanded(
-          child: Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: AspectRatio(
-                  aspectRatio: 1.85,
-                  child: _TaskImage(path: images[index]),
-                ),
-              ),
-              if (removable)
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: InkWell(
-                    key: ValueKey('remove-task-proof-$index'),
-                    onTap: () => onRemove?.call(index),
-                    child: Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      const spacing = 8.0;
+      final itemWidth = (constraints.maxWidth - spacing) / 2;
+      return Wrap(
+        spacing: spacing,
+        runSpacing: spacing,
+        children: [
+          for (var index = 0; index < images.length; index++)
+            SizedBox(
+              width: itemWidth,
+              height: 92,
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: SizedBox.expand(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          key: ValueKey('preview-task-photo-$index'),
+                          onTap: () => AppImagePreviewDialog.showSource(
+                            context,
+                            images[index],
+                          ),
+                          child: _TaskImage(path: images[index]),
+                        ),
                       ),
-                      child: const Icon(Icons.close, size: 17),
                     ),
                   ),
-                ),
-            ],
-          ),
-        ),
-      ],
-    ],
+                  if (removable)
+                    Positioned(
+                      right: 4,
+                      top: 4,
+                      child: InkWell(
+                        key: ValueKey('remove-task-proof-$index'),
+                        onTap: () => onRemove?.call(index),
+                        child: Container(
+                          width: 22,
+                          height: 22,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Icon(Icons.close, size: 17),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+        ],
+      );
+    },
   );
 }
 

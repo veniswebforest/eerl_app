@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -19,6 +18,8 @@ import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart'
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
+import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
 
 enum RaiseRequestViewMode { empty, filled }
 
@@ -37,6 +38,7 @@ class RaiseRequestScreen extends StatefulWidget {
 }
 
 class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
+  static const _cameraRecoveryId = 'request.raise';
   late final TextEditingController _descriptionController;
   final List<String> _photoPaths = [];
   _RequestPriority _priority = _RequestPriority.low;
@@ -53,6 +55,13 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
   void initState() {
     super.initState();
     _descriptionController = TextEditingController();
+    _restoreCameraResult();
+  }
+
+  Future<void> _restoreCameraResult() async {
+    final photo = await ImageCompressor.claimRecoveredImage(_cameraRecoveryId);
+    if (photo == null || !mounted || _photoPaths.length >= 2) return;
+    setState(() => _photoPaths.add(photo.path));
   }
 
   @override
@@ -95,20 +104,17 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
 
   Future<void> _capturePhoto() async {
     if (_photoPaths.length >= 2) return;
-    final photo = await ImageCompressor.pickAndCompress(
-      source: ImageSource.camera,
+    final photo = await InAppCameraScreen.capture(
+      context,
+      recoveryId: _cameraRecoveryId,
+      title: 'Capture Request Photo',
     );
     if (photo == null || !mounted) return;
     setState(() => _photoPaths.add(photo.path));
   }
 
   void _previewPhoto(String path) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        fullscreenDialog: true,
-        builder: (_) => _RequestPhotoPreviewScreen(path: path),
-      ),
-    );
+    AppImagePreviewDialog.showSource(context, path);
   }
 
   Future<void> _submitRequest() async {
@@ -565,53 +571,6 @@ class _RequestPhoto extends StatelessWidget {
                 width: 24,
                 height: 24,
               ),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _RequestPhotoPreviewScreen extends StatelessWidget {
-  const _RequestPhotoPreviewScreen({required this.path});
-
-  final String path;
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    key: const Key('request-photo-preview-screen'),
-    backgroundColor: Colors.black,
-    body: SafeArea(
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: InteractiveViewer(
-              minScale: 1,
-              maxScale: 4,
-              child: Center(
-                child: Image.file(
-                  File(path),
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => const Icon(
-                    Icons.broken_image_outlined,
-                    size: 48,
-                    color: Colors.white70,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 8,
-            right: 8,
-            child: IconButton.filled(
-              key: const Key('request-photo-preview-close'),
-              onPressed: () => Navigator.of(context).pop(),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.black.withValues(alpha: 0.55),
-              ),
-              icon: const Icon(Icons.close, color: Colors.white),
             ),
           ),
         ],

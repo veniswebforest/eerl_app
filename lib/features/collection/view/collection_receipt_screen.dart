@@ -369,7 +369,9 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
       0,
       (total, amount) => total + amount,
     );
-    final totalAmount = collection.totalAmount ?? calculatedAmount;
+    final totalAmount = collection.showPrice
+        ? collection.totalAmount ?? calculatedAmount
+        : null;
     final channel = collection.channel.trim().toUpperCase();
     final isMrf = channel == 'MRF';
     final givenBy =
@@ -545,7 +547,7 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
     required CollectionModel collection,
     required List<CollectionItemModel> items,
     required Map<String, _UnitTotals> unitTotals,
-    required double totalAmount,
+    required double? totalAmount,
     required String timestamp,
     required DateTime? parsedTimestamp,
     required bool isMrf,
@@ -708,7 +710,7 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
                       ),
                     ),
                     Text(
-                      _money(totalAmount),
+                      totalAmount == null ? '-' : _money(totalAmount),
                       style: _receiptText(size: 18, weight: FontWeight.w700),
                     ),
                   ],
@@ -979,9 +981,9 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
     final unit = _unitCode(item);
     final verified = item.verifiedQty ?? item.qty;
     final amount = _itemAmount(item);
-    final detail = item.rate == null
-        ? '${_number(verified)} $unit'
-        : '${_number(verified)} $unit × ${_money(item.rate!)}';
+    final detail =
+        '${_number(verified)} $unit × '
+        '${item.rate == null ? '-' : _money(item.rate!)}';
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 7, 8, 6),
       decoration: BoxDecoration(
@@ -1020,13 +1022,11 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
                   style: _receiptText(size: 10),
                 ),
               ),
-              if (amount != null) ...[
-                const SizedBox(width: 8),
-                Text(
-                  _money(amount),
-                  style: _receiptText(size: 12, weight: FontWeight.w700),
-                ),
-              ],
+              const SizedBox(width: 8),
+              Text(
+                amount == null ? '-' : _money(amount),
+                style: _receiptText(size: 12, weight: FontWeight.w700),
+              ),
             ],
           ),
           const SizedBox(height: 6),

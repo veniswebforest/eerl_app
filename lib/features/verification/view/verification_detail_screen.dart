@@ -22,6 +22,7 @@ import 'package:eerl_app/features/verification/model/verification_entry.dart';
 import 'package:eerl_app/features/verification/view/reject_collection_screen.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 
 class VerificationDetailScreen extends StatefulWidget {
   const VerificationDetailScreen({
@@ -307,8 +308,9 @@ class _Content extends StatelessWidget {
                 verifiedValue: '${data.verified.toStringAsFixed(2)} KG',
                 comparisonValue:
                     '${(data.verified - data.collected).toStringAsFixed(2)} KG',
-                totalPriceValue:
-                    '₹${NumberFormat('#,##0.00').format(data.price)}',
+                totalPriceValue: data.price == null
+                    ? '-'
+                    : '₹${NumberFormat('#,##0.00').format(data.price)}',
               ),
             ],
           ),
@@ -433,10 +435,17 @@ class _VehiclePhoto extends StatelessWidget {
         const SizedBox(height: 10),
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            width: 109,
-            height: 70,
-            child: CachedAppImage(source: path, fit: BoxFit.cover),
+          child: Material(
+            color: AppColors.cool100,
+            child: InkWell(
+              key: const Key('preview-verification-vehicle-photo'),
+              onTap: () => AppImagePreviewDialog.showSource(context, path),
+              child: SizedBox(
+                width: 109,
+                height: 70,
+                child: CachedAppImage(source: path, fit: BoxFit.cover),
+              ),
+            ),
           ),
         ),
       ],
@@ -537,7 +546,7 @@ class _Data {
   final List<CollectionItemModel> items;
   final double collected;
   final double verified;
-  final double price;
+  final double? price;
   final VerificationDetailStatus status;
   final String rejectionReason;
   final String rejectionRemarks;
@@ -585,9 +594,10 @@ class _Data {
           ? collected
           : collection.totalQty,
       verified: verified,
-      price:
-          collection?.totalAmount ??
-          items.fold<double>(0, (sum, item) => sum + (item.amount ?? 0)),
+      price: collection?.showPrice == true
+          ? collection?.totalAmount ??
+                items.fold<double>(0, (sum, item) => sum + (item.amount ?? 0))
+          : null,
       status: status,
       rejectionReason: collection?.rejectionReason ?? '',
       rejectionRemarks: collection?.rejectionRemarks ?? '',

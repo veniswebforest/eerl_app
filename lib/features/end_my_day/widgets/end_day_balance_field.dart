@@ -30,10 +30,14 @@ class EndDayBalanceField extends StatelessWidget {
           color: AppColors.primary100,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Text(
-          value,
-          style: AppTextStyles.semiboldH9_14.copyWith(
-            color: AppColors.neutral950,
+        child: FittedBox(
+          alignment: Alignment.centerLeft,
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: AppTextStyles.semiboldH9_14.copyWith(
+              color: AppColors.neutral950,
+            ),
           ),
         ),
       ),

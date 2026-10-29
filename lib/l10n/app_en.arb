@@ -520,6 +520,17 @@
   "taskDueTomorrow": "Due Tomorrow, 2:00 PM",
   "taskDueDate": "Due 25 Aug 2026",
   "taskCompletedTime": "Completed: Today, 11:30 AM",
+  "taskDueTodayAt": "Due Today, {time}",
+  "@taskDueTodayAt": {"placeholders": {"time": {"type": "String"}}},
+  "taskDueTomorrowAt": "Due Tomorrow, {time}",
+  "@taskDueTomorrowAt": {"placeholders": {"time": {"type": "String"}}},
+  "taskDueAt": "Due {dateTime}",
+  "@taskDueAt": {"placeholders": {"dateTime": {"type": "String"}}},
+  "taskCompletedLabel": "Completed",
+  "taskCompletedTodayAt": "Completed: Today, {time}",
+  "@taskCompletedTodayAt": {"placeholders": {"time": {"type": "String"}}},
+  "taskCompletedAt": "Completed: {dateTime}",
+  "@taskCompletedAt": {"placeholders": {"dateTime": {"type": "String"}}},
   "taskListTime0900": "Today, 09:00 AM",
   "taskListTime1000": "Today, 10:00 AM",
   "taskListTime1145": "Today, 11:45 AM",
@@ -577,8 +588,14 @@
   "expenseDescriptionCounter": "Max 150 Characters",
   "submitExpenseClaim": "Submit Expense Claim",
   "expenseSubmittedTitle": "Expense Submitted!",
-  "expenseSubmittedDeduction": "₹350 deducted from your wallet balance.",
-  "expenseSubmittedBalance": "Remaining Balance: ₹4,850",
+  "expenseSubmittedDeduction": "₹{amount} deducted from your wallet balance.",
+  "@expenseSubmittedDeduction": {
+    "placeholders": {"amount": {"type": "String"}}
+  },
+  "expenseSubmittedBalance": "Remaining Balance: ₹{balance}",
+  "@expenseSubmittedBalance": {
+    "placeholders": {"balance": {"type": "String"}}
+  },
   "expenseBackToWallet": "Back to Wallet",
   "expensePendingPrefix": "This entry will be marked as ",
   "expensePendingStatus": "PENDING",
@@ -615,7 +632,10 @@
   "cashDetailDateTimeValue": "Today • 08:15 AM",
   "cashDetailWaitingApproval": "Waiting for Supervisor Approval",
   "cashDetailApprovedSupervisor": "Approved by Supervisor",
-  "cashDetailApprovedNote": "Note: ₹1,000 credited to your active cash wallet balance.",
+  "cashDetailApprovedNote": "Note: {amount} credited to your active cash wallet balance.",
+  "@cashDetailApprovedNote": {
+    "placeholders": {"amount": {"type": "String"}}
+  },
   "cashDetailRejectReason": "Invalid / Incomplete Request",
   "cashDetailRejectRemarks": "Your existing wallet balance is sufficient for today's route. Please log pending expenses first.",
   "startYourCollections": "Start your collections",
@@ -870,7 +890,7 @@
   "taskProofSupported": "Supported: JPG, PNG (Max 5MB).",
   "taskDescriptionLabel": "Description *",
   "taskDescriptionHint": "Add Description",
-  "taskDescriptionMinimum": "Min 150 Characters",
+  "taskDescriptionMinimum": "Max 150 Characters",
   "taskFilledDescription": "Weight scale calibrated using 10kg standard test weight. Zero-error verified.",
   "taskMarkCompleted": "Mark as Completed",
   "taskDetailsTitle": "Task Details",
@@ -1050,6 +1070,9 @@
   "requestDescriptionPlain": "Description",
   "requestAgentName": "Rahul Patel",
   "requestCompletedStatus": "Completed: Today, 11:30 AM",
+  "requestCompletedLabel": "Completed",
+  "requestCompletedValue": "Completed: {dateTime}",
+  "@requestCompletedValue": {"placeholders": {"dateTime": {"type": "String"}}},
   "requestDetailDescription": "Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight, inspect all uploaded item photos (before and after verification), and ensure customer details and material categories match the system records before final approval.",
   "transferDetailTitle": "Transfer Request Details",
   "transferDetailRequestId": "#TRF-2026-089",
@@ -1075,6 +1098,8 @@
   "transferDetailDateTimeValue": "22 October • 11:15 AM",
   "transferDetailRequestedBy": "Requested By",
   "transferDetailRequestedByValue": "Rahul Patel",
+  "transferDetailEstimatedExpense": "Estimated Expense",
+  "transferDetailEstimatedExpenseValue": "₹ 900",
   "transferDetailRequestStatus": "Request Status",
   "transferDetailWaitingManager": "Waiting for Collection Manager",
   "transferDetailVehicleDispatched": "Vehicle Dispatched by Collection Manager",
@@ -1578,5 +1603,7 @@
   "@supervisorTransferApprovedTitle": {"placeholders": {"id": {"type": "String"}}},
   "supervisorTransferApprovedMessage": "{requester} will send it to {destination}. Truck {vehicle}, expected {expected}.",
   "@supervisorTransferApprovedMessage": {"placeholders": {"requester": {"type": "String"}, "destination": {"type": "String"}, "vehicle": {"type": "String"}, "expected": {"type": "String"}}},
-  "supervisorTransferBackToRequests": "Back to Requests"
+  "supervisorTransferBackToRequests": "Back to Requests",
+  "offlineStatus": "Offline",
+  "offlineStatusSubtitle": "No internet connection"
 }

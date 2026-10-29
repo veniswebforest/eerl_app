@@ -20,6 +20,7 @@ import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 
 enum _ExpensePage {
   list,
@@ -1173,11 +1174,17 @@ class _Photo extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ClipRRect(
     borderRadius: BorderRadius.circular(6),
-    child: CachedAppImage(
-      source: source,
-      width: 109,
-      height: 70,
-      fit: BoxFit.cover,
+    child: Material(
+      color: AppColors.cool100,
+      child: InkWell(
+        onTap: () => AppImagePreviewDialog.showSource(context, source),
+        child: CachedAppImage(
+          source: source,
+          width: 109,
+          height: 70,
+          fit: BoxFit.cover,
+        ),
+      ),
     ),
   );
 }

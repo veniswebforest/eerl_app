@@ -12,6 +12,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/item_image_cache_service.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 
 enum D2dMeasureUnit { kg, pcs }
 
@@ -172,11 +173,11 @@ class _D2dMaterialCard extends StatelessWidget {
         ? null
         : rate! * verifiedQuantity;
     final rateText = rate == null
-        ? '${context.l10n.collectionDetailRate} —'
+        ? '${context.l10n.collectionDetailRate} -'
         : '${context.l10n.collectionDetailRate} '
               '₹${rate!.toStringAsFixed(2)}/$unitLabel';
     final totalText = materialTotal == null
-        ? '${context.l10n.collectionDetailMaterialTotal} —'
+        ? '${context.l10n.collectionDetailMaterialTotal} -'
         : '${context.l10n.collectionDetailMaterialTotal} '
               '₹${materialTotal.toStringAsFixed(2)}';
     return Container(
@@ -256,27 +257,22 @@ class _D2dMaterialCard extends StatelessWidget {
                   ),
                   child: const SizedBox(width: double.infinity, height: 0),
                 ),
-                if (rate != null) ...[
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          rateText,
-                          style: AppTextStyles.regularB8_12,
-                        ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(rateText, style: AppTextStyles.regularB8_12),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      totalText,
+                      style: AppTextStyles.regularB8_12.copyWith(
+                        color: AppColors.primary500,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        totalText,
-                        style: AppTextStyles.regularB8_12.copyWith(
-                          color: AppColors.primary500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 14),
                 InkWell(
                   key: Key('d2d-capture-photo-$item'),
@@ -406,28 +402,9 @@ class _MaterialThumbnail extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           key: Key('material-image-$name'),
-          onTap: () => showDialog<void>(
-            context: context,
-            barrierColor: Colors.black87,
-            builder: (dialogContext) => Dialog(
-              backgroundColor: Colors.transparent,
-              insetPadding: const EdgeInsets.all(20),
-              child: Stack(
-                children: [
-                  InteractiveViewer(
-                    child: Image.file(file, fit: BoxFit.contain),
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: IconButton.filled(
-                      onPressed: () => Navigator.of(dialogContext).pop(),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          onTap: () => AppImagePreviewDialog.show(
+            context,
+            imageProvider: FileImage(file),
           ),
           borderRadius: BorderRadius.circular(8),
           child: ClipRRect(

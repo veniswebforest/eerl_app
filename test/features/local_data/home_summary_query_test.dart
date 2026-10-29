@@ -137,11 +137,17 @@ void main() {
       expect(agent.transferRequests, 2);
 
       final supervisor = await local.getSupervisorHomeSummary();
-      expect(supervisor.activeAgents, 2);
+      // agent-1 has collections today (active); agent-2 has none (offline).
+      expect(supervisor.activeAgents, 1);
       expect(supervisor.transfersDone, 1);
       expect(supervisor.totalTransfers, 3);
       expect(supervisor.stockKg, 40);
       expect(supervisor.pendingExpenses, 3);
+
+      // When agent-2 also submits a collection today, active agents count increases to 2.
+      await _insertCollection(database, 'agent-2-col', 'SUBMITTED', today, agentId: 'agent-2');
+      final updatedSupervisor = await local.getSupervisorHomeSummary();
+      expect(updatedSupervisor.activeAgents, 2);
     },
   );
 }
@@ -162,12 +168,13 @@ Future<void> _insertCollection(
   AppDatabase database,
   String id,
   String status,
-  String collectedAt,
-) => database.insert(DatabaseTables.collections, {
+  String collectedAt, {
+  String agentId = 'agent-1',
+}) => database.insert(DatabaseTables.collections, {
   'id': id,
   'center_id': 'center-1',
-  'agent_id': 'agent-1',
-  'agent_name': 'Agent One',
+  'agent_id': agentId,
+  'agent_name': agentId,
   'channel': 'D2D',
   'status': status,
   'collected_at': collectedAt,

@@ -5,6 +5,7 @@ import 'package:eerl_app/core/router/app_route_data.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/ist_date_time.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
 import 'package:eerl_app/features/collection/widgets/collection_draft_saved_notification.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
@@ -34,7 +35,7 @@ class RecordsTabScreen extends StatefulWidget {
 class _RecordsTabScreenState extends State<RecordsTabScreen> {
   late RecordsViewFlag _view = widget.initialView;
   _RecordsTypeFilter _typeFilter = _RecordsTypeFilter.all;
-  _RecordsDateFilter _dateFilter = _RecordsDateFilter.today;
+  _RecordsDateFilter _dateFilter = _RecordsDateFilter.all;
   String _query = '';
   String? _draftToDiscard;
   late final LocalQueryController<
@@ -220,7 +221,7 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
 
   Widget _buildDrafts() {
     final drafts = (_controller.data?.drafts ?? const <CollectionModel>[])
-        .where((draft) => _matchesType(draft.channel))
+        .where((draft) => _matchesType(draft.channel) && _matchesDate(draft))
         .toList(growable: false);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -272,6 +273,8 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
       ),
     );
     if (!mounted) return;
+    await _controller.load();
+    if (!mounted) return;
     switch (result) {
       case CollectionRouteResult.draftSaved:
         setState(() => _view = RecordsViewFlag.drafts);
@@ -283,12 +286,15 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
     }
   }
 
-  bool _matchesType(String name) => switch (_typeFilter) {
-    _RecordsTypeFilter.all => true,
-    _RecordsTypeFilter.d2d => name.toUpperCase() == 'D2D',
-    _RecordsTypeFilter.mrf => name.toUpperCase().contains('MRF'),
-    _RecordsTypeFilter.ramp => name.toUpperCase() == 'RAMP',
-  };
+  bool _matchesType(String name) {
+    final upper = name.trim().toUpperCase();
+    return switch (_typeFilter) {
+      _RecordsTypeFilter.all => true,
+      _RecordsTypeFilter.d2d => upper == 'D2D' || upper.contains('D2D'),
+      _RecordsTypeFilter.mrf => upper.contains('MRF'),
+      _RecordsTypeFilter.ramp => upper == 'RAMP' || upper.contains('RAMP'),
+    };
+  }
 
   CollectionType _collectionType(String channel) =>
       channel.toUpperCase() == 'D2D'
@@ -298,14 +304,16 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
       : CollectionType.mrfStation;
 
   bool _matchesDate(CollectionModel item) {
-    final value = DateTime.tryParse(
-      item.collectedAt ?? item.updatedAt,
-    )?.toLocal();
+    if (_dateFilter == _RecordsDateFilter.all) return true;
+    final rawDate = item.collectedAt ?? item.updatedAt;
+    final value = DateTime.tryParse(rawDate);
     if (value == null) return true;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final day = DateTime(value.year, value.month, value.day);
+    final istDay = IstDateTime.fromUtc(value.toUtc());
+    final istNow = IstDateTime.now();
+    final today = DateTime(istNow.year, istNow.month, istNow.day);
+    final day = DateTime(istDay.year, istDay.month, istDay.day);
     return switch (_dateFilter) {
+      _RecordsDateFilter.all => true,
       _RecordsDateFilter.today => day == today,
       _RecordsDateFilter.yesterday =>
         day == today.subtract(const Duration(days: 1)),
@@ -411,7 +419,7 @@ class _SearchField extends StatelessWidget {
 
 enum _RecordsTypeFilter { all, d2d, mrf, ramp }
 
-enum _RecordsDateFilter { today, yesterday, lastSevenDays }
+enum _RecordsDateFilter { all, today, yesterday, lastSevenDays }
 
 class _RecordsTypeChips extends StatelessWidget {
   const _RecordsTypeChips({required this.selected, required this.onSelected});
@@ -480,6 +488,7 @@ class _RecordsDateFilterSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final labels = <_RecordsDateFilter, String>{
+      _RecordsDateFilter.all: context.l10n.recordsAll,
       _RecordsDateFilter.today: context.l10n.recordsFilterToday,
       _RecordsDateFilter.yesterday: context.l10n.recordsFilterYesterday,
       _RecordsDateFilter.lastSevenDays: context.l10n.recordsFilterLastSevenDays,

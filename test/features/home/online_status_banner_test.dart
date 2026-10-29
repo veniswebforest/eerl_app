@@ -19,4 +19,27 @@ void main() {
     expect(find.byKey(const Key('home-sync-now-button')), findsOneWidget);
     expect(find.text('3 collection pending'), findsNothing);
   });
+
+  testWidgets('shows offline state and hides Sync Now without internet', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: OnlineStatusBanner(
+            isOffline: true,
+            pendingCount: 3,
+            onSyncNowTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Offline'), findsOneWidget);
+    expect(find.text('3 item(s) pending sync'), findsOneWidget);
+    expect(find.byIcon(Icons.wifi_off_rounded), findsOneWidget);
+    expect(find.byKey(const Key('home-sync-now-button')), findsNothing);
+  });
 }

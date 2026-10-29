@@ -19,6 +19,8 @@ import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
+import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
 import '../widgets/transfer_dispatch_date_time_picker.dart';
 
 class TransferDispatchFlowScreen extends StatefulWidget {
@@ -84,7 +86,26 @@ class _TransferDispatchFlowScreenState
   void initState() {
     super.initState();
     _usePieces = _isPieces;
-    _restoreDraft();
+    _restoreDraftThenCameraResult();
+  }
+
+  Future<void> _restoreDraftThenCameraResult() async {
+    await _restoreDraft();
+    await _restoreCameraResult();
+  }
+
+  String _cameraRecoveryId(String field) =>
+      'transfer.dispatch.${widget.transfer.id}.$field';
+
+  Future<void> _restoreCameraResult() async {
+    final recoveryId = await ImageCompressor.recoveredImageId();
+    final prefix = 'transfer.dispatch.${widget.transfer.id}.';
+    if (recoveryId == null || !recoveryId.startsWith(prefix)) return;
+    final field = recoveryId.substring(prefix.length);
+    if (field != 'vehicle' && field != 'weighbridge') return;
+    final photo = await ImageCompressor.claimRecoveredImage(recoveryId);
+    if (photo == null || !mounted) return;
+    await _storePhoto(field, photo);
   }
 
   Future<void> _restoreDraft() async {
@@ -113,11 +134,19 @@ class _TransferDispatchFlowScreenState
   }
 
   Future<void> _capturePhoto(String field) async {
-    final photo = await ImageCompressor.pickAndCompress(
+    final photo = await InAppCameraScreen.capture(
+      context,
       picker: _imagePicker,
-      source: ImageSource.camera,
+      recoveryId: _cameraRecoveryId(field),
+      title: field == 'vehicle'
+          ? 'Capture Vehicle Photo'
+          : 'Capture Weighbridge Slip',
     );
     if (photo == null || !mounted) return;
+    await _storePhoto(field, photo);
+  }
+
+  Future<void> _storePhoto(String field, XFile photo) async {
     final stored = await EerlLocalRepository.instance.addTransferDispatchPhoto(
       transferId: widget.transfer.id,
       field: field,
@@ -682,11 +711,23 @@ class _PhotoField extends StatelessWidget {
                             color: AppColors.cool200,
                             child: const Icon(Icons.image),
                           )
-                        : Image.file(
-                            File(photo.localPath!),
-                            width: 82,
-                            height: 58,
-                            fit: BoxFit.cover,
+                        : Material(
+                            color: AppColors.cool200,
+                            child: InkWell(
+                              key: ValueKey(
+                                'preview-transfer-photo-${photo.id}',
+                              ),
+                              onTap: () => AppImagePreviewDialog.showSource(
+                                context,
+                                photo.localPath!,
+                              ),
+                              child: Image.file(
+                                File(photo.localPath!),
+                                width: 82,
+                                height: 58,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                   ),
                   Positioned(

@@ -7,6 +7,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 
 class RagpickerRegistrationCard extends StatelessWidget {
   const RagpickerRegistrationCard({super.key, required this.registrationId});
@@ -129,12 +130,19 @@ class RagpickerProofCard extends StatelessWidget {
         if (photoUrl != null && photoUrl!.isNotEmpty)
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: CachedAppImage(
-              source: photoUrl,
-              width: 109,
-              height: 70,
-              fit: BoxFit.cover,
-              placeholder: const SizedBox.shrink(),
+            child: Material(
+              color: AppColors.cool100,
+              child: InkWell(
+                onTap: () =>
+                    AppImagePreviewDialog.showSource(context, photoUrl!),
+                child: CachedAppImage(
+                  source: photoUrl,
+                  width: 109,
+                  height: 70,
+                  fit: BoxFit.cover,
+                  placeholder: const SizedBox.shrink(),
+                ),
+              ),
             ),
           )
         else

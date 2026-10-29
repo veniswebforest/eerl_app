@@ -228,6 +228,167 @@ void main() {
     expect(find.byKey(const Key('end-day-internet-dialog')), findsNothing);
     expect(find.byKey(const Key('confirm-end-my-day-button')), findsOneWidget);
   });
+
+  testWidgets('renders cleanly without overflow on narrow screens with multi-unit values', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: EndMyDayScreen(
+          hasInternetAccess: () async => true,
+          now: () => DateTime(2026, 10, 19, 19),
+          loadData: () async => const DayCloseScreenData(
+            pendingSyncCount: 15,
+            dayClose: DayCloseData(
+              centerId: 'selected-center',
+              date: '2026-10-19',
+              lockTime: '18:30:00',
+              canClose: true,
+              openDrafts: 12,
+              summary: DayCloseSummary(
+                wallet: DayCloseWalletSummary(
+                  opening: 1234567.50,
+                  topUps: 0,
+                  collectionPayments: 987654.25,
+                  expenses: 54321.00,
+                  closing: 193234.25,
+                ),
+                collections: DayCloseCollectionsSummary(
+                  total: 45,
+                  pendingReview: 18,
+                  rejected: 2,
+                  byUnit: [
+                    DayCloseCollectionUnit(unit: 'KG', quantity: 1250.75),
+                    DayCloseCollectionUnit(unit: 'PCS', quantity: 340),
+                  ],
+                ),
+                expenses: DayCloseExpensesSummary(count: 8, amount: 54321),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('₹ 12,34,567.50'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('1250.75 KG / 340 PCS'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('1250.75 KG / 340 PCS'), findsOneWidget);
+  });
+
+  testWidgets('supervisor end-my-day view renders cleanly without overflow', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 480);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: EndMyDayScreen(isSupervisor: true),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('supervisor-end-my-day-screen')), findsOneWidget);
+  });
+
+  testWidgets('displays values accurately from user real API response', (
+    tester,
+  ) async {
+    final json = {
+      'data': {
+        'centerId': '107f30ce-f001-4471-9e91-c2fb71d0c924',
+        'date': '2026-10-29',
+        'lockTime': null,
+        'canClose': false,
+        'blockedReason': 'OPEN_DRAFTS',
+        'openDrafts': 8,
+        'summary': {
+          'wallet': {
+            'opening': -2531.2,
+            'topUps': 501150,
+            'collectionPayments': 8332,
+            'expenses': 2489,
+            'closing': 487797.8,
+          },
+          'collections': {
+            'total': 11,
+            'pendingReview': 10,
+            'rejected': 2,
+            'byUnit': [
+              {
+                'unit': {'code': 'KG', 'name': 'Kilogram'},
+                'verifiedQty': 484,
+              },
+              {
+                'unit': {'code': 'PCS', 'name': 'Pieces'},
+                'verifiedQty': 88,
+              },
+            ],
+          },
+          'expenses': {'count': 6, 'amount': 2489},
+        },
+        'closedAt': null,
+        'closedBy': null,
+        'shareText': null,
+      },
+    };
+
+    final parsed = DayCloseResponse.fromJson(json);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: EndMyDayScreen(
+          hasInternetAccess: () async => true,
+          now: () => DateTime(2026, 10, 29, 14, 30),
+          loadData: () async => DayCloseScreenData(
+            dayClose: parsed.data,
+            pendingSyncCount: 0,
+            eodLockTime: null,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('-₹ 2,531.20'), findsOneWidget);
+    expect(find.text('₹ 2,489.00'), findsOneWidget);
+    expect(find.text('₹ 8,332.00'), findsOneWidget);
+    expect(find.text('₹ 4,87,797.80'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('484 KG / 88 PCS'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+
+    expect(find.text('484 KG / 88 PCS'), findsOneWidget);
+    expect(find.text('11'), findsOneWidget);
+    expect(find.text('8'), findsOneWidget);
+    expect(find.text('6'), findsOneWidget);
+    expect(find.text('10'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.textContaining('8'), findsWidgets);
+  });
 }
 
 DayCloseScreenData _screenData({required bool canClose, String? eodLockTime}) =>

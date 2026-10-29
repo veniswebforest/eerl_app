@@ -57,58 +57,68 @@ class SupervisorEndMyDayView extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.endDayActivitySummary,
-                    style: AppTextStyles.semiboldH7_18.copyWith(
-                      color: AppColors.neutral950,
-                    ),
+            child: LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight - 28,
                   ),
-                  const SizedBox(height: 16),
-                  SupervisorEndDayActivityCard(items: activities),
-                  const Spacer(),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      key: const Key('supervisor-end-my-day-button'),
-                      onPressed: () async {
-                        final shouldShare =
-                            await showSupervisorEndDayConfirmDialog(context);
-                        if (context.mounted && shouldShare == true) {
-                          Navigator.of(context).pop();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: AppColors.primary500,
-                        foregroundColor: AppColors.neutral50,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.endDayActivitySummary,
+                          style: AppTextStyles.semiboldH7_18.copyWith(
+                            color: AppColors.neutral950,
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        l10n.endMyDay,
-                        style: AppTextStyles.boldH7_16,
-                      ),
+                        const SizedBox(height: 16),
+                        SupervisorEndDayActivityCard(items: activities),
+                        const Spacer(),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            key: const Key('supervisor-end-my-day-button'),
+                            onPressed: () async {
+                              final shouldShare =
+                                  await showSupervisorEndDayConfirmDialog(context);
+                              if (context.mounted && shouldShare == true) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              backgroundColor: AppColors.primary500,
+                              foregroundColor: AppColors.neutral50,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              l10n.endMyDay,
+                              style: AppTextStyles.boldH7_16,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Text(
+                            l10n.endDayWarning,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.mediumSH9_12.copyWith(
+                              color: AppColors.cool600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Text(
-                      l10n.endDayWarning,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.mediumSH9_12.copyWith(
-                        color: AppColors.cool600,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

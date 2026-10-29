@@ -12,6 +12,8 @@ import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_assets.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
+import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
@@ -36,6 +38,7 @@ class AssignSupervisorTaskScreen extends StatefulWidget {
 
 class _AssignSupervisorTaskScreenState
     extends State<AssignSupervisorTaskScreen> {
+  static const _cameraRecoveryId = 'supervisor.task.assign';
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
   final ImagePicker _imagePicker = ImagePicker();
@@ -68,6 +71,13 @@ class _AssignSupervisorTaskScreenState
     _photoCount = _isFilled ? 2 : 0;
     _selectedDateTime = _isFilled ? DateTime(2026, 8, 16, 15, 0) : null;
     _loadCentersAndAgents();
+    _restoreCameraResult();
+  }
+
+  Future<void> _restoreCameraResult() async {
+    final photo = await ImageCompressor.claimRecoveredImage(_cameraRecoveryId);
+    if (photo == null || !mounted) return;
+    setState(() => _capturedPhotos.add(photo));
   }
 
   @override
@@ -91,9 +101,11 @@ class _AssignSupervisorTaskScreenState
 
   Future<void> _capturePhoto() async {
     try {
-      final photo = await ImageCompressor.pickAndCompress(
+      final photo = await InAppCameraScreen.capture(
+        context,
         picker: _imagePicker,
-        source: ImageSource.camera,
+        recoveryId: _cameraRecoveryId,
+        title: 'Capture Task Photo',
       );
       if (photo != null && mounted) {
         setState(() {
@@ -264,11 +276,24 @@ class _AssignSupervisorTaskScreenState
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(6),
-                                  child: Image.file(
-                                    File(_capturedPhotos[index].path),
-                                    width: double.infinity,
-                                    height: 92,
-                                    fit: BoxFit.cover,
+                                  child: Material(
+                                    color: AppColors.cool100,
+                                    child: InkWell(
+                                      key: ValueKey(
+                                        'preview-assigned-task-photo-$index',
+                                      ),
+                                      onTap: () =>
+                                          AppImagePreviewDialog.showSource(
+                                            context,
+                                            _capturedPhotos[index].path,
+                                          ),
+                                      child: Image.file(
+                                        File(_capturedPhotos[index].path),
+                                        width: double.infinity,
+                                        height: 92,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 Positioned(

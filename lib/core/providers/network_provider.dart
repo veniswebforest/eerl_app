@@ -1,17 +1,28 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
+import 'package:eerl_app/core/network/internet_connectivity_service.dart';
 import 'package:flutter/foundation.dart';
 
 /// Manages real-time network connectivity state across the application.
 class NetworkProvider extends ChangeNotifier {
-  NetworkProvider({Connectivity? connectivity})
-    : _connectivity = connectivity ?? Connectivity() {
+  NetworkProvider({
+    Connectivity? connectivity,
+    Future<bool> Function()? internetAccessChecker,
+    this.reachabilityInterval = const Duration(seconds: 15),
+  }) : _connectivity = connectivity ?? Connectivity(),
+       _internetAccessChecker =
+           internetAccessChecker ??
+           InternetConnectivityService.instance.hasInternetAccess {
     _initConnectivity();
   }
 
   final Connectivity _connectivity;
+  final Future<bool> Function() _internetAccessChecker;
+  final Duration reachabilityInterval;
   StreamSubscription<List<ConnectivityResult>>? _subscription;
+  Timer? _reachabilityTimer;
+  int _checkGeneration = 0;
 
   bool _isOffline = false;
   bool _showRestoredBanner = false;
@@ -30,26 +41,59 @@ class NetworkProvider extends ChangeNotifier {
     try {
       final initialResults = await _connectivity.checkConnectivity();
       if (_disposed) return;
-      _updateConnectionStatus(initialResults, isInitial: true);
+      await _refreshConnectionStatus(initialResults, isInitial: true);
     } catch (e) {
       AppLogger.error('CONNECTIVITY', 'Initial check failed: $e');
+      _setOffline(true, isInitial: true);
     }
 
     if (_disposed) return;
     _subscription = _connectivity.onConnectivityChanged.listen((results) {
       if (_disposed) return;
-      _updateConnectionStatus(results);
+      unawaited(_refreshConnectionStatus(results));
     });
+    _reachabilityTimer = Timer.periodic(
+      reachabilityInterval,
+      (_) => unawaited(_refreshCurrentConnection()),
+    );
   }
 
-  void _updateConnectionStatus(
+  Future<void> _refreshCurrentConnection() async {
+    try {
+      final results = await _connectivity.checkConnectivity();
+      if (_disposed) return;
+      await _refreshConnectionStatus(results);
+    } catch (error) {
+      AppLogger.error('CONNECTIVITY', 'Periodic check failed: $error');
+      _setOffline(true);
+    }
+  }
+
+  Future<void> _refreshConnectionStatus(
     List<ConnectivityResult> results, {
     bool isInitial = false,
-  }) {
-    final offline =
+  }) async {
+    final generation = ++_checkGeneration;
+    final hasNoInterface =
         results.isEmpty ||
         results.every((result) => result == ConnectivityResult.none);
+    if (hasNoInterface) {
+      _setOffline(true, isInitial: isInitial);
+      return;
+    }
 
+    bool hasInternet;
+    try {
+      hasInternet = await _internetAccessChecker();
+    } catch (error) {
+      AppLogger.error('CONNECTIVITY', 'Reachability check failed: $error');
+      hasInternet = false;
+    }
+    if (_disposed || generation != _checkGeneration) return;
+    _setOffline(!hasInternet, isInitial: isInitial);
+  }
+
+  void _setOffline(bool offline, {bool isInitial = false}) {
     if (_isOffline == offline && !isInitial) return;
 
     final wasOffline = _isOffline;
@@ -88,6 +132,7 @@ class NetworkProvider extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _subscription?.cancel();
+    _reachabilityTimer?.cancel();
     _restoredBannerTimer?.cancel();
     super.dispose();
   }

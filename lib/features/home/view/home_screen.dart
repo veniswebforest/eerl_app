@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/core/location/device_location_service.dart';
+import 'package:eerl_app/core/providers/network_provider.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -87,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final navigation = context.watch<DashboardNavigationProvider>();
+    final isOffline = context.watch<NetworkProvider>().isOffline;
     // Rebuild and re-query outbox counts when an outgoing/bootstrap run starts
     // or finishes. This hides Sync Now immediately after the queue is drained.
     context.watch<BootstrapSyncService>();
@@ -168,8 +170,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           padding: EdgeInsets.symmetric(
                             horizontal: horizontalPadding,
                           ),
-                          sliver: const SliverToBoxAdapter(
-                            child: _CenteredHomeContent(child: ZoneSelector()),
+                          sliver: SliverToBoxAdapter(
+                            child: _CenteredHomeContent(
+                              child: ZoneSelector(
+                                onSelected: (_) {
+                                  if (mounted) setState(() {});
+                                },
+                              ),
+                            ),
                           ),
                         ),
                         SliverPadding(
@@ -190,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       status?.hasOutboxEntries ?? false;
                                   return _CenteredHomeContent(
                                     child: OnlineStatusBanner(
+                                      isOffline: isOffline,
                                       pendingCount: status?.outboxCount ?? 0,
                                       onSyncNowTap: hasOutbox
                                           ? () => showSyncDataDialog(
@@ -242,8 +251,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 const SizedBox(height: 24),
                                 _CenteredHomeContent(
                                   child: CollectionDrafts(
-                                    onViewAllTap: () =>
-                                        navigation.selectPage('records'),
+                                    onViewAllTap:
+                                        navigation.showSavedCollections,
                                     onContinueCollectionTap: () =>
                                         _openCollection(
                                           context,

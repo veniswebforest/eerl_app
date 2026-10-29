@@ -405,6 +405,12 @@
   "taskDueTomorrow": "कल, दोपहर 2:00 बजे",
   "taskDueDate": "25 अगस्त 2026 तक",
   "taskCompletedTime": "पूर्ण: आज, सुबह 11:30 बजे",
+  "taskDueTodayAt": "आज, {time} तक",
+  "taskDueTomorrowAt": "कल, {time} तक",
+  "taskDueAt": "{dateTime} तक",
+  "taskCompletedLabel": "पूर्ण",
+  "taskCompletedTodayAt": "पूर्ण: आज, {time}",
+  "taskCompletedAt": "पूर्ण: {dateTime}",
   "taskListTime0900": "आज, 09:00 AM",
   "taskListTime1000": "आज, 10:00 AM",
   "taskListTime1145": "आज, 11:45 AM",
@@ -462,8 +468,14 @@
   "expenseDescriptionCounter": "अधिकतम 150 अक्षर",
   "submitExpenseClaim": "व्यय दावा जमा करें",
   "expenseSubmittedTitle": "व्यय जमा हो गया!",
-  "expenseSubmittedDeduction": "आपके वॉलेट बैलेंस से ₹350 काटे गए।",
-  "expenseSubmittedBalance": "शेष राशि: ₹4,850",
+  "expenseSubmittedDeduction": "आपके वॉलेट बैलेंस से ₹{amount} काटे गए।",
+  "@expenseSubmittedDeduction": {
+    "placeholders": {"amount": {"type": "String"}}
+  },
+  "expenseSubmittedBalance": "शेष राशि: ₹{balance}",
+  "@expenseSubmittedBalance": {
+    "placeholders": {"balance": {"type": "String"}}
+  },
   "expenseBackToWallet": "वॉलेट पर वापस जाएँ",
   "expensePendingPrefix": "यह प्रविष्टि ",
   "expensePendingStatus": "लंबित",
@@ -500,7 +512,10 @@
   "cashDetailDateTimeValue": "आज • 08:15 AM",
   "cashDetailWaitingApproval": "सुपरवाइज़र की मंज़ूरी की प्रतीक्षा में",
   "cashDetailApprovedSupervisor": "सुपरवाइज़र द्वारा स्वीकृत",
-  "cashDetailApprovedNote": "नोट: ₹1,000 आपके सक्रिय नकद वॉलेट बैलेंस में जमा किए गए।",
+  "cashDetailApprovedNote": "नोट: {amount} आपके सक्रिय नकद वॉलेट बैलेंस में जमा किए गए।",
+  "@cashDetailApprovedNote": {
+    "placeholders": {"amount": {"type": "String"}}
+  },
   "cashDetailRejectReason": "अमान्य / अधूरा अनुरोध",
   "cashDetailRejectRemarks": "आज के मार्ग के लिए आपका मौजूदा वॉलेट बैलेंस पर्याप्त है। कृपया पहले लंबित खर्च दर्ज करें।",
   "startYourCollections": "अपना संग्रह शुरू करें",
@@ -754,7 +769,7 @@
   "taskProofSupported": "समर्थित: JPG, PNG (अधिकतम 5MB)।",
   "taskDescriptionLabel": "विवरण *",
   "taskDescriptionHint": "विवरण जोड़ें",
-  "taskDescriptionMinimum": "न्यूनतम 150 अक्षर",
+  "taskDescriptionMinimum": "अधिकतम 150 अक्षर",
   "taskFilledDescription": "10 किलो मानक परीक्षण वजन से वेट स्केल कैलिब्रेट किया। शून्य-त्रुटि सत्यापित की।",
   "taskMarkCompleted": "पूर्ण के रूप में चिह्नित करें",
   "taskDetailsTitle": "कार्य विवरण",
@@ -924,6 +939,9 @@
   "requestDescriptionPlain": "विवरण",
   "requestAgentName": "राहुल पटेल",
   "requestCompletedStatus": "पूर्ण: आज, 11:30 AM",
+  "requestCompletedLabel": "पूर्ण",
+  "requestCompletedValue": "पूर्ण: {dateTime}",
+  "@requestCompletedValue": {"placeholders": {"dateTime": {"type": "String"}}},
   "requestDetailDescription": "फील्ड एजेंट द्वारा जमा की गई नवीनतम कलेक्शन एंट्री की समीक्षा और सत्यापन करें। दर्ज कलेक्शन वज़न को सत्यापित वज़न से मिलाएँ, अपलोड किए गए सभी फ़ोटो जाँचें और अंतिम स्वीकृति से पहले ग्राहक तथा सामग्री विवरण का सिस्टम रिकॉर्ड से मिलान सुनिश्चित करें।",
   "transferDetailTitle": "ट्रांसफर अनुरोध विवरण",
   "transferDetailRequestId": "#TRF-2026-089",
@@ -949,6 +967,8 @@
   "transferDetailDateTimeValue": "22 अक्टूबर • 11:15 AM",
   "transferDetailRequestedBy": "अनुरोधकर्ता",
   "transferDetailRequestedByValue": "राहुल पटेल",
+  "transferDetailEstimatedExpense": "अनुमानित खर्च",
+  "transferDetailEstimatedExpenseValue": "₹ 900",
   "transferDetailRequestStatus": "अनुरोध स्थिति",
   "transferDetailWaitingManager": "कलेक्शन मैनेजर की प्रतीक्षा",
   "transferDetailVehicleDispatched": "कलेक्शन मैनेजर द्वारा वाहन भेजा गया",
@@ -1444,5 +1464,7 @@
   "supervisorTransferConfirm": "ट्रांसफर की पुष्टि करें",
   "supervisorTransferApprovedTitle": "{id} स्वीकृत!",
   "supervisorTransferApprovedMessage": "{requester} इसे {destination} भेजेंगे। ट्रक {vehicle}, अपेक्षित समय {expected}।",
-  "supervisorTransferBackToRequests": "अनुरोधों पर वापस जाएं"
+  "supervisorTransferBackToRequests": "अनुरोधों पर वापस जाएं",
+  "offlineStatus": "ऑफ़लाइन",
+  "offlineStatusSubtitle": "इंटरनेट कनेक्शन उपलब्ध नहीं है"
 }

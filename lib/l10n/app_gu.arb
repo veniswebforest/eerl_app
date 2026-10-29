@@ -322,6 +322,12 @@
   "taskDueTomorrow": "આવતીકાલે, બપોરે 2:00 વાગ્યે",
   "taskDueDate": "25 ઑગસ્ટ 2026 સુધી",
   "taskCompletedTime": "પૂર્ણ: આજે, સવારે 11:30 વાગ્યે",
+  "taskDueTodayAt": "આજે, {time} સુધી",
+  "taskDueTomorrowAt": "આવતીકાલે, {time} સુધી",
+  "taskDueAt": "{dateTime} સુધી",
+  "taskCompletedLabel": "પૂર્ણ",
+  "taskCompletedTodayAt": "પૂર્ણ: આજે, {time}",
+  "taskCompletedAt": "પૂર્ણ: {dateTime}",
   "taskListTime0900": "આજે, 09:00 AM",
   "taskListTime1000": "આજે, 10:00 AM",
   "taskListTime1145": "આજે, 11:45 AM",
@@ -379,8 +385,14 @@
   "expenseDescriptionCounter": "મહત્તમ 150 અક્ષરો",
   "submitExpenseClaim": "ખર્ચનો દાવો સબમિટ કરો",
   "expenseSubmittedTitle": "ખર્ચ સબમિટ થયો!",
-  "expenseSubmittedDeduction": "તમારા વૉલેટ બેલેન્સમાંથી ₹350 કપાયા.",
-  "expenseSubmittedBalance": "બાકી બેલેન્સ: ₹4,850",
+  "expenseSubmittedDeduction": "તમારા વૉલેટ બેલેન્સમાંથી ₹{amount} કપાયા.",
+  "@expenseSubmittedDeduction": {
+    "placeholders": {"amount": {"type": "String"}}
+  },
+  "expenseSubmittedBalance": "બાકી બેલેન્સ: ₹{balance}",
+  "@expenseSubmittedBalance": {
+    "placeholders": {"balance": {"type": "String"}}
+  },
   "expenseBackToWallet": "વૉલેટ પર પાછા જાઓ",
   "expensePendingPrefix": "આ એન્ટ્રી ",
   "expensePendingStatus": "બાકી",
@@ -417,7 +429,10 @@
   "cashDetailDateTimeValue": "આજે • 08:15 AM",
   "cashDetailWaitingApproval": "સુપરવાઇઝરની મંજૂરીની રાહમાં",
   "cashDetailApprovedSupervisor": "સુપરવાઇઝર દ્વારા મંજૂર",
-  "cashDetailApprovedNote": "નોંધ: ₹1,000 તમારા સક્રિય રોકડ વૉલેટ બેલેન્સમાં જમા થયા.",
+  "cashDetailApprovedNote": "નોંધ: {amount} તમારા સક્રિય રોકડ વૉલેટ બેલેન્સમાં જમા થયા.",
+  "@cashDetailApprovedNote": {
+    "placeholders": {"amount": {"type": "String"}}
+  },
   "cashDetailRejectReason": "અમાન્ય / અધૂરી વિનંતી",
   "cashDetailRejectRemarks": "તમારા આજના રૂટ માટે હાલનું વૉલેટ બેલેન્સ પૂરતું છે. કૃપા કરીને પહેલા બાકી ખર્ચ નોંધો.",
   "startYourCollections": "તમારું સંગ્રહ શરૂ કરો",
@@ -671,7 +686,7 @@
   "taskProofSupported": "સમર્થિત: JPG, PNG (મહત્તમ 5MB).",
   "taskDescriptionLabel": "વર્ણન *",
   "taskDescriptionHint": "વર્ણન ઉમેરો",
-  "taskDescriptionMinimum": "ઓછામાં ઓછા 150 અક્ષરો",
+  "taskDescriptionMinimum": "વધુમાં વધુ 150 અક્ષરો",
   "taskFilledDescription": "10 કિલોના પ્રમાણભૂત ટેસ્ટ વજનથી વેઇટ સ્કેલ કેલિબ્રેટ કર્યું. ઝીરો-એરર ચકાસ્યું.",
   "taskMarkCompleted": "પૂર્ણ તરીકે ચિહ્નિત કરો",
   "taskDetailsTitle": "કાર્યની વિગતો",
@@ -841,6 +856,9 @@
   "requestDescriptionPlain": "વર્ણન",
   "requestAgentName": "રાહુલ પટેલ",
   "requestCompletedStatus": "પૂર્ણ: આજે, 11:30 AM",
+  "requestCompletedLabel": "પૂર્ણ",
+  "requestCompletedValue": "પૂર્ણ: {dateTime}",
+  "@requestCompletedValue": {"placeholders": {"dateTime": {"type": "String"}}},
   "requestDetailDescription": "ફિલ્ડ એજન્ટ દ્વારા સબમિટ કરેલી નવીનતમ કલેક્શન એન્ટ્રીની સમીક્ષા અને ચકાસણી કરો. નોંધાયેલા કલેક્શન વજનને ચકાસાયેલ વજન સાથે સરખાવો, અપલોડ કરેલા તમામ ફોટા તપાસો અને અંતિમ મંજૂરી પહેલાં ગ્રાહક તથા મટિરિયલની વિગતો સિસ્ટમ રેકોર્ડ સાથે મેળ ખાય છે તેની ખાતરી કરો.",
   "transferDetailTitle": "ટ્રાન્સફર વિનંતીની વિગતો",
   "transferDetailRequestId": "#TRF-2026-089",
@@ -866,6 +884,8 @@
   "transferDetailDateTimeValue": "22 ઑક્ટોબર • 11:15 AM",
   "transferDetailRequestedBy": "વિનંતી કરનાર",
   "transferDetailRequestedByValue": "રાહુલ પટેલ",
+  "transferDetailEstimatedExpense": "અંદાજિત ખર્ચ",
+  "transferDetailEstimatedExpenseValue": "₹ 900",
   "transferDetailRequestStatus": "વિનંતીની સ્થિતિ",
   "transferDetailWaitingManager": "કલેક્શન મેનેજરની રાહમાં",
   "transferDetailVehicleDispatched": "કલેક્શન મેનેજર દ્વારા વાહન મોકલાયું",
@@ -1361,5 +1381,7 @@
   "supervisorTransferConfirm": "ટ્રાન્સફર કન્ફર્મ કરો",
   "supervisorTransferApprovedTitle": "{id} મંજૂર થયું!",
   "supervisorTransferApprovedMessage": "{requester} તેને {destination} મોકલશે. ટ્રક {vehicle}, અપેક્ષિત સમય {expected}.",
-  "supervisorTransferBackToRequests": "રિક્વેસ્ટ પર પાછા જાઓ"
+  "supervisorTransferBackToRequests": "રિક્વેસ્ટ પર પાછા જાઓ",
+  "offlineStatus": "ઑફલાઇન",
+  "offlineStatusSubtitle": "ઇન્ટરનેટ કનેક્શન ઉપલબ્ધ નથી"
 }

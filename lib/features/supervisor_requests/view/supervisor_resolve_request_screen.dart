@@ -12,6 +12,7 @@ import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_header.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -42,6 +43,9 @@ class _SupervisorResolveRequestScreenState
 
   bool get _canResolve => _descriptionController.text.trim().length >= 3;
 
+  String get _cameraRecoveryId =>
+      'supervisor.request.resolve.${widget.request.id}';
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +57,25 @@ class _SupervisorResolveRequestScreenState
           _descriptionHasFocus = _descriptionFocusNode.hasFocus;
         });
       }
+    });
+    _restoreCameraResult();
+  }
+
+  Future<void> _restoreCameraResult() async {
+    final photo = await ImageCompressor.claimRecoveredImage(_cameraRecoveryId);
+    if (photo == null || !mounted) return;
+    await _addCapturedPhoto(photo);
+  }
+
+  Future<void> _addCapturedPhoto(XFile photo) async {
+    final photoId = await EerlLocalRepository.instance.stageRequestAnswerPhoto(
+      requestId: widget.request.id,
+      path: photo.path,
+    );
+    if (!mounted) return;
+    setState(() {
+      _capturedPhotos.add(photo);
+      _capturedPhotoIds.add(photoId);
     });
   }
 
@@ -73,21 +96,14 @@ class _SupervisorResolveRequestScreenState
 
   Future<void> _capturePhoto() async {
     try {
-      final photo = await ImageCompressor.pickAndCompress(
+      final photo = await InAppCameraScreen.capture(
+        context,
         picker: _imagePicker,
-        source: ImageSource.camera,
+        recoveryId: _cameraRecoveryId,
+        title: 'Capture Answer Proof',
       );
       if (photo != null && mounted) {
-        final photoId = await EerlLocalRepository.instance
-            .stageRequestAnswerPhoto(
-              requestId: widget.request.id,
-              path: photo.path,
-            );
-        if (!mounted) return;
-        setState(() {
-          _capturedPhotos.add(photo);
-          _capturedPhotoIds.add(photoId);
-        });
+        await _addCapturedPhoto(photo);
       }
     } catch (_) {
       if (!mounted) return;

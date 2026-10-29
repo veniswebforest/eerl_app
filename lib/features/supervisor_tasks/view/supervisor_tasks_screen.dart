@@ -184,6 +184,9 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
                                 itemBuilder: (context, index) =>
                                     SupervisorTaskCard(
                                       item: tasks[index],
+                                      showClosedTimestamp:
+                                          _selectedStatus ==
+                                          TaskListStatus.closed,
                                       onTap: () => _openTask(tasks[index]),
                                     ),
                               ),

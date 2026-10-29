@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import 'wallet_assets.dart';
 
 class ReceiptUploadSection extends StatelessWidget {
@@ -152,16 +153,23 @@ class _ReceiptPreview extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: Image.file(
-              File(path),
-              key: ValueKey('expense-receipt-image-$index'),
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const ColoredBox(
-                color: AppColors.cool100,
-                child: Center(
-                  child: Icon(
-                    Icons.broken_image_outlined,
-                    color: AppColors.neutral400,
+            child: Material(
+              color: AppColors.cool100,
+              child: InkWell(
+                key: ValueKey('preview-expense-receipt-$index'),
+                onTap: () => AppImagePreviewDialog.showSource(context, path),
+                child: Image.file(
+                  File(path),
+                  key: ValueKey('expense-receipt-image-$index'),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const ColoredBox(
+                    color: AppColors.cool100,
+                    child: Center(
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: AppColors.neutral400,
+                      ),
+                    ),
                   ),
                 ),
               ),

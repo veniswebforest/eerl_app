@@ -150,7 +150,7 @@ class _CollectionDraftsState extends State<CollectionDrafts> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${draft.totalQty.toStringAsFixed(2)} kg • ${draft.itemCount} items',
+                          '${draft.formattedQuantity} • ${draft.itemCount} items',
                           style: AppTextStyles.mediumSH8_14.copyWith(
                             color: AppColors.neutral700,
                           ),

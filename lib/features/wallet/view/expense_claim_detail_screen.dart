@@ -7,6 +7,7 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import '../model/expense_claim_detail_status.dart';
 import '../widgets/expense_detail_cards.dart';
 import '../widgets/wallet_screen_header.dart';
@@ -291,11 +292,17 @@ class _ExpensePhoto extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(6),
-      child: CachedAppImage(
-        source: source,
-        width: 109,
-        height: 70,
-        fit: BoxFit.cover,
+      child: Material(
+        color: AppColors.cool100,
+        child: InkWell(
+          onTap: () => AppImagePreviewDialog.showSource(context, source),
+          child: CachedAppImage(
+            source: source,
+            width: 109,
+            height: 70,
+            fit: BoxFit.cover,
+          ),
+        ),
       ),
     );
   }

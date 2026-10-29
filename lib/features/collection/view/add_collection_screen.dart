@@ -20,6 +20,8 @@ import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/ragpicker_directory/widgets/ragpicker_status_confirmation_dialog.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
+import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
 import '../model/collection_entry_state.dart';
 import '../widgets/collection_step_indicator.dart';
 import '../widgets/collection_success_dialog.dart';
@@ -76,6 +78,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   List<MrfPersonModel> _mrfPeople = const [];
   List<RagpickerModel> _ragpickers = const [];
   List<ItemModel> _materials = const [];
+  bool _showPrice = false;
   ProfileModel? _profile;
   String? _centerId;
   String? _userId;
@@ -130,6 +133,24 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     }
     _selected.addAll(widget.initialSelectedItems);
     _loadReferenceData();
+    _restoreCameraResult();
+  }
+
+  Future<void> _restoreCameraResult() async {
+    final recoveryId = await ImageCompressor.recoveredImageId();
+    const itemPrefix = 'collection.item.';
+    int? photoKey;
+    if (recoveryId == 'collection.vehicle') {
+      photoKey = -1;
+    } else if (recoveryId == 'collection.ramp.handover') {
+      photoKey = 99;
+    } else if (recoveryId?.startsWith(itemPrefix) == true) {
+      photoKey = int.tryParse(recoveryId!.substring(itemPrefix.length));
+    }
+    if (recoveryId == null || photoKey == null) return;
+    final image = await ImageCompressor.claimRecoveredImage(recoveryId);
+    if (image == null || !mounted) return;
+    setState(() => (_photos[photoKey!] ??= []).add(image));
   }
 
   @override
@@ -172,6 +193,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       repository.getMrfPeople(centerId: centerId),
       repository.getRagpickers(centerId: centerId, activeOnly: true),
       repository.getCollectionMaterials(centerId: centerId, channel: _channel),
+      repository.getChannels(centerId: centerId),
       repository.getProfile(),
       repository.currentUserId,
       if (widget.initialCollectionId != null)
@@ -186,14 +208,18 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       _mrfPeople = values[0] as List<MrfPersonModel>;
       _ragpickers = values[1] as List<RagpickerModel>;
       _materials = values[2] as List<ItemModel>;
-      _profile = values[3] as ProfileModel;
-      _userId = values[4] as String?;
+      final channels = values[3] as List<CenterChannelModel>;
+      _showPrice = channels.any(
+        (entry) => entry.channel.toUpperCase() == _channel && entry.showPrice,
+      );
+      _profile = values[4] as ProfileModel;
+      _userId = values[5] as String?;
       _mrfAgentName = _mrfSupervisor?.name;
       _selected.removeWhere((index) => index >= _materials.length);
       if (widget.initialCollectionId != null) {
         _restoreDraft(
-          values[5] as CollectionModel?,
-          values[6] as List<CollectionItemModel>,
+          values[6] as CollectionModel?,
+          values[7] as List<CollectionItemModel>,
         );
       }
     });
@@ -428,11 +454,13 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
             },
             onCapturePhoto: () async {
               try {
-                final image = await ImageCompressor.pickAndCompress(
+                final image = await InAppCameraScreen.capture(
+                  context,
                   picker: _imagePicker,
-                  source: ImageSource.camera,
+                  recoveryId: 'collection.ramp.handover',
+                  title: context.l10n.collectionCapturePhoto,
                 );
-                if (image != null) {
+                if (image != null && mounted) {
                   setState(() => _photos[99] = [image]);
                 }
               } catch (_) {}
@@ -907,6 +935,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       _ReviewTotalsCard(
         collectionWeight: _totalWeight(_collectionWeights),
         verifiedWeight: _totalWeight(_verifiedWeights),
+        totalAmount: _showPrice ? _totalAmount : null,
       ),
     ],
   );
@@ -1260,6 +1289,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
           paidBy: _type == CollectionType.mrfStation
               ? null
               : _d2dPaymentMode.name.toUpperCase(),
+          showPrice: _showPrice,
           totalAmount: items.fold<double>(
             0,
             (total, item) => total + (item.amount ?? 0),
@@ -1333,18 +1363,28 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       ),
     );
     if (source == null || !mounted) return;
-    final image = await ImageCompressor.pickAndCompress(
-      picker: _imagePicker,
-      source: source,
-    );
+    final image = source == ImageSource.camera
+        ? await InAppCameraScreen.capture(
+            context,
+            picker: _imagePicker,
+            recoveryId: 'collection.item.$itemId',
+            title: context.l10n.collectionCapturePhoto,
+          )
+        : await ImageCompressor.pickAndCompress(
+            picker: _imagePicker,
+            source: ImageSource.gallery,
+            recoveryId: 'collection.item.$itemId',
+          );
     if (image == null || !mounted) return;
     setState(() => (_photos[itemId] ??= []).add(image));
   }
 
   Future<void> _pickVehicleImage() async {
-    final image = await ImageCompressor.pickAndCompress(
+    final image = await InAppCameraScreen.capture(
+      context,
       picker: _imagePicker,
-      source: ImageSource.camera,
+      recoveryId: 'collection.vehicle',
+      title: context.l10n.collectionCapturePhoto,
     );
     if (image == null || !mounted) return;
     setState(() => _photos[-1] = [image]);
@@ -1352,18 +1392,20 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
 
   Future<void> _pickD2dCollectionImage(int itemId) async {
     if ((_photos[itemId]?.length ?? 0) >= 2) return;
-    final image = await ImageCompressor.pickAndCompress(
+    final image = await InAppCameraScreen.capture(
+      context,
       picker: _imagePicker,
-      source: ImageSource.camera,
+      recoveryId: 'collection.item.$itemId',
+      title: context.l10n.collectionCapturePhoto,
     );
     if (image == null || !mounted) return;
     setState(() => (_photos[itemId] ??= []).add(image));
   }
 
   void _showImagePreview(XFile image) {
-    context.push<void>(
-      AppRoutes.collectionImagePreview,
-      extra: FileImage(File(image.path)),
+    AppImagePreviewDialog.show(
+      context,
+      imageProvider: FileImage(File(image.path)),
     );
   }
 
@@ -1404,6 +1446,16 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     0,
     (total, item) => total + (double.tryParse(values[item] ?? '') ?? 0),
   );
+
+  double get _totalAmount => _selected.fold<double>(0, (total, item) {
+    if (item < 0 || item >= _materials.length) return total;
+    final rate = _materials[item].rate;
+    final verifiedQuantity = double.tryParse(
+      _verifiedWeights[item]?.trim() ?? '',
+    );
+    if (rate == null || verifiedQuantity == null) return total;
+    return total + (rate * verifiedQuantity);
+  });
 
   bool get _photosComplete =>
       _selected.isNotEmpty &&
@@ -2029,11 +2081,11 @@ class _ReviewMaterial extends StatelessWidget {
         ? null
         : rate! * verifiedQuantity;
     final rateText = rate == null
-        ? '${context.l10n.collectionDetailRate} —'
+        ? '${context.l10n.collectionDetailRate} -'
         : '${context.l10n.collectionDetailRate} '
               '₹${rate!.toStringAsFixed(2)}/$unitLabel';
     final totalText = materialTotal == null
-        ? '${context.l10n.collectionDetailMaterialTotal} —'
+        ? '${context.l10n.collectionDetailMaterialTotal} -'
         : '${context.l10n.collectionDetailMaterialTotal} '
               '₹${materialTotal.toStringAsFixed(2)}';
     return Column(
@@ -2082,34 +2134,32 @@ class _ReviewMaterial extends StatelessWidget {
             ),
           ],
         ),
-        if (rate != null) ...[
-          const SizedBox(height: 16),
-          const Divider(height: 1, color: AppColors.cool400),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text(
-                  rateText,
-                  maxLines: 2,
-                  style: AppTextStyles.mediumSH8_14,
+        const SizedBox(height: 16),
+        const Divider(height: 1, color: AppColors.cool400),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                rateText,
+                maxLines: 2,
+                style: AppTextStyles.mediumSH8_14,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                totalText,
+                maxLines: 2,
+                textAlign: TextAlign.end,
+                style: AppTextStyles.semiboldH9_14.copyWith(
+                  color: AppColors.primary500,
                 ),
               ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  totalText,
-                  maxLines: 2,
-                  textAlign: TextAlign.end,
-                  style: AppTextStyles.semiboldH9_14.copyWith(
-                    color: AppColors.primary500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
         _ReviewPhotos(images: pickedImages, onPreview: onPreview),
       ],
@@ -2218,9 +2268,11 @@ class _ReviewTotalsCard extends StatelessWidget {
   const _ReviewTotalsCard({
     required this.collectionWeight,
     required this.verifiedWeight,
+    required this.totalAmount,
   });
 
   final double collectionWeight, verifiedWeight;
+  final double? totalAmount;
 
   @override
   Widget build(BuildContext context) {
@@ -2290,7 +2342,9 @@ class _ReviewTotalsCard extends StatelessWidget {
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
-                  '₹35,550.00',
+                  totalAmount == null
+                      ? '-'
+                      : '₹${totalAmount!.toStringAsFixed(2)}',
                   textAlign: TextAlign.end,
                   style: AppTextStyles.boldH6_20.copyWith(
                     color: AppColors.primary500,

@@ -86,7 +86,7 @@ class CollectionHistoryCard extends StatelessWidget {
                   const SizedBox(width: 16),
                   _Info(
                     icon: RecordsAssets.weight,
-                    text: '${item.totalQty.toStringAsFixed(2)} kg',
+                    text: item.formattedQuantity,
                   ),
                 ],
               ),

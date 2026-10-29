@@ -31,26 +31,36 @@ class EndDayActivityCard extends StatelessWidget {
     child: Column(
       children: [
         for (var index = 0; index < items.length; index++) ...[
-          SizedBox(
-            height: 46,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    items[index].label,
-                    style: AppTextStyles.regularB7_14.copyWith(
-                      color: AppColors.neutral700,
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 46),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      items[index].label,
+                      style: AppTextStyles.regularB7_14.copyWith(
+                        color: AppColors.neutral700,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  items[index].value,
-                  style: AppTextStyles.mediumSH8_14.copyWith(
-                    color: items[index].valueColor,
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        items[index].value,
+                        textAlign: TextAlign.end,
+                        style: AppTextStyles.mediumSH8_14.copyWith(
+                          color: items[index].valueColor,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           if (index != items.length - 1)

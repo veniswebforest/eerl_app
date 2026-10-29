@@ -59,7 +59,8 @@ class VerificationEntryCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${entry.totalQty.toStringAsFixed(2)} kg • ₹${(entry.totalAmount ?? 0).toStringAsFixed(2)}',
+                        '${entry.formattedQuantity} • '
+                        '${entry.showPrice && entry.totalAmount != null ? '₹${entry.totalAmount!.toStringAsFixed(2)}' : '-'}',
                         style: AppTextStyles.boldH8_14.copyWith(
                           color: AppColors.green600,
                         ),

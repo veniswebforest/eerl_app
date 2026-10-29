@@ -587,6 +587,49 @@ void main() {
     expect((body['handoverPhotoUrls'] as List), hasLength(1));
   });
 
+  test(
+    'collection reads hide stored prices when channel show_price is off',
+    () async {
+      const id = 'collection-hidden-price';
+      await repository.saveCollection(
+        collection: const CollectionModel(
+          id: id,
+          centerId: 'center-1',
+          agentId: 'agent-1',
+          agentName: 'Agent One',
+          channel: 'D2D',
+          status: 'SUBMITTED',
+          collectedAt: '2026-10-29T05:00:00.000Z',
+          vehicleId: 'vehicle-1',
+          givenByName: 'Kiran Rathod',
+          paidBy: 'CASH',
+          totalAmount: 38,
+          handoverPhotoUrls: ['/tmp/hidden-price-handover.jpg'],
+          gpsLat: 21.1702,
+          gpsLng: 72.8311,
+          updatedAt: '2026-10-29T05:00:00.000Z',
+          syncState: 'pending',
+        ),
+        items: [line(id)],
+        submit: true,
+      );
+      await database.update(
+        DatabaseTables.centerChannels,
+        {'show_price': 0},
+        where: 'center_id = ? AND channel = ?',
+        whereArgs: ['center-1', 'D2D'],
+      );
+
+      final collection = await repository.getCollection(id);
+      final items = await repository.getCollectionItems(id);
+
+      expect(collection?.showPrice, isFalse);
+      expect(collection?.totalAmount, 38);
+      expect(items.single.rate, isNull);
+      expect(items.single.amount, isNull);
+    },
+  );
+
   test('sync repairs a legacy collection submit method and path', () async {
     const id = 'legacy-submit';
     const body = {

@@ -1966,6 +1966,42 @@ abstract class AppLocalizations {
   /// **'Completed: Today, 11:30 AM'**
   String get taskCompletedTime;
 
+  /// No description provided for @taskDueTodayAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Today, {time}'**
+  String taskDueTodayAt(String time);
+
+  /// No description provided for @taskDueTomorrowAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Tomorrow, {time}'**
+  String taskDueTomorrowAt(String time);
+
+  /// No description provided for @taskDueAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {dateTime}'**
+  String taskDueAt(String dateTime);
+
+  /// No description provided for @taskCompletedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get taskCompletedLabel;
+
+  /// No description provided for @taskCompletedTodayAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed: Today, {time}'**
+  String taskCompletedTodayAt(String time);
+
+  /// No description provided for @taskCompletedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed: {dateTime}'**
+  String taskCompletedAt(String dateTime);
+
   /// No description provided for @taskListTime0900.
   ///
   /// In en, this message translates to:
@@ -2275,14 +2311,14 @@ abstract class AppLocalizations {
   /// No description provided for @expenseSubmittedDeduction.
   ///
   /// In en, this message translates to:
-  /// **'₹350 deducted from your wallet balance.'**
-  String get expenseSubmittedDeduction;
+  /// **'₹{amount} deducted from your wallet balance.'**
+  String expenseSubmittedDeduction(String amount);
 
   /// No description provided for @expenseSubmittedBalance.
   ///
   /// In en, this message translates to:
-  /// **'Remaining Balance: ₹4,850'**
-  String get expenseSubmittedBalance;
+  /// **'Remaining Balance: ₹{balance}'**
+  String expenseSubmittedBalance(String balance);
 
   /// No description provided for @expenseBackToWallet.
   ///
@@ -2497,8 +2533,8 @@ abstract class AppLocalizations {
   /// No description provided for @cashDetailApprovedNote.
   ///
   /// In en, this message translates to:
-  /// **'Note: ₹1,000 credited to your active cash wallet balance.'**
-  String get cashDetailApprovedNote;
+  /// **'Note: {amount} credited to your active cash wallet balance.'**
+  String cashDetailApprovedNote(String amount);
 
   /// No description provided for @cashDetailRejectReason.
   ///
@@ -3997,7 +4033,7 @@ abstract class AppLocalizations {
   /// No description provided for @taskDescriptionMinimum.
   ///
   /// In en, this message translates to:
-  /// **'Min 150 Characters'**
+  /// **'Max 150 Characters'**
   String get taskDescriptionMinimum;
 
   /// No description provided for @taskFilledDescription.
@@ -4990,6 +5026,18 @@ abstract class AppLocalizations {
   /// **'Completed: Today, 11:30 AM'**
   String get requestCompletedStatus;
 
+  /// No description provided for @requestCompletedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get requestCompletedLabel;
+
+  /// No description provided for @requestCompletedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed: {dateTime}'**
+  String requestCompletedValue(String dateTime);
+
   /// No description provided for @requestDetailDescription.
   ///
   /// In en, this message translates to:
@@ -5133,6 +5181,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rahul Patel'**
   String get transferDetailRequestedByValue;
+
+  /// No description provided for @transferDetailEstimatedExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Expense'**
+  String get transferDetailEstimatedExpense;
+
+  /// No description provided for @transferDetailEstimatedExpenseValue.
+  ///
+  /// In en, this message translates to:
+  /// **'₹ 900'**
+  String get transferDetailEstimatedExpenseValue;
 
   /// No description provided for @transferDetailRequestStatus.
   ///
@@ -8078,6 +8138,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to Requests'**
   String get supervisorTransferBackToRequests;
+
+  /// No description provided for @offlineStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offlineStatus;
+
+  /// No description provided for @offlineStatusSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get offlineStatusSubtitle;
 }
 
 class _AppLocalizationsDelegate

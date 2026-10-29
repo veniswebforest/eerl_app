@@ -76,7 +76,7 @@ class CollectionDraftCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 _DraftInfo(
                   icon: RecordsAssets.weight,
-                  text: '${item.totalQty.toStringAsFixed(2)} kg',
+                  text: item.formattedQuantity,
                 ),
                 const SizedBox(height: 8),
                 _DraftInfo(

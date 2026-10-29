@@ -9,11 +9,15 @@ class RequestDetailSectionCard extends StatelessWidget {
     required this.title,
     required this.child,
     this.padding = const EdgeInsets.all(16),
+    this.titleStyle,
+    this.borderRadius = 10,
   });
 
   final String title;
   final Widget child;
   final EdgeInsets padding;
+  final TextStyle? titleStyle;
+  final double borderRadius;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -21,14 +25,14 @@ class RequestDetailSectionCard extends StatelessWidget {
     padding: padding,
     decoration: BoxDecoration(
       color: AppColors.cool200,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(borderRadius),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: AppTextStyles.mediumSH8_14.copyWith(
+          style: (titleStyle ?? AppTextStyles.mediumSH8_14).copyWith(
             color: AppColors.neutral950,
           ),
         ),

@@ -3,8 +3,6 @@ import 'package:lottie/lottie.dart';
 
 import 'package:eerl_app/core/constants/app_constants.dart';
 
-import '../../core/theme/app_colors.dart';
-
 class LoadingWidget extends StatelessWidget {
   final bool isLoading;
   final String? message;

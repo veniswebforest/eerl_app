@@ -16,6 +16,7 @@ import 'core/providers/theme_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/router/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'core/utils/image_compressor.dart';
 import 'features/auth/data/auth_session_storage.dart';
 import 'features/auth/presentation/auth_provider.dart';
 import 'features/bootstrap/service/bootstrap_sync_service.dart';
@@ -23,6 +24,12 @@ import 'shared/widgets/network_status_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Android can terminate this process while its external camera activity is
+  // open. Recover that camera result before rebuilding the restored route.
+  // Do not hold the native splash screen while a vendor camera/plugin is
+  // finishing its Android activity-result recovery. Individual photo forms
+  // await the same initialization future before claiming their result.
+  unawaited(ImageCompressor.initializeLostDataRecovery());
   await AppDatabase.instance.database;
 
   final storedAccessToken = await AuthSessionStorage().getAccessToken();
@@ -115,11 +122,15 @@ class _EerlAppState extends State<EerlApp> with WidgetsBindingObserver {
       unawaited(() async {
         final token = await AuthSessionStorage().getAccessToken();
         // ignore: avoid_print
-        print('════════════════════════════════════════════════════════════════');
+        print(
+          '════════════════════════════════════════════════════════════════',
+        );
         // ignore: avoid_print
         print('🔑 [APP_RESUMED] ACCESS_TOKEN: ${token ?? 'not_found'}');
         // ignore: avoid_print
-        print('════════════════════════════════════════════════════════════════');
+        print(
+          '════════════════════════════════════════════════════════════════',
+        );
       }());
       unawaited(
         BootstrapSyncService.instance.triggerBootstrap(
@@ -141,6 +152,7 @@ class _EerlAppState extends State<EerlApp> with WidgetsBindingObserver {
     final localeProvider = context.watch<LocaleProvider>();
 
     return MaterialApp.router(
+      restorationScopeId: 'eerl-app',
       builder: (context, child) {
         return NetworkStatusOverlay(child: SafeAreaWrapper(child: child!));
       },

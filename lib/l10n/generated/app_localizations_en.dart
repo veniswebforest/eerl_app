@@ -999,6 +999,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskCompletedTime => 'Completed: Today, 11:30 AM';
 
   @override
+  String taskDueTodayAt(String time) {
+    return 'Due Today, $time';
+  }
+
+  @override
+  String taskDueTomorrowAt(String time) {
+    return 'Due Tomorrow, $time';
+  }
+
+  @override
+  String taskDueAt(String dateTime) {
+    return 'Due $dateTime';
+  }
+
+  @override
+  String get taskCompletedLabel => 'Completed';
+
+  @override
+  String taskCompletedTodayAt(String time) {
+    return 'Completed: Today, $time';
+  }
+
+  @override
+  String taskCompletedAt(String dateTime) {
+    return 'Completed: $dateTime';
+  }
+
+  @override
   String get taskListTime0900 => 'Today, 09:00 AM';
 
   @override
@@ -1159,11 +1187,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseSubmittedTitle => 'Expense Submitted!';
 
   @override
-  String get expenseSubmittedDeduction =>
-      '₹350 deducted from your wallet balance.';
+  String expenseSubmittedDeduction(String amount) {
+    return '₹$amount deducted from your wallet balance.';
+  }
 
   @override
-  String get expenseSubmittedBalance => 'Remaining Balance: ₹4,850';
+  String expenseSubmittedBalance(String balance) {
+    return 'Remaining Balance: ₹$balance';
+  }
 
   @override
   String get expenseBackToWallet => 'Back to Wallet';
@@ -1274,8 +1305,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cashDetailApprovedSupervisor => 'Approved by Supervisor';
 
   @override
-  String get cashDetailApprovedNote =>
-      'Note: ₹1,000 credited to your active cash wallet balance.';
+  String cashDetailApprovedNote(String amount) {
+    return 'Note: $amount credited to your active cash wallet balance.';
+  }
 
   @override
   String get cashDetailRejectReason => 'Invalid / Incomplete Request';
@@ -2068,7 +2100,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get taskDescriptionHint => 'Add Description';
 
   @override
-  String get taskDescriptionMinimum => 'Min 150 Characters';
+  String get taskDescriptionMinimum => 'Max 150 Characters';
 
   @override
   String get taskFilledDescription =>
@@ -2608,6 +2640,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requestCompletedStatus => 'Completed: Today, 11:30 AM';
 
   @override
+  String get requestCompletedLabel => 'Completed';
+
+  @override
+  String requestCompletedValue(String dateTime) {
+    return 'Completed: $dateTime';
+  }
+
+  @override
   String get requestDetailDescription =>
       'Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight, inspect all uploaded item photos (before and after verification), and ensure customer details and material categories match the system records before final approval.';
 
@@ -2683,6 +2723,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferDetailRequestedByValue => 'Rahul Patel';
+
+  @override
+  String get transferDetailEstimatedExpense => 'Estimated Expense';
+
+  @override
+  String get transferDetailEstimatedExpenseValue => '₹ 900';
 
   @override
   String get transferDetailRequestStatus => 'Request Status';
@@ -4256,4 +4302,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supervisorTransferBackToRequests => 'Back to Requests';
+
+  @override
+  String get offlineStatus => 'Offline';
+
+  @override
+  String get offlineStatusSubtitle => 'No internet connection';
 }

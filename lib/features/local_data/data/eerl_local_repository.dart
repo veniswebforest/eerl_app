@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
@@ -7,11 +9,22 @@ class EerlLocalRepository {
 
   static final EerlLocalRepository instance = EerlLocalRepository();
   final EerlLocalDataSource _local;
+  final ValueNotifier<String?> activeCenterNotifier =
+      ValueNotifier<String?>(null);
 
   Future<String?> get currentUserId => _local.currentUserId;
-  Future<String?> get activeCenterId => _local.activeCenterId;
+  Future<String?> get activeCenterId async {
+    final id = await _local.activeCenterId;
+    if (activeCenterNotifier.value != id) {
+      activeCenterNotifier.value = id;
+    }
+    return id;
+  }
   Future<String?> get activeRole => _local.activeRole;
-  Future<void> selectCenter(String id) => _local.selectCenter(id);
+  Future<void> selectCenter(String id) async {
+    await _local.selectCenter(id);
+    activeCenterNotifier.value = id;
+  }
   Future<List<MyRoleModel>> getRoles() => _local.getRoles();
   Future<List<CenterModel>> getCenters() => _local.getCenters();
   Future<List<CenterModel>> getMyCenters() => _local.getMyCenters();
@@ -21,8 +34,9 @@ class EerlLocalRepository {
   Future<ProfileModel> getProfile() => _local.getProfile();
   Future<AgentHomeSummaryModel> getAgentHomeSummary() =>
       _local.getAgentHomeSummary();
-  Future<SupervisorHomeSummaryModel> getSupervisorHomeSummary() =>
-      _local.getSupervisorHomeSummary();
+  Future<SupervisorHomeSummaryModel> getSupervisorHomeSummary({
+    String? centerId,
+  }) => _local.getSupervisorHomeSummary(centerId: centerId);
   Future<List<CenterChannelModel>> getChannels({String? centerId}) =>
       _local.getChannels(centerId: centerId);
   Future<List<ItemModel>> getItems({
@@ -326,6 +340,8 @@ class EerlLocalRepository {
     bool supervisor = false,
     String search = '',
   }) => _local.getRequests(supervisor: supervisor, search: search);
+  Future<RequestModel?> getRequest(String requestId) =>
+      _local.getRequest(requestId);
   Future<void> answerRequest({
     required String requestId,
     required String notes,

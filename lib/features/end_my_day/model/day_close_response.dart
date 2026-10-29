@@ -30,7 +30,7 @@ class DayCloseData {
 
   final String centerId;
   final String date;
-  final String lockTime;
+  final String? lockTime;
   final bool canClose;
   final String? blockedReason;
   final int openDrafts;
@@ -42,7 +42,7 @@ class DayCloseData {
   factory DayCloseData.fromJson(Map<String, dynamic> json) => DayCloseData(
     centerId: json['centerId']?.toString() ?? '',
     date: json['date']?.toString() ?? '',
-    lockTime: json['lockTime']?.toString() ?? '',
+    lockTime: json['lockTime']?.toString(),
     canClose: json['canClose'] == true,
     blockedReason: json['blockedReason']?.toString(),
     openDrafts: _integer(json['openDrafts']),
@@ -133,16 +133,49 @@ class DayCloseCollectionsSummary {
 }
 
 class DayCloseCollectionUnit {
-  const DayCloseCollectionUnit({required this.unit, required this.quantity});
+  const DayCloseCollectionUnit({
+    required this.unit,
+    required this.quantity,
+    this.unitName,
+    this.verifiedQty,
+  });
 
   final String unit;
   final double quantity;
+  final String? unitName;
+  final double? verifiedQty;
 
-  factory DayCloseCollectionUnit.fromJson(Map<String, dynamic> json) =>
-      DayCloseCollectionUnit(
-        unit: json['unit']?.toString() ?? '',
-        quantity: _number(json['quantity']),
-      );
+  double get effectiveQuantity => verifiedQty ?? quantity;
+
+  factory DayCloseCollectionUnit.fromJson(Map<String, dynamic> json) {
+    final rawUnit = json['unit'];
+    final String unitCode;
+    final String? unitName;
+    if (rawUnit is Map) {
+      unitCode = rawUnit['code']?.toString() ??
+          rawUnit['unit']?.toString() ??
+          rawUnit['name']?.toString() ??
+          '';
+      unitName = rawUnit['name']?.toString();
+    } else {
+      unitCode = rawUnit?.toString() ?? '';
+      unitName = null;
+    }
+
+    final verified = json.containsKey('verifiedQty') && json['verifiedQty'] != null
+        ? _number(json['verifiedQty'])
+        : null;
+    final qty = _number(
+      json['verifiedQty'] ?? json['quantity'] ?? json['qty'],
+    );
+
+    return DayCloseCollectionUnit(
+      unit: unitCode,
+      quantity: qty,
+      unitName: unitName,
+      verifiedQty: verified,
+    );
+  }
 }
 
 class DayCloseExpensesSummary {
@@ -169,13 +202,16 @@ class DayCloseScreenData {
   final int pendingSyncCount;
   final String? eodLockTime;
 
-  String get effectiveLockTime {
+  String? get effectiveLockTime {
     final centerLockTime = eodLockTime?.trim();
     if (centerLockTime != null && _validClockTime(centerLockTime)) {
       return centerLockTime;
     }
-    final apiLockTime = dayClose.lockTime.trim();
-    return _validClockTime(apiLockTime) ? apiLockTime : '18:00:00';
+    final apiLockTime = dayClose.lockTime?.trim();
+    if (apiLockTime != null && _validClockTime(apiLockTime)) {
+      return apiLockTime;
+    }
+    return null;
   }
 }
 

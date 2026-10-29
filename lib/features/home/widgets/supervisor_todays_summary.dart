@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
@@ -32,6 +34,13 @@ class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
     )..load();
     _bootstrapRevision = BootstrapSyncService.instance.revision;
     BootstrapSyncService.instance.addListener(_reloadAfterBootstrap);
+    EerlLocalRepository.instance.activeCenterNotifier.addListener(
+      _reloadAfterCenterChange,
+    );
+  }
+
+  void _reloadAfterCenterChange() {
+    if (mounted) _controller.load();
   }
 
   void _reloadAfterBootstrap() {
@@ -43,6 +52,9 @@ class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
 
   @override
   void dispose() {
+    EerlLocalRepository.instance.activeCenterNotifier.removeListener(
+      _reloadAfterCenterChange,
+    );
     BootstrapSyncService.instance.removeListener(_reloadAfterBootstrap);
     _controller.dispose();
     super.dispose();
@@ -61,6 +73,7 @@ class _SupervisorTodaysSummaryState extends State<SupervisorTodaysSummary> {
             label: context.l10n.supervisorActiveAgents,
             value: TextSpan(text: '${summary?.activeAgents ?? 0}'),
             valueColor: AppColors.secondary500,
+            onTap: () => context.push(AppRoutes.agentStatus),
           ),
           _SupervisorSummaryItem(
             icon: HomeAssets.supervisorTransportsDone,
@@ -182,6 +195,7 @@ class _SupervisorSummaryItem {
     required this.label,
     required this.value,
     required this.valueColor,
+    this.onTap,
   });
 
   final String icon;
@@ -189,6 +203,7 @@ class _SupervisorSummaryItem {
   final String label;
   final InlineSpan value;
   final Color valueColor;
+  final VoidCallback? onTap;
 }
 
 class _SupervisorSummaryCard extends StatelessWidget {
@@ -198,8 +213,8 @@ class _SupervisorSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 144,
+    final card = Container(
+      height: 125,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.neutral50,
@@ -220,17 +235,14 @@ class _SupervisorSummaryCard extends StatelessWidget {
             child: SvgPicture.asset(item.icon),
           ),
           const SizedBox(height: 8),
-          SizedBox(
-            height: 38,
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                item.label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.semiboldH9_14.copyWith(
-                  color: AppColors.neutral900,
-                ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              item.label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.semiboldH9_14.copyWith(
+                color: AppColors.neutral900,
               ),
             ),
           ),
@@ -243,7 +255,7 @@ class _SupervisorSummaryCard extends StatelessWidget {
               child: Text.rich(
                 item.value,
                 maxLines: 1,
-                style: AppTextStyles.semiboldH6_20.copyWith(
+                style: AppTextStyles.semiboldH7_18.copyWith(
                   color: item.valueColor,
                 ),
               ),
@@ -252,5 +264,18 @@ class _SupervisorSummaryCard extends StatelessWidget {
         ],
       ),
     );
+
+    if (item.onTap != null) {
+      return Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: item.onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: card,
+        ),
+      );
+    }
+    return card;
   }
 }

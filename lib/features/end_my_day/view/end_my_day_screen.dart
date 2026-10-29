@@ -147,20 +147,23 @@ class _EndMyDayScreenState extends State<EndMyDayScreen> {
     return DateTime(now.year, now.month, now.day, hour, minute, second);
   }
 
-  bool _isAfterLockTime(String lockTime) {
+  bool _isAfterLockTime(String? lockTime) {
+    if (lockTime == null || lockTime.trim().isEmpty) return true;
     final lockDateTime = _lockDateTime(lockTime);
     return lockDateTime != null && !_now().isBefore(lockDateTime);
   }
 
-  String _lockTimeLabel(String lockTime) {
+  String? _lockTimeLabel(String? lockTime) {
+    if (lockTime == null || lockTime.trim().isEmpty) return null;
     final lockDateTime = _lockDateTime(lockTime);
     return lockDateTime == null
         ? lockTime
         : DateFormat('h:mm a').format(lockDateTime);
   }
 
-  void _scheduleLockTimeRefresh(String lockTime) {
+  void _scheduleLockTimeRefresh(String? lockTime) {
     _lockTimeTimer?.cancel();
+    if (lockTime == null || lockTime.trim().isEmpty) return;
     final now = _now();
     final lockDateTime = _lockDateTime(lockTime);
     if (lockDateTime == null || !now.isBefore(lockDateTime)) return;
@@ -297,7 +300,7 @@ class _AgentEndDayContent extends StatelessWidget {
 
   final DayCloseScreenData data;
   final bool isAfterLockTime;
-  final String lockTimeLabel;
+  final String? lockTimeLabel;
   final Future<void> Function(String centerId) onCloseDay;
 
   static final _currency = NumberFormat.currency(
@@ -309,15 +312,17 @@ class _AgentEndDayContent extends StatelessWidget {
   String _money(double value) => _currency.format(value);
 
   String _wasteCollected(DayCloseCollectionsSummary collections) {
-    if (collections.byUnit.isEmpty) return '0';
+    if (collections.byUnit.isEmpty) return '0 KG';
     return collections.byUnit
         .map((item) {
-          final quantity = item.quantity == item.quantity.roundToDouble()
-              ? item.quantity.toInt().toString()
-              : item.quantity.toStringAsFixed(2);
-          return '$quantity ${item.unit}'.trim();
+          final qty = item.effectiveQuantity;
+          final quantity = qty == qty.roundToDouble()
+              ? qty.toInt().toString()
+              : qty.toStringAsFixed(2);
+          final unit = item.unit.trim().toUpperCase();
+          return '$quantity $unit'.trim();
         })
-        .join(', ');
+        .join(' / ');
   }
 
   @override
@@ -353,6 +358,12 @@ class _AgentEndDayContent extends StatelessWidget {
             ? AppColors.yellow600
             : AppColors.neutral950,
       ),
+      if (summary.collections.rejected > 0)
+        EndDayActivityItem(
+          label: l10n.supervisorEndDayRejectedCollections,
+          value: summary.collections.rejected.toString(),
+          valueColor: AppColors.red600,
+        ),
       EndDayActivityItem(
         label: l10n.endDayOfflineSync,
         value: data.pendingSyncCount.toString(),
@@ -420,11 +431,14 @@ class _AgentEndDayContent extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          !isAfterLockTime
-                              ? l10n.endDayCloseAfterTime(lockTimeLabel)
+                          !isAfterLockTime && lockTimeLabel != null
+                              ? l10n.endDayCloseAfterTime(lockTimeLabel!)
                               : dayClose.blockedReason == 'BEFORE_LOCK_TIME' &&
-                                    dayClose.lockTime.isNotEmpty
-                              ? l10n.endDayCloseAfterTime(lockTimeLabel)
+                                    lockTimeLabel != null
+                              ? l10n.endDayCloseAfterTime(lockTimeLabel!)
+                              : dayClose.blockedReason == 'OPEN_DRAFTS' ||
+                                    dayClose.openDrafts > 0
+                              ? '${dayClose.openDrafts} ${l10n.endDayPendingCollections}'
                               : l10n.endDayCloseBlocked,
                           textAlign: TextAlign.center,
                           style: AppTextStyles.mediumSH9_12.copyWith(
@@ -555,7 +569,7 @@ class _ClosingBalanceCard extends StatelessWidget {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
             color: AppColors.primary100,
             borderRadius: BorderRadius.circular(8),
@@ -564,10 +578,13 @@ class _ClosingBalanceCard extends StatelessWidget {
             children: [
               Text(label, style: AppTextStyles.mediumSH8_14),
               const SizedBox(height: 4),
-              Text(
-                value,
-                style: AppTextStyles.semiboldH5_24.copyWith(
-                  color: AppColors.primary600,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  value,
+                  style: AppTextStyles.semiboldH5_24.copyWith(
+                    color: AppColors.primary600,
+                  ),
                 ),
               ),
             ],

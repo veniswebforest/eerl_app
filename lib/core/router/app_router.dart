@@ -75,6 +75,8 @@ class AppRouter {
     final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
     return GoRouter(
       navigatorKey: rootNavigatorKey,
+      restorationScopeId: 'eerl-router',
+      extraCodec: const AppRouteExtraCodec(),
       initialLocation: initialLocation,
       routes: _routes(rootNavigatorKey, homeBuilder),
       errorBuilder: (context, state) => const _ErrorPage(),
@@ -133,18 +135,26 @@ class AppRouter {
     GoRoute(
       path: AppRoutes.expenseSubmitted,
       parentNavigatorKey: rootNavigatorKey,
-      pageBuilder: (_, state) => CustomTransitionPage<void>(
-        key: state.pageKey,
-        opaque: false,
-        barrierColor: Colors.transparent,
-        transitionDuration: const Duration(milliseconds: 180),
-        reverseTransitionDuration: const Duration(milliseconds: 140),
-        transitionsBuilder: (_, animation, _, child) => FadeTransition(
-          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
-          child: child,
-        ),
-        child: const ExpenseSubmittedScreen(),
-      ),
+      pageBuilder: (_, state) {
+        final data = state.extra as ExpenseSubmittedRouteData?;
+        return CustomTransitionPage<void>(
+          key: state.pageKey,
+          opaque: false,
+          barrierColor: Colors.transparent,
+          transitionDuration: const Duration(milliseconds: 180),
+          reverseTransitionDuration: const Duration(milliseconds: 140),
+          transitionsBuilder: (_, animation, _, child) => FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+            child: child,
+          ),
+          child: data == null
+              ? const _ErrorPage()
+              : ExpenseSubmittedScreen(
+                  amount: data.amount,
+                  remainingBalance: data.remainingBalance,
+                ),
+        );
+      },
     ),
     GoRoute(
       path: AppRoutes.expenseClaimDetail,
@@ -170,15 +180,12 @@ class AppRouter {
       builder: (_, state) {
         final extra = state.extra;
         final request = extra is CashRequestModel ? extra : null;
-        final status = request == null
-            ? extra is CashRequestDetailStatus
-                  ? extra
-                  : CashRequestDetailStatus.pending
-            : switch (request.status.toUpperCase()) {
-                'APPROVED' || 'CREDITED' => CashRequestDetailStatus.approved,
-                'REJECTED' => CashRequestDetailStatus.rejected,
-                _ => CashRequestDetailStatus.pending,
-              };
+        if (request == null) return const _ErrorPage();
+        final status = switch (request.status.toUpperCase()) {
+          'APPROVED' || 'CREDITED' => CashRequestDetailStatus.approved,
+          'REJECTED' => CashRequestDetailStatus.rejected,
+          _ => CashRequestDetailStatus.pending,
+        };
         return CashRequestDetailScreen(cashRequest: request, status: status);
       },
     ),

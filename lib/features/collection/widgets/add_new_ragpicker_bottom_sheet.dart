@@ -11,7 +11,9 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_required_text.dart';
 import 'package:eerl_app/shared/widgets/app_mobile_number_field.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
 
 class NewRagpickerInput {
   const NewRagpickerInput({
@@ -61,12 +63,25 @@ class AddNewRagpickerBottomSheet extends StatefulWidget {
 
 class _AddNewRagpickerBottomSheetState
     extends State<AddNewRagpickerBottomSheet> {
+  static const _cameraRecoveryId = 'collection.ragpicker.add';
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _aadharController = TextEditingController();
   XFile? _photo;
   final ImagePicker _imagePicker = ImagePicker();
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreCameraResult();
+  }
+
+  Future<void> _restoreCameraResult() async {
+    final image = await ImageCompressor.claimRecoveredImage(_cameraRecoveryId);
+    if (image == null || !mounted) return;
+    setState(() => _photo = image);
+  }
 
   @override
   void dispose() {
@@ -78,11 +93,13 @@ class _AddNewRagpickerBottomSheetState
 
   Future<void> _pickImage() async {
     try {
-      final image = await ImageCompressor.pickAndCompress(
+      final image = await InAppCameraScreen.capture(
+        context,
         picker: _imagePicker,
-        source: ImageSource.camera,
+        recoveryId: _cameraRecoveryId,
+        title: 'Capture Ragpicker Photo',
       );
-      if (image != null) {
+      if (image != null && mounted) {
         setState(() => _photo = image);
       }
     } catch (_) {}
@@ -318,7 +335,12 @@ class _AddNewRagpickerBottomSheetState
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.file(File(_photo!.path), fit: BoxFit.cover),
+              InkWell(
+                key: const Key('new-ragpicker-photo-preview'),
+                onTap: () =>
+                    AppImagePreviewDialog.showSource(context, _photo!.path),
+                child: Image.file(File(_photo!.path), fit: BoxFit.cover),
+              ),
               Positioned(
                 top: 8,
                 right: 8,

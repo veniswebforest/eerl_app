@@ -5,9 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:intl/intl.dart';
 
 class ExpenseSubmittedScreen extends StatelessWidget {
-  const ExpenseSubmittedScreen({super.key});
+  const ExpenseSubmittedScreen({
+    super.key,
+    required this.amount,
+    this.remainingBalance,
+  });
+
+  /// Nullable only to keep an already-mounted pre-hot-reload/restored dialog
+  /// from crashing when this field did not exist in the older widget shape.
+  /// Every new expense submission supplies the committed amount.
+  final double? amount;
+  final double? remainingBalance;
+
+  String _money(double value) => NumberFormat.currency(
+    locale: 'en_IN',
+    symbol: '',
+    decimalDigits: 2,
+  ).format(value).trim();
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -49,22 +66,30 @@ class ExpenseSubmittedScreen extends StatelessWidget {
                           color: AppColors.neutral950,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        context.l10n.expenseSubmittedDeduction,
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.mediumSH8_14.copyWith(
-                          color: AppColors.neutral600,
+                      if (amount != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          context.l10n.expenseSubmittedDeduction(
+                            _money(amount!),
+                          ),
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.mediumSH8_14.copyWith(
+                            color: AppColors.neutral600,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n.expenseSubmittedBalance,
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.mediumSH8_14.copyWith(
-                          color: AppColors.neutral600,
+                      ],
+                      if (remainingBalance != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          context.l10n.expenseSubmittedBalance(
+                            _money(remainingBalance!),
+                          ),
+                          textAlign: TextAlign.center,
+                          style: AppTextStyles.mediumSH8_14.copyWith(
+                            color: AppColors.neutral600,
+                          ),
                         ),
-                      ),
+                      ],
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,

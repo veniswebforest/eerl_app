@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
+import 'package:eerl_app/core/router/app_route_data.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
@@ -19,6 +20,7 @@ import '../widgets/request_new_expense_category_dialog.dart';
 import '../widgets/wallet_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
+import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
 import 'package:go_router/go_router.dart';
 
 typedef ExpenseSaver =
@@ -47,6 +49,7 @@ class LogExpenseScreen extends StatefulWidget {
 }
 
 class _LogExpenseScreenState extends State<LogExpenseScreen> {
+  static const _cameraRecoveryId = 'expense.log.receipt';
   final _amountController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _imagePicker = ImagePicker();
@@ -73,6 +76,13 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
     } else {
       unawaited(_loadCategories());
     }
+    _restoreCameraResult();
+  }
+
+  Future<void> _restoreCameraResult() async {
+    final photo = await ImageCompressor.claimRecoveredImage(_cameraRecoveryId);
+    if (photo == null || !mounted || _receiptPhotos.length >= 2) return;
+    setState(() => _receiptPhotos.add(photo));
   }
 
   @override
@@ -119,9 +129,11 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
     final picker = widget.receiptPhotoPicker;
     final photo = picker != null
         ? await picker()
-        : await ImageCompressor.pickAndCompress(
+        : await InAppCameraScreen.capture(
+            context,
             picker: _imagePicker,
-            source: ImageSource.camera,
+            recoveryId: _cameraRecoveryId,
+            title: 'Capture Receipt Photo',
           );
     if (photo == null || !mounted) return;
     setState(() => _receiptPhotos.add(photo));
@@ -145,7 +157,21 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
       );
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
       if (!mounted) return;
-      final submitted = await context.push<bool>(AppRoutes.expenseSubmitted);
+      double? remainingBalance;
+      try {
+        final summary = await EerlLocalRepository.instance.getWalletSummary();
+        remainingBalance = summary.balanceNow;
+      } catch (error) {
+        AppLogger.error('EXPENSE_BALANCE_LOAD', error.toString());
+      }
+      if (!mounted) return;
+      final submitted = await context.push<bool>(
+        AppRoutes.expenseSubmitted,
+        extra: ExpenseSubmittedRouteData(
+          amount: amount,
+          remainingBalance: remainingBalance,
+        ),
+      );
       if (submitted == true && mounted) Navigator.of(context).pop();
     } catch (error) {
       AppLogger.error('EXPENSE_SAVE', error.toString());

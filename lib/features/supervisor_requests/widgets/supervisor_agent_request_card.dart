@@ -13,10 +13,12 @@ class SupervisorAgentRequestCard extends StatelessWidget {
     super.key,
     required this.item,
     required this.onTap,
+    this.showClosedTimestamp = false,
   });
 
   final RequestModel item;
   final VoidCallback onTap;
+  final bool showClosedTimestamp;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -141,7 +143,8 @@ class SupervisorAgentRequestCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      _formatCreatedAt(item.createdAt),
+                      _formatListTime(),
+                      key: ValueKey('supervisor-request-time-${item.id}'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
@@ -163,7 +166,10 @@ class SupervisorAgentRequestCard extends StatelessWidget {
     return IstDateTime.formatUtc(value, 'dd MMM, h:mm a');
   }
 
-  String _formatCreatedAt(String value) {
+  String _formatListTime() {
+    final value = showClosedTimestamp
+        ? item.answeredAt ?? item.createdAt
+        : item.createdAt;
     final parsed = DateTime.tryParse(value);
     return parsed == null
         ? value

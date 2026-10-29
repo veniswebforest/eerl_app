@@ -173,6 +173,9 @@ class _SupervisorAgentRequestsScreenState
                           final item = _items[index];
                           return SupervisorAgentRequestCard(
                             item: item,
+                            showClosedTimestamp:
+                                _status ==
+                                SupervisorAgentRequestStatus.resolved,
                             onTap: () => _openRequest(item),
                           );
                         },

@@ -998,6 +998,34 @@ class AppLocalizationsHi extends AppLocalizations {
   String get taskCompletedTime => 'पूर्ण: आज, सुबह 11:30 बजे';
 
   @override
+  String taskDueTodayAt(String time) {
+    return 'आज, $time तक';
+  }
+
+  @override
+  String taskDueTomorrowAt(String time) {
+    return 'कल, $time तक';
+  }
+
+  @override
+  String taskDueAt(String dateTime) {
+    return '$dateTime तक';
+  }
+
+  @override
+  String get taskCompletedLabel => 'पूर्ण';
+
+  @override
+  String taskCompletedTodayAt(String time) {
+    return 'पूर्ण: आज, $time';
+  }
+
+  @override
+  String taskCompletedAt(String dateTime) {
+    return 'पूर्ण: $dateTime';
+  }
+
+  @override
   String get taskListTime0900 => 'आज, 09:00 AM';
 
   @override
@@ -1159,10 +1187,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get expenseSubmittedTitle => 'व्यय जमा हो गया!';
 
   @override
-  String get expenseSubmittedDeduction => 'आपके वॉलेट बैलेंस से ₹350 काटे गए।';
+  String expenseSubmittedDeduction(String amount) {
+    return 'आपके वॉलेट बैलेंस से ₹$amount काटे गए।';
+  }
 
   @override
-  String get expenseSubmittedBalance => 'शेष राशि: ₹4,850';
+  String expenseSubmittedBalance(String balance) {
+    return 'शेष राशि: ₹$balance';
+  }
 
   @override
   String get expenseBackToWallet => 'वॉलेट पर वापस जाएँ';
@@ -1275,8 +1307,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get cashDetailApprovedSupervisor => 'सुपरवाइज़र द्वारा स्वीकृत';
 
   @override
-  String get cashDetailApprovedNote =>
-      'नोट: ₹1,000 आपके सक्रिय नकद वॉलेट बैलेंस में जमा किए गए।';
+  String cashDetailApprovedNote(String amount) {
+    return 'नोट: $amount आपके सक्रिय नकद वॉलेट बैलेंस में जमा किए गए।';
+  }
 
   @override
   String get cashDetailRejectReason => 'अमान्य / अधूरा अनुरोध';
@@ -2069,7 +2102,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get taskDescriptionHint => 'विवरण जोड़ें';
 
   @override
-  String get taskDescriptionMinimum => 'न्यूनतम 150 अक्षर';
+  String get taskDescriptionMinimum => 'अधिकतम 150 अक्षर';
 
   @override
   String get taskFilledDescription =>
@@ -2610,6 +2643,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get requestCompletedStatus => 'पूर्ण: आज, 11:30 AM';
 
   @override
+  String get requestCompletedLabel => 'पूर्ण';
+
+  @override
+  String requestCompletedValue(String dateTime) {
+    return 'पूर्ण: $dateTime';
+  }
+
+  @override
   String get requestDetailDescription =>
       'फील्ड एजेंट द्वारा जमा की गई नवीनतम कलेक्शन एंट्री की समीक्षा और सत्यापन करें। दर्ज कलेक्शन वज़न को सत्यापित वज़न से मिलाएँ, अपलोड किए गए सभी फ़ोटो जाँचें और अंतिम स्वीकृति से पहले ग्राहक तथा सामग्री विवरण का सिस्टम रिकॉर्ड से मिलान सुनिश्चित करें।';
 
@@ -2684,6 +2725,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get transferDetailRequestedByValue => 'राहुल पटेल';
+
+  @override
+  String get transferDetailEstimatedExpense => 'अनुमानित खर्च';
+
+  @override
+  String get transferDetailEstimatedExpenseValue => '₹ 900';
 
   @override
   String get transferDetailRequestStatus => 'अनुरोध स्थिति';
@@ -4247,4 +4294,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get supervisorTransferBackToRequests => 'अनुरोधों पर वापस जाएं';
+
+  @override
+  String get offlineStatus => 'ऑफ़लाइन';
+
+  @override
+  String get offlineStatusSubtitle => 'इंटरनेट कनेक्शन उपलब्ध नहीं है';
 }

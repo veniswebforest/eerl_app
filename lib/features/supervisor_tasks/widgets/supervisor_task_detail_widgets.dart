@@ -4,6 +4,7 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/supervisor_tasks/model/supervisor_task_detail_status.dart';
 import 'package:eerl_app/features/supervisor_tasks/widgets/supervisor_task_assets.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -142,9 +143,18 @@ class SupervisorTaskDetailCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                       child: AspectRatio(
                         aspectRatio: 143.5 / 92,
-                        child: CachedAppImage(
-                          source: visibleImages[index],
-                          fit: BoxFit.cover,
+                        child: Material(
+                          color: AppColors.cool100,
+                          child: InkWell(
+                            onTap: () => AppImagePreviewDialog.showSource(
+                              context,
+                              visibleImages[index],
+                            ),
+                            child: CachedAppImage(
+                              source: visibleImages[index],
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                       ),
                     ),

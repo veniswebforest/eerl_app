@@ -19,6 +19,7 @@ import 'package:eerl_app/shared/widgets/app_message_banner.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import '../widgets/collection_detail_assets.dart';
 import '../widgets/collection_detail_cards.dart';
 import '../widgets/collection_material_card.dart';
@@ -229,12 +230,13 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
               const SizedBox(height: 12),
               _UnitSummaryCard(
                 items: items,
-                totalPrice:
-                    collection.totalAmount ??
-                    items.fold<double>(
-                      0,
-                      (sum, item) => sum + (item.amount ?? 0),
-                    ),
+                totalPrice: collection.showPrice
+                    ? collection.totalAmount ??
+                          items.fold<double>(
+                            0,
+                            (sum, item) => sum + (item.amount ?? 0),
+                          )
+                    : null,
               ),
               const SizedBox(height: 16),
               if (isDraft) ...[
@@ -327,10 +329,7 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
       }
     }
     if (!mounted) return;
-    await context.push<void>(
-      AppRoutes.collectionImagePreview,
-      extra: imageProvider,
-    );
+    await AppImagePreviewDialog.show(context, imageProvider: imageProvider);
   }
 
   (CollectionModel, List<CollectionItemModel>) _mockData(
@@ -441,7 +440,7 @@ class _VehiclePhotoCard extends StatelessWidget {
 class _UnitSummaryCard extends StatelessWidget {
   const _UnitSummaryCard({required this.items, required this.totalPrice});
   final List<CollectionItemModel> items;
-  final double totalPrice;
+  final double? totalPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -495,7 +494,9 @@ class _UnitSummaryCard extends StatelessWidget {
           const Divider(height: 26, color: AppColors.primary800),
           _SummaryLine(
             label: context.l10n.collectionDetailTotalPrice,
-            value: '₹${NumberFormat('#,##0.00').format(totalPrice)}',
+            value: totalPrice == null
+                ? '-'
+                : '₹${NumberFormat('#,##0.00').format(totalPrice)}',
             highlighted: true,
           ),
         ],

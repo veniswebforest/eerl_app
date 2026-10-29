@@ -15,31 +15,20 @@ class CashRequestDetailScreen extends StatelessWidget {
   const CashRequestDetailScreen({
     super.key,
     required this.status,
-    this.cashRequest,
+    required this.cashRequest,
   });
 
   final CashRequestDetailStatus status;
-  final CashRequestModel? cashRequest;
+  final CashRequestModel cashRequest;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final fallbackReference = switch (status) {
-      CashRequestDetailStatus.pending => l10n.cashDetailPendingReference,
-      CashRequestDetailStatus.approved => l10n.cashDetailApprovedReference,
-      CashRequestDetailStatus.rejected => l10n.cashDetailRejectedReference,
-    };
-    final fallbackCategory = status == CashRequestDetailStatus.pending
-        ? l10n.cashReasonEmergencyFuel
-        : l10n.cashReasonDailyAdvance;
     final reference = _valueOrFallback(
-      cashRequest?.number,
-      fallback: cashRequest?.id ?? fallbackReference,
+      cashRequest.number,
+      fallback: cashRequest.id,
     );
-    final category = _valueOrFallback(
-      cashRequest?.reason,
-      fallback: fallbackCategory,
-    );
+    final category = _valueOrFallback(cashRequest.reason);
     final statusLabel = switch (status) {
       CashRequestDetailStatus.pending => l10n.cashDetailWaitingApproval,
       CashRequestDetailStatus.approved => l10n.cashDetailApprovedSupervisor,
@@ -85,30 +74,24 @@ class CashRequestDetailScreen extends StatelessWidget {
                           const _DetailDivider(),
                           ExpenseDetailRow(
                             label: l10n.expenseDetailAmount,
-                            value: cashRequest == null
-                                ? l10n.cashDetailAmountValue
-                                : NumberFormat.currency(
-                                    locale: 'en_IN',
-                                    symbol: '₹',
-                                    decimalDigits: 2,
-                                  ).format(cashRequest!.amount),
+                            value: NumberFormat.currency(
+                              locale: 'en_IN',
+                              symbol: '₹',
+                              decimalDigits: 2,
+                            ).format(cashRequest.amount),
                           ),
                           const _DetailDivider(),
-                          if (cashRequest != null) ...[
-                            ExpenseDetailRow(
-                              label: l10n.expenseRequestedBy,
-                              value: _valueOrFallback(
-                                cashRequest?.requestedByName,
-                                fallback: cashRequest?.requestedBy,
-                              ),
+                          ExpenseDetailRow(
+                            label: l10n.expenseRequestedBy,
+                            value: _valueOrFallback(
+                              cashRequest.requestedByName,
+                              fallback: cashRequest.requestedBy,
                             ),
-                            const _DetailDivider(),
-                          ],
+                          ),
+                          const _DetailDivider(),
                           ExpenseDetailRow(
                             label: l10n.expenseDateTime,
-                            value: cashRequest == null
-                                ? l10n.cashDetailDateTimeValue
-                                : _formattedDate(cashRequest?.createdAt),
+                            value: _formattedDate(cashRequest.createdAt),
                           ),
                           const _DetailDivider(),
                           Text(
@@ -125,7 +108,13 @@ class CashRequestDetailScreen extends StatelessWidget {
                           if (status == CashRequestDetailStatus.approved) ...[
                             const SizedBox(height: 8),
                             Text(
-                              l10n.cashDetailApprovedNote,
+                              l10n.cashDetailApprovedNote(
+                                NumberFormat.currency(
+                                  locale: 'en_IN',
+                                  symbol: '₹',
+                                  decimalDigits: 2,
+                                ).format(cashRequest.amount),
+                              ),
                               style: AppTextStyles.mediumSH9_12.copyWith(
                                 color: AppColors.neutral700,
                               ),
@@ -147,10 +136,7 @@ class CashRequestDetailScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            _valueOrFallback(
-                              cashRequest?.reason,
-                              fallback: l10n.expenseDetailDescription,
-                            ),
+                            _valueOrFallback(cashRequest.reason),
                             style: AppTextStyles.mediumSH9_12.copyWith(
                               color: AppColors.neutral900,
                             ),
@@ -176,22 +162,16 @@ class CashRequestDetailScreen extends StatelessWidget {
                             const SizedBox(height: 12),
                             _LabeledParagraph(
                               label: l10n.expenseRejectReasonLabel,
-                              value: _valueOrFallback(
-                                cashRequest?.decisionNote,
-                                fallback: l10n.cashDetailRejectReason,
-                              ),
+                              value: _valueOrFallback(cashRequest.decisionNote),
                             ),
-                            if (cashRequest == null ||
-                                cashRequest?.decisionRemarks
-                                        ?.trim()
-                                        .isNotEmpty ==
-                                    true) ...[
+                            if (cashRequest.decisionRemarks
+                                    ?.trim()
+                                    .isNotEmpty ==
+                                true) ...[
                               const SizedBox(height: 8),
                               _LabeledParagraph(
                                 label: l10n.expenseRejectRemarksLabel,
-                                value: cashRequest == null
-                                    ? l10n.cashDetailRejectRemarks
-                                    : cashRequest!.decisionRemarks!.trim(),
+                                value: cashRequest.decisionRemarks!.trim(),
                               ),
                             ],
                           ],
