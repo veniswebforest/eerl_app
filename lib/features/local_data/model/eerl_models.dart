@@ -1165,6 +1165,7 @@ class TaskModel {
     this.dueAt,
     this.completedAt,
     required this.photoUrls,
+    this.referencePhotoUrls = const [],
     required this.createdAt,
     required this.syncState,
   });
@@ -1184,6 +1185,7 @@ class TaskModel {
   final String? dueAt;
   final String? completedAt;
   final List<String> photoUrls;
+  final List<String> referencePhotoUrls;
   final String createdAt;
   final String syncState;
   factory TaskModel.fromMap(DbMap map) => TaskModel(
@@ -1203,6 +1205,7 @@ class TaskModel {
     dueAt: map['due_at'] as String?,
     completedAt: map['completed_at'] as String?,
     photoUrls: _strings(map['photo_urls']),
+    referencePhotoUrls: _strings(map['reference_photo_urls']),
     createdAt: map['created_at'] as String,
     syncState: map['sync_state'] as String,
   );
@@ -1222,6 +1225,7 @@ class TaskModel {
     'due_at': dueAt,
     'completed_at': completedAt,
     'photo_urls': _jsonStrings(photoUrls),
+    'reference_photo_urls': _jsonStrings(referencePhotoUrls),
     'created_at': createdAt,
     'sync_state': syncState,
   };

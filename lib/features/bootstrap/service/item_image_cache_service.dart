@@ -192,6 +192,7 @@ class ItemImageCacheService {
     await addColumn(DatabaseTables.transfers, 'vehicle_photo_urls');
     await addColumn(DatabaseTables.transfers, 'weighbridge_photo_urls');
     await addColumn(DatabaseTables.tasks, 'photo_urls');
+    await addColumn(DatabaseTables.tasks, 'reference_photo_urls');
     await addColumn(DatabaseTables.requests, 'photo_urls');
     await addColumn(DatabaseTables.photos, 'remote_url');
 

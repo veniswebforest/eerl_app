@@ -217,7 +217,7 @@ class _SupervisorTaskDetailScreenState
   }
 
   List<String> _attachmentImages(TaskModel? task) {
-    if (task != null) return task.photoUrls;
+    if (task != null) return task.referencePhotoUrls;
     return const [
       SupervisorTaskAssets.referencePhoto,
       SupervisorTaskAssets.referencePhoto,

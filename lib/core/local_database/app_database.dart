@@ -15,7 +15,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 11;
+  static const databaseVersion = 12;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -188,6 +188,42 @@ class AppDatabase {
     if (oldVersion < 11) {
       await _rebuildNotificationsWithRoleScope(db);
       _log('Added notification role and optional center scope in version 11');
+    }
+    if (oldVersion < 12) {
+      await _addMissingColumns(db, DatabaseTables.tasks, const {
+        'reference_photo_urls': "TEXT NOT NULL DEFAULT '[]'",
+      });
+      await db.rawUpdate(
+        '''
+        UPDATE ${DatabaseTables.tasks}
+        SET reference_photo_urls = photo_urls,
+            photo_urls = '[]'
+        WHERE EXISTS (
+          SELECT 1 FROM ${DatabaseTables.outbox} o
+          WHERE o.entity = ? AND o.entity_id = ${DatabaseTables.tasks}.id
+            AND o.kind = 'assign'
+        )
+          AND photo_urls <> '[]'
+      ''',
+        [DatabaseTables.tasks],
+      );
+      await db.update(
+        DatabaseTables.photos,
+        {'field': 'reference'},
+        where: 'owner_table = ? AND field = ?',
+        whereArgs: [DatabaseTables.tasks, 'assignment'],
+      );
+      await db.rawUpdate(
+        '''
+        UPDATE ${DatabaseTables.outbox}
+        SET status = 'queued', attempts = 0, last_error = NULL,
+            next_attempt_at = NULL
+        WHERE entity = ? AND method = 'PUT' AND status = 'failed'
+          AND last_error LIKE '%UNRECOGNIZED_KEYS%'
+      ''',
+        [DatabaseTables.tasks],
+      );
+      _log('Added task reference-photo schema in version 12');
     }
   }
 
@@ -397,7 +433,11 @@ class AppDatabase {
         'decided_at': 'TEXT',
         'decision_reason': 'TEXT',
       },
-      DatabaseTables.tasks: {'number': 'TEXT', 'note': 'TEXT'},
+      DatabaseTables.tasks: {
+        'number': 'TEXT',
+        'note': 'TEXT',
+        'reference_photo_urls': "TEXT NOT NULL DEFAULT '[]'",
+      },
       DatabaseTables.requests: {
         'number': 'TEXT',
         'follow_up_at': 'TEXT',

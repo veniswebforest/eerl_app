@@ -1,10 +1,16 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
+import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -22,6 +28,9 @@ void main() {
   });
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues({
+      AppConstants.accessTokenKey: 'task-token',
+    });
     await database.clearDatabaseOnLogout();
     await database.insert(DatabaseTables.centers, {
       'id': 'center-1',
@@ -73,7 +82,8 @@ void main() {
       expect(task['status'], 'PENDING');
       expect(task['priority'], 'HIGH');
       expect(task['due_at'], dueDate.toIso8601String());
-      expect(jsonDecode(task['photo_urls']! as String), ['/tmp/reference.jpg']);
+      expect(jsonDecode(task['photo_urls']! as String), isEmpty);
+      expect(jsonDecode(task['reference_photo_urls']! as String), isEmpty);
       expect(task['sync_state'], 'pending');
 
       final detail = await repository.getTask(taskId);
@@ -81,6 +91,8 @@ void main() {
       expect(detail!.centerName, 'Center One');
       expect(detail.title, 'Check ID cards');
       expect(detail.assignedToName, 'Agent One');
+      expect(detail.photoUrls, isEmpty);
+      expect(detail.referencePhotoUrls, ['/tmp/reference.jpg']);
 
       final outbox = (await database.query(DatabaseTables.outbox)).single;
       expect(outbox['method'], 'PUT');
@@ -92,7 +104,7 @@ void main() {
       final photos = await database.query(
         DatabaseTables.photos,
         where: 'owner_table = ? AND owner_id = ? AND field = ?',
-        whereArgs: [DatabaseTables.tasks, taskId, 'assignment'],
+        whereArgs: [DatabaseTables.tasks, taskId, 'reference'],
       );
       expect(photos, hasLength(1));
       expect(photos.single['local_path'], '/tmp/reference.jpg');
@@ -115,6 +127,98 @@ void main() {
       });
     },
   );
+
+  test('syncs reference photos without mixing completion proof', () async {
+    final reference = File(
+      p.join(await getDatabasesPath(), 'task-reference.jpg'),
+    );
+    await reference.writeAsBytes(const [1, 2, 3, 4]);
+    addTearDown(() async {
+      if (await reference.exists()) await reference.delete();
+    });
+    final dueDate = DateTime.now().toUtc().add(const Duration(days: 1));
+    final taskId = await repository.assignTask(
+      centerId: 'center-1',
+      assignedToId: 'agent-1',
+      title: 'Check ID cards',
+      description: 'Bring copies to the office.',
+      priority: 'LOW',
+      dueDate: dueDate,
+      photoPaths: [reference.path],
+    );
+    final photo = (await database.query(DatabaseTables.photos)).single;
+    const remoteUrl = 'https://example.test/task-reference.jpg';
+    await database.update(
+      DatabaseTables.photos,
+      {'status': 'uploaded', 'remote_url': remoteUrl},
+      where: 'id = ?',
+      whereArgs: [photo['id']],
+    );
+
+    late http.Request sent;
+    final service = OutgoingSyncService(
+      database: database,
+      internetAccessChecker: () async => true,
+      client: MockClient((request) async {
+        sent = request;
+        return http.Response(
+          jsonEncode({
+            'data': {
+              'id': taskId,
+              'number': 'TSK-001',
+              'status': 'PENDING',
+              'referencePhotoUrls': [remoteUrl],
+              'photoUrls': <String>[],
+            },
+          }),
+          200,
+        );
+      }),
+    );
+
+    await service.drain();
+
+    expect(sent.method, 'PUT');
+    expect(sent.url.path, '/api/v1/mobile/tasks/$taskId');
+    expect(jsonDecode(sent.body), {
+      'assignedToId': 'agent-1',
+      'centerId': 'center-1',
+      'title': 'Check ID cards',
+      'description': 'Bring copies to the office.',
+      'priority': 'LOW',
+      'dueDate': dueDate.toIso8601String(),
+      'photoUrls': [remoteUrl],
+    });
+    final task = (await database.query(DatabaseTables.tasks)).single;
+    expect(jsonDecode(task['photo_urls']! as String), isEmpty);
+    expect(jsonDecode(task['reference_photo_urls']! as String), [remoteUrl]);
+    expect(task['sync_state'], 'synced');
+  });
+
+  test('allows an assignment without optional reference photos', () async {
+    final taskId = await repository.assignTask(
+      centerId: 'center-1',
+      assignedToId: 'agent-1',
+      title: 'Check ID cards',
+      description: 'Bring copies to the office.',
+      priority: 'NORMAL',
+      dueDate: DateTime.now().toUtc().add(const Duration(days: 1)),
+      photoPaths: const [],
+    );
+
+    final task = (await database.query(
+      DatabaseTables.tasks,
+      where: 'id = ?',
+      whereArgs: [taskId],
+    )).single;
+    final outbox = (await database.query(DatabaseTables.outbox)).single;
+    final body = jsonDecode(outbox['body']! as String) as Map;
+    expect(jsonDecode(task['photo_urls']! as String), isEmpty);
+    expect(jsonDecode(task['reference_photo_urls']! as String), isEmpty);
+    expect(body['photoUrls'], isEmpty);
+    expect(await database.query(DatabaseTables.photos), isEmpty);
+    expect(await database.query(DatabaseTables.outboxPhotos), isEmpty);
+  });
 
   test('rejects past dates without creating task or outbox rows', () async {
     await expectLater(

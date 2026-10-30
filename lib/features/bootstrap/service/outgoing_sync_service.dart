@@ -735,6 +735,8 @@ class OutgoingSyncService {
     if (data.containsKey('note')) 'note': data['note'],
     if (data['completedAt'] != null) 'completed_at': data['completedAt'],
     if (data['photoUrls'] is List) 'photo_urls': jsonEncode(data['photoUrls']),
+    if (data['referencePhotoUrls'] is List)
+      'reference_photo_urls': jsonEncode(data['referencePhotoUrls']),
   };
 
   Map<String, Object?> _requestServerValues(Map<Object?, Object?> data) {
@@ -1885,10 +1887,11 @@ class OutgoingSyncService {
           ownerTable != DatabaseTables.tasks) {
         return;
       }
-      final ownerPhotoColumn =
-          ownerTable == DatabaseTables.requests && photoField == 'answer'
-          ? 'answer_photo_urls'
-          : 'photo_urls';
+      final ownerPhotoColumn = switch ((ownerTable, photoField)) {
+        (DatabaseTables.requests, 'answer') => 'answer_photo_urls',
+        (DatabaseTables.tasks, 'reference') => 'reference_photo_urls',
+        _ => 'photo_urls',
+      };
       final ownerRows = await txn.query(
         ownerTable,
         columns: [ownerPhotoColumn],

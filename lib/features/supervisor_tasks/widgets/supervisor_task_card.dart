@@ -21,6 +21,13 @@ class SupervisorTaskCard extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showClosedTimestamp;
 
+  List<String> get _displayPhotos {
+    final status = item.status.trim().toUpperCase();
+    return const {'COMPLETED', 'CLOSED', 'RESOLVED'}.contains(status)
+        ? item.photoUrls
+        : item.referencePhotoUrls;
+  }
+
   @override
   Widget build(BuildContext context) => Container(
     decoration: BoxDecoration(
@@ -97,7 +104,7 @@ class SupervisorTaskCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (item.photoUrls.isNotEmpty) ...[
+              if (_displayPhotos.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -109,7 +116,7 @@ class SupervisorTaskCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        context.l10n.taskPhotoAttached(item.photoUrls.length),
+                        context.l10n.taskPhotoAttached(_displayPhotos.length),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.mediumSH8_14.copyWith(

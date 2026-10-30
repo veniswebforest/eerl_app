@@ -61,7 +61,7 @@ void main() {
   testWidgets('loads supervisor attachments from the latest SQLite task row', (
     tester,
   ) async {
-    final initial = _pendingTask(photoUrls: const []);
+    final initial = _pendingTask(referencePhotoUrls: const []);
     final latest = _pendingTask();
 
     await tester.pumpWidget(
@@ -100,7 +100,9 @@ Future<void> _pumpTask(WidgetTester tester, TaskModel task) async {
 }
 
 TaskModel _pendingTask({
-  List<String> photoUrls = const ['assets/images/profile_rahul_patel.png'],
+  List<String> referencePhotoUrls = const [
+    'assets/images/profile_rahul_patel.png',
+  ],
 }) {
   final due = DateTime.now().add(const Duration(hours: 2)).toUtc();
   return TaskModel(
@@ -113,7 +115,8 @@ TaskModel _pendingTask({
     priority: 'HIGH',
     status: 'PENDING',
     dueAt: due.toIso8601String(),
-    photoUrls: photoUrls,
+    photoUrls: const [],
+    referencePhotoUrls: referencePhotoUrls,
     createdAt: DateTime.now().toUtc().toIso8601String(),
     syncState: 'synced',
   );

@@ -4175,7 +4175,29 @@ class EerlLocalDataSource {
       ''',
       [normalizedTaskId],
     );
-    return rows.isEmpty ? null : TaskModel.fromMap(rows.single);
+    if (rows.isEmpty) return null;
+    final row = Map<String, Object?>.from(rows.single);
+    final referenceSources = <String>[
+      ..._decodeStringList(row['reference_photo_urls']),
+    ];
+    final localReferences = await _database.query(
+      DatabaseTables.photos,
+      columns: const ['local_path', 'remote_url'],
+      where: 'owner_table = ? AND owner_id = ? AND field = ?',
+      whereArgs: [DatabaseTables.tasks, normalizedTaskId, 'reference'],
+      orderBy: 'created_at',
+    );
+    for (final photo in localReferences) {
+      final source = (photo['remote_url'] as String?)?.trim().isNotEmpty == true
+          ? photo['remote_url'] as String
+          : photo['local_path'] as String?;
+      if (source?.trim().isNotEmpty == true &&
+          !referenceSources.contains(source)) {
+        referenceSources.add(source!);
+      }
+    }
+    row['reference_photo_urls'] = jsonEncode(referenceSources);
+    return TaskModel.fromMap(row);
   }
 
   Future<String> assignTask({
@@ -4234,11 +4256,10 @@ class EerlLocalDataSource {
         'Due date and time must be in the future.',
       );
     }
-    if (uniquePhotoPaths.isEmpty) {
-      throw ArgumentError.value(
-        photoPaths,
-        'photoPaths',
-        'A reference photo is required.',
+    if (uniquePhotoPaths.length > 5) {
+      throw const LocalWriteValidationException(
+        'You can add up to 5 task reference photos.',
+        field: 'photoUrls',
       );
     }
 
@@ -4291,7 +4312,8 @@ class EerlLocalDataSource {
         'priority': normalizedPriority,
         'status': 'PENDING',
         'due_at': dueDateUtc,
-        'photo_urls': jsonEncode(uniquePhotoPaths),
+        'photo_urls': '[]',
+        'reference_photo_urls': '[]',
         'created_at': now,
         'sync_state': 'pending',
       });
@@ -4303,7 +4325,7 @@ class EerlLocalDataSource {
           'id': photoId,
           'owner_table': DatabaseTables.tasks,
           'owner_id': taskId,
-          'field': 'assignment',
+          'field': 'reference',
           // TASK_COMPLETION is the server-supported task upload purpose and is
           // also used for the supervisor's task reference attachments.
           'purpose': 'TASK_COMPLETION',

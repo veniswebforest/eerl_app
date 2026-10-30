@@ -305,6 +305,7 @@ abstract final class DatabaseSchema {
         due_at TEXT,
         completed_at TEXT,
         photo_urls TEXT NOT NULL DEFAULT '[]',
+        reference_photo_urls TEXT NOT NULL DEFAULT '[]',
         created_at TEXT NOT NULL,
         sync_state TEXT NOT NULL DEFAULT 'synced'
       )

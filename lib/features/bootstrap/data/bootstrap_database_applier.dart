@@ -189,6 +189,7 @@ class BootstrapDatabaseApplier {
       'due_at',
       'completed_at',
       'photo_urls',
+      'reference_photo_urls',
       'created_at',
       'sync_state',
     },

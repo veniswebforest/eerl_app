@@ -109,6 +109,27 @@ void main() {
             },
           ],
         },
+        'tasks': {
+          'upserts': [
+            {
+              'id': 'task-1',
+              'center_id': 'center-1',
+              'assigned_to': 'agent-1',
+              'assigned_to_name': 'Agent One',
+              'assigned_by': 'supervisor-1',
+              'assigned_by_name': 'Supervisor One',
+              'title': 'Verify the scale',
+              'description': 'Use the reference photos.',
+              'priority': 'NORMAL',
+              'status': 'PENDING',
+              'due_at': '2026-10-31T04:00:00.000Z',
+              'photo_urls': '[]',
+              'reference_photo_urls':
+                  '["https://example.test/task-reference.jpg"]',
+              'created_at': '2026-10-30T09:00:00.000Z',
+            },
+          ],
+        },
       },
     });
 
@@ -140,6 +161,12 @@ void main() {
     )).single;
     expect(notification['role'], 'AGENT');
     expect(notification['center_id'], 'center-1');
+    final task = (await database.query(DatabaseTables.tasks)).single;
+    expect(task['photo_urls'], '[]');
+    expect(
+      task['reference_photo_urls'],
+      '["https://example.test/task-reference.jpg"]',
+    );
     expect(await database.getSyncMeta('cursor'), 'latest-1');
 
     await database.update(
@@ -210,61 +237,63 @@ void main() {
     expect(await database.getSyncMeta('cursor'), 'latest-2');
   });
 
-  test('applies me.supervisor.photoUrl to sync_meta supervisor_photo_url', () async {
-    final applier = BootstrapDatabaseApplier(database: database);
-    final dataWithSupervisor = BootstrapData.fromJson({
-      'cursor': 'sup-1',
-      'hasMore': false,
-      'full': false,
-      'me': {
-        'user': {
-          'id': 'agent-1',
-          'name': 'Agent One',
-          'phone': '9876543210',
-          'photoUrl': 'https://example.com/user.jpg',
+  test(
+    'applies me.supervisor.photoUrl to sync_meta supervisor_photo_url',
+    () async {
+      final applier = BootstrapDatabaseApplier(database: database);
+      final dataWithSupervisor = BootstrapData.fromJson({
+        'cursor': 'sup-1',
+        'hasMore': false,
+        'full': false,
+        'me': {
+          'user': {
+            'id': 'agent-1',
+            'name': 'Agent One',
+            'phone': '9876543210',
+            'photoUrl': 'https://example.com/user.jpg',
+          },
+          'supervisor': {
+            'name': 'Supervisor One',
+            'phone': '9876543211',
+            'photoUrl': 'https://example.com/supervisor.jpg',
+          },
         },
-        'supervisor': {
-          'name': 'Supervisor One',
-          'phone': '9876543211',
-          'photoUrl': 'https://example.com/supervisor.jpg',
+        'tables': {},
+      });
+
+      await applier.apply(dataWithSupervisor);
+
+      expect(await database.getSyncMeta('user_id'), 'agent-1');
+      expect(await database.getSyncMeta('user_name'), 'Agent One');
+      expect(await database.getSyncMeta('user_phone'), '9876543210');
+      expect(
+        await database.getSyncMeta('user_photo_url'),
+        'https://example.com/user.jpg',
+      );
+      expect(await database.getSyncMeta('supervisor_name'), 'Supervisor One');
+      expect(await database.getSyncMeta('supervisor_phone'), '9876543211');
+      expect(
+        await database.getSyncMeta('supervisor_photo_url'),
+        'https://example.com/supervisor.jpg',
+      );
+
+      // When supervisor is null
+      final dataWithoutSupervisor = BootstrapData.fromJson({
+        'cursor': 'sup-2',
+        'hasMore': false,
+        'full': false,
+        'me': {
+          'user': {'id': 'agent-1', 'name': 'Agent One', 'phone': '9876543210'},
+          'supervisor': null,
         },
-      },
-      'tables': {},
-    });
+        'tables': {},
+      });
 
-    await applier.apply(dataWithSupervisor);
+      await applier.apply(dataWithoutSupervisor);
 
-    expect(await database.getSyncMeta('user_id'), 'agent-1');
-    expect(await database.getSyncMeta('user_name'), 'Agent One');
-    expect(await database.getSyncMeta('user_phone'), '9876543210');
-    expect(await database.getSyncMeta('user_photo_url'), 'https://example.com/user.jpg');
-    expect(await database.getSyncMeta('supervisor_name'), 'Supervisor One');
-    expect(await database.getSyncMeta('supervisor_phone'), '9876543211');
-    expect(
-      await database.getSyncMeta('supervisor_photo_url'),
-      'https://example.com/supervisor.jpg',
-    );
-
-    // When supervisor is null
-    final dataWithoutSupervisor = BootstrapData.fromJson({
-      'cursor': 'sup-2',
-      'hasMore': false,
-      'full': false,
-      'me': {
-        'user': {
-          'id': 'agent-1',
-          'name': 'Agent One',
-          'phone': '9876543210',
-        },
-        'supervisor': null,
-      },
-      'tables': {},
-    });
-
-    await applier.apply(dataWithoutSupervisor);
-
-    expect(await database.getSyncMeta('supervisor_name'), isNull);
-    expect(await database.getSyncMeta('supervisor_phone'), isNull);
-    expect(await database.getSyncMeta('supervisor_photo_url'), isNull);
-  });
+      expect(await database.getSyncMeta('supervisor_name'), isNull);
+      expect(await database.getSyncMeta('supervisor_phone'), isNull);
+      expect(await database.getSyncMeta('supervisor_photo_url'), isNull);
+    },
+  );
 }

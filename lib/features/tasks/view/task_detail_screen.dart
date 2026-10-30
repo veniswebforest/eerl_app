@@ -204,7 +204,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           ],
                         ),
                       ),
-                      if (_task.photoUrls.isNotEmpty) ...[
+                      if (_task.referencePhotoUrls.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         TaskInformationCard(
                           title: context.l10n.taskAttachmentTitle,
@@ -213,7 +213,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             children: [
                               TaskPhotoGrid(
                                 key: const Key('supervisor-task-attachments'),
-                                images: _task.photoUrls,
+                                images: _task.referencePhotoUrls,
                               ),
                               const SizedBox(height: 12),
                               _BySupervisor(

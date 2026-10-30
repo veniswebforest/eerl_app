@@ -120,6 +120,10 @@ TaskModel _task({
     'assets/images/collection_detail/pet_collection.png',
     'assets/images/collection_detail/pet_collection.png',
   ],
+  referencePhotoUrls: const [
+    'assets/images/collection_detail/pet_collection.png',
+    'assets/images/collection_detail/pet_collection.png',
+  ],
   createdAt: '2026-08-15T06:00:00.000Z',
   syncState: 'synced',
 );

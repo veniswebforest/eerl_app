@@ -15,6 +15,10 @@ class TaskListCard extends StatelessWidget {
   final TaskModel item;
   final VoidCallback? onTap;
 
+  List<String> get _displayPhotos => isClosedTaskStatus(item.status)
+      ? item.photoUrls
+      : item.referencePhotoUrls;
+
   @override
   Widget build(BuildContext context) => Material(
     color: Colors.white,
@@ -79,7 +83,7 @@ class TaskListCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            if (item.photoUrls.isNotEmpty) ...[
+            if (_displayPhotos.isNotEmpty) ...[
               Row(
                 children: [
                   const Icon(
@@ -89,7 +93,7 @@ class TaskListCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    context.l10n.taskPhotoAttached(item.photoUrls.length),
+                    context.l10n.taskPhotoAttached(_displayPhotos.length),
                     style: AppTextStyles.regularB8_12.copyWith(
                       color: AppColors.neutral600,
                     ),
