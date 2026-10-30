@@ -10,6 +10,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,17 +33,21 @@ typedef ExpenseSaver =
       String? collectionId,
     });
 
+typedef WalletBalanceLoader = Future<double> Function();
+
 class LogExpenseScreen extends StatefulWidget {
   const LogExpenseScreen({
     super.key,
     this.receiptPhotoPicker,
     this.initialCategories,
     this.expenseSaver,
+    this.walletBalanceLoader,
   });
 
   final Future<XFile?> Function()? receiptPhotoPicker;
   final List<ExpenseCategoryModel>? initialCategories;
   final ExpenseSaver? expenseSaver;
+  final WalletBalanceLoader? walletBalanceLoader;
 
   @override
   State<LogExpenseScreen> createState() => _LogExpenseScreenState();
@@ -58,12 +63,22 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
   int? _selectedCategory;
   bool _categoryOpen = false;
   bool _isSubmitting = false;
+  double? _walletBalance;
+
+  double? get _enteredAmount => double.tryParse(_amountController.text.trim());
+
+  bool get _amountExceedsBalance {
+    final amount = _enteredAmount;
+    final balance = _walletBalance;
+    return amount != null && balance != null && amount > balance;
+  }
 
   bool get _canSubmit =>
       !_isSubmitting &&
       _selectedCategory != null &&
       _selectedCategory! < _categories.length &&
       (double.tryParse(_amountController.text.trim()) ?? 0) > 0 &&
+      !_amountExceedsBalance &&
       _receiptPhotos.isNotEmpty;
 
   @override
@@ -76,6 +91,7 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
     } else {
       unawaited(_loadCategories());
     }
+    unawaited(_loadWalletBalance());
     _restoreCameraResult();
   }
 
@@ -121,7 +137,20 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
   }
 
   Future<void> _refreshExpenseData() async {
-    await _loadCategories();
+    await Future.wait([_loadCategories(), _loadWalletBalance()]);
+  }
+
+  Future<void> _loadWalletBalance() async {
+    try {
+      final loader = widget.walletBalanceLoader;
+      final balance = loader != null
+          ? await loader()
+          : (await EerlLocalRepository.instance.getWalletSummary()).balanceNow;
+      if (!mounted) return;
+      setState(() => _walletBalance = balance);
+    } catch (error) {
+      AppLogger.error('EXPENSE_BALANCE_LOAD', error.toString());
+    }
   }
 
   Future<void> _captureReceipt() async {
@@ -173,6 +202,17 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
         ),
       );
       if (submitted == true && mounted) Navigator.of(context).pop();
+    } on ExpenseBalanceUnavailableException catch (error) {
+      AppLogger.error('EXPENSE_SAVE', error.toString());
+      if (mounted) {
+        setState(() => _walletBalance = error.availableBalance);
+        AppSnackbar.error(
+          context,
+          message: context.l10n.expenseAmountExceedsWalletBalance(
+            error.availableBalance.toStringAsFixed(2),
+          ),
+        );
+      }
     } catch (error) {
       AppLogger.error('EXPENSE_SAVE', error.toString());
       if (mounted) {
@@ -189,6 +229,11 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
     final categories = _categories
         .map((category) => category.name)
         .toList(growable: false);
+    final amountError = _amountExceedsBalance
+        ? l10n.expenseAmountExceedsWalletBalance(
+            _walletBalance!.toStringAsFixed(2),
+          )
+        : null;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -259,6 +304,7 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
                           controller: _amountController,
                           hint: l10n.expenseAmountHint,
                           keyboardType: TextInputType.number,
+                          errorText: amountError,
                         ),
                       ),
                       const SizedBox(height: 24),

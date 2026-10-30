@@ -2260,6 +2260,12 @@ abstract class AppLocalizations {
   /// **'₹ Enter Expense Amount'**
   String get expenseAmountHint;
 
+  /// No description provided for @expenseAmountExceedsWalletBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount cannot exceed the available wallet balance of ₹{balance}.'**
+  String expenseAmountExceedsWalletBalance(String balance);
+
   /// No description provided for @uploadReceiptLabel.
   ///
   /// In en, this message translates to:
@@ -2650,6 +2656,24 @@ abstract class AppLocalizations {
   /// **'Filter By Date'**
   String get recordsFilterByDate;
 
+  /// No description provided for @recordsFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get recordsFilterTitle;
+
+  /// No description provided for @recordsSelectTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Types'**
+  String get recordsSelectTypes;
+
+  /// No description provided for @recordsApplyFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filter'**
+  String get recordsApplyFilter;
+
   /// No description provided for @recordsFilterToday.
   ///
   /// In en, this message translates to:
@@ -2685,6 +2709,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'22 October Collections'**
   String get recordsOctoberCollections;
+
+  /// No description provided for @recordsDatedCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} Collections'**
+  String recordsDatedCollections(String date);
 
   /// No description provided for @recordsCollectionDrafts.
   ///
@@ -2751,6 +2781,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No drafts for now'**
   String get recordsNoDrafts;
+
+  /// No description provided for @recordsNoCollectionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No Collection History for now'**
+  String get recordsNoCollectionHistory;
 
   /// No description provided for @profileUserProfile.
   ///
@@ -3567,6 +3603,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload Ramp Person Photo'**
   String get collectionRampPersonPhoto;
+
+  /// No description provided for @collectionRampHandoverPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Handover Photo'**
+  String get collectionRampHandoverPhoto;
+
+  /// No description provided for @collectionRampHandoverPhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture a photo as proof of handover.'**
+  String get collectionRampHandoverPhotoHint;
 
   /// No description provided for @collectionTotalWeight.
   ///
@@ -4816,6 +4864,12 @@ abstract class AppLocalizations {
   /// **'Raise Request'**
   String get requestRaiseTitle;
 
+  /// No description provided for @noSupervisorSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No supervisor set: ask your admin to set one.'**
+  String get noSupervisorSet;
+
   /// No description provided for @requestToSupervisor.
   ///
   /// In en, this message translates to:
@@ -5337,6 +5391,16 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g. 1250'**
   String get transferLoadedWeightHint;
+
+  /// No description provided for @transferDispatchStockExceeded.
+  ///
+  /// In en, this message translates to:
+  /// **'This center holds {quantity} {unit} of {item}.'**
+  String transferDispatchStockExceeded(
+    String quantity,
+    String unit,
+    String item,
+  );
 
   /// No description provided for @transferNumberOfBales.
   ///
@@ -6753,6 +6817,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request Rejected Successfully'**
   String get supervisorExpenseRejectedMessage;
+
+  /// No description provided for @supervisorCashApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Request Approved!'**
+  String get supervisorCashApprovedTitle;
+
+  /// No description provided for @supervisorCashApprovedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Request Approved Successfully'**
+  String get supervisorCashApprovedMessage;
+
+  /// No description provided for @supervisorCashRejectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Request Rejected!'**
+  String get supervisorCashRejectedTitle;
+
+  /// No description provided for @supervisorCashRejectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash Request Rejected Successfully'**
+  String get supervisorCashRejectedMessage;
 
   /// No description provided for @supervisorExpenseRejectScreenTitle.
   ///

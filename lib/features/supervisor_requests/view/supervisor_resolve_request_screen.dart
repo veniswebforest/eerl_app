@@ -147,9 +147,12 @@ class _SupervisorResolveRequestScreenState
                 Expanded(
                   child: ListView(
                     key: const Key('supervisor-resolve-request-scroll'),
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
                     children: [
-                      const SupervisorRequestStatusCard(completed: false),
+                      SupervisorRequestStatusCard(
+                        completed: false,
+                        time: widget.request.answeredAt,
+                      ),
                       const SizedBox(height: 16),
                       SupervisorRequestInfoCard(
                         title: context.l10n.requestDescriptionPlain,

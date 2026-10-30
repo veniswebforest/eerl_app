@@ -4,6 +4,7 @@ import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/home/widgets/collection_drafts.dart';
 import 'package:eerl_app/features/records/model/records_view_flag.dart';
 import 'package:eerl_app/features/records/widgets/collection_draft_card.dart';
 import 'package:eerl_app/features/records/view/records_tab_screen.dart';
@@ -75,6 +76,51 @@ void main() {
       drafts: true,
     );
     expect(drafts, hasLength(2));
+    expect(drafts.every((draft) => draft.centerName == 'Center One'), isTrue);
+  });
+
+  testWidgets('home draft card shows center name instead of center UUID', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(body: CollectionDrafts()),
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+    });
+    await tester.pump();
+
+    expect(find.text('Center One'), findsOneWidget);
+    expect(find.text('center-1'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('empty history shows collection history message and icon', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.runAsync(() async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: RecordsTabScreen(),
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+    });
+    await tester.pump();
+
+    expect(find.text('No Collection History for now'), findsOneWidget);
+    expect(find.byKey(const Key('records-history-empty-icon')), findsOneWidget);
   });
 
   testWidgets('Records tab filters drafts by channel type and date properly', (
@@ -102,20 +148,28 @@ void main() {
     expect(find.text('D2D'), findsOneWidget);
     expect(find.text('RAMP'), findsOneWidget);
 
-    // Tap D2D chip: only D2D draft should be visible
-    await tester.tap(find.byKey(const Key('records-filter-d2d')));
+    // Type filters now live in the Figma filter bottom sheet and apply only
+    // after the user confirms them.
+    await tester.tap(find.byKey(const Key('records-date-filter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('records-type-d2d')));
+    await tester.tap(find.byKey(const Key('records-apply-filter')));
     await tester.pumpAndSettle();
     expect(find.text('D2D'), findsOneWidget);
     expect(find.text('RAMP'), findsNothing);
 
-    // Tap Ramp chip: only RAMP draft should be visible
-    await tester.tap(find.byKey(const Key('records-filter-ramp')));
+    await tester.tap(find.byKey(const Key('records-date-filter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('records-type-ramp')));
+    await tester.tap(find.byKey(const Key('records-apply-filter')));
     await tester.pumpAndSettle();
     expect(find.text('D2D'), findsNothing);
     expect(find.text('RAMP'), findsOneWidget);
 
-    // Tap All chip: both drafts visible again
-    await tester.tap(find.byKey(const Key('records-filter-all')));
+    await tester.tap(find.byKey(const Key('records-date-filter')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('records-type-all')));
+    await tester.tap(find.byKey(const Key('records-apply-filter')));
     await tester.pumpAndSettle();
     expect(find.text('D2D'), findsOneWidget);
     expect(find.text('RAMP'), findsOneWidget);
@@ -124,8 +178,9 @@ void main() {
     await tester.tap(find.byKey(const Key('records-date-filter')));
     await tester.pumpAndSettle();
 
-    // Select Today filter: only today's D2D draft should remain
+    // Select Today and apply: only today's D2D draft should remain.
     await tester.tap(find.byKey(const Key('records-date-today')));
+    await tester.tap(find.byKey(const Key('records-apply-filter')));
     await tester.pumpAndSettle();
     expect(find.text('D2D'), findsOneWidget);
     expect(find.text('RAMP'), findsNothing);
@@ -134,14 +189,16 @@ void main() {
     await tester.tap(find.byKey(const Key('records-date-filter')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('records-date-yesterday')));
+    await tester.tap(find.byKey(const Key('records-apply-filter')));
     await tester.pumpAndSettle();
     expect(find.text('D2D'), findsNothing);
     expect(find.text('RAMP'), findsOneWidget);
 
-    // Open Date filter sheet again and select All
+    // Last 7 days restores both dates (the design no longer has date "All").
     await tester.tap(find.byKey(const Key('records-date-filter')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('records-date-all')));
+    await tester.tap(find.byKey(const Key('records-date-lastSevenDays')));
+    await tester.tap(find.byKey(const Key('records-apply-filter')));
     await tester.pumpAndSettle();
     expect(find.text('D2D'), findsOneWidget);
     expect(find.text('RAMP'), findsOneWidget);

@@ -89,6 +89,21 @@ void main() {
       expect(outbox['entity_id'], taskId);
       expect(outbox['kind'], 'assign');
       expect(outbox['status'], 'queued');
+      final photos = await database.query(
+        DatabaseTables.photos,
+        where: 'owner_table = ? AND owner_id = ? AND field = ?',
+        whereArgs: [DatabaseTables.tasks, taskId, 'assignment'],
+      );
+      expect(photos, hasLength(1));
+      expect(photos.single['local_path'], '/tmp/reference.jpg');
+      expect(photos.single['purpose'], 'TASK_COMPLETION');
+      final outboxPhotos = await database.query(
+        DatabaseTables.outboxPhotos,
+        where: 'outbox_seq = ?',
+        whereArgs: [outbox['seq']],
+      );
+      expect(outboxPhotos, hasLength(1));
+      expect(outboxPhotos.single['photo_id'], photos.single['id']);
       expect(jsonDecode(outbox['body']! as String), {
         'assignedToId': 'agent-1',
         'centerId': 'center-1',
@@ -96,6 +111,7 @@ void main() {
         'description': 'Bring copies to the office.',
         'priority': 'HIGH',
         'dueDate': dueDate.toIso8601String(),
+        'photoUrls': [photos.single['id']],
       });
     },
   );

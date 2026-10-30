@@ -1162,6 +1162,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expenseAmountHint => '₹ Enter Expense Amount';
 
   @override
+  String expenseAmountExceedsWalletBalance(String balance) {
+    return 'Amount cannot exceed the available wallet balance of ₹$balance.';
+  }
+
+  @override
   String get uploadReceiptLabel => 'Upload Receipt';
 
   @override
@@ -1368,6 +1373,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordsFilterByDate => 'Filter By Date';
 
   @override
+  String get recordsFilterTitle => 'Filter';
+
+  @override
+  String get recordsSelectTypes => 'Select Types';
+
+  @override
+  String get recordsApplyFilter => 'Apply Filter';
+
+  @override
   String get recordsFilterToday => 'Today';
 
   @override
@@ -1384,6 +1398,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recordsOctoberCollections => '22 October Collections';
+
+  @override
+  String recordsDatedCollections(String date) {
+    return '$date Collections';
+  }
 
   @override
   String get recordsCollectionDrafts => 'Collection Drafts';
@@ -1418,6 +1437,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recordsNoDrafts => 'No drafts for now';
+
+  @override
+  String get recordsNoCollectionHistory => 'No Collection History for now';
 
   @override
   String get profileUserProfile => 'User Profile';
@@ -1852,6 +1874,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionRampPersonPhoto => 'Upload Ramp Person Photo';
+
+  @override
+  String get collectionRampHandoverPhoto => 'Handover Photo';
+
+  @override
+  String get collectionRampHandoverPhotoHint =>
+      'Capture a photo as proof of handover.';
 
   @override
   String get collectionTotalWeight => 'Total Collection Weight';
@@ -2529,6 +2558,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requestRaiseTitle => 'Raise Request';
 
   @override
+  String get noSupervisorSet => 'No supervisor set: ask your admin to set one.';
+
+  @override
   String get requestToSupervisor => 'TO : Bhavesh Shah (Supervisor)';
 
   @override
@@ -2802,6 +2834,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferLoadedWeightHint => 'e.g. 1250';
+
+  @override
+  String transferDispatchStockExceeded(
+    String quantity,
+    String unit,
+    String item,
+  ) {
+    return 'This center holds $quantity $unit of $item.';
+  }
 
   @override
   String get transferNumberOfBales => 'Number of Bales / Boris';
@@ -3537,6 +3578,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get supervisorExpenseRejectedMessage =>
       'Request Rejected Successfully';
+
+  @override
+  String get supervisorCashApprovedTitle => 'Cash Request Approved!';
+
+  @override
+  String get supervisorCashApprovedMessage =>
+      'Cash Request Approved Successfully';
+
+  @override
+  String get supervisorCashRejectedTitle => 'Cash Request Rejected!';
+
+  @override
+  String get supervisorCashRejectedMessage =>
+      'Cash Request Rejected Successfully';
 
   @override
   String get supervisorExpenseRejectScreenTitle => 'Reject Expenses';

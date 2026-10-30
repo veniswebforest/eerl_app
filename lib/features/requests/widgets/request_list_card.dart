@@ -9,6 +9,7 @@ import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/utils/ist_date_time.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/shared/widgets/supervisor_avatar.dart';
 
 class RequestListCard extends StatelessWidget {
   const RequestListCard({super.key, required this.item, this.onTap});
@@ -32,14 +33,11 @@ class RequestListCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              ClipOval(
-                child: Image.asset(
-                  'assets/images/request_supervisor.png',
-                  key: const Key('request-supervisor-photo'),
-                  width: 40,
-                  height: 40,
-                  fit: BoxFit.cover,
-                ),
+              SupervisorAvatar(
+                key: const Key('request-supervisor-photo'),
+                name: item.supervisorName,
+                photoUrl: item.supervisorPhotoUrl,
+                size: 40,
               ),
               const SizedBox(width: 12),
               Expanded(

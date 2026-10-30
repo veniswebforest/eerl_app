@@ -53,6 +53,32 @@ class TransferDispatchValidationException implements Exception {
   String toString() => message;
 }
 
+class TransferDispatchStockExceededException implements Exception {
+  const TransferDispatchStockExceededException({
+    required this.itemId,
+    required this.itemName,
+    required this.unitCode,
+    required this.attemptedQuantity,
+    required this.availableQuantity,
+  });
+
+  final String itemId;
+  final String itemName;
+  final String unitCode;
+  final double attemptedQuantity;
+  final double availableQuantity;
+
+  @override
+  String toString() =>
+      'This center holds ${_displayQuantity(availableQuantity)} '
+      '${unitCode.toLowerCase()} of $itemName.';
+}
+
+String _displayQuantity(double value) {
+  final fixed = value.toStringAsFixed(3);
+  return fixed.replaceFirst(RegExp(r'\.?0+$'), '');
+}
+
 class TransferDecisionValidationException implements Exception {
   const TransferDecisionValidationException(this.message);
 
@@ -186,6 +212,7 @@ class EerlLocalDataSource {
         MAX(CASE WHEN key = 'user_photo_url' THEN value END) AS user_photo_url,
         MAX(CASE WHEN key = 'supervisor_name' THEN value END) AS supervisor_name,
         MAX(CASE WHEN key = 'supervisor_phone' THEN value END) AS supervisor_phone,
+        MAX(CASE WHEN key = 'supervisor_photo_url' THEN value END) AS supervisor_photo_url,
         MAX(CASE WHEN key = 'session_expires_at' THEN value END) AS session_expires_at
       FROM ${DatabaseTables.syncMeta}
     ''');
@@ -196,6 +223,7 @@ class EerlLocalDataSource {
       userPhotoUrl: row['user_photo_url'] as String?,
       supervisorName: row['supervisor_name'] as String?,
       supervisorPhone: row['supervisor_phone'] as String?,
+      supervisorPhotoUrl: row['supervisor_photo_url'] as String?,
       sessionExpiresAt: row['session_expires_at'] as String?,
     );
   }
@@ -1126,6 +1154,7 @@ class EerlLocalDataSource {
   Future<void> saveRagpicker(
     RagpickerModel ragpicker, {
     String? localPhotoPath,
+    List<String>? localPhotoPaths,
   }) async {
     final normalizedName = ragpicker.name.trim();
     if (normalizedName.length < 2 || normalizedName.length > 255) {
@@ -1154,13 +1183,26 @@ class EerlLocalDataSource {
         field: 'idNumber',
       );
     }
-    final normalizedPhotoPath = localPhotoPath?.trim();
-    final hasNewPhoto = normalizedPhotoPath?.isNotEmpty == true;
+    final effectiveLocalPaths =
+        (localPhotoPaths ??
+                (localPhotoPath != null ? [localPhotoPath] : const <String>[]))
+            .map((p) => p.trim())
+            .where((p) => p.isNotEmpty)
+            .toList(growable: false);
+    final hasNewPhotos = effectiveLocalPaths.isNotEmpty;
     final now = DateTime.now().toUtc().toIso8601String();
-    final photoId = hasNewPhoto ? UuidGenerator.v4() : null;
-    final blockingPhotoIds = photoId == null
-        ? const <String>[]
-        : <String>[photoId];
+    final photoIds = <String>[];
+    final photoSizes = <String, int?>{};
+    for (final path in effectiveLocalPaths) {
+      photoIds.add(UuidGenerator.v4());
+      photoSizes[path] = await _localFileSize(path);
+    }
+    final blockingPhotoIds = photoIds;
+    final primaryPhotoRef = photoIds.isNotEmpty
+        ? photoIds.first
+        : (ragpicker.photoUrls.isNotEmpty
+              ? ragpicker.photoUrls.first
+              : ragpicker.photoUrl);
     final body = <String, Object?>{
       'centerId': ragpicker.centerId,
       'name': normalizedName,
@@ -1168,7 +1210,7 @@ class EerlLocalDataSource {
       'idNumber': normalizedIdNumber?.isEmpty == true
           ? null
           : normalizedIdNumber,
-      'photoUrl': photoId ?? ragpicker.photoUrl,
+      'photoUrl': primaryPhotoRef,
     };
     var outboxSeq = -1;
     await _database.transaction((txn) async {
@@ -1185,21 +1227,36 @@ class EerlLocalDataSource {
           field: 'name',
         );
       }
-      if (photoId != null) {
+      for (var i = 0; i < effectiveLocalPaths.length; i++) {
+        final path = effectiveLocalPaths[i];
+        final id = photoIds[i];
         await txn.insert(DatabaseTables.photos, {
-          'id': photoId,
+          'id': id,
           'owner_table': DatabaseTables.ragpickers,
           'owner_id': ragpicker.id,
           'field': 'profile',
           // Exact enum documented by POST /mobile/uploads/batch.
           'purpose': 'RAGPICKER',
           'content_type': 'image/jpeg',
-          'local_path': normalizedPhotoPath,
+          'local_path': path,
           'status': 'local',
-          'size_bytes': await _localFileSize(normalizedPhotoPath!),
+          'size_bytes': photoSizes[path],
           'created_at': now,
         });
       }
+      final storedPhotoUrl = () {
+        if (ragpicker.photoUrls.isNotEmpty) {
+          return ragpicker.photoUrls.length == 1
+              ? ragpicker.photoUrls.first
+              : jsonEncode(ragpicker.photoUrls);
+        }
+        if (hasNewPhotos) {
+          return effectiveLocalPaths.length == 1
+              ? effectiveLocalPaths.first
+              : jsonEncode(effectiveLocalPaths);
+        }
+        return ragpicker.photoUrl;
+      }();
       await _upsertById(txn, DatabaseTables.ragpickers, {
         ...ragpicker.toMap(),
         'name': normalizedName,
@@ -1207,7 +1264,7 @@ class EerlLocalDataSource {
         'id_number': normalizedIdNumber?.isEmpty == true
             ? null
             : normalizedIdNumber,
-        'photo_url': hasNewPhoto ? normalizedPhotoPath : ragpicker.photoUrl,
+        'photo_url': storedPhotoUrl,
         'sync_state': 'pending',
       });
       final updated = await OutboxQueue.updateQueued(
@@ -1247,8 +1304,8 @@ class EerlLocalDataSource {
         where:
             'owner_table = ? AND owner_id = ? '
             "AND status IN ('local', 'failed')"
-            '${photoId == null ? '' : ' AND id <> ?'}',
-        whereArgs: [DatabaseTables.ragpickers, ragpicker.id, ?photoId],
+            '${photoIds.isEmpty ? '' : ' AND id NOT IN (${List.filled(photoIds.length, '?').join(', ')})'}',
+        whereArgs: [DatabaseTables.ragpickers, ragpicker.id, ...photoIds],
       );
     });
     if (kDebugMode) {
@@ -1256,13 +1313,48 @@ class EerlLocalDataSource {
         'COMMIT',
         'Ragpicker stored | '
             'ragpicker_id=${ragpicker.id} center=${ragpicker.centerId} '
-            'photo=${photoId != null ? 'queued' : 'none'} '
+            'photo=${photoIds.isNotEmpty ? 'queued' : 'none'} '
             'sync_state=pending '
             '${outboxSeq < 0 ? 'outbox=updated' : 'outbox_seq=$outboxSeq'} '
             'method=PUT '
             'path=/ragpickers/${ragpicker.id}',
       );
     }
+  }
+
+  Future<List<String>> getRagpickerPhotoSources(String ragpickerId) async {
+    final rows = await _database.query(
+      DatabaseTables.ragpickers,
+      columns: const ['photo_url'],
+      where: 'id = ?',
+      whereArgs: [ragpickerId],
+      limit: 1,
+    );
+    final stored = rows.isEmpty
+        ? const <String>[]
+        : _decodeStringListOrSingle(rows.single['photo_url']);
+    final photoRows = await _database.query(
+      DatabaseTables.photos,
+      columns: const ['id', 'local_path', 'remote_url', 'created_at'],
+      where: 'owner_table = ? AND owner_id = ?',
+      whereArgs: [DatabaseTables.ragpickers, ragpickerId],
+      orderBy: 'created_at ASC',
+    );
+    return _photoSourcesForReferences(stored, photoRows);
+  }
+
+  static List<String> _decodeStringListOrSingle(Object? value) {
+    if (value is List) {
+      return value.map((item) => item.toString()).toList(growable: false);
+    }
+    if (value is! String || value.trim().isEmpty) return const [];
+    try {
+      final decoded = jsonDecode(value);
+      if (decoded is List) {
+        return decoded.map((item) => item.toString()).toList(growable: false);
+      }
+    } catch (_) {}
+    return [value];
   }
 
   Future<void> setRagpickerActive(RagpickerModel ragpicker, bool active) async {
@@ -1374,12 +1466,14 @@ class EerlLocalDataSource {
     }
     final rows = await _database.rawQuery('''
       SELECT c.*,
+        ce.name AS center_name,
         COALESCE(ch.show_price, 0) AS show_price,
         COALESCE(SUM(COALESCE(ci.verified_qty, ci.qty)), 0) AS total_qty,
         COALESCE(SUM(CASE WHEN UPPER(COALESCE(itm.unit_code, 'KG')) = 'PCS' THEN 0 ELSE COALESCE(ci.verified_qty, ci.qty) END), 0) AS total_kg,
         COALESCE(SUM(CASE WHEN UPPER(COALESCE(itm.unit_code, 'KG')) = 'PCS' THEN COALESCE(ci.verified_qty, ci.qty) ELSE 0 END), 0) AS total_pcs,
         COUNT(ci.id) AS item_count
       FROM ${DatabaseTables.collections} c
+      LEFT JOIN ${DatabaseTables.centers} ce ON ce.id = c.center_id
       LEFT JOIN ${DatabaseTables.centerChannels} ch
         ON ch.center_id = c.center_id AND ch.channel = c.channel
       LEFT JOIN ${DatabaseTables.collectionItems} ci ON ci.collection_id = c.id
@@ -3886,6 +3980,29 @@ class EerlLocalDataSource {
         'gps': {'lat': coordinates.latitude, 'lng': coordinates.longitude},
     };
     await _database.runInTransaction((txn) async {
+      final stockByItem = {
+        for (final stock in await _getTransferDispatchStock(
+          txn,
+          transferId: transferId,
+          centerId: transferRows.single['center_id']! as String,
+        ))
+          stock.itemId: stock,
+      };
+      for (final dispatchItem in dispatchItems) {
+        final itemId = dispatchItem['itemId']! as String;
+        final attempted = (dispatchItem['quantity']! as num).toDouble();
+        final stock = stockByItem[itemId];
+        final available = stock?.quantityCanGo ?? 0;
+        if ((attempted * 1000).round() > (available * 1000).round()) {
+          throw TransferDispatchStockExceededException(
+            itemId: itemId,
+            itemName: stock?.name ?? 'Removed item',
+            unitCode: stock?.unitCode ?? 'KG',
+            attemptedQuantity: attempted,
+            availableQuantity: available,
+          );
+        }
+      }
       final updated = await txn.update(
         DatabaseTables.transfers,
         {
@@ -3939,6 +4056,77 @@ class EerlLocalDataSource {
             'outbox_path=/transfers/$transferId/handover',
       );
     }
+  }
+
+  Future<List<TransferDispatchStockModel>> getTransferDispatchStock(
+    String transferId,
+  ) async {
+    final transfer = await _database.query(
+      DatabaseTables.transfers,
+      columns: const ['center_id'],
+      where: 'id = ?',
+      whereArgs: [transferId],
+      limit: 1,
+    );
+    if (transfer.isEmpty || transfer.single['center_id'] == null) {
+      return const [];
+    }
+    return _getTransferDispatchStock(
+      await _database.database,
+      transferId: transferId,
+      centerId: transfer.single['center_id']! as String,
+    );
+  }
+
+  Future<List<TransferDispatchStockModel>> _getTransferDispatchStock(
+    DatabaseExecutor executor, {
+    required String transferId,
+    required String centerId,
+  }) async {
+    final rows = await executor.rawQuery(
+      '''
+      WITH line AS (
+        SELECT item_id
+        FROM ${DatabaseTables.transferItems}
+        WHERE transfer_id = ?
+      ), in_hand AS (
+        SELECT s.item_id,
+               SUM(s.qty) + COALESCE((
+                 SELECT SUM(ci.verified_qty)
+                 FROM ${DatabaseTables.collectionItems} ci
+                 JOIN ${DatabaseTables.collections} c
+                   ON c.id = ci.collection_id
+                 WHERE c.center_id = s.center_id
+                   AND ci.item_id = s.item_id
+                   AND c.sync_state = 'pending'
+                   AND c.status = 'SUBMITTED'
+               ), 0) AS qty_now
+        FROM ${DatabaseTables.stock} s
+        WHERE s.center_id = ?
+          AND s.stage = 'RM'
+          AND s.item_id IN (SELECT item_id FROM line)
+        GROUP BY s.item_id
+      ), loading_elsewhere AS (
+        SELECT ti.item_id, SUM(ti.dispatched_qty) AS qty
+        FROM ${DatabaseTables.transferItems} ti
+        JOIN ${DatabaseTables.transfers} t ON t.id = ti.transfer_id
+        WHERE t.center_id = ?
+          AND t.id <> ?
+          AND t.status = 'DISPATCHED'
+          AND t.sync_state = 'pending'
+        GROUP BY ti.item_id
+      )
+      SELECT l.item_id, i.name, i.unit_code,
+             MAX(COALESCE(h.qty_now, 0) - COALESCE(e.qty, 0), 0)
+               AS qty_can_go
+      FROM line l
+      JOIN ${DatabaseTables.items} i ON i.id = l.item_id
+      LEFT JOIN in_hand h ON h.item_id = l.item_id
+      LEFT JOIN loading_elsewhere e ON e.item_id = l.item_id
+      ''',
+      [transferId, centerId, centerId, transferId],
+    );
+    return rows.map(TransferDispatchStockModel.fromMap).toList(growable: false);
   }
 
   Future<List<TaskModel>> getTasks({
@@ -4085,6 +4273,10 @@ class EerlLocalDataSource {
     final taskId = UuidGenerator.v4();
     final now = DateTime.now().toUtc().toIso8601String();
     final dueDateUtc = dueDate.toUtc().toIso8601String();
+    final photoSizes = <String, int?>{
+      for (final path in uniquePhotoPaths) path: await _localFileSize(path),
+    };
+    final photoIds = <String>[];
     late final int outboxSeq;
     await _database.runInTransaction((txn) async {
       await txn.insert(DatabaseTables.tasks, {
@@ -4104,6 +4296,25 @@ class EerlLocalDataSource {
         'sync_state': 'pending',
       });
 
+      for (final path in uniquePhotoPaths) {
+        final photoId = UuidGenerator.v4();
+        photoIds.add(photoId);
+        await txn.insert(DatabaseTables.photos, {
+          'id': photoId,
+          'owner_table': DatabaseTables.tasks,
+          'owner_id': taskId,
+          'field': 'assignment',
+          // TASK_COMPLETION is the server-supported task upload purpose and is
+          // also used for the supervisor's task reference attachments.
+          'purpose': 'TASK_COMPLETION',
+          'content_type': 'image/jpeg',
+          'local_path': path,
+          'status': 'local',
+          'size_bytes': photoSizes[path],
+          'created_at': now,
+        });
+      }
+
       outboxSeq = await OutboxQueue.enqueue(
         txn,
         method: 'PUT',
@@ -4118,8 +4329,10 @@ class EerlLocalDataSource {
           'description': normalizedDescription,
           'priority': normalizedPriority,
           'dueDate': dueDateUtc,
+          'photoUrls': photoIds,
         },
         refs: [normalizedCenterId, normalizedAssignedToId],
+        blockingPhotoIds: photoIds,
         createdAt: now,
       );
     });
@@ -4129,6 +4342,7 @@ class EerlLocalDataSource {
         'COMMIT',
         'Task assigned | task_id=$taskId center=$normalizedCenterId '
             'agent=$normalizedAssignedToId due_at=$dueDateUtc '
+            'photos=${photoIds.length} '
             'outbox_seq=$outboxSeq method=PUT path=/tasks/$taskId',
       );
     }
@@ -4309,6 +4523,8 @@ class EerlLocalDataSource {
             SELECT r.*,
               (SELECT value FROM ${DatabaseTables.syncMeta}
                 WHERE key = 'supervisor_name') AS supervisor_name,
+              (SELECT value FROM ${DatabaseTables.syncMeta}
+                WHERE key = 'supervisor_photo_url') AS supervisor_photo_url,
               (r.follow_up_at IS NOT NULL
                 AND r.follow_up_at < ?
                 AND UPPER(r.status) IN ('OPEN', 'PENDING')) AS overdue
@@ -4324,7 +4540,9 @@ class EerlLocalDataSource {
         : await _database.rawQuery('''
             SELECT r.*,
               (SELECT value FROM ${DatabaseTables.syncMeta}
-                WHERE key = 'supervisor_name') AS supervisor_name
+                WHERE key = 'supervisor_name') AS supervisor_name,
+              (SELECT value FROM ${DatabaseTables.syncMeta}
+                WHERE key = 'supervisor_photo_url') AS supervisor_photo_url
             FROM ${DatabaseTables.requests} r
             WHERE ${conditions.join(' AND ')}
             ORDER BY r.created_at DESC
@@ -4339,7 +4557,9 @@ class EerlLocalDataSource {
       '''
       SELECT r.*,
         (SELECT value FROM ${DatabaseTables.syncMeta}
-          WHERE key = 'supervisor_name') AS supervisor_name
+          WHERE key = 'supervisor_name') AS supervisor_name,
+        (SELECT value FROM ${DatabaseTables.syncMeta}
+          WHERE key = 'supervisor_photo_url') AS supervisor_photo_url
       FROM ${DatabaseTables.requests} r
       WHERE r.id = ?
       LIMIT 1
@@ -4646,6 +4866,7 @@ class EerlLocalDataSource {
         spent: 0,
       );
     }
+    final todayStartUtc = _startOfIstDayUtc();
     final rows = await _database.rawQuery(
       '''
       SELECT
@@ -4656,20 +4877,41 @@ class EerlLocalDataSource {
           - COALESCE((SELECT SUM(total_amount) FROM ${DatabaseTables.collections}
               WHERE center_id = ? AND sync_state = 'pending'
                 AND status = 'SUBMITTED' AND takes_payment = 1), 0) AS balance_now,
-        COALESCE(SUM(CASE WHEN kind = 'TOP_UP' THEN amount ELSE 0 END), 0) AS cash_in,
-        -COALESCE(SUM(CASE WHEN kind IN ('COLLECTION_PAYMENT', 'COLLECTION_REVERSAL')
-          THEN amount ELSE 0 END), 0) AS paid_out,
-        -COALESCE(SUM(CASE WHEN kind IN ('EXPENSE', 'EXPENSE_REVERSAL')
-          THEN amount ELSE 0 END), 0) AS spent
-      FROM ${DatabaseTables.walletEntries}
-      WHERE center_id = ? AND created_at >= ?
+        COALESCE(SUM(CASE WHEN w.kind = 'TOP_UP' THEN w.amount END), 0)
+          AS cash_in,
+        -COALESCE(SUM(CASE WHEN w.kind IN (
+          'COLLECTION_PAYMENT', 'COLLECTION_REVERSAL'
+        ) THEN w.amount END), 0) AS paid_out,
+        -COALESCE(SUM(CASE WHEN w.kind IN (
+          'EXPENSE', 'EXPENSE_REVERSAL'
+        ) THEN w.amount END), 0) AS spent
+      FROM ${DatabaseTables.walletEntries} w
+      WHERE w.center_id = ?
+        AND w.created_at >= ?
+        AND (
+          w.kind NOT IN ('COLLECTION_REVERSAL', 'EXPENSE_REVERSAL')
+          OR (
+            SELECT MAX(p.created_at)
+            FROM ${DatabaseTables.walletEntries} p
+            WHERE p.created_at <= w.created_at
+              AND (
+                (w.kind = 'COLLECTION_REVERSAL'
+                  AND p.kind = 'COLLECTION_PAYMENT'
+                  AND p.collection_id = w.collection_id)
+                OR (w.kind = 'EXPENSE_REVERSAL'
+                  AND p.kind = 'EXPENSE'
+                  AND p.expense_id = w.expense_id)
+              )
+          ) >= ?
+        )
     ''',
       [
         resolvedCenter,
         resolvedCenter,
         resolvedCenter,
         resolvedCenter,
-        _startOfIstDayUtc(),
+        todayStartUtc,
+        todayStartUtc,
       ],
     );
     return WalletSummaryModel.fromMap(rows.single);

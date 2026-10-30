@@ -3,9 +3,12 @@ class RecordsAssets {
 
   static const search = 'assets/icons/wallet/search.svg';
   static const filter = 'assets/icons/records/filter.svg';
+  static const filterDate = 'assets/icons/records/filter_date.svg';
+  static const filterType = 'assets/icons/records/filter_type.svg';
   static const receipt = 'assets/icons/home/collection_receipt.svg';
   static const weight = 'assets/icons/home/collection_weight.svg';
   static const items = 'assets/icons/home/draft_weight.svg';
   static const openDetails = 'assets/icons/home/collection_open_details.svg';
   static const emptyDrafts = 'assets/images/records_empty_drafts.svg';
+  static const emptyHistory = 'assets/images/records_empty_drafts.svg';
 }

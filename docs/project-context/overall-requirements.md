@@ -1,6 +1,6 @@
 # EERL Mobile — Offline Data Guide
 
-> Local context snapshot from [the overall reference artifact](https://claude.ai/artifact/PyiXRt2UzSPbCu2ejoCjEu#2c3cabed-28bc.mqr00mm7t5y.3325~the-response), captured on 28 Oct 2026. Update only when the user explicitly requests it.
+> Local context snapshot from [the overall reference artifact](https://claude.ai/artifact/PyiXRt2UzSPbCu2ejoCjEu#2c3cabed-28bc.mqr00mm7t5y.3325~the-response), captured on 30 Oct 2026. Update only when the user explicitly requests it.
 
 8 Oct 2026 · @Someone
 

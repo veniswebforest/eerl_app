@@ -10,6 +10,7 @@ import 'home_styles.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
+import 'package:eerl_app/core/utils/collection_quantity_formatter.dart';
 
 /// 2×2 grid summary section showing today's collection stats.
 class TodaysSummary extends StatefulWidget {
@@ -77,13 +78,10 @@ class _TodaysSummaryState extends State<TodaysSummary> {
       builder: (context, _) {
         final summary = _controller.data?.summary;
         final wallet = _controller.data?.wallet;
-        final kgCount = (summary?.collectedKg ?? 0).round();
-        final pcsVal = summary?.collectedPcs ?? 0;
-        final pcsCount = pcsVal % 1 == 0
-            ? pcsVal.toInt().toString()
-            : pcsVal.toStringAsFixed(1);
-        final collectedValue =
-            '${context.l10n.weightKg(kgCount)} / $pcsCount ${context.l10n.collectionUnitPcs}';
+        final collectedValue = formatCollectionQuantity(
+          kilograms: summary?.collectedKg ?? 0,
+          pieces: summary?.collectedPcs ?? 0,
+        );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

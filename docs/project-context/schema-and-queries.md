@@ -1,6 +1,6 @@
 # EERL Mobile — SQLite Schema & Queries
 
-> Local context snapshot from [the schema and query artifact](https://claude.ai/artifact/WEnT56TBowJyGgxjNvD3kD#1323c428-fc8e), captured on 28 Oct 2026. Update only when the user explicitly requests it.
+> Local context snapshot from [the schema and query artifact](https://claude.ai/artifact/WEnT56TBowJyGgxjNvD3kD#1323c428-fc8e), captured on 30 Oct 2026. Update only when the user explicitly requests it.
 
 8 Oct 2026 · @Someone
 
@@ -3251,3 +3251,180 @@ No server change, no table change, no new SQL. Two corrections to this doc after
 A missing parent on one of these columns is normal: log it as information, not a warning, and never refuse the row. A missing parent on any other column is a sync bug: report it with the table, the row id and the missing id. In debug builds,`PRAGMA foreign_key_check;` after a full sync lists every row whose parent is absent.
 
 Also corrected:`destinations` and`transfer_vehicles` are sent to**everyone who sees transfers**, agents included (the schema comments said "only to someone who approves transfers"). The`vehicles.type_id` row of that table is gone: D2D vehicles have no type since 26 Oct 2026.
+
+## 29 Oct 2026 — No API change: check the loaded quantity against the stock before Submit Transfer
+
+No server change, no table change. **Submit Transfer must not queue a dispatch that takes more than the centre holds.** The server already refuses it, but the agent is usually offline at the truck, so the refusal arrives later as a failed outbox item, after the truck has gone.
+
+What the server checks on `POST /transfers/{id}/handover`: what goes on the truck against the stock in hand at the centre. For a one-item KG transfer sent without `items`, that is `dispatchedWeight`; otherwise each `items[].quantity`. Above it the answer is `422 INVALID_TRANSFER` with `dispatchedWeight` or `items.N.quantity` / `OVER_STOCK` in `details`, and the message "This center holds 25 of that item." It does **not** subtract what other open transfers ask for: that limit (`qty_free`) applies only when raising a request.
+
+If you send `items` for a KG item, its `quantity` must be the loaded weight. The server takes `items[].quantity` off the stock and checks that figure, not `dispatchedWeight`. Leaving `items` out for a one-item KG transfer is still the simplest.
+
+### 1. The most that can go on the truck, per item of this transfer
+
+An item with no `stock` row gives `qty_can_go = 0`: nothing of it can go.
+
+```sql
+WITH line AS (
+  SELECT item_id FROM transfer_items WHERE transfer_id = :id
+), in_hand AS (
+  -- Server stock plus submitted collections not yet sent.
+  SELECT s.item_id,
+         SUM(s.qty) + COALESCE((
+           SELECT SUM(ci.verified_qty)
+           FROM collection_items ci
+           JOIN collections c ON c.id = ci.collection_id
+           WHERE c.center_id = s.center_id
+             AND ci.item_id = s.item_id
+             AND c.sync_state = 'pending'
+             AND c.status = 'SUBMITTED'
+         ), 0) AS qty_now
+  FROM stock s
+  WHERE s.center_id = :center
+    AND s.stage = 'RM'
+    AND s.item_id IN (SELECT item_id FROM line)
+  GROUP BY s.item_id
+), loading_elsewhere AS (
+  -- Other dispatches from this centre saved on the phone and not sent yet:
+  -- the server takes them first.
+  SELECT ti.item_id, SUM(ti.dispatched_qty) AS qty
+  FROM transfer_items ti
+  JOIN transfers t ON t.id = ti.transfer_id
+  WHERE t.center_id = :center
+    AND t.id <> :id
+    AND t.status = 'DISPATCHED'
+    AND t.sync_state = 'pending'
+  GROUP BY ti.item_id
+)
+SELECT l.item_id, i.name, i.unit_code,
+       MAX(COALESCE(h.qty_now, 0) - COALESCE(e.qty, 0), 0) AS qty_can_go
+FROM line l
+JOIN items i ON i.id = l.item_id
+LEFT JOIN in_hand h ON h.item_id = l.item_id
+LEFT JOIN loading_elsewhere e ON e.item_id = l.item_id;
+```
+
+### 2. On Submit Transfer: block when it is more
+
+Run the query when the agent taps **Submit Transfer**, before anything is written. For each item, the quantity going is the **loaded weight** (an item in KG) or the **pieces loaded** (an item in PCS).
+
+- When `ROUND(quantity going, 3) > ROUND(qty_can_go, 3)`: queue nothing, keep both screens filled in, and show under the Loaded weight (or Pieces loaded) box: "This center holds 25 kg of Plastic." (`qty_can_go`, the unit, `name`).
+- Otherwise run Submit Transfer as today: nothing in that transaction changes.
+
+### 3. When the server still refuses
+
+The stock can change between the last sync and the send: another phone's dispatch, or an admin's stock correction. The answer is the same `422` with `OVER_STOCK`. Today the item parks as failed and the transfer keeps showing Dispatched, which is wrong: nothing left the centre's stock.
+
+Show the message on the transfer and offer **Fix the dispatch**. It puts the transfer back to Approved, keeps the vehicle number, driver and photos, and drops the refused send. The agent re-types the loaded weight and submits again.
+
+Use the same steps for a handover that already failed this way before this entry: an outbox item with `kind = 'handover'`, `status = 'failed'` and a `422` with `OVER_STOCK`.
+
+```sql
+-- The refused send.
+SELECT seq FROM outbox
+WHERE entity = 'transfers' AND entity_id = :id
+  AND kind = 'handover' AND status = 'failed';
+
+BEGIN;
+-- Keep the vehicle and driver, so Vehicle Details opens filled in.
+INSERT OR REPLACE INTO sync_meta (key, value)
+SELECT 'dispatch_draft:' || id,
+       json_object('vehicleNumber', vehicle_plate, 'driverName', driver_name)
+FROM transfers WHERE id = :id;
+
+UPDATE transfers
+SET status = 'APPROVED', handed_over_at = NULL, vehicle_plate = NULL,
+    driver_name = NULL, dispatched_weight = NULL, bale_count = NULL,
+    gps_lat = NULL, gps_lng = NULL, sync_state = 'synced'
+WHERE id = :id AND status = 'DISPATCHED';
+
+UPDATE transfer_items SET dispatched_qty = NULL WHERE transfer_id = :id;
+
+-- The photos stay in photos (already uploaded) and are linked again on the next Submit.
+DELETE FROM outbox_photos WHERE outbox_seq = :seq;
+DELETE FROM outbox WHERE seq = :seq;
+COMMIT;
+```
+
+## 29 Oct 2026 — Supervisor Home (SUP-M01): every tile, and it reads the chosen centre
+
+No server change, no table change. **This entry replaces the `### Home` block under Supervisor screens.** That block gave six numbers across every centre; the screen shows nine, for one.
+
+**Home reads the active centre.** The centre picker sits on Home—it is the same one the Stock screen reads (20 Oct 2026), and the picture under it belongs to that centre. A supervisor holding two centres cannot act on "12 approvals waiting" without knowing whose they are. So every query below is `center_id = :center`, not `IN (SELECT center_id FROM my_centers)`. `:center` is always one of `my_centers`: the picker offers nothing else.
+
+`:today_start_utc` and `:tomorrow_start_utc` bracket the IST day.
+
+**Do not build Home from `GET /mobile/supervisor/summary`.** That endpoint takes no centre and measures across every centre in scope, so the moment a supervisor holds two it disagrees with the tiles. Home reads SQLite, like every other screen.
+
+### The tiles
+
+| Tile | Reads |
+| --- | --- |
+| Active Agents | the agent roster at this centre |
+| Transports Done | transfers raised today, and how many came back received |
+| Total Stocks | raw material in hand, one figure per unit |
+| Pending Expenses | expenses waiting for a decision |
+| Assigned Tasks | open tasks, and tasks completed today |
+| Transfer Requests (badge) | transfers waiting for a decision |
+| Approvals & Claims (badge) | expenses + cash requests + category requests waiting |
+| Verification (badge) | collections waiting to be verified |
+| Tasks and Requests (badge) | open requests |
+
+`Total Stocks` is the total line already written for the Stock screen (20 Oct 2026)—the `in_hand` query grouped by `unit_code`. Run that one, so the tile and the Stock screen can never disagree, and show it the same way: `2,840.00 KG · 25 PCS`. **Never add KG and PCS into one number.** Stock of an item taken off the list is left out of both, as it is of the Stock screen.
+
+```sql
+-- Active Agents. The roster: everyone placed at this centre who holds the agent
+-- role. NOT who has recorded something today (settled with the client, 24 Sep).
+SELECT COUNT(*) FROM center_people
+WHERE center_id = :center AND is_agent = 1;
+
+-- Transports Done: received / raised. Both figures are about transfers raised
+-- today, because the tile sits under Today's Summary—one raised yesterday and
+-- received today is not counted.
+SELECT SUM(status = 'RECEIVED'), COUNT(*) FROM transfers
+WHERE center_id = :center
+  AND requested_at >= :today_start_utc
+  AND requested_at < :tomorrow_start_utc;
+
+-- Pending Expenses.
+SELECT COUNT(*) FROM expenses
+WHERE center_id = :center AND status = 'PENDING';
+
+-- Approvals & Claims: the badge, and its three parts.
+SELECT (SELECT COUNT(*) FROM expenses
+        WHERE center_id = :center AND status = 'PENDING') AS expenses,
+       (SELECT COUNT(*) FROM cash_requests
+        WHERE center_id = :center AND status = 'PENDING') AS cash_requests,
+       (SELECT COUNT(*) FROM category_requests
+        WHERE center_id = :center AND status = 'PENDING') AS category_requests;
+
+-- Transfer Requests: waiting for a decision.
+SELECT COUNT(*) FROM transfers
+WHERE center_id = :center AND status = 'REQUESTED';
+
+-- Verification: waiting to be verified.
+SELECT COUNT(*) FROM collections
+WHERE center_id = :center AND status = 'SUBMITTED';
+
+-- Assigned Tasks: pending is every open task, of any age; completed is today's
+-- only. Two different windows on one card—do not give them the same one.
+SELECT (SELECT COUNT(*) FROM tasks
+        WHERE center_id = :center AND status = 'PENDING') AS pending,
+       (SELECT COUNT(*) FROM tasks
+        WHERE center_id = :center AND status = 'COMPLETED'
+          AND completed_at >= :today_start_utc
+          AND completed_at < :tomorrow_start_utc) AS completed;
+
+-- Open requests, for the Tasks and Requests screen's badge.
+SELECT COUNT(*) FROM requests
+WHERE center_id = :center AND status = 'OPEN';
+```
+
+### Notes on Active Agents
+
+- The label says **Active** and means the roster. Nothing on the phone records whether an agent has started work: `center_people` carries `user_id`, `center_id`, `name`, `phone`, `is_agent` and nothing else—no last-seen, no activity. The "8/10" fraction in the old PRD journey cannot be built from this data and is not what the screen shows.
+- Deactivated and deleted people are already gone. `/bootstrap` sends `center_people` filtered to active, undeleted users, and sets `is_agent = 1` only for someone holding the agent role in this company. So `is_agent = 1` is the whole filter: no extra condition, and the supervisor does not count themselves.
+- `center_people` reaches only someone who hands out work, so this tile exists on the supervisor's Home and nowhere else.
+- `COUNT(*)` is right because the table's key is `(user_id, center_id)`—one row per person per centre. Should this tile ever be shown across several centres, it becomes `COUNT(DISTINCT user_id)`: an agent placed at two of them is one agent, which is how the server counts.
+
+Agent status (the **View Status** card) already takes `:center`. Pass the active centre, so the list under the tile is the same people the tile counted.

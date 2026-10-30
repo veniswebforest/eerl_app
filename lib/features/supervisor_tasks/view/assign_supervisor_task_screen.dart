@@ -172,7 +172,7 @@ class _AssignSupervisorTaskScreenState
             constraints: const BoxConstraints(maxWidth: 600),
             child: ListView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
               children: [
                 _requiredLabel(context.l10n.supervisorTaskAssignTo),
                 const SizedBox(height: 8),
@@ -671,7 +671,7 @@ class _AgentSelectorState extends State<_AgentSelector> {
             ),
           ),
         ),
-        SizedBox(height: 4),
+        SizedBox(height: 8),
         if (widget.expanded)
           Container(
             width: double.infinity,

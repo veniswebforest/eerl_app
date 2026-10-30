@@ -21,12 +21,22 @@ class NewRagpickerInput {
     required this.phone,
     this.idNumber,
     this.localPhotoPath,
+    this.localPhotoPaths = const [],
   });
 
   final String name;
   final String phone;
   final String? idNumber;
   final String? localPhotoPath;
+  final List<String> localPhotoPaths;
+
+  List<String> get effectivePhotoPaths {
+    if (localPhotoPaths.isNotEmpty) return localPhotoPaths;
+    if (localPhotoPath != null && localPhotoPath!.isNotEmpty) {
+      return [localPhotoPath!];
+    }
+    return const [];
+  }
 }
 
 class AddNewRagpickerBottomSheet extends StatefulWidget {
@@ -67,7 +77,7 @@ class _AddNewRagpickerBottomSheetState
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _mobileController = TextEditingController();
   final TextEditingController _aadharController = TextEditingController();
-  XFile? _photo;
+  final List<XFile> _photos = [];
   final ImagePicker _imagePicker = ImagePicker();
   bool _saving = false;
 
@@ -80,7 +90,11 @@ class _AddNewRagpickerBottomSheetState
   Future<void> _restoreCameraResult() async {
     final image = await ImageCompressor.claimRecoveredImage(_cameraRecoveryId);
     if (image == null || !mounted) return;
-    setState(() => _photo = image);
+    setState(() {
+      if (_photos.length < 2) {
+        _photos.add(image);
+      }
+    });
   }
 
   @override
@@ -92,6 +106,7 @@ class _AddNewRagpickerBottomSheetState
   }
 
   Future<void> _pickImage() async {
+    if (_photos.length >= 2) return;
     try {
       final image = await InAppCameraScreen.capture(
         context,
@@ -100,7 +115,7 @@ class _AddNewRagpickerBottomSheetState
         title: 'Capture Ragpicker Photo',
       );
       if (image != null && mounted) {
-        setState(() => _photo = image);
+        setState(() => _photos.add(image));
       }
     } catch (_) {}
   }
@@ -119,6 +134,7 @@ class _AddNewRagpickerBottomSheetState
     if (_saving) return;
     setState(() => _saving = true);
     try {
+      final photoPaths = _photos.map((p) => p.path).toList();
       await widget.onSave(
         NewRagpickerInput(
           name: name,
@@ -126,7 +142,8 @@ class _AddNewRagpickerBottomSheetState
           idNumber: _aadharController.text.trim().isEmpty
               ? null
               : _aadharController.text.trim(),
-          localPhotoPath: _photo?.path,
+          localPhotoPath: photoPaths.isEmpty ? null : photoPaths.first,
+          localPhotoPaths: photoPaths,
         ),
       );
       if (mounted) Navigator.pop(context);
@@ -321,51 +338,50 @@ class _AddNewRagpickerBottomSheetState
     );
   }
 
-  Widget _buildPhotoPicker(BuildContext context) {
-    if (_photo != null) {
-      return Container(
-        height: 82,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.primary500),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              InkWell(
-                key: const Key('new-ragpicker-photo-preview'),
-                onTap: () =>
-                    AppImagePreviewDialog.showSource(context, _photo!.path),
-                child: Image.file(File(_photo!.path), fit: BoxFit.cover),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: GestureDetector(
-                  onTap: () => setState(() => _photo = null),
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.black54,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 18,
-                    ),
+  Widget _buildPhotoTile(BuildContext context, int index, XFile file) {
+    return Container(
+      height: 82,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.primary500),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            InkWell(
+              key: Key('new-ragpicker-photo-preview-$index'),
+              onTap: () => AppImagePreviewDialog.showSource(context, file.path),
+              child: Image.file(File(file.path), fit: BoxFit.cover),
+            ),
+            Positioned(
+              top: 6,
+              right: 6,
+              child: GestureDetector(
+                key: Key('new-ragpicker-remove-photo-$index'),
+                onTap: () => setState(() => _photos.removeAt(index)),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 16,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
-    }
+      ),
+    );
+  }
 
+  Widget _buildCaptureBox(BuildContext context) {
     return DottedBorder(
       options: const RoundedRectDottedBorderOptions(
         radius: Radius.circular(10),
@@ -395,6 +411,7 @@ class _AddNewRagpickerBottomSheetState
               const SizedBox(height: 8),
               Text(
                 context.l10n.collectionCapturePhoto,
+                textAlign: TextAlign.center,
                 style: AppTextStyles.semiboldH9_14.copyWith(
                   color: AppColors.primary500,
                 ),
@@ -403,6 +420,24 @@ class _AddNewRagpickerBottomSheetState
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPhotoPicker(BuildContext context) {
+    if (_photos.isEmpty) {
+      return _buildCaptureBox(context);
+    }
+    return Row(
+      children: [
+        for (var i = 0; i < _photos.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(child: _buildPhotoTile(context, i, _photos[i])),
+        ],
+        if (_photos.length < 2) ...[
+          const SizedBox(width: 10),
+          Expanded(child: _buildCaptureBox(context)),
+        ],
+      ],
     );
   }
 }

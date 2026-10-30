@@ -1160,6 +1160,11 @@ class AppLocalizationsGu extends AppLocalizations {
   String get expenseAmountHint => '₹ ખર્ચની રકમ દાખલ કરો';
 
   @override
+  String expenseAmountExceedsWalletBalance(String balance) {
+    return 'રકમ ઉપલબ્ધ વૉલેટ બેલેન્સ ₹$balance કરતાં વધુ ન હોઈ શકે.';
+  }
+
+  @override
   String get uploadReceiptLabel => 'રસીદ અપલોડ કરો';
 
   @override
@@ -1367,6 +1372,15 @@ class AppLocalizationsGu extends AppLocalizations {
   String get recordsFilterByDate => 'તારીખ પ્રમાણે ફિલ્ટર કરો';
 
   @override
+  String get recordsFilterTitle => 'ફિલ્ટર';
+
+  @override
+  String get recordsSelectTypes => 'પ્રકાર પસંદ કરો';
+
+  @override
+  String get recordsApplyFilter => 'ફિલ્ટર લાગુ કરો';
+
+  @override
   String get recordsFilterToday => 'આજે';
 
   @override
@@ -1383,6 +1397,11 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get recordsOctoberCollections => '22 ઑક્ટોબરના કલેક્શન';
+
+  @override
+  String recordsDatedCollections(String date) {
+    return '$date ના કલેક્શન';
+  }
 
   @override
   String get recordsCollectionDrafts => 'કલેક્શન ડ્રાફ્ટ';
@@ -1417,6 +1436,9 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get recordsNoDrafts => 'હાલ કોઈ ડ્રાફ્ટ નથી';
+
+  @override
+  String get recordsNoCollectionHistory => 'હાલ કોઈ કલેક્શન હિસ્ટ્રી નથી';
 
   @override
   String get profileUserProfile => 'વપરાશકર્તા પ્રોફાઇલ';
@@ -1852,6 +1874,13 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get collectionRampPersonPhoto => 'રેમ્પ વ્યક્તિનો ફોટો અપલોડ કરો';
+
+  @override
+  String get collectionRampHandoverPhoto => 'હેન્ડઓવર ફોટો';
+
+  @override
+  String get collectionRampHandoverPhotoHint =>
+      'હેન્ડઓવરના પુરાવા તરીકે ફોટો લો.';
 
   @override
   String get collectionTotalWeight => 'કુલ કલેક્શન વજન';
@@ -2528,6 +2557,10 @@ class AppLocalizationsGu extends AppLocalizations {
   String get requestRaiseTitle => 'વિનંતી કરો';
 
   @override
+  String get noSupervisorSet =>
+      'કોઈ સુપરવાઇઝર સેટ નથી: તમારા એડમિનને એક સેટ કરવા કહો.';
+
+  @override
   String get requestToSupervisor => 'પ્રતિ : ભાવેશ શાહ (સુપરવાઇઝર)';
 
   @override
@@ -2799,6 +2832,15 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get transferLoadedWeightHint => 'દા.ત. 1250';
+
+  @override
+  String transferDispatchStockExceeded(
+    String quantity,
+    String unit,
+    String item,
+  ) {
+    return 'આ સેન્ટરમાં $itemનો માત્ર $quantity $unit સ્ટોક ઉપલબ્ધ છે.';
+  }
 
   @override
   String get transferNumberOfBales => 'ગાંસડી / બોરીની સંખ્યા';
@@ -3530,6 +3572,19 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get supervisorExpenseRejectedMessage => 'વિનંતી સફળતાપૂર્વક નકારાઈ';
+
+  @override
+  String get supervisorCashApprovedTitle => 'રોકડ વિનંતી મંજૂર થઈ!';
+
+  @override
+  String get supervisorCashApprovedMessage =>
+      'રોકડ વિનંતી સફળતાપૂર્વક મંજૂર થઈ';
+
+  @override
+  String get supervisorCashRejectedTitle => 'રોકડ વિનંતી નકારાઈ!';
+
+  @override
+  String get supervisorCashRejectedMessage => 'રોકડ વિનંતી સફળતાપૂર્વક નકારાઈ';
 
   @override
   String get supervisorExpenseRejectScreenTitle => 'ખર્ચ નકારો';

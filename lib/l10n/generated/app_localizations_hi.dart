@@ -1162,6 +1162,11 @@ class AppLocalizationsHi extends AppLocalizations {
   String get expenseAmountHint => '₹ व्यय राशि दर्ज करें';
 
   @override
+  String expenseAmountExceedsWalletBalance(String balance) {
+    return 'राशि उपलब्ध वॉलेट बैलेंस ₹$balance से अधिक नहीं हो सकती।';
+  }
+
+  @override
   String get uploadReceiptLabel => 'रसीद अपलोड करें';
 
   @override
@@ -1370,6 +1375,15 @@ class AppLocalizationsHi extends AppLocalizations {
   String get recordsFilterByDate => 'तारीख के अनुसार फ़िल्टर करें';
 
   @override
+  String get recordsFilterTitle => 'फ़िल्टर';
+
+  @override
+  String get recordsSelectTypes => 'प्रकार चुनें';
+
+  @override
+  String get recordsApplyFilter => 'फ़िल्टर लागू करें';
+
+  @override
   String get recordsFilterToday => 'आज';
 
   @override
@@ -1386,6 +1400,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get recordsOctoberCollections => '22 अक्टूबर के संग्रह';
+
+  @override
+  String recordsDatedCollections(String date) {
+    return '$date के संग्रह';
+  }
 
   @override
   String get recordsCollectionDrafts => 'संग्रह ड्राफ्ट';
@@ -1420,6 +1439,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get recordsNoDrafts => 'अभी कोई ड्राफ्ट नहीं';
+
+  @override
+  String get recordsNoCollectionHistory => 'अभी कोई कलेक्शन हिस्ट्री नहीं है';
 
   @override
   String get profileUserProfile => 'उपयोगकर्ता प्रोफ़ाइल';
@@ -1853,6 +1875,13 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get collectionRampPersonPhoto => 'रैंप व्यक्ति का फोटो अपलोड करें';
+
+  @override
+  String get collectionRampHandoverPhoto => 'हैंडओवर फोटो';
+
+  @override
+  String get collectionRampHandoverPhotoHint =>
+      'हैंडओवर के प्रमाण के रूप में फोटो लें।';
 
   @override
   String get collectionTotalWeight => 'कुल संग्रह वजन';
@@ -2532,6 +2561,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get requestRaiseTitle => 'अनुरोध करें';
 
   @override
+  String get noSupervisorSet =>
+      'कोई सुपरवाइज़र सेट नहीं है: अपने एडमिन से एक सेट करने के लिए कहें।';
+
+  @override
   String get requestToSupervisor => 'प्रति : भावेश शाह (सुपरवाइज़र)';
 
   @override
@@ -2804,6 +2837,15 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get transferLoadedWeightHint => 'जैसे 1250';
+
+  @override
+  String transferDispatchStockExceeded(
+    String quantity,
+    String unit,
+    String item,
+  ) {
+    return 'इस सेंटर में $item का केवल $quantity $unit स्टॉक उपलब्ध है।';
+  }
 
   @override
   String get transferNumberOfBales => 'गांठों / बोरियों की संख्या';
@@ -3539,6 +3581,20 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get supervisorExpenseRejectedMessage => 'अनुरोध सफलतापूर्वक अस्वीकृत';
+
+  @override
+  String get supervisorCashApprovedTitle => 'नकद अनुरोध स्वीकृत!';
+
+  @override
+  String get supervisorCashApprovedMessage =>
+      'नकद अनुरोध सफलतापूर्वक स्वीकृत हुआ';
+
+  @override
+  String get supervisorCashRejectedTitle => 'नकद अनुरोध अस्वीकृत!';
+
+  @override
+  String get supervisorCashRejectedMessage =>
+      'नकद अनुरोध सफलतापूर्वक अस्वीकृत हुआ';
 
   @override
   String get supervisorExpenseRejectScreenTitle => 'खर्च अस्वीकार करें';

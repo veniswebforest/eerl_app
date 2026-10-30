@@ -178,11 +178,13 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                     ? collection.handedOverBy!
                     : context.l10n.verificationDetailGivenByValue,
               ),
-              const SizedBox(height: 10),
-              _VehiclePhotoCard(
-                paths: collection.handoverPhotoUrls,
-                onPhotoTap: _openImagePreview,
-              ),
+              if (collection.handoverPhotoUrls.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                _VehiclePhotoCard(
+                  paths: collection.handoverPhotoUrls,
+                  onPhotoTap: _openImagePreview,
+                ),
+              ],
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(16),
@@ -402,8 +404,7 @@ class _VehiclePhotoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final path =
-        paths.firstOrNull ?? 'assets/images/collection_detail/figma/raw_01.png';
+    final path = paths.first;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),

@@ -13,6 +13,11 @@ void main() {
     expect(find.text('Resolve Task'), findsOneWidget);
     expect(find.text('Verify Collection Details'), findsOneWidget);
     expect(find.text('Attachment from Supervisor'), findsOneWidget);
+    expect(
+      find.byKey(const Key('supervisor-task-attachments')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('preview-task-photo-0')), findsOneWidget);
     await tester.drag(find.byType(ListView), const Offset(0, -320));
     await tester.pump();
     expect(
@@ -52,6 +57,30 @@ void main() {
     expect(find.text('Bhavesh Shah'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('loads supervisor attachments from the latest SQLite task row', (
+    tester,
+  ) async {
+    final initial = _pendingTask(photoUrls: const []);
+    final latest = _pendingTask();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: TaskDetailScreen(task: initial, taskLoader: (_) async => latest),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Attachment from Supervisor'), findsOneWidget);
+    expect(
+      find.byKey(const Key('supervisor-task-attachments')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('preview-task-photo-0')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }
 
 Future<void> _pumpTask(WidgetTester tester, TaskModel task) async {
@@ -64,13 +93,15 @@ Future<void> _pumpTask(WidgetTester tester, TaskModel task) async {
     MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: TaskDetailScreen(task: task),
+      home: TaskDetailScreen(task: task, taskLoader: (_) async => task),
     ),
   );
   await tester.pump();
 }
 
-TaskModel _pendingTask() {
+TaskModel _pendingTask({
+  List<String> photoUrls = const ['assets/images/profile_rahul_patel.png'],
+}) {
   final due = DateTime.now().add(const Duration(hours: 2)).toUtc();
   return TaskModel(
     id: 'pending-task',
@@ -82,7 +113,7 @@ TaskModel _pendingTask() {
     priority: 'HIGH',
     status: 'PENDING',
     dueAt: due.toIso8601String(),
-    photoUrls: const ['assets/images/profile_rahul_patel.png'],
+    photoUrls: photoUrls,
     createdAt: DateTime.now().toUtc().toIso8601String(),
     syncState: 'synced',
   );

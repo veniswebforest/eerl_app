@@ -73,7 +73,7 @@ class SupervisorAgentRequestCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    item.priority,
+                    "Verify Collection Details",
                     style: AppTextStyles.semiboldH9_14.copyWith(
                       color: AppColors.neutral950,
                     ),

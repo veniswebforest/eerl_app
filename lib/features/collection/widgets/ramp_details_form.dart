@@ -17,24 +17,24 @@ class RampDetailsForm extends StatefulWidget {
     super.key,
     required this.people,
     required this.selectedPersonId,
-    required this.photo,
     required this.onPersonSelected,
     required this.onAddNewPerson,
     required this.onDeactivatePerson,
-    required this.onCapturePhoto,
-    required this.onRemovePhoto,
-    required this.onPreviewPhoto,
+    required this.handoverPhoto,
+    required this.onCaptureHandoverPhoto,
+    required this.onRemoveHandoverPhoto,
+    required this.onPreviewHandoverPhoto,
   });
 
   final List<RagpickerModel> people;
   final String? selectedPersonId;
-  final XFile? photo;
   final ValueChanged<RagpickerModel> onPersonSelected;
   final Future<void> Function(NewRagpickerInput) onAddNewPerson;
   final ValueChanged<RagpickerModel> onDeactivatePerson;
-  final VoidCallback onCapturePhoto;
-  final VoidCallback onRemovePhoto;
-  final VoidCallback onPreviewPhoto;
+  final XFile? handoverPhoto;
+  final VoidCallback onCaptureHandoverPhoto;
+  final VoidCallback onRemoveHandoverPhoto;
+  final VoidCallback onPreviewHandoverPhoto;
 
   @override
   State<RampDetailsForm> createState() => _RampDetailsFormState();
@@ -75,8 +75,90 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
           else
             _buildPersonList(filteredPeople),
         ],
-        const SizedBox(height: 20),
-        _buildPhotoCard(context),
+        const SizedBox(height: 24),
+        _requiredLabel(context.l10n.collectionRampHandoverPhoto),
+        const SizedBox(height: 8),
+        InkWell(
+          key: const Key('ramp-capture-handover-photo'),
+          onTap: widget.handoverPhoto == null
+              ? widget.onCaptureHandoverPhoto
+              : null,
+          borderRadius: BorderRadius.circular(10),
+          child: DottedBorder(
+            options: const RoundedRectDottedBorderOptions(
+              radius: Radius.circular(10),
+              color: AppColors.primary500,
+              dashPattern: [4, 3],
+              strokeWidth: 1,
+              padding: EdgeInsets.zero,
+            ),
+            child: Container(
+              height: 92,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.primary50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'assets/icons/collection/capture_camera.svg',
+                    width: 24,
+                    height: 24,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    context.l10n.collectionCapturePhoto,
+                    style: AppTextStyles.semiboldH9_14.copyWith(
+                      color: AppColors.neutral900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          context.l10n.collectionRampHandoverPhotoHint,
+          style: AppTextStyles.regularB8_12.copyWith(
+            color: AppColors.neutral600,
+          ),
+        ),
+        if (widget.handoverPhoto != null) ...[
+          const SizedBox(height: 12),
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: InkWell(
+                  key: const Key('ramp-preview-handover-photo'),
+                  onTap: widget.onPreviewHandoverPhoto,
+                  child: Image.file(
+                    File(widget.handoverPhoto!.path),
+                    width: 109,
+                    height: 70,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 6,
+                top: 6,
+                child: InkWell(
+                  key: const Key('ramp-remove-handover-photo'),
+                  onTap: widget.onRemoveHandoverPhoto,
+                  child: SvgPicture.asset(
+                    'assets/icons/wallet/expense_remove.svg',
+                    width: 22,
+                    height: 22,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -326,106 +408,6 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
         width: selected ? 4.5 : 1.2,
       ),
     ),
-  );
-
-  Widget _buildPhotoCard(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: AppColors.neutral50,
-      borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: AppColors.cool200),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _requiredLabel(context.l10n.captureVehiclePhoto),
-        const SizedBox(height: 8),
-        _buildCaptureArea(context),
-        const SizedBox(height: 12),
-        Text(
-          context.l10n.collectionVehiclePhotoHint,
-          style: AppTextStyles.regularB8_12.copyWith(
-            color: AppColors.neutral600,
-          ),
-        ),
-        if (widget.photo != null) ...[
-          const SizedBox(height: 12),
-          _buildSelectedPhoto(),
-        ],
-      ],
-    ),
-  );
-
-  Widget _buildCaptureArea(BuildContext context) => DottedBorder(
-    options: const RoundedRectDottedBorderOptions(
-      radius: Radius.circular(10),
-      color: AppColors.primary500,
-      dashPattern: [4, 3],
-      strokeWidth: 1,
-      padding: EdgeInsets.zero,
-    ),
-    child: InkWell(
-      key: const Key('ramp-capture-vehicle-photo'),
-      onTap: widget.photo == null ? widget.onCapturePhoto : null,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        width: double.infinity,
-        height: 92,
-        decoration: BoxDecoration(
-          color: AppColors.primary50,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              'assets/icons/collection/capture_camera.svg',
-              width: 24,
-              height: 24,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              context.l10n.collectionCapturePhoto,
-              style: AppTextStyles.mediumSH8_14.copyWith(
-                color: AppColors.neutral900,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-
-  Widget _buildSelectedPhoto() => Stack(
-    children: [
-      ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: InkWell(
-          key: const Key('ramp-preview-vehicle-photo'),
-          onTap: widget.onPreviewPhoto,
-          child: Image.file(
-            File(widget.photo!.path),
-            width: 109,
-            height: 70,
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
-      Positioned(
-        right: 6,
-        top: 6,
-        child: InkWell(
-          key: const Key('ramp-remove-vehicle-photo'),
-          onTap: widget.onRemovePhoto,
-          child: SvgPicture.asset(
-            'assets/icons/wallet/expense_remove.svg',
-            width: 22,
-            height: 22,
-          ),
-        ),
-      ),
-    ],
   );
 }
 

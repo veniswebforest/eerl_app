@@ -229,6 +229,45 @@ void main() {
     expect(sent.url.path, '/api/v1/mobile/ragpickers/ragpicker-1/status');
     expect(jsonDecode(sent.body), {'isActive': false});
   });
+
+  test('stores ragpicker with 2 photos and retrieves both photo sources', () async {
+    await repository.saveRagpicker(
+      const RagpickerModel(
+        id: 'ragpicker-2',
+        centerId: 'center-1',
+        name: 'Asha Ben',
+        phone: '9898989898',
+        isActive: true,
+        syncState: 'pending',
+      ),
+      localPhotoPaths: ['/tmp/ragpicker-photo-1.jpg', '/tmp/ragpicker-photo-2.jpg'],
+    );
+
+    final ragpicker = (await database.query(
+      DatabaseTables.ragpickers,
+      where: 'id = ?',
+      whereArgs: ['ragpicker-2'],
+    )).single;
+    expect(
+      ragpicker['photo_url'],
+      jsonEncode(['/tmp/ragpicker-photo-1.jpg', '/tmp/ragpicker-photo-2.jpg']),
+    );
+
+    final photos = await database.query(
+      DatabaseTables.photos,
+      where: 'owner_id = ?',
+      whereArgs: ['ragpicker-2'],
+      orderBy: 'created_at ASC',
+    );
+    expect(photos, hasLength(2));
+    expect(photos[0]['local_path'], '/tmp/ragpicker-photo-1.jpg');
+    expect(photos[1]['local_path'], '/tmp/ragpicker-photo-2.jpg');
+    expect(photos[0]['purpose'], 'RAGPICKER');
+    expect(photos[1]['purpose'], 'RAGPICKER');
+
+    final sources = await repository.getRagpickerPhotoSources('ragpicker-2');
+    expect(sources, ['/tmp/ragpicker-photo-1.jpg', '/tmp/ragpicker-photo-2.jpg']);
+  });
 }
 
 Future<void> _save(EerlLocalRepository repository) => repository.saveRagpicker(

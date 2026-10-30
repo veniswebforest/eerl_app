@@ -127,7 +127,9 @@ class _CollectionDraftsState extends State<CollectionDrafts> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            draft.centerId,
+                            draft.centerName?.trim().isNotEmpty == true
+                                ? draft.centerName!
+                                : '-',
                             style: AppTextStyles.mediumSH8_14.copyWith(
                               color: AppColors.neutral700,
                             ),

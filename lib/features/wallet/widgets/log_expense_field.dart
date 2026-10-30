@@ -52,6 +52,7 @@ class LogExpenseInput extends StatelessWidget {
     this.maxLines = 1,
     this.maxLength,
     this.counterText,
+    this.errorText,
   });
 
   final TextEditingController controller;
@@ -60,6 +61,7 @@ class LogExpenseInput extends StatelessWidget {
   final int maxLines;
   final int? maxLength;
   final String? counterText;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +78,10 @@ class LogExpenseInput extends StatelessWidget {
           color: AppColors.cool500,
         ),
         counterText: hasInsideCounter ? '' : null,
+        errorText: errorText,
+        errorStyle: AppTextStyles.regularB8_12.copyWith(
+          color: AppColors.red600,
+        ),
         filled: true,
         fillColor: Colors.white,
         contentPadding: hasInsideCounter
@@ -84,6 +90,12 @@ class LogExpenseInput extends StatelessWidget {
         enabledBorder: _border,
         focusedBorder: _border.copyWith(
           borderSide: const BorderSide(color: AppColors.primary500),
+        ),
+        errorBorder: _border.copyWith(
+          borderSide: const BorderSide(color: AppColors.red600),
+        ),
+        focusedErrorBorder: _border.copyWith(
+          borderSide: const BorderSide(color: AppColors.red600),
         ),
         border: _border,
       ),

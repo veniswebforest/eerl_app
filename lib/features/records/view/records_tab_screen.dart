@@ -21,6 +21,7 @@ import '../widgets/records_assets.dart';
 import '../widgets/records_segmented_control.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class RecordsTabScreen extends StatefulWidget {
   const RecordsTabScreen({
@@ -35,7 +36,8 @@ class RecordsTabScreen extends StatefulWidget {
 class _RecordsTabScreenState extends State<RecordsTabScreen> {
   late RecordsViewFlag _view = widget.initialView;
   _RecordsTypeFilter _typeFilter = _RecordsTypeFilter.all;
-  _RecordsDateFilter _dateFilter = _RecordsDateFilter.all;
+  _RecordsDateFilter _dateFilter = _RecordsDateFilter.lastSevenDays;
+  _RecordsStatusFilter _statusFilter = _RecordsStatusFilter.all;
   String _query = '';
   String? _draftToDiscard;
   late final LocalQueryController<
@@ -107,7 +109,7 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
                           actions: [
                             IconButton(
                               key: const Key('records-date-filter'),
-                              onPressed: _showDateFilter,
+                              onPressed: _showFilters,
                               icon: SvgPicture.asset(
                                 RecordsAssets.filter,
                                 width: 28,
@@ -136,12 +138,15 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        _RecordsTypeChips(
-                          selected: _typeFilter,
-                          onSelected: (value) =>
-                              setState(() => _typeFilter = value),
-                        ),
-                        const SizedBox(height: 24),
+                        if (!_showDrafts) ...[
+                          _RecordsStatusChips(
+                            selected: _statusFilter,
+                            onSelected: (value) =>
+                                setState(() => _statusFilter = value),
+                          ),
+                          const SizedBox(height: 24),
+                        ] else
+                          const SizedBox(height: 24),
                         ListenableBuilder(
                           listenable: _controller,
                           builder: (context, _) {
@@ -186,36 +191,54 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
 
   Widget _buildHistory() {
     final items = (_controller.data?.history ?? const <CollectionModel>[])
-        .where((item) => _matchesType(item.channel) && _matchesDate(item))
+        .where(
+          (item) =>
+              _matchesType(item.channel) &&
+              _matchesDate(item) &&
+              _matchesStatus(item.status),
+        )
         .toList(growable: false);
+    if (items.isEmpty) {
+      return _RecordsEmptyState(
+        key: const Key('records-history-empty'),
+        message: context.l10n.recordsNoCollectionHistory,
+        asset: RecordsAssets.emptyHistory,
+        imageKey: const Key('records-history-empty-icon'),
+      );
+    }
+    final grouped = <DateTime, List<CollectionModel>>{};
+    for (final item in items) {
+      final day = _collectionIstDay(item);
+      (grouped[day] ??= <CollectionModel>[]).add(item);
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.l10n.recordsAllCollections,
-          style: AppTextStyles.semiboldH7_18.copyWith(
-            color: AppColors.neutral950,
-          ),
-        ),
-        const SizedBox(height: 10),
-        if (items.isEmpty)
-          _RecordsEmptyState(
-            key: const Key('records-history-empty'),
-            message: context.l10n.verificationEmpty,
-          )
-        else
-          for (final item in items) ...[
-            CollectionHistoryCard(
-              item: item,
-              statusLabel: _statusLabel(item.status),
-              onTap: () => context.push<void>(
-                AppRoutes.collectionDetail,
-                extra: item.id,
+      children: grouped.entries.indexed
+          .expand((entry) {
+            final group = entry.$2;
+            return <Widget>[
+              if (entry.$1 > 0) const SizedBox(height: 14),
+              Text(
+                _dateGroupLabel(group.key),
+                style: AppTextStyles.semiboldH7_18.copyWith(
+                  color: AppColors.neutral950,
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-          ],
-      ],
+              const SizedBox(height: 12),
+              for (final item in group.value) ...[
+                CollectionHistoryCard(
+                  item: item,
+                  statusLabel: _statusLabel(item.status),
+                  onTap: () => context.push<void>(
+                    AppRoutes.collectionDetail,
+                    extra: item.id,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ];
+          })
+          .toList(growable: false),
     );
   }
 
@@ -296,6 +319,18 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
     };
   }
 
+  bool _matchesStatus(String status) {
+    final upper = status.trim().toUpperCase();
+    return switch (_statusFilter) {
+      _RecordsStatusFilter.all => true,
+      _RecordsStatusFilter.pending =>
+        upper == 'PENDING' || upper == 'SUBMITTED',
+      _RecordsStatusFilter.verified =>
+        upper == 'VERIFIED' || upper == 'APPROVED',
+      _RecordsStatusFilter.rejected => upper == 'REJECTED',
+    };
+  }
+
   CollectionType _collectionType(String channel) =>
       channel.toUpperCase() == 'D2D'
       ? CollectionType.d2d
@@ -304,7 +339,6 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
       : CollectionType.mrfStation;
 
   bool _matchesDate(CollectionModel item) {
-    if (_dateFilter == _RecordsDateFilter.all) return true;
     final rawDate = item.collectedAt ?? item.updatedAt;
     final value = DateTime.tryParse(rawDate);
     if (value == null) return true;
@@ -313,7 +347,6 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
     final today = DateTime(istNow.year, istNow.month, istNow.day);
     final day = DateTime(istDay.year, istDay.month, istDay.day);
     return switch (_dateFilter) {
-      _RecordsDateFilter.all => true,
       _RecordsDateFilter.today => day == today,
       _RecordsDateFilter.yesterday =>
         day == today.subtract(const Duration(days: 1)),
@@ -321,6 +354,26 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
         !day.isBefore(today.subtract(const Duration(days: 6))) &&
             !day.isAfter(today),
     };
+  }
+
+  DateTime _collectionIstDay(CollectionModel item) {
+    final parsed = DateTime.tryParse(item.collectedAt ?? item.updatedAt);
+    final value = parsed == null
+        ? IstDateTime.now()
+        : IstDateTime.fromUtc(parsed.toUtc());
+    return DateTime(value.year, value.month, value.day);
+  }
+
+  String _dateGroupLabel(DateTime day) {
+    final now = IstDateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    if (day == today) return context.l10n.recordsTodayCollections;
+    if (day == today.subtract(const Duration(days: 1))) {
+      return context.l10n.recordsYesterdayCollections;
+    }
+    return context.l10n.recordsDatedCollections(
+      DateFormat('dd MMMM').format(day),
+    );
   }
 
   Future<void> _discardDraft() async {
@@ -335,23 +388,37 @@ class _RecordsTabScreenState extends State<RecordsTabScreen> {
     });
   }
 
-  Future<void> _showDateFilter() async {
-    final selected = await showModalBottomSheet<_RecordsDateFilter>(
+  Future<void> _showFilters() async {
+    final selected = await showModalBottomSheet<_RecordsFilterSelection>(
       context: context,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.56),
-      builder: (context) => _RecordsDateFilterSheet(selected: _dateFilter),
+      isScrollControlled: true,
+      builder: (context) => _RecordsFilterSheet(
+        selectedDate: _dateFilter,
+        selectedType: _typeFilter,
+      ),
     );
     if (selected != null && mounted) {
-      setState(() => _dateFilter = selected);
+      setState(() {
+        _dateFilter = selected.date;
+        _typeFilter = selected.type;
+      });
     }
   }
 }
 
 class _RecordsEmptyState extends StatelessWidget {
-  const _RecordsEmptyState({super.key, required this.message});
+  const _RecordsEmptyState({
+    super.key,
+    required this.message,
+    this.asset = RecordsAssets.emptyDrafts,
+    this.imageKey,
+  });
 
   final String message;
+  final String asset;
+  final Key? imageKey;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -359,7 +426,7 @@ class _RecordsEmptyState extends StatelessWidget {
     child: Center(
       child: Column(
         children: [
-          SvgPicture.asset(RecordsAssets.emptyDrafts, width: 213, height: 233),
+          SvgPicture.asset(asset, key: imageKey, width: 213, height: 233),
           const SizedBox(height: 16),
           Text(
             message,
@@ -419,33 +486,40 @@ class _SearchField extends StatelessWidget {
 
 enum _RecordsTypeFilter { all, d2d, mrf, ramp }
 
-enum _RecordsDateFilter { all, today, yesterday, lastSevenDays }
+enum _RecordsDateFilter { today, yesterday, lastSevenDays }
 
-class _RecordsTypeChips extends StatelessWidget {
-  const _RecordsTypeChips({required this.selected, required this.onSelected});
+enum _RecordsStatusFilter { all, pending, verified, rejected }
 
-  final _RecordsTypeFilter selected;
-  final ValueChanged<_RecordsTypeFilter> onSelected;
+typedef _RecordsFilterSelection = ({
+  _RecordsDateFilter date,
+  _RecordsTypeFilter type,
+});
+
+class _RecordsStatusChips extends StatelessWidget {
+  const _RecordsStatusChips({required this.selected, required this.onSelected});
+
+  final _RecordsStatusFilter selected;
+  final ValueChanged<_RecordsStatusFilter> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final labels = <_RecordsTypeFilter, String>{
-      _RecordsTypeFilter.all: context.l10n.recordsAll,
-      _RecordsTypeFilter.d2d: context.l10n.d2d,
-      _RecordsTypeFilter.mrf: context.l10n.collectionMrfShort,
-      _RecordsTypeFilter.ramp: context.l10n.ramp,
+    final labels = <_RecordsStatusFilter, String>{
+      _RecordsStatusFilter.all: context.l10n.recordsAll,
+      _RecordsStatusFilter.pending: context.l10n.filterPending,
+      _RecordsStatusFilter.verified: context.l10n.expenseVerified,
+      _RecordsStatusFilter.rejected: context.l10n.verificationRejected,
     };
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: _RecordsTypeFilter.values
+        children: _RecordsStatusFilter.values
             .map(
               (value) => Padding(
                 padding: EdgeInsets.only(
-                  right: value == _RecordsTypeFilter.values.last ? 0 : 8,
+                  right: value == _RecordsStatusFilter.values.last ? 0 : 8,
                 ),
                 child: InkWell(
-                  key: Key('records-filter-${value.name}'),
+                  key: Key('records-status-${value.name}'),
                   onTap: () => onSelected(value),
                   borderRadius: BorderRadius.circular(16),
                   child: AnimatedContainer(
@@ -480,15 +554,25 @@ class _RecordsTypeChips extends StatelessWidget {
   }
 }
 
-class _RecordsDateFilterSheet extends StatelessWidget {
-  const _RecordsDateFilterSheet({required this.selected});
+class _RecordsFilterSheet extends StatefulWidget {
+  const _RecordsFilterSheet({
+    required this.selectedDate,
+    required this.selectedType,
+  });
+  final _RecordsDateFilter selectedDate;
+  final _RecordsTypeFilter selectedType;
 
-  final _RecordsDateFilter selected;
+  @override
+  State<_RecordsFilterSheet> createState() => _RecordsFilterSheetState();
+}
+
+class _RecordsFilterSheetState extends State<_RecordsFilterSheet> {
+  late _RecordsDateFilter _date = widget.selectedDate;
+  late _RecordsTypeFilter _type = widget.selectedType;
 
   @override
   Widget build(BuildContext context) {
     final labels = <_RecordsDateFilter, String>{
-      _RecordsDateFilter.all: context.l10n.recordsAll,
       _RecordsDateFilter.today: context.l10n.recordsFilterToday,
       _RecordsDateFilter.yesterday: context.l10n.recordsFilterYesterday,
       _RecordsDateFilter.lastSevenDays: context.l10n.recordsFilterLastSevenDays,
@@ -508,7 +592,7 @@ class _RecordsDateFilterSheet extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    context.l10n.recordsFilterByDate,
+                    context.l10n.recordsFilterTitle,
                     style: AppTextStyles.semiboldH6_20.copyWith(
                       color: AppColors.neutral950,
                     ),
@@ -527,34 +611,98 @@ class _RecordsDateFilterSheet extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
+            _FilterSectionTitle(
+              iconAsset: RecordsAssets.filterDate,
+              label: context.l10n.recordsFilterByDate,
+            ),
+            const SizedBox(height: 8),
             for (final value in _RecordsDateFilter.values)
-              InkWell(
+              _FilterChoice(
                 key: Key('records-date-${value.name}'),
-                onTap: () => Navigator.pop(context, value),
-                borderRadius: BorderRadius.circular(6),
-                child: Container(
-                  height: 40,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: value == selected
-                        ? AppColors.primary50
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    children: [
-                      _RecordsRadio(selected: value == selected),
-                      const SizedBox(width: 12),
-                      Text(labels[value]!, style: AppTextStyles.regularB7_14),
-                    ],
-                  ),
-                ),
+                label: labels[value]!,
+                selected: value == _date,
+                onTap: () => setState(() => _date = value),
               ),
+            const SizedBox(height: 12),
+            _FilterSectionTitle(
+              iconAsset: RecordsAssets.filterType,
+              label: context.l10n.recordsSelectTypes,
+            ),
+            const SizedBox(height: 8),
+            for (final value in _RecordsTypeFilter.values)
+              _FilterChoice(
+                key: Key('records-type-${value.name}'),
+                label: switch (value) {
+                  _RecordsTypeFilter.all => context.l10n.recordsAll,
+                  _RecordsTypeFilter.d2d => context.l10n.d2d,
+                  _RecordsTypeFilter.mrf => context.l10n.collectionMrfShort,
+                  _RecordsTypeFilter.ramp => context.l10n.ramp,
+                },
+                selected: value == _type,
+                onTap: () => setState(() => _type = value),
+              ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                key: const Key('records-apply-filter'),
+                onPressed: () =>
+                    Navigator.pop(context, (date: _date, type: _type)),
+                child: Text(context.l10n.recordsApplyFilter),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
+}
+
+class _FilterSectionTitle extends StatelessWidget {
+  const _FilterSectionTitle({required this.iconAsset, required this.label});
+  final String iconAsset;
+  final String label;
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      SvgPicture.asset(iconAsset, width: 24, height: 24),
+      const SizedBox(width: 8),
+      Text(label, style: AppTextStyles.mediumSH8_14),
+    ],
+  );
+}
+
+class _FilterChoice extends StatelessWidget {
+  const _FilterChoice({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(8),
+    child: Container(
+      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: selected ? AppColors.primary50 : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          _RecordsRadio(selected: selected),
+          const SizedBox(width: 12),
+          Text(label, style: AppTextStyles.regularB7_14),
+        ],
+      ),
+    ),
+  );
 }
 
 class _RecordsRadio extends StatelessWidget {

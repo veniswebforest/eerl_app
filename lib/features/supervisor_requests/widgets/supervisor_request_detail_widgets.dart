@@ -4,6 +4,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/ist_date_time.dart';
 import 'package:eerl_app/features/supervisor_requests/widgets/supervisor_request_assets.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
@@ -12,11 +13,17 @@ import 'package:flutter/material.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 class SupervisorRequestStatusCard extends StatelessWidget {
-  const SupervisorRequestStatusCard({super.key, required this.completed});
+  const SupervisorRequestStatusCard({
+    super.key,
+    required this.completed,
+    this.time,
+  });
 
   final bool completed;
+  final String? time;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -55,7 +62,7 @@ class SupervisorRequestStatusCard extends StatelessWidget {
             Flexible(
               child: Text(
                 completed
-                    ? context.l10n.requestCompletedStatus
+                    ? _completedLabel(context, time)
                     : context.l10n.requestAwaitingResponse,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -69,6 +76,26 @@ class SupervisorRequestStatusCard extends StatelessWidget {
       ),
     ),
   );
+
+  String _completedLabel(BuildContext context, String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return context.l10n.requestCompletedLabel;
+    }
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null) {
+      return context.l10n.requestCompletedValue(value);
+    }
+    final completed = IstDateTime.fromUtc(parsed);
+    final now = IstDateTime.now();
+    final timeStr = DateFormat('hh:mm a').format(completed);
+    final dateTime = DateUtils.isSameDay(completed, now)
+        ? context.l10n.requestTodayTime(timeStr)
+        : DateFormat(
+            'dd MMM yyyy, hh:mm a',
+            Localizations.localeOf(context).toLanguageTag(),
+          ).format(completed);
+    return context.l10n.requestCompletedValue(dateTime);
+  }
 }
 
 class SupervisorRequestInfoCard extends StatelessWidget {

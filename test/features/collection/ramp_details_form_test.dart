@@ -3,7 +3,6 @@ import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image_picker/image_picker.dart';
 
 void main() {
   testWidgets('pencil menu deactivates the selected ragpicker record', (
@@ -27,13 +26,13 @@ void main() {
             child: RampDetailsForm(
               people: const [ragpicker],
               selectedPersonId: null,
-              photo: null,
               onPersonSelected: (_) {},
               onAddNewPerson: (_) async {},
               onDeactivatePerson: (person) => deactivated = person,
-              onCapturePhoto: () {},
-              onRemovePhoto: () {},
-              onPreviewPhoto: () {},
+              handoverPhoto: null,
+              onCaptureHandoverPhoto: () {},
+              onRemoveHandoverPhoto: () {},
+              onPreviewHandoverPhoto: () {},
             ),
           ),
         ),
@@ -54,12 +53,10 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('captured photo keeps common capture area and shows thumbnail', (
+  testWidgets('Ramp form exposes handover, not vehicle, photo capture', (
     tester,
   ) async {
-    var removed = false;
-    var previewed = false;
-
+    var handoverCaptureTapped = false;
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -69,27 +66,28 @@ void main() {
             child: RampDetailsForm(
               people: const [],
               selectedPersonId: null,
-              photo: XFile('test/assets/test_photo.jpg'),
               onPersonSelected: (_) {},
               onAddNewPerson: (_) async {},
               onDeactivatePerson: (_) {},
-              onCapturePhoto: () {},
-              onRemovePhoto: () => removed = true,
-              onPreviewPhoto: () => previewed = true,
+              handoverPhoto: null,
+              onCaptureHandoverPhoto: () => handoverCaptureTapped = true,
+              onRemoveHandoverPhoto: () {},
+              onPreviewHandoverPhoto: () {},
             ),
           ),
         ),
       ),
     );
 
-    expect(find.byKey(const Key('ramp-capture-vehicle-photo')), findsOneWidget);
-    expect(find.byKey(const Key('ramp-preview-vehicle-photo')), findsOneWidget);
-    expect(find.byKey(const Key('ramp-remove-vehicle-photo')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('ramp-preview-vehicle-photo')));
-    expect(previewed, isTrue);
-    await tester.tap(find.byKey(const Key('ramp-remove-vehicle-photo')));
-    expect(removed, isTrue);
+    expect(find.byKey(const Key('ramp-capture-vehicle-photo')), findsNothing);
+    expect(find.text('Capture Vehicle Photo *'), findsNothing);
+    expect(
+      find.byKey(const Key('ramp-capture-handover-photo')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('ramp-preview-handover-photo')), findsNothing);
+    await tester.tap(find.byKey(const Key('ramp-capture-handover-photo')));
+    expect(handoverCaptureTapped, isTrue);
     expect(tester.takeException(), isNull);
   });
 }

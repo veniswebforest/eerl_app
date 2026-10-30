@@ -7,6 +7,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
+import 'package:eerl_app/shared/widgets/supervisor_avatar.dart';
 
 class MrfDetailsForm extends StatefulWidget {
   const MrfDetailsForm({
@@ -16,6 +17,7 @@ class MrfDetailsForm extends StatefulWidget {
     required this.onLaborSelected,
     this.supervisorName,
     this.supervisorPhone,
+    this.supervisorPhotoUrl,
   });
 
   final List<MrfPersonModel> people;
@@ -23,6 +25,7 @@ class MrfDetailsForm extends StatefulWidget {
   final ValueChanged<MrfPersonModel> onLaborSelected;
   final String? supervisorName;
   final String? supervisorPhone;
+  final String? supervisorPhotoUrl;
 
   @override
   State<MrfDetailsForm> createState() => _MrfDetailsFormState();
@@ -40,6 +43,7 @@ class _MrfDetailsFormState extends State<MrfDetailsForm> {
 
   void _showSupervisor() {
     FocusScope.of(context).unfocus();
+    final hasSupervisor = widget.supervisorName?.trim().isNotEmpty == true;
     showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
@@ -54,11 +58,22 @@ class _MrfDetailsFormState extends State<MrfDetailsForm> {
                 style: AppTextStyles.semiboldH7_18,
               ),
               const SizedBox(height: 16),
-              if (widget.supervisorName?.isNotEmpty == true)
+              if (hasSupervisor)
                 _ContactCard(
                   cardKey: const Key('mrf-contact-supervisor-details'),
-                  fullName: widget.supervisorName!,
+                  fullName: widget.supervisorName!.trim(),
                   mobileNumber: widget.supervisorPhone ?? '',
+                  photoUrl: widget.supervisorPhotoUrl?.trim(),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    context.l10n.noSupervisorSet,
+                    style: AppTextStyles.regularB7_14.copyWith(
+                      color: AppColors.neutral700,
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -326,11 +341,13 @@ class _ContactCard extends StatelessWidget {
     required this.cardKey,
     required this.fullName,
     required this.mobileNumber,
+    this.photoUrl,
   });
 
   final Key cardKey;
   final String fullName;
   final String mobileNumber;
+  final String? photoUrl;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -342,17 +359,33 @@ class _ContactCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       boxShadow: [HomeStyles.cardShadow],
     ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _DetailLine(label: context.l10n.collectionFullName, value: fullName),
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 10),
-          child: Divider(height: 1, color: AppColors.cool400),
+        SupervisorAvatar(
+          name: fullName,
+          photoUrl: photoUrl,
+          size: 48,
         ),
-        _DetailLine(
-          label: context.l10n.collectionMobileNumber,
-          value: mobileNumber,
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _DetailLine(
+                label: context.l10n.collectionFullName,
+                value: fullName.isEmpty ? '-' : fullName,
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Divider(height: 1, color: AppColors.cool400),
+              ),
+              _DetailLine(
+                label: context.l10n.collectionMobileNumber,
+                value: mobileNumber.isEmpty ? '-' : mobileNumber,
+              ),
+            ],
+          ),
         ),
       ],
     ),

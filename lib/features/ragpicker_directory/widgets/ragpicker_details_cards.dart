@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
@@ -112,44 +114,78 @@ class RagpickerInformationCard extends StatelessWidget {
 }
 
 class RagpickerProofCard extends StatelessWidget {
-  const RagpickerProofCard({super.key, required this.title, this.photoUrl});
+  const RagpickerProofCard({
+    super.key,
+    required this.title,
+    this.photoUrl,
+    this.photoUrls = const <String>[],
+  });
 
   final String title;
   final String? photoUrl;
+  final List<String> photoUrls;
+
+  List<String> get _effectivePhotos {
+    if (photoUrls.isNotEmpty) return photoUrls;
+    if (photoUrl == null || photoUrl!.trim().isEmpty) return const [];
+    final trimmed = photoUrl!.trim();
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        final decoded = jsonDecode(trimmed);
+        if (decoded is List) {
+          return decoded
+              .map((e) => e.toString().trim())
+              .where((e) => e.isNotEmpty)
+              .toList();
+        }
+      } catch (_) {}
+    }
+    return [trimmed];
+  }
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(16),
-    decoration: _cardDecoration(12),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: AppTextStyles.semiboldH7_18),
-        const SizedBox(height: 12),
-        if (photoUrl != null && photoUrl!.isNotEmpty)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: Material(
-              color: AppColors.cool100,
-              child: InkWell(
-                onTap: () =>
-                    AppImagePreviewDialog.showSource(context, photoUrl!),
-                child: CachedAppImage(
-                  source: photoUrl,
-                  width: 109,
-                  height: 70,
-                  fit: BoxFit.cover,
-                  placeholder: const SizedBox.shrink(),
-                ),
-              ),
-            ),
-          )
-        else
-          const Text('—'),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final photos = _effectivePhotos;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: _cardDecoration(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: AppTextStyles.semiboldH7_18),
+          const SizedBox(height: 12),
+          if (photos.isNotEmpty)
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (final photo in photos)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Material(
+                      color: AppColors.cool100,
+                      child: InkWell(
+                        onTap: () =>
+                            AppImagePreviewDialog.showSource(context, photo),
+                        child: CachedAppImage(
+                          source: photo,
+                          width: 109,
+                          height: 70,
+                          fit: BoxFit.cover,
+                          placeholder: const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            )
+          else
+            const Text('—'),
+        ],
+      ),
+    );
+  }
 }
 
 BoxDecoration _cardDecoration(double radius) => BoxDecoration(

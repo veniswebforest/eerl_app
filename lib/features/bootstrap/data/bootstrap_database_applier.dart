@@ -604,6 +604,7 @@ class BootstrapDatabaseApplier {
     await _setMeta(txn, 'user_photo_url', me.user?.photoUrl);
     await _setMeta(txn, 'supervisor_name', me.supervisor?.name);
     await _setMeta(txn, 'supervisor_phone', me.supervisor?.phone);
+    await _setMeta(txn, 'supervisor_photo_url', me.supervisor?.photoUrl);
     await _setMeta(txn, 'session_expires_at', me.session?.expiresAt);
   }
 

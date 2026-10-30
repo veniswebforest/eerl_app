@@ -23,15 +23,19 @@ import 'package:eerl_app/features/tasks/model/task_list_item.dart';
 import '../widgets/task_information_card.dart';
 import '../widgets/task_photo_grid.dart';
 
+typedef TaskDetailLoader = Future<TaskModel?> Function(String taskId);
+
 class TaskDetailScreen extends StatefulWidget {
   const TaskDetailScreen({
     super.key,
     required this.task,
     this.initiallyFilled = false,
+    this.taskLoader,
   });
 
   final TaskModel task;
   final bool initiallyFilled;
+  final TaskDetailLoader? taskLoader;
 
   @override
   State<TaskDetailScreen> createState() => _TaskDetailScreenState();
@@ -40,29 +44,52 @@ class TaskDetailScreen extends StatefulWidget {
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late final TextEditingController _descriptionController;
   late List<String> _proofImages;
+  late TaskModel _task;
   bool _isCompleting = false;
 
   bool get _canComplete =>
       _proofImages.isNotEmpty && _descriptionController.text.trim().isNotEmpty;
 
-  String get _cameraRecoveryId => 'task.resolve.${widget.task.id}';
+  String get _cameraRecoveryId => 'task.resolve.${_task.id}';
 
   String? get _assignmentDescription {
-    final description = widget.task.description?.trim();
+    final description = _task.description?.trim();
     if (description?.isNotEmpty == true) return description;
     if (_isClosed) return null;
-    final note = widget.task.note?.trim();
+    final note = _task.note?.trim();
     return note?.isNotEmpty == true ? note : null;
   }
 
   @override
   void initState() {
     super.initState();
-    _proofImages = _isClosed ? [...widget.task.photoUrls] : [];
+    _task = widget.task;
+    _proofImages = _isClosed ? [..._task.photoUrls] : [];
     _descriptionController = TextEditingController(
-      text: _isClosed ? widget.task.note ?? '' : '',
+      text: _isClosed ? _task.note ?? '' : '',
     );
+    unawaited(_loadLatestTask());
     _restoreCameraResult();
+  }
+
+  Future<void> _loadLatestTask() async {
+    try {
+      final loader = widget.taskLoader;
+      final task = loader != null
+          ? await loader(_task.id)
+          : await EerlLocalRepository.instance.getTask(_task.id);
+      if (task == null || !mounted) return;
+      final wasClosed = _isClosed;
+      setState(() {
+        _task = task;
+        if (!wasClosed && _isClosed) {
+          _proofImages = [...task.photoUrls];
+          _descriptionController.text = task.note ?? '';
+        }
+      });
+    } catch (error) {
+      AppLogger.error('TASK_DETAIL_LOAD', error.toString());
+    }
   }
 
   Future<void> _restoreCameraResult() async {
@@ -94,14 +121,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     }
   }
 
-  bool get _isClosed => isClosedTaskStatus(widget.task.status);
+  bool get _isClosed => isClosedTaskStatus(_task.status);
 
   Future<void> _completeTask() async {
     if (!_canComplete || _isCompleting) return;
     setState(() => _isCompleting = true);
     try {
       await EerlLocalRepository.instance.completeTask(
-        taskId: widget.task.id,
+        taskId: _task.id,
         note: _descriptionController.text,
         photoPaths: _proofImages,
       );
@@ -154,11 +181,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
                   children: [
-                    _TaskStatusRow(task: widget.task),
+                    _TaskStatusRow(task: _task),
                     if (!_isClosed) ...[
                       const SizedBox(height: 16),
                       TaskInformationCard(
-                        title: widget.task.title,
+                        title: _task.title,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -172,26 +199,25 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                               const SizedBox(height: 12),
                             ],
                             _BySupervisor(
-                              label:
-                                  widget.task.assignedByName ??
-                                  widget.task.assignedBy,
+                              label: _task.assignedByName ?? _task.assignedBy,
                             ),
                           ],
                         ),
                       ),
-                      if (widget.task.photoUrls.isNotEmpty) ...[
+                      if (_task.photoUrls.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         TaskInformationCard(
                           title: context.l10n.taskAttachmentTitle,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              TaskPhotoGrid(images: widget.task.photoUrls),
+                              TaskPhotoGrid(
+                                key: const Key('supervisor-task-attachments'),
+                                images: _task.photoUrls,
+                              ),
                               const SizedBox(height: 12),
                               _BySupervisor(
-                                label:
-                                    widget.task.assignedByName ??
-                                    widget.task.assignedBy,
+                                label: _task.assignedByName ?? _task.assignedBy,
                               ),
                             ],
                           ),
@@ -321,7 +347,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   );
 
   List<Widget> _closedTaskContent(BuildContext context) => [
-    if (!isCancelledTaskStatus(widget.task.status)) ...[
+    if (!isCancelledTaskStatus(_task.status)) ...[
       const SizedBox(height: 24),
       _sectionLabel(context.l10n.taskCompletionProofPlain),
       const SizedBox(height: 16),
@@ -341,7 +367,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         style: AppTextStyles.mediumSH8_14,
       ),
       const SizedBox(height: 8),
-      _ReadOnlyDescription(text: widget.task.note?.trim() ?? ''),
+      _ReadOnlyDescription(text: _task.note?.trim() ?? ''),
     ],
     const SizedBox(height: 24),
     _sectionLabel(context.l10n.taskSupervisorDetails),
@@ -362,9 +388,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             ),
             const SizedBox(height: 12),
           ],
-          _BySupervisor(
-            label: widget.task.assignedByName ?? widget.task.assignedBy,
-          ),
+          _BySupervisor(label: _task.assignedByName ?? _task.assignedBy),
         ],
       ),
     ),

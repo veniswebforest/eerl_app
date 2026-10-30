@@ -9,6 +9,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
+import 'package:eerl_app/shared/widgets/supervisor_avatar.dart';
 
 class D2dVehicleDetailsForm extends StatefulWidget {
   const D2dVehicleDetailsForm({
@@ -24,6 +25,7 @@ class D2dVehicleDetailsForm extends StatefulWidget {
     required this.onPreviewPhoto,
     this.supervisorName,
     this.supervisorPhone,
+    this.supervisorPhotoUrl,
   });
 
   final List<String> vehicleNumbers;
@@ -37,6 +39,7 @@ class D2dVehicleDetailsForm extends StatefulWidget {
   final VoidCallback onPreviewPhoto;
   final String? supervisorName;
   final String? supervisorPhone;
+  final String? supervisorPhotoUrl;
 
   @override
   State<D2dVehicleDetailsForm> createState() => _D2dVehicleDetailsFormState();
@@ -73,6 +76,7 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
 
   void _showSupervisor() {
     FocusScope.of(context).unfocus();
+    final hasSupervisor = widget.supervisorName?.trim().isNotEmpty == true;
     showModalBottomSheet<void>(
       context: context,
       builder: (context) => SafeArea(
@@ -87,10 +91,22 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
                 style: AppTextStyles.semiboldH7_18,
               ),
               const SizedBox(height: 16),
-              _SupervisorContactCard(
-                fullName: widget.supervisorName?.trim() ?? '',
-                mobileNumber: widget.supervisorPhone?.trim() ?? '',
-              ),
+              if (hasSupervisor)
+                _SupervisorContactCard(
+                  fullName: widget.supervisorName!.trim(),
+                  mobileNumber: widget.supervisorPhone?.trim() ?? '',
+                  photoUrl: widget.supervisorPhotoUrl?.trim(),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    context.l10n.noSupervisorSet,
+                    style: AppTextStyles.regularB7_14.copyWith(
+                      color: AppColors.neutral700,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -479,10 +495,12 @@ class _SupervisorContactCard extends StatelessWidget {
   const _SupervisorContactCard({
     required this.fullName,
     required this.mobileNumber,
+    this.photoUrl,
   });
 
   final String fullName;
   final String mobileNumber;
+  final String? photoUrl;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -494,20 +512,33 @@ class _SupervisorContactCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       boxShadow: [HomeStyles.cardShadow],
     ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _SupervisorDetailLine(
-          label: context.l10n.collectionFullName,
-          value: fullName.isEmpty ? '-' : fullName,
+        SupervisorAvatar(
+          name: fullName,
+          photoUrl: photoUrl,
+          size: 48,
         ),
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 10),
-          child: Divider(height: 1, color: AppColors.cool400),
-        ),
-        _SupervisorDetailLine(
-          label: context.l10n.collectionMobileNumber,
-          value: mobileNumber.isEmpty ? '-' : mobileNumber,
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SupervisorDetailLine(
+                label: context.l10n.collectionFullName,
+                value: fullName.isEmpty ? '-' : fullName,
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                child: Divider(height: 1, color: AppColors.cool400),
+              ),
+              _SupervisorDetailLine(
+                label: context.l10n.collectionMobileNumber,
+                value: mobileNumber.isEmpty ? '-' : mobileNumber,
+              ),
+            ],
+          ),
         ),
       ],
     ),

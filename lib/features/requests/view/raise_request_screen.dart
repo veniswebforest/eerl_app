@@ -16,10 +16,12 @@ import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/core/utils/ist_date_time.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
+import 'package:eerl_app/shared/widgets/supervisor_avatar.dart';
 
 enum RaiseRequestViewMode { empty, filled }
 
@@ -29,9 +31,11 @@ class RaiseRequestScreen extends StatefulWidget {
   const RaiseRequestScreen({
     super.key,
     this.viewMode = RaiseRequestViewMode.empty,
+    this.profileLoader,
   });
 
   final RaiseRequestViewMode viewMode;
+  final Future<ProfileModel> Function()? profileLoader;
 
   @override
   State<RaiseRequestScreen> createState() => _RaiseRequestScreenState();
@@ -43,6 +47,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
   final List<String> _photoPaths = [];
   _RequestPriority _priority = _RequestPriority.low;
   DateTime? _followupDateTime;
+  ProfileModel? _profile;
   bool _submitting = false;
 
   bool get _canSubmit =>
@@ -55,7 +60,17 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
   void initState() {
     super.initState();
     _descriptionController = TextEditingController();
+    _loadProfile();
     _restoreCameraResult();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final loader = widget.profileLoader ?? EerlLocalRepository.instance.getProfile;
+      final profile = await loader();
+      if (!mounted) return;
+      setState(() => _profile = profile);
+    } catch (_) {}
   }
 
   Future<void> _restoreCameraResult() async {
@@ -157,7 +172,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                   children: [
-                    const _SupervisorCard(),
+                    _SupervisorCard(profile: _profile),
                     const SizedBox(height: 24),
                     AppRequiredText(
                       context.l10n.requestPriorityLevel,
@@ -452,26 +467,61 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
 }
 
 class _SupervisorCard extends StatelessWidget {
-  const _SupervisorCard();
+  const _SupervisorCard({this.profile});
+
+  final ProfileModel? profile;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 56,
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [HomeStyles.cardShadow],
-    ),
-    child: Center(
-      child: Text(
-        context.l10n.requestToSupervisor,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: AppTextStyles.semiboldH9_14,
+  Widget build(BuildContext context) {
+    final supervisorName = profile?.supervisorName?.trim();
+    final supervisorPhotoUrl = profile?.supervisorPhotoUrl?.trim();
+    final hasSupervisor = supervisorName != null && supervisorName.isNotEmpty;
+
+    return Container(
+      key: const Key('request-supervisor-card'),
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [HomeStyles.cardShadow],
       ),
-    ),
-  );
+      child: hasSupervisor
+          ? Row(
+              children: [
+                SupervisorAvatar(
+                  key: const Key('request-supervisor-avatar'),
+                  name: supervisorName,
+                  photoUrl: supervisorPhotoUrl,
+                  size: 38,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'TO : $supervisorName',
+                    key: const Key('request-to-supervisor-text'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.semiboldH9_14.copyWith(
+                      color: AppColors.neutral950,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          : Center(
+              child: Text(
+                context.l10n.noSupervisorSet,
+                key: const Key('request-no-supervisor-text'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.mediumSH8_14.copyWith(
+                  color: AppColors.neutral600,
+                ),
+              ),
+            ),
+    );
+  }
 }
 
 class _PrioritySelector extends StatelessWidget {

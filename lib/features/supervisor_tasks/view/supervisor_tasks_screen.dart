@@ -107,19 +107,9 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                         child: Column(
                           children: [
-                            TaskSegmentedControl(
-                              status: _selectedStatus,
-                              openLabel: context.l10n.taskOpenCount(openCount),
-                              closedLabel: context.l10n.taskClosedCount(
-                                closedCount,
-                              ),
-                              onChanged: (status) =>
-                                  setState(() => _selectedStatus = status),
-                            ),
-                            const SizedBox(height: 22),
                             SizedBox(
                               height: 55,
                               child: TextField(
@@ -160,7 +150,18 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
                                   ),
                                 ),
                               ),
+                            ),                            const SizedBox(height: 8),
+
+                            TaskSegmentedControl(
+                              status: _selectedStatus,
+                              openLabel: context.l10n.taskOpenCount(openCount),
+                              closedLabel: context.l10n.taskClosedCount(
+                                closedCount,
+                              ),
+                              onChanged: (status) =>
+                                  setState(() => _selectedStatus = status),
                             ),
+
                           ],
                         ),
                       ),

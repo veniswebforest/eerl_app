@@ -432,6 +432,7 @@ abstract final class MobileWriteValidator {
     _optionalText(value, 'description', max: 2000);
     _enum(value, 'priority', const {'HIGH', 'NORMAL', 'LOW'}, optional: true);
     _dateTime(value, 'dueDate', optional: true);
+    _list(value, 'photoUrls', min: 1, max: 5, optional: true);
   }
 
   static void _request(Map<String, Object?> value) {

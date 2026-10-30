@@ -107,7 +107,14 @@ class EerlLocalRepository {
   Future<void> saveRagpicker(
     RagpickerModel ragpicker, {
     String? localPhotoPath,
-  }) => _local.saveRagpicker(ragpicker, localPhotoPath: localPhotoPath);
+    List<String>? localPhotoPaths,
+  }) => _local.saveRagpicker(
+    ragpicker,
+    localPhotoPath: localPhotoPath,
+    localPhotoPaths: localPhotoPaths,
+  );
+  Future<List<String>> getRagpickerPhotoSources(String ragpickerId) =>
+      _local.getRagpickerPhotoSources(ragpickerId);
   Future<void> setRagpickerActive(RagpickerModel ragpicker, bool active) =>
       _local.setRagpickerActive(ragpicker, active);
   Future<List<ExpenseCategoryModel>> getExpenseCategories({String? centerId}) =>
@@ -308,6 +315,9 @@ class EerlLocalRepository {
     baleCount: baleCount,
     piecesLoaded: piecesLoaded,
   );
+  Future<List<TransferDispatchStockModel>> getTransferDispatchStock(
+    String transferId,
+  ) => _local.getTransferDispatchStock(transferId);
   Future<List<TaskModel>> getTasks({
     bool supervisor = false,
     String search = '',

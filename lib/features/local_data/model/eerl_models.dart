@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:eerl_app/core/utils/collection_quantity_formatter.dart';
+
 typedef DbMap = Map<String, Object?>;
 
 double _double(Object? value, [double fallback = 0]) =>
@@ -375,6 +377,8 @@ class RagpickerModel {
     'is_active': isActive ? 1 : 0,
     'sync_state': syncState,
   };
+
+  List<String> get photoUrls => _strings(photoUrl);
 }
 
 class ExpenseCategoryModel {
@@ -546,26 +550,11 @@ class CollectionModel {
   final int itemCount;
   final String? centerName;
 
-  String get formattedQuantity {
-    final effectiveKg =
-        totalKg > 0 ? totalKg : (totalPcs == 0 ? totalQty : 0.0);
-    final hasKg = effectiveKg > 0;
-    final hasPcs = totalPcs > 0;
-    final kgStr = '${effectiveKg.toStringAsFixed(2)}kg';
-    final pcsFormatted = totalPcs % 1 == 0
-        ? totalPcs.toInt().toString()
-        : totalPcs.toStringAsFixed(2);
-    final pcsStr = '${pcsFormatted}pcs';
-
-    if (hasKg && hasPcs) {
-      return '$kgStr / $pcsStr';
-    } else if (hasPcs) {
-      return pcsStr;
-    } else if (hasKg) {
-      return kgStr;
-    }
-    return '0.00kg';
-  }
+  String get formattedQuantity => formatCollectionQuantity(
+    kilograms: totalKg,
+    pieces: totalPcs,
+    fallbackKilograms: totalQty,
+  );
 
   factory CollectionModel.fromMap(DbMap map) => CollectionModel(
     id: map['id'] as String,
@@ -1092,6 +1081,32 @@ class TransferItemModel {
   };
 }
 
+class TransferDispatchStockModel {
+  const TransferDispatchStockModel({
+    required this.itemId,
+    required this.name,
+    required this.unitCode,
+    required this.quantityCanGo,
+  });
+
+  final String itemId;
+  final String name;
+  final String unitCode;
+  final double quantityCanGo;
+
+  factory TransferDispatchStockModel.fromMap(DbMap map) =>
+      TransferDispatchStockModel(
+        itemId: map['item_id'] as String,
+        name: (map['name'] as String?)?.trim().isNotEmpty == true
+            ? (map['name'] as String).trim()
+            : 'Removed item',
+        unitCode: (map['unit_code'] as String?)?.trim().toUpperCase() ?? 'KG',
+        quantityCanGo:
+            (map['qty_can_go'] as num?)?.toDouble().clamp(0, double.infinity) ??
+            0,
+      );
+}
+
 class TransferDispatchPhotoModel {
   const TransferDispatchPhotoModel({
     required this.id,
@@ -1220,6 +1235,7 @@ class RequestModel {
     required this.createdBy,
     this.createdByName,
     this.supervisorName,
+    this.supervisorPhotoUrl,
     required this.body,
     required this.priority,
     required this.status,
@@ -1238,6 +1254,7 @@ class RequestModel {
   final String createdBy;
   final String? createdByName;
   final String? supervisorName;
+  final String? supervisorPhotoUrl;
   final String body;
   final String priority;
   final String status;
@@ -1256,6 +1273,7 @@ class RequestModel {
     createdBy: map['created_by'] as String,
     createdByName: map['created_by_name'] as String?,
     supervisorName: map['supervisor_name'] as String?,
+    supervisorPhotoUrl: map['supervisor_photo_url'] as String?,
     body: map['body'] as String,
     priority: map['priority'] as String,
     status: map['status'] as String,
@@ -1584,6 +1602,7 @@ class ProfileModel {
     this.userPhotoUrl,
     this.supervisorName,
     this.supervisorPhone,
+    this.supervisorPhotoUrl,
     this.sessionExpiresAt,
   });
   final String? userName;
@@ -1591,6 +1610,7 @@ class ProfileModel {
   final String? userPhotoUrl;
   final String? supervisorName;
   final String? supervisorPhone;
+  final String? supervisorPhotoUrl;
   final String? sessionExpiresAt;
 }
 

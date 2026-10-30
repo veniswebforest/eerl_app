@@ -290,6 +290,8 @@ class _Content extends StatelessWidget {
                         rateLabel: context.l10n.collectionDetailRate,
                         totalLabel: context.l10n.collectionDetailMaterialTotal,
                         matchSummaryDesign: true,
+                        onPhotoTap: (path) =>
+                            AppImagePreviewDialog.showSource(context, path),
                       ),
                       if (index != data.items.length - 1)
                         const Divider(height: 28, color: AppColors.cool300),

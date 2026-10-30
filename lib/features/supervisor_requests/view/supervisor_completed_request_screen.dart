@@ -17,7 +17,7 @@ class SupervisorCompletedRequestScreen extends StatelessWidget {
     key: const Key('supervisor-completed-request-screen'),
     backgroundColor: AppColors.backgroundColor,
     appBar: SupervisorTaskHeader(
-      title: context.l10n.supervisorTaskDetailsTitle,
+      title: context.l10n.requestDetailsTitle,
     ),
     body: SafeArea(
       top: false,
@@ -27,7 +27,10 @@ class SupervisorCompletedRequestScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
-              const SupervisorRequestStatusCard(completed: true),
+              SupervisorRequestStatusCard(
+                completed: true,
+                time: request.answeredAt,
+              ),
               const SizedBox(height: 24),
               Text(
                 context.l10n.supervisorAgentRequestResolveDetails,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -65,7 +66,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   RagpickerModel? _editingItem;
   String _query = '';
   String? _nameError;
-  String? _photoSource;
+  List<String> _photoSources = const [];
   bool _saving = false;
   bool _centerExpanded = false;
   bool _formZoneExpanded = false;
@@ -96,7 +97,9 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
     final photo = await ImageCompressor.claimRecoveredImage(_cameraRecoveryId);
     if (photo == null || !mounted) return;
     setState(() {
-      _photoSource = photo.path;
+      if (_photoSources.length < 2) {
+        _photoSources = [..._photoSources, photo.path];
+      }
       _view = RagpickerDirectoryView.addEmpty;
     });
   }
@@ -393,7 +396,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                       _phoneController.clear();
                       _identityController.clear();
                       _nameError = null;
-                      _photoSource = null;
+                      _photoSources = const [];
                       _formZoneIndex = -1;
                       _formZoneExpanded = false;
                     }),
@@ -447,9 +450,22 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                             : null,
                       ),
                       const SizedBox(height: 16),
-                      RagpickerProofCard(
-                        title: context.l10n.ragpickerProofLabel,
-                        photoUrl: item.photoUrl,
+                      FutureBuilder<List<String>>(
+                        future: EerlLocalRepository.instance
+                            .getRagpickerPhotoSources(item.id),
+                        initialData: item.photoUrls,
+                        builder: (context, snapshot) {
+                          final photos =
+                              (snapshot.data != null &&
+                                      snapshot.data!.isNotEmpty)
+                                  ? snapshot.data!
+                                  : item.photoUrls;
+                          return RagpickerProofCard(
+                            title: context.l10n.ragpickerProofLabel,
+                            photoUrls: photos,
+                            photoUrl: item.photoUrl,
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -458,20 +474,28 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                   active: active,
                   onStatusTap: () => _confirmStatusChange(active),
                   onEdit: active
-                      ? () => setState(() {
-                          _nameController.text = item.name;
-                          _phoneController.text = _editablePhone(item.phone);
-                          _identityController.text = item.idNumber ?? '';
-                          _nameError = null;
-                          _photoSource = item.photoUrl;
-                          _formZoneIndex = _centers.indexWhere(
-                            (center) => center.id == item.centerId,
-                          );
-                          _formZoneExpanded = false;
-                          _editingItem = item;
-                          _selectedItem = null;
-                          _view = RagpickerDirectoryView.addFilled;
-                        })
+                      ? () async {
+                          final localPhotos = await EerlLocalRepository.instance
+                              .getRagpickerPhotoSources(item.id);
+                          final initialPhotos = localPhotos.isNotEmpty
+                              ? localPhotos
+                              : item.photoUrls;
+                          if (!mounted) return;
+                          setState(() {
+                            _nameController.text = item.name;
+                            _phoneController.text = _editablePhone(item.phone);
+                            _identityController.text = item.idNumber ?? '';
+                            _nameError = null;
+                            _photoSources = List<String>.from(initialPhotos);
+                            _formZoneIndex = _centers.indexWhere(
+                              (center) => center.id == item.centerId,
+                            );
+                            _formZoneExpanded = false;
+                            _editingItem = item;
+                            _selectedItem = null;
+                            _view = RagpickerDirectoryView.addFilled;
+                          });
+                        }
                       : null,
                 ),
               ],
@@ -559,9 +583,12 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                       label: context.l10n.ragpickerProofLabel,
                       captureLabel: context.l10n.ragpickerCapturePhoto,
                       helperText: context.l10n.ragpickerPhotoHelper,
-                      photoSource: _photoSource,
+                      photoSources: _photoSources,
                       onCapture: _capturePhoto,
-                      onRemove: (_) => setState(() => _photoSource = null),
+                      onRemove: (index) => setState(() {
+                        _photoSources = List<String>.from(_photoSources)
+                          ..removeAt(index);
+                      }),
                     ),
                   ],
                 ),
@@ -581,6 +608,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   );
 
   Future<void> _capturePhoto() async {
+    if (_photoSources.length >= 2) return;
     final photo = await InAppCameraScreen.capture(
       context,
       picker: _imagePicker,
@@ -588,7 +616,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
       title: 'Capture Ragpicker Photo',
     );
     if (photo == null || !mounted) return;
-    setState(() => _photoSource = photo.path);
+    setState(() => _photoSources = [..._photoSources, photo.path]);
   }
 
   Future<void> _saveForm() async {
@@ -617,12 +645,19 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
       AppSnackbar.error(context, message: 'Select a center.');
       return;
     }
-    final photoSource = _photoSource?.trim();
-    final isLocalPhoto =
-        photoSource != null &&
-        photoSource.isNotEmpty &&
-        !photoSource.startsWith('http://') &&
-        !photoSource.startsWith('https://');
+    final localPhotoPaths = _photoSources
+        .where(
+          (s) =>
+              s.trim().isNotEmpty &&
+              !s.startsWith('http://') &&
+              !s.startsWith('https://'),
+        )
+        .toList();
+    final photoUrlValue = _photoSources.isEmpty
+        ? null
+        : (_photoSources.length == 1
+            ? _photoSources.first
+            : jsonEncode(_photoSources));
     setState(() => _saving = true);
     try {
       await EerlLocalRepository.instance.saveRagpicker(
@@ -635,11 +670,11 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
           idNumber: _identityController.text.trim().isEmpty
               ? null
               : _identityController.text.trim(),
-          photoUrl: isLocalPhoto ? null : photoSource,
+          photoUrl: photoUrlValue,
           isActive: true,
           syncState: 'pending',
         ),
-        localPhotoPath: isLocalPhoto ? photoSource : null,
+        localPhotoPaths: localPhotoPaths,
       );
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
       if (!mounted) return;
@@ -647,7 +682,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
         _editingItem = null;
         _status = RagpickerStatus.active;
         _view = RagpickerDirectoryView.activeList;
-        _photoSource = null;
+        _photoSources = const [];
       });
       await _load(centerId: _centers[centerIndex].id);
     } catch (error) {

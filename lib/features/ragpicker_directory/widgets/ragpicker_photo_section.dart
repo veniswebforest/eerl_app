@@ -15,6 +15,7 @@ class RagpickerPhotoSection extends StatelessWidget {
     required this.captureLabel,
     required this.helperText,
     this.photoSource,
+    this.photoSources = const <String>[],
     required this.onCapture,
     required this.onRemove,
   });
@@ -23,10 +24,17 @@ class RagpickerPhotoSection extends StatelessWidget {
   final String captureLabel;
   final String helperText;
   final String? photoSource;
+  final List<String> photoSources;
   final VoidCallback onCapture;
   final ValueChanged<int> onRemove;
 
-  bool get hasPhoto => photoSource?.trim().isNotEmpty == true;
+  List<String> get effectivePhotoSources {
+    if (photoSources.isNotEmpty) return photoSources;
+    if (photoSource?.trim().isNotEmpty == true) return [photoSource!];
+    return const <String>[];
+  }
+
+  bool get canCapture => effectivePhotoSources.length < 2;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -36,18 +44,18 @@ class RagpickerPhotoSection extends StatelessWidget {
       const SizedBox(height: 8),
       GestureDetector(
         key: const Key('ragpicker-photo-capture'),
-        onTap: onCapture,
+        onTap: canCapture ? onCapture : null,
         child: DottedBorder(
           options: RoundedRectDottedBorderOptions(
             radius: const Radius.circular(10),
-            color: hasPhoto ? AppColors.cool400 : AppColors.primary500,
+            color: canCapture ? AppColors.primary500 : AppColors.cool400,
             dashPattern: const [4, 4],
           ),
           child: Container(
             width: double.infinity,
             height: 80,
             decoration: BoxDecoration(
-              color: hasPhoto ? AppColors.cool100 : AppColors.primary50,
+              color: canCapture ? AppColors.primary50 : AppColors.cool100,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -58,7 +66,7 @@ class RagpickerPhotoSection extends StatelessWidget {
                   width: 24,
                   height: 24,
                   colorFilter: ColorFilter.mode(
-                    hasPhoto ? AppColors.cool400 : AppColors.primary500,
+                    canCapture ? AppColors.primary500 : AppColors.cool400,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -66,13 +74,13 @@ class RagpickerPhotoSection extends StatelessWidget {
                 Text(
                   captureLabel,
                   style:
-                      (hasPhoto
-                              ? AppTextStyles.mediumSH8_14
-                              : AppTextStyles.semiboldH9_14)
+                      (canCapture
+                              ? AppTextStyles.semiboldH9_14
+                              : AppTextStyles.mediumSH8_14)
                           .copyWith(
-                            color: hasPhoto
-                                ? AppColors.neutral400
-                                : AppColors.neutral900,
+                            color: canCapture
+                                ? AppColors.neutral900
+                                : AppColors.neutral400,
                           ),
                 ),
               ],
@@ -80,11 +88,23 @@ class RagpickerPhotoSection extends StatelessWidget {
           ),
         ),
       ),
-      if (hasPhoto) ...[
+      if (effectivePhotoSources.isNotEmpty) ...[
         const SizedBox(height: 8),
-        SizedBox(
-          width: 150,
-          child: _PhotoTile(path: photoSource!, onRemove: () => onRemove(0)),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (var index = 0; index < effectivePhotoSources.length; index++)
+              SizedBox(
+                width: 143.5,
+                child: _PhotoTile(
+                  key: ValueKey('ragpicker-photo-$index'),
+                  removeKey: ValueKey('ragpicker-photo-remove-$index'),
+                  path: effectivePhotoSources[index],
+                  onRemove: () => onRemove(index),
+                ),
+              ),
+          ],
         ),
       ],
       const SizedBox(height: 8),
@@ -97,10 +117,16 @@ class RagpickerPhotoSection extends StatelessWidget {
 }
 
 class _PhotoTile extends StatelessWidget {
-  const _PhotoTile({required this.path, required this.onRemove});
+  const _PhotoTile({
+    super.key,
+    required this.path,
+    required this.onRemove,
+    this.removeKey,
+  });
 
   final String path;
   final VoidCallback onRemove;
+  final Key? removeKey;
 
   @override
   Widget build(BuildContext context) => AspectRatio(
@@ -126,6 +152,7 @@ class _PhotoTile extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(4),
             child: InkWell(
+              key: removeKey,
               onTap: onRemove,
               borderRadius: BorderRadius.circular(4),
               child: const SizedBox(

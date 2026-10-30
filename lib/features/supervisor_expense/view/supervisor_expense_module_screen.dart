@@ -32,7 +32,9 @@ enum _ExpensePage {
 }
 
 class SupervisorExpenseModuleScreen extends StatefulWidget {
-  const SupervisorExpenseModuleScreen({super.key});
+  const SupervisorExpenseModuleScreen({super.key, this.syncAfterDecision});
+
+  final Future<void> Function()? syncAfterDecision;
 
   @override
   State<SupervisorExpenseModuleScreen> createState() =>
@@ -42,10 +44,12 @@ class SupervisorExpenseModuleScreen extends StatefulWidget {
 class _SupervisorExpenseModuleScreenState
     extends State<SupervisorExpenseModuleScreen> {
   _ExpensePage _page = _ExpensePage.list;
+  int _listType = 0;
   ExpenseModel? _selectedExpense;
   CashRequestModel? _selectedCashRequest;
 
   void _openDetail(ExpenseModel expense) => setState(() {
+    _listType = 0;
     _selectedExpense = expense;
     _page = _ExpensePage.expenseDetail;
   });
@@ -63,27 +67,41 @@ class _SupervisorExpenseModuleScreenState
       reason: reason,
       remarks: remarks,
     );
-    await OutgoingSyncService.instance.drain();
+    await (widget.syncAfterDecision ?? OutgoingSyncService.instance.drain)();
   }
 
   void _openCashDetail(CashRequestModel request) => setState(() {
+    _listType = 1;
     _selectedCashRequest = request;
     _page = _ExpensePage.cashDetail;
   });
 
-  void _showDecisionNotification(bool approved) => AppTopNotification.show(
-    context,
-    key: const Key('supervisor-expense-toast'),
-    title: approved
-        ? context.l10n.supervisorExpenseApprovedTitle
-        : context.l10n.supervisorExpenseRejectedTitle,
-    subtitle: approved
-        ? context.l10n.supervisorExpenseApprovedMessage
-        : context.l10n.supervisorExpenseRejectedMessage,
-    tone: approved
-        ? AppTopNotificationTone.success
-        : AppTopNotificationTone.error,
-  );
+  void _showDecisionNotification(bool approved, {bool cashRequest = false}) =>
+      AppTopNotification.show(
+        context,
+        key: Key(
+          cashRequest
+              ? 'supervisor-cash-request-toast'
+              : 'supervisor-expense-toast',
+        ),
+        title: cashRequest
+            ? (approved
+                  ? context.l10n.supervisorCashApprovedTitle
+                  : context.l10n.supervisorCashRejectedTitle)
+            : (approved
+                  ? context.l10n.supervisorExpenseApprovedTitle
+                  : context.l10n.supervisorExpenseRejectedTitle),
+        subtitle: cashRequest
+            ? (approved
+                  ? context.l10n.supervisorCashApprovedMessage
+                  : context.l10n.supervisorCashRejectedMessage)
+            : (approved
+                  ? context.l10n.supervisorExpenseApprovedMessage
+                  : context.l10n.supervisorExpenseRejectedMessage),
+        tone: approved
+            ? AppTopNotificationTone.success
+            : AppTopNotificationTone.error,
+      );
 
   Future<void> _decideCashRequest(
     String outcome, {
@@ -98,7 +116,7 @@ class _SupervisorExpenseModuleScreenState
       reason: reason,
       remarks: remarks,
     );
-    await OutgoingSyncService.instance.drain();
+    await (widget.syncAfterDecision ?? OutgoingSyncService.instance.drain)();
   }
 
   @override
@@ -109,6 +127,7 @@ class _SupervisorExpenseModuleScreenState
     },
     child: switch (_page) {
       _ExpensePage.list => _ExpenseListScreen(
+        initialType: _listType,
         onTap: _openDetail,
         onCashTap: _openCashDetail,
         onCategoryRequests: () =>
@@ -120,7 +139,10 @@ class _SupervisorExpenseModuleScreenState
         onApprove: () async {
           await _decideExpense('APPROVED');
           if (!mounted) return;
-          setState(() => _page = _ExpensePage.list);
+          setState(() {
+            _listType = 0;
+            _page = _ExpensePage.list;
+          });
           _showDecisionNotification(true);
         },
         onReject: () => setState(() => _page = _ExpensePage.expenseReject),
@@ -135,18 +157,27 @@ class _SupervisorExpenseModuleScreenState
             remarks: decision.remarks,
           );
           if (!mounted) return;
-          setState(() => _page = _ExpensePage.list);
+          setState(() {
+            _listType = 0;
+            _page = _ExpensePage.list;
+          });
           _showDecisionNotification(false);
         },
       ),
       _ExpensePage.cashDetail => _CashRequestDetailScreen(
         request: _selectedCashRequest!,
-        onBack: () => setState(() => _page = _ExpensePage.list),
+        onBack: () => setState(() {
+          _listType = 1;
+          _page = _ExpensePage.list;
+        }),
         onApprove: () async {
           await _decideCashRequest('APPROVED');
           if (!mounted) return;
-          setState(() => _page = _ExpensePage.list);
-          _showDecisionNotification(true);
+          setState(() {
+            _listType = 1;
+            _page = _ExpensePage.list;
+          });
+          _showDecisionNotification(true, cashRequest: true);
         },
         onReject: () => setState(() => _page = _ExpensePage.cashReject),
       ),
@@ -160,8 +191,11 @@ class _SupervisorExpenseModuleScreenState
             remarks: decision.remarks,
           );
           if (!mounted) return;
-          setState(() => _page = _ExpensePage.list);
-          _showDecisionNotification(false);
+          setState(() {
+            _listType = 1;
+            _page = _ExpensePage.list;
+          });
+          _showDecisionNotification(false, cashRequest: true);
         },
       ),
       _ExpensePage.categoryRequests => SupervisorCategoryRequestScreen(
@@ -181,11 +215,13 @@ class _SupervisorExpenseModuleScreenState
 
 class _ExpenseListScreen extends StatefulWidget {
   const _ExpenseListScreen({
+    required this.initialType,
     required this.onTap,
     required this.onCashTap,
     required this.onCategoryRequests,
   });
 
+  final int initialType;
   final ValueChanged<ExpenseModel> onTap;
   final ValueChanged<CashRequestModel> onCashTap;
   final VoidCallback onCategoryRequests;
@@ -196,7 +232,7 @@ class _ExpenseListScreen extends StatefulWidget {
 
 class _ExpenseListScreenState extends State<_ExpenseListScreen> {
   int _filter = 0;
-  int _type = 0;
+  late int _type;
   bool _loading = true;
   Object? _error;
   String _search = '';
@@ -206,6 +242,7 @@ class _ExpenseListScreenState extends State<_ExpenseListScreen> {
   @override
   void initState() {
     super.initState();
+    _type = widget.initialType;
     _loadData();
   }
 
@@ -308,6 +345,11 @@ class _ExpenseListScreenState extends State<_ExpenseListScreen> {
                   ),
                   const SizedBox(height: 16),
                   _ExpenseSegmentedControl(
+                    key: Key(
+                      _type == 1
+                          ? 'supervisor-cash-request-tab-active'
+                          : 'supervisor-expense-tab-active',
+                    ),
                     selectedIndex: _type,
                     expenseLabel: l.expenseTypeExpense,
                     cashRequestLabel: l.expenseTypeCashRequest,
@@ -392,6 +434,7 @@ class _ExpenseListScreenState extends State<_ExpenseListScreen> {
 
 class _ExpenseSegmentedControl extends StatelessWidget {
   const _ExpenseSegmentedControl({
+    super.key,
     required this.selectedIndex,
     required this.expenseLabel,
     required this.cashRequestLabel,
@@ -1384,7 +1427,7 @@ class _RejectExpenseScreenState extends State<_RejectExpenseScreen> {
                             height: 134,
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              border: Border.all(color: AppColors.cool400),
+                              // border: Border.all(color: AppColors.cool400),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Stack(
@@ -1414,7 +1457,7 @@ class _RejectExpenseScreenState extends State<_RejectExpenseScreen> {
                                 ),
                                 Positioned(
                                   right: 12,
-                                  bottom: 8,
+                                  bottom: 4,
                                   child: Text(
                                     '${_remarksController.text.characters.length}/150',
                                     style: AppTextStyles.regularB8_12.copyWith(

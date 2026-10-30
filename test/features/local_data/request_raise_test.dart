@@ -185,4 +185,11 @@ void main() {
       '2026-08-16T09:30:00.000Z',
     );
   });
+
+  test('reads supervisor_photo_url from sync_meta into profile', () async {
+    await database.setSyncMeta('supervisor_photo_url', 'https://example.com/sup.jpg');
+    final profile = await repository.getProfile();
+    expect(profile.supervisorName, 'Supervisor One');
+    expect(profile.supervisorPhotoUrl, 'https://example.com/sup.jpg');
+  });
 }

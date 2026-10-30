@@ -15,6 +15,7 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_required_text.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
@@ -57,6 +58,8 @@ class _TransferDispatchFlowScreenState
   late bool _usePieces;
   bool _loadingDraft = true;
   bool _saving = false;
+  List<TransferDispatchStockModel>? _stockAvailability;
+  String? _loadedQuantityError;
 
   bool get _isPieces =>
       widget.items.length == 1 &&
@@ -80,6 +83,8 @@ class _TransferDispatchFlowScreenState
       _loadedAt != null &&
       _vehiclePhotos.isNotEmpty &&
       _dispatchPhotos.length <= 5 &&
+      _stockAvailability != null &&
+      _loadedQuantityError == null &&
       !_saving;
 
   @override
@@ -90,8 +95,36 @@ class _TransferDispatchFlowScreenState
   }
 
   Future<void> _restoreDraftThenCameraResult() async {
-    await _restoreDraft();
+    await Future.wait([_restoreDraft(), _loadStockAvailability()]);
     await _restoreCameraResult();
+  }
+
+  Future<void> _loadStockAvailability() async {
+    final stock = await EerlLocalRepository.instance.getTransferDispatchStock(
+      widget.transfer.id,
+    );
+    if (!mounted) return;
+    setState(() {
+      _stockAvailability = stock;
+      _loadedQuantityError = _stockErrorForCurrentInput();
+    });
+  }
+
+  String? _stockErrorForCurrentInput() {
+    final stock = _stockAvailability;
+    final attempted = double.tryParse(_loadedQuantityController.text.trim());
+    if (stock == null || stock.length != 1 || attempted == null) return null;
+    final available = stock.single.quantityCanGo;
+    if ((attempted * 1000).round() <= (available * 1000).round()) return null;
+    return context.l10n.transferDispatchStockExceeded(
+      _formatQuantity(available),
+      stock.single.unitCode.toLowerCase(),
+      stock.single.name,
+    );
+  }
+
+  void _onLoadedQuantityChanged(String _) {
+    setState(() => _loadedQuantityError = _stockErrorForCurrentInput());
   }
 
   String _cameraRecoveryId(String field) =>
@@ -249,7 +282,10 @@ class _TransferDispatchFlowScreenState
               const SizedBox(height: 8),
               _WeightUnitSelector(
                 usePieces: _usePieces,
-                onChanged: (value) => setState(() => _usePieces = value),
+                onChanged: (value) => setState(() {
+                  _usePieces = value;
+                  _loadedQuantityError = _stockErrorForCurrentInput();
+                }),
               ),
               const SizedBox(height: 8),
               _DispatchField(
@@ -263,7 +299,8 @@ class _TransferDispatchFlowScreenState
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                onChanged: (_) => setState(() {}),
+                errorText: _loadedQuantityError,
+                onChanged: _onLoadedQuantityChanged,
               ),
               const SizedBox(height: 24),
               _DispatchField(
@@ -336,6 +373,17 @@ class _TransferDispatchFlowScreenState
         piecesLoaded: _usePieces ? loadedQuantity : null,
       );
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
+    } on TransferDispatchStockExceededException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _saving = false;
+        _loadedQuantityError = context.l10n.transferDispatchStockExceeded(
+          _formatQuantity(error.availableQuantity),
+          error.unitCode.toLowerCase(),
+          error.itemName,
+        );
+      });
+      return;
     } catch (error) {
       if (!mounted) return;
       AppSnackbar.error(context, message: error.toString());
@@ -570,6 +618,7 @@ class _DispatchField extends StatelessWidget {
     this.prefix,
     this.keyboardType,
     this.showLabel = true,
+    this.errorText,
   });
 
   final String label;
@@ -579,6 +628,7 @@ class _DispatchField extends StatelessWidget {
   final String? prefix;
   final TextInputType? keyboardType;
   final bool showLabel;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -589,7 +639,7 @@ class _DispatchField extends StatelessWidget {
         const SizedBox(height: 8),
       ],
       SizedBox(
-        height: 55,
+        height: errorText == null ? 55 : 78,
         child: TextField(
           controller: controller,
           keyboardType: keyboardType,
@@ -616,6 +666,8 @@ class _DispatchField extends StatelessWidget {
             filled: true,
             fillColor: AppColors.neutral50,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            errorText: errorText,
+            errorMaxLines: 2,
             enabledBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: AppColors.cool400),
               borderRadius: BorderRadius.circular(10),
@@ -629,6 +681,11 @@ class _DispatchField extends StatelessWidget {
       ),
     ],
   );
+}
+
+String _formatQuantity(double value) {
+  final fixed = value.toStringAsFixed(3);
+  return fixed.replaceFirst(RegExp(r'\.?0+$'), '');
 }
 
 class _PhotoField extends StatelessWidget {

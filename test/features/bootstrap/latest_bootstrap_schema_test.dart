@@ -209,4 +209,62 @@ void main() {
     expect(serverTransfer['sync_state'], 'synced');
     expect(await database.getSyncMeta('cursor'), 'latest-2');
   });
+
+  test('applies me.supervisor.photoUrl to sync_meta supervisor_photo_url', () async {
+    final applier = BootstrapDatabaseApplier(database: database);
+    final dataWithSupervisor = BootstrapData.fromJson({
+      'cursor': 'sup-1',
+      'hasMore': false,
+      'full': false,
+      'me': {
+        'user': {
+          'id': 'agent-1',
+          'name': 'Agent One',
+          'phone': '9876543210',
+          'photoUrl': 'https://example.com/user.jpg',
+        },
+        'supervisor': {
+          'name': 'Supervisor One',
+          'phone': '9876543211',
+          'photoUrl': 'https://example.com/supervisor.jpg',
+        },
+      },
+      'tables': {},
+    });
+
+    await applier.apply(dataWithSupervisor);
+
+    expect(await database.getSyncMeta('user_id'), 'agent-1');
+    expect(await database.getSyncMeta('user_name'), 'Agent One');
+    expect(await database.getSyncMeta('user_phone'), '9876543210');
+    expect(await database.getSyncMeta('user_photo_url'), 'https://example.com/user.jpg');
+    expect(await database.getSyncMeta('supervisor_name'), 'Supervisor One');
+    expect(await database.getSyncMeta('supervisor_phone'), '9876543211');
+    expect(
+      await database.getSyncMeta('supervisor_photo_url'),
+      'https://example.com/supervisor.jpg',
+    );
+
+    // When supervisor is null
+    final dataWithoutSupervisor = BootstrapData.fromJson({
+      'cursor': 'sup-2',
+      'hasMore': false,
+      'full': false,
+      'me': {
+        'user': {
+          'id': 'agent-1',
+          'name': 'Agent One',
+          'phone': '9876543210',
+        },
+        'supervisor': null,
+      },
+      'tables': {},
+    });
+
+    await applier.apply(dataWithoutSupervisor);
+
+    expect(await database.getSyncMeta('supervisor_name'), isNull);
+    expect(await database.getSyncMeta('supervisor_phone'), isNull);
+    expect(await database.getSyncMeta('supervisor_photo_url'), isNull);
+  });
 }

@@ -76,6 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 userPhotoUrl: profile.userPhotoUrl,
                 supervisorName: profile.supervisorName,
                 supervisorPhone: profile.supervisorPhone,
+                supervisorPhotoUrl: profile.supervisorPhotoUrl,
                 sessionExpiresAt: authSessionExpiresAt.toIso8601String(),
               );
             }

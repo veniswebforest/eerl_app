@@ -180,15 +180,17 @@ class BootstrapSlipCounter {
 }
 
 class BootstrapSupervisor {
-  const BootstrapSupervisor({this.name, this.phone});
+  const BootstrapSupervisor({this.name, this.phone, this.photoUrl});
 
   final String? name;
   final String? phone;
+  final String? photoUrl;
 
   factory BootstrapSupervisor.fromJson(Map<String, dynamic> json) =>
       BootstrapSupervisor(
         name: json['name'] as String?,
         phone: json['phone'] as String?,
+        photoUrl: (json['photoUrl'] ?? json['photo_url']) as String?,
       );
 }
 

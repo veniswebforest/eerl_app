@@ -36,22 +36,31 @@ class CollectionMaterialCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: AppColors.cool200,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: thumbnailPath == null
-                  ? const Icon(Icons.recycling, color: AppColors.primary500)
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: CachedAppImage(
-                        source: thumbnailPath!,
-                        fit: BoxFit.cover,
+            GestureDetector(
+              key: thumbnailPath == null
+                  ? null
+                  : ValueKey('collection-material-thumbnail-$thumbnailPath'),
+              behavior: HitTestBehavior.opaque,
+              onTap: thumbnailPath == null || onPhotoTap == null
+                  ? null
+                  : () => onPhotoTap!(thumbnailPath!),
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: AppColors.cool200,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: thumbnailPath == null
+                    ? const Icon(Icons.recycling, color: AppColors.primary500)
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(5),
+                        child: CachedAppImage(
+                          source: thumbnailPath!,
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                    ),
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
