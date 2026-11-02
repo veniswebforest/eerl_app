@@ -184,12 +184,12 @@ class _RequestCashScreenState extends State<RequestCashScreen> {
     final amount = double.parse(_amountController.text.trim());
     final purpose = reasons[_selectedReason!];
     final description = _descriptionController.text.trim();
-    final reason = description.isEmpty ? purpose : '$purpose: $description';
     setState(() => _isSubmitting = true);
     try {
       await EerlLocalRepository.instance.saveCashRequest(
         amount: amount,
-        reason: reason,
+        reason: purpose,
+        description: description.isEmpty ? null : description,
       );
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
       if (!mounted) return;

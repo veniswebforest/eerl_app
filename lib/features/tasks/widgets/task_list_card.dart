@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/ist_date_time.dart';
 import '../../home/widgets/home_styles.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/tasks/model/task_list_item.dart';
@@ -16,8 +17,8 @@ class TaskListCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   List<String> get _displayPhotos => isClosedTaskStatus(item.status)
-      ? item.photoUrls
-      : item.referencePhotoUrls;
+      ? item.referencePhotoUrls
+      : item.photoUrls;
 
   @override
   Widget build(BuildContext context) => Material(
@@ -140,7 +141,7 @@ class TaskListCard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(
-                    _timeLabel(context),
+                    _timeLabel(),
                     key: Key('task-time-${item.id}'),
                     style: AppTextStyles.regularB8_12.copyWith(
                       color: AppColors.neutral600,
@@ -198,12 +199,7 @@ class TaskListCard extends StatelessWidget {
     return DateFormat('dd MMM yyyy').format(due);
   }
 
-  String _timeLabel(BuildContext context) {
-    if (_isCancelled) return '';
-    final raw = _isClosed ? item.completedAt : item.dueAt;
-    final value = DateTime.tryParse(raw ?? '')?.toLocal();
-    return value == null ? '' : DateFormat('hh:mm a').format(value);
-  }
+  String _timeLabel() => IstDateTime.formatUtc(item.createdAt, 'dd MMM, hh:mm a');
 }
 
 class _StatusChip extends StatelessWidget {

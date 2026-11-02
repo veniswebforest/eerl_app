@@ -57,6 +57,7 @@ void main() {
     final requestId = await repository.saveCashRequest(
       amount: 350,
       reason: 'Float for the weekend',
+      description: 'Buy collection supplies',
     );
     late http.Request sent;
     final service = OutgoingSyncService(
@@ -71,6 +72,7 @@ void main() {
               'number': 'CTR-CASH-001',
               'amount': 350,
               'reason': 'Float for the weekend',
+              'description': 'Server-normalized description',
               'status': 'PENDING',
               'createdAt': '2026-10-09T05:00:00.000Z',
               'updatedAt': '2026-10-09T05:00:01.000Z',
@@ -90,11 +92,13 @@ void main() {
       'centerId': 'center-1',
       'amount': 350.0,
       'reason': 'Float for the weekend',
+      'description': 'Buy collection supplies',
     });
     expect(await database.query(DatabaseTables.outbox), isEmpty);
     final stored = (await database.query(DatabaseTables.cashRequests)).single;
     expect(stored['number'], 'CTR-CASH-001');
     expect(stored['status'], 'PENDING');
+    expect(stored['description'], 'Server-normalized description');
     expect(stored['sync_state'], 'synced');
     expect(stored['updated_at'], '2026-10-09T05:00:01.000Z');
   });

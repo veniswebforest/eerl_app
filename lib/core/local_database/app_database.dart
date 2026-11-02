@@ -15,7 +15,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 12;
+  static const databaseVersion = 14;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -225,6 +225,27 @@ class AppDatabase {
       );
       _log('Added task reference-photo schema in version 12');
     }
+    if (oldVersion < 13) {
+      // Version 12 used the opposite task-photo meaning. The current contract
+      // stores supervisor assignment photos in photo_urls and the agent's
+      // completion proof in reference_photo_urls.
+      await db.rawUpdate('''
+        UPDATE ${DatabaseTables.tasks}
+        SET photo_urls = reference_photo_urls,
+            reference_photo_urls = photo_urls
+      ''');
+      _log('Aligned task photo columns with the version 13 contract');
+    }
+    if (oldVersion < 14) {
+      await _addMissingColumns(db, DatabaseTables.cashRequests, const {
+        'description': 'TEXT',
+      });
+      await db.insert(DatabaseTables.syncMeta, const {
+        'key': 'cash_requests_refetch_required',
+        'value': '1',
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      _log('Added cash-request description schema in version 14');
+    }
   }
 
   Future<void> _rebuildNotificationsWithRoleScope(Database db) async {
@@ -425,6 +446,7 @@ class AppDatabase {
       DatabaseTables.cashRequests: {
         'number': 'TEXT',
         'decision_remarks': 'TEXT',
+        'description': 'TEXT',
       },
       DatabaseTables.categoryRequests: {
         'number': 'TEXT',

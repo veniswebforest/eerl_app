@@ -209,7 +209,9 @@ class _SupervisorTaskDetailScreenState
 
   List<String> _completionImages(TaskModel? task, bool isCompleted) {
     if (!isCompleted) return const [];
-    if (task?.photoUrls.isNotEmpty == true) return task!.photoUrls;
+    if (task?.referencePhotoUrls.isNotEmpty == true) {
+      return task!.referencePhotoUrls;
+    }
     return const [
       SupervisorTaskAssets.completionProofOne,
       SupervisorTaskAssets.completionProofTwo,
@@ -217,7 +219,7 @@ class _SupervisorTaskDetailScreenState
   }
 
   List<String> _attachmentImages(TaskModel? task) {
-    if (task != null) return task.referencePhotoUrls;
+    if (task != null) return task.photoUrls;
     return const [
       SupervisorTaskAssets.referencePhoto,
       SupervisorTaskAssets.referencePhoto,

@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -183,10 +184,37 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
     if (!mounted || !confirmed) return;
 
     final item = _selectedItem!;
-    await EerlLocalRepository.instance.setRagpickerActive(
-      item,
-      !currentlyActive,
-    );
+    try {
+      await EerlLocalRepository.instance.setRagpickerActive(
+        item,
+        !currentlyActive,
+      );
+    } on LocalWriteValidationException catch (error) {
+      AppLogger.diagnostic(
+        'RAGPICKER_STATUS_BLOCKED',
+        'ragpicker_id=${item.id} field=${error.field} reason=${error.message}',
+      );
+      if (!mounted) return;
+      AppTopNotification.show(
+        context,
+        key: const Key('ragpicker-status-blocked-notification'),
+        title: context.l10n.ragpickerDeactivateBlockedTitle,
+        subtitle: context.l10n.ragpickerDeactivateBlockedSubtitle,
+        tone: AppTopNotificationTone.error,
+      );
+      return;
+    } catch (error) {
+      AppLogger.error('RAGPICKER_STATUS_CHANGE', error.toString());
+      if (!mounted) return;
+      AppTopNotification.show(
+        context,
+        key: const Key('ragpicker-status-error-notification'),
+        title: context.l10n.error,
+        subtitle: context.l10n.ragpickerStatusChangeFailed,
+        tone: AppTopNotificationTone.error,
+      );
+      return;
+    }
     unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
     if (!mounted) return;
     setState(() {
@@ -457,9 +485,9 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                         builder: (context, snapshot) {
                           final photos =
                               (snapshot.data != null &&
-                                      snapshot.data!.isNotEmpty)
-                                  ? snapshot.data!
-                                  : item.photoUrls;
+                                  snapshot.data!.isNotEmpty)
+                              ? snapshot.data!
+                              : item.photoUrls;
                           return RagpickerProofCard(
                             title: context.l10n.ragpickerProofLabel,
                             photoUrls: photos,
@@ -656,8 +684,8 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
     final photoUrlValue = _photoSources.isEmpty
         ? null
         : (_photoSources.length == 1
-            ? _photoSources.first
-            : jsonEncode(_photoSources));
+              ? _photoSources.first
+              : jsonEncode(_photoSources));
     setState(() => _saving = true);
     try {
       await EerlLocalRepository.instance.saveRagpicker(

@@ -32,9 +32,18 @@ enum _ExpensePage {
 }
 
 class SupervisorExpenseModuleScreen extends StatefulWidget {
-  const SupervisorExpenseModuleScreen({super.key, this.syncAfterDecision});
+  const SupervisorExpenseModuleScreen({
+    super.key,
+    this.syncAfterDecision,
+    this.loadExpenses,
+    this.loadCashRequests,
+    this.loadCategoryRequests,
+  });
 
   final Future<void> Function()? syncAfterDecision;
+  final Future<List<ExpenseModel>> Function()? loadExpenses;
+  final Future<List<CashRequestModel>> Function()? loadCashRequests;
+  final Future<List<CategoryRequestModel>> Function()? loadCategoryRequests;
 
   @override
   State<SupervisorExpenseModuleScreen> createState() =>
@@ -132,6 +141,9 @@ class _SupervisorExpenseModuleScreenState
         onCashTap: _openCashDetail,
         onCategoryRequests: () =>
             setState(() => _page = _ExpensePage.categoryRequests),
+        loadExpenses: widget.loadExpenses,
+        loadCashRequests: widget.loadCashRequests,
+        loadCategoryRequests: widget.loadCategoryRequests,
       ),
       _ExpensePage.expenseDetail => _ExpenseDetailScreen(
         expenseId: _selectedExpense!.id,
@@ -219,12 +231,18 @@ class _ExpenseListScreen extends StatefulWidget {
     required this.onTap,
     required this.onCashTap,
     required this.onCategoryRequests,
+    this.loadExpenses,
+    this.loadCashRequests,
+    this.loadCategoryRequests,
   });
 
   final int initialType;
   final ValueChanged<ExpenseModel> onTap;
   final ValueChanged<CashRequestModel> onCashTap;
   final VoidCallback onCategoryRequests;
+  final Future<List<ExpenseModel>> Function()? loadExpenses;
+  final Future<List<CashRequestModel>> Function()? loadCashRequests;
+  final Future<List<CategoryRequestModel>> Function()? loadCategoryRequests;
 
   @override
   State<_ExpenseListScreen> createState() => _ExpenseListScreenState();
@@ -238,6 +256,7 @@ class _ExpenseListScreenState extends State<_ExpenseListScreen> {
   String _search = '';
   List<ExpenseModel> _expenses = const [];
   List<CashRequestModel> _cashRequests = const [];
+  int _pendingCategoryRequestCount = 0;
 
   @override
   void initState() {
@@ -250,13 +269,20 @@ class _ExpenseListScreenState extends State<_ExpenseListScreen> {
     if (mounted) setState(() => _loading = true);
     try {
       final values = await Future.wait([
-        EerlLocalRepository.instance.getExpenses(supervisor: true),
-        EerlLocalRepository.instance.getCashRequests(supervisor: true),
+        widget.loadExpenses?.call() ??
+            EerlLocalRepository.instance.getExpenses(supervisor: true),
+        widget.loadCashRequests?.call() ??
+            EerlLocalRepository.instance.getCashRequests(supervisor: true),
+        widget.loadCategoryRequests?.call() ??
+            EerlLocalRepository.instance.getCategoryRequests(supervisor: true),
       ]);
       if (!mounted) return;
       setState(() {
         _expenses = values[0] as List<ExpenseModel>;
         _cashRequests = values[1] as List<CashRequestModel>;
+        _pendingCategoryRequestCount = (values[2] as List<CategoryRequestModel>)
+            .where((request) => request.status.toUpperCase() == 'PENDING')
+            .length;
         _error = null;
         _loading = false;
       });
@@ -296,7 +322,7 @@ class _ExpenseListScreenState extends State<_ExpenseListScreen> {
               request.requestedBy,
             ),
             role: l.supervisorExpenseAgentRole,
-            category: _displayValue(request.reason, request.number),
+            category: _displayValue(request.reason, 'Cash request'),
             date: _formatExpenseDate(request.createdAt),
             amount: _formatExpenseAmount(request.amount),
             status: _supervisorExpenseStatus(request.status),
@@ -380,6 +406,7 @@ class _ExpenseListScreenState extends State<_ExpenseListScreen> {
                       title: l.supervisorExpenseNewCategories,
                       subtitle: l.supervisorExpenseReviewCategories,
                       buttonLabel: l.supervisorExpenseViewRequests,
+                      pendingCount: _pendingCategoryRequestCount,
                       onPressed: widget.onCategoryRequests,
                     ),
                     const SizedBox(height: 16),
@@ -595,12 +622,14 @@ class _CategoryRequestsCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.buttonLabel,
+    required this.pendingCount,
     required this.onPressed,
   });
 
   final String title;
   final String subtitle;
   final String buttonLabel;
+  final int pendingCount;
   final VoidCallback onPressed;
 
   @override
@@ -648,6 +677,7 @@ class _CategoryRequestsCard extends StatelessWidget {
               ),
             ),
             Container(
+              key: const Key('category-request-pending-count'),
               width: 28,
               height: 28,
               alignment: Alignment.center,
@@ -655,10 +685,17 @@ class _CategoryRequestsCard extends StatelessWidget {
                 color: AppColors.yellow600,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: Colors.white,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    '$pendingCount',
+                    style: AppTextStyles.boldH8_14.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -988,7 +1025,8 @@ class _CashRequestDetailScreen extends StatelessWidget {
     final status = _supervisorExpenseStatus(request.status);
     final pending = status == SupervisorExpenseStatus.pending;
     final reference = _displayValue(request.number, request.id);
-    final category = _displayValue(request.reason, null);
+    final reason = _displayValue(request.reason, 'Cash request');
+    final description = request.description?.trim();
     final amount = _formatExpenseAmount(request.amount);
     final requestedBy = _displayValue(
       request.requestedByName,
@@ -1035,8 +1073,8 @@ class _CashRequestDetailScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ExpenseDetailRow(
-                              label: l.expenseDetailCategory,
-                              value: category,
+                              label: l.cashDetailRequestReason,
+                              value: reason,
                             ),
                             const _Divider(),
                             ExpenseDetailRow(
@@ -1068,25 +1106,27 @@ class _CashRequestDetailScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      ExpenseDetailCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l.expenseDescriptionLabel,
-                              style: AppTextStyles.semiboldH7_18,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              category,
-                              style: AppTextStyles.mediumSH9_12.copyWith(
-                                color: AppColors.neutral900,
+                      if (description?.isNotEmpty == true) ...[
+                        const SizedBox(height: 16),
+                        ExpenseDetailCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l.expenseDescriptionLabel,
+                                style: AppTextStyles.semiboldH7_18,
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 8),
+                              Text(
+                                description!,
+                                style: AppTextStyles.mediumSH9_12.copyWith(
+                                  color: AppColors.neutral900,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      ],
                       if (status == SupervisorExpenseStatus.rejected) ...[
                         const SizedBox(height: 20),
                         ExpenseDetailCard(

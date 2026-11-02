@@ -48,7 +48,8 @@ void main() {
   test('cash request stores locally and queues its PUT API body', () async {
     final requestId = await repository.saveCashRequest(
       amount: 350,
-      reason: 'Emergency Fuel: Float for the weekend',
+      reason: 'Emergency Fuel',
+      description: 'Float for the weekend',
     );
 
     final request = (await database.query(DatabaseTables.cashRequests)).single;
@@ -57,7 +58,8 @@ void main() {
     expect(request['requested_by'], 'user-1');
     expect(request['requested_by_name'], 'Agent One');
     expect(request['amount'], 350.0);
-    expect(request['reason'], 'Emergency Fuel: Float for the weekend');
+    expect(request['reason'], 'Emergency Fuel');
+    expect(request['description'], 'Float for the weekend');
     expect(request['status'], 'PENDING');
     expect(request['sync_state'], 'pending');
 
@@ -71,7 +73,8 @@ void main() {
     expect(jsonDecode(outbox['body']! as String), {
       'centerId': 'center-1',
       'amount': 350.0,
-      'reason': 'Emergency Fuel: Float for the weekend',
+      'reason': 'Emergency Fuel',
+      'description': 'Float for the weekend',
     });
   });
 

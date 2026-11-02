@@ -18,6 +18,7 @@ void main() {
     requestedByName: 'Kiran Rathod',
     amount: 2750.50,
     reason: 'Vehicle fuel advance',
+    description: 'Fuel needed for the west-zone route.',
     status: status,
     decidedByName: 'Supervisor Name',
     decisionNote: decisionNote,
@@ -55,7 +56,8 @@ void main() {
     expect(find.text('AAN-CSH-261029-004'), findsOneWidget);
     expect(find.text('₹2,750.50'), findsOneWidget);
     expect(find.text('Kiran Rathod'), findsOneWidget);
-    expect(find.text('Vehicle fuel advance'), findsNWidgets(2));
+    expect(find.text('Vehicle fuel advance'), findsOneWidget);
+    expect(find.text('Fuel needed for the west-zone route.'), findsOneWidget);
     expect(find.textContaining('#REQ-2026-088'), findsNothing);
     expect(find.text('₹1000'), findsNothing);
     expect(find.textContaining('08:15 AM'), findsNothing);

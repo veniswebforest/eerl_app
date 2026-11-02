@@ -123,9 +123,8 @@ void main() {
               'priority': 'NORMAL',
               'status': 'PENDING',
               'due_at': '2026-10-31T04:00:00.000Z',
-              'photo_urls': '[]',
-              'reference_photo_urls':
-                  '["https://example.test/task-reference.jpg"]',
+              'photo_urls': '["https://example.test/task-reference.jpg"]',
+              'reference_photo_urls': '[]',
               'created_at': '2026-10-30T09:00:00.000Z',
             },
           ],
@@ -162,11 +161,8 @@ void main() {
     expect(notification['role'], 'AGENT');
     expect(notification['center_id'], 'center-1');
     final task = (await database.query(DatabaseTables.tasks)).single;
-    expect(task['photo_urls'], '[]');
-    expect(
-      task['reference_photo_urls'],
-      '["https://example.test/task-reference.jpg"]',
-    );
+    expect(task['photo_urls'], '["https://example.test/task-reference.jpg"]');
+    expect(task['reference_photo_urls'], '[]');
     expect(await database.getSyncMeta('cursor'), 'latest-1');
 
     await database.update(

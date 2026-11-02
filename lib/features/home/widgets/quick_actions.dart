@@ -11,17 +11,15 @@ import 'package:eerl_app/features/local_data/presentation/local_query_controller
 import 'home_assets.dart';
 import 'home_styles.dart';
 
-/// Quick Actions section with Start Collection and Wallet & Log Expense cards.
+/// Agent Quick Actions section matching the AG-M01 home-screen design.
 class QuickActions extends StatefulWidget {
   const QuickActions({
     super.key,
-    required this.onAddCollectionTap,
     required this.onTasksTap,
     required this.onLogExpenseTap,
     this.taskLoader,
   });
 
-  final VoidCallback onAddCollectionTap;
   final Future<void> Function() onTasksTap;
   final VoidCallback onLogExpenseTap;
   final Future<List<TaskModel>> Function()? taskLoader;
@@ -70,17 +68,6 @@ class _QuickActionsState extends State<QuickActions> {
       children: [
         Text(context.l10n.quickActions, style: HomeStyles.sectionTitle),
         const SizedBox(height: 16),
-        QuickActionCard(
-          key: const Key('home-start-collection-card'),
-          iconAsset: HomeAssets.startCollection,
-          iconColor: AppColors.orange,
-          iconBg: AppColors.orangeLight,
-          title: context.l10n.startCollection,
-          subtitle: context.l10n.recordWeightProof,
-          buttonLabel: context.l10n.addCollection,
-          onTap: widget.onAddCollectionTap,
-        ),
-        const SizedBox(height: 16),
         ListenableBuilder(
           listenable: _tasksController,
           builder: (context, _) {
@@ -94,7 +81,7 @@ class _QuickActionsState extends State<QuickActions> {
                 .length;
             return QuickActionCard(
               key: const Key('home-pending-task-card'),
-              iconAsset: 'assets/icons/profile/sync_pending_collection.svg',
+              iconAsset: HomeAssets.pendingTaskHourglass,
               iconColor: AppColors.yellow600,
               iconBg: AppColors.yellow50,
               title: context.l10n.homePendingTask,
@@ -102,6 +89,7 @@ class _QuickActionsState extends State<QuickActions> {
               buttonLabel: context.l10n.viewTask,
               badge: pendingCount?.toString(),
               badgeKey: const Key('agent-pending-task-count'),
+              height: 166,
               onTap: _openTasks,
             );
           },
@@ -115,6 +103,7 @@ class _QuickActionsState extends State<QuickActions> {
           title: context.l10n.walletLogExpense,
           subtitle: context.l10n.trackFieldSpending,
           buttonLabel: context.l10n.logExpense,
+          height: 166,
           onTap: widget.onLogExpenseTap,
         ),
       ],
@@ -161,32 +150,83 @@ class QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
+      width: double.infinity,
       height: height,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.neutral50,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [HomeStyles.cardShadow],
-      ),
-      child: height == null
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _titleRow(),
-                const SizedBox(height: 6),
-                _subtitle(),
-                const SizedBox(height: 16),
-                _button(),
-              ],
-            )
-          : Stack(
-              children: [
-                Positioned(left: 0, right: 0, top: 0, child: _titleRow()),
-                Positioned(left: 0, right: 0, top: 48, child: _subtitle()),
-                Positioned(left: 0, right: 0, bottom: 0, child: _button()),
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: height,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.neutral50,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x1F000000),
+                  blurRadius: 5,
+                  offset: Offset(0, 2),
+                ),
               ],
             ),
+            child: height == null
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _titleRow(),
+                      const SizedBox(height: 8),
+                      _subtitle(),
+                      const SizedBox(height: 16),
+                      _button(),
+                    ],
+                  )
+                : Stack(
+                    children: [
+                      Positioned(
+                        left: 0,
+                        right: badge == null ? 0 : 36,
+                        top: 0,
+                        child: _titleRow(),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        top: 48,
+                        child: _subtitle(),
+                      ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: _button(),
+                      ),
+                    ],
+                  ),
+          ),
+          if (badge != null)
+            Positioned(
+              top: 12,
+              right: 12,
+              child: Container(
+                key: badgeKey,
+                width: 28,
+                height: 28,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: AppColors.yellow600,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  badge!,
+                  style: AppTextStyles.semiboldH8_16.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -210,7 +250,7 @@ class QuickActionCard extends StatelessWidget {
               )
             : Icon(iconData, size: 24, color: iconColor),
       ),
-      const SizedBox(width: 12),
+      const SizedBox(width: 8),
       Expanded(
         child: Text(
           title,
@@ -218,26 +258,9 @@ class QuickActionCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style:
               titleStyle ??
-              AppTextStyles.semiboldH8_16.copyWith(color: AppColors.neutral950),
+              AppTextStyles.semiboldH7_18.copyWith(color: AppColors.neutral950),
         ),
       ),
-      if (badge != null) ...[
-        const SizedBox(width: 8),
-        Container(
-          key: badgeKey,
-          width: 28,
-          height: 28,
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            color: AppColors.yellow600,
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            badge!,
-            style: AppTextStyles.semiboldH10_12.copyWith(color: Colors.white),
-          ),
-        ),
-      ],
     ],
   );
 
@@ -247,7 +270,7 @@ class QuickActionCard extends StatelessWidget {
     overflow: TextOverflow.ellipsis,
     style:
         subtitleStyle ??
-        AppTextStyles.regularB8_12.copyWith(color: AppColors.neutral600),
+        AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral700),
   );
 
   Widget _button() => SizedBox(
@@ -258,7 +281,7 @@ class QuickActionCard extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary500,
         foregroundColor: AppColors.neutral50,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 0,
         textStyle: AppTextStyles.boldH7_16,
       ),

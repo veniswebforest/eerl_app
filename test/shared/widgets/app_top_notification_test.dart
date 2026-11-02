@@ -3,6 +3,7 @@ import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -42,6 +43,17 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byKey(notificationKey), findsOneWidget);
+      final rejectedIcon = find.byKey(
+        const Key('app-top-notification-rejected-icon'),
+      );
+      expect(rejectedIcon, findsOneWidget);
+      expect(tester.widget<SvgPicture>(rejectedIcon).width, isNull);
+      expect(tester.getSize(rejectedIcon).width, closeTo(19.5, 0.01));
+      expect(tester.getSize(rejectedIcon).height, closeTo(19.5, 0.01));
+      expect(
+        find.byKey(const Key('app-top-notification-close-icon')),
+        findsOneWidget,
+      );
       expect(tester.getTopLeft(find.byKey(markerKey)), markerBefore);
 
       await tester.pump(const Duration(seconds: 2));
@@ -51,6 +63,47 @@ void main() {
       expect(tester.getTopLeft(find.byKey(markerKey)), markerBefore);
     },
   );
+
+  testWidgets('success overlay uses the exact Figma approved icon', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: ElevatedButton(
+              onPressed: () => AppTopNotification.show(
+                context,
+                key: const Key('success-top-notification'),
+                title: 'Approved',
+                subtitle: 'Request approved successfully.',
+                tone: AppTopNotificationTone.success,
+              ),
+              child: const Text('Show success'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show success'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final approvedIcon = find.byKey(
+      const Key('app-top-notification-approved-icon'),
+    );
+    expect(approvedIcon, findsOneWidget);
+    expect(tester.widget<SvgPicture>(approvedIcon).width, isNull);
+    expect(tester.getSize(approvedIcon), const Size(30, 30));
+    expect(
+      find.byKey(const Key('app-top-notification-rejected-icon')),
+      findsNothing,
+    );
+
+    AppTopNotification.dismiss();
+    await tester.pump();
+  });
 
   testWidgets('collection draft success uses the shared two-second overlay', (
     tester,

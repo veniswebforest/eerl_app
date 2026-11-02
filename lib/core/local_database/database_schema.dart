@@ -212,6 +212,7 @@ abstract final class DatabaseSchema {
         requested_by_name TEXT,
         amount REAL NOT NULL,
         reason TEXT,
+        description TEXT,
         status TEXT NOT NULL,
         decided_by_name TEXT,
         decision_note TEXT,

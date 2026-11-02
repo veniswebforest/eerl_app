@@ -7,6 +7,7 @@ import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:eerl_app/core/location/device_location_service.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
@@ -1108,6 +1109,19 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         key: const Key('ramp-ragpicker-status-notification'),
         title: context.l10n.ragpickerDeactivatedSuccess,
         subtitle: context.l10n.ragpickerDeactivatedSubtitle,
+        tone: AppTopNotificationTone.error,
+      );
+    } on LocalWriteValidationException catch (error) {
+      AppLogger.diagnostic(
+        'RAMP_RAGPICKER_DEACTIVATE_BLOCKED',
+        'ragpicker_id=${person.id} field=${error.field} reason=${error.message}',
+      );
+      if (!mounted) return;
+      AppTopNotification.show(
+        context,
+        key: const Key('ramp-ragpicker-status-blocked-notification'),
+        title: context.l10n.ragpickerDeactivateBlockedTitle,
+        subtitle: context.l10n.ragpickerDeactivateBlockedSubtitle,
         tone: AppTopNotificationTone.error,
       );
     } catch (error) {

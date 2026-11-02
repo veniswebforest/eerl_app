@@ -66,6 +66,7 @@ flutter:
     - assets/images/agent_status/
     - assets/images/profile/
     - assets/images/end_my_day/
+    - assets/images/d2d_vehicle/
     - assets/icons/home/
     - assets/icons/home/supervisor/
     - assets/icons/home/supervisor/drawer/

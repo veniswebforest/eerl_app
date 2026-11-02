@@ -54,14 +54,14 @@ void main() {
       find.text('Review and verify the submitted collection.'),
       findsOneWidget,
     );
-    expect(find.text('Bhavesh Shah'), findsOneWidget);
+    expect(find.text('Bhavesh Shah'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('loads supervisor attachments from the latest SQLite task row', (
     tester,
   ) async {
-    final initial = _pendingTask(referencePhotoUrls: const []);
+    final initial = _pendingTask(photoUrls: const []);
     final latest = _pendingTask();
 
     await tester.pumpWidget(
@@ -100,9 +100,7 @@ Future<void> _pumpTask(WidgetTester tester, TaskModel task) async {
 }
 
 TaskModel _pendingTask({
-  List<String> referencePhotoUrls = const [
-    'assets/images/profile_rahul_patel.png',
-  ],
+  List<String> photoUrls = const ['assets/images/profile_rahul_patel.png'],
 }) {
   final due = DateTime.now().add(const Duration(hours: 2)).toUtc();
   return TaskModel(
@@ -115,8 +113,8 @@ TaskModel _pendingTask({
     priority: 'HIGH',
     status: 'PENDING',
     dueAt: due.toIso8601String(),
-    photoUrls: const [],
-    referencePhotoUrls: referencePhotoUrls,
+    photoUrls: photoUrls,
+    referencePhotoUrls: const [],
     createdAt: DateTime.now().toUtc().toIso8601String(),
     syncState: 'synced',
   );
@@ -137,7 +135,8 @@ TaskModel _completedTask() {
     priority: 'HIGH',
     status: 'COMPLETED',
     completedAt: completed.toIso8601String(),
-    photoUrls: const [
+    photoUrls: const ['assets/images/profile_rahul_patel.png'],
+    referencePhotoUrls: const [
       'assets/images/profile_rahul_patel.png',
       'assets/images/profile_rahul_patel.png',
     ],

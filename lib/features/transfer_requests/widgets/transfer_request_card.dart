@@ -67,15 +67,17 @@ class TransferRequestCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Expanded(
-                child: _DetailRow(
-                  icon: 'assets/icons/records/clock.svg',
-                  label: context.l10n.transferDateTime(item.date, item.time),
-                  compact: true,
+              _DetailRow(
+                icon: 'assets/icons/records/clock.svg',
+                label: context.l10n.transferDateTime(item.date, item.time),
+                style: AppTextStyles.semiboldH10_12.copyWith(
+                  color: AppColors.primary800,
                 ),
+                compact: true,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               _TransferStatus(status: item.status),
             ],
           ),
@@ -90,9 +92,11 @@ class _DetailRow extends StatelessWidget {
     required this.icon,
     required this.label,
     this.compact = false,
+    this.style,
   });
 
   final String icon;
+  final TextStyle? style;
   final String label;
   final bool compact;
 
@@ -100,6 +104,7 @@ class _DetailRow extends StatelessWidget {
   Widget build(BuildContext context) => Row(
     mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
     children: [
+      SizedBox(width: 12),
       SvgPicture.asset(
         icon,
         width: 18,
@@ -115,9 +120,9 @@ class _DetailRow extends StatelessWidget {
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.semiboldH9_14.copyWith(
-            color: AppColors.neutral950,
-          ),
+          style:
+              style ??
+              AppTextStyles.semiboldH9_14.copyWith(color: AppColors.neutral950),
         ),
       ),
     ],
@@ -159,10 +164,10 @@ class _TransferStatus extends StatelessWidget {
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -20,7 +20,16 @@ import '../widgets/d2d_vehicle_form.dart';
 import '../widgets/d2d_vehicle_segmented_control.dart';
 
 class D2dVehicleManagementScreen extends StatefulWidget {
-  const D2dVehicleManagementScreen({super.key});
+  const D2dVehicleManagementScreen({
+    super.key,
+    this.loadCenters,
+    this.loadActiveCenterId,
+    this.loadVehicles,
+  });
+
+  final Future<List<CenterModel>> Function()? loadCenters;
+  final Future<String?> Function()? loadActiveCenterId;
+  final Future<List<VehicleModel>> Function(String centerId)? loadVehicles;
 
   @override
   State<D2dVehicleManagementScreen> createState() =>
@@ -68,13 +77,16 @@ class _D2dVehicleManagementScreenState
   Future<void> _load({String? centerId}) async {
     setState(() => _loading = true);
     final repository = EerlLocalRepository.instance;
-    final centers = await repository.getCenters();
+    final centers =
+        await (widget.loadCenters?.call() ?? repository.getCenters());
     var selected = centerId;
-    selected ??= await repository.activeCenterId;
+    selected ??=
+        await (widget.loadActiveCenterId?.call() ?? repository.activeCenterId);
     if (selected == null && centers.isNotEmpty) selected = centers.first.id;
     final vehicles = selected == null
         ? const <VehicleModel>[]
-        : await repository.getVehicles(centerId: selected, activeOnly: false);
+        : await (widget.loadVehicles?.call(selected) ??
+              repository.getVehicles(centerId: selected, activeOnly: false));
     if (!mounted) return;
     setState(() {
       _centers = centers;
@@ -273,6 +285,7 @@ class _D2dVehicleManagementScreenState
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         sliver: SliverList.list(
                           children: [
+                            const SizedBox(height: 18),
                             Align(
                               alignment: Alignment.centerLeft,
                               child: AppSquareBackButton(
@@ -301,6 +314,9 @@ class _D2dVehicleManagementScreenState
                                 'd2d-vehicle-center-options',
                               ),
                               optionKeyPrefix: 'd2d-vehicle-center',
+                              borderRadius: 10,
+                              iconSize: 24,
+                              hintColor: AppColors.cool500,
                               onToggle: () => setState(
                                 () => _centerExpanded = !_centerExpanded,
                               ),
@@ -343,6 +359,13 @@ class _D2dVehicleManagementScreenState
                       if (_loading)
                         const SliverFillRemaining(
                           child: Center(child: CircularProgressIndicator()),
+                        )
+                      else if (vehicles.isEmpty)
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: _D2dVehicleEmptyState(
+                            label: context.l10n.d2dNoVehicleAdded,
+                          ),
                         )
                       else
                         SliverPadding(
@@ -455,6 +478,40 @@ class _D2dVehicleManagementScreenState
   );
 }
 
+class _D2dVehicleEmptyState extends StatelessWidget {
+  const _D2dVehicleEmptyState({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.topCenter,
+    child: Padding(
+      padding: const EdgeInsets.only(top: 86),
+      child: Column(
+        key: const Key('d2d-vehicle-empty-state'),
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(
+            'assets/images/d2d_vehicle/empty_vehicle.png',
+            key: const Key('d2d-vehicle-empty-illustration'),
+            width: 285,
+            height: 127,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.semiboldH8_16.copyWith(
+              color: AppColors.neutral400,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 class _SearchField extends StatelessWidget {
   const _SearchField({
     required this.controller,
@@ -512,7 +569,7 @@ class _PrimaryBottomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SafeArea(
     top: false,
-    minimum: const EdgeInsets.fromLTRB(20, 10, 20, 16),
+    minimum: const EdgeInsets.fromLTRB(20, 0, 20, 16),
     child: SizedBox(
       width: double.infinity,
       height: 52,

@@ -65,7 +65,8 @@ void main() {
       expect(task['status'], 'COMPLETED');
       expect(task['note'], 'All four IDs checked.');
       expect(task['completed_at'], isNotNull);
-      expect(jsonDecode(task['photo_urls']! as String), [proof.path]);
+      expect(jsonDecode(task['photo_urls']! as String), isEmpty);
+      expect(jsonDecode(task['reference_photo_urls']! as String), [proof.path]);
       expect(task['sync_state'], 'pending');
 
       final photo = (await database.query(DatabaseTables.photos)).single;
@@ -126,7 +127,8 @@ void main() {
 
       task = (await database.query(DatabaseTables.tasks)).single;
       expect(task['sync_state'], 'synced');
-      expect(jsonDecode(task['photo_urls']! as String), [remoteUrl]);
+      expect(jsonDecode(task['photo_urls']! as String), isEmpty);
+      expect(jsonDecode(task['reference_photo_urls']! as String), [remoteUrl]);
     },
   );
 }

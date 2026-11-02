@@ -219,7 +219,7 @@ void main() {
     await tester.tap(find.text('View Requests'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Expense Category Request'), findsOneWidget);
+    expect(find.text('Add Category Request'), findsOneWidget);
     expect(find.text('Request Pending'), findsWidgets);
     await tester.tap(find.text('Closed (4)'));
     await tester.pumpAndSettle();

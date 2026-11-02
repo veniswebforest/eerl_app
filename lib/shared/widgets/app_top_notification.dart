@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/shared/widgets/app_message_banner.dart';
@@ -126,19 +127,32 @@ class _AppTopNotificationEntryState extends State<_AppTopNotificationEntry>
   Widget build(BuildContext context) {
     final palette = switch (widget.tone) {
       AppTopNotificationTone.success => (
-        color: AppColors.primary500,
+        color: AppColors.primary400,
         background: AppColors.primary50,
-        defaultIcon: Icons.check_rounded,
+        iconPadding: EdgeInsets.zero,
+        defaultIcon: SvgPicture.asset(
+          'assets/icons/toast_approved.svg',
+          key: const Key('app-top-notification-approved-icon'),
+        ),
       ),
       AppTopNotificationTone.error => (
         color: AppColors.red500,
         background: AppColors.red50,
-        defaultIcon: Icons.error_outline_rounded,
+        iconPadding: const EdgeInsets.all(5.25),
+        defaultIcon: SvgPicture.asset(
+          'assets/icons/toast_rejected.svg',
+          key: const Key('app-top-notification-rejected-icon'),
+        ),
       ),
       AppTopNotificationTone.info => (
         color: AppColors.secondary500,
         background: AppColors.secondary50,
-        defaultIcon: Icons.info_outline_rounded,
+        iconPadding: const EdgeInsets.all(5),
+        defaultIcon: const Icon(
+          Icons.info_outline_rounded,
+          size: 18,
+          color: Colors.white,
+        ),
       ),
     };
     return Positioned(
@@ -171,16 +185,14 @@ class _AppTopNotificationEntryState extends State<_AppTopNotificationEntry>
                       ),
                     ],
                     iconBackgroundColor: palette.color,
-                    iconPadding: const EdgeInsets.all(5),
-                    icon:
-                        widget.icon ??
-                        Icon(
-                          palette.defaultIcon,
-                          size: 18,
-                          color: Colors.white,
-                        ),
+                    iconPadding: palette.iconPadding,
+                    icon: widget.icon ?? palette.defaultIcon,
                     autoDismiss: false,
                     closeButtonKey: widget.closeButtonKey,
+                    closeIcon: SvgPicture.asset(
+                      'assets/icons/toast_close.svg',
+                      key: const Key('app-top-notification-close-icon'),
+                    ),
                     onClose: _dismiss,
                   ),
                 ),

@@ -176,34 +176,9 @@ class _ExpenseClaimDetailScreenState extends State<ExpenseClaimDetailScreen> {
                     if (widget.status == ExpenseClaimDetailStatus.rejected &&
                         expense?.decisionReason?.trim().isNotEmpty == true) ...[
                       const SizedBox(height: 20),
-                      ExpenseDetailCard(
-                        border: AppColors.red500,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.expenseRejectReasonTitle,
-                              style: AppTextStyles.semiboldH7_18.copyWith(
-                                color: AppColors.neutral950,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            const Divider(height: 1, color: AppColors.cool400),
-                            const SizedBox(height: 12),
-                            _LabeledParagraph(
-                              label: l10n.expenseRejectReasonLabel,
-                              value: expense!.decisionReason!.trim(),
-                            ),
-                            if (expense.decisionRemarks?.trim().isNotEmpty ==
-                                true) ...[
-                              const SizedBox(height: 8),
-                              _LabeledParagraph(
-                                label: l10n.expenseRejectRemarksLabel,
-                                value: expense.decisionRemarks!.trim(),
-                              ),
-                            ],
-                          ],
-                        ),
+                      _RejectReasonCard(
+                        reason: expense!.decisionReason!.trim(),
+                        remarks: expense.decisionRemarks!.trim(),
                       ),
                     ],
                   ],
@@ -228,6 +203,79 @@ class _ExpenseClaimDetailScreenState extends State<ExpenseClaimDetailScreen> {
     if (date == null) return _valueOrFallback(value);
     return DateFormat('dd MMM yyyy, hh:mm a').format(date);
   }
+}
+
+class _RejectReasonCard extends StatelessWidget {
+  const _RejectReasonCard({this.reason, this.remarks});
+
+  final String? reason;
+  final String? remarks;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: AppColors.neutral50,
+      border: Border.all(color: AppColors.red500),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text.rich(
+          TextSpan(
+            children: [
+              const TextSpan(text: 'Reason for '),
+              TextSpan(
+                text: 'Reject',
+                style: AppTextStyles.semiboldH7_18.copyWith(
+                  color: AppColors.red500,
+                ),
+              ),
+            ],
+          ),
+          style: AppTextStyles.semiboldH7_18.copyWith(
+            color: AppColors.neutral950,
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Divider(height: 1, color: AppColors.cool300),
+        const SizedBox(height: 12),
+        Text.rich(
+          TextSpan(
+            children: [
+              const TextSpan(
+                text: 'Reason : ',
+                style: AppTextStyles.semiboldH9_14,
+              ),
+              TextSpan(text: reason?.trim().isNotEmpty == true ? reason! : '-'),
+            ],
+          ),
+          style: AppTextStyles.mediumSH8_14.copyWith(
+            color: AppColors.neutral950,
+          ),
+        ),
+        if (remarks?.trim().isNotEmpty == true) ...[
+          const SizedBox(height: 8),
+          Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(
+                  text: 'Remarks : ',
+                  style: AppTextStyles.semiboldH9_14,
+                ),
+                TextSpan(text: remarks!.trim()),
+              ],
+            ),
+            style: AppTextStyles.mediumSH8_14.copyWith(
+              color: AppColors.neutral950,
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
 }
 
 class _DetailDivider extends StatelessWidget {

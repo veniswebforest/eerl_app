@@ -1681,7 +1681,7 @@ abstract class AppLocalizations {
   /// No description provided for @d2dSelectTargetCenter.
   ///
   /// In en, this message translates to:
-  /// **'Select Target Center'**
+  /// **'Assign Target Agent / Center'**
   String get d2dSelectTargetCenter;
 
   /// No description provided for @d2dSelectCenter.
@@ -1707,6 +1707,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Vehicle'**
   String get d2dAddVehicle;
+
+  /// No description provided for @d2dNoVehicleAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'No Vehicle Added Yet'**
+  String get d2dNoVehicleAdded;
 
   /// No description provided for @d2dActivatedVehicleTitle.
   ///
@@ -4297,7 +4303,7 @@ abstract class AppLocalizations {
   /// No description provided for @homePendingTask.
   ///
   /// In en, this message translates to:
-  /// **'Pending Task'**
+  /// **'View Pending Tasks'**
   String get homePendingTask;
 
   /// No description provided for @homePendingTaskSubtitle.
@@ -5930,6 +5936,18 @@ abstract class AppLocalizations {
   /// **'Ragpicker profile deactivated.'**
   String get ragpickerDeactivatedSubtitle;
 
+  /// No description provided for @ragpickerDeactivateBlockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivation blocked'**
+  String get ragpickerDeactivateBlockedTitle;
+
+  /// No description provided for @ragpickerDeactivateBlockedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This ragpicker has an open collection. Complete or discard it before deactivating the ragpicker.'**
+  String get ragpickerDeactivateBlockedSubtitle;
+
   /// No description provided for @ragpickerStatusChangeFailed.
   ///
   /// In en, this message translates to:
@@ -6173,7 +6191,7 @@ abstract class AppLocalizations {
   /// No description provided for @verificationEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No collection entries found'**
+  /// **'No Collection History for now'**
   String get verificationEmpty;
 
   /// No description provided for @verificationRahulPatel.
@@ -7007,8 +7025,14 @@ abstract class AppLocalizations {
   /// No description provided for @supervisorCategoryTitle.
   ///
   /// In en, this message translates to:
-  /// **'Expense Category Request'**
+  /// **'Add Category Request'**
   String get supervisorCategoryTitle;
+
+  /// No description provided for @supervisorCategoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No Category Request to Review'**
+  String get supervisorCategoryEmpty;
 
   /// No description provided for @supervisorCategoryPendingTab.
   ///

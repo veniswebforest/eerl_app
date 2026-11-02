@@ -27,6 +27,7 @@ void main() {
 
     expect(find.text('Task Cancelled'), findsOneWidget);
     expect(find.byIcon(Icons.cancel_outlined), findsOneWidget);
+    expect(find.text('02:30 PM'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

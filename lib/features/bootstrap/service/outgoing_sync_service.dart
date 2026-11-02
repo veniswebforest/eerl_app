@@ -450,7 +450,12 @@ class OutgoingSyncService {
       );
       if (remaining != 0) return;
 
-      final values = await _serverValues(txn, entity, response);
+      final values = await _serverValues(
+        txn,
+        entity,
+        response,
+        kind: item['kind'] as String?,
+      );
       values['sync_state'] = 'synced';
       if (entity == DatabaseTables.centerItems) {
         final parts = entityId.split(':');
@@ -484,8 +489,9 @@ class OutgoingSyncService {
   Future<Map<String, Object?>> _serverValues(
     Transaction txn,
     String table,
-    Map<String, Object?> response,
-  ) async {
+    Map<String, Object?> response, {
+    String? kind,
+  }) async {
     final data = response['data'];
     if (data is! Map) return <String, Object?>{};
     if (table == DatabaseTables.collections) {
@@ -513,7 +519,7 @@ class OutgoingSyncService {
       return _vehicleServerValues(data);
     }
     if (table == DatabaseTables.tasks) {
-      return _taskServerValues(data);
+      return _taskServerValues(data, kind: kind);
     }
     if (table == DatabaseTables.requests) {
       return _requestServerValues(data);
@@ -686,6 +692,7 @@ class OutgoingSyncService {
       if (data['number'] != null) 'number': data['number'],
       if (data['amount'] != null) 'amount': data['amount'],
       if (data['reason'] != null) 'reason': data['reason'],
+      if (data.containsKey('description')) 'description': data['description'],
       if (data['status'] != null) 'status': data['status'],
       if (decidedBy is Map && decidedBy['name'] != null)
         'decided_by_name': decidedBy['name'],
@@ -729,15 +736,49 @@ class OutgoingSyncService {
       'is_active': _sqliteValue(data['isActive']),
   };
 
-  Map<String, Object?> _taskServerValues(Map<Object?, Object?> data) => {
-    if (data['number'] != null) 'number': data['number'],
-    if (data['status'] != null) 'status': data['status'],
-    if (data.containsKey('note')) 'note': data['note'],
-    if (data['completedAt'] != null) 'completed_at': data['completedAt'],
-    if (data['photoUrls'] is List) 'photo_urls': jsonEncode(data['photoUrls']),
-    if (data['referencePhotoUrls'] is List)
-      'reference_photo_urls': jsonEncode(data['referencePhotoUrls']),
-  };
+  Map<String, Object?> _taskServerValues(
+    Map<Object?, Object?> data, {
+    String? kind,
+  }) {
+    final values = <String, Object?>{
+      if (data['number'] != null) 'number': data['number'],
+      if (data['status'] != null) 'status': data['status'],
+      if (data.containsKey('note')) 'note': data['note'],
+      if (data['completedAt'] != null) 'completed_at': data['completedAt'],
+    };
+    final photoUrls = data['photoUrls'];
+    final referencePhotoUrls = data['referencePhotoUrls'];
+    if (kind == 'assign') {
+      final assignmentPhotos = photoUrls is List && photoUrls.isNotEmpty
+          ? photoUrls
+          : referencePhotoUrls is List
+          ? referencePhotoUrls
+          : photoUrls is List
+          ? photoUrls
+          : null;
+      if (assignmentPhotos != null) {
+        values['photo_urls'] = jsonEncode(assignmentPhotos);
+      }
+    } else if (kind == 'complete') {
+      final completionPhotos =
+          referencePhotoUrls is List && referencePhotoUrls.isNotEmpty
+          ? referencePhotoUrls
+          : photoUrls is List
+          ? photoUrls
+          : referencePhotoUrls is List
+          ? referencePhotoUrls
+          : null;
+      if (completionPhotos != null) {
+        values['reference_photo_urls'] = jsonEncode(completionPhotos);
+      }
+    } else {
+      if (photoUrls is List) values['photo_urls'] = jsonEncode(photoUrls);
+      if (referencePhotoUrls is List) {
+        values['reference_photo_urls'] = jsonEncode(referencePhotoUrls);
+      }
+    }
+    return values;
+  }
 
   Map<String, Object?> _requestServerValues(Map<Object?, Object?> data) {
     final answer = data['answer'];
@@ -1039,22 +1080,22 @@ class OutgoingSyncService {
       localPaths.addAll(
         await _photoPaths(
           txn,
-          where: 'owner_table = ? AND owner_id = ?',
-          whereArgs: [DatabaseTables.tasks, taskId],
+          where: 'owner_table = ? AND owner_id = ? AND field = ?',
+          whereArgs: [DatabaseTables.tasks, taskId, 'completion'],
         ),
       );
       await _deleteOutboxItem(txn, (item['seq'] as num).toInt());
       await txn.delete(
         DatabaseTables.photos,
-        where: 'owner_table = ? AND owner_id = ?',
-        whereArgs: [DatabaseTables.tasks, taskId],
+        where: 'owner_table = ? AND owner_id = ? AND field = ?',
+        whereArgs: [DatabaseTables.tasks, taskId, 'completion'],
       );
       await txn.update(
         DatabaseTables.tasks,
         {
           'status': 'CANCELLED',
           'completed_at': null,
-          'photo_urls': '[]',
+          'reference_photo_urls': '[]',
           'sync_state': 'synced',
         },
         where: 'id = ?',
@@ -1889,7 +1930,8 @@ class OutgoingSyncService {
       }
       final ownerPhotoColumn = switch ((ownerTable, photoField)) {
         (DatabaseTables.requests, 'answer') => 'answer_photo_urls',
-        (DatabaseTables.tasks, 'reference') => 'reference_photo_urls',
+        (DatabaseTables.tasks, 'reference') => 'photo_urls',
+        (DatabaseTables.tasks, 'completion') => 'reference_photo_urls',
         _ => 'photo_urls',
       };
       final ownerRows = await txn.query(

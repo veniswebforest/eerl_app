@@ -114,6 +114,7 @@ class BootstrapDatabaseApplier {
       'requested_by_name',
       'amount',
       'reason',
+      'description',
       'status',
       'decided_by_name',
       'decision_note',

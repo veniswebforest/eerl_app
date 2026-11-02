@@ -3009,6 +3009,7 @@ class EerlLocalDataSource {
   Future<String> saveCashRequest({
     required double amount,
     required String reason,
+    String? description,
   }) async {
     if (!amount.isFinite ||
         amount <= 0 ||
@@ -3021,10 +3022,17 @@ class EerlLocalDataSource {
       );
     }
     final normalizedReason = reason.trim();
-    if (normalizedReason.length > 255) {
+    final normalizedDescription = description?.trim();
+    if (normalizedReason.isEmpty || normalizedReason.length > 255) {
       throw const LocalWriteValidationException(
-        'Reason must be 255 characters or fewer.',
+        'Reason is required and must be 255 characters or fewer.',
         field: 'reason',
+      );
+    }
+    if ((normalizedDescription?.length ?? 0) > 255) {
+      throw const LocalWriteValidationException(
+        'Description must be 255 characters or fewer.',
+        field: 'description',
       );
     }
 
@@ -3045,7 +3053,10 @@ class EerlLocalDataSource {
         'requested_by': userId,
         'requested_by_name': profile.userName,
         'amount': amount,
-        'reason': normalizedReason.isEmpty ? null : normalizedReason,
+        'reason': normalizedReason,
+        'description': normalizedDescription?.isEmpty == true
+            ? null
+            : normalizedDescription,
         'status': 'PENDING',
         'created_at': now,
         'updated_at': now,
@@ -3061,7 +3072,9 @@ class EerlLocalDataSource {
         body: {
           'centerId': centerId,
           'amount': amount,
-          if (normalizedReason.isNotEmpty) 'reason': normalizedReason,
+          'reason': normalizedReason,
+          if (normalizedDescription?.isNotEmpty == true)
+            'description': normalizedDescription,
         },
         refs: [centerId],
         createdAt: now,
@@ -3086,15 +3099,29 @@ class EerlLocalDataSource {
     final userId = await currentUserId;
     if (!supervisor && userId == null) return const [];
     final centerId = await activeCenterId;
-    if (centerId == null) return const [];
-    final rows = await _database.query(
-      DatabaseTables.categoryRequests,
-      where: supervisor
-          ? 'center_id = ?'
-          : 'requested_by = ? AND center_id = ?',
-      whereArgs: supervisor ? [centerId] : [userId, centerId],
-      orderBy: 'created_at DESC',
-    );
+    if (!supervisor && centerId == null) return const [];
+    final rows = supervisor
+        ? await _database.rawQuery('''
+            SELECT r.*, c.name AS center_name
+            FROM ${DatabaseTables.categoryRequests} r
+            JOIN ${DatabaseTables.centers} c ON c.id = r.center_id
+            WHERE r.center_id IN (
+              SELECT center_id FROM ${DatabaseTables.myCenters}
+            )
+              AND (? IS NULL OR r.center_id = ?)
+            ORDER BY
+              CASE WHEN UPPER(r.status) = 'PENDING' THEN 0 ELSE 1 END,
+              CASE WHEN UPPER(r.status) = 'PENDING' THEN r.created_at END ASC,
+              CASE WHEN UPPER(r.status) IN ('APPROVED', 'REJECTED')
+                   THEN COALESCE(r.decided_at, r.created_at) END DESC,
+              r.id
+          ''', [centerId, centerId])
+        : await _database.query(
+            DatabaseTables.categoryRequests,
+            where: 'requested_by = ? AND center_id = ?',
+            whereArgs: [userId, centerId],
+            orderBy: 'created_at DESC',
+          );
     return rows.map(CategoryRequestModel.fromMap).toList(growable: false);
   }
 
@@ -3113,8 +3140,12 @@ class EerlLocalDataSource {
       );
     }
     if (normalizedOutcome == 'REJECTED' &&
-        (normalizedReason == null || normalizedReason.isEmpty)) {
-      throw ArgumentError.value(reason, 'reason', 'Reject reason is required.');
+        (normalizedReason == null || normalizedReason.length < 3)) {
+      throw ArgumentError.value(
+        reason,
+        'reason',
+        'Reject reason must be at least 3 characters.',
+      );
     }
     if ((normalizedReason?.length ?? 0) > 1000) {
       throw ArgumentError.value(
@@ -3140,7 +3171,7 @@ class EerlLocalDataSource {
           'sync_state': 'pending',
         },
         where:
-            "id = ? AND center_id = ? AND UPPER(status) IN ('PENDING', 'OPEN')",
+            "id = ? AND center_id = ? AND UPPER(status) = 'PENDING'",
         whereArgs: [normalizedId, centerId],
       );
       if (updated != 1) {
@@ -4177,9 +4208,7 @@ class EerlLocalDataSource {
     );
     if (rows.isEmpty) return null;
     final row = Map<String, Object?>.from(rows.single);
-    final referenceSources = <String>[
-      ..._decodeStringList(row['reference_photo_urls']),
-    ];
+    final assignmentSources = <String>[..._decodeStringList(row['photo_urls'])];
     final localReferences = await _database.query(
       DatabaseTables.photos,
       columns: const ['local_path', 'remote_url'],
@@ -4192,11 +4221,32 @@ class EerlLocalDataSource {
           ? photo['remote_url'] as String
           : photo['local_path'] as String?;
       if (source?.trim().isNotEmpty == true &&
-          !referenceSources.contains(source)) {
-        referenceSources.add(source!);
+          !assignmentSources.contains(source)) {
+        assignmentSources.add(source!);
       }
     }
-    row['reference_photo_urls'] = jsonEncode(referenceSources);
+    row['photo_urls'] = jsonEncode(assignmentSources);
+
+    final completionSources = <String>[
+      ..._decodeStringList(row['reference_photo_urls']),
+    ];
+    final localCompletions = await _database.query(
+      DatabaseTables.photos,
+      columns: const ['local_path', 'remote_url'],
+      where: 'owner_table = ? AND owner_id = ? AND field = ?',
+      whereArgs: [DatabaseTables.tasks, normalizedTaskId, 'completion'],
+      orderBy: 'created_at',
+    );
+    for (final photo in localCompletions) {
+      final source = (photo['remote_url'] as String?)?.trim().isNotEmpty == true
+          ? photo['remote_url'] as String
+          : photo['local_path'] as String?;
+      if (source?.trim().isNotEmpty == true &&
+          !completionSources.contains(source)) {
+        completionSources.add(source!);
+      }
+    }
+    row['reference_photo_urls'] = jsonEncode(completionSources);
     return TaskModel.fromMap(row);
   }
 
@@ -4312,7 +4362,7 @@ class EerlLocalDataSource {
         'priority': normalizedPriority,
         'status': 'PENDING',
         'due_at': dueDateUtc,
-        'photo_urls': '[]',
+        'photo_urls': jsonEncode(uniquePhotoPaths),
         'reference_photo_urls': '[]',
         'created_at': now,
         'sync_state': 'pending',
@@ -4439,7 +4489,7 @@ class EerlLocalDataSource {
           'status': 'COMPLETED',
           'note': normalizedNote,
           'completed_at': now,
-          'photo_urls': jsonEncode(uniquePhotoPaths),
+          'reference_photo_urls': jsonEncode(uniquePhotoPaths),
           'sync_state': 'pending',
         },
         where: "id = ? AND UPPER(status) NOT IN ('COMPLETED', 'CLOSED')",

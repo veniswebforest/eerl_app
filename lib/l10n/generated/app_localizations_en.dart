@@ -839,7 +839,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get d2dVehicleManagementTitle => 'D2D Vehicle Management';
 
   @override
-  String get d2dSelectTargetCenter => 'Select Target Center';
+  String get d2dSelectTargetCenter => 'Assign Target Agent / Center';
 
   @override
   String get d2dSelectCenter => 'Select Center';
@@ -856,6 +856,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get d2dAddVehicle => 'Add Vehicle';
+
+  @override
+  String get d2dNoVehicleAdded => 'No Vehicle Added Yet';
 
   @override
   String get d2dActivatedVehicleTitle => 'Activated Vehicle!';
@@ -2250,7 +2253,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationPreviousDate => '24 Oct, 08:00 AM';
 
   @override
-  String get homePendingTask => 'Pending Task';
+  String get homePendingTask => 'View Pending Tasks';
 
   @override
   String get homePendingTaskSubtitle => 'View tasks assigned to you.';
@@ -3124,6 +3127,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ragpickerDeactivatedSubtitle => 'Ragpicker profile deactivated.';
 
   @override
+  String get ragpickerDeactivateBlockedTitle => 'Deactivation blocked';
+
+  @override
+  String get ragpickerDeactivateBlockedSubtitle =>
+      'This ragpicker has an open collection. Complete or discard it before deactivating the ragpicker.';
+
+  @override
   String get ragpickerStatusChangeFailed =>
       'Ragpicker status could not be updated. Please try again.';
 
@@ -3247,7 +3257,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verificationRejected => 'Rejected';
 
   @override
-  String get verificationEmpty => 'No collection entries found';
+  String get verificationEmpty => 'No Collection History for now';
 
   @override
   String get verificationRahulPatel => 'Rahul Patel';
@@ -3679,7 +3689,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Type additional remarks for agent...';
 
   @override
-  String get supervisorCategoryTitle => 'Expense Category Request';
+  String get supervisorCategoryTitle => 'Add Category Request';
+
+  @override
+  String get supervisorCategoryEmpty => 'No Category Request to Review';
 
   @override
   String supervisorCategoryPendingTab(int count) {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -30,14 +29,20 @@ class D2dVehicleCard extends StatelessWidget {
       child: InkWell(
         key: ValueKey('d2d-vehicle-${item.plateNumber}'),
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
           constraints: const BoxConstraints(minHeight: 86),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [HomeStyles.cardShadow],
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x1F000000),
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
           child: Stack(
             children: [
@@ -51,32 +56,38 @@ class D2dVehicleCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      active
-                          ? Icon(
-                              Icons.check_circle_outline,
-                              size: 18,
-                              color: color,
-                            )
-                          : SvgPicture.asset(
-                              'assets/icons/ragpicker_deactivated.svg',
-                              width: 18,
-                              height: 18,
-                              colorFilter: ColorFilter.mode(
-                                color,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                      const SizedBox(width: 5),
-                      Text(
-                        active ? activeLabel : deactivatedLabel,
-                        style: AppTextStyles.mediumSH9_12.copyWith(
-                          color: color,
+                  Container(
+                    height: 32,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: active ? AppColors.primary50 : AppColors.red50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          active
+                              ? 'assets/icons/d2d_vehicle_active.svg'
+                              : 'assets/icons/ragpicker_deactivated.svg',
+                          width: 20,
+                          height: 20,
+                          colorFilter: active
+                              ? null
+                              : ColorFilter.mode(color, BlendMode.srcIn),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 6),
+                        Text(
+                          active ? activeLabel : deactivatedLabel,
+                          style: AppTextStyles.semiboldH10_12.copyWith(
+                            color: color,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

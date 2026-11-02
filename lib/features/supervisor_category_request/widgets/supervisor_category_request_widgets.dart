@@ -61,10 +61,16 @@ class SupervisorCategoryRequestCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 20,
-                      backgroundImage: AssetImage(
-                        'assets/images/category_request_rahul.png',
+                      backgroundColor: AppColors.primary50,
+                      child: Text(
+                        item.agent.trim().isEmpty
+                            ? '?'
+                            : item.agent.trim()[0].toUpperCase(),
+                        style: AppTextStyles.semiboldH8_16.copyWith(
+                          color: AppColors.primary500,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),

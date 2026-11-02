@@ -24,8 +24,8 @@ class SupervisorTaskCard extends StatelessWidget {
   List<String> get _displayPhotos {
     final status = item.status.trim().toUpperCase();
     return const {'COMPLETED', 'CLOSED', 'RESOLVED'}.contains(status)
-        ? item.photoUrls
-        : item.referencePhotoUrls;
+        ? item.referencePhotoUrls
+        : item.photoUrls;
   }
 
   @override
@@ -141,7 +141,7 @@ class SupervisorTaskCard extends StatelessWidget {
                   Flexible(
                     flex: 2,
                     child: Text(
-                      _time(context),
+                      _time(),
                       key: ValueKey('supervisor-task-time-${item.id}'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -160,12 +160,7 @@ class SupervisorTaskCard extends StatelessWidget {
     ),
   );
 
-  String _time(BuildContext context) {
-    final value = showClosedTimestamp
-        ? item.completedAt ?? item.createdAt
-        : item.dueAt ?? item.createdAt;
-    return IstDateTime.formatUtc(value, 'dd MMM, hh:mm a');
-  }
+  String _time() => IstDateTime.formatUtc(item.createdAt, 'dd MMM, hh:mm a');
 }
 
 class _TaskStatusChip extends StatelessWidget {

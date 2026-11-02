@@ -12,6 +12,7 @@ import 'package:eerl_app/features/home/widgets/zone_selector.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
+import '../../profile/widgets/profile_assets.dart';
 import '../model/stock_item.dart';
 import '../widgets/stock_stage_card.dart';
 
@@ -111,10 +112,15 @@ class _FacilityStockScreenState extends State<FacilityStockScreen> {
                           ],
                         ),
                       ),
-                      SvgPicture.asset(
-                        HomeAssets.notification,
-                        width: 45,
-                        height: 45,
+                      InkWell(
+                        key: const Key('profile-notification-button'),
+                        onTap: () => context.push(AppRoutes.notifications),
+                        borderRadius: BorderRadius.circular(24),
+                        child: SvgPicture.asset(
+                          ProfileAssets.notification,
+                          width: 45,
+                          height: 45,
+                        ),
                       ),
                     ],
                   ),

@@ -35,18 +35,16 @@ void main() {
     syncState: 'synced',
   );
 
-  testWidgets('task card uses completed_at only for the closed tab', (
-    tester,
-  ) async {
+  testWidgets('task card always uses created_at in IST', (tester) async {
     await _pumpCard(
       tester,
       SupervisorTaskCard(item: task, showClosedTimestamp: true),
     );
-    expect(find.text('23 Oct, 09:30 AM'), findsOneWidget);
-    expect(find.text('20 Oct, 09:00 AM'), findsNothing);
+    expect(find.text('18 Oct, 09:00 AM'), findsOneWidget);
+    expect(find.text('23 Oct, 09:30 AM'), findsNothing);
 
     await _pumpCard(tester, const SupervisorTaskCard(item: task));
-    expect(find.text('20 Oct, 09:00 AM'), findsOneWidget);
+    expect(find.text('18 Oct, 09:00 AM'), findsOneWidget);
     expect(find.text('23 Oct, 09:30 AM'), findsNothing);
   });
 

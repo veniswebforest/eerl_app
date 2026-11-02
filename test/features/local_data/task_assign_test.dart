@@ -82,7 +82,7 @@ void main() {
       expect(task['status'], 'PENDING');
       expect(task['priority'], 'HIGH');
       expect(task['due_at'], dueDate.toIso8601String());
-      expect(jsonDecode(task['photo_urls']! as String), isEmpty);
+      expect(jsonDecode(task['photo_urls']! as String), ['/tmp/reference.jpg']);
       expect(jsonDecode(task['reference_photo_urls']! as String), isEmpty);
       expect(task['sync_state'], 'pending');
 
@@ -91,8 +91,8 @@ void main() {
       expect(detail!.centerName, 'Center One');
       expect(detail.title, 'Check ID cards');
       expect(detail.assignedToName, 'Agent One');
-      expect(detail.photoUrls, isEmpty);
-      expect(detail.referencePhotoUrls, ['/tmp/reference.jpg']);
+      expect(detail.photoUrls, ['/tmp/reference.jpg']);
+      expect(detail.referencePhotoUrls, isEmpty);
 
       final outbox = (await database.query(DatabaseTables.outbox)).single;
       expect(outbox['method'], 'PUT');
@@ -190,8 +190,8 @@ void main() {
       'photoUrls': [remoteUrl],
     });
     final task = (await database.query(DatabaseTables.tasks)).single;
-    expect(jsonDecode(task['photo_urls']! as String), isEmpty);
-    expect(jsonDecode(task['reference_photo_urls']! as String), [remoteUrl]);
+    expect(jsonDecode(task['photo_urls']! as String), [remoteUrl]);
+    expect(jsonDecode(task['reference_photo_urls']! as String), isEmpty);
     expect(task['sync_state'], 'synced');
   });
 

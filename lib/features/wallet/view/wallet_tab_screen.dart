@@ -218,7 +218,9 @@ class _WalletTabScreenState extends State<WalletTabScreen> {
     return [
       for (final item in filtered) ...[
         ExpenseClaimCard(
-          title: item.reason ?? item.id,
+          title: item.reason?.trim().isNotEmpty == true
+              ? item.reason!.trim()
+              : 'Cash request',
           date: _date(item.createdAt),
           amount: '₹${item.amount.toStringAsFixed(2)}',
           statusLabel: item.status,

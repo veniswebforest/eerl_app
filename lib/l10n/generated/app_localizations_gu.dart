@@ -837,7 +837,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get d2dVehicleManagementTitle => 'D2D વાહન વ્યવસ્થાપન';
 
   @override
-  String get d2dSelectTargetCenter => 'લક્ષ્ય કેન્દ્ર પસંદ કરો';
+  String get d2dSelectTargetCenter => 'લક્ષ્ય એજન્ટ / કેન્દ્ર સોંપો';
 
   @override
   String get d2dSelectCenter => 'કેન્દ્ર પસંદ કરો';
@@ -854,6 +854,9 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get d2dAddVehicle => 'વાહન ઉમેરો';
+
+  @override
+  String get d2dNoVehicleAdded => 'હજુ સુધી કોઈ વાહન ઉમેર્યું નથી';
 
   @override
   String get d2dActivatedVehicleTitle => 'વાહન સક્રિય છે!';
@@ -2251,7 +2254,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get notificationPreviousDate => '24 ઑક્ટો, 08:00 AM';
 
   @override
-  String get homePendingTask => 'બાકી કાર્ય';
+  String get homePendingTask => 'બાકી ટાસ્ક જુઓ';
 
   @override
   String get homePendingTaskSubtitle => 'તમને સોંપાયેલા કાર્યો જુઓ.';
@@ -3121,6 +3124,13 @@ class AppLocalizationsGu extends AppLocalizations {
   String get ragpickerDeactivatedSubtitle => 'રેગપિકર પ્રોફાઇલ નિષ્ક્રિય થઈ.';
 
   @override
+  String get ragpickerDeactivateBlockedTitle => 'નિષ્ક્રિય કરી શકાતું નથી';
+
+  @override
+  String get ragpickerDeactivateBlockedSubtitle =>
+      'આ રેગપિકરનું એક ખુલ્લું કલેક્શન છે. રેગપિકરને નિષ્ક્રિય કરતાં પહેલાં તેને પૂર્ણ કરો અથવા કાઢી નાખો.';
+
+  @override
   String get ragpickerStatusChangeFailed =>
       'રેગપિકરનું સ્ટેટસ અપડેટ થઈ શક્યું નથી. કૃપા કરીને ફરી પ્રયાસ કરો.';
 
@@ -3244,7 +3254,7 @@ class AppLocalizationsGu extends AppLocalizations {
   String get verificationRejected => 'નામંજૂર';
 
   @override
-  String get verificationEmpty => 'કોઈ કલેક્શન એન્ટ્રી મળી નથી';
+  String get verificationEmpty => 'હાલ કોઈ કલેક્શન ઇતિહાસ નથી';
 
   @override
   String get verificationRahulPatel => 'રાહુલ પટેલ';
@@ -3669,7 +3679,10 @@ class AppLocalizationsGu extends AppLocalizations {
   String get supervisorCashRemarksHint => 'એજન્ટ માટે વધારાની ટિપ્પણી લખો...';
 
   @override
-  String get supervisorCategoryTitle => 'ખર્ચ કેટેગરી વિનંતી';
+  String get supervisorCategoryTitle => 'કેટેગરી વિનંતી ઉમેરો';
+
+  @override
+  String get supervisorCategoryEmpty => 'સમીક્ષા માટે કોઈ કેટેગરી વિનંતી નથી';
 
   @override
   String supervisorCategoryPendingTab(int count) {

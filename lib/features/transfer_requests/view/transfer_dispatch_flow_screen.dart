@@ -5,6 +5,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -22,6 +23,7 @@ import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
+import '../../../core/utils/vehicle_registration_number.dart';
 import '../widgets/transfer_dispatch_date_time_picker.dart';
 
 class TransferDispatchFlowScreen extends StatefulWidget {
@@ -254,27 +256,36 @@ class _TransferDispatchFlowScreenState
                 number: widget.transfer.number ?? widget.transfer.id,
               ),
               const SizedBox(height: 24),
+
               _DispatchField(
                 label: context.l10n.transferVehicleNumberRequired,
                 hint: context.l10n.transferVehiclePlateInputHint,
+                inputFormatters: const [VehicleRegistrationInputFormatter()],
+
                 controller: _vehicleController,
                 onChanged: (_) => setState(() {}),
               ),
-              const SizedBox(height: 8),
+
+              // textCapitalization: TextCapitalization.characters,
+              // keyboardType: TextInputType.text,
+              // inputFormatters: const [
+              //   VehicleRegistrationInputFormatter(),
+              // ],
+              const SizedBox(height: 2),
               Text(
                 context.l10n.transferVehicleNumberExample,
                 style: AppTextStyles.regularB7_14.copyWith(
                   color: AppColors.neutral600,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
               _DispatchField(
                 label: context.l10n.transferDriverDetailRequired,
                 hint: context.l10n.transferSelectDriverName,
                 controller: _driverController,
                 onChanged: (_) => setState(() {}),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
               AppRequiredText(
                 context.l10n.transferLoadedWeightRequired,
                 style: AppTextStyles.mediumSH8_14,
@@ -302,7 +313,7 @@ class _TransferDispatchFlowScreenState
                 errorText: _loadedQuantityError,
                 onChanged: _onLoadedQuantityChanged,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
               _DispatchField(
                 label: context.l10n.transferBalesRequired,
                 hint: context.l10n.transferBalesCountHint,
@@ -310,7 +321,7 @@ class _TransferDispatchFlowScreenState
                 keyboardType: TextInputType.number,
                 onChanged: (_) => setState(() {}),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
               AppRequiredText(
                 context.l10n.transferLoadedAtRequired,
                 style: AppTextStyles.mediumSH8_14,
@@ -470,7 +481,7 @@ class _TransferNumberCard extends StatelessWidget {
             color: AppColors.primary100,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: SvgPicture.asset('assets/icons/home/transfer.svg'),
+          child: SvgPicture.asset('assets/icons/transfer_requests/request_route.svg'),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -619,6 +630,7 @@ class _DispatchField extends StatelessWidget {
     this.keyboardType,
     this.showLabel = true,
     this.errorText,
+    this.inputFormatters,
   });
 
   final String label;
@@ -629,6 +641,7 @@ class _DispatchField extends StatelessWidget {
   final TextInputType? keyboardType;
   final bool showLabel;
   final String? errorText;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -639,11 +652,12 @@ class _DispatchField extends StatelessWidget {
         const SizedBox(height: 8),
       ],
       SizedBox(
-        height: errorText == null ? 55 : 78,
+        height: errorText == null ? 55 : 55,
         child: TextField(
           controller: controller,
           keyboardType: keyboardType,
           onChanged: onChanged,
+          inputFormatters: inputFormatters,
           style: AppTextStyles.regularB7_14,
           decoration: InputDecoration(
             hintText: hint,
@@ -666,12 +680,11 @@ class _DispatchField extends StatelessWidget {
             filled: true,
             fillColor: AppColors.neutral50,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            errorText: errorText,
-            errorMaxLines: 2,
             enabledBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: AppColors.cool400),
               borderRadius: BorderRadius.circular(10),
             ),
+
             focusedBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: AppColors.primary500),
               borderRadius: BorderRadius.circular(10),
@@ -679,6 +692,12 @@ class _DispatchField extends StatelessWidget {
           ),
         ),
       ),
+      if (errorText!=null) ...[
+        Text(
+          errorText ?? '',
+          style: AppTextStyles.regularB8_12.copyWith(color: AppColors.red500),
+        ),
+      ],
     ],
   );
 }

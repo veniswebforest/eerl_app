@@ -19,8 +19,10 @@ class SupervisorVerificationScreen extends StatefulWidget {
   const SupervisorVerificationScreen({
     super.key,
     this.initialStatus = VerificationListStatus.pending,
+    this.loadCollections,
   });
   final VerificationListStatus initialStatus;
+  final Future<List<CollectionModel>> Function()? loadCollections;
   @override
   State<SupervisorVerificationScreen> createState() =>
       _SupervisorVerificationScreenState();
@@ -46,11 +48,13 @@ class _SupervisorVerificationScreenState
   void initState() {
     super.initState();
     _controller = LocalQueryController(
-      () => EerlLocalRepository.instance.getVerificationCollections(
-        pending: _status == VerificationListStatus.pending,
-        channel: _channel,
-        search: _query,
-      ),
+      () =>
+          widget.loadCollections?.call() ??
+          EerlLocalRepository.instance.getVerificationCollections(
+            pending: _status == VerificationListStatus.pending,
+            channel: _channel,
+            search: _query,
+          ),
     )..load();
   }
 
@@ -171,13 +175,8 @@ class _SupervisorVerificationScreenState
                     else if (entries.isEmpty)
                       SliverFillRemaining(
                         hasScrollBody: false,
-                        child: Center(
-                          child: Text(
-                            context.l10n.verificationEmpty,
-                            style: AppTextStyles.mediumSH8_14.copyWith(
-                              color: AppColors.neutral600,
-                            ),
-                          ),
+                        child: _VerificationEmptyState(
+                          label: context.l10n.verificationEmpty,
                         ),
                       )
                     else
@@ -240,6 +239,34 @@ class _SupervisorVerificationScreenState
       setState(() => _dateFilter = selected);
     }
   }
+}
+
+class _VerificationEmptyState extends StatelessWidget {
+  const _VerificationEmptyState({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Column(
+      key: const Key('verification-empty-state'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SvgPicture.asset(
+          'assets/images/verification/empty_history.svg',
+          key: const Key('verification-empty-illustration'),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          style: AppTextStyles.semiboldH8_16.copyWith(
+            color: AppColors.neutral400,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _VerificationHeader extends StatelessWidget {

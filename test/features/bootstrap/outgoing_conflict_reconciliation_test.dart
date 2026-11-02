@@ -103,7 +103,8 @@ void main() {
     final task = (await database.query(DatabaseTables.tasks)).single;
     expect(task['status'], 'CANCELLED');
     expect(task['completed_at'], isNull);
-    expect(task['photo_urls'], '[]');
+    expect(task['photo_urls'], '["supervisor-reference"]');
+    expect(task['reference_photo_urls'], '[]');
     expect(task['sync_state'], 'synced');
     expect(await database.query(DatabaseTables.notifications), hasLength(1));
   });
@@ -580,7 +581,8 @@ Future<void> _insertTask(
   'priority': 'HIGH',
   'status': status,
   'completed_at': '2026-10-16T05:00:00.000Z',
-  'photo_urls': '[]',
+  'photo_urls': '["supervisor-reference"]',
+  'reference_photo_urls': '["agent-completion"]',
   'created_at': '2026-10-16T04:00:00.000Z',
   'sync_state': syncState,
 });

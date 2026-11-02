@@ -18,6 +18,9 @@ class AppLabeledDropdown extends StatelessWidget {
     this.selectorKey,
     this.optionsKey,
     this.optionKeyPrefix = 'dropdown-option',
+    this.borderRadius = 12,
+    this.iconSize = 20,
+    this.hintColor = AppColors.neutral500,
   });
 
   final String label;
@@ -31,6 +34,9 @@ class AppLabeledDropdown extends StatelessWidget {
   final Key? selectorKey;
   final Key? optionsKey;
   final String optionKeyPrefix;
+  final double borderRadius;
+  final double iconSize;
+  final Color hintColor;
 
   @override
   Widget build(BuildContext context) {
@@ -59,17 +65,17 @@ class AppLabeledDropdown extends StatelessWidget {
         const SizedBox(height: 8),
         Material(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(borderRadius),
           child: InkWell(
             key: selectorKey,
             onTap: onToggle,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(borderRadius),
             child: Container(
               height: 55,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 border: Border.all(color: AppColors.cool400),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(borderRadius),
               ),
               child: Row(
                 children: [
@@ -81,7 +87,7 @@ class AppLabeledDropdown extends StatelessWidget {
                       style: AppTextStyles.regularB7_14.copyWith(
                         color: selectedIndex >= 0 && !expanded
                             ? AppColors.neutral950
-                            : AppColors.neutral500,
+                            : hintColor,
                       ),
                     ),
                   ),
@@ -89,8 +95,8 @@ class AppLabeledDropdown extends StatelessWidget {
                     angle: 1.5707963267948966,
                     child: SvgPicture.asset(
                       'assets/icons/tasks/dropdown.svg',
-                      width: 20,
-                      height: 20,
+                      width: iconSize,
+                      height: iconSize,
                     ),
                   ),
                 ],

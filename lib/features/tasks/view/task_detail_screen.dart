@@ -64,7 +64,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   void initState() {
     super.initState();
     _task = widget.task;
-    _proofImages = _isClosed ? [..._task.photoUrls] : [];
+    _proofImages = _isClosed ? [..._task.referencePhotoUrls] : [];
     _descriptionController = TextEditingController(
       text: _isClosed ? _task.note ?? '' : '',
     );
@@ -83,7 +83,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       setState(() {
         _task = task;
         if (!wasClosed && _isClosed) {
-          _proofImages = [...task.photoUrls];
+          _proofImages = [...task.referencePhotoUrls];
           _descriptionController.text = task.note ?? '';
         }
       });
@@ -204,7 +204,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           ],
                         ),
                       ),
-                      if (_task.referencePhotoUrls.isNotEmpty) ...[
+                      if (_task.photoUrls.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         TaskInformationCard(
                           title: context.l10n.taskAttachmentTitle,
@@ -213,7 +213,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             children: [
                               TaskPhotoGrid(
                                 key: const Key('supervisor-task-attachments'),
-                                images: _task.referencePhotoUrls,
+                                images: _task.photoUrls,
                               ),
                               const SizedBox(height: 12),
                               _BySupervisor(
@@ -392,6 +392,25 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         ],
       ),
     ),
+    if (_task.photoUrls.isNotEmpty) ...[
+      const SizedBox(height: 16),
+      TaskInformationCard(
+        title: context.l10n.taskAttachmentTitle,
+        backgroundColor: AppColors.cool200,
+        showShadow: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TaskPhotoGrid(
+              key: const Key('closed-supervisor-task-attachments'),
+              images: _task.photoUrls,
+            ),
+            const SizedBox(height: 12),
+            _BySupervisor(label: _task.assignedByName ?? _task.assignedBy),
+          ],
+        ),
+      ),
+    ],
   ];
 }
 

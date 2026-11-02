@@ -838,7 +838,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get d2dVehicleManagementTitle => 'D2D वाहन प्रबंधन';
 
   @override
-  String get d2dSelectTargetCenter => 'लक्षित केंद्र चुनें';
+  String get d2dSelectTargetCenter => 'लक्षित एजेंट / केंद्र असाइन करें';
 
   @override
   String get d2dSelectCenter => 'केंद्र चुनें';
@@ -855,6 +855,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get d2dAddVehicle => 'वाहन जोड़ें';
+
+  @override
+  String get d2dNoVehicleAdded => 'अभी तक कोई वाहन नहीं जोड़ा गया';
 
   @override
   String get d2dActivatedVehicleTitle => 'वाहन सक्रिय है!';
@@ -2252,7 +2255,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get notificationPreviousDate => '24 अक्टू., 08:00 AM';
 
   @override
-  String get homePendingTask => 'लंबित कार्य';
+  String get homePendingTask => 'लंबित टास्क देखें';
 
   @override
   String get homePendingTaskSubtitle => 'आपको सौंपे गए कार्य देखें।';
@@ -3128,6 +3131,13 @@ class AppLocalizationsHi extends AppLocalizations {
       'रैगपिकर प्रोफ़ाइल निष्क्रिय की गई।';
 
   @override
+  String get ragpickerDeactivateBlockedTitle => 'निष्क्रिय नहीं किया जा सकता';
+
+  @override
+  String get ragpickerDeactivateBlockedSubtitle =>
+      'इस रैगपिकर का एक खुला कलेक्शन है। रैगपिकर को निष्क्रिय करने से पहले उसे पूरा करें या हटाएँ।';
+
+  @override
   String get ragpickerStatusChangeFailed =>
       'रैगपिकर की स्थिति अपडेट नहीं हो सकी। कृपया फिर से प्रयास करें।';
 
@@ -3253,7 +3263,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get verificationRejected => 'अस्वीकृत';
 
   @override
-  String get verificationEmpty => 'कोई संग्रह प्रविष्टि नहीं मिली';
+  String get verificationEmpty => 'फिलहाल कोई संग्रह इतिहास नहीं है';
 
   @override
   String get verificationRahulPatel => 'राहुल पटेल';
@@ -3681,7 +3691,11 @@ class AppLocalizationsHi extends AppLocalizations {
       'एजेंट के लिए अतिरिक्त टिप्पणी लिखें...';
 
   @override
-  String get supervisorCategoryTitle => 'व्यय श्रेणी अनुरोध';
+  String get supervisorCategoryTitle => 'श्रेणी अनुरोध जोड़ें';
+
+  @override
+  String get supervisorCategoryEmpty =>
+      'समीक्षा के लिए कोई श्रेणी अनुरोध नहीं है';
 
   @override
   String supervisorCategoryPendingTab(int count) {

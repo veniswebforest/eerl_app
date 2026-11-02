@@ -295,11 +295,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                         },
                                       )
                                     : QuickActions(
-                                        onAddCollectionTap: () =>
-                                            _openCollection(
-                                              context,
-                                              navigation,
-                                            ),
                                         onTasksTap: () async {
                                           await context.push(AppRoutes.tasks);
                                         },

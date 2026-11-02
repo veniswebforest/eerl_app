@@ -212,7 +212,12 @@ class EerlLocalRepository {
   Future<String> saveCashRequest({
     required double amount,
     required String reason,
-  }) => _local.saveCashRequest(amount: amount, reason: reason);
+    String? description,
+  }) => _local.saveCashRequest(
+    amount: amount,
+    reason: reason,
+    description: description,
+  );
   Future<List<CategoryRequestModel>> getCategoryRequests({
     bool supervisor = false,
   }) => _local.getCategoryRequests(supervisor: supervisor);

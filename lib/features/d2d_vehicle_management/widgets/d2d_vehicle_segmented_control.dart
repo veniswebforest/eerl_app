@@ -24,8 +24,14 @@ class D2dVehicleSegmentedControl extends StatelessWidget {
     padding: const EdgeInsets.all(4),
     decoration: BoxDecoration(
       color: Colors.white,
-      border: Border.all(color: AppColors.cool400),
       borderRadius: BorderRadius.circular(12),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x26000000),
+          blurRadius: 5,
+          offset: Offset(0, 2),
+        ),
+      ],
     ),
     child: Row(
       children: [
@@ -66,18 +72,20 @@ class _Tab extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
     color: selected ? AppColors.primary500 : Colors.transparent,
-    borderRadius: BorderRadius.circular(9),
+    borderRadius: BorderRadius.circular(12),
     child: InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(9),
+      borderRadius: BorderRadius.circular(12),
       child: Center(
         child: Text(
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.mediumSH8_14.copyWith(
-            color: selected ? Colors.white : AppColors.neutral700,
-          ),
+          style:
+              (selected ? AppTextStyles.boldH8_14 : AppTextStyles.mediumSH8_14)
+                  .copyWith(
+                    color: selected ? Colors.white : AppColors.neutral700,
+                  ),
         ),
       ),
     ),

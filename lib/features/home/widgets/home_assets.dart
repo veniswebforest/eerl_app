@@ -16,6 +16,7 @@ abstract final class HomeAssets {
   static const summaryView = '$_root/summary_view.svg';
   static const summaryHide = '$_root/summary_hide.svg';
   static const startCollection = '$_root/start_collection.svg';
+  static const pendingTaskHourglass = '$_root/pending_task_hourglass.svg';
   static const walletExpense = '$_root/wallet_expense.svg';
   static const chevronRight = '$_root/chevron_right.svg';
   static const collectionD2d = '$_root/collection_d2d.svg';

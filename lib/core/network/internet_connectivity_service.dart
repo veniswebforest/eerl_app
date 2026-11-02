@@ -35,5 +35,5 @@ class InternetConnectivityService {
 
   static void _log(String message) {
     AppLogger.diagnostic('CONNECTIVITY', message);
-  }
+  } 
 }

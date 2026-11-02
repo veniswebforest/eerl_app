@@ -765,6 +765,7 @@ class CashRequestModel {
     this.requestedByName,
     required this.amount,
     this.reason,
+    this.description,
     required this.status,
     this.decidedByName,
     this.decisionNote,
@@ -780,6 +781,7 @@ class CashRequestModel {
   final String? requestedByName;
   final double amount;
   final String? reason;
+  final String? description;
   final String status;
   final String? decidedByName;
   final String? decisionNote;
@@ -795,6 +797,7 @@ class CashRequestModel {
     requestedByName: map['requested_by_name'] as String?,
     amount: _double(map['amount']),
     reason: map['reason'] as String?,
+    description: map['description'] as String?,
     status: map['status'] as String,
     decidedByName: map['decided_by_name'] as String?,
     decisionNote: map['decision_note'] as String?,
@@ -811,6 +814,7 @@ class CashRequestModel {
     'requested_by_name': requestedByName,
     'amount': amount,
     'reason': reason,
+    'description': description,
     'status': status,
     'decided_by_name': decidedByName,
     'decision_note': decisionNote,
@@ -826,6 +830,7 @@ class CategoryRequestModel {
     required this.id,
     this.number,
     required this.centerId,
+    this.centerName,
     required this.requestedBy,
     this.requestedByName,
     required this.name,
@@ -840,6 +845,7 @@ class CategoryRequestModel {
   final String id;
   final String? number;
   final String centerId;
+  final String? centerName;
   final String requestedBy;
   final String? requestedByName;
   final String name;
@@ -854,6 +860,7 @@ class CategoryRequestModel {
     id: map['id'] as String,
     number: map['number'] as String?,
     centerId: map['center_id'] as String,
+    centerName: map['center_name'] as String?,
     requestedBy: map['requested_by'] as String,
     requestedByName: map['requested_by_name'] as String?,
     name: map['name'] as String,

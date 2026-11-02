@@ -28,7 +28,8 @@ class CashRequestDetailScreen extends StatelessWidget {
       cashRequest.number,
       fallback: cashRequest.id,
     );
-    final category = _valueOrFallback(cashRequest.reason);
+    final reason = _valueOrFallback(cashRequest.reason);
+    final description = cashRequest.description?.trim();
     final statusLabel = switch (status) {
       CashRequestDetailStatus.pending => l10n.cashDetailWaitingApproval,
       CashRequestDetailStatus.approved => l10n.cashDetailApprovedSupervisor,
@@ -66,10 +67,8 @@ class CashRequestDetailScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ExpenseDetailRow(
-                            label: status == CashRequestDetailStatus.pending
-                                ? l10n.cashDetailRequestReason
-                                : l10n.expenseDetailCategory,
-                            value: category,
+                            label: l10n.cashDetailRequestReason,
+                            value: reason,
                           ),
                           const _DetailDivider(),
                           ExpenseDetailRow(
@@ -123,27 +122,29 @@ class CashRequestDetailScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    ExpenseDetailCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.expenseDescriptionLabel,
-                            style: AppTextStyles.semiboldH7_18.copyWith(
-                              color: AppColors.neutral950,
+                    if (description?.isNotEmpty == true) ...[
+                      const SizedBox(height: 16),
+                      ExpenseDetailCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.expenseDescriptionLabel,
+                              style: AppTextStyles.semiboldH7_18.copyWith(
+                                color: AppColors.neutral950,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _valueOrFallback(cashRequest.reason),
-                            style: AppTextStyles.mediumSH9_12.copyWith(
-                              color: AppColors.neutral900,
+                            const SizedBox(height: 8),
+                            Text(
+                              description!,
+                              style: AppTextStyles.mediumSH9_12.copyWith(
+                                color: AppColors.neutral900,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                     if (status == CashRequestDetailStatus.rejected) ...[
                       const SizedBox(height: 16),
                       ExpenseDetailCard(
