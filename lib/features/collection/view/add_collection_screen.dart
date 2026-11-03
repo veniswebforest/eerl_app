@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:eerl_app/core/location/device_location_service.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
+import 'package:eerl_app/core/providers/bluetooth_weight_provider.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -90,6 +92,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   bool _saving = false;
   late int _bootstrapRevision;
   late final Future<DeviceCoordinates?> _submissionCoordinatesPrefetch;
+  BluetoothWeightProvider _weightProvider = BluetoothWeightProvider.instance;
+  int _lastWeightRevision = -1;
+  bool _weightProviderAttached = false;
 
   List<String> get _vehicleNumbers =>
       _vehicles.map((item) => item.plateNumber).toList(growable: false);
@@ -140,6 +145,38 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     _restoreCameraResult();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final provided = Provider.of<BluetoothWeightProvider?>(
+      context,
+      listen: false,
+    );
+    final next = provided ?? BluetoothWeightProvider.instance;
+    if (_weightProviderAttached && identical(next, _weightProvider)) return;
+    if (_weightProviderAttached) {
+      _weightProvider.removeListener(_applyBluetoothWeight);
+    }
+    _weightProvider = next;
+    _lastWeightRevision = next.measurementRevision;
+    _weightProvider.addListener(_applyBluetoothWeight);
+    _weightProviderAttached = true;
+  }
+
+  void _applyBluetoothWeight() {
+    if (!mounted ||
+        _lastWeightRevision == _weightProvider.measurementRevision) {
+      return;
+    }
+    _lastWeightRevision = _weightProvider.measurementRevision;
+    final item = _weightProvider.targetItem;
+    final weight = _weightProvider.weightKg;
+    if (item == null || weight == null || !_selected.contains(item)) return;
+    final unit = _d2dUnits[item] ?? defaultCollectionUnit(_materials[item]);
+    if (unit != D2dMeasureUnit.kg) return;
+    setState(() => _verifiedWeights[item] = weight.toStringAsFixed(3));
+  }
+
   Future<void> _restoreCameraResult() async {
     final recoveryId = await ImageCompressor.recoveredImageId();
     const itemPrefix = 'collection.item.';
@@ -160,6 +197,10 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   @override
   void dispose() {
     BootstrapSyncService.instance.removeListener(_reloadVehiclesAfterBootstrap);
+    if (_weightProviderAttached) {
+      _weightProvider.removeListener(_applyBluetoothWeight);
+      unawaited(_weightProvider.disconnect());
+    }
     super.dispose();
   }
 
@@ -227,6 +268,16 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         );
       }
     });
+    _weightProvider.selectTarget(_firstSelectedKgItem());
+  }
+
+  int? _firstSelectedKgItem() {
+    for (final item in _selected) {
+      if (item < 0 || item >= _materials.length) continue;
+      final unit = _d2dUnits[item] ?? defaultCollectionUnit(_materials[item]);
+      if (unit == D2dMeasureUnit.kg) return item;
+    }
+    return null;
   }
 
   void _reloadVehiclesAfterBootstrap() {
@@ -813,6 +864,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
 
   Widget _d2dCollectionPhotosStep(BuildContext context) =>
       D2dCollectionPhotosStep(
+        weightProvider: _weightProvider,
         selectedItems: _selected.toList(),
         items: _materials,
         photos: _photos,
@@ -1053,6 +1105,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                       );
                     }
                   }
+                  _weightProvider.selectTarget(_firstSelectedKgItem());
                 }
                 _step = CollectionEntryStep.values[_step.index + 1];
               })

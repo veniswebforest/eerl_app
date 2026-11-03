@@ -40,12 +40,14 @@ dependencies:
   local_auth_darwin: ^1.6.1
   sqflite: ^2.4.4
   path: ^1.9.1
-  geolocator: ^14.1.1
+  geolocator: ^14.0.1
   share_plus: ^13.3.1
   print_bluetooth_thermal: ^1.2.5
   esc_pos_utils_plus: ^2.0.4
   image: ^4.10.1
   camera: ^0.12.2
+  universal_ble: ^3.2.0
+  permission_handler: ^12.0.1
 
 dev_dependencies:
   flutter_test:

@@ -10,9 +10,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/providers/bluetooth_weight_provider.dart';
 import 'package:eerl_app/features/bootstrap/service/item_image_cache_service.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
+import 'package:eerl_app/features/collection/widgets/bluetooth_weight_panel.dart';
 
 enum D2dMeasureUnit { kg, pcs }
 
@@ -28,6 +30,7 @@ D2dMeasureUnit defaultCollectionUnit(ItemModel item) {
 class D2dCollectionPhotosStep extends StatelessWidget {
   const D2dCollectionPhotosStep({
     super.key,
+    required this.weightProvider,
     required this.selectedItems,
     required this.items,
     required this.photos,
@@ -44,6 +47,7 @@ class D2dCollectionPhotosStep extends StatelessWidget {
     required this.onPaymentModeChanged,
   });
 
+  final BluetoothWeightProvider weightProvider;
   final List<int> selectedItems;
   final List<ItemModel> items;
   final Map<int, List<XFile>> photos;
@@ -68,6 +72,7 @@ class D2dCollectionPhotosStep extends StatelessWidget {
         style: AppTextStyles.mediumSH8_14,
       ),
       const SizedBox(height: 16),
+      BluetoothWeightPanel(provider: weightProvider),
       ...selectedItems.map((item) {
         final material = items[item];
         return Padding(
@@ -82,6 +87,12 @@ class D2dCollectionPhotosStep extends StatelessWidget {
             collectionWeight: collectionWeights[item] ?? '',
             verifiedWeight: verifiedWeights[item] ?? '',
             unit: units[item] ?? defaultCollectionUnit(material),
+            bluetoothTarget: weightProvider.targetItem == item,
+            onBluetoothTap:
+                (units[item] ?? defaultCollectionUnit(material)) ==
+                    D2dMeasureUnit.kg
+                ? () => weightProvider.selectTarget(item)
+                : null,
             onCollectionWeightChanged: (value) =>
                 onCollectionWeightChanged(item, value),
             onVerifiedWeightChanged: (value) =>
@@ -141,6 +152,8 @@ class _D2dMaterialCard extends StatelessWidget {
     required this.collectionWeight,
     required this.verifiedWeight,
     required this.unit,
+    required this.bluetoothTarget,
+    required this.onBluetoothTap,
     required this.onCollectionWeightChanged,
     required this.onVerifiedWeightChanged,
     required this.onCapture,
@@ -157,6 +170,8 @@ class _D2dMaterialCard extends StatelessWidget {
   final String collectionWeight;
   final String verifiedWeight;
   final D2dMeasureUnit unit;
+  final bool bluetoothTarget;
+  final VoidCallback? onBluetoothTap;
   final ValueChanged<String> onCollectionWeightChanged;
   final ValueChanged<String> onVerifiedWeightChanged;
   final VoidCallback onCapture;
@@ -243,6 +258,8 @@ class _D2dMaterialCard extends StatelessWidget {
                         required: true,
                         value: verifiedWeight,
                         unit: unitLabel,
+                        bluetoothTarget: bluetoothTarget,
+                        onBluetoothTap: onBluetoothTap,
                         onChanged: onVerifiedWeightChanged,
                       ),
                     ),
@@ -425,7 +442,7 @@ Color _parseMaterialColour(String? value) {
   return parsed == null ? AppColors.primary100 : Color(parsed);
 }
 
-class _MeasureField extends StatelessWidget {
+class _MeasureField extends StatefulWidget {
   const _MeasureField({
     required this.fieldKey,
     required this.labelKey,
@@ -434,6 +451,8 @@ class _MeasureField extends StatelessWidget {
     required this.unit,
     required this.onChanged,
     this.required = false,
+    this.bluetoothTarget = false,
+    this.onBluetoothTap,
   });
 
   final Key fieldKey;
@@ -443,16 +462,50 @@ class _MeasureField extends StatelessWidget {
   final String unit;
   final ValueChanged<String> onChanged;
   final bool required;
+  final bool bluetoothTarget;
+  final VoidCallback? onBluetoothTap;
+
+  @override
+  State<_MeasureField> createState() => _MeasureFieldState();
+}
+
+class _MeasureFieldState extends State<_MeasureField> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.value);
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MeasureField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value &&
+        _controller.text != widget.value &&
+        !_focusNode.hasFocus) {
+      _controller.text = widget.value;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text.rich(
-        key: labelKey,
+        key: widget.labelKey,
         TextSpan(
-          text: label,
-          children: required
+          text: widget.label,
+          children: widget.required
               ? const [
                   TextSpan(
                     text: ' *',
@@ -468,21 +521,42 @@ class _MeasureField extends StatelessWidget {
       SizedBox(
         height: 44,
         child: TextFormField(
-          key: fieldKey,
-          initialValue: value,
-          onChanged: onChanged,
+          key: widget.fieldKey,
+          controller: _controller,
+          focusNode: _focusNode,
+          onChanged: widget.onChanged,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           style: AppTextStyles.regularB7_14,
           decoration: InputDecoration(
-            hintText: required && value.isEmpty ? '123.00' : '---',
+            hintText: widget.required && widget.value.isEmpty
+                ? '123.00'
+                : '---',
             prefixIcon: Center(
-              child: Text(unit, style: AppTextStyles.semiboldH9_14),
+              child: Text(widget.unit, style: AppTextStyles.semiboldH9_14),
             ),
             prefixIconConstraints: const BoxConstraints(
               minWidth: 42,
               maxWidth: 42,
             ),
             contentPadding: const EdgeInsets.only(right: 8),
+            suffixIcon: widget.onBluetoothTap == null
+                ? null
+                : IconButton(
+                    key: ValueKey(
+                      'verified-weight-bluetooth-${widget.fieldKey}',
+                    ),
+                    tooltip: 'Use live Bluetooth weight for this item',
+                    onPressed: widget.onBluetoothTap,
+                    icon: Icon(
+                      widget.bluetoothTarget
+                          ? Icons.bluetooth_connected_rounded
+                          : Icons.bluetooth_rounded,
+                      size: 20,
+                      color: widget.bluetoothTarget
+                          ? AppColors.primary500
+                          : AppColors.neutral500,
+                    ),
+                  ),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),

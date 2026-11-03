@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'core/local_database/app_database.dart';
 import 'core/logging/app_logger.dart';
 import 'core/providers/app_lock_provider.dart';
+import 'core/providers/bluetooth_weight_provider.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/network_provider.dart';
 import 'core/providers/theme_provider.dart';
@@ -56,6 +57,7 @@ void main() async {
   final authProvider = AuthProvider();
   final networkProvider = NetworkProvider();
   final appLockProvider = AppLockProvider();
+  final bluetoothWeightProvider = BluetoothWeightProvider.instance;
   final bootstrapSyncService = BootstrapSyncService.instance;
 
   var wasOffline = networkProvider.isOffline;
@@ -94,6 +96,7 @@ void main() async {
         ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider.value(value: networkProvider),
         ChangeNotifierProvider.value(value: appLockProvider),
+        ChangeNotifierProvider.value(value: bluetoothWeightProvider),
         ChangeNotifierProvider.value(value: bootstrapSyncService),
       ],
       child: const EerlApp(),

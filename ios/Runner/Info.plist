@@ -29,9 +29,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access is used to capture collection photos.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Bluetooth access is used to connect and print collection slips on a thermal printer.</string>
+	<string>Bluetooth access is used to connect to weighing scales and thermal printers.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>Bluetooth access is used to communicate with thermal printers.</string>
+	<string>Bluetooth access is used to communicate with weighing scales and thermal printers.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Photo library access is used to select collection photos.</string>
 	<key>NSFaceIDUsageDescription</key>
