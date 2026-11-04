@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_thermal_printer/utils/printer.dart';
 
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter/rendering.dart';
@@ -12,7 +14,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
-import 'package:eerl_app/core/services/bluetooth_thermal_printer_service.dart';
+import 'package:eerl_app/core/services/thermal_printer_service.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -140,11 +142,44 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
 
   Future<void> _printReceipt(CollectionModel collection) =>
       _runReceiptAction(_ReceiptAction.print, () async {
-        if (!await _ensureBluetoothPrinter()) return;
+        final transport = await _showPrinterTransportPicker();
+        if (transport == null || !mounted) return;
+
+        WifiThermalPrinter? wifiPrinter;
+        Printer? directPrinter;
+        switch (transport) {
+          case ThermalPrinterTransport.bluetooth:
+            directPrinter = await _selectBluetoothPrinter();
+            if (directPrinter == null || !mounted) return;
+            break;
+          case ThermalPrinterTransport.wifi:
+            wifiPrinter = await _selectWifiPrinter();
+            if (wifiPrinter == null || !mounted) return;
+            break;
+          case ThermalPrinterTransport.usb:
+            directPrinter = await _selectUsbPrinter();
+            if (directPrinter == null || !mounted) return;
+            break;
+        }
+
         final imageBytes = await _captureReceiptImage();
-        final printed = await BluetoothThermalPrinterService.instance.printPng(
-          imageBytes,
-        );
+        final printed = switch (transport) {
+          ThermalPrinterTransport.bluetooth =>
+            await ThermalPrinterService.instance.printPng(
+              directPrinter!,
+              imageBytes,
+            ),
+          ThermalPrinterTransport.wifi =>
+            await WifiThermalPrinterService.instance.printPng(
+              wifiPrinter!,
+              imageBytes,
+            ),
+          ThermalPrinterTransport.usb =>
+            await ThermalPrinterService.instance.printPng(
+              directPrinter!,
+              imageBytes,
+            ),
+        };
         if (!printed) {
           if (mounted) {
             _showError(
@@ -155,17 +190,21 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
           return;
         }
         await _refreshPrinterStatus();
+        if (mounted) {
+          _showSuccess(
+            title: context.l10n.collectionPrinterPrintSuccessTitle,
+            subtitle: context.l10n.collectionPrinterPrintSuccess,
+          );
+        }
       });
 
   Future<void> _refreshPrinterStatus() async {
     try {
-      final service = BluetoothThermalPrinterService.instance;
-      final connected = await service.isConnected;
-      final savedPrinter = await service.savedPrinter;
+      final lastPrinter = await ThermalPrinterPreferences.lastPrinter;
       if (!mounted) return;
       setState(() {
-        _printerConnected = connected;
-        _printerName = connected ? savedPrinter?.name : null;
+        _printerConnected = lastPrinter != null;
+        _printerName = lastPrinter?.label;
       });
     } catch (_) {
       if (!mounted) return;
@@ -176,114 +215,241 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
     }
   }
 
-  Future<bool> _ensureBluetoothPrinter() async {
-    final service = BluetoothThermalPrinterService.instance;
-    final permissionGranted = await service.requestPermission();
-    if (!permissionGranted) {
-      if (mounted) {
-        _showError(
-          title: context.l10n.collectionBluetoothPermissionTitle,
-          subtitle: context.l10n.collectionBluetoothPermissionRequired,
-        );
-      }
-      return false;
+  Future<ThermalPrinterTransport?> _showPrinterTransportPicker() =>
+      showModalBottomSheet<ThermalPrinterTransport>(
+        context: context,
+        showDragHandle: true,
+        builder: (sheetContext) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.collectionChoosePrinter,
+                  style: AppTextStyles.semiboldH7_18,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  context.l10n.collectionChoosePrinterHint,
+                  style: AppTextStyles.regularB8_12.copyWith(
+                    color: AppColors.neutral600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _printerTransportTile(
+                  sheetContext,
+                  transport: ThermalPrinterTransport.bluetooth,
+                  icon: Icons.bluetooth_rounded,
+                  title: context.l10n.collectionBluetoothPrinter,
+                  subtitle: context.l10n.collectionBluetoothPrinterHint,
+                ),
+                _printerTransportTile(
+                  sheetContext,
+                  transport: ThermalPrinterTransport.wifi,
+                  icon: Icons.wifi_rounded,
+                  title: context.l10n.collectionWifiPrinter,
+                  subtitle: context.l10n.collectionWifiPrinterHint,
+                ),
+                if (!Platform.isIOS)
+                  _printerTransportTile(
+                    sheetContext,
+                    transport: ThermalPrinterTransport.usb,
+                    icon: Icons.usb_rounded,
+                    title: context.l10n.collectionUsbPrinter,
+                    subtitle: context.l10n.collectionUsbPrinterHint,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+  Widget _printerTransportTile(
+    BuildContext sheetContext, {
+    required ThermalPrinterTransport transport,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) => ListTile(
+    key: ValueKey('printer-transport-${transport.name}'),
+    contentPadding: EdgeInsets.zero,
+    leading: CircleAvatar(
+      backgroundColor: AppColors.primary50,
+      child: Icon(icon, color: AppColors.primary500),
+    ),
+    title: Text(title),
+    subtitle: Text(subtitle),
+    trailing: const Icon(Icons.chevron_right_rounded),
+    onTap: () => Navigator.of(sheetContext).pop(transport),
+  );
+
+  Future<WifiThermalPrinter?> _selectWifiPrinter() async {
+    final printers = await WifiThermalPrinterService.instance
+        .discoverPrinters();
+    if (!mounted) return null;
+    if (printers.isEmpty) {
+      _showError(
+        title: context.l10n.collectionNoWifiPrinterTitle,
+        subtitle: context.l10n.collectionNoWifiPrinter,
+      );
+      return null;
     }
-    if (!await service.isBluetoothEnabled) {
+    return showModalBottomSheet<WifiThermalPrinter>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.l10n.collectionSelectWifiPrinter,
+                style: AppTextStyles.semiboldH7_18,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                context.l10n.collectionWifiDiscoveryHint,
+                style: AppTextStyles.regularB8_12.copyWith(
+                  color: AppColors.neutral600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 320),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: printers.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final printer = printers[index];
+                    return ListTile(
+                      key: ValueKey(
+                        'wifi-printer-${printer.host}-${printer.port}',
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                      leading: const CircleAvatar(
+                        backgroundColor: AppColors.primary50,
+                        child: Icon(
+                          Icons.wifi_rounded,
+                          color: AppColors.primary500,
+                        ),
+                      ),
+                      title: Text(printer.label),
+                      subtitle: Text(printer.host),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => Navigator.of(sheetContext).pop(printer),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<Printer?> _selectBluetoothPrinter() async {
+    if (!await ThermalPrinterService.instance.ensureBluetoothEnabled()) {
       if (mounted) {
         _showError(
           title: context.l10n.collectionBluetoothDisabledTitle,
           subtitle: context.l10n.collectionBluetoothDisabled,
         );
       }
-      return false;
+      return null;
     }
-    if (await service.isConnected || await service.reconnectSavedPrinter()) {
-      await _refreshPrinterStatus();
-      return true;
-    }
-
-    final printers = await service.pairedPrinters();
-    if (!mounted) return false;
-    if (printers.isEmpty) {
-      _showError(
-        title: context.l10n.collectionNoPairedPrintersTitle,
-        subtitle: context.l10n.collectionNoPairedPrinters,
-      );
-      return false;
-    }
-    final selected = await _showPrinterPicker(printers);
-    if (selected == null || !mounted) return false;
-    final connected = await service.connect(selected);
-    if (!mounted) return false;
-    if (!connected) {
-      _showError(
-        title: context.l10n.collectionPrinterConnectionFailedTitle,
-        subtitle: context.l10n.collectionPrinterConnectionFailed,
-      );
-      return false;
-    }
-    setState(() {
-      _printerConnected = true;
-      _printerName = selected.name;
-    });
-    return true;
+    return _selectPluginPrinter(ConnectionType.BLE);
   }
 
-  Future<BluetoothThermalPrinter?> _showPrinterPicker(
-    List<BluetoothThermalPrinter> printers,
-  ) => showModalBottomSheet<BluetoothThermalPrinter>(
-    context: context,
-    showDragHandle: true,
-    builder: (sheetContext) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.collectionSelectBluetoothPrinter,
-              style: AppTextStyles.semiboldH7_18,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              context.l10n.collectionPairedPrintersHint,
-              style: AppTextStyles.regularB8_12.copyWith(
-                color: AppColors.neutral600,
+  Future<Printer?> _selectUsbPrinter() =>
+      _selectPluginPrinter(ConnectionType.USB);
+
+  Future<Printer?> _selectPluginPrinter(ConnectionType type) async {
+    final printers = await ThermalPrinterService.instance.scanPrinters(type);
+    if (!mounted) return null;
+    if (printers.isEmpty) {
+      _showError(
+        title: type == ConnectionType.BLE
+            ? context.l10n.collectionNoPairedPrintersTitle
+            : context.l10n.collectionNoUsbPrinterTitle,
+        subtitle: type == ConnectionType.BLE
+            ? context.l10n.collectionNoPairedPrinters
+            : context.l10n.collectionNoUsbPrinter,
+      );
+      return null;
+    }
+    return showModalBottomSheet<Printer>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                type == ConnectionType.BLE
+                    ? context.l10n.collectionSelectBluetoothPrinter
+                    : context.l10n.collectionSelectUsbPrinter,
+                style: AppTextStyles.semiboldH7_18,
               ),
-            ),
-            const SizedBox(height: 14),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 320),
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: printers.length,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final printer = printers[index];
-                  return ListTile(
-                    key: ValueKey('bluetooth-printer-${printer.address}'),
-                    contentPadding: EdgeInsets.zero,
-                    leading: const CircleAvatar(
-                      backgroundColor: AppColors.primary50,
-                      child: Icon(
-                        Icons.print_rounded,
-                        color: AppColors.primary500,
+              const SizedBox(height: 6),
+              Text(
+                type == ConnectionType.BLE
+                    ? context.l10n.collectionPairedPrintersHint
+                    : context.l10n.collectionUsbPermissionHint,
+                style: AppTextStyles.regularB8_12.copyWith(
+                  color: AppColors.neutral600,
+                ),
+              ),
+              const SizedBox(height: 14),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 300),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: printers.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final printer = printers[index];
+                    return ListTile(
+                      key: ValueKey(
+                        '${type.name.toLowerCase()}-printer-${printer.uniqueId}',
                       ),
-                    ),
-                    title: Text(printer.name),
-                    subtitle: Text(printer.address),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: () => Navigator.of(sheetContext).pop(printer),
-                  );
-                },
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.primary50,
+                        child: Icon(
+                          type == ConnectionType.BLE
+                              ? Icons.bluetooth_rounded
+                              : Icons.usb_rounded,
+                          color: AppColors.primary500,
+                        ),
+                      ),
+                      title: Text(
+                        printer.name ?? context.l10n.collectionPrinterReady,
+                      ),
+                      subtitle: Text(
+                        printer.address ??
+                            '${printer.vendorId ?? ''}:${printer.productId ?? ''}',
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => Navigator.of(sheetContext).pop(printer),
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
   Future<void> _runReceiptAction(
     _ReceiptAction action,
@@ -312,6 +478,16 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
       title: title,
       subtitle: subtitle,
       tone: AppTopNotificationTone.error,
+    );
+  }
+
+  void _showSuccess({required String title, required String subtitle}) {
+    AppTopNotification.show(
+      context,
+      key: const Key('collection-printer-success-notification'),
+      title: title,
+      subtitle: subtitle,
+      tone: AppTopNotificationTone.success,
     );
   }
 
@@ -508,7 +684,7 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
             borderRadius: BorderRadius.circular(4),
           ),
           child: const Icon(
-            Icons.bluetooth,
+            Icons.print_rounded,
             size: 14,
             color: AppColors.primary500,
           ),

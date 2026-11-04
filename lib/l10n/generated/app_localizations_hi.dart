@@ -2000,18 +2000,73 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get collectionPrinterHint =>
-      'सुनिश्चित करें कि आपका Bluetooth थर्मल प्रिंटर चालू और कनेक्टेड है।';
+      'Bluetooth, Wi-Fi या USB ESC/POS थर्मल प्रिंटर से प्रिंट करें।';
 
   @override
-  String get collectionPrinterReady => 'प्रिंटर तैयार';
+  String get collectionPrinterReady => 'पिछला प्रिंटर';
 
   @override
   String get collectionPrinterConnected =>
-      'Bluetooth थर्मल प्रिंटर कनेक्टेड है।';
+      'थर्मल प्रिंटर कॉन्फ़िगर किया गया है।';
 
   @override
   String get collectionPrinterDisconnected =>
-      'Bluetooth प्रिंटर जोड़ने के लिए स्लिप प्रिंट करें पर टैप करें।';
+      'स्लिप प्रिंट करें पर टैप करके Bluetooth, Wi-Fi या USB चुनें।';
+
+  @override
+  String get collectionChoosePrinter => 'प्रिंटर कनेक्शन चुनें';
+
+  @override
+  String get collectionChoosePrinterHint =>
+      'फ़ोन थर्मल प्रिंटर से कैसे जुड़े, यह चुनें।';
+
+  @override
+  String get collectionBluetoothPrinter => 'Bluetooth प्रिंटर';
+
+  @override
+  String get collectionBluetoothPrinterHint =>
+      'फ़ोन सेटिंग में पेयर किए गए प्रिंटर से कनेक्ट करें।';
+
+  @override
+  String get collectionWifiPrinter => 'Wi-Fi प्रिंटर';
+
+  @override
+  String get collectionWifiPrinterHint =>
+      'उसी Wi-Fi नेटवर्क पर ESC/POS प्रिंटर से प्रिंट करें।';
+
+  @override
+  String get collectionUsbPrinter => 'USB प्रिंटर';
+
+  @override
+  String get collectionUsbPrinterHint => 'OTG केबल से USB प्रिंटर कनेक्ट करें।';
+
+  @override
+  String get collectionSelectWifiPrinter => 'Wi-Fi प्रिंटर चुनें';
+
+  @override
+  String get collectionWifiDiscoveryHint =>
+      'मौजूदा Wi-Fi नेटवर्क पर मिले प्रिंटर नीचे दिखाए गए हैं।';
+
+  @override
+  String get collectionNoWifiPrinterTitle => 'Wi-Fi प्रिंटर नहीं मिला';
+
+  @override
+  String get collectionNoWifiPrinter =>
+      'फ़ोन और प्रिंटर को एक ही Wi-Fi नेटवर्क से जोड़ें, प्रिंटर चालू करें और फिर कोशिश करें।';
+
+  @override
+  String get collectionSelectUsbPrinter => 'USB प्रिंटर चुनें';
+
+  @override
+  String get collectionUsbPermissionHint =>
+      'जुड़ा प्रिंटर चुनें और पूछे जाने पर USB अनुमति दें।';
+
+  @override
+  String get collectionNoUsbPrinterTitle => 'USB प्रिंटर नहीं मिला';
+
+  @override
+  String get collectionNoUsbPrinter =>
+      'USB OTG केबल से प्रिंटर जोड़ें, चालू करें और फिर कोशिश करें।';
 
   @override
   String get collectionBluetoothPermissionTitle => 'Bluetooth अनुमति आवश्यक है';
@@ -2021,7 +2076,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get collectionPairedPrintersHint =>
-      'फ़ोन की Bluetooth सेटिंग में पहले से पेयर किया हुआ प्रिंटर चुनें।';
+      'पास का Bluetooth/BLE थर्मल प्रिंटर चुनें।';
 
   @override
   String get collectionBluetoothPermissionRequired =>
@@ -2036,11 +2091,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get collectionNoPairedPrinters =>
-      'कोई पेयर किया हुआ Bluetooth प्रिंटर नहीं मिला। पहले फ़ोन सेटिंग में थर्मल प्रिंटर पेयर करें।';
+      'पास में कोई Bluetooth/BLE थर्मल प्रिंटर नहीं मिला। प्रिंटर चालू करके फिर कोशिश करें।';
 
   @override
-  String get collectionNoPairedPrintersTitle =>
-      'पेयर किया हुआ प्रिंटर नहीं मिला';
+  String get collectionNoPairedPrintersTitle => 'Bluetooth प्रिंटर नहीं मिला';
 
   @override
   String get collectionPrinterConnectionFailed =>
@@ -2052,10 +2106,17 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get collectionPrinterPrintFailed =>
-      'Bluetooth प्रिंटर ने स्लिप स्वीकार नहीं की। कनेक्शन जाँचकर फिर प्रयास करें।';
+      'प्रिंटर ने स्लिप स्वीकार नहीं की। Bluetooth, Wi-Fi या USB कनेक्शन जाँचकर फिर प्रयास करें।';
 
   @override
   String get collectionPrinterPrintFailedTitle => 'स्लिप प्रिंट नहीं हुई';
+
+  @override
+  String get collectionPrinterPrintSuccessTitle => 'स्लिप प्रिंटर को भेजी गई';
+
+  @override
+  String get collectionPrinterPrintSuccess =>
+      'पूरी स्लिप सफलतापूर्वक भेज दी गई है। प्रिंट होने में कुछ सेकंड लग सकते हैं।';
 
   @override
   String get collectionReceiptDateTime => 'दिनांक और समय';

@@ -1999,18 +1999,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionPrinterHint =>
-      'Ensure your Bluetooth thermal printer is switched on and connected.';
+      'Print using a Bluetooth, Wi-Fi or USB ESC/POS thermal printer.';
 
   @override
-  String get collectionPrinterReady => 'Printer Ready';
+  String get collectionPrinterReady => 'Last printer';
 
   @override
-  String get collectionPrinterConnected =>
-      'Bluetooth thermal printer connected.';
+  String get collectionPrinterConnected => 'Thermal printer configured.';
 
   @override
   String get collectionPrinterDisconnected =>
-      'Tap Print Slip to connect a Bluetooth printer.';
+      'Tap Print Slip and choose Bluetooth, Wi-Fi or USB.';
+
+  @override
+  String get collectionChoosePrinter => 'Choose printer connection';
+
+  @override
+  String get collectionChoosePrinterHint =>
+      'Select how this phone connects to the thermal printer.';
+
+  @override
+  String get collectionBluetoothPrinter => 'Bluetooth printer';
+
+  @override
+  String get collectionBluetoothPrinterHint =>
+      'Connect to a printer paired in phone settings.';
+
+  @override
+  String get collectionWifiPrinter => 'Wi-Fi printer';
+
+  @override
+  String get collectionWifiPrinterHint =>
+      'Print to an ESC/POS printer on the same Wi-Fi network.';
+
+  @override
+  String get collectionUsbPrinter => 'USB printer';
+
+  @override
+  String get collectionUsbPrinterHint =>
+      'Connect a USB printer using an OTG cable.';
+
+  @override
+  String get collectionSelectWifiPrinter => 'Select Wi-Fi printer';
+
+  @override
+  String get collectionWifiDiscoveryHint =>
+      'Printers found on the current Wi-Fi network are shown below.';
+
+  @override
+  String get collectionNoWifiPrinterTitle => 'Wi-Fi printer not found';
+
+  @override
+  String get collectionNoWifiPrinter =>
+      'Connect the phone and printer to the same Wi-Fi network, switch the printer on and try again.';
+
+  @override
+  String get collectionSelectUsbPrinter => 'Select USB printer';
+
+  @override
+  String get collectionUsbPermissionHint =>
+      'Choose the attached printer and allow USB access when asked.';
+
+  @override
+  String get collectionNoUsbPrinterTitle => 'USB printer not found';
+
+  @override
+  String get collectionNoUsbPrinter =>
+      'Connect the printer with a USB OTG cable, switch it on and try again.';
 
   @override
   String get collectionBluetoothPermissionTitle =>
@@ -2021,7 +2076,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionPairedPrintersHint =>
-      'Select a printer already paired in your phone\'s Bluetooth settings.';
+      'Select a nearby Bluetooth/BLE thermal printer.';
 
   @override
   String get collectionBluetoothPermissionRequired =>
@@ -2035,10 +2090,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionNoPairedPrinters =>
-      'No paired Bluetooth printer found. Pair the thermal printer in phone settings first.';
+      'No nearby Bluetooth/BLE thermal printer was found. Switch the printer on and try again.';
 
   @override
-  String get collectionNoPairedPrintersTitle => 'No paired printer found';
+  String get collectionNoPairedPrintersTitle => 'Bluetooth printer not found';
 
   @override
   String get collectionPrinterConnectionFailed =>
@@ -2050,10 +2105,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionPrinterPrintFailed =>
-      'The Bluetooth printer did not accept the slip. Check the connection and try again.';
+      'The printer did not accept the slip. Check its Bluetooth, Wi-Fi or USB connection and try again.';
 
   @override
   String get collectionPrinterPrintFailedTitle => 'Slip printing failed';
+
+  @override
+  String get collectionPrinterPrintSuccessTitle => 'Slip sent to printer';
+
+  @override
+  String get collectionPrinterPrintSuccess =>
+      'The complete slip was sent successfully. Printing may take a few seconds.';
 
   @override
   String get collectionReceiptDateTime => 'Date & Time';

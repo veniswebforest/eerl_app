@@ -3847,26 +3847,122 @@ abstract class AppLocalizations {
   /// No description provided for @collectionPrinterHint.
   ///
   /// In en, this message translates to:
-  /// **'Ensure your Bluetooth thermal printer is switched on and connected.'**
+  /// **'Print using a Bluetooth, Wi-Fi or USB ESC/POS thermal printer.'**
   String get collectionPrinterHint;
 
   /// No description provided for @collectionPrinterReady.
   ///
   /// In en, this message translates to:
-  /// **'Printer Ready'**
+  /// **'Last printer'**
   String get collectionPrinterReady;
 
   /// No description provided for @collectionPrinterConnected.
   ///
   /// In en, this message translates to:
-  /// **'Bluetooth thermal printer connected.'**
+  /// **'Thermal printer configured.'**
   String get collectionPrinterConnected;
 
   /// No description provided for @collectionPrinterDisconnected.
   ///
   /// In en, this message translates to:
-  /// **'Tap Print Slip to connect a Bluetooth printer.'**
+  /// **'Tap Print Slip and choose Bluetooth, Wi-Fi or USB.'**
   String get collectionPrinterDisconnected;
+
+  /// No description provided for @collectionChoosePrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose printer connection'**
+  String get collectionChoosePrinter;
+
+  /// No description provided for @collectionChoosePrinterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select how this phone connects to the thermal printer.'**
+  String get collectionChoosePrinterHint;
+
+  /// No description provided for @collectionBluetoothPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth printer'**
+  String get collectionBluetoothPrinter;
+
+  /// No description provided for @collectionBluetoothPrinterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to a printer paired in phone settings.'**
+  String get collectionBluetoothPrinterHint;
+
+  /// No description provided for @collectionWifiPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi printer'**
+  String get collectionWifiPrinter;
+
+  /// No description provided for @collectionWifiPrinterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print to an ESC/POS printer on the same Wi-Fi network.'**
+  String get collectionWifiPrinterHint;
+
+  /// No description provided for @collectionUsbPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'USB printer'**
+  String get collectionUsbPrinter;
+
+  /// No description provided for @collectionUsbPrinterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect a USB printer using an OTG cable.'**
+  String get collectionUsbPrinterHint;
+
+  /// No description provided for @collectionSelectWifiPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Wi-Fi printer'**
+  String get collectionSelectWifiPrinter;
+
+  /// No description provided for @collectionWifiDiscoveryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Printers found on the current Wi-Fi network are shown below.'**
+  String get collectionWifiDiscoveryHint;
+
+  /// No description provided for @collectionNoWifiPrinterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wi-Fi printer not found'**
+  String get collectionNoWifiPrinterTitle;
+
+  /// No description provided for @collectionNoWifiPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect the phone and printer to the same Wi-Fi network, switch the printer on and try again.'**
+  String get collectionNoWifiPrinter;
+
+  /// No description provided for @collectionSelectUsbPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Select USB printer'**
+  String get collectionSelectUsbPrinter;
+
+  /// No description provided for @collectionUsbPermissionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the attached printer and allow USB access when asked.'**
+  String get collectionUsbPermissionHint;
+
+  /// No description provided for @collectionNoUsbPrinterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'USB printer not found'**
+  String get collectionNoUsbPrinterTitle;
+
+  /// No description provided for @collectionNoUsbPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect the printer with a USB OTG cable, switch it on and try again.'**
+  String get collectionNoUsbPrinter;
 
   /// No description provided for @collectionBluetoothPermissionTitle.
   ///
@@ -3883,7 +3979,7 @@ abstract class AppLocalizations {
   /// No description provided for @collectionPairedPrintersHint.
   ///
   /// In en, this message translates to:
-  /// **'Select a printer already paired in your phone\'s Bluetooth settings.'**
+  /// **'Select a nearby Bluetooth/BLE thermal printer.'**
   String get collectionPairedPrintersHint;
 
   /// No description provided for @collectionBluetoothPermissionRequired.
@@ -3907,13 +4003,13 @@ abstract class AppLocalizations {
   /// No description provided for @collectionNoPairedPrinters.
   ///
   /// In en, this message translates to:
-  /// **'No paired Bluetooth printer found. Pair the thermal printer in phone settings first.'**
+  /// **'No nearby Bluetooth/BLE thermal printer was found. Switch the printer on and try again.'**
   String get collectionNoPairedPrinters;
 
   /// No description provided for @collectionNoPairedPrintersTitle.
   ///
   /// In en, this message translates to:
-  /// **'No paired printer found'**
+  /// **'Bluetooth printer not found'**
   String get collectionNoPairedPrintersTitle;
 
   /// No description provided for @collectionPrinterConnectionFailed.
@@ -3931,7 +4027,7 @@ abstract class AppLocalizations {
   /// No description provided for @collectionPrinterPrintFailed.
   ///
   /// In en, this message translates to:
-  /// **'The Bluetooth printer did not accept the slip. Check the connection and try again.'**
+  /// **'The printer did not accept the slip. Check its Bluetooth, Wi-Fi or USB connection and try again.'**
   String get collectionPrinterPrintFailed;
 
   /// No description provided for @collectionPrinterPrintFailedTitle.
@@ -3939,6 +4035,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Slip printing failed'**
   String get collectionPrinterPrintFailedTitle;
+
+  /// No description provided for @collectionPrinterPrintSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Slip sent to printer'**
+  String get collectionPrinterPrintSuccessTitle;
+
+  /// No description provided for @collectionPrinterPrintSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'The complete slip was sent successfully. Printing may take a few seconds.'**
+  String get collectionPrinterPrintSuccess;
 
   /// No description provided for @collectionReceiptDateTime.
   ///

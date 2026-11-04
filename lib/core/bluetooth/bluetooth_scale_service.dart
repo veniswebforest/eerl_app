@@ -47,7 +47,7 @@ class BluetoothScaleService extends ChangeNotifier {
 
   final Map<String, BluetoothScaleDevice> _devices = {};
   StreamSubscription<BleDevice>? _scanSubscription;
-  StreamSubscription<BleConnectionChange>? _connectionSubscription;
+  StreamSubscription<bool>? _connectionSubscription;
   StreamSubscription<Uint8List>? _measurementSubscription;
   Timer? _scanTimer;
   Timer? _reconnectTimer;
@@ -156,16 +156,17 @@ class BluetoothScaleService extends ChangeNotifier {
       // Do not filter by UUID: proprietary scales may advertise no service
       // UUID at all. Their GATT UUIDs are inspected after connection.
       await UniversalBle.startScan(
-        scanFilter: ScanFilter(connectableOnly: true),
+        scanFilter: ScanFilter(),
         platformConfig: PlatformConfig(
           android: AndroidOptions(
             requestLocationPermission: false,
             scanMode: AndroidScanMode.lowLatency,
+            // Most weighing scales still advertise with BLE 4.x legacy
+            // packets. universal_ble otherwise selects extended BLE 5
+            // advertisements on Android 8+ and those scales are missed.
+            legacy: true,
           ),
         ),
-        // Some devices advertise their name only in a later packet. Keep
-        // duplicates enabled until a named result has been stored.
-        skipDuplicates: false,
       );
       unawaited(_loadSystemDevices());
       _scanTimer?.cancel();
@@ -213,7 +214,7 @@ class BluetoothScaleService extends ChangeNotifier {
   }
 
   bool _storeDevice(BleDevice result) {
-    final id = UniversalBle.canonicalDeviceId(result.deviceId);
+    final id = _canonicalDeviceId(result.deviceId);
     if (_devices.containsKey(id)) return false;
     final name = resolveDeviceName(
       advertisedName: result.name ?? '',
@@ -226,6 +227,12 @@ class BluetoothScaleService extends ChangeNotifier {
       name: name,
       id: id,
       rssi: result.rssi ?? 0,
+    );
+    AppLogger.diagnostic(
+      'BLE_DEVICE_FOUND',
+      'name=$name id=$id rssi=${result.rssi ?? 0} '
+          'paired=${result.paired} system=${result.isSystemDevice} '
+          'services=${result.services.join(',')}',
     );
     return true;
   }
@@ -262,23 +269,16 @@ class BluetoothScaleService extends ChangeNotifier {
 
   void _listenToConnection(BleDevice device) {
     unawaited(_connectionSubscription?.cancel());
-    _connectionSubscription = device.connectionChangeStream.listen((change) {
-      if (!change.isConnected &&
+    _connectionSubscription = device.connectionStream.listen((isConnected) {
+      if (!isConnected &&
           _connectedDevice != null &&
-          UniversalBle.canonicalDeviceId(_connectedDevice!.deviceId) ==
-              UniversalBle.canonicalDeviceId(change.deviceId)) {
+          _canonicalDeviceId(_connectedDevice!.deviceId) ==
+              _canonicalDeviceId(device.deviceId)) {
         _measurementCharacteristic = null;
         _weightKg = null;
         if (_intentionalDisconnect) {
           _status = BluetoothScaleStatus.disconnected;
         } else {
-          if (change.error?.isNotEmpty == true) {
-            AppLogger.diagnostic(
-              'BLE_SCALE_DISCONNECTED',
-              '${change.errorCode}: ${change.error} '
-                  '(native=${change.nativeErrorCode})',
-            );
-          }
           _scheduleReconnect(device);
         }
         notifyListeners();
@@ -398,8 +398,8 @@ class BluetoothScaleService extends ChangeNotifier {
       () async {
         if (_intentionalDisconnect ||
             _connectedDevice == null ||
-            UniversalBle.canonicalDeviceId(_connectedDevice!.deviceId) !=
-                UniversalBle.canonicalDeviceId(device.deviceId)) {
+            _canonicalDeviceId(_connectedDevice!.deviceId) !=
+                _canonicalDeviceId(device.deviceId)) {
           return;
         }
         try {
@@ -420,7 +420,7 @@ class BluetoothScaleService extends ChangeNotifier {
       await startScan();
       return;
     }
-    final id = UniversalBle.canonicalDeviceId(device.deviceId);
+    final id = _canonicalDeviceId(device.deviceId);
     final known =
         _devices[id] ??
         BluetoothScaleDevice(
@@ -438,6 +438,8 @@ class BluetoothScaleService extends ChangeNotifier {
   }
 
   Future<void> disconnect() => _disconnectCurrent(intentional: true);
+
+  static String _canonicalDeviceId(String deviceId) => deviceId.toLowerCase();
 
   Future<void> _disconnectCurrent({required bool intentional}) async {
     _intentionalDisconnect = intentional;

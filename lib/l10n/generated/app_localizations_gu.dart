@@ -1999,18 +1999,72 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get collectionPrinterHint =>
-      'ખાતરી કરો કે તમારું Bluetooth થર્મલ પ્રિન્ટર ચાલુ અને જોડાયેલું છે.';
+      'Bluetooth, Wi-Fi અથવા USB ESC/POS થર્મલ પ્રિન્ટરથી પ્રિન્ટ કરો.';
 
   @override
-  String get collectionPrinterReady => 'પ્રિન્ટર તૈયાર';
+  String get collectionPrinterReady => 'છેલ્લું પ્રિન્ટર';
 
   @override
-  String get collectionPrinterConnected =>
-      'Bluetooth થર્મલ પ્રિન્ટર જોડાયેલું છે.';
+  String get collectionPrinterConnected => 'થર્મલ પ્રિન્ટર સેટ કરેલું છે.';
 
   @override
   String get collectionPrinterDisconnected =>
-      'Bluetooth પ્રિન્ટર જોડવા માટે સ્લિપ પ્રિન્ટ કરો પર ટેપ કરો.';
+      'સ્લિપ પ્રિન્ટ કરો પર ટેપ કરીને Bluetooth, Wi-Fi અથવા USB પસંદ કરો.';
+
+  @override
+  String get collectionChoosePrinter => 'પ્રિન્ટર કનેક્શન પસંદ કરો';
+
+  @override
+  String get collectionChoosePrinterHint =>
+      'ફોન થર્મલ પ્રિન્ટર સાથે કેવી રીતે જોડાય તે પસંદ કરો.';
+
+  @override
+  String get collectionBluetoothPrinter => 'Bluetooth પ્રિન્ટર';
+
+  @override
+  String get collectionBluetoothPrinterHint =>
+      'ફોન સેટિંગમાં pair કરેલા પ્રિન્ટર સાથે જોડાઓ.';
+
+  @override
+  String get collectionWifiPrinter => 'Wi-Fi પ્રિન્ટર';
+
+  @override
+  String get collectionWifiPrinterHint =>
+      'સમાન Wi-Fi નેટવર્ક પરના ESC/POS પ્રિન્ટરથી પ્રિન્ટ કરો.';
+
+  @override
+  String get collectionUsbPrinter => 'USB પ્રિન્ટર';
+
+  @override
+  String get collectionUsbPrinterHint => 'OTG કેબલથી USB પ્રિન્ટર જોડો.';
+
+  @override
+  String get collectionSelectWifiPrinter => 'Wi-Fi પ્રિન્ટર પસંદ કરો';
+
+  @override
+  String get collectionWifiDiscoveryHint =>
+      'હાલના Wi-Fi નેટવર્ક પર મળેલા પ્રિન્ટર નીચે બતાવ્યા છે.';
+
+  @override
+  String get collectionNoWifiPrinterTitle => 'Wi-Fi પ્રિન્ટર મળ્યું નથી';
+
+  @override
+  String get collectionNoWifiPrinter =>
+      'ફોન અને પ્રિન્ટરને એક જ Wi-Fi નેટવર્ક સાથે જોડો, પ્રિન્ટર ચાલુ કરો અને ફરી પ્રયાસ કરો.';
+
+  @override
+  String get collectionSelectUsbPrinter => 'USB પ્રિન્ટર પસંદ કરો';
+
+  @override
+  String get collectionUsbPermissionHint =>
+      'જોડાયેલું પ્રિન્ટર પસંદ કરો અને પૂછવામાં આવે ત્યારે USB access આપો.';
+
+  @override
+  String get collectionNoUsbPrinterTitle => 'USB પ્રિન્ટર મળ્યું નથી';
+
+  @override
+  String get collectionNoUsbPrinter =>
+      'USB OTG કેબલથી પ્રિન્ટર જોડો, ચાલુ કરો અને ફરી પ્રયાસ કરો.';
 
   @override
   String get collectionBluetoothPermissionTitle =>
@@ -2021,7 +2075,7 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get collectionPairedPrintersHint =>
-      'ફોનના Bluetooth સેટિંગમાં પહેલેથી pair કરેલું પ્રિન્ટર પસંદ કરો.';
+      'નજીકનું Bluetooth/BLE થર્મલ પ્રિન્ટર પસંદ કરો.';
 
   @override
   String get collectionBluetoothPermissionRequired =>
@@ -2036,10 +2090,10 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get collectionNoPairedPrinters =>
-      'કોઈ paired Bluetooth પ્રિન્ટર મળ્યું નથી. પહેલાં ફોન સેટિંગમાં થર્મલ પ્રિન્ટર pair કરો.';
+      'નજીકમાં કોઈ Bluetooth/BLE થર્મલ પ્રિન્ટર મળ્યું નથી. પ્રિન્ટર ચાલુ કરીને ફરી પ્રયાસ કરો.';
 
   @override
-  String get collectionNoPairedPrintersTitle => 'Paired પ્રિન્ટર મળ્યું નથી';
+  String get collectionNoPairedPrintersTitle => 'Bluetooth પ્રિન્ટર મળ્યું નથી';
 
   @override
   String get collectionPrinterConnectionFailed =>
@@ -2051,10 +2105,17 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get collectionPrinterPrintFailed =>
-      'Bluetooth પ્રિન્ટરે સ્લિપ સ્વીકારી નથી. જોડાણ ચકાસીને ફરી પ્રયાસ કરો.';
+      'પ્રિન્ટરે સ્લિપ સ્વીકારી નથી. Bluetooth, Wi-Fi અથવા USB જોડાણ ચકાસીને ફરી પ્રયાસ કરો.';
 
   @override
   String get collectionPrinterPrintFailedTitle => 'સ્લિપ પ્રિન્ટ થઈ નથી';
+
+  @override
+  String get collectionPrinterPrintSuccessTitle => 'સ્લિપ પ્રિન્ટરને મોકલાઈ';
+
+  @override
+  String get collectionPrinterPrintSuccess =>
+      'સંપૂર્ણ સ્લિપ સફળતાપૂર્વક મોકલાઈ છે. પ્રિન્ટ થવામાં થોડી સેકન્ડ લાગી શકે છે.';
 
   @override
   String get collectionReceiptDateTime => 'તારીખ અને સમય';

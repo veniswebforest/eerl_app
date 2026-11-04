@@ -29,10 +29,10 @@ packages:
     dependency: transitive
     description:
       name: bluez
-      sha256: "4747e4f25abf91a9a341a1c3f83a9081be9bdd189d913e391b6707db4214b4d2"
+      sha256: "61a7204381925896a374301498f2f5399e59827c6498ae1e924aaa598751b545"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.0"
+    version: "0.8.3"
   boolean_selector:
     dependency: transitive
     description:
@@ -117,10 +117,10 @@ packages:
     dependency: "direct main"
     description:
       name: connectivity_plus
-      sha256: d7749fd36d8b404a4935612b94eca7c3ce3705377ab678e24ff2a4301436f741
+      sha256: "762c99f890ca8bf87f7337236f99edd42793843bc6c3631da294a76653a54bd0"
       url: "https://pub.dev"
     source: hosted
-    version: "7.3.2"
+    version: "7.3.1"
   connectivity_plus_platform_interface:
     dependency: transitive
     description:
@@ -165,10 +165,10 @@ packages:
     dependency: transitive
     description:
       name: dbus
-      sha256: f7db8504e715b835f5ebe5fe74604ccd961d504c73389a5d8e81bafc2e2f3612
+      sha256: a48d5da28e89bd02196e80d81ed8d7954923d00a0f4a68cc20b575038f023383
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.0"
+    version: "0.7.15"
   dotted_border:
     dependency: "direct main"
     description:
@@ -296,6 +296,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_thermal_printer:
+    dependency: "direct main"
+    description:
+      name: flutter_thermal_printer
+      sha256: e05d535ab99c16bd5510cef9897f23fd1c39b4528e7e059c9acc105db23a24fc
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
   flutter_web_bluetooth:
     dependency: transitive
     description:
@@ -629,6 +637,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  multicast_dns:
+    dependency: "direct main"
+    description:
+      name: multicast_dns
+      sha256: "134668a9605c747322d8c3eb0e89a4c0cbdedb29f8d2d5ae29d14daef724987b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.3+1"
   native_toolchain_c:
     dependency: transitive
     description:
@@ -649,10 +665,10 @@ packages:
     dependency: transitive
     description:
       name: nm
-      sha256: "2ae480aa3379716b8bb58dfebb168e2919394c92b629efaaa0baaa5d140786e6"
+      sha256: "2c9aae4127bdc8993206464fcc063611e0e36e72018696cd9631023a31b24254"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.0"
+    version: "0.5.0"
   objective_c:
     dependency: transitive
     description:
@@ -821,14 +837,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.2"
-  print_bluetooth_thermal:
-    dependency: "direct main"
-    description:
-      name: print_bluetooth_thermal
-      sha256: "2b26ba9328c52ad9d0caaefaf94b40f754005677b3c5ac899f56b857cbaec645"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.5"
   provider:
     dependency: "direct main"
     description:
@@ -853,6 +861,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
+  screenshot:
+    dependency: transitive
+    description:
+      name: screenshot
+      sha256: "63817697a7835e6ce82add4228e15d233b74d42975c143ad8cfe07009fab866b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   share_plus:
     dependency: "direct main"
     description:
@@ -1062,10 +1078,10 @@ packages:
     dependency: "direct main"
     description:
       name: universal_ble
-      sha256: "31780289d5fd2646a0249a667d36cde8bd126d18eb8e3ce3c4622ac70bb621cd"
+      sha256: bdebe7d4ff3a24f28b5e56c999104ea1584a9de55da4ee0b4c2346bcf8f8c528
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.0"
+    version: "2.3.0"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -1162,14 +1178,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.4.0"
-  win_ble:
-    dependency: transitive
-    description:
-      name: win_ble
-      sha256: "2a867e13c4b355b101fc2c6e2ac85eeebf965db34eca46856f8b478e93b41e96"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.1"
   xdg_directories:
     dependency: transitive
     description:

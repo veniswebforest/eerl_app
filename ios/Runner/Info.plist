@@ -38,6 +38,15 @@
 	<string>Please authenticate to access the app.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is attached to collection records as GPS evidence.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Local network access is used to find and print to Wi-Fi thermal printers.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_pdl-datastream._tcp</string>
+		<string>_printer._tcp</string>
+		<string>_ipp._tcp</string>
+		<string>_ipps._tcp</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
