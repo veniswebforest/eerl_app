@@ -23,14 +23,14 @@ class BluetoothWeightProvider extends ChangeNotifier {
     final connected = _service.connectedDevice;
     if (connected == null) return null;
     for (final device in devices) {
-      if (device.device.deviceId == connected.deviceId) return device;
+      if (device.device.address == connected.address) return device;
     }
     return null;
   }
 
   double? get weightKg => _service.weightKg;
   String? get errorMessage => _service.errorMessage;
-  List<String> get discoveredGatt => _service.discoveredGatt;
+  String? get lastRawFrame => _service.lastRawFrame;
   int? get targetItem => _targetItem;
   int get measurementRevision => _measurementRevision;
   bool get isScanning => _service.isScanning;

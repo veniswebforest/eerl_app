@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:universal_ble/universal_ble.dart';
+import 'package:flutter_classic_bluetooth/flutter_classic_bluetooth.dart';
 
 import 'package:eerl_app/core/logging/app_logger.dart';
 
@@ -27,110 +27,159 @@ class BluetoothScaleDevice {
     required this.rssi,
   });
 
-  final BleDevice device;
+  final BtcDevice device;
   final String name;
   final String id;
-  final int rssi;
+  final int? rssi;
+
+  bool get isPaired => device.bondState == BtcBondState.bonded;
 }
 
-/// Owns every BLE subscription used by the weighing-scale flow.
+/// Owns every Bluetooth Classic/RFCOMM subscription used by the scale flow.
 ///
-/// Only the Bluetooth SIG Weight Scale service/measurement UUID pair is
-/// interpreted here. Custom characteristics are deliberately reported (with
-/// their UUIDs) instead of guessing a proprietary payload format.
+/// The scale is an HC-05-style Serial Port Profile device. Incoming RFCOMM
+/// bytes are framed on CR/LF where possible. Until the manufacturer's exact
+/// open-protocol document is available, only an unambiguous numeric weight is
+/// accepted; every raw frame is logged so the real protocol can be tightened
+/// after device testing.
 class BluetoothScaleService extends ChangeNotifier {
-  BluetoothScaleService();
+  BluetoothScaleService({FlutterClassicBluetooth? bluetooth})
+    : _bluetooth = bluetooth ?? FlutterClassicBluetooth();
 
   static const Duration scanTimeout = Duration(seconds: 12);
-  static const String weightScaleServiceUuid = '181d';
-  static const String weightMeasurementCharacteristicUuid = '2a9d';
+  static const Duration connectionTimeout = Duration(seconds: 15);
 
+  final FlutterClassicBluetooth _bluetooth;
   final Map<String, BluetoothScaleDevice> _devices = {};
-  StreamSubscription<BleDevice>? _scanSubscription;
-  StreamSubscription<bool>? _connectionSubscription;
-  StreamSubscription<Uint8List>? _measurementSubscription;
+
+  StreamSubscription<BtcAdapterState>? _adapterSubscription;
+  StreamSubscription<BtcDevice>? _discoverySubscription;
+  StreamSubscription<bool>? _discoveryStateSubscription;
+  StreamSubscription<Uint8List>? _inputSubscription;
+  StreamSubscription<BtcConnectionState>? _connectionStateSubscription;
   Timer? _scanTimer;
   Timer? _reconnectTimer;
+  Timer? _unterminatedFrameTimer;
 
   BluetoothScaleStatus _status = BluetoothScaleStatus.idle;
-  AvailabilityState _adapterState = AvailabilityState.unknown;
-  BleDevice? _connectedDevice;
-  BleCharacteristic? _measurementCharacteristic;
+  BtcAdapterState _adapterState = BtcAdapterState.unknown;
+  BtcDevice? _connectedDevice;
+  BtcConnection? _connection;
   double? _weightKg;
   String? _errorMessage;
-  List<String> _discoveredGatt = const [];
+  String? _lastRawFrame;
+  String _receiveBuffer = '';
   bool _intentionalDisconnect = false;
   bool _initialized = false;
   int _reconnectAttempts = 0;
 
   BluetoothScaleStatus get status => _status;
-  AvailabilityState get adapterState => _adapterState;
-  List<BluetoothScaleDevice> get devices =>
-      _devices.values.toList()..sort((a, b) => b.rssi.compareTo(a.rssi));
-  BleDevice? get connectedDevice => _connectedDevice;
+  BtcAdapterState get adapterState => _adapterState;
+  List<BluetoothScaleDevice> get devices {
+    final result = _devices.values.toList();
+    result.sort((a, b) {
+      if (a.isPaired != b.isPaired) return a.isPaired ? -1 : 1;
+      return (b.rssi ?? -1000).compareTo(a.rssi ?? -1000);
+    });
+    return result;
+  }
+
+  BtcDevice? get connectedDevice => _connectedDevice;
   double? get weightKg => _weightKg;
   String? get errorMessage => _errorMessage;
-  List<String> get discoveredGatt => _discoveredGatt;
+  String? get lastRawFrame => _lastRawFrame;
   bool get isScanning => _status == BluetoothScaleStatus.scanning;
-  bool get isConnected => _status == BluetoothScaleStatus.connected;
+  bool get isConnected =>
+      _status == BluetoothScaleStatus.connected &&
+      _connection?.isConnected == true;
 
   Future<void> initialize() async {
     if (_initialized) return;
-    UniversalBle.queueType = QueueType.perDevice;
-    UniversalBle.onAvailabilityChange = _onAvailabilityChanged;
-    _scanSubscription = UniversalBle.scanStream.listen(
-      _onScanResult,
-      onError: (Object error) => _setError('BLE scan failed: $error'),
-    );
     try {
-      _onAvailabilityChanged(
-        await UniversalBle.getBluetoothAvailabilityState(),
+      if (!await _bluetooth.isSupported()) {
+        _status = BluetoothScaleStatus.unsupported;
+        _errorMessage = 'Bluetooth Classic is not supported on this device.';
+        notifyListeners();
+        return;
+      }
+      _adapterSubscription = _bluetooth.adapterState.listen(
+        _onAdapterStateChanged,
+        onError: (Object error) =>
+            _setError('Bluetooth adapter state failed: $error'),
+      );
+      _discoverySubscription = _bluetooth.discoveryResults.listen(
+        _onDiscoveryResult,
+        onError: (Object error) =>
+            _setError('Bluetooth device discovery failed: $error'),
+      );
+      _discoveryStateSubscription = _bluetooth.discoveryState.listen(
+        _onDiscoveryStateChanged,
+        onError: (Object error) =>
+            AppLogger.diagnostic('BT_SCALE_DISCOVERY_STATE', error.toString()),
       );
       _initialized = true;
-    } catch (error) {
-      await _scanSubscription?.cancel();
-      _scanSubscription = null;
-      UniversalBle.onAvailabilityChange = null;
-      _setError(
-        'Bluetooth service is not loaded in this app process. Fully stop and '
-        'reinstall/restart the app after the Universal BLE plugin change.',
+      _onAdapterStateChanged(
+        await _bluetooth.isEnabled() ? BtcAdapterState.on : BtcAdapterState.off,
       );
-      AppLogger.diagnostic('BLE_PLUGIN_UNAVAILABLE', error.toString());
+    } catch (error) {
+      _setError(
+        'Bluetooth Classic service is not loaded. Fully stop and reinstall '
+        'the app after the plugin change. Details: $error',
+      );
+      AppLogger.diagnostic('BT_CLASSIC_PLUGIN_UNAVAILABLE', error.toString());
     }
   }
 
-  void _onAvailabilityChanged(AvailabilityState state) {
+  void _onAdapterStateChanged(BtcAdapterState state) {
     _adapterState = state;
-    if (state != AvailabilityState.poweredOn) {
-      _weightKg = null;
-      if (state == AvailabilityState.unauthorized) {
-        _status = BluetoothScaleStatus.permissionDenied;
-        _errorMessage = 'Bluetooth permission is required to find the scale.';
-      } else if (state == AvailabilityState.poweredOff) {
-        _status = BluetoothScaleStatus.adapterOff;
-        _errorMessage = 'Turn on Bluetooth to find a weighing scale.';
-      } else if (state == AvailabilityState.unsupported) {
-        _status = BluetoothScaleStatus.error;
-        _errorMessage = 'Bluetooth Low Energy is not supported on this device.';
+    if (state == BtcAdapterState.on) {
+      if (_status == BluetoothScaleStatus.adapterOff ||
+          _status == BluetoothScaleStatus.permissionDenied) {
+        _status = BluetoothScaleStatus.idle;
+        _errorMessage = null;
       }
-    } else if (_status == BluetoothScaleStatus.adapterOff ||
-        _status == BluetoothScaleStatus.permissionDenied) {
-      _status = BluetoothScaleStatus.idle;
-      _errorMessage = null;
+    } else {
+      _weightKg = null;
+      switch (state) {
+        case BtcAdapterState.unauthorized:
+          _status = BluetoothScaleStatus.permissionDenied;
+          _errorMessage =
+              'Nearby devices permission is required to find the scale.';
+        case BtcAdapterState.off:
+        case BtcAdapterState.turningOff:
+          _status = BluetoothScaleStatus.adapterOff;
+          _errorMessage = 'Turn on Bluetooth to find the weighing scale.';
+        case BtcAdapterState.unsupported:
+          _status = BluetoothScaleStatus.unsupported;
+          _errorMessage = 'Bluetooth Classic is not supported on this device.';
+        case BtcAdapterState.unknown:
+        case BtcAdapterState.turningOn:
+        case BtcAdapterState.on:
+          break;
+      }
     }
     notifyListeners();
   }
 
   Future<bool> requestPermissions() async {
     try {
-      await UniversalBle.requestPermissions(withAndroidFineLocation: false);
-      return true;
+      final result = await _bluetooth.requestPermissions(
+        permissions: const {BtcPermission.scan, BtcPermission.connect},
+      );
+      if (result == BtcPermissionStatus.granted ||
+          result == BtcPermissionStatus.notRequired) {
+        return true;
+      }
+      _status = BluetoothScaleStatus.permissionDenied;
+      _errorMessage = result == BtcPermissionStatus.permanentlyDenied
+          ? 'Nearby devices permission is permanently denied. Enable it in app settings.'
+          : 'Nearby devices permission is required to find the weighing scale.';
+      notifyListeners();
+      return false;
     } catch (error) {
       _status = BluetoothScaleStatus.permissionDenied;
-      _errorMessage =
-          'Bluetooth permission is required to find the weighing scale. '
-          'Enable it in app settings if it was permanently denied.';
-      AppLogger.diagnostic('BLE_SCALE_PERMISSION', error.toString());
+      _errorMessage = 'Unable to request Bluetooth permission: $error';
+      AppLogger.diagnostic('BT_SCALE_PERMISSION', error.toString());
       notifyListeners();
       return false;
     }
@@ -138,52 +187,57 @@ class BluetoothScaleService extends ChangeNotifier {
 
   Future<void> startScan() async {
     await initialize();
-    if (!_initialized) return;
-    if (!await requestPermissions()) return;
-    final state = await UniversalBle.getBluetoothAvailabilityState();
-    if (state != AvailabilityState.poweredOn) {
-      _onAvailabilityChanged(state);
+    if (!_initialized || !await requestPermissions()) return;
+    if (!await _bluetooth.isEnabled()) {
+      _onAdapterStateChanged(BtcAdapterState.off);
       return;
     }
-    if (_status == BluetoothScaleStatus.scanning) {
-      await stopScan();
+    if (await _bluetooth.isLocationServiceRequired() &&
+        !await _bluetooth.isLocationServiceEnabled()) {
+      _status = BluetoothScaleStatus.error;
+      _errorMessage =
+          'Turn on Location to discover Bluetooth devices on this Android version.';
+      notifyListeners();
+      return;
     }
+
+    await stopScan();
     _devices.clear();
     _errorMessage = null;
     _status = BluetoothScaleStatus.scanning;
     notifyListeners();
+
     try {
-      // Do not filter by UUID: proprietary scales may advertise no service
-      // UUID at all. Their GATT UUIDs are inspected after connection.
-      await UniversalBle.startScan(
-        scanFilter: ScanFilter(),
-        platformConfig: PlatformConfig(
-          android: AndroidOptions(
-            requestLocationPermission: false,
-            scanMode: AndroidScanMode.lowLatency,
-            // Most weighing scales still advertise with BLE 4.x legacy
-            // packets. universal_ble otherwise selects extended BLE 5
-            // advertisements on Android 8+ and those scales are missed.
-            legacy: true,
-          ),
-        ),
-      );
-      unawaited(_loadSystemDevices());
+      // A paired scale should be selectable immediately, even when it is not
+      // currently discoverable. Live discovery then adds unpaired devices.
+      final paired = await _bluetooth.getPairedDevices();
+      for (final device in paired) {
+        _storeDevice(device);
+      }
+      notifyListeners();
+      await _bluetooth.startDiscovery();
       _scanTimer?.cancel();
       _scanTimer = Timer(scanTimeout, () => unawaited(stopScan()));
+    } on BtcPermissionException catch (error) {
+      _status = BluetoothScaleStatus.permissionDenied;
+      _errorMessage = error.message;
+      notifyListeners();
+    } on BtcDisabledException {
+      _onAdapterStateChanged(BtcAdapterState.off);
     } catch (error) {
-      _setError('Unable to scan for BLE devices: $error');
+      _setError('Unable to scan for Bluetooth Classic devices: $error');
     }
   }
 
   Future<void> stopScan() async {
     _scanTimer?.cancel();
     _scanTimer = null;
-    if (_status != BluetoothScaleStatus.scanning) return;
     try {
-      await UniversalBle.stopScan();
+      if (_initialized && await _bluetooth.isDiscovering()) {
+        await _bluetooth.stopDiscovery();
+      }
     } catch (error) {
-      AppLogger.diagnostic('BLE_SCALE_STOP_SCAN', error.toString());
+      AppLogger.diagnostic('BT_SCALE_STOP_SCAN', error.toString());
     }
     if (_status == BluetoothScaleStatus.scanning) {
       _status = BluetoothScaleStatus.idle;
@@ -191,61 +245,51 @@ class BluetoothScaleService extends ChangeNotifier {
     }
   }
 
-  void _onScanResult(BleDevice result) {
-    if (_storeDevice(result)) notifyListeners();
-  }
-
-  Future<void> _loadSystemDevices() async {
-    try {
-      final systemDevices = await UniversalBle.getSystemDevices(
-        withServices: const [],
-        timeout: const Duration(seconds: 5),
-      );
-      var changed = false;
-      for (final device in systemDevices) {
-        changed = _storeDevice(device) || changed;
-      }
-      if (changed) notifyListeners();
-    } catch (error) {
-      // System devices supplement active scan results; scan remains usable
-      // when a platform cannot return its already-connected BLE devices.
-      AppLogger.diagnostic('BLE_SYSTEM_DEVICES', error.toString());
+  void _onDiscoveryStateChanged(bool discovering) {
+    if (!discovering && _status == BluetoothScaleStatus.scanning) {
+      _scanTimer?.cancel();
+      _scanTimer = null;
+      _status = BluetoothScaleStatus.idle;
+      notifyListeners();
     }
   }
 
-  bool _storeDevice(BleDevice result) {
-    final id = _canonicalDeviceId(result.deviceId);
-    if (_devices.containsKey(id)) return false;
-    final name = resolveDeviceName(
-      advertisedName: result.name ?? '',
-      platformName: '',
-    );
-    // A nameless advertisement cannot be identified reliably in the UI.
+  void _onDiscoveryResult(BtcDevice result) {
+    if (_storeDevice(result)) notifyListeners();
+  }
+
+  bool _storeDevice(BtcDevice result) {
+    if (result.type == BtcDeviceType.le) return false;
+    final id = _canonicalDeviceId(result.address);
+    final name = resolveDeviceName(result.alias, result.name);
     if (name == null) return false;
+    final previous = _devices[id];
+    final merged = previous == null
+        ? result
+        : previous.device.mergedWith(result);
     _devices[id] = BluetoothScaleDevice(
-      device: result,
-      name: name,
+      device: merged,
+      name: resolveDeviceName(merged.alias, merged.name) ?? name,
       id: id,
-      rssi: result.rssi ?? 0,
+      rssi: merged.rssi,
     );
-    AppLogger.diagnostic(
-      'BLE_DEVICE_FOUND',
-      'name=$name id=$id rssi=${result.rssi ?? 0} '
-          'paired=${result.paired} system=${result.isSystemDevice} '
-          'services=${result.services.join(',')}',
-    );
+    if (previous == null) {
+      AppLogger.diagnostic(
+        'BT_CLASSIC_DEVICE_FOUND',
+        'name=$name address=$id rssi=${result.rssi} '
+            'paired=${result.bondState == BtcBondState.bonded} '
+            'type=${result.type.name} uuids=${result.uuids.join(',')}',
+      );
+    }
     return true;
   }
 
   @visibleForTesting
-  static String? resolveDeviceName({
-    required String advertisedName,
-    required String platformName,
-  }) {
-    final advertised = advertisedName.trim();
-    if (advertised.isNotEmpty) return advertised;
-    final platform = platformName.trim();
-    return platform.isEmpty ? null : platform;
+  static String? resolveDeviceName(String? alias, String? name) {
+    final localAlias = alias?.trim() ?? '';
+    if (localAlias.isNotEmpty) return localAlias;
+    final advertisedName = name?.trim() ?? '';
+    return advertisedName.isEmpty ? null : advertisedName;
   }
 
   Future<void> connect(BluetoothScaleDevice scale) async {
@@ -256,162 +300,190 @@ class BluetoothScaleService extends ChangeNotifier {
     _status = BluetoothScaleStatus.connecting;
     _errorMessage = null;
     _weightKg = null;
+    _receiveBuffer = '';
     notifyListeners();
+
     try {
-      _listenToConnection(scale.device);
-      await scale.device.connect(timeout: const Duration(seconds: 15));
+      var device = scale.device;
+      if (device.bondState != BtcBondState.bonded) {
+        final paired = await _bluetooth.bondDevice(device.address);
+        if (!paired) {
+          throw const BtcConnectionException(
+            'Pairing was not completed. Pair the scale and try again.',
+            cause: BtcConnectFailure.notPaired,
+          );
+        }
+        device = BtcDevice(
+          address: device.address,
+          name: device.name,
+          alias: device.alias,
+          rssi: device.rssi,
+          type: device.type,
+          bondState: BtcBondState.bonded,
+          uuids: device.uuids,
+        );
+        _connectedDevice = device;
+        _storeDevice(device);
+      }
+
+      final connection = await _bluetooth.connect(
+        address: device.address,
+        timeout: connectionTimeout,
+      );
+      _connection = connection;
       _reconnectAttempts = 0;
-      await _discoverWeightCharacteristic(scale.device);
+      _listenToConnection(connection);
+      _status = BluetoothScaleStatus.connected;
+      _errorMessage = null;
+      AppLogger.diagnostic(
+        'BT_SCALE_CONNECTED',
+        'name=${scale.name} address=${device.address} uuid=${BtcUuid.spp}',
+      );
+      notifyListeners();
+    } on BtcConnectionException catch (error) {
+      _setError('Unable to connect to ${scale.name}: ${error.message}');
+    } on BtcTimeoutException catch (error) {
+      _setError('Connection to ${scale.name} timed out: ${error.message}');
     } catch (error) {
       _setError('Unable to connect to ${scale.name}: $error');
     }
   }
 
-  void _listenToConnection(BleDevice device) {
-    unawaited(_connectionSubscription?.cancel());
-    _connectionSubscription = device.connectionStream.listen((isConnected) {
-      if (!isConnected &&
-          _connectedDevice != null &&
-          _canonicalDeviceId(_connectedDevice!.deviceId) ==
-              _canonicalDeviceId(device.deviceId)) {
-        _measurementCharacteristic = null;
-        _weightKg = null;
-        if (_intentionalDisconnect) {
-          _status = BluetoothScaleStatus.disconnected;
-        } else {
-          _scheduleReconnect(device);
-        }
-        notifyListeners();
+  void _listenToConnection(BtcConnection connection) {
+    unawaited(_inputSubscription?.cancel());
+    unawaited(_connectionStateSubscription?.cancel());
+    _inputSubscription = connection.input.listen(
+      _onSerialBytes,
+      onError: (Object error) => _setError('Weight stream failed: $error'),
+      onDone: _handleRemoteDisconnect,
+    );
+    _connectionStateSubscription = connection.stateStream.listen((state) {
+      if (state == BtcConnectionState.disconnected) {
+        _handleRemoteDisconnect();
       }
     });
   }
 
-  Future<void> _discoverWeightCharacteristic(BleDevice device) async {
-    final services = await device.discoverServices(
-      timeout: const Duration(seconds: 15),
+  void _onSerialBytes(Uint8List bytes) {
+    if (bytes.isEmpty) return;
+    final chunk = ascii
+        .decode(bytes, allowInvalid: true)
+        .replaceAll('\u0000', '');
+    AppLogger.diagnostic(
+      'BT_SCALE_RX',
+      'hex=${bytes.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join(' ')} '
+          'text=${jsonEncode(chunk)}',
     );
-    final diagnostics = <String>[];
-    BleCharacteristic? measurement;
-    for (final service in services) {
-      for (final characteristic in service.characteristics) {
-        final properties = characteristic.properties;
-        diagnostics.add(
-          '${service.uuid}/${characteristic.uuid} '
-          '[read=${properties.contains(CharacteristicProperty.read)}, '
-          'notify=${properties.contains(CharacteristicProperty.notify)}, '
-          'indicate=${properties.contains(CharacteristicProperty.indicate)}]',
-        );
-        if (BleUuidParser.compareStrings(
-              service.uuid,
-              weightScaleServiceUuid,
-            ) &&
-            BleUuidParser.compareStrings(
-              characteristic.uuid,
-              weightMeasurementCharacteristicUuid,
-            )) {
-          measurement = characteristic;
-        }
-      }
+    _receiveBuffer += chunk;
+    if (_receiveBuffer.length > 4096) {
+      _receiveBuffer = _receiveBuffer.substring(_receiveBuffer.length - 4096);
     }
-    _discoveredGatt = List.unmodifiable(diagnostics);
-    if (measurement == null) {
-      _status = BluetoothScaleStatus.unsupported;
-      _errorMessage =
-          'Connected, but the standard Weight Measurement characteristic '
-          '(0x2A9D) was not found. This may be a custom BLE protocol or a '
-          'Bluetooth Classic SPP scale; its manufacturer UUID and payload '
-          'format are required.';
-      AppLogger.diagnostic('BLE_SCALE_GATT', diagnostics.join(', '));
+
+    final frames = _receiveBuffer.split(RegExp(r'[\r\n]+'));
+    _receiveBuffer = frames.removeLast();
+    for (final frame in frames) {
+      _processFrame(frame);
+    }
+
+    // Some open-protocol indicators stream fixed records without CR/LF.
+    // Debounce the current chunk and treat it as one frame without losing the
+    // normal delimiter-based path.
+    _unterminatedFrameTimer?.cancel();
+    if (_receiveBuffer.trim().isNotEmpty) {
+      _unterminatedFrameTimer = Timer(const Duration(milliseconds: 180), () {
+        final frame = _receiveBuffer;
+        _receiveBuffer = '';
+        _processFrame(frame);
+      });
+    }
+  }
+
+  void _processFrame(String frame) {
+    final clean = frame.trim();
+    if (clean.isEmpty) return;
+    _lastRawFrame = clean;
+    AppLogger.diagnostic('BT_SCALE_FRAME', jsonEncode(clean));
+    final parsed = tryParseOpenProtocolWeight(clean);
+    if (parsed == null || !parsed.isFinite || parsed < 0) {
+      AppLogger.diagnostic(
+        'BT_SCALE_UNPARSED_FRAME',
+        'No unambiguous weight found in ${jsonEncode(clean)}',
+      );
       notifyListeners();
       return;
     }
-
-    _measurementCharacteristic = measurement;
-    await _measurementSubscription?.cancel();
-    _measurementSubscription = measurement.onValueReceived.listen(
-      _onMeasurement,
-      onError: (Object error) => _setError('Weight stream failed: $error'),
-    );
-    final properties = measurement.properties;
-    if (properties.contains(CharacteristicProperty.notify)) {
-      await measurement.notifications.subscribe(
-        timeout: const Duration(seconds: 10),
-      );
-    } else if (properties.contains(CharacteristicProperty.indicate)) {
-      await measurement.indications.subscribe(
-        timeout: const Duration(seconds: 10),
-      );
-    }
-    if (properties.contains(CharacteristicProperty.read)) {
-      _onMeasurement(
-        await measurement.read(timeout: const Duration(seconds: 10)),
-      );
-    }
+    _weightKg = parsed;
     _status = BluetoothScaleStatus.connected;
     _errorMessage = null;
     notifyListeners();
   }
 
-  void _onMeasurement(Uint8List bytes) {
-    if (bytes.isEmpty) return;
-    try {
-      final parsed = parseStandardWeightMeasurement(bytes);
-      if (parsed <= 0 || !parsed.isFinite) return;
-      _weightKg = parsed;
-      _status = BluetoothScaleStatus.connected;
-      _errorMessage = null;
-      notifyListeners();
-    } on FormatException catch (error) {
-      _setError(error.message);
-    }
-  }
-
   @visibleForTesting
-  static double parseStandardWeightMeasurement(List<int> bytes) {
-    if (bytes.length < 3) {
-      throw const FormatException('Invalid 0x2A9D weight payload.');
+  static double? tryParseOpenProtocolWeight(String frame) {
+    final normalized = frame
+        .replaceAll('\u0000', '')
+        .replaceAll(',', '.')
+        .trim();
+    if (normalized.isEmpty) return null;
+
+    // Prefer a value explicitly labelled with a supported unit.
+    final labelled = RegExp(
+      r'([+-]?\s*\d+(?:\.\d+)?)\s*(kg|kgs|kilograms?|g|grams?|lb|lbs|pounds?)\b',
+      caseSensitive: false,
+    ).allMatches(normalized).toList();
+    if (labelled.isNotEmpty) {
+      final match = labelled.last;
+      final value = double.tryParse(match.group(1)!.replaceAll(' ', ''));
+      if (value == null) return null;
+      final unit = match.group(2)!.toLowerCase();
+      if (unit == 'g' || unit.startsWith('gram')) return value / 1000;
+      if (unit == 'lb' || unit == 'lbs' || unit.startsWith('pound')) {
+        return value * 0.45359237;
+      }
+      return value;
     }
-    final data = Uint8List.fromList(bytes);
-    final flags = data[0];
-    final rawWeight = ByteData.sublistView(data).getUint16(1, Endian.little);
-    final imperial = (flags & 0x01) != 0;
-    if (imperial) {
-      final pounds = rawWeight * 0.01;
-      return pounds * 0.45359237;
-    }
-    return rawWeight * 0.005;
+
+    // For an unlabelled serial frame, accept it only when there is exactly
+    // one numeric field. This avoids mistaking status codes for a weight.
+    final numbers = RegExp(
+      r'[+-]?\s*\d+(?:\.\d+)?',
+    ).allMatches(normalized).toList();
+    if (numbers.length != 1) return null;
+    return double.tryParse(numbers.single.group(0)!.replaceAll(' ', ''));
   }
 
-  void _scheduleReconnect(BleDevice device) {
+  void _handleRemoteDisconnect() {
+    if (_intentionalDisconnect || _connectedDevice == null) return;
+    if (_status == BluetoothScaleStatus.reconnecting) return;
+    final connection = _connection;
+    _connection = null;
+    connection?.dispose();
+    _weightKg = null;
+    _scheduleReconnect();
+    notifyListeners();
+  }
+
+  void _scheduleReconnect() {
     _reconnectTimer?.cancel();
     if (_reconnectAttempts >= 3 ||
-        _adapterState != AvailabilityState.poweredOn) {
+        _adapterState != BtcAdapterState.on ||
+        _connectedDevice == null) {
       _status = BluetoothScaleStatus.disconnected;
       _errorMessage =
           'Weighing scale disconnected. Tap reconnect to try again.';
+      notifyListeners();
       return;
     }
     _reconnectAttempts++;
     _status = BluetoothScaleStatus.reconnecting;
-    _reconnectTimer = Timer(
-      Duration(seconds: _reconnectAttempts * 2),
-      () async {
-        if (_intentionalDisconnect ||
-            _connectedDevice == null ||
-            _canonicalDeviceId(_connectedDevice!.deviceId) !=
-                _canonicalDeviceId(device.deviceId)) {
-          return;
-        }
-        try {
-          await device.connect(timeout: const Duration(seconds: 15));
-          await _discoverWeightCharacteristic(device);
-        } catch (error) {
-          AppLogger.diagnostic('BLE_SCALE_RECONNECT', error.toString());
-          _scheduleReconnect(device);
-          notifyListeners();
-        }
-      },
-    );
+    _reconnectTimer = Timer(Duration(seconds: _reconnectAttempts * 2), () {
+      final device = _connectedDevice;
+      if (_intentionalDisconnect || device == null) return;
+      final known = _devices[_canonicalDeviceId(device.address)];
+      if (known != null) {
+        unawaited(connect(known));
+      }
+    });
   }
 
   Future<void> reconnect() async {
@@ -420,53 +492,35 @@ class BluetoothScaleService extends ChangeNotifier {
       await startScan();
       return;
     }
-    final id = _canonicalDeviceId(device.deviceId);
-    final known =
-        _devices[id] ??
-        BluetoothScaleDevice(
-          device: device,
-          name:
-              resolveDeviceName(
-                advertisedName: device.name ?? '',
-                platformName: '',
-              ) ??
-              'Weighing scale',
-          id: id,
-          rssi: device.rssi ?? 0,
-        );
-    await connect(known);
+    final known = _devices[_canonicalDeviceId(device.address)];
+    if (known != null) await connect(known);
   }
 
   Future<void> disconnect() => _disconnectCurrent(intentional: true);
 
-  static String _canonicalDeviceId(String deviceId) => deviceId.toLowerCase();
+  static String _canonicalDeviceId(String address) => address.toUpperCase();
 
   Future<void> _disconnectCurrent({required bool intentional}) async {
     _intentionalDisconnect = intentional;
     _reconnectTimer?.cancel();
-    await _measurementSubscription?.cancel();
-    _measurementSubscription = null;
-    final characteristic = _measurementCharacteristic;
-    if (characteristic?.isSubscribed == true) {
+    _unterminatedFrameTimer?.cancel();
+    await _inputSubscription?.cancel();
+    await _connectionStateSubscription?.cancel();
+    _inputSubscription = null;
+    _connectionStateSubscription = null;
+    final connection = _connection;
+    _connection = null;
+    if (connection != null) {
       try {
-        await characteristic!.unsubscribe(timeout: const Duration(seconds: 5));
+        await connection.close();
       } catch (_) {
-        // The device may already be gone; subscriptions are still released.
+        // The remote device may already be gone.
       }
+      connection.dispose();
     }
-    _measurementCharacteristic = null;
-    final device = _connectedDevice;
-    if (device != null) {
-      try {
-        await device.disconnect(timeout: const Duration(seconds: 5));
-      } catch (_) {
-        // Safe cleanup after a remote disconnect.
-      }
-    }
-    await _connectionSubscription?.cancel();
-    _connectionSubscription = null;
     _connectedDevice = null;
     _weightKg = null;
+    _receiveBuffer = '';
     if (intentional) _status = BluetoothScaleStatus.disconnected;
     notifyListeners();
   }
@@ -474,18 +528,23 @@ class BluetoothScaleService extends ChangeNotifier {
   void _setError(String message) {
     _status = BluetoothScaleStatus.error;
     _errorMessage = message;
-    AppLogger.diagnostic('BLE_SCALE_ERROR', message);
+    AppLogger.diagnostic('BT_SCALE_ERROR', message);
     notifyListeners();
   }
 
-  Future<void> openSettings() => openAppSettings();
+  Future<void> openSettings() async {
+    await _bluetooth.openAppSettings();
+  }
 
   Future<void> close() async {
     await stopScan();
     await _disconnectCurrent(intentional: true);
-    await _scanSubscription?.cancel();
-    _scanSubscription = null;
-    UniversalBle.onAvailabilityChange = null;
+    await _adapterSubscription?.cancel();
+    await _discoverySubscription?.cancel();
+    await _discoveryStateSubscription?.cancel();
+    _adapterSubscription = null;
+    _discoverySubscription = null;
+    _discoveryStateSubscription = null;
     _initialized = false;
     super.dispose();
   }

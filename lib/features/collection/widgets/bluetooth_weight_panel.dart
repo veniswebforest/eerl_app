@@ -164,13 +164,14 @@ class BluetoothWeightPanel extends StatelessWidget {
         BluetoothScaleStatus.idle => 'Not connected',
         BluetoothScaleStatus.permissionDenied => 'Permission required',
         BluetoothScaleStatus.adapterOff => 'Bluetooth is off',
-        BluetoothScaleStatus.scanning => 'Scanning nearby BLE devices…',
+        BluetoothScaleStatus.scanning =>
+          'Scanning nearby Bluetooth Classic devices…',
         BluetoothScaleStatus.connecting => 'Connecting…',
         BluetoothScaleStatus.connected =>
           'Connected to ${provider.connectedDevice?.name ?? 'scale'}',
         BluetoothScaleStatus.reconnecting => 'Reconnecting…',
         BluetoothScaleStatus.disconnected => 'Disconnected',
-        BluetoothScaleStatus.unsupported => 'Unsupported scale protocol',
+        BluetoothScaleStatus.unsupported => 'Bluetooth Classic unsupported',
         BluetoothScaleStatus.error => 'Connection error',
       };
 
@@ -196,7 +197,7 @@ class BluetoothWeightPanel extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            'Nearby BLE devices',
+                            'Nearby Bluetooth Classic devices',
                             style: AppTextStyles.semiboldH7_18,
                           ),
                         ),
@@ -217,8 +218,8 @@ class BluetoothWeightPanel extends StatelessWidget {
                               child: Text(
                                 provider.errorMessage ??
                                     (provider.isScanning
-                                        ? 'Searching for nearby BLE devices…'
-                                        : 'No named BLE devices found. Make sure the scale is on and in pairing mode.'),
+                                        ? 'Searching for nearby Bluetooth Classic devices…'
+                                        : 'No Bluetooth Classic devices found. Make sure the scale is on and in pairing mode.'),
                                 textAlign: TextAlign.center,
                               ),
                             ),
@@ -233,7 +234,7 @@ class BluetoothWeightPanel extends StatelessWidget {
                               final connected =
                                   provider.connectedDevice?.id == device.id;
                               return ListTile(
-                                key: ValueKey('ble-device-${device.id}'),
+                                key: ValueKey('classic-device-${device.id}'),
                                 contentPadding: EdgeInsets.zero,
                                 leading: Icon(
                                   connected
@@ -246,8 +247,9 @@ class BluetoothWeightPanel extends StatelessWidget {
                                 title: Text(device.name),
                                 subtitle: Text(
                                   '${device.id}\n'
-                                  '${device.device.isSystemDevice == true ? 'System device • ' : ''}'
-                                  '${connected ? 'Connected' : 'Disconnected'} • ${device.rssi} dBm',
+                                  '${device.isPaired ? 'Paired • ' : ''}'
+                                  '${connected ? 'Connected' : 'Disconnected'}'
+                                  '${device.rssi == null ? '' : ' • ${device.rssi} dBm'}',
                                 ),
                                 isThreeLine: true,
                                 trailing: TextButton(
