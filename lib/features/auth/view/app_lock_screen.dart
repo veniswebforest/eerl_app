@@ -73,7 +73,12 @@ class _AppLockScreenState extends State<AppLockScreen> {
         );
         if (!mounted) return;
         final role = DashboardUserRoleX.fromKey(storedRole);
-        context.go(AppRoutes.home, extra: role);
+        context.go(
+          role == DashboardUserRole.driver
+              ? AppRoutes.driverHome
+              : AppRoutes.home,
+          extra: role == DashboardUserRole.driver ? null : role,
+        );
       }
     } else {
       if (widget.onAuthFailed != null) {

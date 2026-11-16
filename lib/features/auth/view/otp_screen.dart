@@ -100,11 +100,20 @@ class _OtpScreenState extends State<OtpScreen>
     if (success) {
       // verifyOtp only succeeds after the API returns and its validated session
       // is persisted. Navigation must not wait for Bootstrap or image caching.
-      final role = await (widget.loadInitialRole ?? _storedDashboardRole)();
+      final loginIdentifiedDriver =
+          authProvider.verifyOtpResponse?.isDriver == true;
+      final role = loginIdentifiedDriver
+          ? DashboardUserRole.driver
+          : await (widget.loadInitialRole ?? _storedDashboardRole)();
       if (!mounted) return;
       final onAuthenticated = widget.onAuthenticated;
       if (onAuthenticated != null) {
         onAuthenticated(role);
+        _startInitialSyncAfterNavigation();
+      } else if (role == DashboardUserRole.driver) {
+        await AppDatabase.instance.setSyncMeta('active_role', role.syncMetaKey);
+        if (!mounted) return;
+        context.go(AppRoutes.driverHome);
         _startInitialSyncAfterNavigation();
       } else {
         context.go(

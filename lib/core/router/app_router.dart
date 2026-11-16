@@ -51,6 +51,7 @@ import 'package:eerl_app/features/wallet/view/expense_submitted_screen.dart';
 import 'package:eerl_app/features/wallet/view/log_expense_screen.dart';
 import 'package:eerl_app/features/wallet/view/request_cash_screen.dart';
 import 'package:eerl_app/features/wallet/view/wallet_tab_screen.dart';
+import 'package:pickup_supervisor/driver/view/driver_home_screen.dart';
 import 'app_route_data.dart';
 import 'app_routes.dart';
 
@@ -116,6 +117,12 @@ class AppRouter {
             state.extra as DashboardUserRole? ??
             DashboardUserRole.collectionAgent,
       ),
+    ),
+    GoRoute(
+      path: AppRoutes.driverHome,
+      name: 'driverHome',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (_, _) => const DriverHomeScreen(),
     ),
     GoRoute(
       path: AppRoutes.wallet,

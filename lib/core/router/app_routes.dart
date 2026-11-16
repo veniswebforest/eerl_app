@@ -7,6 +7,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String otp = '/otp';
   static const String appLock = '/app-lock';
+  static const String driverHome = '/driver';
 
   // ── Shell (bottom navigation) ────────────────────────────────────
   /// Home tab — also the shell root for the bottom navigation.

@@ -66,7 +66,14 @@ class _SplashScreenState extends State<SplashScreen>
         context.go(AppRoutes.appLock);
       } else {
         final role = await _storedDashboardRole();
-        if (mounted) context.go(AppRoutes.home, extra: role);
+        if (mounted) {
+          context.go(
+            role == DashboardUserRole.driver
+                ? AppRoutes.driverHome
+                : AppRoutes.home,
+            extra: role == DashboardUserRole.driver ? null : role,
+          );
+        }
       }
     } else {
       context.go(AppRoutes.login);

@@ -12,6 +12,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 void main() {
+  test('parses DRIVER from a successful login response', () {
+    final response = VerifyOtpResponse.fromJson({
+      'accessToken': 'valid-driver-token',
+      'sessionExpiresAt': '2026-11-17T08:00:00.000Z',
+      'roles': [
+        {'key': 'DRIVER', 'name': 'Driver'},
+      ],
+    });
+
+    expect(response.roles, ['DRIVER']);
+    expect(response.isDriver, isTrue);
+    expect(
+      DashboardUserRoleX.fromKey(response.roles.single),
+      DashboardUserRole.driver,
+    );
+  });
+
   testWidgets(
     'navigates after OTP verification without awaiting initial sync',
     (tester) async {
@@ -52,6 +69,39 @@ void main() {
       await tester.pump();
     },
   );
+
+  testWidgets('uses DRIVER from the successful login response', (tester) async {
+    final syncCompleter = Completer<void>();
+    DashboardUserRole? authenticatedRole;
+    final authProvider = AuthProvider(repository: _DriverAuthRepository())
+      ..setPhoneNumber('9876543210')
+      ..setOtp('123456');
+    addTearDown(authProvider.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: authProvider,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: OtpScreen(
+            phoneNumber: '9876543210',
+            loadInitialRole: () async => DashboardUserRole.collectionAgent,
+            onAuthenticated: (role) => authenticatedRole = role,
+            startInitialSync: () => syncCompleter.future,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Verify'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(authenticatedRole, DashboardUserRole.driver);
+    syncCompleter.complete();
+    await tester.pump();
+  });
 
   testWidgets('verify dismisses the OTP keyboard before awaiting the API', (
     tester,
@@ -152,6 +202,18 @@ class _PendingVerifyRepository extends AuthRepository {
     required String phone,
     required String otp,
   }) => verifyCompleter.future;
+}
+
+class _DriverAuthRepository extends AuthRepository {
+  @override
+  Future<VerifyOtpResponse> verifyOtp({
+    required String phone,
+    required String otp,
+  }) async => VerifyOtpResponse(
+    accessToken: 'valid-driver-token',
+    sessionExpiresAt: DateTime.now().toUtc().add(const Duration(hours: 1)),
+    roles: const ['DRIVER'],
+  );
 }
 
 class _ResendAuthRepository extends AuthRepository {

@@ -7,6 +7,7 @@ enum DashboardUserRole {
   iecAgent,
   supervisor,
   admin,
+  driver,
 }
 
 extension DashboardUserRoleX on DashboardUserRole {
@@ -16,6 +17,7 @@ extension DashboardUserRoleX on DashboardUserRole {
     DashboardUserRole.collectionManager => 'COLLECTION_MANAGER',
     DashboardUserRole.iecAgent => 'IEC_AGENT',
     DashboardUserRole.collectionAgent => 'AGENT',
+    DashboardUserRole.driver => 'DRIVER',
   };
 
   static DashboardUserRole fromKey(String? key) {
@@ -26,6 +28,7 @@ extension DashboardUserRoleX on DashboardUserRole {
       'ADMIN' => DashboardUserRole.admin,
       'COLLECTION_MANAGER' => DashboardUserRole.collectionManager,
       'IEC_AGENT' => DashboardUserRole.iecAgent,
+      'DRIVER' => DashboardUserRole.driver,
       'AGENT' || 'COLLECTION_AGENT' => DashboardUserRole.collectionAgent,
       _ => DashboardUserRole.collectionAgent,
     };

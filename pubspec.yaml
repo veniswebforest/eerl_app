@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  pickup_supervisor:
+    path: modules/pickup_supervisor
 
   # Icons
   cupertino_icons: ^1.0.8

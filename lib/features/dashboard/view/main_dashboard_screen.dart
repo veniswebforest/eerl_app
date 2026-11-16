@@ -155,7 +155,12 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       final storedRole = await AppDatabase.instance.getSyncMeta('active_role');
       if (!mounted) return;
       _appliedBootstrapRevision = revision;
-      _navigation.updateRoleFromParent(DashboardUserRoleX.fromKey(storedRole));
+      final role = DashboardUserRoleX.fromKey(storedRole);
+      if (role == DashboardUserRole.driver) {
+        context.go(AppRoutes.driverHome);
+        return;
+      }
+      _navigation.updateRoleFromParent(role);
     } finally {
       _roleRefreshScheduled = false;
     }

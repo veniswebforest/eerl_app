@@ -5,6 +5,7 @@ import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pickup_supervisor/driver/services/driver_photo_capture.dart';
 import 'package:provider/provider.dart';
 
 import 'core/local_database/app_database.dart';
@@ -21,15 +22,13 @@ import 'core/utils/image_compressor.dart';
 import 'features/auth/data/auth_session_storage.dart';
 import 'features/auth/presentation/auth_provider.dart';
 import 'features/bootstrap/service/bootstrap_sync_service.dart';
+import 'shared/widgets/in_app_camera_screen.dart';
 import 'shared/widgets/network_status_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Android can terminate this process while its external camera activity is
-  // open. Recover that camera result before rebuilding the restored route.
-  // Do not hold the native splash screen while a vendor camera/plugin is
-  // finishing its Android activity-result recovery. Individual photo forms
-  // await the same initialization future before claiming their result.
+  // Android can terminate this process while its external camera activity is open. Recover that camera result before rebuilding the restored route.
+  // Do not hold the native splash screen while a vendor camera/plugin is finishing its Android activity-result recovery. Individual photo forms await the same initialization future before claiming their result.
   unawaited(ImageCompressor.initializeLostDataRecovery());
   await AppDatabase.instance.database;
 
@@ -157,7 +156,18 @@ class _EerlAppState extends State<EerlApp> with WidgetsBindingObserver {
     return MaterialApp.router(
       restorationScopeId: 'eerl-app',
       builder: (context, child) {
-        return NetworkStatusOverlay(child: SafeAreaWrapper(child: child!));
+        return DriverPhotoCaptureScope(
+          adapter: DriverPhotoCaptureAdapter(
+            capture: (captureContext, {required recoveryId, required title}) =>
+                InAppCameraScreen.capture(
+                  captureContext,
+                  recoveryId: recoveryId,
+                  title: title,
+                ),
+            recover: ImageCompressor.claimRecoveredImage,
+          ),
+          child: NetworkStatusOverlay(child: SafeAreaWrapper(child: child!)),
+        );
       },
       // ── App Info ─────────────────────────────────────────────────
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
