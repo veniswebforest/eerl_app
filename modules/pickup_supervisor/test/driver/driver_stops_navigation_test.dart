@@ -71,6 +71,36 @@ void main() {
     expect(find.text('Cardboard'), findsOneWidget);
     expect(find.text('Photos (material and scale)'), findsOneWidget);
     expect(find.text('Ask supervisor to correct'), findsOneWidget);
+
+    await tester.tap(find.text('Ask supervisor to correct'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ask to correct'), findsOneWidget);
+    expect(
+      find.byKey(const Key('driver-correction-problem-label')),
+      findsOneWidget,
+    );
+    expect(find.text('Weight'), findsOneWidget);
+    expect(find.text('Item'), findsOneWidget);
+    expect(find.text('Photo'), findsOneWidget);
+    expect(find.text('Other'), findsOneWidget);
+    expect(
+      find.byKey(const Key('driver-correction-note-label')),
+      findsOneWidget,
+    );
+    expect(find.text('Max 150 Characters'), findsOneWidget);
+    expect(find.text('Send to supervisor'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('driver-correction-item')));
+    await tester.enterText(
+      find.byKey(const Key('driver-correction-note')),
+      List.filled(151, 'a').join(),
+    );
+    await tester.pump();
+    final note = tester.widget<TextField>(
+      find.byKey(const Key('driver-correction-note')),
+    );
+    expect(note.controller!.text.length, 150);
   });
 
   testWidgets('stop list uses Gujarati localization', (tester) async {

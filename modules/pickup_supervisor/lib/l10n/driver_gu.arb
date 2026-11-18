@@ -192,5 +192,14 @@
   "cardboardWeight": "35 કિગ્રા",
   "photosMaterialScale": "ફોટા (સામગ્રી અને વજનકાંટો)",
   "askSupervisorToCorrect": "સુધારવા સુપરવાઇઝરને કહો",
-  "savedCollectionReadonlyMessage": "તમે સેવ કરેલું કલેક્શન માત્ર જોઈ શકો છો. કંઈ ખોટું હોય તો તમારા સુપરવાઇઝરને કહો; તેઓ ફોટા સાથે તપાસીને સુધારશે."
+  "savedCollectionReadonlyMessage": "તમે સેવ કરેલું કલેક્શન માત્ર જોઈ શકો છો. કંઈ ખોટું હોય તો તમારા સુપરવાઇઝરને કહો; તેઓ ફોટા સાથે તપાસીને સુધારશે.",
+  "askToCorrect": "સુધારવા કહો",
+  "whatIsWrongAtStop": "શું ખોટું છે? હોટેલ રાજધાની · સ્ટોપ 2",
+  "correctionWeight": "વજન",
+  "correctionItem": "વસ્તુ",
+  "correctionPhoto": "ફોટો",
+  "correctionOther": "અન્ય",
+  "rightValueAndNote": "સાચી કિંમત અને નોંધ",
+  "correctionNoteExample": "ઉદાહરણ: PET બોટલનું વજન 50 નહીં, 60 કિગ્રા હતું. વજનકાંટાના ફોટામાં 60 કિગ્રા દેખાય છે.",
+  "sendToSupervisor": "સુપરવાઇઝરને મોકલો"
 }

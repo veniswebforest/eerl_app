@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/driver/view/driver_collection_correction_screen.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_dashboard_widgets.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_stops_widgets.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
@@ -70,7 +71,12 @@ class _CollectedStopDetailView extends StatelessWidget {
                           DriverPrimaryButton(
                             label: l10n.askSupervisorToCorrect,
                             radius: 12,
-                            onPressed: () {},
+                            onPressed: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) =>
+                                    const DriverCollectionCorrectionScreen(),
+                              ),
+                            ),
                           ),
                           const SizedBox(height: 16),
                           Text(

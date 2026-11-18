@@ -192,5 +192,14 @@
   "cardboardWeight": "35 kg",
   "photosMaterialScale": "Photos (material and scale)",
   "askSupervisorToCorrect": "Ask supervisor to correct",
-  "savedCollectionReadonlyMessage": "You can only view a saved collection. If something is wrong, ask your supervisor: they check it against the photos and correct it."
+  "savedCollectionReadonlyMessage": "You can only view a saved collection. If something is wrong, ask your supervisor: they check it against the photos and correct it.",
+  "askToCorrect": "Ask to correct",
+  "whatIsWrongAtStop": "What is wrong? Hotel Rajdhani · stop 2",
+  "correctionWeight": "Weight",
+  "correctionItem": "Item",
+  "correctionPhoto": "Photo",
+  "correctionOther": "Other",
+  "rightValueAndNote": "Right value and note",
+  "correctionNoteExample": "Example: PET Bottles was 60 kg, not 50 kg. The scale photo shows 60 kg.",
+  "sendToSupervisor": "Send to supervisor"
 }

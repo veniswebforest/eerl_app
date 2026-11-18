@@ -542,4 +542,32 @@ class DriverLocalizationsHi extends DriverLocalizations {
   @override
   String get savedCollectionReadonlyMessage =>
       'आप सेव किया हुआ संग्रह केवल देख सकते हैं। कुछ गलत हो तो अपने सुपरवाइज़र से कहें; वे फोटो से जाँच कर उसे सुधारेंगे।';
+
+  @override
+  String get askToCorrect => 'सुधार के लिए कहें';
+
+  @override
+  String get whatIsWrongAtStop => 'क्या गलत है? होटल राजधानी · स्टॉप 2';
+
+  @override
+  String get correctionWeight => 'वज़न';
+
+  @override
+  String get correctionItem => 'वस्तु';
+
+  @override
+  String get correctionPhoto => 'फोटो';
+
+  @override
+  String get correctionOther => 'अन्य';
+
+  @override
+  String get rightValueAndNote => 'सही मान और टिप्पणी';
+
+  @override
+  String get correctionNoteExample =>
+      'उदाहरण: PET बोतलें 50 नहीं, 60 किग्रा थीं। तराजू के फोटो में 60 किग्रा दिखता है।';
+
+  @override
+  String get sendToSupervisor => 'सुपरवाइज़र को भेजें';
 }

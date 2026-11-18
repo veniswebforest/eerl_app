@@ -1095,6 +1095,60 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'You can only view a saved collection. If something is wrong, ask your supervisor: they check it against the photos and correct it.'**
   String get savedCollectionReadonlyMessage;
+
+  /// No description provided for @askToCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask to correct'**
+  String get askToCorrect;
+
+  /// No description provided for @whatIsWrongAtStop.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong? Hotel Rajdhani · stop 2'**
+  String get whatIsWrongAtStop;
+
+  /// No description provided for @correctionWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight'**
+  String get correctionWeight;
+
+  /// No description provided for @correctionItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get correctionItem;
+
+  /// No description provided for @correctionPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get correctionPhoto;
+
+  /// No description provided for @correctionOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get correctionOther;
+
+  /// No description provided for @rightValueAndNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Right value and note'**
+  String get rightValueAndNote;
+
+  /// No description provided for @correctionNoteExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: PET Bottles was 60 kg, not 50 kg. The scale photo shows 60 kg.'**
+  String get correctionNoteExample;
+
+  /// No description provided for @sendToSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to supervisor'**
+  String get sendToSupervisor;
 }
 
 class _DriverLocalizationsDelegate

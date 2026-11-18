@@ -541,4 +541,32 @@ class DriverLocalizationsGu extends DriverLocalizations {
   @override
   String get savedCollectionReadonlyMessage =>
       'તમે સેવ કરેલું કલેક્શન માત્ર જોઈ શકો છો. કંઈ ખોટું હોય તો તમારા સુપરવાઇઝરને કહો; તેઓ ફોટા સાથે તપાસીને સુધારશે.';
+
+  @override
+  String get askToCorrect => 'સુધારવા કહો';
+
+  @override
+  String get whatIsWrongAtStop => 'શું ખોટું છે? હોટેલ રાજધાની · સ્ટોપ 2';
+
+  @override
+  String get correctionWeight => 'વજન';
+
+  @override
+  String get correctionItem => 'વસ્તુ';
+
+  @override
+  String get correctionPhoto => 'ફોટો';
+
+  @override
+  String get correctionOther => 'અન્ય';
+
+  @override
+  String get rightValueAndNote => 'સાચી કિંમત અને નોંધ';
+
+  @override
+  String get correctionNoteExample =>
+      'ઉદાહરણ: PET બોટલનું વજન 50 નહીં, 60 કિગ્રા હતું. વજનકાંટાના ફોટામાં 60 કિગ્રા દેખાય છે.';
+
+  @override
+  String get sendToSupervisor => 'સુપરવાઇઝરને મોકલો';
 }

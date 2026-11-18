@@ -541,4 +541,32 @@ class DriverLocalizationsEn extends DriverLocalizations {
   @override
   String get savedCollectionReadonlyMessage =>
       'You can only view a saved collection. If something is wrong, ask your supervisor: they check it against the photos and correct it.';
+
+  @override
+  String get askToCorrect => 'Ask to correct';
+
+  @override
+  String get whatIsWrongAtStop => 'What is wrong? Hotel Rajdhani · stop 2';
+
+  @override
+  String get correctionWeight => 'Weight';
+
+  @override
+  String get correctionItem => 'Item';
+
+  @override
+  String get correctionPhoto => 'Photo';
+
+  @override
+  String get correctionOther => 'Other';
+
+  @override
+  String get rightValueAndNote => 'Right value and note';
+
+  @override
+  String get correctionNoteExample =>
+      'Example: PET Bottles was 60 kg, not 50 kg. The scale photo shows 60 kg.';
+
+  @override
+  String get sendToSupervisor => 'Send to supervisor';
 }
