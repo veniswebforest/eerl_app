@@ -12,7 +12,7 @@ void main() {
 
     await tester.drag(
       find.byKey(const Key('driver-home-scroll')),
-      const Offset(0, -700),
+      const Offset(0, -3000),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Report Issue'));
@@ -40,7 +40,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.drag(
       find.byKey(const Key('driver-home-scroll')),
-      const Offset(0, -700),
+      const Offset(0, -3000),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Report Issue'));

@@ -53,7 +53,10 @@ flutter:
     - assets/icons/driver/stops/
     - assets/icons/driver/pickup/
     - assets/icons/driver/issues/
+    - assets/icons/driver/home_v2/
+    - assets/icons/driver/stops_v2/
     - assets/images/driver/pickup/
+    - assets/images/driver/stops_v2/
 
   fonts:
     - family: Manrope

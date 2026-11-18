@@ -7,6 +7,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Welcome back'), findsOneWidget);
-    expect(find.text('Magdalla Warehouse'), findsOneWidget);
+    expect(find.text('Kiran Shah'), findsOneWidget);
+    expect(find.text('You’re Online'), findsOneWidget);
   });
 }

@@ -645,6 +645,456 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'Submit Issue'**
   String get submitIssue;
+
+  /// No description provided for @yourPickupSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Pickup Supervisor'**
+  String get yourPickupSupervisor;
+
+  /// No description provided for @supervisorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Kiran Shah'**
+  String get supervisorName;
+
+  /// No description provided for @message.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get message;
+
+  /// No description provided for @collectedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected today'**
+  String get collectedToday;
+
+  /// No description provided for @collectedWeight420.
+  ///
+  /// In en, this message translates to:
+  /// **'420 kg so far'**
+  String get collectedWeight420;
+
+  /// No description provided for @collectedWeightZero.
+  ///
+  /// In en, this message translates to:
+  /// **'0 kg'**
+  String get collectedWeightZero;
+
+  /// No description provided for @zeroKg.
+  ///
+  /// In en, this message translates to:
+  /// **'0 kg'**
+  String get zeroKg;
+
+  /// No description provided for @cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get cancelled;
+
+  /// No description provided for @todaysTripsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Today’s Trips ({count})'**
+  String todaysTripsCount(int count);
+
+  /// No description provided for @todaysTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Today’s Trips'**
+  String get todaysTrips;
+
+  /// No description provided for @tripMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip 1 · Morning'**
+  String get tripMorning;
+
+  /// No description provided for @tripAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip 2 · Afternoon'**
+  String get tripAfternoon;
+
+  /// No description provided for @morningTripTime.
+  ///
+  /// In en, this message translates to:
+  /// **'7:00 – 11:00 am · 7 stops'**
+  String get morningTripTime;
+
+  /// No description provided for @afternoonTripTime.
+  ///
+  /// In en, this message translates to:
+  /// **'2:00 – 5:00 pm · 6 stops'**
+  String get afternoonTripTime;
+
+  /// No description provided for @afternoonStartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'2:00 pm'**
+  String get afternoonStartTime;
+
+  /// No description provided for @onTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'On the way'**
+  String get onTheWay;
+
+  /// No description provided for @startsAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts {time}'**
+  String startsAt(String time);
+
+  /// No description provided for @delivered.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivered'**
+  String get delivered;
+
+  /// No description provided for @vehicleCrew.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-XX-1234 · Suresh, Mahesh'**
+  String get vehicleCrew;
+
+  /// No description provided for @dropMagdalla.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop at Magdalla Warehouse'**
+  String get dropMagdalla;
+
+  /// No description provided for @dropSachin.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop at Sachin Warehouse'**
+  String get dropSachin;
+
+  /// No description provided for @collectedOnTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected on this trip'**
+  String get collectedOnTrip;
+
+  /// No description provided for @weight420Kg.
+  ///
+  /// In en, this message translates to:
+  /// **'420 kg'**
+  String get weight420Kg;
+
+  /// No description provided for @weight180Kg.
+  ///
+  /// In en, this message translates to:
+  /// **'180 kg'**
+  String get weight180Kg;
+
+  /// No description provided for @stopsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} stops done'**
+  String stopsDone(int completed, int total);
+
+  /// No description provided for @seeAllStops.
+  ///
+  /// In en, this message translates to:
+  /// **'See all {count} stops'**
+  String seeAllStops(int count);
+
+  /// No description provided for @nextStopOnTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Next stop on Trip {trip}'**
+  String nextStopOnTrip(int trip);
+
+  /// No description provided for @afterThat.
+  ///
+  /// In en, this message translates to:
+  /// **'After that ({count})'**
+  String afterThat(int count);
+
+  /// No description provided for @laterToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Later today'**
+  String get laterToday;
+
+  /// No description provided for @earlierToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier today'**
+  String get earlierToday;
+
+  /// No description provided for @stopPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop {current} of {total}'**
+  String stopPosition(int current, int total);
+
+  /// No description provided for @nextStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Next stop'**
+  String get nextStop;
+
+  /// No description provided for @enterCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter collection'**
+  String get enterCollection;
+
+  /// No description provided for @opensAfterStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens after stop {stop}'**
+  String opensAfterStop(int stop);
+
+  /// No description provided for @unlockAfterStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocks when stop {stop} is done, or when you reach this stop (GPS). Tap to check your location.'**
+  String unlockAfterStop(int stop);
+
+  /// No description provided for @handedOverWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Handed over · 1,240 kg net'**
+  String get handedOverWeight;
+
+  /// No description provided for @royalResidency.
+  ///
+  /// In en, this message translates to:
+  /// **'Royal Residency'**
+  String get royalResidency;
+
+  /// No description provided for @shantiNagar.
+  ///
+  /// In en, this message translates to:
+  /// **'Shanti Nagar'**
+  String get shantiNagar;
+
+  /// No description provided for @ghodDodRoadSurat.
+  ///
+  /// In en, this message translates to:
+  /// **'Ghod Dod Road, Surat'**
+  String get ghodDodRoadSurat;
+
+  /// No description provided for @citylightRoadSurat.
+  ///
+  /// In en, this message translates to:
+  /// **'Citylight Road, Surat'**
+  String get citylightRoadSurat;
+
+  /// No description provided for @rakeshStoreManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Rakesh Shah · Store manager'**
+  String get rakeshStoreManager;
+
+  /// No description provided for @maheshOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Mahesh Desai · Owner'**
+  String get maheshOwner;
+
+  /// No description provided for @priyaSecretary.
+  ///
+  /// In en, this message translates to:
+  /// **'Priya Patel · Secretary'**
+  String get priyaSecretary;
+
+  /// No description provided for @meenaSecretary.
+  ///
+  /// In en, this message translates to:
+  /// **'Meena Desai · Secretary'**
+  String get meenaSecretary;
+
+  /// No description provided for @pickupSchedule9to11.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu · 9:00–11:00 am'**
+  String get pickupSchedule9to11;
+
+  /// No description provided for @pickupSchedule3to330.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu · 3:00–3:30 pm'**
+  String get pickupSchedule3to330;
+
+  /// No description provided for @pickupSchedule330to4.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu · 3:30–4:00 pm'**
+  String get pickupSchedule330to4;
+
+  /// No description provided for @noTripToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No trip today'**
+  String get noTripToday;
+
+  /// No description provided for @noTripMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Kiran Shah hasn’t put you on a trip today. You’ll get a message when one is added.'**
+  String get noTripMessage;
+
+  /// No description provided for @tripOneStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip 1 stops'**
+  String get tripOneStops;
+
+  /// No description provided for @morningTripWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning · 7:00 – 11:00 am'**
+  String get morningTripWindow;
+
+  /// No description provided for @fiveOfSevenDone.
+  ///
+  /// In en, this message translates to:
+  /// **'5 of 7 done'**
+  String get fiveOfSevenDone;
+
+  /// No description provided for @stillToCollect.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to collect ({count})'**
+  String stillToCollect(int count);
+
+  /// No description provided for @doneStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Done ({count})'**
+  String doneStops(int count);
+
+  /// No description provided for @stopNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop {number}'**
+  String stopNumber(int number);
+
+  /// No description provided for @hotelRajdhani.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotel Rajdhani'**
+  String get hotelRajdhani;
+
+  /// No description provided for @greenParkSociety.
+  ///
+  /// In en, this message translates to:
+  /// **'Green Park Society'**
+  String get greenParkSociety;
+
+  /// No description provided for @navratriGroundEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Navratri Ground (event)'**
+  String get navratriGroundEvent;
+
+  /// No description provided for @cityBakery.
+  ///
+  /// In en, this message translates to:
+  /// **'City Bakery'**
+  String get cityBakery;
+
+  /// No description provided for @hotelRajdhaniWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'85 kg'**
+  String get hotelRajdhaniWeight;
+
+  /// No description provided for @greenParkWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'120 kg'**
+  String get greenParkWeight;
+
+  /// No description provided for @navratriGroundWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'215 kg'**
+  String get navratriGroundWeight;
+
+  /// No description provided for @noMaterialToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No material today'**
+  String get noMaterialToday;
+
+  /// No description provided for @cancelledBySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by source'**
+  String get cancelledBySource;
+
+  /// No description provided for @stockTakingReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed for stock-taking'**
+  String get stockTakingReason;
+
+  /// No description provided for @unlockStopMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocks when stop 6 is done, or when you reach this stop (GPS). Tap to check your location.'**
+  String get unlockStopMessage;
+
+  /// No description provided for @stopTwoCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop 2 · collection'**
+  String get stopTwoCollection;
+
+  /// No description provided for @savedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved at 7:52 am · Thu 22 Jul'**
+  String get savedAt;
+
+  /// No description provided for @whatYouSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'What you saved'**
+  String get whatYouSaved;
+
+  /// No description provided for @cardboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardboard'**
+  String get cardboard;
+
+  /// No description provided for @petBottlesWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'50 kg'**
+  String get petBottlesWeight;
+
+  /// No description provided for @cardboardWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'35 kg'**
+  String get cardboardWeight;
+
+  /// No description provided for @photosMaterialScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos (material and scale)'**
+  String get photosMaterialScale;
+
+  /// No description provided for @askSupervisorToCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask supervisor to correct'**
+  String get askSupervisorToCorrect;
+
+  /// No description provided for @savedCollectionReadonlyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You can only view a saved collection. If something is wrong, ask your supervisor: they check it against the photos and correct it.'**
+  String get savedCollectionReadonlyMessage;
 }
 
 class _DriverLocalizationsDelegate

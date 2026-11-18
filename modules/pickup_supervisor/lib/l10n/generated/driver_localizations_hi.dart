@@ -290,4 +290,256 @@ class DriverLocalizationsHi extends DriverLocalizations {
 
   @override
   String get submitIssue => 'समस्या सबमिट करें';
+
+  @override
+  String get yourPickupSupervisor => 'आपके पिकअप सुपरवाइज़र';
+
+  @override
+  String get supervisorName => 'किरण शाह';
+
+  @override
+  String get message => 'संदेश';
+
+  @override
+  String get collectedToday => 'आज एकत्रित';
+
+  @override
+  String get collectedWeight420 => 'अब तक 420 किग्रा';
+
+  @override
+  String get collectedWeightZero => '0 किग्रा';
+
+  @override
+  String get zeroKg => '0 किग्रा';
+
+  @override
+  String get cancelled => 'रद्द';
+
+  @override
+  String todaysTripsCount(int count) {
+    return 'आज की ट्रिप्स ($count)';
+  }
+
+  @override
+  String get todaysTrips => 'आज की ट्रिप्स';
+
+  @override
+  String get tripMorning => 'ट्रिप 1 · सुबह';
+
+  @override
+  String get tripAfternoon => 'ट्रिप 2 · दोपहर';
+
+  @override
+  String get morningTripTime => 'सुबह 7:00 – 11:00 · 7 स्टॉप';
+
+  @override
+  String get afternoonTripTime => 'दोपहर 2:00 – 5:00 · 6 स्टॉप';
+
+  @override
+  String get afternoonStartTime => 'दोपहर 2:00';
+
+  @override
+  String get onTheWay => 'रास्ते में';
+
+  @override
+  String startsAt(String time) {
+    return '$time बजे शुरू';
+  }
+
+  @override
+  String get delivered => 'पहुंचाया गया';
+
+  @override
+  String get vehicleCrew => 'GJ-XX-1234 · सुरेश, महेश';
+
+  @override
+  String get dropMagdalla => 'मगदल्ला वेयरहाउस पर ड्रॉप';
+
+  @override
+  String get dropSachin => 'सचिन वेयरहाउस पर ड्रॉप';
+
+  @override
+  String get collectedOnTrip => 'इस ट्रिप में एकत्रित';
+
+  @override
+  String get weight420Kg => '420 किग्रा';
+
+  @override
+  String get weight180Kg => '180 किग्रा';
+
+  @override
+  String stopsDone(int completed, int total) {
+    return '$total में से $completed स्टॉप पूरे';
+  }
+
+  @override
+  String seeAllStops(int count) {
+    return 'सभी $count स्टॉप देखें';
+  }
+
+  @override
+  String nextStopOnTrip(int trip) {
+    return 'ट्रिप $trip का अगला स्टॉप';
+  }
+
+  @override
+  String afterThat(int count) {
+    return 'उसके बाद ($count)';
+  }
+
+  @override
+  String get laterToday => 'आज बाद में';
+
+  @override
+  String get earlierToday => 'आज पहले';
+
+  @override
+  String stopPosition(int current, int total) {
+    return 'स्टॉप $current / $total';
+  }
+
+  @override
+  String get nextStop => 'अगला स्टॉप';
+
+  @override
+  String get enterCollection => 'कलेक्शन दर्ज करें';
+
+  @override
+  String opensAfterStop(int stop) {
+    return 'स्टॉप $stop के बाद खुलेगा';
+  }
+
+  @override
+  String unlockAfterStop(int stop) {
+    return 'स्टॉप $stop पूरा होने या इस स्टॉप पर पहुंचने (GPS) पर खुलेगा। स्थान जांचने के लिए टैप करें।';
+  }
+
+  @override
+  String get handedOverWeight => 'सौंपा गया · शुद्ध 1,240 किग्रा';
+
+  @override
+  String get royalResidency => 'रॉयल रेसिडेंसी';
+
+  @override
+  String get shantiNagar => 'शांति नगर';
+
+  @override
+  String get ghodDodRoadSurat => 'घोड़ दौड़ रोड, सूरत';
+
+  @override
+  String get citylightRoadSurat => 'सिटीलाइट रोड, सूरत';
+
+  @override
+  String get rakeshStoreManager => 'राकेश शाह · स्टोर मैनेजर';
+
+  @override
+  String get maheshOwner => 'महेश देसाई · मालिक';
+
+  @override
+  String get priyaSecretary => 'प्रिया पटेल · सचिव';
+
+  @override
+  String get meenaSecretary => 'मीना देसाई · सचिव';
+
+  @override
+  String get pickupSchedule9to11 => 'गुरु · सुबह 9:00–11:00';
+
+  @override
+  String get pickupSchedule3to330 => 'गुरु · दोपहर 3:00–3:30';
+
+  @override
+  String get pickupSchedule330to4 => 'गुरु · दोपहर 3:30–4:00';
+
+  @override
+  String get noTripToday => 'आज कोई ट्रिप नहीं';
+
+  @override
+  String get noTripMessage =>
+      'किरण शाह ने आज आपको किसी ट्रिप पर नहीं रखा है। ट्रिप जुड़ने पर आपको संदेश मिलेगा।';
+
+  @override
+  String get tripOneStops => 'ट्रिप 1 स्टॉप्स';
+
+  @override
+  String get morningTripWindow => 'सुबह · 7:00 – 11:00 बजे';
+
+  @override
+  String get fiveOfSevenDone => '7 में से 5 पूरे';
+
+  @override
+  String stillToCollect(int count) {
+    return 'अभी संग्रह बाकी ($count)';
+  }
+
+  @override
+  String doneStops(int count) {
+    return 'पूर्ण ($count)';
+  }
+
+  @override
+  String stopNumber(int number) {
+    return 'स्टॉप $number';
+  }
+
+  @override
+  String get hotelRajdhani => 'होटल राजधानी';
+
+  @override
+  String get greenParkSociety => 'ग्रीन पार्क सोसायटी';
+
+  @override
+  String get navratriGroundEvent => 'नवरात्रि ग्राउंड (कार्यक्रम)';
+
+  @override
+  String get cityBakery => 'सिटी बेकरी';
+
+  @override
+  String get hotelRajdhaniWeight => '85 किग्रा';
+
+  @override
+  String get greenParkWeight => '120 किग्रा';
+
+  @override
+  String get navratriGroundWeight => '215 किग्रा';
+
+  @override
+  String get noMaterialToday => 'आज कोई सामग्री नहीं';
+
+  @override
+  String get cancelledBySource => 'स्रोत द्वारा रद्द';
+
+  @override
+  String get stockTakingReason => 'स्टॉक गणना के लिए बंद';
+
+  @override
+  String get unlockStopMessage =>
+      'स्टॉप 6 पूरा होने या इस स्टॉप पर पहुँचने (GPS) पर खुलेगा। अपना स्थान जाँचने के लिए टैप करें।';
+
+  @override
+  String get stopTwoCollection => 'स्टॉप 2 · संग्रह';
+
+  @override
+  String get savedAt => 'सुबह 7:52 बजे सेव किया · गुरु 22 जुलाई';
+
+  @override
+  String get whatYouSaved => 'आपने जो सेव किया';
+
+  @override
+  String get cardboard => 'कार्डबोर्ड';
+
+  @override
+  String get petBottlesWeight => '50 किग्रा';
+
+  @override
+  String get cardboardWeight => '35 किग्रा';
+
+  @override
+  String get photosMaterialScale => 'फोटो (सामग्री और तराजू)';
+
+  @override
+  String get askSupervisorToCorrect => 'सुधार के लिए सुपरवाइज़र से कहें';
+
+  @override
+  String get savedCollectionReadonlyMessage =>
+      'आप सेव किया हुआ संग्रह केवल देख सकते हैं। कुछ गलत हो तो अपने सुपरवाइज़र से कहें; वे फोटो से जाँच कर उसे सुधारेंगे।';
 }

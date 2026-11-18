@@ -64,6 +64,12 @@ abstract final class DriverTextStyles {
     fontWeight: FontWeight.w700,
     height: 20 / 16,
   );
+  static const bold20 = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    height: 24 / 20,
+  );
   static const bold12 = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 12,

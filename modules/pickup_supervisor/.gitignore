@@ -34,6 +34,14 @@ xcuserdata
 *.pyc
 *sync/
 Icon?
+!assets/icons/
+assets/icons/*
+!assets/icons/driver/
+assets/icons/driver/*
+!assets/icons/driver/home_v2/
+!assets/icons/driver/home_v2/**
+!assets/icons/driver/stops_v2/
+!assets/icons/driver/stops_v2/**
 .tags*
 
 build/
