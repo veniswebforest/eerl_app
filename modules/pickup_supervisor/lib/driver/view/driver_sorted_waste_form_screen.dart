@@ -11,20 +11,27 @@ import 'package:pickup_supervisor/driver/services/driver_photo_capture.dart';
 import 'package:pickup_supervisor/driver/view/driver_pickup_success_screen.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_pickup_form_widgets.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_stops_widgets.dart';
+import 'package:pickup_supervisor/driver/widgets/driver_voice_note_recorder.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 
 class DriverSortedWasteFormScreen extends StatelessWidget {
-  const DriverSortedWasteFormScreen({super.key});
+  const DriverSortedWasteFormScreen({super.key, this.locationMatched = true});
+
+  final bool locationMatched;
 
   @override
   Widget build(BuildContext context) {
-    return const DriverLocalizationScope(child: _SortedWasteFormView());
+    return DriverLocalizationScope(
+      child: _SortedWasteFormView(locationMatched: locationMatched),
+    );
   }
 }
 
 class _SortedWasteFormView extends StatefulWidget {
-  const _SortedWasteFormView();
+  const _SortedWasteFormView({required this.locationMatched});
+
+  final bool locationMatched;
 
   @override
   State<_SortedWasteFormView> createState() => _SortedWasteFormViewState();
@@ -33,9 +40,30 @@ class _SortedWasteFormView extends StatefulWidget {
 class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
   static const _maximumPhotos = 2;
   final List<List<XFile>> _photos = List.generate(3, (_) => <XFile>[]);
+  final List<TextEditingController> _collectedControllers = List.generate(
+    3,
+    (_) => TextEditingController(),
+  );
+  final TextEditingController _noteController = TextEditingController();
   bool _restoredPhotos = false;
 
-  bool get _canSave => _photos.every((photos) => photos.isNotEmpty);
+  bool get _canSave =>
+      _photos.every((photos) => photos.isNotEmpty) &&
+      _collectedControllers.every(
+        (controller) => controller.text.trim().isNotEmpty,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+    for (final controller in _collectedControllers) {
+      controller.addListener(_refreshForm);
+    }
+  }
+
+  void _refreshForm() {
+    if (mounted) setState(() {});
+  }
 
   @override
   void didChangeDependencies() {
@@ -51,7 +79,10 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
     for (var index = 0; index < _photos.length; index++) {
       final photo = await recover(_recoveryId(index));
       if (photo != null && mounted && _photos[index].length < _maximumPhotos) {
-        setState(() => _photos[index].add(photo));
+        setState(() {
+          _photos[index].add(photo);
+          _applyMockCollectedValue(index);
+        });
       }
     }
   }
@@ -68,8 +99,25 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
     setState(() {
       if (_photos[index].length < _maximumPhotos) {
         _photos[index].add(photo);
+        _applyMockCollectedValue(index);
       }
     });
+  }
+
+  void _applyMockCollectedValue(int index) {
+    if (_collectedControllers[index].text.isNotEmpty) return;
+    _collectedControllers[index].text = index == 2 ? '25' : '270.00';
+  }
+
+  @override
+  void dispose() {
+    for (final controller in _collectedControllers) {
+      controller
+        ..removeListener(_refreshForm)
+        ..dispose();
+    }
+    _noteController.dispose();
+    super.dispose();
   }
 
   String _recoveryId(int index) => 'driver.pickup.sorted.$index';
@@ -84,21 +132,21 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
         unit: l10n.kgUnit,
         emptyImage: '$driverPickupImageRoot/pet_empty.png',
         filledImage: '$driverPickupImageRoot/pet_filled.png',
-        value: l10n.petCollectedWeight,
+        allowDecimal: true,
       ),
       _SortedMaterialData(
         name: l10n.hdpeRigid,
         unit: l10n.kgUnit,
         emptyImage: '$driverPickupImageRoot/hdpe_empty.png',
         filledImage: '$driverPickupImageRoot/hdpe_filled.png',
-        value: l10n.hdpeCollectedWeight,
+        allowDecimal: true,
       ),
       _SortedMaterialData(
         name: l10n.eWaste,
         unit: l10n.pcsUnit,
         emptyImage: '$driverPickupImageRoot/ewaste_empty.png',
         filledImage: '$driverPickupImageRoot/ewaste_filled.png',
-        value: l10n.eWasteCollectedCount,
+        allowDecimal: false,
       ),
     ];
 
@@ -132,6 +180,21 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
                             backAsset: '$driverPickupIconRoot/sorted_back.svg',
                             onBack: () => Navigator.of(context).pop(),
                           ),
+                          const SizedBox(height: 24),
+                          DriverPickupStopSummary(
+                            title: l10n.abcTextileMills,
+                            subtitle: l10n.sortedStopSixOfSeven,
+                            locationLabel: widget.locationMatched
+                                ? l10n.locationMatched
+                                : l10n.locationNotMatched,
+                            locationMatched: widget.locationMatched,
+                          ),
+                          if (!widget.locationMatched) ...[
+                            const SizedBox(height: 16),
+                            DriverLocationMismatchNotice(
+                              message: l10n.recordedLaterWarning,
+                            ),
+                          ],
                           const SizedBox(height: 32),
                           Text(
                             l10n.captureMaterialScalePhoto,
@@ -147,6 +210,7 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
                           ) ...[
                             _SortedMaterialCard(
                               data: materials[index],
+                              controller: _collectedControllers[index],
                               photos: _photos[index],
                               collectedLabel: l10n.collectedLabel,
                               placeholder: l10n.exampleWeight,
@@ -165,6 +229,21 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
                               const SizedBox(height: 16),
                           ],
                           const SizedBox(height: 32),
+                          Text(
+                            l10n.noteForSupervisorOptional,
+                            style: DriverTextStyles.medium14.copyWith(
+                              color: DriverColors.neutral950,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          DriverSupervisorNoteField(
+                            controller: _noteController,
+                            hint: l10n.typeANote,
+                            limitLabel: l10n.max150Characters,
+                          ),
+                          const SizedBox(height: 8),
+                          const DriverVoiceNoteRecorder(),
+                          const SizedBox(height: 24),
                           DriverFormButton(
                             label: l10n.savePickup,
                             enabled: _canSave,
@@ -195,19 +274,20 @@ class _SortedMaterialData {
     required this.unit,
     required this.emptyImage,
     required this.filledImage,
-    required this.value,
+    required this.allowDecimal,
   });
 
   final String name;
   final String unit;
   final String emptyImage;
   final String filledImage;
-  final String value;
+  final bool allowDecimal;
 }
 
 class _SortedMaterialCard extends StatelessWidget {
   const _SortedMaterialCard({
     required this.data,
+    required this.controller,
     required this.photos,
     required this.collectedLabel,
     required this.placeholder,
@@ -218,6 +298,7 @@ class _SortedMaterialCard extends StatelessWidget {
   });
 
   final _SortedMaterialData data;
+  final TextEditingController controller;
   final List<XFile> photos;
   final String collectedLabel;
   final String placeholder;
@@ -277,10 +358,11 @@ class _SortedMaterialCard extends StatelessWidget {
               children: [
                 DriverRequiredLabel(label: collectedLabel),
                 const SizedBox(height: 8),
-                DriverValueField(
+                DriverEditableValueField(
+                  controller: controller,
                   prefix: data.unit,
-                  value: isFilled ? data.value : placeholder,
-                  isPlaceholder: !isFilled,
+                  placeholder: placeholder,
+                  allowDecimal: data.allowDecimal,
                 ),
                 const SizedBox(height: 16),
                 SizedBox(

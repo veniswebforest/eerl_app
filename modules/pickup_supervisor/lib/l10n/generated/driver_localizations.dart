@@ -163,8 +163,8 @@ abstract class DriverLocalizations {
   /// No description provided for @collectedCount.
   ///
   /// In en, this message translates to:
-  /// **'03'**
-  String get collectedCount;
+  /// **'Collected ({count})'**
+  String collectedCount(int count);
 
   /// No description provided for @todaysTrip.
   ///
@@ -1149,6 +1149,840 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'Send to supervisor'**
   String get sendToSupervisor;
+
+  /// No description provided for @requestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get requestSent;
+
+  /// No description provided for @toYourSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'to your supervisor'**
+  String get toYourSupervisor;
+
+  /// No description provided for @correctionRequestSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Hotel Rajdhani · weight · 50 kg → 60 kg'**
+  String get correctionRequestSummary;
+
+  /// No description provided for @whatHappensNext.
+  ///
+  /// In en, this message translates to:
+  /// **'WHAT HAPPENS NEXT'**
+  String get whatHappensNext;
+
+  /// No description provided for @supervisorChecksPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Kiran Shah checks it against your photos'**
+  String get supervisorChecksPhotos;
+
+  /// No description provided for @correctionRequestedUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'The stop shows “Correction requested” until then'**
+  String get correctionRequestedUntil;
+
+  /// No description provided for @correctionNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'You get a notification when it is corrected'**
+  String get correctionNotification;
+
+  /// No description provided for @backToMyStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to my stops'**
+  String get backToMyStops;
+
+  /// No description provided for @backToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to home'**
+  String get backToHome;
+
+  /// No description provided for @stopTripPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop 6 of 7 · Trip 1'**
+  String get stopTripPosition;
+
+  /// No description provided for @personAtPickupPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Person at the pickup point'**
+  String get personAtPickupPoint;
+
+  /// No description provided for @rakeshShah.
+  ///
+  /// In en, this message translates to:
+  /// **'Rakesh Shah'**
+  String get rakeshShah;
+
+  /// No description provided for @storeManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Store manager'**
+  String get storeManager;
+
+  /// No description provided for @pickupContactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'+91 98765 43214'**
+  String get pickupContactPhone;
+
+  /// No description provided for @nothingToCollectWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to collect (0 kg)'**
+  String get nothingToCollectWeight;
+
+  /// No description provided for @nothingToCollect.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to collect'**
+  String get nothingToCollect;
+
+  /// No description provided for @abcStopSixOfSeven.
+  ///
+  /// In en, this message translates to:
+  /// **'ABC Textile Mills · Stop 6 of 7'**
+  String get abcStopSixOfSeven;
+
+  /// No description provided for @savedAsZeroKgMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This stop will be saved as 0 kg.'**
+  String get savedAsZeroKgMessage;
+
+  /// No description provided for @whyNothingCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Why was nothing collected?'**
+  String get whyNothingCollected;
+
+  /// No description provided for @reasonClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get reasonClosed;
+
+  /// No description provided for @reasonRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused to give'**
+  String get reasonRefused;
+
+  /// No description provided for @reasonNotReachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not reachable'**
+  String get reasonNotReachable;
+
+  /// No description provided for @reasonVehicleFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle full'**
+  String get reasonVehicleFull;
+
+  /// No description provided for @photoOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo (optional)'**
+  String get photoOptional;
+
+  /// No description provided for @noteForSupervisorOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Note for supervisor (optional)'**
+  String get noteForSupervisorOptional;
+
+  /// No description provided for @typeANote.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a note…'**
+  String get typeANote;
+
+  /// No description provided for @holdToRecordVoiceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to record a voice note'**
+  String get holdToRecordVoiceNote;
+
+  /// No description provided for @upToOneMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 1 minute'**
+  String get upToOneMinute;
+
+  /// No description provided for @voiceNoteZeroTime.
+  ///
+  /// In en, this message translates to:
+  /// **'0:00'**
+  String get voiceNoteZeroTime;
+
+  /// No description provided for @recordingVoiceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording voice note…'**
+  String get recordingVoiceNote;
+
+  /// No description provided for @voiceNoteRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice note recorded'**
+  String get voiceNoteRecorded;
+
+  /// No description provided for @playVoiceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Play voice note'**
+  String get playVoiceNote;
+
+  /// No description provided for @pauseVoiceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause voice note'**
+  String get pauseVoiceNote;
+
+  /// No description provided for @removeVoiceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove voice note'**
+  String get removeVoiceNote;
+
+  /// No description provided for @voiceNotePlaybackFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not play the voice note. Please try again.'**
+  String get voiceNotePlaybackFailed;
+
+  /// No description provided for @microphonePermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission is required to record a voice note.'**
+  String get microphonePermissionRequired;
+
+  /// No description provided for @voiceNoteRecordingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not record the voice note. Please try again.'**
+  String get voiceNoteRecordingFailed;
+
+  /// No description provided for @locationMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Location matched'**
+  String get locationMatched;
+
+  /// No description provided for @locationNotMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Location not matched'**
+  String get locationNotMatched;
+
+  /// No description provided for @sortedStopSixOfSeven.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop 6 of 7 · Sorted'**
+  String get sortedStopSixOfSeven;
+
+  /// No description provided for @mixedStopSevenOfSeven.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop 7 of 7 · Mixed'**
+  String get mixedStopSevenOfSeven;
+
+  /// No description provided for @recordedLaterWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded later: you are not at this stop now. The supervisor and the gate see this note.'**
+  String get recordedLaterWarning;
+
+  /// No description provided for @saveAsZeroKg.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as 0 kg'**
+  String get saveAsZeroKg;
+
+  /// No description provided for @orderedPickupStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Ordered Pickup Stops'**
+  String get orderedPickupStops;
+
+  /// No description provided for @startYourCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your collections'**
+  String get startYourCollections;
+
+  /// No description provided for @searchHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Here...'**
+  String get searchHere;
+
+  /// No description provided for @pendingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending ({count})'**
+  String pendingCount(int count);
+
+  /// No description provided for @yashTextileHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Yash Textile Hub'**
+  String get yashTextileHub;
+
+  /// No description provided for @anjanaFarmAreaSurat.
+  ///
+  /// In en, this message translates to:
+  /// **'Anjana Farm Area, Surat'**
+  String get anjanaFarmAreaSurat;
+
+  /// No description provided for @collectionWindowNineToTen.
+  ///
+  /// In en, this message translates to:
+  /// **'09:00 AM - 10:00 AM'**
+  String get collectionWindowNineToTen;
+
+  /// No description provided for @materialSortedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Material : Sorted'**
+  String get materialSortedLabel;
+
+  /// No description provided for @findingYourLocationStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your location…'**
+  String get findingYourLocationStatus;
+
+  /// No description provided for @findingYourLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your location'**
+  String get findingYourLocation;
+
+  /// No description provided for @findingLocationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Stand near the pickup point. This takes a few seconds.'**
+  String get findingLocationMessage;
+
+  /// No description provided for @cancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelAction;
+
+  /// No description provided for @locationDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Location detected'**
+  String get locationDetected;
+
+  /// No description provided for @notHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Here'**
+  String get notHere;
+
+  /// No description provided for @startCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Start collection'**
+  String get startCollection;
+
+  /// No description provided for @stopsNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} stops nearby'**
+  String stopsNearby(int count);
+
+  /// No description provided for @whichStopAreYouAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Which stop are you at?'**
+  String get whichStopAreYouAt;
+
+  /// No description provided for @twoStopsCloseMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Two stops on your trip are close to you.'**
+  String get twoStopsCloseMessage;
+
+  /// No description provided for @distanceStopSeven.
+  ///
+  /// In en, this message translates to:
+  /// **'40 m away · Stop 7'**
+  String get distanceStopSeven;
+
+  /// No description provided for @distanceAlreadyCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'85 m away · already collected'**
+  String get distanceAlreadyCollected;
+
+  /// No description provided for @continueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueAction;
+
+  /// No description provided for @noStopFoundHere.
+  ///
+  /// In en, this message translates to:
+  /// **'No stop found here'**
+  String get noStopFoundHere;
+
+  /// No description provided for @notAtTripStop.
+  ///
+  /// In en, this message translates to:
+  /// **'You’re not at a stop on this trip'**
+  String get notAtTripStop;
+
+  /// No description provided for @notAtStopMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Move closer and try again, choose the stop yourself, or leave it for the gate team.'**
+  String get notAtStopMessage;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
+
+  /// No description provided for @chooseStopMyself.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the stop myself'**
+  String get chooseStopMyself;
+
+  /// No description provided for @gateTeamWillEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Gate team will enter'**
+  String get gateTeamWillEnter;
+
+  /// No description provided for @locationIsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is off'**
+  String get locationIsOff;
+
+  /// No description provided for @turnOnLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location'**
+  String get turnOnLocation;
+
+  /// No description provided for @locationOffMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The app finds your stop from your location. Turn it on to record pickups.'**
+  String get locationOffMessage;
+
+  /// No description provided for @shreeSaiStopSeven.
+  ///
+  /// In en, this message translates to:
+  /// **'Shree Sai Dairy · Stop 7 of 7'**
+  String get shreeSaiStopSeven;
+
+  /// No description provided for @gateTeamEntryMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The back office enters this pickup at the warehouse gate.'**
+  String get gateTeamEntryMessage;
+
+  /// No description provided for @weightYouNotedOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight you noted (optional)'**
+  String get weightYouNotedOptional;
+
+  /// No description provided for @aboutThreeHundred.
+  ///
+  /// In en, this message translates to:
+  /// **'about 300'**
+  String get aboutThreeHundred;
+
+  /// No description provided for @gateWeightHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A rough figure helps the gate team. They weigh it again at the gate.'**
+  String get gateWeightHelp;
+
+  /// No description provided for @markForGateTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark for the gate team'**
+  String get markForGateTeam;
+
+  /// No description provided for @nextPickupSavedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'ABC Textile Mills · 540 kg + 25 pcs saved.'**
+  String get nextPickupSavedMessage;
+
+  /// No description provided for @lastPickupSavedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Shree Sai Dairy · 300 kg saved.'**
+  String get lastPickupSavedMessage;
+
+  /// No description provided for @nextStopSevenOfSeven.
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT STOP · 7 OF 7'**
+  String get nextStopSevenOfSeven;
+
+  /// No description provided for @nextStopDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'L.P Savani Road, Surat · 1.2 km'**
+  String get nextStopDistance;
+
+  /// No description provided for @goToNextStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to next stop'**
+  String get goToNextStop;
+
+  /// No description provided for @allTripStopsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'ALL 7 STOPS OF TRIP 1 DONE'**
+  String get allTripStopsDone;
+
+  /// No description provided for @takeLoadToWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the load to Magdalla Warehouse'**
+  String get takeLoadToWarehouse;
+
+  /// No description provided for @vehicleLoadTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'1,260 kg + 25 pcs on the vehicle'**
+  String get vehicleLoadTotal;
+
+  /// No description provided for @warehouseDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Magdalla, Surat · 6.4 km'**
+  String get warehouseDistance;
+
+  /// No description provided for @viewTripSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'View trip summary'**
+  String get viewTripSummary;
+
+  /// No description provided for @tripOneSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip 1 summary'**
+  String get tripOneSummary;
+
+  /// No description provided for @allStopsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All stops done'**
+  String get allStopsDone;
+
+  /// No description provided for @tripCollectedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'1,260 kg + 25 pcs'**
+  String get tripCollectedTotal;
+
+  /// No description provided for @mixedWaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed waste'**
+  String get mixedWaste;
+
+  /// No description provided for @weight635Kg.
+  ///
+  /// In en, this message translates to:
+  /// **'635 kg'**
+  String get weight635Kg;
+
+  /// No description provided for @weight270Kg.
+  ///
+  /// In en, this message translates to:
+  /// **'270 kg'**
+  String get weight270Kg;
+
+  /// No description provided for @weight85Kg.
+  ///
+  /// In en, this message translates to:
+  /// **'85 kg'**
+  String get weight85Kg;
+
+  /// No description provided for @count25Pcs.
+  ///
+  /// In en, this message translates to:
+  /// **'25 pcs'**
+  String get count25Pcs;
+
+  /// No description provided for @dropAt.
+  ///
+  /// In en, this message translates to:
+  /// **'DROP AT'**
+  String get dropAt;
+
+  /// No description provided for @warehouseAddressDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Magdalla Port Road, Surat · 6.4 km'**
+  String get warehouseAddressDistance;
+
+  /// No description provided for @openInMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Maps'**
+  String get openInMaps;
+
+  /// No description provided for @callWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Call warehouse'**
+  String get callWarehouse;
+
+  /// No description provided for @notCollectedTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Not collected (2)'**
+  String get notCollectedTwo;
+
+  /// No description provided for @closedForStockTaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed for stock-taking'**
+  String get closedForStockTaking;
+
+  /// No description provided for @handOverAtWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand over at the warehouse'**
+  String get handOverAtWarehouse;
+
+  /// No description provided for @warehouseGateInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap at the warehouse gate. You enter the number of bags; the Warehouse Incharge weighs the vehicle.'**
+  String get warehouseGateInstruction;
+
+  /// No description provided for @handOverTripOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand over · Trip 1'**
+  String get handOverTripOne;
+
+  /// No description provided for @yourCountFromStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Your count (from the stops)'**
+  String get yourCountFromStops;
+
+  /// No description provided for @numberOfBags.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of bags'**
+  String get numberOfBags;
+
+  /// No description provided for @bagsUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'BAGS'**
+  String get bagsUnit;
+
+  /// No description provided for @bagsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'42'**
+  String get bagsCount;
+
+  /// No description provided for @bagsHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Count the bags you unload. Loose items such as e-waste are counted in pieces.'**
+  String get bagsHelp;
+
+  /// No description provided for @handOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand over'**
+  String get handOver;
+
+  /// No description provided for @warehouseWeighInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'The Warehouse Incharge checks the load and weighs the vehicle on the weighbridge. You see the weight here when they save it.'**
+  String get warehouseWeighInstruction;
+
+  /// No description provided for @tripAtWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip 1 · at the warehouse'**
+  String get tripAtWarehouse;
+
+  /// No description provided for @waitingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get waitingStatus;
+
+  /// No description provided for @vehicleAtWarehouseSince.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-XX-1234 · at Magdalla since 11:20 am'**
+  String get vehicleAtWarehouseSince;
+
+  /// No description provided for @youHandedOver.
+  ///
+  /// In en, this message translates to:
+  /// **'You handed over'**
+  String get youHandedOver;
+
+  /// No description provided for @handedOverTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'1,260 kg + 25 pcs · 42 bags'**
+  String get handedOverTotal;
+
+  /// No description provided for @waitingWarehouseInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Handed over at 11:20 am. The Warehouse Incharge is weighing the vehicle; the weighbridge weight shows here when they save it.'**
+  String get waitingWarehouseInstruction;
+
+  /// No description provided for @tripReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip 1 · received'**
+  String get tripReceived;
+
+  /// No description provided for @receivedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get receivedStatus;
+
+  /// No description provided for @vehicleAtWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-XX-1234 · Magdalla Warehouse'**
+  String get vehicleAtWarehouse;
+
+  /// No description provided for @weighbridgeEnteredByWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighbridge · entered by the warehouse'**
+  String get weighbridgeEnteredByWarehouse;
+
+  /// No description provided for @warehouseReceivedTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'1,240 kg net + 25 pcs'**
+  String get warehouseReceivedTotal;
+
+  /// No description provided for @withLoadGross.
+  ///
+  /// In en, this message translates to:
+  /// **'With load (gross)'**
+  String get withLoadGross;
+
+  /// No description provided for @weight8940Kg.
+  ///
+  /// In en, this message translates to:
+  /// **'8,940 kg'**
+  String get weight8940Kg;
+
+  /// No description provided for @emptyVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty vehicle'**
+  String get emptyVehicle;
+
+  /// No description provided for @weight7700Kg.
+  ///
+  /// In en, this message translates to:
+  /// **'7,700 kg'**
+  String get weight7700Kg;
+
+  /// No description provided for @netWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Net weight'**
+  String get netWeight;
+
+  /// No description provided for @weight1240Kg.
+  ///
+  /// In en, this message translates to:
+  /// **'1,240 kg'**
+  String get weight1240Kg;
+
+  /// No description provided for @bagsReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Bags received'**
+  String get bagsReceived;
+
+  /// No description provided for @eWasteCounted.
+  ///
+  /// In en, this message translates to:
+  /// **'E-Waste (counted)'**
+  String get eWasteCounted;
+
+  /// No description provided for @yourCountVsWeighbridge.
+  ///
+  /// In en, this message translates to:
+  /// **'Your count vs the weighbridge'**
+  String get yourCountVsWeighbridge;
+
+  /// No description provided for @yourCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Your count'**
+  String get yourCount;
+
+  /// No description provided for @weight1260Kg.
+  ///
+  /// In en, this message translates to:
+  /// **'1,260 kg'**
+  String get weight1260Kg;
+
+  /// No description provided for @weighbridgeNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighbridge net'**
+  String get weighbridgeNet;
+
+  /// No description provided for @difference.
+  ///
+  /// In en, this message translates to:
+  /// **'Difference'**
+  String get difference;
+
+  /// No description provided for @weightDifference.
+  ///
+  /// In en, this message translates to:
+  /// **'−20 kg (1.6% less)'**
+  String get weightDifference;
+
+  /// No description provided for @receivedWarehouseInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Received at 11:42 am by Ramesh Patel, Warehouse Incharge. If the difference looks wrong, raise an issue.'**
+  String get receivedWarehouseInstruction;
 }
 
 class _DriverLocalizationsDelegate

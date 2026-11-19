@@ -72,12 +72,14 @@ class DriverPrimaryButton extends StatelessWidget {
     required this.onPressed,
     this.height = 52,
     this.radius = 14,
+    this.icon,
   });
 
   final String label;
   final VoidCallback onPressed;
   final double height;
   final double radius;
+  final Widget? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +97,16 @@ class DriverPrimaryButton extends StatelessWidget {
           ),
           textStyle: DriverTextStyles.bold16,
         ),
-        child: Text(label),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[icon!, const SizedBox(width: 8)],
+            Flexible(
+              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+          ],
+        ),
       ),
     );
   }

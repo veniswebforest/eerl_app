@@ -7,6 +7,7 @@ import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/driver/model/driver_pickup_stop.dart';
 import 'package:pickup_supervisor/driver/view/driver_collected_stop_detail_screen.dart';
+import 'package:pickup_supervisor/driver/view/driver_location_flow_screen.dart';
 import 'package:pickup_supervisor/driver/view/driver_stop_detail_screen.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_dashboard_widgets.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_stops_widgets.dart';
@@ -81,7 +82,8 @@ class _DriverStopsView extends StatelessWidget {
                             isNext: true,
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute<void>(
-                                builder: (_) => const DriverStopDetailScreen(),
+                                builder: (_) =>
+                                    const DriverLocationFlowScreen(),
                               ),
                             ),
                           ),
@@ -487,6 +489,7 @@ class _FullStopCard extends StatelessWidget {
                   child: SizedBox(
                     height: 44,
                     child: FilledButton.icon(
+                      key: isNext ? const Key('driver-enter-collection') : null,
                       onPressed: isNext ? onTap : null,
                       icon: isNext
                           ? SvgPicture.asset(

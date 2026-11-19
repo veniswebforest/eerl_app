@@ -28,6 +28,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access is used to capture collection photos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone access is used to attach voice notes to collection records.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Bluetooth access is used to connect to weighing scales and thermal printers.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>

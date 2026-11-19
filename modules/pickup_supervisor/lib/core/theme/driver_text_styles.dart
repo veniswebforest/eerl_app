@@ -16,6 +16,8 @@ abstract final class DriverTextStyles {
     fontWeight: FontWeight.w600,
     height: 22 / 18,
   );
+
+
   static const semibold16 = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 16,

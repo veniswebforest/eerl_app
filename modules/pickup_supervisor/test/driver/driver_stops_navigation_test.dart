@@ -30,14 +30,33 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: DriverStopsScreen()));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Enter collection'));
+    await tester.ensureVisible(
+      find.byKey(const Key('driver-enter-collection')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('driver-enter-collection')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Location is off'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('driver-turn-on-location')));
+    await tester.pump();
+    expect(find.text('Finding your location'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+    expect(find.text('Location detected'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('driver-start-collection')));
     await tester.pumpAndSettle();
 
     expect(find.text('Stop Detail'), findsOneWidget);
     expect(find.text('Request Information'), findsOneWidget);
-    await tester.drag(
-      find.byKey(const Key('driver-stop-detail')),
-      const Offset(0, -320),
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('driver-start-pickup')),
+      400,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('driver-stop-detail')),
+        matching: find.byType(Scrollable),
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text('Start Pickup'), findsOneWidget);
@@ -101,6 +120,29 @@ void main() {
       find.byKey(const Key('driver-correction-note')),
     );
     expect(note.controller!.text.length, 150);
+
+    tester.testTextInput.hide();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('driver-send-correction')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('driver-correction-sent-modal')),
+      findsOneWidget,
+    );
+    expect(find.text('Request sent'), findsOneWidget);
+    expect(find.text('to your supervisor'), findsOneWidget);
+    expect(
+      find.text('Hotel Rajdhani · weight · 50 kg → 60 kg'),
+      findsOneWidget,
+    );
+    expect(find.text('WHAT HAPPENS NEXT'), findsOneWidget);
+    expect(find.text('Back to my stops'), findsOneWidget);
+    expect(find.text('Back to home'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('driver-correction-back-stops')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('driver-stops-list')), findsOneWidget);
   });
 
   testWidgets('stop list uses Gujarati localization', (tester) async {

@@ -3,24 +3,38 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/driver/view/driver_location_flow_screen.dart';
+import 'package:pickup_supervisor/driver/view/driver_stops_screen.dart';
+import 'package:pickup_supervisor/driver/view/driver_trip_summary_screen.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_pickup_form_widgets.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_stops_widgets.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 
+const _package = 'pickup_supervisor';
+const _successIcons = 'assets/icons/driver/pickup_success_v2';
+const _successImages = 'assets/images/driver/pickup_success_v2';
+
 class DriverPickupSuccessScreen extends StatelessWidget {
-  const DriverPickupSuccessScreen({super.key});
+  const DriverPickupSuccessScreen({super.key, this.isLastStop = false});
+
+  final bool isLastStop;
 
   @override
   Widget build(BuildContext context) {
-    return const DriverLocalizationScope(child: _PickupSuccessView());
+    return DriverLocalizationScope(
+      child: _PickupSuccessView(isLastStop: isLastStop),
+    );
   }
 }
 
 class _PickupSuccessView extends StatelessWidget {
-  const _PickupSuccessView();
+  const _PickupSuccessView({required this.isLastStop});
+
+  final bool isLastStop;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +45,7 @@ class _PickupSuccessView extends StatelessWidget {
         backgroundColor: DriverColors.background,
         body: Stack(
           children: [
-            const Positioned.fill(child: _SuccessFormBackground()),
+            const Positioned.fill(child: DriverSuccessFormBackground()),
             Positioned.fill(
               child: ClipRect(
                 child: BackdropFilter(
@@ -51,17 +65,13 @@ class _PickupSuccessView extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      '$driverPickupImageRoot/success_illustration.png',
-                      package: driverAssetPackage,
-                      width: 135,
-                      height: 135,
-                      fit: BoxFit.contain,
-                    ),
+                    const _AnimatedSuccessIllustration(),
                     const SizedBox(height: 24),
                     Text(
                       l10n.pickupRecorded,
                       textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: DriverTextStyles.bold24.copyWith(
                         color: DriverColors.neutral950,
                       ),
@@ -69,39 +79,51 @@ class _PickupSuccessView extends StatelessWidget {
                     Text(
                       l10n.successfully,
                       textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: DriverTextStyles.bold24.copyWith(
                         color: DriverColors.primary500,
                       ),
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      l10n.pickupSuccessMessage,
+                      isLastStop
+                          ? l10n.lastPickupSavedMessage
+                          : l10n.nextPickupSavedMessage,
                       textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: DriverTextStyles.semibold14.copyWith(
                         color: DriverColors.neutral600,
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: FilledButton(
-                        key: const Key('driver-back-to-list'),
-                        onPressed: () => Navigator.of(context).popUntil(
-                          (route) =>
-                              route.settings.name == 'driver-stops' ||
-                              route.isFirst,
-                        ),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: DriverColors.cool200,
-                          foregroundColor: DriverColors.neutral950,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          textStyle: DriverTextStyles.semibold16,
-                        ),
-                        child: Text(l10n.backToList),
+                    const SizedBox(height: 16),
+                    isLastStop ? const _TripDoneCard() : const _NextStopCard(),
+                    const SizedBox(height: 16),
+                    _SuccessActionButton(
+                      key: Key(
+                        isLastStop
+                            ? 'driver-view-trip-summary'
+                            : 'driver-go-next-stop',
                       ),
+                      label: isLastStop
+                          ? l10n.viewTripSummary
+                          : l10n.goToNextStop,
+                      icon: '$_successIcons/arrow.svg',
+                      primary: true,
+                      onPressed: isLastStop
+                          ? () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => const DriverTripSummaryScreen(),
+                              ),
+                            )
+                          : () => _goToNextStop(context),
+                    ),
+                    const SizedBox(height: 16),
+                    _SuccessActionButton(
+                      key: const Key('driver-back-to-list'),
+                      label: l10n.backToList,
+                      onPressed: () => _backToStops(context),
                     ),
                   ],
                 ),
@@ -112,10 +134,301 @@ class _PickupSuccessView extends StatelessWidget {
       ),
     );
   }
+
+  void _goToNextStop(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(builder: (_) => const DriverLocationFlowScreen()),
+      (route) => route.settings.name == DriverStopsScreen.routeName,
+    );
+  }
+
+  void _backToStops(BuildContext context) {
+    Navigator.of(context).popUntil(
+      (route) =>
+          route.settings.name == DriverStopsScreen.routeName || route.isFirst,
+    );
+  }
 }
 
-class _SuccessFormBackground extends StatelessWidget {
-  const _SuccessFormBackground();
+class _NextStopCard extends StatelessWidget {
+  const _NextStopCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = DriverLocalizations.of(context);
+    return _SuccessInfoCard(
+      background: DriverColors.cool100,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.nextStopSevenOfSeven,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: DriverTextStyles.semibold12.copyWith(
+              color: DriverColors.primary500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.stopCardTitle(l10n.shreeSaiDairy, l10n.mixedMaterial),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: DriverTextStyles.semibold16.copyWith(
+              color: DriverColors.neutral950,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _SuccessInfoRow(
+            asset: '$_successIcons/pin.svg',
+            text: l10n.nextStopDistance,
+          ),
+          const SizedBox(height: 8),
+          _SuccessInfoRow(
+            asset: '$_successIcons/user.svg',
+            text: l10n.maheshOwner,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TripDoneCard extends StatelessWidget {
+  const _TripDoneCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = DriverLocalizations.of(context);
+    return _SuccessInfoCard(
+      background: DriverColors.primary50,
+      border: DriverColors.summaryBorder,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.allTripStopsDone,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: DriverTextStyles.semibold12.copyWith(
+              color: DriverColors.primary500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.takeLoadToWarehouse,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: DriverTextStyles.semibold16.copyWith(
+              color: DriverColors.neutral950,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _SuccessInfoRow(
+            asset: '$_successIcons/package.svg',
+            text: l10n.vehicleLoadTotal,
+          ),
+          const SizedBox(height: 8),
+          _SuccessInfoRow(
+            asset: '$_successIcons/warehouse.svg',
+            text: l10n.warehouseDistance,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SuccessInfoCard extends StatelessWidget {
+  const _SuccessInfoCard({
+    required this.background,
+    required this.child,
+    this.border,
+  });
+
+  final Color background;
+  final Color? border;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: background,
+        border: border == null ? null : Border.all(color: border!),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _SuccessInfoRow extends StatelessWidget {
+  const _SuccessInfoRow({required this.asset, required this.text});
+
+  final String asset;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SvgPicture.asset(asset, package: _package),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: DriverTextStyles.medium14.copyWith(
+              color: DriverColors.neutral900,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SuccessActionButton extends StatelessWidget {
+  const _SuccessActionButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+    this.primary = false,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
+  final String? icon;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          elevation: 0,
+          backgroundColor: primary
+              ? DriverColors.primary500
+              : DriverColors.cool200,
+          foregroundColor: primary
+              ? DriverColors.surface
+              : DriverColors.neutral950,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: primary
+              ? DriverTextStyles.bold16
+              : DriverTextStyles.semibold16,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+            if (icon != null) ...[
+              const SizedBox(width: 8),
+              SvgPicture.asset(icon!, package: _package),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AnimatedSuccessIllustration extends StatefulWidget {
+  const _AnimatedSuccessIllustration();
+
+  @override
+  State<_AnimatedSuccessIllustration> createState() =>
+      _AnimatedSuccessIllustrationState();
+}
+
+class _AnimatedSuccessIllustrationState
+    extends State<_AnimatedSuccessIllustration>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 3),
+  )..repeat();
+
+  late final Animation<double> _scale = TweenSequence<double>([
+    _segment(0, .009, 3.333),
+    _segment(.009, .046, 3.334),
+    _segment(.046, .135, 3.333),
+    _segment(.135, .431, 3.333),
+    _segment(.431, 1.511, 3.334),
+    _segment(1.511, 1.633, 3.333),
+    _segment(1.633, 1.682, 3.333),
+    _segment(1.682, 1.699, 3.334),
+    _segment(1.699, 1.7, 1.111),
+    _segment(1.7, 1.7, 50),
+    _segment(1.7, 1.693, 2.222),
+    _segment(1.693, 1.643, 3.333),
+    _segment(1.643, 1.472, 3.334),
+    _segment(1.472, .228, 3.333),
+    _segment(.228, .057, 3.333),
+    _segment(.057, .007, 3.334),
+    _segment(.007, 0, 2.222),
+    _segment(0, 0, 1.111),
+  ]).animate(_controller);
+
+  static TweenSequenceItem<double> _segment(
+    double begin,
+    double end,
+    double weight,
+  ) {
+    return TweenSequenceItem<double>(
+      tween: Tween<double>(begin: begin, end: end),
+      weight: weight,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    return SizedBox(
+      width: 135,
+      height: 135,
+      child: ClipRect(
+        child: Center(
+          child: AnimatedBuilder(
+            animation: _scale,
+            builder: (context, child) => Transform.scale(
+              scale: reduceMotion ? 1 : _scale.value,
+              child: child,
+            ),
+            child: Image.asset(
+              '$_successImages/success.gif',
+              package: _package,
+              width: 122,
+              height: 122,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DriverSuccessFormBackground extends StatelessWidget {
+  const DriverSuccessFormBackground({super.key});
 
   @override
   Widget build(BuildContext context) {

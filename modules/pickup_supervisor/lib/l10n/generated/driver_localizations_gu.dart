@@ -41,7 +41,9 @@ class DriverLocalizationsGu extends DriverLocalizations {
   String get collected => 'એકત્રિત';
 
   @override
-  String get collectedCount => '03';
+  String collectedCount(int count) {
+    return 'એકત્રિત ($count)';
+  }
 
   @override
   String get todaysTrip => 'આજની ટ્રિપ';
@@ -569,4 +571,443 @@ class DriverLocalizationsGu extends DriverLocalizations {
 
   @override
   String get sendToSupervisor => 'સુપરવાઇઝરને મોકલો';
+
+  @override
+  String get requestSent => 'વિનંતી મોકલાઈ';
+
+  @override
+  String get toYourSupervisor => 'તમારા સુપરવાઇઝરને';
+
+  @override
+  String get correctionRequestSummary =>
+      'હોટેલ રાજધાની · વજન · 50 કિગ્રા → 60 કિગ્રા';
+
+  @override
+  String get whatHappensNext => 'હવે આગળ શું થશે';
+
+  @override
+  String get supervisorChecksPhotos =>
+      'કિરણ શાહ તમારા ફોટા સાથે તેની તપાસ કરશે';
+
+  @override
+  String get correctionRequestedUntil =>
+      'ત્યાં સુધી સ્ટોપ પર “સુધારાની વિનંતી” દેખાશે';
+
+  @override
+  String get correctionNotification => 'સુધારો થયા પછી તમને સૂચના મળશે';
+
+  @override
+  String get backToMyStops => 'મારા સ્ટોપ્સ પર પાછા જાઓ';
+
+  @override
+  String get backToHome => 'હોમ પર પાછા જાઓ';
+
+  @override
+  String get stopTripPosition => 'સ્ટોપ 7 માંથી 6 · ટ્રિપ 1';
+
+  @override
+  String get personAtPickupPoint => 'પિકઅપ પોઇન્ટ પરની વ્યક્તિ';
+
+  @override
+  String get rakeshShah => 'રાકેશ શાહ';
+
+  @override
+  String get storeManager => 'સ્ટોર મેનેજર';
+
+  @override
+  String get pickupContactPhone => '+91 98765 43214';
+
+  @override
+  String get nothingToCollectWeight => 'કલેક્શન માટે કંઈ નથી (0 કિગ્રા)';
+
+  @override
+  String get nothingToCollect => 'કલેક્શન માટે કંઈ નથી';
+
+  @override
+  String get abcStopSixOfSeven => 'ABC ટેક્સટાઇલ મિલ્સ · સ્ટોપ 7 માંથી 6';
+
+  @override
+  String get savedAsZeroKgMessage => 'આ સ્ટોપ 0 કિગ્રા તરીકે સેવ થશે.';
+
+  @override
+  String get whyNothingCollected => 'કંઈ કલેક્શન કેમ ન થયું?';
+
+  @override
+  String get reasonClosed => 'બંધ હતું';
+
+  @override
+  String get reasonRefused => 'આપવાનો ઇનકાર કર્યો';
+
+  @override
+  String get reasonNotReachable => 'સંપર્ક ન થયો';
+
+  @override
+  String get reasonVehicleFull => 'વાહન ભરેલું છે';
+
+  @override
+  String get photoOptional => 'ફોટો (વૈકલ્પિક)';
+
+  @override
+  String get noteForSupervisorOptional => 'સુપરવાઇઝર માટે નોંધ (વૈકલ્પિક)';
+
+  @override
+  String get typeANote => 'નોંધ લખો…';
+
+  @override
+  String get holdToRecordVoiceNote => 'વોઇસ નોંધ રેકોર્ડ કરવા દબાવી રાખો';
+
+  @override
+  String get upToOneMinute => '1 મિનિટ સુધી';
+
+  @override
+  String get voiceNoteZeroTime => '0:00';
+
+  @override
+  String get recordingVoiceNote => 'વોઇસ નોંધ રેકોર્ડ થઈ રહી છે…';
+
+  @override
+  String get voiceNoteRecorded => 'વોઇસ નોંધ રેકોર્ડ થઈ';
+
+  @override
+  String get playVoiceNote => 'વોઇસ નોંધ ચલાવો';
+
+  @override
+  String get pauseVoiceNote => 'વોઇસ નોંધ થોભાવો';
+
+  @override
+  String get removeVoiceNote => 'વોઇસ નોંધ દૂર કરો';
+
+  @override
+  String get voiceNotePlaybackFailed =>
+      'વોઇસ નોંધ ચાલી શકી નથી. ફરી પ્રયાસ કરો.';
+
+  @override
+  String get microphonePermissionRequired =>
+      'વોઇસ નોંધ રેકોર્ડ કરવા માઇક્રોફોનની પરવાનગી જરૂરી છે.';
+
+  @override
+  String get voiceNoteRecordingFailed =>
+      'વોઇસ નોંધ રેકોર્ડ થઈ શકી નથી. ફરી પ્રયાસ કરો.';
+
+  @override
+  String get locationMatched => 'સ્થાન મેળ ખાય છે';
+
+  @override
+  String get locationNotMatched => 'સ્થાન મેળ ખાતું નથી';
+
+  @override
+  String get sortedStopSixOfSeven => '7 માંથી સ્ટોપ 6 · છાંટેલું';
+
+  @override
+  String get mixedStopSevenOfSeven => '7 માંથી સ્ટોપ 7 · મિશ્ર';
+
+  @override
+  String get recordedLaterWarning =>
+      'પછી નોંધ્યું: તમે અત્યારે આ સ્ટોપ પર નથી. સુપરવાઇઝર અને ગેટ આ નોંધ જોઈ શકે છે.';
+
+  @override
+  String get saveAsZeroKg => '0 કિગ્રા તરીકે સેવ કરો';
+
+  @override
+  String get orderedPickupStops => 'ક્રમબદ્ધ પિકઅપ સ્ટોપ્સ';
+
+  @override
+  String get startYourCollections => 'તમારું કલેક્શન શરૂ કરો';
+
+  @override
+  String get searchHere => 'અહીં શોધો...';
+
+  @override
+  String pendingCount(int count) {
+    return 'બાકી ($count)';
+  }
+
+  @override
+  String get yashTextileHub => 'યશ ટેક્સટાઇલ હબ';
+
+  @override
+  String get anjanaFarmAreaSurat => 'અંજના ફાર્મ વિસ્તાર, સુરત';
+
+  @override
+  String get collectionWindowNineToTen => '09:00 AM - 10:00 AM';
+
+  @override
+  String get materialSortedLabel => 'સામગ્રી : છાંટેલી';
+
+  @override
+  String get findingYourLocationStatus => 'તમારું સ્થાન શોધી રહ્યા છીએ…';
+
+  @override
+  String get findingYourLocation => 'તમારું સ્થાન શોધી રહ્યા છીએ';
+
+  @override
+  String get findingLocationMessage =>
+      'પિકઅપ પોઇન્ટની નજીક ઊભા રહો. આમાં થોડી સેકન્ડ લાગે છે.';
+
+  @override
+  String get cancelAction => 'રદ કરો';
+
+  @override
+  String get locationDetected => 'સ્થાન મળ્યું';
+
+  @override
+  String get notHere => 'અહીં નથી';
+
+  @override
+  String get startCollection => 'કલેક્શન શરૂ કરો';
+
+  @override
+  String stopsNearby(int count) {
+    return 'નજીકમાં $count સ્ટોપ્સ';
+  }
+
+  @override
+  String get whichStopAreYouAt => 'તમે કયા સ્ટોપ પર છો?';
+
+  @override
+  String get twoStopsCloseMessage => 'તમારી ટ્રિપના બે સ્ટોપ તમારી નજીક છે.';
+
+  @override
+  String get distanceStopSeven => '40 મી દૂર · સ્ટોપ 7';
+
+  @override
+  String get distanceAlreadyCollected => '85 મી દૂર · પહેલેથી એકત્રિત';
+
+  @override
+  String get continueAction => 'આગળ વધો';
+
+  @override
+  String get noStopFoundHere => 'અહીં કોઈ સ્ટોપ મળ્યો નથી';
+
+  @override
+  String get notAtTripStop => 'તમે આ ટ્રિપના કોઈ સ્ટોપ પર નથી';
+
+  @override
+  String get notAtStopMessage =>
+      'નજીક જાઓ અને ફરી પ્રયાસ કરો, સ્ટોપ જાતે પસંદ કરો અથવા ગેટ ટીમ માટે છોડી દો.';
+
+  @override
+  String get tryAgain => 'ફરી પ્રયાસ કરો';
+
+  @override
+  String get chooseStopMyself => 'સ્ટોપ જાતે પસંદ કરો';
+
+  @override
+  String get gateTeamWillEnter => 'ગેટ ટીમ દાખલ કરશે';
+
+  @override
+  String get locationIsOff => 'સ્થાન બંધ છે';
+
+  @override
+  String get turnOnLocation => 'સ્થાન ચાલુ કરો';
+
+  @override
+  String get locationOffMessage =>
+      'એપ તમારા સ્થાન પરથી સ્ટોપ શોધે છે. પિકઅપ નોંધવા માટે તેને ચાલુ કરો.';
+
+  @override
+  String get shreeSaiStopSeven => 'શ્રી સાઈ ડેરી · 7 માંથી સ્ટોપ 7';
+
+  @override
+  String get gateTeamEntryMessage =>
+      'બેક ઓફિસ વેરહાઉસ ગેટ પર આ પિકઅપ દાખલ કરે છે.';
+
+  @override
+  String get weightYouNotedOptional => 'તમે નોંધેલું વજન (વૈકલ્પિક)';
+
+  @override
+  String get aboutThreeHundred => 'લગભગ 300';
+
+  @override
+  String get gateWeightHelp =>
+      'અંદાજિત આંકડો ગેટ ટીમને મદદ કરે છે. તેઓ ગેટ પર ફરી વજન કરે છે.';
+
+  @override
+  String get markForGateTeam => 'ગેટ ટીમ માટે ચિહ્નિત કરો';
+
+  @override
+  String get nextPickupSavedMessage =>
+      'ABC ટેક્સટાઇલ મિલ્સ · 540 કિગ્રા + 25 નંગ સેવ થયા.';
+
+  @override
+  String get lastPickupSavedMessage => 'શ્રી સાઈ ડેરી · 300 કિગ્રા સેવ થયા.';
+
+  @override
+  String get nextStopSevenOfSeven => 'આગળનો સ્ટોપ · 7 માંથી 7';
+
+  @override
+  String get nextStopDistance => 'એલ.પી. સવાણી રોડ, સુરત · 1.2 કિમી';
+
+  @override
+  String get goToNextStop => 'આગળના સ્ટોપ પર જાઓ';
+
+  @override
+  String get allTripStopsDone => 'ટ્રિપ 1 ના તમામ 7 સ્ટોપ પૂર્ણ';
+
+  @override
+  String get takeLoadToWarehouse => 'લોડ મગદલ્લા વેરહાઉસ લઈ જાઓ';
+
+  @override
+  String get vehicleLoadTotal => 'વાહનમાં 1,260 કિગ્રા + 25 નંગ';
+
+  @override
+  String get warehouseDistance => 'મગદલ્લા, સુરત · 6.4 કિમી';
+
+  @override
+  String get viewTripSummary => 'ટ્રિપ સારાંશ જુઓ';
+
+  @override
+  String get tripOneSummary => 'ટ્રિપ 1 સારાંશ';
+
+  @override
+  String get allStopsDone => 'બધા સ્ટોપ પૂર્ણ';
+
+  @override
+  String get tripCollectedTotal => '1,260 કિગ્રા + 25 નંગ';
+
+  @override
+  String get mixedWaste => 'મિશ્ર કચરો';
+
+  @override
+  String get weight635Kg => '635 કિગ્રા';
+
+  @override
+  String get weight270Kg => '270 કિગ્રા';
+
+  @override
+  String get weight85Kg => '85 કિગ્રા';
+
+  @override
+  String get count25Pcs => '25 નંગ';
+
+  @override
+  String get dropAt => 'અહીં ઉતારો';
+
+  @override
+  String get warehouseAddressDistance => 'મગદલ્લા પોર્ટ રોડ, સુરત · 6.4 કિમી';
+
+  @override
+  String get openInMaps => 'નકશામાં ખોલો';
+
+  @override
+  String get callWarehouse => 'વેરહાઉસને કૉલ કરો';
+
+  @override
+  String get notCollectedTwo => 'સંગ્રહ ન થયું (2)';
+
+  @override
+  String get closedForStockTaking => 'સ્ટોક ગણતરી માટે બંધ';
+
+  @override
+  String get handOverAtWarehouse => 'વેરહાઉસમાં સોંપો';
+
+  @override
+  String get warehouseGateInstruction =>
+      'વેરહાઉસ ગેટ પર ટેપ કરો. તમે બેગની સંખ્યા દાખલ કરો; વેરહાઉસ ઇન્ચાર્જ વાહનનું વજન કરે છે.';
+
+  @override
+  String get handOverTripOne => 'સોંપણી · ટ્રિપ 1';
+
+  @override
+  String get yourCountFromStops => 'તમારી ગણતરી (સ્ટોપ પરથી)';
+
+  @override
+  String get numberOfBags => 'બેગની સંખ્યા';
+
+  @override
+  String get bagsUnit => 'બેગ';
+
+  @override
+  String get bagsCount => '42';
+
+  @override
+  String get bagsHelp =>
+      'તમે ઉતારેલી બેગ ગણો. ઇ-વેસ્ટ જેવી છૂટક વસ્તુઓ નંગમાં ગણાય છે.';
+
+  @override
+  String get handOver => 'સોંપો';
+
+  @override
+  String get warehouseWeighInstruction =>
+      'વેરહાઉસ ઇન્ચાર્જ લોડ તપાસે છે અને વેઇબ્રિજ પર વાહનનું વજન કરે છે. તેઓ સેવ કરે પછી વજન અહીં દેખાશે.';
+
+  @override
+  String get tripAtWarehouse => 'ટ્રિપ 1 · વેરહાઉસ પર';
+
+  @override
+  String get waitingStatus => 'રાહમાં';
+
+  @override
+  String get vehicleAtWarehouseSince => 'GJ-XX-1234 · 11:20 થી મગદલ્લા પર';
+
+  @override
+  String get youHandedOver => 'તમે સોંપ્યું';
+
+  @override
+  String get handedOverTotal => '1,260 કિગ્રા + 25 નંગ · 42 બેગ';
+
+  @override
+  String get waitingWarehouseInstruction =>
+      '11:20 વાગ્યે સોંપ્યું. વેરહાઉસ ઇન્ચાર્જ વાહનનું વજન કરી રહ્યા છે; સેવ થયા પછી વેઇબ્રિજ વજન અહીં દેખાશે.';
+
+  @override
+  String get tripReceived => 'ટ્રિપ 1 · પ્રાપ્ત';
+
+  @override
+  String get receivedStatus => 'પ્રાપ્ત';
+
+  @override
+  String get vehicleAtWarehouse => 'GJ-XX-1234 · મગદલ્લા વેરહાઉસ';
+
+  @override
+  String get weighbridgeEnteredByWarehouse => 'વેઇબ્રિજ · વેરહાઉસ દ્વારા દાખલ';
+
+  @override
+  String get warehouseReceivedTotal => '1,240 કિગ્રા નેટ + 25 નંગ';
+
+  @override
+  String get withLoadGross => 'લોડ સાથે (ગ્રોસ)';
+
+  @override
+  String get weight8940Kg => '8,940 કિગ્રા';
+
+  @override
+  String get emptyVehicle => 'ખાલી વાહન';
+
+  @override
+  String get weight7700Kg => '7,700 કિગ્રા';
+
+  @override
+  String get netWeight => 'નેટ વજન';
+
+  @override
+  String get weight1240Kg => '1,240 કિગ્રા';
+
+  @override
+  String get bagsReceived => 'પ્રાપ્ત બેગ';
+
+  @override
+  String get eWasteCounted => 'ઇ-વેસ્ટ (ગણેલ)';
+
+  @override
+  String get yourCountVsWeighbridge => 'તમારી ગણતરી અને વેઇબ્રિજ';
+
+  @override
+  String get yourCount => 'તમારી ગણતરી';
+
+  @override
+  String get weight1260Kg => '1,260 કિગ્રા';
+
+  @override
+  String get weighbridgeNet => 'વેઇબ્રિજ નેટ';
+
+  @override
+  String get difference => 'તફાવત';
+
+  @override
+  String get weightDifference => '−20 કિગ્રા (1.6% ઓછું)';
+
+  @override
+  String get receivedWarehouseInstruction =>
+      '11:42 વાગ્યે વેરહાઉસ ઇન્ચાર્જ રમેશ પટેલે પ્રાપ્ત કર્યું. તફાવત ખોટો લાગે તો સમસ્યા નોંધાવો.';
 }

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/driver/view/driver_correction_request_sent_screen.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_stops_widgets.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
@@ -143,7 +144,13 @@ class _CollectionCorrectionViewState extends State<_CollectionCorrectionView> {
                             height: 52,
                             child: FilledButton(
                               key: const Key('driver-send-correction'),
-                              onPressed: () {},
+                              onPressed: () =>
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) =>
+                                          const DriverCorrectionRequestSentScreen(),
+                                    ),
+                                  ),
                               style: FilledButton.styleFrom(
                                 padding: EdgeInsets.zero,
                                 backgroundColor: DriverColors.primary500,

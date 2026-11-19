@@ -10,6 +10,7 @@ import 'package:pickup_supervisor/driver/services/driver_photo_capture.dart';
 import 'package:pickup_supervisor/driver/view/driver_pickup_success_screen.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_pickup_form_widgets.dart';
 import 'package:pickup_supervisor/driver/widgets/driver_stops_widgets.dart';
+import 'package:pickup_supervisor/driver/widgets/driver_voice_note_recorder.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 
@@ -33,7 +34,21 @@ class _MixedWasteFormViewState extends State<_MixedWasteFormView> {
   static const _maximumPhotos = 2;
   static const _recoveryId = 'driver.pickup.mixed';
   final List<XFile> _photos = [];
+  final TextEditingController _weightController = TextEditingController(
+    text: '300.00',
+  );
+  final TextEditingController _noteController = TextEditingController();
   bool _restoredPhoto = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _weightController.addListener(_refreshForm);
+  }
+
+  void _refreshForm() {
+    if (mounted) setState(() {});
+  }
 
   @override
   void didChangeDependencies() {
@@ -63,6 +78,15 @@ class _MixedWasteFormViewState extends State<_MixedWasteFormView> {
   }
 
   @override
+  void dispose() {
+    _weightController
+      ..removeListener(_refreshForm)
+      ..dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
     final mediaPadding = MediaQuery.paddingOf(context);
@@ -71,6 +95,20 @@ class _MixedWasteFormViewState extends State<_MixedWasteFormView> {
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
         backgroundColor: DriverColors.background,
+        bottomNavigationBar: SafeArea(
+          minimum: const EdgeInsets.fromLTRB(20, 8, 20, 10),
+          child: DriverFormButton(
+            label: l10n.savePickup,
+            enabled:
+                _photos.isNotEmpty && _weightController.text.trim().isNotEmpty,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) =>
+                    const DriverPickupSuccessScreen(isLastStop: true),
+              ),
+            ),
+          ),
+        ),
         body: LayoutBuilder(
           builder: (context, constraints) {
             final pageWidth = math.min(constraints.maxWidth, 480.0);
@@ -104,12 +142,19 @@ class _MixedWasteFormViewState extends State<_MixedWasteFormView> {
                             backAsset: '$driverPickupIconRoot/mixed_back.svg',
                             onBack: () => Navigator.of(context).pop(),
                           ),
+                          const SizedBox(height: 24),
+                          DriverPickupStopSummary(
+                            title: l10n.shreeSaiDairy,
+                            subtitle: l10n.mixedStopSevenOfSeven,
+                            locationLabel: l10n.locationMatched,
+                          ),
                           const SizedBox(height: 32),
                           DriverRequiredLabel(label: l10n.enterWeightKg),
                           const SizedBox(height: 8),
-                          DriverValueField(
+                          DriverEditableValueField(
+                            controller: _weightController,
                             prefix: l10n.kgUnit,
-                            value: l10n.mixedWeightValue,
+                            placeholder: l10n.exampleWeight,
                             height: 55,
                           ),
                           const SizedBox(height: 24),
@@ -168,18 +213,22 @@ class _MixedWasteFormViewState extends State<_MixedWasteFormView> {
                               color: DriverColors.neutral600,
                             ),
                           ),
-                          const Spacer(),
-                          const SizedBox(height: 24),
-                          DriverFormButton(
-                            label: l10n.savePickup,
-                            enabled: _photos.isNotEmpty,
-                            onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) =>
-                                    const DriverPickupSuccessScreen(),
-                              ),
+                          const SizedBox(height: 32),
+                          Text(
+                            l10n.noteForSupervisorOptional,
+                            style: DriverTextStyles.medium14.copyWith(
+                              color: DriverColors.neutral950,
                             ),
                           ),
+                          const SizedBox(height: 8),
+                          DriverSupervisorNoteField(
+                            controller: _noteController,
+                            hint: l10n.typeANote,
+                            limitLabel: l10n.max150Characters,
+                          ),
+                          const SizedBox(height: 8),
+                          const DriverVoiceNoteRecorder(),
+                          const SizedBox(height: 24),
                         ],
                       ),
                     ),

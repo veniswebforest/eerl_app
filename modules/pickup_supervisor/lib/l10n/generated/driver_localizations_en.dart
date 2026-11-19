@@ -41,7 +41,9 @@ class DriverLocalizationsEn extends DriverLocalizations {
   String get collected => 'Collected';
 
   @override
-  String get collectedCount => '03';
+  String collectedCount(int count) {
+    return 'Collected ($count)';
+  }
 
   @override
   String get todaysTrip => 'Today’s Trip';
@@ -569,4 +571,446 @@ class DriverLocalizationsEn extends DriverLocalizations {
 
   @override
   String get sendToSupervisor => 'Send to supervisor';
+
+  @override
+  String get requestSent => 'Request sent';
+
+  @override
+  String get toYourSupervisor => 'to your supervisor';
+
+  @override
+  String get correctionRequestSummary =>
+      'Hotel Rajdhani · weight · 50 kg → 60 kg';
+
+  @override
+  String get whatHappensNext => 'WHAT HAPPENS NEXT';
+
+  @override
+  String get supervisorChecksPhotos =>
+      'Kiran Shah checks it against your photos';
+
+  @override
+  String get correctionRequestedUntil =>
+      'The stop shows “Correction requested” until then';
+
+  @override
+  String get correctionNotification =>
+      'You get a notification when it is corrected';
+
+  @override
+  String get backToMyStops => 'Back to my stops';
+
+  @override
+  String get backToHome => 'Back to home';
+
+  @override
+  String get stopTripPosition => 'Stop 6 of 7 · Trip 1';
+
+  @override
+  String get personAtPickupPoint => 'Person at the pickup point';
+
+  @override
+  String get rakeshShah => 'Rakesh Shah';
+
+  @override
+  String get storeManager => 'Store manager';
+
+  @override
+  String get pickupContactPhone => '+91 98765 43214';
+
+  @override
+  String get nothingToCollectWeight => 'Nothing to collect (0 kg)';
+
+  @override
+  String get nothingToCollect => 'Nothing to collect';
+
+  @override
+  String get abcStopSixOfSeven => 'ABC Textile Mills · Stop 6 of 7';
+
+  @override
+  String get savedAsZeroKgMessage => 'This stop will be saved as 0 kg.';
+
+  @override
+  String get whyNothingCollected => 'Why was nothing collected?';
+
+  @override
+  String get reasonClosed => 'Closed';
+
+  @override
+  String get reasonRefused => 'Refused to give';
+
+  @override
+  String get reasonNotReachable => 'Not reachable';
+
+  @override
+  String get reasonVehicleFull => 'Vehicle full';
+
+  @override
+  String get photoOptional => 'Photo (optional)';
+
+  @override
+  String get noteForSupervisorOptional => 'Note for supervisor (optional)';
+
+  @override
+  String get typeANote => 'Type a note…';
+
+  @override
+  String get holdToRecordVoiceNote => 'Hold to record a voice note';
+
+  @override
+  String get upToOneMinute => 'Up to 1 minute';
+
+  @override
+  String get voiceNoteZeroTime => '0:00';
+
+  @override
+  String get recordingVoiceNote => 'Recording voice note…';
+
+  @override
+  String get voiceNoteRecorded => 'Voice note recorded';
+
+  @override
+  String get playVoiceNote => 'Play voice note';
+
+  @override
+  String get pauseVoiceNote => 'Pause voice note';
+
+  @override
+  String get removeVoiceNote => 'Remove voice note';
+
+  @override
+  String get voiceNotePlaybackFailed =>
+      'Could not play the voice note. Please try again.';
+
+  @override
+  String get microphonePermissionRequired =>
+      'Microphone permission is required to record a voice note.';
+
+  @override
+  String get voiceNoteRecordingFailed =>
+      'Could not record the voice note. Please try again.';
+
+  @override
+  String get locationMatched => 'Location matched';
+
+  @override
+  String get locationNotMatched => 'Location not matched';
+
+  @override
+  String get sortedStopSixOfSeven => 'Stop 6 of 7 · Sorted';
+
+  @override
+  String get mixedStopSevenOfSeven => 'Stop 7 of 7 · Mixed';
+
+  @override
+  String get recordedLaterWarning =>
+      'Recorded later: you are not at this stop now. The supervisor and the gate see this note.';
+
+  @override
+  String get saveAsZeroKg => 'Save as 0 kg';
+
+  @override
+  String get orderedPickupStops => 'Ordered Pickup Stops';
+
+  @override
+  String get startYourCollections => 'Start your collections';
+
+  @override
+  String get searchHere => 'Search Here...';
+
+  @override
+  String pendingCount(int count) {
+    return 'Pending ($count)';
+  }
+
+  @override
+  String get yashTextileHub => 'Yash Textile Hub';
+
+  @override
+  String get anjanaFarmAreaSurat => 'Anjana Farm Area, Surat';
+
+  @override
+  String get collectionWindowNineToTen => '09:00 AM - 10:00 AM';
+
+  @override
+  String get materialSortedLabel => 'Material : Sorted';
+
+  @override
+  String get findingYourLocationStatus => 'Finding your location…';
+
+  @override
+  String get findingYourLocation => 'Finding your location';
+
+  @override
+  String get findingLocationMessage =>
+      'Stand near the pickup point. This takes a few seconds.';
+
+  @override
+  String get cancelAction => 'Cancel';
+
+  @override
+  String get locationDetected => 'Location detected';
+
+  @override
+  String get notHere => 'Not Here';
+
+  @override
+  String get startCollection => 'Start collection';
+
+  @override
+  String stopsNearby(int count) {
+    return '$count stops nearby';
+  }
+
+  @override
+  String get whichStopAreYouAt => 'Which stop are you at?';
+
+  @override
+  String get twoStopsCloseMessage => 'Two stops on your trip are close to you.';
+
+  @override
+  String get distanceStopSeven => '40 m away · Stop 7';
+
+  @override
+  String get distanceAlreadyCollected => '85 m away · already collected';
+
+  @override
+  String get continueAction => 'Continue';
+
+  @override
+  String get noStopFoundHere => 'No stop found here';
+
+  @override
+  String get notAtTripStop => 'You’re not at a stop on this trip';
+
+  @override
+  String get notAtStopMessage =>
+      'Move closer and try again, choose the stop yourself, or leave it for the gate team.';
+
+  @override
+  String get tryAgain => 'Try again';
+
+  @override
+  String get chooseStopMyself => 'Choose the stop myself';
+
+  @override
+  String get gateTeamWillEnter => 'Gate team will enter';
+
+  @override
+  String get locationIsOff => 'Location is off';
+
+  @override
+  String get turnOnLocation => 'Turn on location';
+
+  @override
+  String get locationOffMessage =>
+      'The app finds your stop from your location. Turn it on to record pickups.';
+
+  @override
+  String get shreeSaiStopSeven => 'Shree Sai Dairy · Stop 7 of 7';
+
+  @override
+  String get gateTeamEntryMessage =>
+      'The back office enters this pickup at the warehouse gate.';
+
+  @override
+  String get weightYouNotedOptional => 'Weight you noted (optional)';
+
+  @override
+  String get aboutThreeHundred => 'about 300';
+
+  @override
+  String get gateWeightHelp =>
+      'A rough figure helps the gate team. They weigh it again at the gate.';
+
+  @override
+  String get markForGateTeam => 'Mark for the gate team';
+
+  @override
+  String get nextPickupSavedMessage =>
+      'ABC Textile Mills · 540 kg + 25 pcs saved.';
+
+  @override
+  String get lastPickupSavedMessage => 'Shree Sai Dairy · 300 kg saved.';
+
+  @override
+  String get nextStopSevenOfSeven => 'NEXT STOP · 7 OF 7';
+
+  @override
+  String get nextStopDistance => 'L.P Savani Road, Surat · 1.2 km';
+
+  @override
+  String get goToNextStop => 'Go to next stop';
+
+  @override
+  String get allTripStopsDone => 'ALL 7 STOPS OF TRIP 1 DONE';
+
+  @override
+  String get takeLoadToWarehouse => 'Take the load to Magdalla Warehouse';
+
+  @override
+  String get vehicleLoadTotal => '1,260 kg + 25 pcs on the vehicle';
+
+  @override
+  String get warehouseDistance => 'Magdalla, Surat · 6.4 km';
+
+  @override
+  String get viewTripSummary => 'View trip summary';
+
+  @override
+  String get tripOneSummary => 'Trip 1 summary';
+
+  @override
+  String get allStopsDone => 'All stops done';
+
+  @override
+  String get tripCollectedTotal => '1,260 kg + 25 pcs';
+
+  @override
+  String get mixedWaste => 'Mixed waste';
+
+  @override
+  String get weight635Kg => '635 kg';
+
+  @override
+  String get weight270Kg => '270 kg';
+
+  @override
+  String get weight85Kg => '85 kg';
+
+  @override
+  String get count25Pcs => '25 pcs';
+
+  @override
+  String get dropAt => 'DROP AT';
+
+  @override
+  String get warehouseAddressDistance => 'Magdalla Port Road, Surat · 6.4 km';
+
+  @override
+  String get openInMaps => 'Open in Maps';
+
+  @override
+  String get callWarehouse => 'Call warehouse';
+
+  @override
+  String get notCollectedTwo => 'Not collected (2)';
+
+  @override
+  String get closedForStockTaking => 'Closed for stock-taking';
+
+  @override
+  String get handOverAtWarehouse => 'Hand over at the warehouse';
+
+  @override
+  String get warehouseGateInstruction =>
+      'Tap at the warehouse gate. You enter the number of bags; the Warehouse Incharge weighs the vehicle.';
+
+  @override
+  String get handOverTripOne => 'Hand over · Trip 1';
+
+  @override
+  String get yourCountFromStops => 'Your count (from the stops)';
+
+  @override
+  String get numberOfBags => 'Number of bags';
+
+  @override
+  String get bagsUnit => 'BAGS';
+
+  @override
+  String get bagsCount => '42';
+
+  @override
+  String get bagsHelp =>
+      'Count the bags you unload. Loose items such as e-waste are counted in pieces.';
+
+  @override
+  String get handOver => 'Hand over';
+
+  @override
+  String get warehouseWeighInstruction =>
+      'The Warehouse Incharge checks the load and weighs the vehicle on the weighbridge. You see the weight here when they save it.';
+
+  @override
+  String get tripAtWarehouse => 'Trip 1 · at the warehouse';
+
+  @override
+  String get waitingStatus => 'Waiting';
+
+  @override
+  String get vehicleAtWarehouseSince =>
+      'GJ-XX-1234 · at Magdalla since 11:20 am';
+
+  @override
+  String get youHandedOver => 'You handed over';
+
+  @override
+  String get handedOverTotal => '1,260 kg + 25 pcs · 42 bags';
+
+  @override
+  String get waitingWarehouseInstruction =>
+      'Handed over at 11:20 am. The Warehouse Incharge is weighing the vehicle; the weighbridge weight shows here when they save it.';
+
+  @override
+  String get tripReceived => 'Trip 1 · received';
+
+  @override
+  String get receivedStatus => 'Received';
+
+  @override
+  String get vehicleAtWarehouse => 'GJ-XX-1234 · Magdalla Warehouse';
+
+  @override
+  String get weighbridgeEnteredByWarehouse =>
+      'Weighbridge · entered by the warehouse';
+
+  @override
+  String get warehouseReceivedTotal => '1,240 kg net + 25 pcs';
+
+  @override
+  String get withLoadGross => 'With load (gross)';
+
+  @override
+  String get weight8940Kg => '8,940 kg';
+
+  @override
+  String get emptyVehicle => 'Empty vehicle';
+
+  @override
+  String get weight7700Kg => '7,700 kg';
+
+  @override
+  String get netWeight => 'Net weight';
+
+  @override
+  String get weight1240Kg => '1,240 kg';
+
+  @override
+  String get bagsReceived => 'Bags received';
+
+  @override
+  String get eWasteCounted => 'E-Waste (counted)';
+
+  @override
+  String get yourCountVsWeighbridge => 'Your count vs the weighbridge';
+
+  @override
+  String get yourCount => 'Your count';
+
+  @override
+  String get weight1260Kg => '1,260 kg';
+
+  @override
+  String get weighbridgeNet => 'Weighbridge net';
+
+  @override
+  String get difference => 'Difference';
+
+  @override
+  String get weightDifference => '−20 kg (1.6% less)';
+
+  @override
+  String get receivedWarehouseInstruction =>
+      'Received at 11:42 am by Ramesh Patel, Warehouse Incharge. If the difference looks wrong, raise an issue.';
 }

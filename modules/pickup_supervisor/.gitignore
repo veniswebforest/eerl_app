@@ -44,6 +44,16 @@ assets/icons/driver/*
 !assets/icons/driver/stops_v2/**
 !assets/icons/driver/correction/
 !assets/icons/driver/correction/**
+!assets/icons/driver/stop_detail_v2/
+!assets/icons/driver/stop_detail_v2/**
+!assets/icons/driver/location_flow/
+!assets/icons/driver/location_flow/**
+!assets/images/driver/location_flow/
+!assets/images/driver/location_flow/**
+!assets/icons/driver/pickup_success_v2/
+!assets/icons/driver/pickup_success_v2/**
+!assets/images/driver/pickup_success_v2/
+!assets/images/driver/pickup_success_v2/**
 .tags*
 
 build/

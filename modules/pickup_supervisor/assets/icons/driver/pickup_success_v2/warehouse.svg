@@ -1,0 +1,8 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="icon/warehouse">
+<path id="Vector" d="M16.5 6.2625V15C16.5 15.3978 16.342 15.7794 16.0607 16.0607C15.7794 16.342 15.3978 16.5 15 16.5H3C2.60218 16.5 2.22064 16.342 1.93934 16.0607C1.65804 15.7794 1.5 15.3978 1.5 15V6.2625C1.50121 5.96336 1.59183 5.67141 1.76022 5.42417C1.92861 5.17693 2.16709 4.98568 2.445 4.875L8.445 2.475C8.80139 2.33306 9.19861 2.33306 9.555 2.475L15.555 4.875C15.8329 4.98568 16.0714 5.17693 16.2398 5.42417C16.4082 5.67141 16.4988 5.96336 16.5 6.2625Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="#2B6B3A"/>
+<path id="Vector_2" d="M4.5 13.5H13.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="#2B6B3A"/>
+<path id="Vector_3" d="M4.5 10.5H13.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="#2B6B3A"/>
+<path id="Vector_4" d="M4.5 7.5H13.5V16.5H4.5V7.5Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="#2B6B3A"/>
+</g>
+</svg>
