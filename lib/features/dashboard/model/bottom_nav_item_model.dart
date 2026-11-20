@@ -6,6 +6,7 @@ enum DashboardUserRole {
   collectionManager,
   iecAgent,
   supervisor,
+  pickupSupervisor,
   admin,
   driver,
 }
@@ -13,6 +14,7 @@ enum DashboardUserRole {
 extension DashboardUserRoleX on DashboardUserRole {
   String get syncMetaKey => switch (this) {
     DashboardUserRole.supervisor => 'SUPERVISOR',
+    DashboardUserRole.pickupSupervisor => 'PICKUP_SUPERVISOR',
     DashboardUserRole.admin => 'ADMIN',
     DashboardUserRole.collectionManager => 'COLLECTION_MANAGER',
     DashboardUserRole.iecAgent => 'IEC_AGENT',
@@ -22,9 +24,14 @@ extension DashboardUserRoleX on DashboardUserRole {
 
   static DashboardUserRole fromKey(String? key) {
     if (key == null) return DashboardUserRole.collectionAgent;
-    final normalized = key.trim().toUpperCase();
+    final normalized = key
+        .trim()
+        .toUpperCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
     return switch (normalized) {
       'SUPERVISOR' => DashboardUserRole.supervisor,
+      'PICKUP_SUPERVISOR' => DashboardUserRole.pickupSupervisor,
       'ADMIN' => DashboardUserRole.admin,
       'COLLECTION_MANAGER' => DashboardUserRole.collectionManager,
       'IEC_AGENT' => DashboardUserRole.iecAgent,

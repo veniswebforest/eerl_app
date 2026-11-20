@@ -113,7 +113,9 @@ class _RoleSwitcherScreenState extends State<RoleSwitcherScreen> {
                           key: ValueKey(roles[index].roleKey),
                           title: roles[index].roleName,
                           zone: centerNames,
-                          icon: role == DashboardUserRole.supervisor
+                          icon:
+                              role == DashboardUserRole.supervisor ||
+                                  role == DashboardUserRole.pickupSupervisor
                               ? RoleSwitcherAssets.supervisor
                               : RoleSwitcherAssets.agent,
                           selected: _selectedRole == role,

@@ -9,6 +9,7 @@ import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/providers/app_lock_provider.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
+import 'package:eerl_app/core/router/role_home_navigation.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/features/auth/data/auth_session_storage.dart';
 import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
@@ -67,12 +68,7 @@ class _SplashScreenState extends State<SplashScreen>
       } else {
         final role = await _storedDashboardRole();
         if (mounted) {
-          context.go(
-            role == DashboardUserRole.driver
-                ? AppRoutes.driverHome
-                : AppRoutes.home,
-            extra: role == DashboardUserRole.driver ? null : role,
-          );
+          goToRoleHome(context, role);
         }
       }
     } else {

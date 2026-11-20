@@ -29,6 +29,22 @@ void main() {
     );
   });
 
+  test('parses PICKUP_SUPERVISOR from a successful login response', () {
+    final response = VerifyOtpResponse.fromJson({
+      'accessToken': 'valid-pickup-supervisor-token',
+      'sessionExpiresAt': '2026-11-17T08:00:00.000Z',
+      'roles': [
+        {'key': 'PICKUP_SUPERVISOR', 'name': 'Pickup Supervisor'},
+      ],
+    });
+
+    expect(response.isPickupSupervisor, isTrue);
+    expect(
+      DashboardUserRoleX.fromKey(response.roles.single),
+      DashboardUserRole.pickupSupervisor,
+    );
+  });
+
   testWidgets(
     'navigates after OTP verification without awaiting initial sync',
     (tester) async {
@@ -99,6 +115,40 @@ void main() {
     await tester.pump();
 
     expect(authenticatedRole, DashboardUserRole.driver);
+    syncCompleter.complete();
+    await tester.pump();
+  });
+
+  testWidgets('uses PICKUP_SUPERVISOR from the login response', (tester) async {
+    final syncCompleter = Completer<void>();
+    DashboardUserRole? authenticatedRole;
+    final authProvider =
+        AuthProvider(repository: _PickupSupervisorAuthRepository())
+          ..setPhoneNumber('9876543210')
+          ..setOtp('123456');
+    addTearDown(authProvider.dispose);
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: authProvider,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: OtpScreen(
+            phoneNumber: '9876543210',
+            loadInitialRole: () async => DashboardUserRole.collectionAgent,
+            onAuthenticated: (role) => authenticatedRole = role,
+            startInitialSync: () => syncCompleter.future,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Verify'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(authenticatedRole, DashboardUserRole.pickupSupervisor);
     syncCompleter.complete();
     await tester.pump();
   });
@@ -213,6 +263,18 @@ class _DriverAuthRepository extends AuthRepository {
     accessToken: 'valid-driver-token',
     sessionExpiresAt: DateTime.now().toUtc().add(const Duration(hours: 1)),
     roles: const ['DRIVER'],
+  );
+}
+
+class _PickupSupervisorAuthRepository extends AuthRepository {
+  @override
+  Future<VerifyOtpResponse> verifyOtp({
+    required String phone,
+    required String otp,
+  }) async => VerifyOtpResponse(
+    accessToken: 'valid-pickup-supervisor-token',
+    sessionExpiresAt: DateTime.now().toUtc().add(const Duration(hours: 1)),
+    roles: const ['PICKUP_SUPERVISOR'],
   );
 }
 

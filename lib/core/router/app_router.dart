@@ -52,6 +52,7 @@ import 'package:eerl_app/features/wallet/view/log_expense_screen.dart';
 import 'package:eerl_app/features/wallet/view/request_cash_screen.dart';
 import 'package:eerl_app/features/wallet/view/wallet_tab_screen.dart';
 import 'package:pickup_supervisor/driver/view/driver_home_screen.dart';
+import 'package:pickup_supervisor/supervisor/view/supervisor_dashboard_shell.dart';
 import 'app_route_data.dart';
 import 'app_routes.dart';
 
@@ -123,6 +124,12 @@ class AppRouter {
       name: 'driverHome',
       parentNavigatorKey: rootNavigatorKey,
       builder: (_, _) => const DriverHomeScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.pickupSupervisorHome,
+      name: 'pickupSupervisorHome',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (_, _) => const SupervisorDashboardShell(),
     ),
     GoRoute(
       path: AppRoutes.wallet,

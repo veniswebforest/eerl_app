@@ -10,6 +10,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/core/router/app_route_data.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
+import 'package:eerl_app/core/router/role_home_navigation.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
 import 'package:eerl_app/features/collection/widgets/collection_draft_saved_notification.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
@@ -462,6 +463,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
     if (context.mounted && role != null && role != navigation.activeRole) {
       await AppDatabase.instance.setSyncMeta('active_role', role.syncMetaKey);
+      if (!context.mounted) return;
+      if (role == DashboardUserRole.driver ||
+          role == DashboardUserRole.pickupSupervisor) {
+        goToRoleHome(context, role);
+        return;
+      }
       navigation.changeRole(role);
     }
   }

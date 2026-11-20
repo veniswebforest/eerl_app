@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
+import 'package:eerl_app/core/router/role_home_navigation.dart';
 import 'package:eerl_app/features/collection/view/collections_tab_screen.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/dashboard/provider/dashboard_navigation_provider.dart';
@@ -156,8 +157,9 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
       if (!mounted) return;
       _appliedBootstrapRevision = revision;
       final role = DashboardUserRoleX.fromKey(storedRole);
-      if (role == DashboardUserRole.driver) {
-        context.go(AppRoutes.driverHome);
+      if (role == DashboardUserRole.driver ||
+          role == DashboardUserRole.pickupSupervisor) {
+        goToRoleHome(context, role);
         return;
       }
       _navigation.updateRoleFromParent(role);

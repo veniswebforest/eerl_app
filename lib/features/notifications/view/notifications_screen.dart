@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
-import 'package:eerl_app/core/router/app_routes.dart';
+import 'package:eerl_app/core/router/role_home_navigation.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
@@ -128,7 +128,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     _switchedRole = null;
     if (switchedRole != null) {
       final router = GoRouter.of(context);
-      router.go(AppRoutes.home, extra: switchedRole);
+      goToRoleHome(context, switchedRole);
       if (destination != null && destination.startsWith('/')) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           router.push(destination);

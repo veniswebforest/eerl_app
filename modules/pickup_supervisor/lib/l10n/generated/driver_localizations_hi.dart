@@ -1010,4 +1010,821 @@ class DriverLocalizationsHi extends DriverLocalizations {
   @override
   String get receivedWarehouseInstruction =>
       '11:42 बजे वेयरहाउस इंचार्ज रमेश पटेल ने प्राप्त किया। अंतर गलत लगे तो समस्या दर्ज करें।';
+
+  @override
+  String get supervisorWelcomeBack => 'वापसी पर स्वागत है';
+
+  @override
+  String get supervisorHeaderSubtitle =>
+      'गुरु 22 अक्तू 2026 · अडाजन, वेसु, पाल';
+
+  @override
+  String get supervisorOnline => 'आप ऑनलाइन हैं';
+
+  @override
+  String get supervisorLastSynced => 'अंतिम सिंक 2 मिनट पहले';
+
+  @override
+  String get supervisorSyncNow => 'अभी सिंक करें';
+
+  @override
+  String get supervisorNeedsAttention => 'आपके ध्यान की ज़रूरत है';
+
+  @override
+  String get supervisorAttentionSubtitle => 'पहले इन्हें मंज़ूर, हल या जाँचें';
+
+  @override
+  String get supervisorApprovals => 'मंज़ूरियाँ';
+
+  @override
+  String get supervisorIssues => 'समस्याएँ';
+
+  @override
+  String get supervisorMyRequests => 'मेरे अनुरोध';
+
+  @override
+  String get supervisorFlags => 'फ़्लैग';
+
+  @override
+  String get supervisorCollectionSummary => 'कलेक्शन सारांश';
+
+  @override
+  String get supervisorToday => 'आज';
+
+  @override
+  String get supervisorYesterday => 'कल';
+
+  @override
+  String get supervisorWeek => 'सप्ताह';
+
+  @override
+  String get supervisorMonth => 'महीना';
+
+  @override
+  String get supervisorCollectedToday => 'आज एकत्रित · 16 में से 12 स्टॉप';
+
+  @override
+  String get supervisorCollectedTotal => '320 किग्रा + 125 नग';
+
+  @override
+  String get supervisorCollected => 'एकत्रित';
+
+  @override
+  String get supervisorKg => 'किग्रा';
+
+  @override
+  String get supervisorMissed => 'छूटे';
+
+  @override
+  String get supervisorCancelled => 'रद्द';
+
+  @override
+  String get supervisorTripsClosed => 'बंद ट्रिप';
+
+  @override
+  String get supervisorViewFullReport => 'पूरी रिपोर्ट देखें';
+
+  @override
+  String get supervisorTodaysTrips => 'आज की ट्रिप';
+
+  @override
+  String get supervisorTripsSubtitle => 'आज के सक्रिय और आगामी पिकअप रूट';
+
+  @override
+  String get supervisorAdajanMorning => 'अडाजन सुबह';
+
+  @override
+  String get supervisorVikramProgress => 'विक्रम सिंह · 8 में से 3 एकत्रित';
+
+  @override
+  String get supervisorOwnVehicle => 'अपना वाहन';
+
+  @override
+  String get supervisorDailyWeekly => 'दैनिक 5 · साप्ताहिक 3';
+
+  @override
+  String get supervisorCallDriver => 'ड्राइवर को कॉल करें';
+
+  @override
+  String get supervisorPalGamMorning => 'पाल गाँव सुबह';
+
+  @override
+  String get supervisorAmitProgress => 'अमित पटेल · ऐप में 8 में से 0 दर्ज';
+
+  @override
+  String get supervisorDriverNotSetUp => 'ड्राइवर ने ऐप सेट नहीं किया';
+
+  @override
+  String get supervisorSeeTripsPlan => 'ट्रिप प्लान देखें';
+
+  @override
+  String get supervisorPickupPoints => 'मेरे पिकअप पॉइंट';
+
+  @override
+  String get supervisorPickupPointsSubtitle =>
+      'अडाजन, वेसु, पाल में 79 · श्रेणी अनुसार';
+
+  @override
+  String get supervisorDaily => 'दैनिक';
+
+  @override
+  String get supervisorWeekly => 'साप्ताहिक';
+
+  @override
+  String get supervisorBiWeekly => 'पाक्षिक';
+
+  @override
+  String get supervisorMonthly => 'मासिक';
+
+  @override
+  String get supervisorOnCall => 'कॉल पर';
+
+  @override
+  String get supervisorQuickActions => 'त्वरित कार्य';
+
+  @override
+  String get supervisorUnassignedSources => 'बिना असाइन स्रोत';
+
+  @override
+  String get supervisorManageUnassigned => 'नए बिना असाइन स्रोत संभालें';
+
+  @override
+  String get supervisorViewSource => 'स्रोत देखें';
+
+  @override
+  String get supervisorExtraPickupRequests => 'अतिरिक्त पिकअप अनुरोध';
+
+  @override
+  String get supervisorManageExtraPickup => 'अतिरिक्त पिकअप स्रोत संभालें';
+
+  @override
+  String get supervisorViewPickups => 'पिकअप देखें';
+
+  @override
+  String get supervisorAskCollectionHead => 'कलेक्शन हेड से पूछें';
+
+  @override
+  String get supervisorAskCollectionHeadSubtitle =>
+      'वाहन, श्रमिक या पिकअप पॉइंट बदलाव';
+
+  @override
+  String get supervisorNewRequest => 'नया अनुरोध';
+
+  @override
+  String get supervisorSuggestions => 'सुझाव';
+
+  @override
+  String get supervisorSuggestionsSubtitle =>
+      'दूरी और समय बचाने के तरीके (कॉन्सेप्ट)';
+
+  @override
+  String get supervisorSeeSuggestions => 'सुझाव देखें';
+
+  @override
+  String get supervisorHome => 'होम';
+
+  @override
+  String get attentionApprovalRequests => 'मंज़ूरी अनुरोध';
+
+  @override
+  String get attentionApprovalSubtitle => 'आपके ड्राइवरों और पिकअप पॉइंट से';
+
+  @override
+  String get attentionToApproveCount => 'मंज़ूरी के लिए 3';
+
+  @override
+  String get attentionDoneCount => 'पूर्ण 12';
+
+  @override
+  String get attentionCorrectionFromDriver => 'सुधार · ड्राइवर से';
+
+  @override
+  String get attentionWaiting => 'प्रतीक्षा में';
+
+  @override
+  String get attentionHotelRajdhaniStop =>
+      'होटल राजधानी · अडाजन मॉर्निंग, स्टॉप 2';
+
+  @override
+  String get attentionDriverCorrectionDetail =>
+      'PET बोतल 50 किग्रा → 60 किग्रा। सुरेश कुमार: “स्केल की फोटो में 60 किग्रा दिखता है।”';
+
+  @override
+  String get attentionSentToday => 'आज, 10:05 am भेजा';
+
+  @override
+  String get attentionDecline => 'अस्वीकार करें';
+
+  @override
+  String get attentionApprove => 'मंज़ूर करें';
+
+  @override
+  String get attentionExtraPickup => 'अतिरिक्त पिकअप';
+
+  @override
+  String get attentionAbcPlastic => 'ABC प्लास्टिक मैन्युफैक्चर';
+
+  @override
+  String get attentionExtraPickupDetail =>
+      'शनि 25 अक्तू, 10 am – 12 pm · मध्यम · अडाजन मॉर्निंग में उपयुक्त';
+
+  @override
+  String get attentionSent21Oct => '21 अक्तू भेजा';
+
+  @override
+  String get attentionCorrectionFromPickupPoint => 'सुधार · पिकअप पॉइंट से';
+
+  @override
+  String get attentionGreenParkSociety => 'ग्रीन पार्क सोसायटी';
+
+  @override
+  String get attentionPickupPointCorrectionDetail =>
+      '19 अक्तू के पिकअप में कार्डबोर्ड 20 किग्रा → 25 किग्रा';
+
+  @override
+  String get attentionSent20Oct => '20 अक्तू भेजा';
+
+  @override
+  String get attentionCorrectionApproved => 'सुधार मंज़ूर हुआ';
+
+  @override
+  String get attentionCorrectionApprovedMessage =>
+      'होटल राजधानी के रिकॉर्ड में अब PET बोतल 60 किग्रा है। सुरेश कुमार और पिकअप पॉइंट को बता दिया गया है।';
+
+  @override
+  String get attentionBackToApprovals => 'मंज़ूरी अनुरोध पर वापस जाएँ';
+
+  @override
+  String get attentionBackToHome => 'होम पर वापस जाएँ';
+
+  @override
+  String get attentionMyRequests => 'मेरे अनुरोध';
+
+  @override
+  String get attentionToCollectionHead => 'कलेक्शन हेड को';
+
+  @override
+  String get attentionAll4 => 'सभी 4';
+
+  @override
+  String get attentionWaiting1 => 'प्रतीक्षा 1';
+
+  @override
+  String get attentionApproved2 => 'मंज़ूर 2';
+
+  @override
+  String get attentionDeclined1 => 'अस्वीकृत 1';
+
+  @override
+  String get attentionVehicleAdajan => 'वाहन · अडाजन मॉर्निंग';
+
+  @override
+  String get attentionVehicleRequestDescription =>
+      'शनि 25 और रवि 26 अक्तू को दूसरा वाहन: नवरात्रि ग्राउंड में लगभग 2 टन अपेक्षित';
+
+  @override
+  String get attentionVehicleRequestResponse =>
+      'अरविंद देसाई (कलेक्शन हेड) के साथ';
+
+  @override
+  String get attentionSentTodayShort => 'आज भेजा';
+
+  @override
+  String get attentionLabourPalGam => 'श्रमिक · पाल गाम मॉर्निंग';
+
+  @override
+  String get attentionLabourRequestDescription =>
+      '3 दिनों के लिए एक और लोडर (20–22 अक्तू)';
+
+  @override
+  String get attentionLabourRequestResponse =>
+      'अरविंद देसाई: “रमेश यादव कल से जुड़ेंगे।”';
+
+  @override
+  String get attentionSent19Oct => '19 अक्तू भेजा';
+
+  @override
+  String get attentionPauseHotelShivam => 'पिकअप पॉइंट रोकें · होटल शिवम';
+
+  @override
+  String get attentionPauseRequestDescription =>
+      '1 – 10 नवम्बर · नवीनीकरण के लिए बंद';
+
+  @override
+  String get attentionPauseRequestResponse =>
+      'अरविंद देसाई: “मंज़ूर। IEC एग्ज़ीक्यूटिव को बता दिया गया है।”';
+
+  @override
+  String get attentionSent18Oct => '18 अक्तू भेजा';
+
+  @override
+  String get attentionStartSunriseSchool =>
+      'पिकअप पॉइंट शुरू करें · सनराइज़ स्कूल';
+
+  @override
+  String get attentionStartRequestDescription =>
+      '1 नवम्बर से पुनागाम फुलडे पर प्रतिदिन';
+
+  @override
+  String get attentionStartRequestResponse =>
+      'अरविंद देसाई: “उस ट्रिप में जगह नहीं है। रांदेर ईवनिंग आज़माएँ।”';
+
+  @override
+  String get attentionSent16Oct => '16 अक्तू भेजा';
+
+  @override
+  String get attentionApproved => 'मंज़ूर';
+
+  @override
+  String get attentionDeclined => 'अस्वीकृत';
+
+  @override
+  String get attentionSuggestions => 'सुझाव';
+
+  @override
+  String get attentionSuggestionsSubtitle =>
+      'कॉन्सेप्ट · GPS, रूट और क्षेत्रों के विचार';
+
+  @override
+  String get attentionAll3 => 'सभी 3';
+
+  @override
+  String get attentionMoveHotelRajdhani =>
+      'होटल राजधानी को पाल गाम मॉर्निंग में ले जाएँ';
+
+  @override
+  String get attentionMoveHotelDescription =>
+      'यह अडाजन मॉर्निंग से 3.1 किमी दूर है; पाल गाम मॉर्निंग इसके गेट से गुजरता है';
+
+  @override
+  String get attentionMoveHotelRoute => 'अडाजन मॉर्निंग → पाल गाम मॉर्निंग';
+
+  @override
+  String get attentionSaving31Km => 'प्रतिदिन 3.1 किमी कम';
+
+  @override
+  String get attentionReorderAdajan => 'अडाजन मॉर्निंग का क्रम बदलें';
+
+  @override
+  String get attentionReorderDescription =>
+      'ग्रीन पार्क सोसायटी से पहले ओम स्वीट्स जाएँ';
+
+  @override
+  String get attentionReorderSecondary => 'वही स्टॉप, छोटा रास्ता';
+
+  @override
+  String get attentionSaving12Min => 'प्रतिदिन 12 मिनट कम';
+
+  @override
+  String get attentionCombineFridayRoutes =>
+      'शुक्रवार को रांदेर और वेसु ईवनिंग: एक वाहन';
+
+  @override
+  String get attentionCombineDescription =>
+      'शुक्रवार को दोनों आधे से कम भरे होते हैं (310 किग्रा और 280 किग्रा)';
+
+  @override
+  String get attentionCombineSecondary =>
+      'शुक्रवार को GJ-05-EE-1001 खाली होता है';
+
+  @override
+  String get attentionSavingOneVehicle => 'शुक्रवार को एक वाहन कम';
+
+  @override
+  String get attentionLast30Days => 'GPS के पिछले 30 दिन';
+
+  @override
+  String get attentionDismiss => 'हटाएँ';
+
+  @override
+  String get attentionApply => 'लागू करें';
+
+  @override
+  String get attentionIssues => 'समस्याएँ';
+
+  @override
+  String get attentionVehicleBreakdown => 'वाहन खराब';
+
+  @override
+  String get attentionSourceClosed => 'स्रोत बंद';
+
+  @override
+  String get attentionRameshDriver => 'रमेश आहिर (ड्राइवर)';
+
+  @override
+  String get attentionMohanDriver => 'मोहन लाल (ड्राइवर)';
+
+  @override
+  String get attentionPrakashDriver => 'प्रकाश जादव (ड्राइवर)';
+
+  @override
+  String get attentionVehicleNumber => 'GJ-05-BX-1234';
+
+  @override
+  String get attentionDriver => 'ड्राइवर';
+
+  @override
+  String get attentionRameshAhir => 'रमेश आहिर';
+
+  @override
+  String get attentionContactNumber => 'संपर्क नंबर';
+
+  @override
+  String get attentionPhoneNumber => '9876543210';
+
+  @override
+  String get attentionRoute => 'रूट';
+
+  @override
+  String get attentionAdajanMorning => 'अडाजन मॉर्निंग';
+
+  @override
+  String get attentionReasonFor => 'कारण: ';
+
+  @override
+  String get attentionIssueWord => 'समस्या';
+
+  @override
+  String get attentionIssueReason => 'कारण : कोई वाहन उपलब्ध नहीं';
+
+  @override
+  String get attentionIssueRemarks =>
+      'टिप्पणी : यार्ड के सभी ट्रक अभी बाहर हैं। दोपहर 2 बजे के बाद प्रयास करें।';
+
+  @override
+  String get flagTimeClash => 'समय टकराव';
+
+  @override
+  String get flagHotelRajdhaniTime => 'होटल राजधानी · 1:30 pm बनाम 9–11 am';
+
+  @override
+  String get flagOffRoute => 'रूट से बाहर';
+
+  @override
+  String get flagSunriseOffRoute => 'सनराइज़ स्कूल · रूट से 4.2 किमी दूर';
+
+  @override
+  String get flagScheduleChanged => 'समय-सारणी बदली';
+
+  @override
+  String get flagAdajanTextileSorted => 'अडाजन टेक्सटाइल मिल · सुलझाया गया';
+
+  @override
+  String get flagSourcePaused => 'स्रोत रोका गया';
+
+  @override
+  String get flagClosedForDiwali => 'दिवाली के लिए बंद';
+
+  @override
+  String get flagNewSourceNoRoute => 'नया स्रोत, कोई रूट नहीं';
+
+  @override
+  String get flagAbcTextileMills => 'ABC टेक्सटाइल मिल्स';
+
+  @override
+  String get flagExtraPickupNoRoute => 'अतिरिक्त पिकअप, कोई रूट नहीं';
+
+  @override
+  String get flagExtraPickupNoRouteDetail => 'अतिरिक्त पिकअप, कोई रूट नहीं';
+
+  @override
+  String get flagShreeSaiSorted => 'श्री साई डेयरी · सुलझाया गया';
+
+  @override
+  String get flagSourceMovedToYou => 'स्रोत आपको दिया गया';
+
+  @override
+  String get flagRkTrading => 'R.K ट्रेडिंग एंड कंपनी';
+
+  @override
+  String get flagNothingToCheck => 'जाँचने के लिए कुछ नहीं!';
+
+  @override
+  String get flagOctober => 'अक्तूबर';
+
+  @override
+  String get flagNothingToCheckSubtitle =>
+      'अभी कोई नई सूचना या लंबित कार्रवाई नहीं है।';
+
+  @override
+  String get flagShreeSaiDairy => 'श्री साई डेयरी';
+
+  @override
+  String get flagShreeSaiAddress => 'U 9, 10, सिद्धगिरि टावर, B/H नवयुग...';
+
+  @override
+  String get flagWas => 'पहले';
+
+  @override
+  String get flagOldSchedule => 'सोम, गुरु · 8–10 am';
+
+  @override
+  String get flagNow => 'अब';
+
+  @override
+  String get flagNewSchedule => 'सोम, बुध · 9–11 am';
+
+  @override
+  String get flagFromMon2Nov => 'से : सोम 2 नवम्बर';
+
+  @override
+  String get flagPausedDates => '20–26 अक्तू तक रोका गया';
+
+  @override
+  String get flagReasonClosedForDiwali => 'कारण: दिवाली के लिए बंद';
+
+  @override
+  String get flagMovedFromVesu => 'वेसु क्षेत्र से स्थानांतरित';
+
+  @override
+  String get flagCheckRoute => 'रूट जाँचें';
+
+  @override
+  String get flagAddToRoute => 'रूट में जोड़ें';
+
+  @override
+  String get flagMarkDone => 'पूर्ण चिह्नित करें';
+
+  @override
+  String get flagDone => 'पूर्ण';
+
+  @override
+  String get sourcesNavLabel => 'स्रोत';
+
+  @override
+  String get sourcesRoutesNavLabel => 'रूट';
+
+  @override
+  String get sourcesProfileNavLabel => 'प्रोफ़ाइल';
+
+  @override
+  String get routesTitle => 'रूट्स';
+
+  @override
+  String get routesSubtitle => 'हर दिन उनसे यात्राएँ बनाई जाती हैं';
+
+  @override
+  String get routesSearchHint => 'यहाँ खोजें...';
+
+  @override
+  String get routesEmptyMessage =>
+      'अभी कोई रूट नहीं है। अपना पहला रूट बनाने के लिए + दबाएँ';
+
+  @override
+  String get routesFilterAll => 'सभी 4';
+
+  @override
+  String get routesFilterOwn => 'अपना वाहन 2';
+
+  @override
+  String get routesFilterContract => 'अनुबंध वाहन 2';
+
+  @override
+  String get routesPalGamMorning => 'पाल गाम मॉर्निंग';
+
+  @override
+  String get routesOwnVehicle => 'अपना वाहन';
+
+  @override
+  String get routesDriverNotUsingApp => 'ड्राइवर ऐप का उपयोग नहीं कर रहा';
+
+  @override
+  String get routesVehicle5678 => 'GJ-05-BX-5678';
+
+  @override
+  String get routesPalGamTime => 'सुबह (12:00 PM – 05:00 PM)';
+
+  @override
+  String get routesOnRoute => 'रूट पर';
+
+  @override
+  String get routesRecordedZero => 'ऐप में 8 में से 0 दर्ज';
+
+  @override
+  String get routesAdajanMorning => 'अडाजन मॉर्निंग';
+
+  @override
+  String get routesDailyWeekly => 'दैनिक 5 · साप्ताहिक 3';
+
+  @override
+  String get routesVehicle1234 => 'GJ-05-BX-1234';
+
+  @override
+  String get routesAdajanTime => 'सुबह (08:00 AM – 02:00 PM)';
+
+  @override
+  String get routesPlanned => 'नियोजित';
+
+  @override
+  String get routesCollectedZero => '8 में से 0 एकत्रित';
+
+  @override
+  String get routesPunagamFullDay => 'पुनागाम फुल डे';
+
+  @override
+  String get routesContractVehicle => 'अनुबंध वाहन';
+
+  @override
+  String get routesDailyMonthly => 'दैनिक 6 · मासिक 2';
+
+  @override
+  String get routesFullDayTime => 'पूरा दिन (08:00 AM – 12:00 PM)';
+
+  @override
+  String get routesApproved => 'स्वीकृत';
+
+  @override
+  String get routesCollectedEight => '8 में से 8 एकत्रित';
+
+  @override
+  String get routesRanderEvening => 'रांदेर इवनिंग';
+
+  @override
+  String get routesWeeklyBiWeekly => 'साप्ताहिक 6 · पाक्षिक 2';
+
+  @override
+  String get routesVehicle9012 => 'GJ-05-BX-9012';
+
+  @override
+  String get routesEveningTime => 'शाम (8 am–8 pm)';
+
+  @override
+  String get routesSwitchOff => 'बंद';
+
+  @override
+  String get supervisorDrawerUserName => 'किरण शाह';
+
+  @override
+  String get supervisorDrawerRole => 'पिकअप सुपरवाइज़र';
+
+  @override
+  String get supervisorDrawerUnassignedSources => 'असाइन न किए गए स्रोत';
+
+  @override
+  String get supervisorDrawerRoutes => 'रूट्स';
+
+  @override
+  String get supervisorDrawerDriversLabour => 'ड्राइवर और श्रमिक';
+
+  @override
+  String get supervisorDrawerIssues => 'समस्याएँ';
+
+  @override
+  String get supervisorDrawerExtraPickupRequests => 'अतिरिक्त पिकअप अनुरोध';
+
+  @override
+  String get supervisorDrawerSyncStatus => 'सिंक स्थिति';
+
+  @override
+  String get supervisorDrawerNotifications => 'सूचनाएँ';
+
+  @override
+  String get supervisorDrawerHelpSupport => 'सहायता और समर्थन';
+
+  @override
+  String get supervisorDrawerLogout => 'लॉग आउट';
+
+  @override
+  String get supervisorDrawerPoweredBy => 'ईको विज़न द्वारा संचालित';
+
+  @override
+  String get sourcesUnassignedTitle => 'बिना असाइन किए स्रोत';
+
+  @override
+  String get sourcesManageSubtitle => 'कलेक्शन स्रोत प्रबंधित करें';
+
+  @override
+  String get sourcesSearchHint => 'स्रोत खोजें';
+
+  @override
+  String get sourcesTabCount => 'स्रोत (3)';
+
+  @override
+  String get sourcesExtraTabCount => 'अतिरिक्त पिकअप (1)';
+
+  @override
+  String get sourcesAdajanTextileSorted => 'अडाजन टेक्सटाइल मिल · सॉर्टेड';
+
+  @override
+  String get sourcesAddressShort => 'U 9, 10, सिद्धगिरि टावर, B/H नवयुग...';
+
+  @override
+  String get sourcesMonThuSchedule => 'सोम, गुरु · 8–10 am';
+
+  @override
+  String get sourcesUnassignedStatus => 'असाइन नहीं';
+
+  @override
+  String get sourcesShreeSaiMixed => 'श्री साई डेयरी · मिक्स्ड';
+
+  @override
+  String get sourcesEmbraneAddress => 'X 3, 10, एम्ब्रेन ज़ोन, नवयुग प्लस...';
+
+  @override
+  String get sourcesExceptSunSchedule => 'रविवार छोड़कर · 9–11 am';
+
+  @override
+  String get sourcesShreeSaiSorted => 'श्री साई डेयरी · सॉर्टेड';
+
+  @override
+  String get sourcesSecondWedSchedule => 'महीने का दूसरा बुध · 10–11 am';
+
+  @override
+  String get sourcesMahavirSorted => 'महावीर पेपर मिल · सॉर्टेड';
+
+  @override
+  String get sourcesExtraPickupSchedule => 'शनि 24 अक्तू · 11 am–12 pm';
+
+  @override
+  String get sourcesEmptyMessage => 'कोई बिना असाइन की ट्रिप उपलब्ध नहीं';
+
+  @override
+  String get sourcesAbcTextileMills => 'ABC टेक्सटाइल मिल्स';
+
+  @override
+  String get sourcesShreeSaiDairy => 'श्री साई डेयरी';
+
+  @override
+  String get sourcesMahavirPaperMill => 'महावीर पेपर मिल';
+
+  @override
+  String get sourcesAddress => 'पता';
+
+  @override
+  String get sourcesFullAddress =>
+      'U 9, 10, सिद्धगिरि टावर, B/H नवयुग कॉलेज रोड, नवयुग सोसायटी, संगाना सोसायटी, अडाजन, सूरत, गुजरात 395009';
+
+  @override
+  String get sourcesOpenMaps => 'Google Maps में खोलें';
+
+  @override
+  String get sourcesSchedule => 'समय-सारणी';
+
+  @override
+  String get sourcesContactNumber => 'संपर्क नंबर';
+
+  @override
+  String get sourcesPhone => '9876543210';
+
+  @override
+  String get sourcesMaterial => 'सामग्री';
+
+  @override
+  String get sourcesSorted => 'सॉर्टेड';
+
+  @override
+  String get sourcesMixed => 'मिक्स्ड';
+
+  @override
+  String get sourcesMaterialsList => 'दूध की थैली, कार्ड बोर्ड';
+
+  @override
+  String get sourcesPickupStatus => 'पिकअप स्थिति';
+
+  @override
+  String get sourcesAddToRoute => 'रूट में जोड़ें';
+
+  @override
+  String get sourcesAdajanMorning => 'अडाजन मॉर्निंग';
+
+  @override
+  String get sourcesVehicleGj051824 => 'GJ 05 1824';
+
+  @override
+  String get sourcesMorningTime => 'सुबह (08:00 AM – 02:00 PM)';
+
+  @override
+  String get sourcesAssignedCount => 'असाइन स्रोत : 2';
+
+  @override
+  String get sourcesPalGamMorning => 'पाल गाम मॉर्निंग';
+
+  @override
+  String get sourcesVehicleGj052564 => 'GJ 05 2564';
+
+  @override
+  String get sourcesPalGamTime => 'मॉर्निंग शिफ्ट (10:00 AM – 12:00 PM)';
+
+  @override
+  String get sourcesVesuEvening => 'वेसु ईवनिंग';
+
+  @override
+  String get sourcesTimeClashWarning =>
+      'समय टकराव: अडाजन मॉर्निंग यहाँ लगभग 1:30 pm पहुँचता है, लेकिन पिकअप समय 9–11 am है।\nरूट से 4.2 किमी दूर: प्रत्येक ट्रिप में लगभग 20 मिनट अधिक।\nपाल गाम मॉर्निंग 9:40 am पर पास से गुजरता है।';
+
+  @override
+  String get sourcesAddNew => 'नया जोड़ें';
+
+  @override
+  String get sourcesAssignAnyway => 'फिर भी असाइन करें';
+
+  @override
+  String get sourcesAddedToRoute => 'स्रोत रूट में जोड़ा गया';
+
+  @override
+  String get sourcesAddedMessage =>
+      'ABC टेक्सटाइल मिल्स अब GJ 05 1824 (मॉर्निंग शिफ्ट) को असाइन है।';
+
+  @override
+  String get sourcesBackToRequests => 'अनुरोधों पर वापस जाएँ';
 }

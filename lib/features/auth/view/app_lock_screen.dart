@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/local_database/app_database.dart';
 import '../../../core/providers/app_lock_provider.dart';
-import '../../../core/router/app_routes.dart';
+import '../../../core/router/role_home_navigation.dart';
 import '../../../core/services/app_lock_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -73,12 +72,7 @@ class _AppLockScreenState extends State<AppLockScreen> {
         );
         if (!mounted) return;
         final role = DashboardUserRoleX.fromKey(storedRole);
-        context.go(
-          role == DashboardUserRole.driver
-              ? AppRoutes.driverHome
-              : AppRoutes.home,
-          extra: role == DashboardUserRole.driver ? null : role,
-        );
+        goToRoleHome(context, role);
       }
     } else {
       if (widget.onAuthFailed != null) {

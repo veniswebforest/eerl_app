@@ -54,6 +54,8 @@ assets/icons/driver/*
 !assets/icons/driver/pickup_success_v2/**
 !assets/images/driver/pickup_success_v2/
 !assets/images/driver/pickup_success_v2/**
+!assets/icons/supervisor/
+!assets/icons/supervisor/**
 .tags*
 
 build/

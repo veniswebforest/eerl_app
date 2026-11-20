@@ -39,6 +39,15 @@ class VerifyOtpResponse {
   bool get isDriver =>
       roles.any((role) => role.trim().toUpperCase() == 'DRIVER');
 
+  bool get isPickupSupervisor => roles.any((role) {
+    final normalized = role
+        .trim()
+        .toUpperCase()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
+    return normalized == 'PICKUP_SUPERVISOR';
+  });
+
   static List<String> _parseRoleKeys(Object? value) {
     final values = value is List<Object?> ? value : <Object?>[value];
     return values

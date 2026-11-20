@@ -8,11 +8,9 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
-import 'package:eerl_app/core/router/app_routes.dart';
-import 'package:eerl_app/core/router/app_route_data.dart';
+import 'package:eerl_app/core/router/role_home_navigation.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import '../widgets/otp_input.dart';
 import '../widgets/primary_button.dart';
@@ -102,24 +100,26 @@ class _OtpScreenState extends State<OtpScreen>
       // is persisted. Navigation must not wait for Bootstrap or image caching.
       final loginIdentifiedDriver =
           authProvider.verifyOtpResponse?.isDriver == true;
+      final loginIdentifiedPickupSupervisor =
+          authProvider.verifyOtpResponse?.isPickupSupervisor == true;
       final role = loginIdentifiedDriver
           ? DashboardUserRole.driver
+          : loginIdentifiedPickupSupervisor
+          ? DashboardUserRole.pickupSupervisor
           : await (widget.loadInitialRole ?? _storedDashboardRole)();
       if (!mounted) return;
       final onAuthenticated = widget.onAuthenticated;
       if (onAuthenticated != null) {
         onAuthenticated(role);
         _startInitialSyncAfterNavigation();
-      } else if (role == DashboardUserRole.driver) {
+      } else if (role == DashboardUserRole.driver ||
+          role == DashboardUserRole.pickupSupervisor) {
         await AppDatabase.instance.setSyncMeta('active_role', role.syncMetaKey);
         if (!mounted) return;
-        context.go(AppRoutes.driverHome);
+        goToRoleHome(context, role);
         _startInitialSyncAfterNavigation();
       } else {
-        context.go(
-          AppRoutes.home,
-          extra: HomeRouteData(role: role, showInitialLoginLoader: true),
-        );
+        goToRoleHome(context, role, showInitialLoginLoader: true);
       }
       return;
     }

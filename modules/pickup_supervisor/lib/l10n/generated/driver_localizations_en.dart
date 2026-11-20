@@ -1013,4 +1013,823 @@ class DriverLocalizationsEn extends DriverLocalizations {
   @override
   String get receivedWarehouseInstruction =>
       'Received at 11:42 am by Ramesh Patel, Warehouse Incharge. If the difference looks wrong, raise an issue.';
+
+  @override
+  String get supervisorWelcomeBack => 'Welcome back';
+
+  @override
+  String get supervisorHeaderSubtitle => 'Thu 22 Oct 2026 · Adajan, Vesu, Pal';
+
+  @override
+  String get supervisorOnline => 'You’re Online';
+
+  @override
+  String get supervisorLastSynced => 'Last synced 2 min ago';
+
+  @override
+  String get supervisorSyncNow => 'Sync Now';
+
+  @override
+  String get supervisorNeedsAttention => 'Needs your attention';
+
+  @override
+  String get supervisorAttentionSubtitle =>
+      'Approve, sort out or check these first';
+
+  @override
+  String get supervisorApprovals => 'Approvals';
+
+  @override
+  String get supervisorIssues => 'Issues';
+
+  @override
+  String get supervisorMyRequests => 'My requests';
+
+  @override
+  String get supervisorFlags => 'Flags';
+
+  @override
+  String get supervisorCollectionSummary => 'Collection summary';
+
+  @override
+  String get supervisorToday => 'Today';
+
+  @override
+  String get supervisorYesterday => 'Yesterday';
+
+  @override
+  String get supervisorWeek => 'Week';
+
+  @override
+  String get supervisorMonth => 'Month';
+
+  @override
+  String get supervisorCollectedToday => 'Collected today · 12 of 16 stops';
+
+  @override
+  String get supervisorCollectedTotal => '320 kg + 125 pcs';
+
+  @override
+  String get supervisorCollected => 'Collected';
+
+  @override
+  String get supervisorKg => 'KG';
+
+  @override
+  String get supervisorMissed => 'Missed';
+
+  @override
+  String get supervisorCancelled => 'Cancelled';
+
+  @override
+  String get supervisorTripsClosed => 'Trips closed';
+
+  @override
+  String get supervisorViewFullReport => 'View full report';
+
+  @override
+  String get supervisorTodaysTrips => 'Today’s trips';
+
+  @override
+  String get supervisorTripsSubtitle =>
+      'Active and upcoming pickup routes for today';
+
+  @override
+  String get supervisorAdajanMorning => 'Adajan Morning';
+
+  @override
+  String get supervisorVikramProgress => 'Vikram Singh · 3 of 8 collected';
+
+  @override
+  String get supervisorOwnVehicle => 'Own vehicle';
+
+  @override
+  String get supervisorDailyWeekly => 'Daily 5 · Weekly 3';
+
+  @override
+  String get supervisorCallDriver => 'Call driver';
+
+  @override
+  String get supervisorPalGamMorning => 'Pal Gam Morning';
+
+  @override
+  String get supervisorAmitProgress =>
+      'Amit Patel · 0 of 8 recorded in the app';
+
+  @override
+  String get supervisorDriverNotSetUp => 'Driver hasn’t set up app';
+
+  @override
+  String get supervisorSeeTripsPlan => 'See trips plan';
+
+  @override
+  String get supervisorPickupPoints => 'My pickup points';
+
+  @override
+  String get supervisorPickupPointsSubtitle =>
+      '79 in Adajan, Vesu, Pal · by category';
+
+  @override
+  String get supervisorDaily => 'Daily';
+
+  @override
+  String get supervisorWeekly => 'Weekly';
+
+  @override
+  String get supervisorBiWeekly => 'Bi-weekly';
+
+  @override
+  String get supervisorMonthly => 'Monthly';
+
+  @override
+  String get supervisorOnCall => 'On call';
+
+  @override
+  String get supervisorQuickActions => 'Quick Actions';
+
+  @override
+  String get supervisorUnassignedSources => 'Unassigned Sources';
+
+  @override
+  String get supervisorManageUnassigned => 'Manage New Unassigned Sources';
+
+  @override
+  String get supervisorViewSource => 'View Source';
+
+  @override
+  String get supervisorExtraPickupRequests => 'Extra pickups requests';
+
+  @override
+  String get supervisorManageExtraPickup => 'Manage Extra Pickup Sources';
+
+  @override
+  String get supervisorViewPickups => 'View Pickups';
+
+  @override
+  String get supervisorAskCollectionHead => 'Ask the Collection Head';
+
+  @override
+  String get supervisorAskCollectionHeadSubtitle =>
+      'Vehicle, labour or pickup point changes';
+
+  @override
+  String get supervisorNewRequest => 'New request';
+
+  @override
+  String get supervisorSuggestions => 'Suggestions';
+
+  @override
+  String get supervisorSuggestionsSubtitle =>
+      'Ways to save distance and time (concept)';
+
+  @override
+  String get supervisorSeeSuggestions => 'See suggestions';
+
+  @override
+  String get supervisorHome => 'Home';
+
+  @override
+  String get attentionApprovalRequests => 'Approval requests';
+
+  @override
+  String get attentionApprovalSubtitle => 'From your drivers and pickup points';
+
+  @override
+  String get attentionToApproveCount => 'To approve 3';
+
+  @override
+  String get attentionDoneCount => 'Done 12';
+
+  @override
+  String get attentionCorrectionFromDriver => 'Correction · from driver';
+
+  @override
+  String get attentionWaiting => 'Waiting';
+
+  @override
+  String get attentionHotelRajdhaniStop =>
+      'Hotel Rajdhani · Adajan Morning, stop 2';
+
+  @override
+  String get attentionDriverCorrectionDetail =>
+      'PET Bottles 50 kg → 60 kg. Suresh Kumar: “The scale photo shows 60 kg.”';
+
+  @override
+  String get attentionSentToday => 'Sent today, 10:05 am';
+
+  @override
+  String get attentionDecline => 'Decline';
+
+  @override
+  String get attentionApprove => 'Approve';
+
+  @override
+  String get attentionExtraPickup => 'Extra pickup';
+
+  @override
+  String get attentionAbcPlastic => 'ABC Plastic Manufacture';
+
+  @override
+  String get attentionExtraPickupDetail =>
+      'Sat 25 Oct, 10 am – 12 pm · Medium · fits Adajan Morning';
+
+  @override
+  String get attentionSent21Oct => 'Sent 21 Oct';
+
+  @override
+  String get attentionCorrectionFromPickupPoint =>
+      'Correction · from pickup point';
+
+  @override
+  String get attentionGreenParkSociety => 'Green Park Society';
+
+  @override
+  String get attentionPickupPointCorrectionDetail =>
+      'Cardboard 20 kg → 25 kg on the 19 Oct pickup';
+
+  @override
+  String get attentionSent20Oct => 'Sent 20 Oct';
+
+  @override
+  String get attentionCorrectionApproved => 'Correction approved';
+
+  @override
+  String get attentionCorrectionApprovedMessage =>
+      'Hotel Rajdhani’s record now shows PET Bottles 60 kg. Suresh Kumar and the pickup point are told.';
+
+  @override
+  String get attentionBackToApprovals => 'Back to approval requests';
+
+  @override
+  String get attentionBackToHome => 'Back to home';
+
+  @override
+  String get attentionMyRequests => 'My requests';
+
+  @override
+  String get attentionToCollectionHead => 'To the Collection Head';
+
+  @override
+  String get attentionAll4 => 'All 4';
+
+  @override
+  String get attentionWaiting1 => 'Waiting 1';
+
+  @override
+  String get attentionApproved2 => 'Approved 2';
+
+  @override
+  String get attentionDeclined1 => 'Declined 1';
+
+  @override
+  String get attentionVehicleAdajan => 'Vehicle · Adajan Morning';
+
+  @override
+  String get attentionVehicleRequestDescription =>
+      'A second vehicle on Sat 25 and Sun 26 Oct: Navratri Ground expects about 2 tonnes';
+
+  @override
+  String get attentionVehicleRequestResponse =>
+      'With Arvind Desai (Collection Head)';
+
+  @override
+  String get attentionSentTodayShort => 'Sent today';
+
+  @override
+  String get attentionLabourPalGam => 'Labour · Pal Gam Morning';
+
+  @override
+  String get attentionLabourRequestDescription =>
+      'One more loader for 3 days (20–22 Oct)';
+
+  @override
+  String get attentionLabourRequestResponse =>
+      'Arvind Desai: “Ramesh Yadav joins from tomorrow.”';
+
+  @override
+  String get attentionSent19Oct => 'Sent 19 Oct';
+
+  @override
+  String get attentionPauseHotelShivam => 'Pause pickup point · Hotel Shivam';
+
+  @override
+  String get attentionPauseRequestDescription =>
+      '1 – 10 Nov · closed for renovation';
+
+  @override
+  String get attentionPauseRequestResponse =>
+      'Arvind Desai: “Approved. The IEC Executive is told.”';
+
+  @override
+  String get attentionSent18Oct => 'Sent 18 Oct';
+
+  @override
+  String get attentionStartSunriseSchool =>
+      'Start pickup point · Sunrise School';
+
+  @override
+  String get attentionStartRequestDescription =>
+      'Daily from 1 Nov on Punagam FullDay';
+
+  @override
+  String get attentionStartRequestResponse =>
+      'Arvind Desai: “No room on that trip. Try Rander Evening.”';
+
+  @override
+  String get attentionSent16Oct => 'Sent 16 Oct';
+
+  @override
+  String get attentionApproved => 'Approved';
+
+  @override
+  String get attentionDeclined => 'Declined';
+
+  @override
+  String get attentionSuggestions => 'Suggestions';
+
+  @override
+  String get attentionSuggestionsSubtitle =>
+      'Concept · ideas from GPS, routes and areas';
+
+  @override
+  String get attentionAll3 => 'All 3';
+
+  @override
+  String get attentionMoveHotelRajdhani =>
+      'Move Hotel Rajdhani to Pal Gam Morning';
+
+  @override
+  String get attentionMoveHotelDescription =>
+      'It is 3.1 km off Adajan Morning; Pal Gam Morning passes its gate';
+
+  @override
+  String get attentionMoveHotelRoute => 'Adajan Morning → Pal Gam Morning';
+
+  @override
+  String get attentionSaving31Km => 'Less 3.1 km a day';
+
+  @override
+  String get attentionReorderAdajan => 'Reorder Adajan Morning';
+
+  @override
+  String get attentionReorderDescription =>
+      'Visit Om Sweets before Green Park Society';
+
+  @override
+  String get attentionReorderSecondary => 'Same stops, shorter path';
+
+  @override
+  String get attentionSaving12Min => 'Less 12 min a day';
+
+  @override
+  String get attentionCombineFridayRoutes =>
+      'Rander and Vesu Evening on Fridays: one vehicle';
+
+  @override
+  String get attentionCombineDescription =>
+      'Both run under half full on Fridays (310 kg and 280 kg)';
+
+  @override
+  String get attentionCombineSecondary => 'Frees GJ-05-EE-1001 on Fridays';
+
+  @override
+  String get attentionSavingOneVehicle => 'One vehicle less on Fri';
+
+  @override
+  String get attentionLast30Days => 'Last 30 days of GPS';
+
+  @override
+  String get attentionDismiss => 'Dismiss';
+
+  @override
+  String get attentionApply => 'Apply';
+
+  @override
+  String get attentionIssues => 'Issues';
+
+  @override
+  String get attentionVehicleBreakdown => 'Vehicle breakdown';
+
+  @override
+  String get attentionSourceClosed => 'Source closed';
+
+  @override
+  String get attentionRameshDriver => 'Ramesh Ahir (Driver)';
+
+  @override
+  String get attentionMohanDriver => 'Mohan laal (Driver)';
+
+  @override
+  String get attentionPrakashDriver => 'Prakash Jadav (Driver)';
+
+  @override
+  String get attentionVehicleNumber => 'GJ-05-BX-1234';
+
+  @override
+  String get attentionDriver => 'Driver';
+
+  @override
+  String get attentionRameshAhir => 'Ramesh Ahir';
+
+  @override
+  String get attentionContactNumber => 'Contact Number';
+
+  @override
+  String get attentionPhoneNumber => '9876543210';
+
+  @override
+  String get attentionRoute => 'Route';
+
+  @override
+  String get attentionAdajanMorning => 'Adajan Morning';
+
+  @override
+  String get attentionReasonFor => 'Reason for ';
+
+  @override
+  String get attentionIssueWord => 'Issue';
+
+  @override
+  String get attentionIssueReason => 'Reason : No Vehicle Available';
+
+  @override
+  String get attentionIssueRemarks =>
+      'Remarks : All yard trucks are currently out. Try after 2 PM.';
+
+  @override
+  String get flagTimeClash => 'Time clash';
+
+  @override
+  String get flagHotelRajdhaniTime => 'Hotel Rajdhani · 1:30 pm vs 9–11 am';
+
+  @override
+  String get flagOffRoute => 'Off the route';
+
+  @override
+  String get flagSunriseOffRoute => 'Sunrise School · 4.2 km off route';
+
+  @override
+  String get flagScheduleChanged => 'Schedule changed';
+
+  @override
+  String get flagAdajanTextileSorted => 'Adajan Textile Mill · Sorted';
+
+  @override
+  String get flagSourcePaused => 'Source paused';
+
+  @override
+  String get flagClosedForDiwali => 'Closed for Diwali';
+
+  @override
+  String get flagNewSourceNoRoute => 'New source, no route';
+
+  @override
+  String get flagAbcTextileMills => 'ABC Textile Mills';
+
+  @override
+  String get flagExtraPickupNoRoute => 'Extra Pickup, no route';
+
+  @override
+  String get flagExtraPickupNoRouteDetail => 'Extra pickup, no route';
+
+  @override
+  String get flagShreeSaiSorted => 'Shree Sai Dairy · Sorted';
+
+  @override
+  String get flagSourceMovedToYou => 'Source moved to you';
+
+  @override
+  String get flagRkTrading => 'R.K trading and co.';
+
+  @override
+  String get flagNothingToCheck => 'Nothing to check!';
+
+  @override
+  String get flagOctober => 'october';
+
+  @override
+  String get flagNothingToCheckSubtitle =>
+      'You don’t have any new notifications or pending action items right now.';
+
+  @override
+  String get flagShreeSaiDairy => 'Shree Sai Dairy';
+
+  @override
+  String get flagShreeSaiAddress => 'U 9, 10, Siddhgiri Tower, B/H Navyug...';
+
+  @override
+  String get flagWas => 'Was';
+
+  @override
+  String get flagOldSchedule => 'Mon, Thu · 8–10 am';
+
+  @override
+  String get flagNow => 'Now';
+
+  @override
+  String get flagNewSchedule => 'Mon, Wed · 9–11 am';
+
+  @override
+  String get flagFromMon2Nov => 'From : Mon 2 Nov';
+
+  @override
+  String get flagPausedDates => 'Paused 20–26 Oct';
+
+  @override
+  String get flagReasonClosedForDiwali => 'Reason: Closed for Diwali';
+
+  @override
+  String get flagMovedFromVesu => 'Moved from Vesu area';
+
+  @override
+  String get flagCheckRoute => 'Check route';
+
+  @override
+  String get flagAddToRoute => 'Add to route';
+
+  @override
+  String get flagMarkDone => 'Mark done';
+
+  @override
+  String get flagDone => 'Done';
+
+  @override
+  String get sourcesNavLabel => 'Sources';
+
+  @override
+  String get sourcesRoutesNavLabel => 'Route';
+
+  @override
+  String get sourcesProfileNavLabel => 'Profile';
+
+  @override
+  String get routesTitle => 'Routes';
+
+  @override
+  String get routesSubtitle => 'Trips are made from them every day';
+
+  @override
+  String get routesSearchHint => 'Search Here...';
+
+  @override
+  String get routesEmptyMessage =>
+      'No routes yet. Tap + to make your first route';
+
+  @override
+  String get routesFilterAll => 'All 4';
+
+  @override
+  String get routesFilterOwn => 'Own vehicle 2';
+
+  @override
+  String get routesFilterContract => 'Contract vehicle 2';
+
+  @override
+  String get routesPalGamMorning => 'Pal Gam Morning';
+
+  @override
+  String get routesOwnVehicle => 'Own vehicle';
+
+  @override
+  String get routesDriverNotUsingApp => 'Driver not using app';
+
+  @override
+  String get routesVehicle5678 => 'GJ-05-BX-5678';
+
+  @override
+  String get routesPalGamTime => 'Morning (12:00 PM – 05:00 PM)';
+
+  @override
+  String get routesOnRoute => 'On route';
+
+  @override
+  String get routesRecordedZero => '0 of 8 recorded in the app';
+
+  @override
+  String get routesAdajanMorning => 'Adajan Morning';
+
+  @override
+  String get routesDailyWeekly => 'Daily 5 · Weekly 3';
+
+  @override
+  String get routesVehicle1234 => 'GJ-05-BX-1234';
+
+  @override
+  String get routesAdajanTime => 'Morning (08:00 AM – 02:00 PM)';
+
+  @override
+  String get routesPlanned => 'Planned';
+
+  @override
+  String get routesCollectedZero => '0 of 8 collected';
+
+  @override
+  String get routesPunagamFullDay => 'Punagam FullDay';
+
+  @override
+  String get routesContractVehicle => 'Contract vehicle';
+
+  @override
+  String get routesDailyMonthly => 'Daily 6 · Monthly 2';
+
+  @override
+  String get routesFullDayTime => 'Full Day (08:00 AM – 12:00 PM)';
+
+  @override
+  String get routesApproved => 'Approved';
+
+  @override
+  String get routesCollectedEight => '8 of 8 collected';
+
+  @override
+  String get routesRanderEvening => 'Rander Evening';
+
+  @override
+  String get routesWeeklyBiWeekly => 'Weekly 6 · Bi-weekly 2';
+
+  @override
+  String get routesVehicle9012 => 'GJ-05-BX-9012';
+
+  @override
+  String get routesEveningTime => 'Evening (8 am–8 pm)';
+
+  @override
+  String get routesSwitchOff => 'Switch Off';
+
+  @override
+  String get supervisorDrawerUserName => 'Kiran Shah';
+
+  @override
+  String get supervisorDrawerRole => 'Pickup Supervisor';
+
+  @override
+  String get supervisorDrawerUnassignedSources => 'Unassigned sources';
+
+  @override
+  String get supervisorDrawerRoutes => 'Routes';
+
+  @override
+  String get supervisorDrawerDriversLabour => 'Drivers and labour';
+
+  @override
+  String get supervisorDrawerIssues => 'Issues';
+
+  @override
+  String get supervisorDrawerExtraPickupRequests => 'Extra pickup requests';
+
+  @override
+  String get supervisorDrawerSyncStatus => 'Sync Status';
+
+  @override
+  String get supervisorDrawerNotifications => 'Notifications';
+
+  @override
+  String get supervisorDrawerHelpSupport => 'Help & Support';
+
+  @override
+  String get supervisorDrawerLogout => 'Logout';
+
+  @override
+  String get supervisorDrawerPoweredBy => 'Powered by Eco Vision';
+
+  @override
+  String get sourcesUnassignedTitle => 'Unassigned sources';
+
+  @override
+  String get sourcesManageSubtitle => 'Manage collection sources';
+
+  @override
+  String get sourcesSearchHint => 'Search sources';
+
+  @override
+  String get sourcesTabCount => 'Sources (3)';
+
+  @override
+  String get sourcesExtraTabCount => 'Extra Pickups (1)';
+
+  @override
+  String get sourcesAdajanTextileSorted => 'Adajan Textile Mill · Sorted';
+
+  @override
+  String get sourcesAddressShort => 'U 9, 10, Siddhgiri Tower, B/H Navyug...';
+
+  @override
+  String get sourcesMonThuSchedule => 'Mon, Thu · 8–10 am';
+
+  @override
+  String get sourcesUnassignedStatus => 'Unassigned';
+
+  @override
+  String get sourcesShreeSaiMixed => 'Shree Sai Dairy · Mixed';
+
+  @override
+  String get sourcesEmbraneAddress => 'X 3, 10, Embrane Zone, navyug plus...';
+
+  @override
+  String get sourcesExceptSunSchedule => 'Except Sun · 9–11 am';
+
+  @override
+  String get sourcesShreeSaiSorted => 'Shree Sai Dairy · Sorted';
+
+  @override
+  String get sourcesSecondWedSchedule => '2nd Wed of the month · 10–11 am';
+
+  @override
+  String get sourcesMahavirSorted => 'Mahavir Paper Mill · Sorted';
+
+  @override
+  String get sourcesExtraPickupSchedule => 'Sat 24 Oct · 11 am–12 pm';
+
+  @override
+  String get sourcesEmptyMessage => 'No Unassigned trips available';
+
+  @override
+  String get sourcesAbcTextileMills => 'ABC Textile Mills';
+
+  @override
+  String get sourcesShreeSaiDairy => 'Shree Sai Dairy';
+
+  @override
+  String get sourcesMahavirPaperMill => 'Mahavir Paper Mill';
+
+  @override
+  String get sourcesAddress => 'Address';
+
+  @override
+  String get sourcesFullAddress =>
+      'U 9, 10, Siddhgiri Tower, B/H Navyug College Rd, Navyug Society, Sangana Society, Adajan, Surat, Gujarat 395009';
+
+  @override
+  String get sourcesOpenMaps => 'Open in Google Maps';
+
+  @override
+  String get sourcesSchedule => 'Schedule';
+
+  @override
+  String get sourcesContactNumber => 'Contact Number';
+
+  @override
+  String get sourcesPhone => '9876543210';
+
+  @override
+  String get sourcesMaterial => 'Material';
+
+  @override
+  String get sourcesSorted => 'Sorted';
+
+  @override
+  String get sourcesMixed => 'Mixed';
+
+  @override
+  String get sourcesMaterialsList => 'Milk Pouch, Card Board';
+
+  @override
+  String get sourcesPickupStatus => 'Pickup Status';
+
+  @override
+  String get sourcesAddToRoute => 'Add to route';
+
+  @override
+  String get sourcesAdajanMorning => 'Adajan Morning';
+
+  @override
+  String get sourcesVehicleGj051824 => 'GJ 05 1824';
+
+  @override
+  String get sourcesMorningTime => 'Morning (08:00 AM – 02:00 PM)';
+
+  @override
+  String get sourcesAssignedCount => 'Assigned Sources : 2';
+
+  @override
+  String get sourcesPalGamMorning => 'Pal Gam Morning';
+
+  @override
+  String get sourcesVehicleGj052564 => 'GJ 05 2564';
+
+  @override
+  String get sourcesPalGamTime => 'Morning Shift (10:00 AM – 12:00 PM)';
+
+  @override
+  String get sourcesVesuEvening => 'Vesu Evening';
+
+  @override
+  String get sourcesTimeClashWarning =>
+      'Time clash: Adajan Morning reaches here at about 1:30 pm, but the pickup window is 9–11 am.\n4.2 km off the route: about 20 min more on each trip.\nPal Gam Morning passes nearby at 9:40 am.';
+
+  @override
+  String get sourcesAddNew => 'Add New';
+
+  @override
+  String get sourcesAssignAnyway => 'Assign anyway';
+
+  @override
+  String get sourcesAddedToRoute => 'Source Added to Route';
+
+  @override
+  String get sourcesAddedMessage =>
+      'ABC Textile Mills is now assigned to GJ 05 1824 (Morning Shift).';
+
+  @override
+  String get sourcesBackToRequests => 'Back to Requests';
 }
