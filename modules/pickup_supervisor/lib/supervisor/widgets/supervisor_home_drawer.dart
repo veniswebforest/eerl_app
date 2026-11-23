@@ -1,3 +1,4 @@
+import 'package:eerl_app/features/home/widgets/home_assets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
@@ -10,7 +11,9 @@ const _assetPackage = 'pickup_supervisor';
 
 /// Static Pickup Supervisor drawer matching Figma node 7028:2245.
 class SupervisorHomeDrawer extends StatelessWidget {
-  const SupervisorHomeDrawer({super.key});
+  const SupervisorHomeDrawer({super.key, this.onItemSelected});
+
+  final ValueChanged<String>? onItemSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +88,10 @@ class SupervisorHomeDrawer extends StatelessWidget {
                       separatorBuilder: (_, _) => const SizedBox(height: 12),
                       itemBuilder: (context, index) => _DrawerNavigationItem(
                         item: items[index],
-                        onTap: () => Navigator.maybePop(context),
+                        onTap: () {
+                          Navigator.pop(context);
+                          onItemSelected?.call(items[index].keyName);
+                        },
                       ),
                     ),
                   ),
@@ -225,7 +231,7 @@ class _DrawerNavigationItem extends StatelessWidget {
               SvgPicture.asset(
                 item.isDestructive
                     ? '$_iconRoot/logout_chevron.svg'
-                    : '$_iconRoot/chevron_right.svg',
+                    : HomeAssets.drawerChevronRight,
                 package: _assetPackage,
                 width: 24,
                 height: 24,

@@ -9,8 +9,9 @@ class EerlLocalRepository {
 
   static final EerlLocalRepository instance = EerlLocalRepository();
   final EerlLocalDataSource _local;
-  final ValueNotifier<String?> activeCenterNotifier =
-      ValueNotifier<String?>(null);
+  final ValueNotifier<String?> activeCenterNotifier = ValueNotifier<String?>(
+    null,
+  );
 
   Future<String?> get currentUserId => _local.currentUserId;
   Future<String?> get activeCenterId async {
@@ -20,11 +21,13 @@ class EerlLocalRepository {
     }
     return id;
   }
+
   Future<String?> get activeRole => _local.activeRole;
   Future<void> selectCenter(String id) async {
     await _local.selectCenter(id);
     activeCenterNotifier.value = id;
   }
+
   Future<List<MyRoleModel>> getRoles() => _local.getRoles();
   Future<List<CenterModel>> getCenters() => _local.getCenters();
   Future<List<CenterModel>> getMyCenters() => _local.getMyCenters();
@@ -39,6 +42,10 @@ class EerlLocalRepository {
   }) => _local.getSupervisorHomeSummary(centerId: centerId);
   Future<List<CenterChannelModel>> getChannels({String? centerId}) =>
       _local.getChannels(centerId: centerId);
+  Future<List<String>> getAssignedZoneNames({
+    String? centerId,
+    required String channel,
+  }) => _local.getAssignedZoneNames(centerId: centerId, channel: channel);
   Future<List<ItemModel>> getItems({
     String? centerId,
     required String channel,
@@ -124,6 +131,19 @@ class EerlLocalRepository {
     bool agentsOnly = false,
   }) => _local.getCenterPeople(centerId: centerId, agentsOnly: agentsOnly);
   Future<List<DestinationModel>> getDestinations() => _local.getDestinations();
+  Future<List<CenterPriceModel>> getCenterPrices({String? centerId}) =>
+      _local.getCenterPrices(centerId: centerId);
+  Future<List<PriceRequestModel>> getPriceRequests({String? centerId}) =>
+      _local.getPriceRequests(centerId: centerId);
+  Future<String> savePriceRequest({
+    required String itemId,
+    required double requestedRate,
+    required String reason,
+  }) => _local.savePriceRequest(
+    itemId: itemId,
+    requestedRate: requestedRate,
+    reason: reason,
+  );
   Future<List<CollectionModel>> getAgentCollections({
     String? centerId,
     bool drafts = false,

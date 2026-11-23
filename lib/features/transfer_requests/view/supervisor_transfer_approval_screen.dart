@@ -264,7 +264,7 @@ class _SupervisorTransferApprovalScreenState
             children: [
               Expanded(
                 child: Text(
-                  _selectedDestination?.name ??
+                  _selectedDestination?.label ??
                       context.l10n.supervisorTransferDestinationHint,
                   style: AppTextStyles.regularB7_14.copyWith(
                     color: _selectedDestination == null
@@ -893,7 +893,7 @@ class _DestinationList extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      destination.name,
+                      destination.label,
                       style: AppTextStyles.regularB7_14,
                     ),
                   ),
@@ -946,7 +946,7 @@ class _ApprovalSuccessDialog extends StatelessWidget {
                   Text(
                     context.l10n.supervisorTransferApprovedMessage(
                       transfer.requestedByName,
-                      destination.name,
+                      destination.label,
                       vehicleNumber,
                       expectedAt == null
                           ? '-'

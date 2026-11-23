@@ -58,6 +58,7 @@ class AppRoutes {
   static const String rejectCollection = '/verification/reject';
   static const String supervisorExpense = '/supervisor/expense';
   static const String supervisorMrfPeople = '/supervisor/mrf-people';
+  static const String supervisorPrices = '/supervisor/prices';
 
   // ── Legacy standalone ────────────────────────────────────────────
   static const String details = '/details';

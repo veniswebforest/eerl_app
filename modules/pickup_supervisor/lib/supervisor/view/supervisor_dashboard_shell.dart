@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
-import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 import 'package:pickup_supervisor/supervisor/model/supervisor_bottom_nav_item.dart';
 import 'package:pickup_supervisor/supervisor/view/supervisor_home_screen.dart';
+import 'package:pickup_supervisor/supervisor/view/supervisor_profile_screens.dart';
 import 'package:pickup_supervisor/supervisor/view/supervisor_routes_screen.dart';
 import 'package:pickup_supervisor/supervisor/view/supervisor_sources_screens.dart';
 import 'package:pickup_supervisor/supervisor/widgets/supervisor_bottom_navigation.dart';
@@ -50,7 +50,29 @@ class _SupervisorDashboardShellState extends State<SupervisorDashboardShell> {
             key: _scaffoldKey,
             extendBody: true,
             backgroundColor: DriverColors.background,
-            drawer: const SupervisorHomeDrawer(),
+            drawer: SupervisorHomeDrawer(
+              onItemSelected: (item) {
+                if (item == 'notifications') {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const DriverLocalizationScope(
+                        child: SupervisorNotificationsScreen(),
+                      ),
+                    ),
+                  );
+                } else if (item == 'help-support') {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const DriverLocalizationScope(
+                        child: SupervisorHelpSupportScreen(),
+                      ),
+                    ),
+                  );
+                } else if (item == 'logout') {
+                  setState(() => _selectedIndex = 3);
+                }
+              },
+            ),
             drawerScrimColor: Colors.black.withValues(alpha: .6),
             body: IndexedStack(
               index: selectedIndex,
@@ -106,30 +128,9 @@ class _SupervisorDashboardShellState extends State<SupervisorDashboardShell> {
       title: l10n.sourcesProfileNavLabel,
       selectedIcon: '$_assetRoot/nav_profile.svg',
       unselectedIcon: '$_assetRoot/nav_profile.svg',
-      page: _SupervisorTabPlaceholder(title: l10n.sourcesProfileNavLabel),
+      page: const SupervisorProfileScreen(),
       pageKey: 'profile',
       roles: const {SupervisorModuleRole.pickupSupervisor},
     ),
   ];
-}
-
-class _SupervisorTabPlaceholder extends StatelessWidget {
-  const _SupervisorTabPlaceholder({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: DriverColors.background,
-      child: Center(
-        child: Text(
-          title,
-          style: DriverTextStyles.semibold20.copyWith(
-            color: DriverColors.neutral950,
-          ),
-        ),
-      ),
-    );
-  }
 }

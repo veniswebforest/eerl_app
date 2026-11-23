@@ -24,6 +24,7 @@ class RampDetailsForm extends StatefulWidget {
     required this.onCaptureHandoverPhoto,
     required this.onRemoveHandoverPhoto,
     required this.onPreviewHandoverPhoto,
+    this.zoneHint,
   });
 
   final List<RagpickerModel> people;
@@ -35,6 +36,7 @@ class RampDetailsForm extends StatefulWidget {
   final VoidCallback onCaptureHandoverPhoto;
   final VoidCallback onRemoveHandoverPhoto;
   final VoidCallback onPreviewHandoverPhoto;
+  final String? zoneHint;
 
   @override
   State<RampDetailsForm> createState() => _RampDetailsFormState();
@@ -43,10 +45,12 @@ class RampDetailsForm extends StatefulWidget {
 class _RampDetailsFormState extends State<RampDetailsForm> {
   bool _isPersonDropdownOpen = false;
   final TextEditingController _personSearchController = TextEditingController();
+  final ScrollController _personScrollController = ScrollController();
 
   @override
   void dispose() {
     _personSearchController.dispose();
+    _personScrollController.dispose();
     super.dispose();
   }
 
@@ -54,7 +58,11 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
   Widget build(BuildContext context) {
     final query = _personSearchController.text.trim().toLowerCase();
     final filteredPeople = widget.people
-        .where((person) => person.name.toLowerCase().contains(query))
+        .where(
+          (person) =>
+              person.name.toLowerCase().contains(query) ||
+              (person.phone?.toLowerCase().contains(query) ?? false),
+        )
         .toList();
     final noResults =
         _isPersonDropdownOpen && query.isNotEmpty && filteredPeople.isEmpty;
@@ -63,6 +71,15 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _requiredLabel(context.l10n.collectionRagpickerPerson),
+        if (widget.zoneHint != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            widget.zoneHint!,
+            style: AppTextStyles.regularB8_12.copyWith(
+              color: AppColors.neutral600,
+            ),
+          ),
+        ],
         const SizedBox(height: 8),
         if (_isPersonDropdownOpen)
           _buildSearchField(noResults: noResults)
@@ -76,89 +93,104 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
             _buildPersonList(filteredPeople),
         ],
         const SizedBox(height: 24),
-        _requiredLabel(context.l10n.collectionRampHandoverPhoto),
-        const SizedBox(height: 8),
-        InkWell(
-          key: const Key('ramp-capture-handover-photo'),
-          onTap: widget.handoverPhoto == null
-              ? widget.onCaptureHandoverPhoto
-              : null,
-          borderRadius: BorderRadius.circular(10),
-          child: DottedBorder(
-            options: const RoundedRectDottedBorderOptions(
-              radius: Radius.circular(10),
-              color: AppColors.primary500,
-              dashPattern: [4, 3],
-              strokeWidth: 1,
-              padding: EdgeInsets.zero,
-            ),
-            child: Container(
-              height: 92,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.primary50,
+        Container(
+          key: const Key('ramp-person-photo-card'),
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: AppColors.cool400),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _requiredLabel(context.l10n.capturePersonPhoto),
+              const SizedBox(height: 8),
+              InkWell(
+                key: const Key('ramp-capture-handover-photo'),
+                onTap: widget.handoverPhoto == null
+                    ? widget.onCaptureHandoverPhoto
+                    : null,
                 borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SvgPicture.asset(
-                    'assets/icons/collection/capture_camera.svg',
-                    width: 24,
-                    height: 24,
+                child: DottedBorder(
+                  options: const RoundedRectDottedBorderOptions(
+                    radius: Radius.circular(10),
+                    color: AppColors.primary500,
+                    dashPattern: [4, 3],
+                    strokeWidth: 1,
+                    padding: EdgeInsets.zero,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    context.l10n.collectionCapturePhoto,
-                    style: AppTextStyles.semiboldH9_14.copyWith(
-                      color: AppColors.neutral900,
+                  child: Container(
+                    height: 82,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary50,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/collection/capture_camera.svg',
+                          width: 24,
+                          height: 24,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          context.l10n.collectionCapturePhoto,
+                          style: AppTextStyles.semiboldH9_14.copyWith(
+                            color: AppColors.neutral900,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          context.l10n.collectionRampHandoverPhotoHint,
-          style: AppTextStyles.regularB8_12.copyWith(
-            color: AppColors.neutral600,
-          ),
-        ),
-        if (widget.handoverPhoto != null) ...[
-          const SizedBox(height: 12),
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: InkWell(
-                  key: const Key('ramp-preview-handover-photo'),
-                  onTap: widget.onPreviewHandoverPhoto,
-                  child: Image.file(
-                    File(widget.handoverPhoto!.path),
-                    width: 109,
-                    height: 70,
-                    fit: BoxFit.cover,
-                  ),
                 ),
               ),
-              Positioned(
-                right: 6,
-                top: 6,
-                child: InkWell(
-                  key: const Key('ramp-remove-handover-photo'),
-                  onTap: widget.onRemoveHandoverPhoto,
-                  child: SvgPicture.asset(
-                    'assets/icons/wallet/expense_remove.svg',
-                    width: 22,
-                    height: 22,
-                  ),
+              const SizedBox(height: 12),
+              Text(
+                context.l10n.collectionRampPhotoHint,
+                style: AppTextStyles.regularB8_12.copyWith(
+                  color: AppColors.neutral600,
                 ),
               ),
+              if (widget.handoverPhoto != null) ...[
+                const SizedBox(height: 16),
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: InkWell(
+                        key: const Key('ramp-preview-handover-photo'),
+                        onTap: widget.onPreviewHandoverPhoto,
+                        child: Image.file(
+                          File(widget.handoverPhoto!.path),
+                          width: 109,
+                          height: 70,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: InkWell(
+                        key: const Key('ramp-remove-handover-photo'),
+                        onTap: widget.onRemoveHandoverPhoto,
+                        child: SvgPicture.asset(
+                          'assets/icons/wallet/expense_remove.svg',
+                          width: 24,
+                          height: 24,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
-        ],
+        ),
       ],
     );
   }
@@ -255,8 +287,8 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
         ),
         SvgPicture.asset(
           'assets/icons/wallet/search.svg',
-          width: 20,
-          height: 20,
+          width: 24,
+          height: 24,
           colorFilter: const ColorFilter.mode(
             AppColors.neutral900,
             BlendMode.srcIn,
@@ -273,80 +305,89 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
       borderRadius: BorderRadius.circular(10),
       border: Border.all(color: AppColors.cool400),
     ),
-    child: ListView.separated(
-      shrinkWrap: true,
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      itemCount: people.length,
-      separatorBuilder: (_, index) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        final person = people[index];
-        return InkWell(
-          onTap: () {
-            widget.onPersonSelected(person);
-            setState(() {
-              _isPersonDropdownOpen = false;
-              _personSearchController.clear();
-            });
-          },
-          child: Container(
-            color: widget.selectedPersonId == person.id
-                ? AppColors.red100
-                : Colors.transparent,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                _radio(widget.selectedPersonId == person.id),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    person.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.regularB7_14.copyWith(
-                      color: AppColors.neutral900,
-                    ),
-                  ),
-                ),
-                PopupMenuButton<_RampPersonAction>(
-                  key: ValueKey('ramp-edit-person-${person.id}'),
-                  padding: EdgeInsets.zero,
-                  onSelected: (action) {
-                    if (action == _RampPersonAction.deactivate) {
-                      widget.onDeactivatePerson(person);
-                    }
-                  },
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  constraints: const BoxConstraints(),
-                  menuPadding: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(color: AppColors.cool400),
-                    borderRadius: BorderRadiusGeometry.all(Radius.circular(10)),
-                  ),
-                  position: PopupMenuPosition.over,
-                  itemBuilder: (context) => [
-                    PopupMenuItem<_RampPersonAction>(
-                      key: ValueKey('ramp-deactivate-person-${person.id}'),
-                      value: _RampPersonAction.deactivate,
-                      height: 44,
-                      child: Text(
-                        context.l10n.deactivate,
-                        style: AppTextStyles.mediumSH8_14.copyWith(
-                          color: AppColors.red600,
-                        ),
+    child: RawScrollbar(
+      controller: _personScrollController,
+      thumbVisibility: people.length > 4,
+      thickness: 6,
+      radius: const Radius.circular(8),
+      thumbColor: AppColors.cool300,
+      crossAxisMargin: 7,
+      mainAxisMargin: 16,
+      child: ListView.builder(
+        controller: _personScrollController,
+        shrinkWrap: true,
+        padding: const EdgeInsets.fromLTRB(0, 6, 12, 6),
+        itemCount: people.length,
+        itemBuilder: (context, index) {
+          final person = people[index];
+          return InkWell(
+            onTap: () {
+              widget.onPersonSelected(person);
+              setState(() {
+                _isPersonDropdownOpen = false;
+                _personSearchController.clear();
+              });
+            },
+            child: Container(
+              color: Colors.transparent,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  _radio(widget.selectedPersonId == person.id),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      _personLabel(person),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.regularB7_14.copyWith(
+                        color: AppColors.neutral900,
                       ),
                     ),
-                  ],
-                  child: SvgPicture.asset(
-                    'assets/icons/collection/edit_person.svg',
-                    width: 20,
-                    height: 20,
                   ),
-                ),
-              ],
+                  PopupMenuButton<_RampPersonAction>(
+                    key: ValueKey('ramp-edit-person-${person.id}'),
+                    padding: EdgeInsets.zero,
+                    onSelected: (action) {
+                      if (action == _RampPersonAction.deactivate) {
+                        widget.onDeactivatePerson(person);
+                      }
+                    },
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    constraints: const BoxConstraints(),
+                    menuPadding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: AppColors.cool400),
+                      borderRadius: BorderRadiusGeometry.all(
+                        Radius.circular(10),
+                      ),
+                    ),
+                    position: PopupMenuPosition.over,
+                    itemBuilder: (context) => [
+                      PopupMenuItem<_RampPersonAction>(
+                        key: ValueKey('ramp-deactivate-person-${person.id}'),
+                        value: _RampPersonAction.deactivate,
+                        height: 44,
+                        child: Text(
+                          context.l10n.deactivate,
+                          style: AppTextStyles.mediumSH8_14.copyWith(
+                            color: AppColors.red600,
+                          ),
+                        ),
+                      ),
+                    ],
+                    child: SvgPicture.asset(
+                      'assets/icons/collection/edit_person.svg',
+                      width: 20,
+                      height: 20,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     ),
   );
 
@@ -398,16 +439,34 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
     ),
   );
 
+  String _personLabel(RagpickerModel person) {
+    final digits = (person.phone ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) return person.name;
+    final visibleDigits = digits.length <= 4
+        ? digits
+        : digits.substring(digits.length - 4);
+    return '${person.name} (••• $visibleDigits)';
+  }
+
   Widget _radio(bool selected) => Container(
-    width: 16,
-    height: 16,
+    width: 20,
+    height: 20,
+    padding: const EdgeInsets.all(3),
     decoration: BoxDecoration(
       shape: BoxShape.circle,
       border: Border.all(
         color: selected ? AppColors.primary500 : AppColors.cool400,
-        width: selected ? 4.5 : 1.2,
+        width: 1.2,
       ),
     ),
+    child: selected
+        ? const DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColors.primary500,
+              shape: BoxShape.circle,
+            ),
+          )
+        : null,
   );
 }
 

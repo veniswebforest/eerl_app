@@ -28,6 +28,7 @@ import 'package:eerl_app/features/stock/model/stock_item.dart';
 import 'package:eerl_app/features/stock/view/stock_detail_screen.dart';
 import 'package:eerl_app/features/supervisor_expense/view/supervisor_expense_module_screen.dart';
 import 'package:eerl_app/features/supervisor_mrf_people/view/supervisor_mrf_people_screen.dart';
+import 'package:eerl_app/features/prices/view/supervisor_prices_screen.dart';
 import 'package:eerl_app/features/supervisor_requests/view/supervisor_agent_requests_screen.dart';
 import 'package:eerl_app/features/supervisor_requests/view/supervisor_completed_request_screen.dart';
 import 'package:eerl_app/features/supervisor_requests/view/supervisor_resolve_request_screen.dart';
@@ -405,6 +406,11 @@ class AppRouter {
       path: AppRoutes.supervisorMrfPeople,
       parentNavigatorKey: rootNavigatorKey,
       builder: (_, _) => const SupervisorMrfPeopleScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.supervisorPrices,
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (_, _) => const SupervisorPricesScreen(),
     ),
 
     // ── Auth routes ──────────────────────────────────────────────

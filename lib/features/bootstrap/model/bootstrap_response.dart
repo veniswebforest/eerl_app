@@ -144,12 +144,14 @@ class BootstrapCenter {
     required this.isPrimary,
     required this.agentNumber,
     required this.slipCounter,
+    this.assignments = const [],
   });
 
   final String? id;
   final bool isPrimary;
   final int? agentNumber;
   final BootstrapSlipCounter? slipCounter;
+  final List<BootstrapAssignment> assignments;
 
   factory BootstrapCenter.fromJson(Map<String, dynamic> json) {
     final rawSlipCounter = json['slipCounter'];
@@ -162,8 +164,22 @@ class BootstrapCenter {
               Map<String, dynamic>.from(rawSlipCounter),
             )
           : null,
+      assignments: _mapList(json['assignment'], BootstrapAssignment.fromJson),
     );
   }
+}
+
+class BootstrapAssignment {
+  const BootstrapAssignment({required this.channel, required this.zoneIds});
+
+  final String? channel;
+  final List<String> zoneIds;
+
+  factory BootstrapAssignment.fromJson(Map<String, dynamic> json) =>
+      BootstrapAssignment(
+        channel: (json['type'] ?? json['channel']) as String?,
+        zoneIds: _stringList(json['zoneIds'] ?? json['zone_ids']),
+      );
 }
 
 class BootstrapSlipCounter {

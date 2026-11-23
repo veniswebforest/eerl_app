@@ -124,15 +124,11 @@ class _EerlAppState extends State<EerlApp> with WidgetsBindingObserver {
       unawaited(() async {
         final token = await AuthSessionStorage().getAccessToken();
         // ignore: avoid_print
-        print(
-          '════════════════════════════════════════════════════════════════',
-        );
+        print('════════════════════════════════════════════════════════════════');
         // ignore: avoid_print
         print('🔑 [APP_RESUMED] ACCESS_TOKEN: ${token ?? 'not_found'}');
         // ignore: avoid_print
-        print(
-          '════════════════════════════════════════════════════════════════',
-        );
+        print('════════════════════════════════════════════════════════════════');
       }());
       unawaited(
         BootstrapSyncService.instance.triggerBootstrap(

@@ -2,6 +2,7 @@ import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
 import 'package:eerl_app/features/bootstrap/data/bootstrap_database_applier.dart';
 import 'package:eerl_app/features/bootstrap/model/bootstrap_response.dart';
+import 'package:eerl_app/features/local_data/data/eerl_local_data_source.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -290,6 +291,292 @@ void main() {
       expect(await database.getSyncMeta('supervisor_name'), isNull);
       expect(await database.getSyncMeta('supervisor_phone'), isNull);
       expect(await database.getSyncMeta('supervisor_photo_url'), isNull);
+    },
+  );
+
+  test(
+    'stores fixed-point assignments, zones, prices, and document fields',
+    () async {
+      final applier = BootstrapDatabaseApplier(database: database);
+      await applier.apply(
+        BootstrapData.fromJson({
+          'cursor': 'fixed-point-1',
+          'hasMore': false,
+          'full': false,
+          'me': {
+            'centers': [
+              {
+                'id': 'center-1',
+                'isPrimary': true,
+                'assignment': [
+                  {
+                    'type': 'D2D',
+                    'zoneIds': ['zone-1'],
+                  },
+                  {
+                    'type': 'RAMP',
+                    'zoneIds': ['zone-1'],
+                  },
+                ],
+              },
+            ],
+          },
+          'tables': {
+            'zones': {
+              'replace': [
+                {
+                  'id': 'zone-1',
+                  'code': 'Z1',
+                  'name': 'Zone One',
+                  'is_active': 1,
+                },
+              ],
+            },
+            'items': {
+              'replace': [
+                {
+                  'id': 'item-fixed',
+                  'name': 'PET Bottles',
+                  'category_name': 'Plastic',
+                  'unit_code': 'KG',
+                  'unit_name': 'Kilogram',
+                  'material_type': 'PLASTIC',
+                  'colour': '#00A86B',
+                  'is_active': 1,
+                },
+              ],
+            },
+            'center_prices': {
+              'replace': [
+                {
+                  'center_id': 'center-1',
+                  'item_id': 'item-fixed',
+                  'rate': 21.5,
+                  'from_name': 'Center One',
+                  'from_level': 'CENTER',
+                  'own': 1,
+                },
+              ],
+            },
+            'center_channels': {
+              'replace': [
+                {
+                  'center_id': 'center-1',
+                  'channel': 'D2D',
+                  'show_price': 1,
+                  'takes_payment': 1,
+                },
+                {
+                  'center_id': 'center-1',
+                  'channel': 'MRF',
+                  'show_price': 0,
+                  'takes_payment': 0,
+                },
+                {
+                  'center_id': 'center-1',
+                  'channel': 'RAMP',
+                  'show_price': 1,
+                  'takes_payment': 1,
+                },
+              ],
+            },
+            'destinations': {
+              'replace': [
+                {
+                  'id': 'other-llp',
+                  'name': 'Other Facility',
+                  'company_code': 'LLP2',
+                },
+              ],
+            },
+          },
+        }),
+      );
+
+      final assignments = await database.query(
+        DatabaseTables.myAssignments,
+        orderBy: 'channel',
+      );
+      expect(assignments.map((row) => row['channel']), ['D2D', 'RAMP']);
+      expect(assignments.first['zone_ids'], '["zone-1"]');
+      expect(
+        (await database.query(DatabaseTables.zones)).single['name'],
+        'Zone One',
+      );
+      expect(
+        (await database.query(DatabaseTables.centerPrices)).single['rate'],
+        21.5,
+      );
+      expect(
+        (await database.query(
+          DatabaseTables.destinations,
+        )).single['company_code'],
+        'LLP2',
+      );
+
+      final local = EerlLocalDataSource(database: database);
+      expect(
+        (await local.getChannels(
+          centerId: 'center-1',
+        )).map((channel) => channel.channel),
+        ['D2D', 'RAMP'],
+      );
+      expect(
+        await local.getAssignedZoneNames(centerId: 'center-1', channel: 'D2D'),
+        ['Zone One'],
+      );
+
+      for (final vehicle in <Map<String, Object?>>[
+        {
+          'id': 'vehicle-assigned',
+          'center_id': 'center-1',
+          'plate_number': 'GJ-05-AA-1001',
+          'zone_id': 'zone-1',
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+        {
+          'id': 'vehicle-no-zone',
+          'center_id': 'center-1',
+          'plate_number': 'GJ-05-AA-1002',
+          'zone_id': null,
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+        {
+          'id': 'vehicle-other-zone',
+          'center_id': 'center-1',
+          'plate_number': 'GJ-05-AA-1003',
+          'zone_id': 'zone-2',
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+        {
+          'id': 'vehicle-other-center',
+          'center_id': 'center-2',
+          'plate_number': 'GJ-05-AA-1004',
+          'zone_id': 'zone-1',
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+      ]) {
+        await database.insert(DatabaseTables.vehicles, vehicle);
+      }
+      for (final ragpicker in <Map<String, Object?>>[
+        {
+          'id': 'ragpicker-assigned',
+          'center_id': 'center-1',
+          'name': 'Assigned Ragpicker',
+          'zone_id': 'zone-1',
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+        {
+          'id': 'ragpicker-no-zone',
+          'center_id': 'center-1',
+          'name': 'No Zone Ragpicker',
+          'zone_id': null,
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+        {
+          'id': 'ragpicker-other-zone',
+          'center_id': 'center-1',
+          'name': 'Other Zone Ragpicker',
+          'zone_id': 'zone-2',
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+        {
+          'id': 'ragpicker-other-center',
+          'center_id': 'center-2',
+          'name': 'Other Center Ragpicker',
+          'zone_id': 'zone-1',
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+      ]) {
+        await database.insert(DatabaseTables.ragpickers, ragpicker);
+      }
+      for (final labour in <Map<String, Object?>>[
+        {
+          'id': 'labour-assigned',
+          'center_id': 'center-1',
+          'name': 'Assigned Labour',
+          'role': 'LABOUR',
+          'zone_id': 'zone-1',
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+        {
+          'id': 'labour-no-zone',
+          'center_id': 'center-1',
+          'name': 'No Zone Labour',
+          'role': 'LABOUR',
+          'zone_id': null,
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+        {
+          'id': 'labour-other-zone',
+          'center_id': 'center-1',
+          'name': 'Other Zone Labour',
+          'role': 'LABOUR',
+          'zone_id': 'zone-2',
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+        {
+          'id': 'labour-other-center',
+          'center_id': 'center-2',
+          'name': 'Other Center Labour',
+          'role': 'LABOUR',
+          'zone_id': 'zone-1',
+          'is_active': 1,
+          'sync_state': 'synced',
+        },
+      ]) {
+        await database.insert(DatabaseTables.mrfPeople, labour);
+      }
+
+      expect(
+        (await local.getVehicles(centerId: 'center-1')).map((row) => row.id),
+        ['vehicle-assigned', 'vehicle-no-zone'],
+      );
+      expect(
+        (await local.getRagpickers(
+          centerId: 'center-1',
+          activeOnly: true,
+        )).map((row) => row.id),
+        ['ragpicker-assigned', 'ragpicker-no-zone'],
+      );
+      expect(
+        (await local.getMrfPeople(
+          centerId: 'center-1',
+          role: 'LABOUR',
+        )).map((row) => row.id),
+        ['labour-assigned', 'labour-no-zone', 'labour-other-zone'],
+      );
+      await database.insert(DatabaseTables.myAssignments, {
+        'center_id': 'center-1',
+        'channel': 'MRF',
+        'zone_ids': '["zone-1"]',
+      });
+      expect(
+        (await local.getMrfPeople(
+          centerId: 'center-1',
+          role: 'LABOUR',
+        )).map((row) => row.id),
+        ['labour-assigned', 'labour-no-zone'],
+      );
+
+      await database.delete(DatabaseTables.myAssignments);
+      expect(
+        (await local.getChannels(
+          centerId: 'center-1',
+        )).map((channel) => channel.channel),
+        ['D2D', 'MRF', 'RAMP'],
+      );
     },
   );
 }

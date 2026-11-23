@@ -3280,6 +3280,468 @@ abstract class DriverLocalizations {
   /// **'Powered by Eco Vision'**
   String get supervisorDrawerPoweredBy;
 
+  /// No description provided for @addRouteStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1 of 2'**
+  String get addRouteStep1;
+
+  /// No description provided for @addRouteStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 2 of 2'**
+  String get addRouteStep2;
+
+  /// No description provided for @addRouteRouteName.
+  ///
+  /// In en, this message translates to:
+  /// **'Route name'**
+  String get addRouteRouteName;
+
+  /// No description provided for @addRouteRouteNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example, Adajan Morning'**
+  String get addRouteRouteNameHint;
+
+  /// No description provided for @addRouteWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse'**
+  String get addRouteWarehouse;
+
+  /// No description provided for @addRouteSelectWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Select warehouse'**
+  String get addRouteSelectWarehouse;
+
+  /// No description provided for @addRouteShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift'**
+  String get addRouteShift;
+
+  /// No description provided for @addRouteSelectShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Shift'**
+  String get addRouteSelectShift;
+
+  /// No description provided for @addRouteContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get addRouteContinue;
+
+  /// No description provided for @addRouteWarehouseAdajan.
+  ///
+  /// In en, this message translates to:
+  /// **'Adajan Central Warehouse'**
+  String get addRouteWarehouseAdajan;
+
+  /// No description provided for @addRouteWarehouseVesu.
+  ///
+  /// In en, this message translates to:
+  /// **'Vesu Storage Hub'**
+  String get addRouteWarehouseVesu;
+
+  /// No description provided for @addRouteWarehouseKatargam.
+  ///
+  /// In en, this message translates to:
+  /// **'Katargam Depot'**
+  String get addRouteWarehouseKatargam;
+
+  /// No description provided for @addRouteWarehousePal.
+  ///
+  /// In en, this message translates to:
+  /// **'Pal Sorting Facility'**
+  String get addRouteWarehousePal;
+
+  /// No description provided for @addRouteWarehouseUdhna.
+  ///
+  /// In en, this message translates to:
+  /// **'Udhna Industrial Warehouse'**
+  String get addRouteWarehouseUdhna;
+
+  /// No description provided for @addRouteShiftMorningEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning · 7 am–3 pm'**
+  String get addRouteShiftMorningEarly;
+
+  /// No description provided for @addRouteShiftMorningLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning · 2 pm–8 pm'**
+  String get addRouteShiftMorningLate;
+
+  /// No description provided for @addRouteShiftFullDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Day (8 am–8 pm)'**
+  String get addRouteShiftFullDay;
+
+  /// No description provided for @addRouteSelectVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Vehicle'**
+  String get addRouteSelectVehicle;
+
+  /// No description provided for @addRouteVehicleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get addRouteVehicleLabel;
+
+  /// No description provided for @addRouteVehicleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Vehicle for Pickup'**
+  String get addRouteVehicleHint;
+
+  /// No description provided for @addRouteSelectDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Driver'**
+  String get addRouteSelectDriver;
+
+  /// No description provided for @addRouteDriverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Driver for Pickup'**
+  String get addRouteDriverHint;
+
+  /// No description provided for @addRouteSelectLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Labour'**
+  String get addRouteSelectLabour;
+
+  /// No description provided for @addRouteLabourHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Labour'**
+  String get addRouteLabourHint;
+
+  /// No description provided for @addRouteDriverNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Not Found'**
+  String get addRouteDriverNotFound;
+
+  /// No description provided for @addRouteDriverNotFoundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No driver added yet. Tap below to add.'**
+  String get addRouteDriverNotFoundHint;
+
+  /// No description provided for @addRouteLabourNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour Not Found'**
+  String get addRouteLabourNotFound;
+
+  /// No description provided for @addRouteLabourNotFoundHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No labour added yet. Tap below to add.'**
+  String get addRouteLabourNotFoundHint;
+
+  /// No description provided for @addRouteAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get addRouteAdd;
+
+  /// No description provided for @addRouteVehicleCompany1001.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-05-EE-1001'**
+  String get addRouteVehicleCompany1001;
+
+  /// No description provided for @addRouteVehicleCompany1234.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-05-BX-1234'**
+  String get addRouteVehicleCompany1234;
+
+  /// No description provided for @addRouteVehicleRental1002.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-05-EE-1002'**
+  String get addRouteVehicleRental1002;
+
+  /// No description provided for @addRouteVehicleRental1001.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-05-EE-1001'**
+  String get addRouteVehicleRental1001;
+
+  /// No description provided for @addRouteCompanyTruck.
+  ///
+  /// In en, this message translates to:
+  /// **'Company truck'**
+  String get addRouteCompanyTruck;
+
+  /// No description provided for @addRouteRentalShreeRam.
+  ///
+  /// In en, this message translates to:
+  /// **'Hired from Shree ram Transport'**
+  String get addRouteRentalShreeRam;
+
+  /// No description provided for @addRouteRentalKhodiyar.
+  ///
+  /// In en, this message translates to:
+  /// **'Hired from Khodiyar Transport'**
+  String get addRouteRentalKhodiyar;
+
+  /// No description provided for @addRouteCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity 3000 KG'**
+  String get addRouteCapacity;
+
+  /// No description provided for @addRouteDriverVikram.
+  ///
+  /// In en, this message translates to:
+  /// **'Vikram Singh (••• 4321)'**
+  String get addRouteDriverVikram;
+
+  /// No description provided for @addRouteDriverSuresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Suresh Kumar (••• 5847)'**
+  String get addRouteDriverSuresh;
+
+  /// No description provided for @addRouteDriverMahesh.
+  ///
+  /// In en, this message translates to:
+  /// **'Mahesh Parmar (••• 2282)'**
+  String get addRouteDriverMahesh;
+
+  /// No description provided for @addRouteDriverRakesh.
+  ///
+  /// In en, this message translates to:
+  /// **'Rakesh Sharma (••• 2458)'**
+  String get addRouteDriverRakesh;
+
+  /// No description provided for @addRouteDriverAmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Amit Patel (••• 9510)'**
+  String get addRouteDriverAmit;
+
+  /// No description provided for @addRouteLabourRavi.
+  ///
+  /// In en, this message translates to:
+  /// **'Ravi Bisht (••• 5847)'**
+  String get addRouteLabourRavi;
+
+  /// No description provided for @addRouteLabourRam.
+  ///
+  /// In en, this message translates to:
+  /// **'Ram Singh (••• 2282)'**
+  String get addRouteLabourRam;
+
+  /// No description provided for @addRouteLabourRamesh.
+  ///
+  /// In en, this message translates to:
+  /// **'Ramesh Yadav (••• 2458)'**
+  String get addRouteLabourRamesh;
+
+  /// No description provided for @addRouteLabourArjun.
+  ///
+  /// In en, this message translates to:
+  /// **'Arjun Jatav (••• 9510)'**
+  String get addRouteLabourArjun;
+
+  /// No description provided for @addRouteDeactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get addRouteDeactivate;
+
+  /// No description provided for @addRouteDeactivateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate?'**
+  String get addRouteDeactivateTitle;
+
+  /// No description provided for @addRouteDeactivateMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to deactivate this person?'**
+  String get addRouteDeactivateMessage;
+
+  /// No description provided for @addRouteCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get addRouteCancel;
+
+  /// No description provided for @addRouteYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get addRouteYes;
+
+  /// No description provided for @addRouteAddNewDriverPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New '**
+  String get addRouteAddNewDriverPrefix;
+
+  /// No description provided for @addRouteDriverWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get addRouteDriverWord;
+
+  /// No description provided for @addRouteLabourWord.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour'**
+  String get addRouteLabourWord;
+
+  /// No description provided for @addRouteFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get addRouteFullName;
+
+  /// No description provided for @addRouteFullNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Full Name'**
+  String get addRouteFullNameHint;
+
+  /// No description provided for @addRouteMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get addRouteMobileNumber;
+
+  /// No description provided for @addRouteMobileNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Mobile number'**
+  String get addRouteMobileNumberHint;
+
+  /// No description provided for @addRouteCountryCode.
+  ///
+  /// In en, this message translates to:
+  /// **'+91'**
+  String get addRouteCountryCode;
+
+  /// No description provided for @addRouteAadhaarNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhar card Number'**
+  String get addRouteAadhaarNumber;
+
+  /// No description provided for @addRouteAadhaarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhaar / Voter ID'**
+  String get addRouteAadhaarHint;
+
+  /// No description provided for @addRouteProfileProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Photo / ID Proof'**
+  String get addRouteProfileProof;
+
+  /// No description provided for @addRouteCapturePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Photo'**
+  String get addRouteCapturePhoto;
+
+  /// No description provided for @addRoutePhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a photo to record and verify details.'**
+  String get addRoutePhotoHint;
+
+  /// No description provided for @addRouteSaveSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Select'**
+  String get addRouteSaveSelect;
+
+  /// No description provided for @addRouteFullNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the full name.'**
+  String get addRouteFullNameRequired;
+
+  /// No description provided for @addRouteFullNameMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name must be at least 2 characters.'**
+  String get addRouteFullNameMinLength;
+
+  /// No description provided for @addRouteMobileRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the mobile number.'**
+  String get addRouteMobileRequired;
+
+  /// No description provided for @addRouteMobileInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid 10-digit mobile number starting with 6–9.'**
+  String get addRouteMobileInvalid;
+
+  /// No description provided for @addRouteReviewShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning (8 am–2 pm)'**
+  String get addRouteReviewShift;
+
+  /// No description provided for @addRouteReviewVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-05-EE-1001'**
+  String get addRouteReviewVehicle;
+
+  /// No description provided for @addRouteReviewCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'(Company Truck)'**
+  String get addRouteReviewCompany;
+
+  /// No description provided for @addRouteReviewDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Vikram Singh (12345 43210)'**
+  String get addRouteReviewDriver;
+
+  /// No description provided for @addRouteReviewLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Ravi Bisht (23456 58492)'**
+  String get addRouteReviewLabour;
+
+  /// No description provided for @addRouteAddToRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to route'**
+  String get addRouteAddToRoute;
+
+  /// No description provided for @addRouteSavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully Saved!'**
+  String get addRouteSavedTitle;
+
+  /// No description provided for @addRouteSavedSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Adajan Morning Route Saved'**
+  String get addRouteSavedSubtitle;
+
   /// No description provided for @sourcesUnassignedTitle.
   ///
   /// In en, this message translates to:
@@ -3555,6 +4017,456 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'Back to Requests'**
   String get sourcesBackToRequests;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'User Profile'**
+  String get profileTitle;
+
+  /// No description provided for @profileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account details & info'**
+  String get profileSubtitle;
+
+  /// No description provided for @profileLanguageCode.
+  ///
+  /// In en, this message translates to:
+  /// **'EN'**
+  String get profileLanguageCode;
+
+  /// No description provided for @profileUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'Kiran Shah'**
+  String get profileUserName;
+
+  /// No description provided for @profileRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Supervisor'**
+  String get profileRole;
+
+  /// No description provided for @profileAccountInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Information'**
+  String get profileAccountInformation;
+
+  /// No description provided for @profileMyAreas.
+  ///
+  /// In en, this message translates to:
+  /// **'My areas'**
+  String get profileMyAreas;
+
+  /// No description provided for @profileAreasValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Adajan, Vesu, Pal'**
+  String get profileAreasValue;
+
+  /// No description provided for @profileMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get profileMobileNumber;
+
+  /// No description provided for @profileMobileValue.
+  ///
+  /// In en, this message translates to:
+  /// **'+91 98765 43210'**
+  String get profileMobileValue;
+
+  /// No description provided for @profileRoleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get profileRoleLabel;
+
+  /// No description provided for @profileSessionExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Expires'**
+  String get profileSessionExpires;
+
+  /// No description provided for @profileSessionValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in 6h 24m'**
+  String get profileSessionValue;
+
+  /// No description provided for @profileActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get profileActions;
+
+  /// No description provided for @profileSyncData.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Data'**
+  String get profileSyncData;
+
+  /// No description provided for @profileSyncDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync your offline data'**
+  String get profileSyncDataSubtitle;
+
+  /// No description provided for @profileEndMyDay.
+  ///
+  /// In en, this message translates to:
+  /// **'End My Day'**
+  String get profileEndMyDay;
+
+  /// No description provided for @profileEndMyDaySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close today once your trips are done'**
+  String get profileEndMyDaySubtitle;
+
+  /// No description provided for @profileAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get profileAccount;
+
+  /// No description provided for @profileLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get profileLogout;
+
+  /// No description provided for @profileLogoutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out from your account'**
+  String get profileLogoutSubtitle;
+
+  /// No description provided for @profileSyncOfflineData.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Offline Data'**
+  String get profileSyncOfflineData;
+
+  /// No description provided for @profileChangesNotSent.
+  ///
+  /// In en, this message translates to:
+  /// **'3 changes not sent yet'**
+  String get profileChangesNotSent;
+
+  /// No description provided for @profileSyncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Now'**
+  String get profileSyncNow;
+
+  /// No description provided for @profileDataAlreadySynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Already Synced'**
+  String get profileDataAlreadySynced;
+
+  /// No description provided for @profileBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get profileBack;
+
+  /// No description provided for @profileLogoutQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get profileLogoutQuestion;
+
+  /// No description provided for @profileLogoutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Any unsynced offline data will remain on this device until your next sign-in.'**
+  String get profileLogoutMessage;
+
+  /// No description provided for @profileSendChangesWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Send changes to notify drivers'**
+  String get profileSendChangesWarning;
+
+  /// No description provided for @profileNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get profileNo;
+
+  /// No description provided for @profileYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get profileYes;
+
+  /// No description provided for @profileNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get profileNotifications;
+
+  /// No description provided for @profileToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get profileToday;
+
+  /// No description provided for @profileEarlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier'**
+  String get profileEarlier;
+
+  /// No description provided for @profileOfflineMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Mode'**
+  String get profileOfflineMode;
+
+  /// No description provided for @profileOfflineModeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Data will sync automatically when Connection Restored.'**
+  String get profileOfflineModeMessage;
+
+  /// No description provided for @profileJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get profileJustNow;
+
+  /// No description provided for @profileNewSourceUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'New Source Unassigned'**
+  String get profileNewSourceUnassigned;
+
+  /// No description provided for @profileNewSourceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Global Garments (Adajan) needs a route assignment.'**
+  String get profileNewSourceMessage;
+
+  /// No description provided for @profileTenMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'10 Mins ago'**
+  String get profileTenMinutesAgo;
+
+  /// No description provided for @profileDriverEscalation.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Escalation'**
+  String get profileDriverEscalation;
+
+  /// No description provided for @profileDriverEscalationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Ramesh reported gate entry delay at Pal spot.'**
+  String get profileDriverEscalationMessage;
+
+  /// No description provided for @profileYesterdayTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday, 11:30 AM'**
+  String get profileYesterdayTime;
+
+  /// No description provided for @profilePickupSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Skipped'**
+  String get profilePickupSkipped;
+
+  /// No description provided for @profilePickupSkippedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Siddhgiri Traders Skipped collection.'**
+  String get profilePickupSkippedMessage;
+
+  /// No description provided for @profilePickupSkippedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'24 Oct, 08:00 AM'**
+  String get profilePickupSkippedTime;
+
+  /// No description provided for @profileAllCaughtUp.
+  ///
+  /// In en, this message translates to:
+  /// **'All Caught Up!'**
+  String get profileAllCaughtUp;
+
+  /// No description provided for @profileNoNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no new notifications. Check back later for system alerts and Admin updates.'**
+  String get profileNoNotifications;
+
+  /// No description provided for @profileHelpSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Help & Support'**
+  String get profileHelpSupport;
+
+  /// No description provided for @profileCallSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Support'**
+  String get profileCallSupport;
+
+  /// No description provided for @profileCallSupportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Available 24/7 for field issues'**
+  String get profileCallSupportSubtitle;
+
+  /// No description provided for @profileInstantHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Instant Help'**
+  String get profileInstantHelp;
+
+  /// No description provided for @profileInstantHelpSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with a support agent'**
+  String get profileInstantHelpSubtitle;
+
+  /// No description provided for @profileFaqTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently Asked Questions'**
+  String get profileFaqTitle;
+
+  /// No description provided for @profileFaqDailyTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'How do daily trips work?'**
+  String get profileFaqDailyTrips;
+
+  /// No description provided for @profileFaqDailyTripsAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated automatically each morning from your Master Routes.'**
+  String get profileFaqDailyTripsAnswer;
+
+  /// No description provided for @profileFaqSwapDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'How to swap a driver for today?'**
+  String get profileFaqSwapDriver;
+
+  /// No description provided for @profileFaqSwapDriverAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Open today\'s route and use the driver edit action.'**
+  String get profileFaqSwapDriverAnswer;
+
+  /// No description provided for @profileFaqUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'What is the unassigned sources?'**
+  String get profileFaqUnassigned;
+
+  /// No description provided for @profileFaqUnassignedAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources that are not currently attached to a route.'**
+  String get profileFaqUnassignedAnswer;
+
+  /// No description provided for @profileFaqSkipping.
+  ///
+  /// In en, this message translates to:
+  /// **'What does Skipping a stop do?'**
+  String get profileFaqSkipping;
+
+  /// No description provided for @profileFaqSkippingAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'It records the stop as skipped for the current trip.'**
+  String get profileFaqSkippingAnswer;
+
+  /// No description provided for @profileTodaysActivitySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Today’s Activity Summary'**
+  String get profileTodaysActivitySummary;
+
+  /// No description provided for @profileTripsCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips Completed'**
+  String get profileTripsCompleted;
+
+  /// No description provided for @profileTripsCompletedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'08'**
+  String get profileTripsCompletedValue;
+
+  /// No description provided for @profilePendingSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Sources'**
+  String get profilePendingSources;
+
+  /// No description provided for @profilePendingSourcesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'01'**
+  String get profilePendingSourcesValue;
+
+  /// No description provided for @profileOfflinePendingSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Pending Sync'**
+  String get profileOfflinePendingSync;
+
+  /// No description provided for @profileAllSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'All Synced'**
+  String get profileAllSynced;
+
+  /// No description provided for @profileEndDayHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Once you close the day, you won\'t be able to add or edit any entries.'**
+  String get profileEndDayHelper;
+
+  /// No description provided for @profileClosedDayArtwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Now Time to\nCLOSED The Day'**
+  String get profileClosedDayArtwork;
+
+  /// No description provided for @profileSubmitShareWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit & Share to Whatsapp'**
+  String get profileSubmitShareWhatsapp;
+
+  /// No description provided for @profileShareWhatsappMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will lock the day for editing and pre-fill a WhatsApp message to your group.'**
+  String get profileShareWhatsappMessage;
+
+  /// No description provided for @profileCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get profileCancel;
+
+  /// No description provided for @profileShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get profileShare;
 }
 
 class _DriverLocalizationsDelegate

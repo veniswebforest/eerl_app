@@ -15,7 +15,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 14;
+  static const databaseVersion = 15;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -245,6 +245,98 @@ class AppDatabase {
         'value': '1',
       }, conflictAlgorithm: ConflictAlgorithm.replace);
       _log('Added cash-request description schema in version 14');
+    }
+    if (oldVersion < 15) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${DatabaseTables.myAssignments} (
+          center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
+          channel TEXT NOT NULL,
+          zone_ids TEXT NOT NULL DEFAULT '[]',
+          PRIMARY KEY (center_id, channel)
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${DatabaseTables.zones} (
+          id TEXT PRIMARY KEY,
+          code TEXT NOT NULL,
+          name TEXT NOT NULL,
+          is_active INTEGER NOT NULL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${DatabaseTables.centerPrices} (
+          center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
+          item_id TEXT NOT NULL REFERENCES ${DatabaseTables.items} (id),
+          rate REAL,
+          from_name TEXT,
+          from_level TEXT,
+          own INTEGER NOT NULL,
+          PRIMARY KEY (center_id, item_id)
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ${DatabaseTables.priceRequests} (
+          id TEXT PRIMARY KEY,
+          center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
+          item_id TEXT NOT NULL REFERENCES ${DatabaseTables.items} (id),
+          current_rate REAL,
+          current_from_name TEXT,
+          current_from_level TEXT,
+          requested_rate REAL NOT NULL,
+          reason TEXT NOT NULL,
+          status TEXT NOT NULL,
+          raised_by_id TEXT NOT NULL,
+          raised_by_name TEXT NOT NULL,
+          raised_at TEXT NOT NULL,
+          decided_by_name TEXT,
+          decided_at TEXT,
+          rejection_reason TEXT,
+          updated_at TEXT NOT NULL,
+          sync_state TEXT NOT NULL DEFAULT 'synced'
+        )
+      ''');
+      await _addMissingColumns(db, DatabaseTables.centerItems, const {
+        'local_name': 'TEXT',
+        'unit_name': 'TEXT',
+        'unit_factor': 'REAL',
+      });
+      await _addMissingColumns(db, DatabaseTables.vehicles, const {
+        'zone_id': 'TEXT REFERENCES zones (id)',
+      });
+      await _addMissingColumns(db, DatabaseTables.mrfPeople, const {
+        'zone_id': 'TEXT REFERENCES zones (id)',
+      });
+      await _addMissingColumns(db, DatabaseTables.ragpickers, const {
+        'zone_id': 'TEXT REFERENCES zones (id)',
+      });
+      await _addMissingColumns(db, DatabaseTables.destinations, const {
+        'company_code': 'TEXT',
+      });
+      await _addMissingColumns(db, DatabaseTables.collections, const {
+        'reference_number': 'TEXT',
+      });
+      await _addMissingColumns(db, DatabaseTables.collectionItems, const {
+        'unit_name': 'TEXT',
+        'unit_factor': 'REAL',
+        'unit_qty': 'REAL',
+        'unit_verified_qty': 'REAL',
+      });
+      await _addMissingColumns(db, DatabaseTables.transfers, const {
+        'between_llps': 'INTEGER NOT NULL DEFAULT 0',
+      });
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS ix_assignments_center ON '
+        '${DatabaseTables.myAssignments} (center_id, channel)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS ix_price_requests_center ON '
+        '${DatabaseTables.priceRequests} (center_id, status, raised_at)',
+      );
+      await db.insert(DatabaseTables.syncMeta, const {
+        'key': 'fixed_point_refetch_required',
+        'value': '1',
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      _log('Added fixed-point schema in version 15');
     }
   }
 
@@ -639,6 +731,7 @@ class AppDatabase {
     return runInTransaction((txn) async {
       const tablesToClear = <String>[
         DatabaseTables.myRoles,
+        DatabaseTables.myAssignments,
         DatabaseTables.walletEntries,
         DatabaseTables.collectionItems,
         DatabaseTables.transferItems,
@@ -648,11 +741,14 @@ class AppDatabase {
         DatabaseTables.expenses,
         DatabaseTables.cashRequests,
         DatabaseTables.categoryRequests,
+        DatabaseTables.priceRequests,
         DatabaseTables.tasks,
         DatabaseTables.requests,
         DatabaseTables.collections,
         DatabaseTables.transfers,
         DatabaseTables.transferVehicles,
+        DatabaseTables.centerPrices,
+        DatabaseTables.zones,
         DatabaseTables.centerItems,
         DatabaseTables.vehicles,
         DatabaseTables.mrfPeople,
@@ -693,6 +789,7 @@ class AppDatabase {
         DatabaseTables.outbox,
         DatabaseTables.photos,
         DatabaseTables.myRoles,
+        DatabaseTables.myAssignments,
         DatabaseTables.walletEntries,
         DatabaseTables.collectionItems,
         DatabaseTables.transferItems,
@@ -702,11 +799,14 @@ class AppDatabase {
         DatabaseTables.expenses,
         DatabaseTables.cashRequests,
         DatabaseTables.categoryRequests,
+        DatabaseTables.priceRequests,
         DatabaseTables.tasks,
         DatabaseTables.requests,
         DatabaseTables.collections,
         DatabaseTables.transfers,
         DatabaseTables.transferVehicles,
+        DatabaseTables.centerPrices,
+        DatabaseTables.zones,
         DatabaseTables.centerItems,
         DatabaseTables.vehicles,
         DatabaseTables.mrfPeople,

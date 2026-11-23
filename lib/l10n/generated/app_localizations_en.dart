@@ -4438,4 +4438,192 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offlineStatusSubtitle => 'No internet connection';
+
+  @override
+  String get pricesTitle => 'Prices';
+
+  @override
+  String get pricesSubtitle => 'Today\'s price at your centre';
+
+  @override
+  String get pricesCentreSuratSouth => 'EERL – Surat South';
+
+  @override
+  String get pricesYourRequests => 'Your price requests:';
+
+  @override
+  String pricesWaitingCount(int count) {
+    return '$count waiting  ›';
+  }
+
+  @override
+  String get pricesMaterials => 'Materials';
+
+  @override
+  String get pricesPetBottles => 'PET Bottles';
+
+  @override
+  String get pricesHdpeRigid => 'HDPE Rigid';
+
+  @override
+  String get pricesPpHardPlastics => 'PP Hard Plastics';
+
+  @override
+  String get pricesCardboard => 'Cardboard';
+
+  @override
+  String get pricesPlasticType => '(Plastic)';
+
+  @override
+  String get pricesPaperType => '(Paper)';
+
+  @override
+  String pricesAmountPerKg(String amount) {
+    return '₹$amount/KG';
+  }
+
+  @override
+  String get pricesFromSmc => 'From SMC (Channel)';
+
+  @override
+  String get pricesOwnPrice => 'Its own price';
+
+  @override
+  String get pricesFromEvsk => 'From EVSK (Partner cluster)';
+
+  @override
+  String pricesAskedWaiting(String amount) {
+    return 'You asked for ₹$amount · waiting';
+  }
+
+  @override
+  String get pricesNoPrice => 'No price';
+
+  @override
+  String get pricesAskForOne => 'Ask for one';
+
+  @override
+  String get priceRequestsTitle => 'Your price requests';
+
+  @override
+  String priceRequestsWaitingTab(int count) {
+    return 'Waiting ($count)';
+  }
+
+  @override
+  String priceRequestsDecidedTab(int count) {
+    return 'Decided ($count)';
+  }
+
+  @override
+  String priceRequestItemCentre(String item, String centre) {
+    return '$item · $centre';
+  }
+
+  @override
+  String priceRequestChange(String oldRate, String newRate, String percent) {
+    return '₹$oldRate → ₹$newRate /KG  ($percent)';
+  }
+
+  @override
+  String get priceRequestPetReason =>
+      'Buyers near Surat pay ₹48 for PET this month; agents are losing givers to other dealers.';
+
+  @override
+  String get priceRequestPpReason =>
+      'PP prices went up at the Sachin buyers this week.';
+
+  @override
+  String get priceRequestHdpeReason => 'Other dealers in Pandesara pay ₹35.';
+
+  @override
+  String get priceRequestWaiting => 'Waiting';
+
+  @override
+  String get priceRequestApproved => 'Approved · from today';
+
+  @override
+  String get priceRequestRejected => 'Rejected';
+
+  @override
+  String get priceRequestApprovedBy => 'Approved by Neha Joshi.';
+
+  @override
+  String get priceRequestRejectionReasonShort =>
+      'Reason: the SMC rate holds until April.';
+
+  @override
+  String get priceRequestToday1030 => 'Today, 10:30 AM';
+
+  @override
+  String get priceRequestToday0905 => 'Today, 9:05 AM';
+
+  @override
+  String get priceRequestYesterday1640 => 'Yesterday, 4:40 PM';
+
+  @override
+  String get priceRequestTitle => 'Price request';
+
+  @override
+  String get priceRequestPriceNow => 'Price now';
+
+  @override
+  String get priceRequestCurrentValue => '₹45.00/KG, from SMC (Channel)';
+
+  @override
+  String get priceRequestYouAskedFor => 'You asked for';
+
+  @override
+  String get priceRequestAskedValue => '₹48.00/KG  (+6.7%)';
+
+  @override
+  String get priceRequestWhy => 'Why';
+
+  @override
+  String get priceRequestAsked => 'Asked';
+
+  @override
+  String get priceRequestAskedBy => 'Bhavesh Shah · Today, 10:30 AM';
+
+  @override
+  String get priceRequestWaitingForHead => 'Waiting for the Collection Head';
+
+  @override
+  String get priceRequestWaitingMessage =>
+      'You get a notification when they decide. Until then the price stays ₹45.00, and you cannot ask again for PET Bottles at this centre.';
+
+  @override
+  String get priceRequestRejectedBy => 'By Neha Joshi · Today, 5:10 PM';
+
+  @override
+  String get priceRequestRejectedReason =>
+      'Reason: the SMC rate holds until April.';
+
+  @override
+  String get priceRequestAskAgain => 'Ask again';
+
+  @override
+  String get priceAskTitle => 'Ask for a price change';
+
+  @override
+  String get priceAskDescription =>
+      'PET Bottles · today ₹45.00/KG, from SMC (Channel). The Collection Head decides; you get a notification.';
+
+  @override
+  String get priceAskNewPrice => 'New price per KG *';
+
+  @override
+  String get priceAskMockValue => '₹ 48.00';
+
+  @override
+  String get priceAskReason => 'Reason *';
+
+  @override
+  String get priceAskMaxCharacters => 'Max 150 Characters';
+
+  @override
+  String get priceAskSendRequest => 'Send request';
+
+  @override
+  String get drawerSupervisorPrices => 'Prices';
 }

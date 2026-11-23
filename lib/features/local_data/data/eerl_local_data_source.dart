@@ -353,13 +353,48 @@ class EerlLocalDataSource {
   Future<List<CenterChannelModel>> getChannels({String? centerId}) async {
     final resolvedCenter = centerId ?? await activeCenterId;
     if (resolvedCenter == null) return const [];
-    final rows = await _database.query(
-      DatabaseTables.centerChannels,
-      where: 'center_id = ?',
-      whereArgs: [resolvedCenter],
-      orderBy: 'channel COLLATE NOCASE',
+    final rows = await _database.rawQuery(
+      '''
+      SELECT ch.*
+      FROM ${DatabaseTables.centerChannels} ch
+      WHERE ch.center_id = ?
+        AND (NOT EXISTS (
+               SELECT 1 FROM ${DatabaseTables.myAssignments} a
+               WHERE a.center_id = ?
+             )
+             OR ch.channel IN (
+               SELECT a.channel FROM ${DatabaseTables.myAssignments} a
+               WHERE a.center_id = ?
+             ))
+      ORDER BY CASE ch.channel WHEN 'D2D' THEN 1 WHEN 'MRF' THEN 2 ELSE 3 END
+    ''',
+      [resolvedCenter, resolvedCenter, resolvedCenter],
     );
     return rows.map(CenterChannelModel.fromMap).toList(growable: false);
+  }
+
+  Future<List<String>> getAssignedZoneNames({
+    String? centerId,
+    required String channel,
+  }) async {
+    final resolvedCenter = centerId ?? await activeCenterId;
+    if (resolvedCenter == null) return const [];
+    final rows = await _database.rawQuery(
+      '''
+      SELECT z.name
+      FROM ${DatabaseTables.myAssignments} a,
+        json_each(a.zone_ids) j
+      JOIN ${DatabaseTables.zones} z ON z.id = j.value
+      WHERE a.center_id = ? AND a.channel = ?
+      ORDER BY z.name COLLATE NOCASE
+      ''',
+      [resolvedCenter, channel.trim().toUpperCase()],
+    );
+    return rows
+        .map((row) => row['name'])
+        .whereType<String>()
+        .where((name) => name.trim().isNotEmpty)
+        .toList(growable: false);
   }
 
   Future<List<ItemModel>> getItems({
@@ -373,6 +408,11 @@ class EerlLocalDataSource {
       '''
       SELECT i.*,
         CASE WHEN COALESCE(ch.show_price, 0) = 1 THEN ci.rate END AS rate,
+        ci.local_name,
+        ci.unit_name AS centre_unit,
+        ci.unit_factor,
+        CASE WHEN ch.show_price = 1 AND ci.unit_factor IS NOT NULL
+             THEN ROUND(ci.rate * ci.unit_factor, 2) END AS rate_per_centre_unit,
         COALESCE(ci.is_selected, 0) AS is_selected,
         ci.sort_order,
         ci.item_id AS configured_item_id
@@ -415,6 +455,11 @@ class EerlLocalDataSource {
       '''
       SELECT i.*,
         CASE WHEN ch.show_price = 1 THEN ci.rate END AS rate,
+        ci.local_name,
+        ci.unit_name AS centre_unit,
+        ci.unit_factor,
+        CASE WHEN ch.show_price = 1 AND ci.unit_factor IS NOT NULL
+             THEN ROUND(ci.rate * ci.unit_factor, 2) END AS rate_per_centre_unit,
         ci.is_selected,
         ci.sort_order
       FROM ${DatabaseTables.centerItems} ci
@@ -488,7 +533,6 @@ class EerlLocalDataSource {
           },
       ],
     };
-
     await _database.transaction((txn) async {
       if (itemIds.isNotEmpty) {
         final placeholders = List.filled(itemIds.length, '?').join(',');
@@ -646,13 +690,24 @@ class EerlLocalDataSource {
   }) async {
     final resolvedCenter = centerId ?? await activeCenterId;
     if (resolvedCenter == null) return const [];
-    final rows = await _database.query(
-      DatabaseTables.vehicles,
-      where:
-          '(center_id = ? OR center_id IS NULL)'
-          '${activeOnly ? ' AND is_active = 1' : ''}',
-      whereArgs: [resolvedCenter],
-      orderBy: 'center_id IS NULL, plate_number COLLATE NOCASE',
+    final rows = await _database.rawQuery(
+      '''
+      SELECT v.* FROM ${DatabaseTables.vehicles} v
+      WHERE (v.center_id = ? OR v.center_id IS NULL)
+        ${activeOnly ? 'AND v.is_active = 1' : ''}
+        AND (v.zone_id IS NULL
+          OR NOT EXISTS (
+            SELECT 1 FROM ${DatabaseTables.myAssignments} a
+            WHERE a.center_id = ? AND a.channel = 'D2D' AND a.zone_ids <> '[]'
+          )
+          OR v.zone_id IN (
+            SELECT j.value FROM ${DatabaseTables.myAssignments} a,
+              json_each(a.zone_ids) j
+            WHERE a.center_id = ? AND a.channel = 'D2D'
+          ))
+      ORDER BY v.center_id IS NULL, v.plate_number COLLATE NOCASE
+    ''',
+      [resolvedCenter, resolvedCenter, resolvedCenter],
     );
     return rows.map(VehicleModel.fromMap).toList(growable: false);
   }
@@ -900,6 +955,20 @@ class EerlLocalDataSource {
       conditions.add('role = ?');
       args.add(role);
     }
+    if (!allCenters && role?.toUpperCase() == 'LABOUR') {
+      conditions.add('''
+        (zone_id IS NULL OR NOT EXISTS (
+          SELECT 1 FROM ${DatabaseTables.myAssignments} a
+          WHERE a.center_id = ${DatabaseTables.mrfPeople}.center_id
+            AND a.channel = 'MRF' AND a.zone_ids <> '[]'
+        ) OR zone_id IN (
+          SELECT j.value FROM ${DatabaseTables.myAssignments} a,
+            json_each(a.zone_ids) j
+          WHERE a.center_id = ${DatabaseTables.mrfPeople}.center_id
+            AND a.channel = 'MRF'
+        ))
+      ''');
+    }
     final rows = await _database.query(
       DatabaseTables.mrfPeople,
       where: conditions.join(' AND '),
@@ -1137,6 +1206,17 @@ class EerlLocalDataSource {
     final conditions = <String>['center_id = ?'];
     final args = <Object?>[resolvedCenter];
     if (activeOnly) conditions.add('is_active = 1');
+    conditions.add('''
+      (zone_id IS NULL OR NOT EXISTS (
+        SELECT 1 FROM ${DatabaseTables.myAssignments} a
+        WHERE a.center_id = ? AND a.channel = 'RAMP' AND a.zone_ids <> '[]'
+      ) OR zone_id IN (
+        SELECT j.value FROM ${DatabaseTables.myAssignments} a,
+          json_each(a.zone_ids) j
+        WHERE a.center_id = ? AND a.channel = 'RAMP'
+      ))
+    ''');
+    args.addAll([resolvedCenter, resolvedCenter]);
     if (search.trim().isNotEmpty) {
       conditions.add('(name LIKE ? OR phone LIKE ?)');
       final like = '%${search.trim()}%';
@@ -1429,9 +1509,134 @@ class EerlLocalDataSource {
       DatabaseTables.destinations,
       where: centerId == null ? null : 'id <> ?',
       whereArgs: centerId == null ? null : [centerId],
-      orderBy: 'name COLLATE NOCASE',
+      orderBy: 'company_code IS NOT NULL, name COLLATE NOCASE',
     );
     return rows.map(DestinationModel.fromMap).toList(growable: false);
+  }
+
+  Future<List<CenterPriceModel>> getCenterPrices({String? centerId}) async {
+    final resolvedCenter = centerId ?? await activeCenterId;
+    if (resolvedCenter == null) return const [];
+    final rows = await _database.rawQuery(
+      '''
+      SELECT p.*, i.name AS item_name, i.category_name, i.unit_code,
+        (SELECT r.requested_rate FROM ${DatabaseTables.priceRequests} r
+         WHERE r.center_id = p.center_id AND r.item_id = p.item_id
+           AND r.status = 'PENDING' LIMIT 1) AS waiting_rate
+      FROM ${DatabaseTables.centerPrices} p
+      JOIN ${DatabaseTables.items} i ON i.id = p.item_id
+      WHERE p.center_id = ? AND i.is_active = 1
+      ORDER BY i.category_name COLLATE NOCASE, i.name COLLATE NOCASE
+    ''',
+      [resolvedCenter],
+    );
+    return rows.map(CenterPriceModel.fromMap).toList(growable: false);
+  }
+
+  Future<List<PriceRequestModel>> getPriceRequests({String? centerId}) async {
+    final resolvedCenter = centerId ?? await activeCenterId;
+    if (resolvedCenter == null) return const [];
+    final rows = await _database.rawQuery(
+      '''
+      SELECT r.*, i.name AS item_name, i.unit_code
+      FROM ${DatabaseTables.priceRequests} r
+      JOIN ${DatabaseTables.items} i ON i.id = r.item_id
+      WHERE r.center_id = ?
+      ORDER BY CASE r.status WHEN 'PENDING' THEN 0 ELSE 1 END,
+               r.raised_at DESC
+    ''',
+      [resolvedCenter],
+    );
+    return rows.map(PriceRequestModel.fromMap).toList(growable: false);
+  }
+
+  Future<String> savePriceRequest({
+    required String itemId,
+    required double requestedRate,
+    required String reason,
+  }) async {
+    if (!requestedRate.isFinite ||
+        requestedRate < 0 ||
+        requestedRate > 99999999.99 ||
+        !_hasAtMostDecimalPlaces(requestedRate, 2)) {
+      throw const LocalWriteValidationException(
+        'Enter a price from 0 to 99,999,999.99 with up to 2 decimals.',
+        field: 'requestedRate',
+      );
+    }
+    final normalizedReason = reason.trim();
+    if (normalizedReason.isEmpty || normalizedReason.length > 1000) {
+      throw const LocalWriteValidationException(
+        'Enter a reason of up to 1000 characters.',
+        field: 'reason',
+      );
+    }
+    final centerId = await activeCenterId;
+    final userId = await currentUserId;
+    final profile = await getProfile();
+    if (centerId == null || userId == null) {
+      throw StateError('Profile or active center is unavailable.');
+    }
+    final id = UuidGenerator.v4();
+    final now = DateTime.now().toUtc().toIso8601String();
+    await _database.runInTransaction((txn) async {
+      final pending = await txn.query(
+        DatabaseTables.priceRequests,
+        columns: const ['id'],
+        where: "center_id = ? AND item_id = ? AND status = 'PENDING'",
+        whereArgs: [centerId, itemId],
+        limit: 1,
+      );
+      if (pending.isNotEmpty) {
+        throw const LocalWriteValidationException(
+          'A change of this price is already waiting for a decision.',
+          field: 'materialItemId',
+        );
+      }
+      final prices = await txn.query(
+        DatabaseTables.centerPrices,
+        where: 'center_id = ? AND item_id = ?',
+        whereArgs: [centerId, itemId],
+        limit: 1,
+      );
+      if (prices.isEmpty) {
+        throw StateError('This material has no price record at the center.');
+      }
+      final price = prices.single;
+      await txn.insert(DatabaseTables.priceRequests, {
+        'id': id,
+        'center_id': centerId,
+        'item_id': itemId,
+        'current_rate': price['rate'],
+        'current_from_name': price['from_name'],
+        'current_from_level': price['from_level'],
+        'requested_rate': requestedRate,
+        'reason': normalizedReason,
+        'status': 'PENDING',
+        'raised_by_id': userId,
+        'raised_by_name': profile.userName ?? '',
+        'raised_at': now,
+        'updated_at': now,
+        'sync_state': 'pending',
+      });
+      await OutboxQueue.enqueue(
+        txn,
+        method: 'PUT',
+        path: '/price-requests/$id',
+        body: {
+          'centerId': centerId,
+          'materialItemId': itemId,
+          'requestedRate': requestedRate,
+          'reason': normalizedReason,
+        },
+        entity: DatabaseTables.priceRequests,
+        entityId: id,
+        kind: 'create',
+        refs: [centerId, itemId],
+        createdAt: now,
+      );
+    });
+    return id;
   }
 
   Future<List<CollectionModel>> getAgentCollections({
@@ -1589,6 +1794,7 @@ class EerlLocalDataSource {
     final rows = await _database.rawQuery(
       '''
       SELECT ci.*, i.name, i.unit_code, i.unit_name,
+        ci.unit_name AS centre_unit_name,
         i.image_url AS item_image_url,
         COALESCE(ch.show_price, 0) AS show_price
       FROM ${DatabaseTables.collectionItems} ci
@@ -2436,6 +2642,13 @@ class EerlLocalDataSource {
             'rate': item['rate'],
             'amount': item['amount'],
             'photoUrls': item['photo_urls'],
+            if (item['unit_name'] != null)
+              'unit': {
+                'name': item['unit_name'],
+                'factor': item['unit_factor'],
+                'collectedQty': item['unit_qty'],
+                'verifiedQty': item['unit_verified_qty'],
+              },
           },
       ],
       'gps': {'lat': gpsLat, 'lng': gpsLng},
@@ -2490,6 +2703,13 @@ class EerlLocalDataSource {
             'rate': item['rate'],
             'amount': item['amount'],
             'photoUrls': item['photo_urls'],
+            if (item['unit_name'] != null)
+              'unit': {
+                'name': item['unit_name'],
+                'factor': item['unit_factor'],
+                'collectedQty': item['unit_qty'],
+                'verifiedQty': item['unit_verified_qty'],
+              },
           },
       ],
       if (_isValidGps(gpsLat, gpsLng)) 'gps': {'lat': gpsLat, 'lng': gpsLng},
@@ -3101,7 +3321,8 @@ class EerlLocalDataSource {
     final centerId = await activeCenterId;
     if (!supervisor && centerId == null) return const [];
     final rows = supervisor
-        ? await _database.rawQuery('''
+        ? await _database.rawQuery(
+            '''
             SELECT r.*, c.name AS center_name
             FROM ${DatabaseTables.categoryRequests} r
             JOIN ${DatabaseTables.centers} c ON c.id = r.center_id
@@ -3115,7 +3336,9 @@ class EerlLocalDataSource {
               CASE WHEN UPPER(r.status) IN ('APPROVED', 'REJECTED')
                    THEN COALESCE(r.decided_at, r.created_at) END DESC,
               r.id
-          ''', [centerId, centerId])
+          ''',
+            [centerId, centerId],
+          )
         : await _database.query(
             DatabaseTables.categoryRequests,
             where: 'requested_by = ? AND center_id = ?',
@@ -3170,8 +3393,7 @@ class EerlLocalDataSource {
               : null,
           'sync_state': 'pending',
         },
-        where:
-            "id = ? AND center_id = ? AND UPPER(status) = 'PENDING'",
+        where: "id = ? AND center_id = ? AND UPPER(status) = 'PENDING'",
         whereArgs: [normalizedId, centerId],
       );
       if (updated != 1) {
@@ -3369,6 +3591,12 @@ class EerlLocalDataSource {
         'Choose where the material is going.',
       );
     }
+    final destinationName = destinationRows.single['name'] as String;
+    final destinationCompanyCode =
+        (destinationRows.single['company_code'] as String?)?.trim();
+    final destinationLabel = destinationCompanyCode?.isNotEmpty == true
+        ? '$destinationName ($destinationCompanyCode)'
+        : destinationName;
 
     TransferVehicleModel? listedVehicle;
     final normalizedVehicleId = transferVehicleId?.trim();
@@ -3461,7 +3689,7 @@ class EerlLocalDataSource {
         {
           'status': 'APPROVED',
           'destination_id': normalizedDestinationId,
-          'destination_name': destinationRows.single['name'],
+          'destination_name': destinationLabel,
           'truck_expected_at': arrival,
           'transfer_vehicle_id': listedVehicle?.id,
           'planned_vehicle_number': normalizedNumber,

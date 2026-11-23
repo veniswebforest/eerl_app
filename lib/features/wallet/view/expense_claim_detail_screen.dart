@@ -27,7 +27,6 @@ class ExpenseClaimDetailScreen extends StatefulWidget {
   State<ExpenseClaimDetailScreen> createState() =>
       _ExpenseClaimDetailScreenState();
 }
-
 class _ExpenseClaimDetailScreenState extends State<ExpenseClaimDetailScreen> {
   Future<List<String>>? _receiptSources;
 
@@ -289,7 +288,6 @@ class _DetailDivider extends StatelessWidget {
     );
   }
 }
-
 class _ExpensePhotosCard extends StatelessWidget {
   const _ExpensePhotosCard({required this.sources});
 
@@ -352,30 +350,6 @@ class _ExpensePhoto extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _LabeledParagraph extends StatelessWidget {
-  const _LabeledParagraph({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text.rich(
-      TextSpan(
-        text: '$label : ',
-        style: const TextStyle(fontWeight: FontWeight.w600),
-        children: [
-          TextSpan(
-            text: value,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-        ],
-      ),
-      style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
     );
   }
 }

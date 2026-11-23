@@ -259,6 +259,29 @@ class OutgoingSyncService {
           await _handleMovedRecordConflict(item, code, token)) {
         return;
       }
+      if (response.statusCode == 409 &&
+          code == 'ALREADY_REQUESTED' &&
+          item['entity'] == DatabaseTables.priceRequests) {
+        await _database.runInTransaction((txn) async {
+          await txn.delete(
+            DatabaseTables.outboxPhotos,
+            where: 'outbox_seq = ?',
+            whereArgs: [item['seq']],
+          );
+          await txn.delete(
+            DatabaseTables.outbox,
+            where: 'seq = ?',
+            whereArgs: [item['seq']],
+          );
+          await txn.delete(
+            DatabaseTables.priceRequests,
+            where: 'id = ?',
+            whereArgs: [item['entity_id']],
+          );
+        });
+        _log('DROPPED #${item['seq']} 409 ALREADY_REQUESTED');
+        return;
+      }
       if (isTransfer &&
           (item['kind'] == 'approve' || item['kind'] == 'reject') &&
           response.statusCode == 409 &&

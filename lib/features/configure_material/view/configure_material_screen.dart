@@ -29,6 +29,7 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
   bool _saving = false;
   Object? _error;
   _MaterialCollectionType _collectionType = _MaterialCollectionType.d2d;
+  List<_MaterialCollectionType> _availableTypes = const [];
   List<ItemModel> _plasticItems = const [];
   List<ItemModel> _nonPlasticItems = const [];
 
@@ -53,6 +54,15 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
       _error = null;
     });
     try {
+      final channels = await EerlLocalRepository.instance.getChannels();
+      final availableTypes = channels
+          .map((entry) => _typeForChannel(entry.channel))
+          .whereType<_MaterialCollectionType>()
+          .toList(growable: false);
+      if (availableTypes.isNotEmpty &&
+          !availableTypes.contains(_collectionType)) {
+        _collectionType = availableTypes.first;
+      }
       final items = await EerlLocalRepository.instance.getItems(
         channel: _channel,
       );
@@ -64,6 +74,9 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
         _nonPlasticItems = items
             .where((item) => item.materialType.toUpperCase() != 'PLASTIC')
             .toList();
+        _availableTypes = availableTypes.isEmpty
+            ? _MaterialCollectionType.values
+            : availableTypes;
         _hasChanges = false;
         _loading = false;
       });
@@ -75,6 +88,14 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
       });
     }
   }
+
+  _MaterialCollectionType? _typeForChannel(String channel) =>
+      switch (channel.trim().toUpperCase()) {
+        'D2D' => _MaterialCollectionType.d2d,
+        'MRF' => _MaterialCollectionType.mrfStation,
+        'RAMP' => _MaterialCollectionType.ramp,
+        _ => null,
+      };
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -133,6 +154,7 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
                       if (_typeDropdownOpen)
                         _TypeDropdown(
                           selected: _collectionType,
+                          types: _availableTypes,
                           onSelected: (type) {
                             setState(() {
                               _collectionType = type;
@@ -386,24 +408,18 @@ class _TypeSelector extends StatelessWidget {
 }
 
 class _TypeDropdown extends StatelessWidget {
-  const _TypeDropdown({required this.selected, required this.onSelected});
+  const _TypeDropdown({
+    required this.selected,
+    required this.types,
+    required this.onSelected,
+  });
 
   final _MaterialCollectionType selected;
+  final List<_MaterialCollectionType> types;
   final ValueChanged<_MaterialCollectionType> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final types = _MaterialCollectionType.values;
-    final labels = [
-      context.l10n.d2d,
-      context.l10n.mrfStation,
-      context.l10n.ramp,
-    ];
-    const icons = [
-      'assets/icons/home/collection_d2d.svg',
-      'assets/icons/home/collection_mrf.svg',
-      'assets/icons/home/collection_ramp.svg',
-    ];
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -439,7 +455,14 @@ class _TypeDropdown extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   SvgPicture.asset(
-                    icons[index],
+                    switch (types[index]) {
+                      _MaterialCollectionType.d2d =>
+                        'assets/icons/home/collection_d2d.svg',
+                      _MaterialCollectionType.mrfStation =>
+                        'assets/icons/home/collection_mrf.svg',
+                      _MaterialCollectionType.ramp =>
+                        'assets/icons/home/collection_ramp.svg',
+                    },
                     width: 20,
                     height: 20,
                     colorFilter: const ColorFilter.mode(
@@ -448,7 +471,12 @@ class _TypeDropdown extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Text(labels[index], style: AppTextStyles.regularB7_14),
+                  Text(switch (types[index]) {
+                    _MaterialCollectionType.d2d => context.l10n.d2d,
+                    _MaterialCollectionType.mrfStation =>
+                      context.l10n.mrfStation,
+                    _MaterialCollectionType.ramp => context.l10n.ramp,
+                  }, style: AppTextStyles.regularB7_14),
                 ],
               ),
             ),

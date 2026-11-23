@@ -5,6 +5,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 
 void main() {
+  testWidgets('matches step-one zone hint and photo card structure', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: D2dVehicleDetailsForm(
+              vehicleNumbers: const ['GJ-05-AB-1234'],
+              selectedVehicle: null,
+              givenBy: '',
+              vehiclePhoto: null,
+              zoneHint: 'Vehicles of your zones: South East',
+              onVehicleSelected: (_) {},
+              onGivenByChanged: (_) {},
+              onCapturePhoto: () {},
+              onRemovePhoto: () {},
+              onPreviewPhoto: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Vehicles of your zones: South East'), findsOneWidget);
+    expect(find.text('Given By'), findsOneWidget);
+    expect(find.text('Given By *'), findsNothing);
+    expect(find.text('Capture Vehicle Photo'), findsOneWidget);
+    expect(find.text('Capture Vehicle Photo *'), findsNothing);
+    expect(find.byKey(const Key('d2d-vehicle-photo-card')), findsOneWidget);
+  });
+
   testWidgets('contact supervisor shows the synced supervisor details', (
     tester,
   ) async {
@@ -44,44 +78,45 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('contact supervisor shows "No supervisor set: ask your admin to set one." when supervisorName is null', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: D2dVehicleDetailsForm(
-              vehicleNumbers: const ['GJ-05-AB-1234'],
-              selectedVehicle: null,
-              givenBy: '',
-              vehiclePhoto: null,
-              supervisorName: null,
-              supervisorPhone: null,
-              onVehicleSelected: (_) {},
-              onGivenByChanged: (_) {},
-              onCapturePhoto: () {},
-              onRemovePhoto: () {},
-              onPreviewPhoto: () {},
+  testWidgets(
+    'contact supervisor shows "No supervisor set: ask your admin to set one." when supervisorName is null',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: D2dVehicleDetailsForm(
+                vehicleNumbers: const ['GJ-05-AB-1234'],
+                selectedVehicle: null,
+                givenBy: '',
+                vehiclePhoto: null,
+                supervisorName: null,
+                supervisorPhone: null,
+                onVehicleSelected: (_) {},
+                onGivenByChanged: (_) {},
+                onCapturePhoto: () {},
+                onRemovePhoto: () {},
+                onPreviewPhoto: () {},
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.byKey(const Key('d2d-vehicle-search')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('d2d-contact-supervisor')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('d2d-vehicle-search')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('d2d-contact-supervisor')));
+      await tester.pumpAndSettle();
 
-    expect(
-      find.text('No supervisor set: ask your admin to set one.'),
-      findsOneWidget,
-    );
-    expect(find.byKey(const Key('d2d-supervisor-details')), findsNothing);
-  });
+      expect(
+        find.text('No supervisor set: ask your admin to set one.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('d2d-supervisor-details')), findsNothing);
+    },
+  );
 
   testWidgets('displays the vehicle photo when captured', (tester) async {
     bool removed = false;
@@ -120,4 +155,3 @@ void main() {
     expect(previewed, isTrue);
   });
 }
-

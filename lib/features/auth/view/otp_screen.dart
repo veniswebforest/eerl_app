@@ -98,15 +98,21 @@ class _OtpScreenState extends State<OtpScreen>
     if (success) {
       // verifyOtp only succeeds after the API returns and its validated session
       // is persisted. Navigation must not wait for Bootstrap or image caching.
-      final loginIdentifiedDriver =
-          authProvider.verifyOtpResponse?.isDriver == true;
-      final loginIdentifiedPickupSupervisor =
-          authProvider.verifyOtpResponse?.isPickupSupervisor == true;
-      final role = loginIdentifiedDriver
-          ? DashboardUserRole.driver
-          : loginIdentifiedPickupSupervisor
-          ? DashboardUserRole.pickupSupervisor
+      final responseRoles =
+          authProvider.verifyOtpResponse?.roles
+              .map(DashboardUserRoleX.fromKey)
+              .toSet()
+              .toList(growable: false) ??
+          const <DashboardUserRole>[];
+      var role = responseRoles.length == 1
+          ? responseRoles.single
           : await (widget.loadInitialRole ?? _storedDashboardRole)();
+      if (responseRoles.length > 1) {
+        if (!responseRoles.contains(role)) role = responseRoles.first;
+        final selected = await _chooseLoginRole(responseRoles, role);
+        if (selected == null || !mounted) return;
+        role = selected;
+      }
       if (!mounted) return;
       final onAuthenticated = widget.onAuthenticated;
       if (onAuthenticated != null) {
@@ -119,6 +125,13 @@ class _OtpScreenState extends State<OtpScreen>
         goToRoleHome(context, role);
         _startInitialSyncAfterNavigation();
       } else {
+        if (responseRoles.isNotEmpty) {
+          await AppDatabase.instance.setSyncMeta(
+            'active_role',
+            role.syncMetaKey,
+          );
+          if (!mounted) return;
+        }
         goToRoleHome(context, role, showInitialLoginLoader: true);
       }
       return;
@@ -149,6 +162,35 @@ class _OtpScreenState extends State<OtpScreen>
       DashboardUserRoleX.fromKey(
         await AppDatabase.instance.getSyncMeta('active_role'),
       );
+
+  Future<DashboardUserRole?> _chooseLoginRole(
+    List<DashboardUserRole> roles,
+    DashboardUserRole initialRole,
+  ) => showDialog<DashboardUserRole>(
+    context: context,
+    barrierDismissible: false,
+    builder: (dialogContext) => SimpleDialog(
+      title: Text(context.l10n.roleSelectTitle),
+      children: [
+        for (final role in roles)
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(dialogContext, role),
+            child: Row(
+              children: [
+                Icon(
+                  role == initialRole
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                  color: AppColors.primary500,
+                ),
+                const SizedBox(width: 12),
+                Text(role.syncMetaKey.replaceAll('_', ' ')),
+              ],
+            ),
+          ),
+      ],
+    ),
+  );
 
   void _startInitialSyncAfterNavigation() {
     final startSync =

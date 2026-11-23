@@ -84,6 +84,8 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   List<MrfPersonModel> _mrfPeople = const [];
   List<RagpickerModel> _ragpickers = const [];
   List<ItemModel> _materials = const [];
+  List<CollectionType> _availableTypes = const [];
+  String? _zoneHint;
   bool _showPrice = false;
   ProfileModel? _profile;
   String? _centerId;
@@ -205,7 +207,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   }
 
   List<String> _itemNames(BuildContext c) =>
-      _materials.map((item) => item.name).toList(growable: false);
+      _materials.map((item) => item.displayName).toList(growable: false);
 
   String get _channel => switch (_type) {
     CollectionType.d2d => 'D2D',
@@ -236,9 +238,11 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
 
     final values = await Future.wait([
       repository.getMrfPeople(centerId: centerId),
+      repository.getMrfPeople(centerId: centerId, role: 'LABOUR'),
       repository.getRagpickers(centerId: centerId, activeOnly: true),
       repository.getCollectionMaterials(centerId: centerId, channel: _channel),
       repository.getChannels(centerId: centerId),
+      repository.getAssignedZoneNames(centerId: centerId, channel: _channel),
       repository.getProfile(),
       repository.currentUserId,
       if (widget.initialCollectionId != null)
@@ -250,26 +254,60 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     setState(() {
       _centerId = centerId;
       _vehicles = vehicles;
-      _mrfPeople = values[0] as List<MrfPersonModel>;
-      _ragpickers = values[1] as List<RagpickerModel>;
-      _materials = values[2] as List<ItemModel>;
-      final channels = values[3] as List<CenterChannelModel>;
+      final allMrfPeople = values[0] as List<MrfPersonModel>;
+      final assignedLabourers = values[1] as List<MrfPersonModel>;
+      _mrfPeople = [
+        ...allMrfPeople.where(
+          (person) => person.role.toUpperCase() != 'LABOUR',
+        ),
+        ...assignedLabourers,
+      ];
+      _ragpickers = values[2] as List<RagpickerModel>;
+      _materials = values[3] as List<ItemModel>;
+      final channels = values[4] as List<CenterChannelModel>;
       _showPrice = channels.any(
         (entry) => entry.channel.toUpperCase() == _channel && entry.showPrice,
       );
-      _profile = values[4] as ProfileModel;
-      _userId = values[5] as String?;
+      final availableTypes = channels
+          .map((entry) => _collectionTypeForChannel(entry.channel))
+          .whereType<CollectionType>()
+          .toList(growable: false);
+      _availableTypes = availableTypes.isEmpty
+          ? CollectionType.values
+          : availableTypes;
+      final zoneNames = values[5] as List<String>;
+      _zoneHint = zoneNames.isEmpty
+          ? null
+          : switch (_type) {
+              CollectionType.d2d =>
+                'Vehicles of your zones: ${zoneNames.join(', ')}',
+              CollectionType.mrfStation =>
+                'Labourers of your zones: ${zoneNames.join(', ')}',
+              CollectionType.ramp =>
+                'Ragpickers of your zone: ${zoneNames.join(', ')}',
+              null => 'Givers of your zones: ${zoneNames.join(', ')}',
+            };
+      _profile = values[6] as ProfileModel;
+      _userId = values[7] as String?;
       _mrfAgentName = _mrfSupervisor?.name;
       _selected.removeWhere((index) => index >= _materials.length);
       if (widget.initialCollectionId != null) {
         _restoreDraft(
-          values[6] as CollectionModel?,
-          values[7] as List<CollectionItemModel>,
+          values[8] as CollectionModel?,
+          values[9] as List<CollectionItemModel>,
         );
       }
     });
     _weightProvider.selectTarget(_firstSelectedKgItem());
   }
+
+  CollectionType? _collectionTypeForChannel(String channel) =>
+      switch (channel.trim().toUpperCase()) {
+        'D2D' => CollectionType.d2d,
+        'MRF' => CollectionType.mrfStation,
+        'RAMP' => CollectionType.ramp,
+        _ => null,
+      };
 
   int? _firstSelectedKgItem() {
     for (final item in _selected) {
@@ -339,9 +377,11 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       );
       if (index < 0) continue;
       _selected.add(index);
-      _collectionWeights[index] = _numberText(item.qty);
-      if (item.verifiedQty != null) {
-        _verifiedWeights[index] = _numberText(item.verifiedQty!);
+      _collectionWeights[index] = _numberText(item.unitQty ?? item.qty);
+      if (item.unitVerifiedQty != null || item.verifiedQty != null) {
+        _verifiedWeights[index] = _numberText(
+          item.unitVerifiedQty ?? item.verifiedQty!,
+        );
       }
       _photos[index] = item.photoUrls.map(XFile.new).toList(growable: true);
       _d2dUnits[index] = item.unitCode?.toUpperCase() == 'KG'
@@ -448,6 +488,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         supervisorPhone: _profile?.supervisorPhone ?? _mrfSupervisor?.phone,
         supervisorPhotoUrl:
             _profile?.supervisorPhotoUrl ?? _mrfSupervisor?.photoUrl,
+        zoneHint: _zoneHint,
         onPreviewPhoto: () {
           final image = (_photos[_vehiclePhotoKey]?.isNotEmpty ?? false)
               ? _photos[_vehiclePhotoKey]!.first
@@ -468,6 +509,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
         supervisorPhone: _mrfSupervisor?.phone ?? _profile?.supervisorPhone,
         supervisorPhotoUrl:
             _mrfSupervisor?.photoUrl ?? _profile?.supervisorPhotoUrl,
+        zoneHint: _zoneHint,
       );
     }
     if (_type == CollectionType.ramp) {
@@ -523,6 +565,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
               final image = _photos[_rampHandoverPhotoKey]?.firstOrNull;
               if (image != null) _showImagePreview(image);
             },
+            zoneHint: _zoneHint,
           ),
         ],
       );
@@ -664,18 +707,8 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
   }
 
   Widget _typeDropdown(BuildContext context) => _DropdownBox(
-    children: List.generate(CollectionType.values.length, (i) {
-      final type = CollectionType.values[i];
-      final labels = [
-        context.l10n.d2d,
-        context.l10n.mrfStation,
-        context.l10n.ramp,
-      ];
-      final icons = [
-        'assets/icons/home/collection_d2d.svg',
-        'assets/icons/home/collection_mrf.svg',
-        'assets/icons/home/collection_ramp.svg',
-      ];
+    children: List.generate(_availableTypes.length, (i) {
+      final type = _availableTypes[i];
       return InkWell(
         onTap: () {
           setState(() {
@@ -699,7 +732,13 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
               _Radio(selected: _type == type),
               const SizedBox(width: 10),
               SvgPicture.asset(
-                icons[i],
+                switch (type) {
+                  CollectionType.d2d => 'assets/icons/home/collection_d2d.svg',
+                  CollectionType.mrfStation =>
+                    'assets/icons/home/collection_mrf.svg',
+                  CollectionType.ramp =>
+                    'assets/icons/home/collection_ramp.svg',
+                },
                 width: 20,
                 height: 20,
                 colorFilter: const ColorFilter.mode(
@@ -708,7 +747,11 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                 ),
               ),
               const SizedBox(width: 6),
-              Text(labels[i], style: AppTextStyles.regularB7_14),
+              Text(switch (type) {
+                CollectionType.d2d => context.l10n.d2d,
+                CollectionType.mrfStation => context.l10n.mrfStation,
+                CollectionType.ramp => context.l10n.ramp,
+              }, style: AppTextStyles.regularB7_14),
             ],
           ),
         ),
@@ -971,7 +1014,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
               children: [
                 _ReviewMaterial(
                   name: _itemNames(context)[entry.$2],
-                  rate: _materials[entry.$2].rate,
+                  rate: _materials[entry.$2].centreUnitName == null
+                      ? _materials[entry.$2].rate
+                      : _materials[entry.$2].ratePerCentreUnit,
                   collectionWeight: _collectionWeights[entry.$2] ?? '',
                   verifiedWeight: _verifiedWeights[entry.$2] ?? '',
                   pickedImages: _photos[entry.$2] ?? const [],
@@ -979,6 +1024,7 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
                   unit:
                       _d2dUnits[entry.$2] ??
                       defaultCollectionUnit(_materials[entry.$2]),
+                  unitLabelOverride: _materials[entry.$2].centreUnitName,
                 ),
                 if (entry.$1 < _selected.length - 1)
                   const Divider(height: 49, color: AppColors.cool400),
@@ -1313,8 +1359,19 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       final index = entry.$2;
       if (index < 0 || index >= _materials.length) continue;
       final material = _materials[index];
-      final qty = double.tryParse(_collectionWeights[index] ?? '') ?? 0;
-      final verified = double.tryParse(_verifiedWeights[index] ?? '');
+      final enteredQty = double.tryParse(_collectionWeights[index] ?? '') ?? 0;
+      final enteredVerified = double.tryParse(_verifiedWeights[index] ?? '');
+      final factor = material.centreUnitName == null
+          ? null
+          : material.unitFactor;
+      final qty = factor == null
+          ? enteredQty
+          : double.parse((enteredQty * factor).toStringAsFixed(3));
+      final verified = enteredVerified == null
+          ? null
+          : factor == null
+          ? enteredVerified
+          : double.parse((enteredVerified * factor).toStringAsFixed(3));
       items.add(
         CollectionItemModel(
           id: UuidGenerator.v4(),
@@ -1330,9 +1387,13 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
               .map((photo) => photo.path)
               .toList(growable: false),
           sortOrder: entry.$1,
-          name: material.name,
+          name: material.displayName,
           unitCode: material.unitCode,
           unitName: material.unitName,
+          centreUnitName: factor == null ? null : material.centreUnitName,
+          unitFactor: factor,
+          unitQty: factor == null ? null : enteredQty,
+          unitVerifiedQty: factor == null ? null : enteredVerified,
         ),
       );
     }
@@ -1538,13 +1599,17 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
     var hasPieces = false;
     for (final item in _selected) {
       final quantity = double.tryParse(values[item]?.trim() ?? '') ?? 0;
+      final material = _materials[item];
+      final ownUnitQuantity = material.centreUnitName == null
+          ? quantity
+          : quantity * (material.unitFactor ?? 1);
       final unit = _d2dUnits[item] ?? defaultCollectionUnit(_materials[item]);
       if (unit == D2dMeasureUnit.pcs) {
         hasPieces = true;
-        pieces += quantity;
+        pieces += ownUnitQuantity;
       } else {
         hasKilograms = true;
-        kilograms += quantity;
+        kilograms += ownUnitQuantity;
       }
     }
     return _CollectionQuantityTotals(
@@ -1562,7 +1627,10 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
       _verifiedWeights[item]?.trim() ?? '',
     );
     if (rate == null || verifiedQuantity == null) return total;
-    return total + (rate * verifiedQuantity);
+    final ownUnitQuantity = _materials[item].centreUnitName == null
+        ? verifiedQuantity
+        : verifiedQuantity * (_materials[item].unitFactor ?? 1);
+    return total + (rate * ownUnitQuantity);
   });
 
   bool get _photosComplete =>
@@ -2153,6 +2221,7 @@ class _ReviewMaterial extends StatelessWidget {
     required this.pickedImages,
     required this.onPreview,
     this.unit = D2dMeasureUnit.kg,
+    this.unitLabelOverride,
   });
 
   final String name;
@@ -2161,13 +2230,14 @@ class _ReviewMaterial extends StatelessWidget {
   final List<XFile> pickedImages;
   final ValueChanged<XFile> onPreview;
   final D2dMeasureUnit unit;
+  final String? unitLabelOverride;
 
   @override
   Widget build(BuildContext context) {
     final isKg = unit == D2dMeasureUnit.kg;
-    final unitLabel = isKg
-        ? context.l10n.collectionUnitKg
-        : context.l10n.collectionUnitPcs;
+    final unitLabel =
+        unitLabelOverride ??
+        (isKg ? context.l10n.collectionUnitKg : context.l10n.collectionUnitPcs);
     final verifiedQuantity = double.tryParse(verifiedWeight.trim());
     final materialTotal = rate == null || verifiedQuantity == null
         ? null

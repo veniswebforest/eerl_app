@@ -1,5 +1,6 @@
 name: pickup_supervisor
 description: "A new Flutter module project."
+publish_to: none
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -23,6 +24,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  eerl_app:
+    path: ../../
+
   flutter_localizations:
     sdk: flutter
   flutter_svg: ^2.3.0
@@ -68,6 +73,10 @@ flutter:
     - assets/icons/supervisor/sources/
     - assets/icons/supervisor/routes/
     - assets/icons/supervisor/drawer/
+    - assets/icons/supervisor/add_route/
+    - assets/icons/supervisor/profile/
+    - assets/icons/supervisor/help_support/
+    - assets/icons/supervisor/end_my_day/
     - assets/images/driver/pickup/
     - assets/images/driver/stops_v2/
     - assets/images/driver/location_flow/
@@ -75,6 +84,8 @@ flutter:
     - assets/images/supervisor/sources/
     - assets/images/supervisor/routes/
     - assets/images/supervisor/drawer/
+    - assets/images/supervisor/profile/
+    - assets/images/supervisor/end_my_day/
 
   fonts:
     - family: Manrope

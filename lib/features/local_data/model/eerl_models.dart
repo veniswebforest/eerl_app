@@ -132,6 +132,10 @@ class ItemModel {
     this.rate,
     this.isSelected,
     this.sortOrder,
+    this.localName,
+    this.centreUnitName,
+    this.unitFactor,
+    this.ratePerCentreUnit,
   });
 
   final String id;
@@ -147,6 +151,13 @@ class ItemModel {
   final double? rate;
   final bool? isSelected;
   final int? sortOrder;
+  final String? localName;
+  final String? centreUnitName;
+  final double? unitFactor;
+  final double? ratePerCentreUnit;
+
+  String get displayName =>
+      localName?.trim().isNotEmpty == true ? localName!.trim() : name;
 
   factory ItemModel.fromMap(DbMap map) => ItemModel(
     id: map['id'] as String,
@@ -164,6 +175,10 @@ class ItemModel {
         ? _bool(map['is_selected'])
         : null,
     sortOrder: (map['sort_order'] as num?)?.toInt(),
+    localName: map['local_name'] as String?,
+    centreUnitName: (map['centre_unit'] ?? map['centre_unit_name']) as String?,
+    unitFactor: (map['unit_factor'] as num?)?.toDouble(),
+    ratePerCentreUnit: (map['rate_per_centre_unit'] as num?)?.toDouble(),
   );
 
   DbMap toMap() => {
@@ -436,12 +451,122 @@ class CenterPersonModel {
 }
 
 class DestinationModel {
-  const DestinationModel({required this.id, required this.name});
+  const DestinationModel({
+    required this.id,
+    required this.name,
+    this.companyCode,
+  });
   final String id;
   final String name;
-  factory DestinationModel.fromMap(DbMap map) =>
-      DestinationModel(id: map['id'] as String, name: map['name'] as String);
-  DbMap toMap() => {'id': id, 'name': name};
+  final String? companyCode;
+  String get label => companyCode?.trim().isNotEmpty == true
+      ? '$name (${companyCode!.trim()})'
+      : name;
+  factory DestinationModel.fromMap(DbMap map) => DestinationModel(
+    id: map['id'] as String,
+    name: map['name'] as String,
+    companyCode: map['company_code'] as String?,
+  );
+  DbMap toMap() => {'id': id, 'name': name, 'company_code': companyCode};
+}
+
+class CenterPriceModel {
+  const CenterPriceModel({
+    required this.centerId,
+    required this.itemId,
+    required this.itemName,
+    required this.categoryName,
+    required this.unitCode,
+    this.rate,
+    this.fromName,
+    this.fromLevel,
+    required this.own,
+    this.waitingRate,
+  });
+
+  final String centerId;
+  final String itemId;
+  final String itemName;
+  final String categoryName;
+  final String unitCode;
+  final double? rate;
+  final String? fromName;
+  final String? fromLevel;
+  final bool own;
+  final double? waitingRate;
+
+  factory CenterPriceModel.fromMap(DbMap map) => CenterPriceModel(
+    centerId: map['center_id'] as String,
+    itemId: map['item_id'] as String,
+    itemName: map['item_name'] as String,
+    categoryName: map['category_name'] as String,
+    unitCode: map['unit_code'] as String,
+    rate: (map['rate'] as num?)?.toDouble(),
+    fromName: map['from_name'] as String?,
+    fromLevel: map['from_level'] as String?,
+    own: _bool(map['own']),
+    waitingRate: (map['waiting_rate'] as num?)?.toDouble(),
+  );
+}
+
+class PriceRequestModel {
+  const PriceRequestModel({
+    required this.id,
+    required this.centerId,
+    required this.itemId,
+    required this.requestedRate,
+    required this.reason,
+    required this.status,
+    required this.raisedById,
+    required this.raisedByName,
+    required this.raisedAt,
+    required this.updatedAt,
+    required this.syncState,
+    this.itemName,
+    this.unitCode,
+    this.currentRate,
+    this.rejectionReason,
+    this.decidedByName,
+    this.decidedAt,
+  });
+
+  final String id;
+  final String centerId;
+  final String itemId;
+  final String? itemName;
+  final String? unitCode;
+  final double? currentRate;
+  final double requestedRate;
+  final String reason;
+  final String status;
+  final String raisedById;
+  final String raisedByName;
+  final String raisedAt;
+  final String? decidedByName;
+  final String? decidedAt;
+  final String? rejectionReason;
+  final String updatedAt;
+  final String syncState;
+
+  factory PriceRequestModel.fromMap(DbMap map) => PriceRequestModel(
+    id: map['id'] as String,
+    centerId: map['center_id'] as String,
+    itemId: map['item_id'] as String,
+    itemName: map['item_name'] as String?,
+    unitCode: map['unit_code'] as String?,
+    currentRate: (map['current_rate'] as num?)?.toDouble(),
+    requestedRate: _double(map['requested_rate']),
+    reason: map['reason'] as String,
+    status: map['status'] as String,
+    raisedById: map['raised_by_id'] as String,
+    raisedByName: map['raised_by_name'] as String,
+    raisedAt: map['raised_at'] as String,
+    decidedByName: map['decided_by_name'] as String?,
+    decidedAt: map['decided_at'] as String?,
+    rejectionReason: map['rejection_reason'] as String?,
+    updatedAt: map['updated_at'] as String,
+    syncState: map['sync_state'] as String,
+  );
 }
 
 class TransferVehicleModel {
@@ -491,6 +616,7 @@ class CollectionModel {
     required this.channel,
     required this.status,
     this.slipNumber,
+    this.referenceNumber,
     this.collectedAt,
     this.vehicleId,
     this.vehiclePlateNumber,
@@ -524,6 +650,7 @@ class CollectionModel {
   final String channel;
   final String status;
   final String? slipNumber;
+  final String? referenceNumber;
   final String? collectedAt;
   final String? vehicleId;
   final String? vehiclePlateNumber;
@@ -564,6 +691,7 @@ class CollectionModel {
     channel: map['channel'] as String,
     status: map['status'] as String,
     slipNumber: map['slip_number'] as String?,
+    referenceNumber: map['reference_number'] as String?,
     collectedAt: map['collected_at'] as String?,
     vehicleId: map['vehicle_id'] as String?,
     vehiclePlateNumber: map['vehicle_plate_number'] as String?,
@@ -602,6 +730,7 @@ class CollectionModel {
     'channel': channel,
     'status': status,
     'slip_number': slipNumber,
+    'reference_number': referenceNumber,
     'collected_at': collectedAt,
     'vehicle_id': vehicleId,
     'mrf_person_id': mrfPersonId,
@@ -638,6 +767,10 @@ class CollectionItemModel {
     this.unitCode,
     this.unitName,
     this.itemImageUrl,
+    this.centreUnitName,
+    this.unitFactor,
+    this.unitQty,
+    this.unitVerifiedQty,
   });
   final String id;
   final String collectionId;
@@ -652,6 +785,10 @@ class CollectionItemModel {
   final String? unitCode;
   final String? unitName;
   final String? itemImageUrl;
+  final String? centreUnitName;
+  final double? unitFactor;
+  final double? unitQty;
+  final double? unitVerifiedQty;
   factory CollectionItemModel.fromMap(DbMap map) => CollectionItemModel(
     id: map['id'] as String,
     collectionId: map['collection_id'] as String,
@@ -666,6 +803,10 @@ class CollectionItemModel {
     unitCode: map['unit_code'] as String?,
     unitName: map['unit_name'] as String?,
     itemImageUrl: map['item_image_url'] as String?,
+    centreUnitName: (map['centre_unit_name'] ?? map['unit_name']) as String?,
+    unitFactor: (map['unit_factor'] as num?)?.toDouble(),
+    unitQty: (map['unit_qty'] as num?)?.toDouble(),
+    unitVerifiedQty: (map['unit_verified_qty'] as num?)?.toDouble(),
   );
   DbMap toMap() => {
     'id': id,
@@ -677,6 +818,10 @@ class CollectionItemModel {
     'amount': amount,
     'photo_urls': _jsonStrings(photoUrls),
     'sort_order': sortOrder,
+    'unit_name': centreUnitName,
+    'unit_factor': unitFactor,
+    'unit_qty': unitQty,
+    'unit_verified_qty': unitVerifiedQty,
   };
 }
 

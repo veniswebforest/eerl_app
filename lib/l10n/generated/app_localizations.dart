@@ -8370,6 +8370,342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No internet connection'**
   String get offlineStatusSubtitle;
+
+  /// No description provided for @pricesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices'**
+  String get pricesTitle;
+
+  /// No description provided for @pricesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s price at your centre'**
+  String get pricesSubtitle;
+
+  /// No description provided for @pricesCentreSuratSouth.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL – Surat South'**
+  String get pricesCentreSuratSouth;
+
+  /// No description provided for @pricesYourRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Your price requests:'**
+  String get pricesYourRequests;
+
+  /// No description provided for @pricesWaitingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} waiting  ›'**
+  String pricesWaitingCount(int count);
+
+  /// No description provided for @pricesMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Materials'**
+  String get pricesMaterials;
+
+  /// No description provided for @pricesPetBottles.
+  ///
+  /// In en, this message translates to:
+  /// **'PET Bottles'**
+  String get pricesPetBottles;
+
+  /// No description provided for @pricesHdpeRigid.
+  ///
+  /// In en, this message translates to:
+  /// **'HDPE Rigid'**
+  String get pricesHdpeRigid;
+
+  /// No description provided for @pricesPpHardPlastics.
+  ///
+  /// In en, this message translates to:
+  /// **'PP Hard Plastics'**
+  String get pricesPpHardPlastics;
+
+  /// No description provided for @pricesCardboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Cardboard'**
+  String get pricesCardboard;
+
+  /// No description provided for @pricesPlasticType.
+  ///
+  /// In en, this message translates to:
+  /// **'(Plastic)'**
+  String get pricesPlasticType;
+
+  /// No description provided for @pricesPaperType.
+  ///
+  /// In en, this message translates to:
+  /// **'(Paper)'**
+  String get pricesPaperType;
+
+  /// No description provided for @pricesAmountPerKg.
+  ///
+  /// In en, this message translates to:
+  /// **'₹{amount}/KG'**
+  String pricesAmountPerKg(String amount);
+
+  /// No description provided for @pricesFromSmc.
+  ///
+  /// In en, this message translates to:
+  /// **'From SMC (Channel)'**
+  String get pricesFromSmc;
+
+  /// No description provided for @pricesOwnPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Its own price'**
+  String get pricesOwnPrice;
+
+  /// No description provided for @pricesFromEvsk.
+  ///
+  /// In en, this message translates to:
+  /// **'From EVSK (Partner cluster)'**
+  String get pricesFromEvsk;
+
+  /// No description provided for @pricesAskedWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'You asked for ₹{amount} · waiting'**
+  String pricesAskedWaiting(String amount);
+
+  /// No description provided for @pricesNoPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'No price'**
+  String get pricesNoPrice;
+
+  /// No description provided for @pricesAskForOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for one'**
+  String get pricesAskForOne;
+
+  /// No description provided for @priceRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your price requests'**
+  String get priceRequestsTitle;
+
+  /// No description provided for @priceRequestsWaitingTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting ({count})'**
+  String priceRequestsWaitingTab(int count);
+
+  /// No description provided for @priceRequestsDecidedTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Decided ({count})'**
+  String priceRequestsDecidedTab(int count);
+
+  /// No description provided for @priceRequestItemCentre.
+  ///
+  /// In en, this message translates to:
+  /// **'{item} · {centre}'**
+  String priceRequestItemCentre(String item, String centre);
+
+  /// No description provided for @priceRequestChange.
+  ///
+  /// In en, this message translates to:
+  /// **'₹{oldRate} → ₹{newRate} /KG  ({percent})'**
+  String priceRequestChange(String oldRate, String newRate, String percent);
+
+  /// No description provided for @priceRequestPetReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Buyers near Surat pay ₹48 for PET this month; agents are losing givers to other dealers.'**
+  String get priceRequestPetReason;
+
+  /// No description provided for @priceRequestPpReason.
+  ///
+  /// In en, this message translates to:
+  /// **'PP prices went up at the Sachin buyers this week.'**
+  String get priceRequestPpReason;
+
+  /// No description provided for @priceRequestHdpeReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Other dealers in Pandesara pay ₹35.'**
+  String get priceRequestHdpeReason;
+
+  /// No description provided for @priceRequestWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting'**
+  String get priceRequestWaiting;
+
+  /// No description provided for @priceRequestApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved · from today'**
+  String get priceRequestApproved;
+
+  /// No description provided for @priceRequestRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get priceRequestRejected;
+
+  /// No description provided for @priceRequestApprovedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by Neha Joshi.'**
+  String get priceRequestApprovedBy;
+
+  /// No description provided for @priceRequestRejectionReasonShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: the SMC rate holds until April.'**
+  String get priceRequestRejectionReasonShort;
+
+  /// No description provided for @priceRequestToday1030.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 10:30 AM'**
+  String get priceRequestToday1030;
+
+  /// No description provided for @priceRequestToday0905.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, 9:05 AM'**
+  String get priceRequestToday0905;
+
+  /// No description provided for @priceRequestYesterday1640.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday, 4:40 PM'**
+  String get priceRequestYesterday1640;
+
+  /// No description provided for @priceRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Price request'**
+  String get priceRequestTitle;
+
+  /// No description provided for @priceRequestPriceNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Price now'**
+  String get priceRequestPriceNow;
+
+  /// No description provided for @priceRequestCurrentValue.
+  ///
+  /// In en, this message translates to:
+  /// **'₹45.00/KG, from SMC (Channel)'**
+  String get priceRequestCurrentValue;
+
+  /// No description provided for @priceRequestYouAskedFor.
+  ///
+  /// In en, this message translates to:
+  /// **'You asked for'**
+  String get priceRequestYouAskedFor;
+
+  /// No description provided for @priceRequestAskedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'₹48.00/KG  (+6.7%)'**
+  String get priceRequestAskedValue;
+
+  /// No description provided for @priceRequestWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why'**
+  String get priceRequestWhy;
+
+  /// No description provided for @priceRequestAsked.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked'**
+  String get priceRequestAsked;
+
+  /// No description provided for @priceRequestAskedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Bhavesh Shah · Today, 10:30 AM'**
+  String get priceRequestAskedBy;
+
+  /// No description provided for @priceRequestWaitingForHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the Collection Head'**
+  String get priceRequestWaitingForHead;
+
+  /// No description provided for @priceRequestWaitingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You get a notification when they decide. Until then the price stays ₹45.00, and you cannot ask again for PET Bottles at this centre.'**
+  String get priceRequestWaitingMessage;
+
+  /// No description provided for @priceRequestRejectedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'By Neha Joshi · Today, 5:10 PM'**
+  String get priceRequestRejectedBy;
+
+  /// No description provided for @priceRequestRejectedReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: the SMC rate holds until April.'**
+  String get priceRequestRejectedReason;
+
+  /// No description provided for @priceRequestAskAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask again'**
+  String get priceRequestAskAgain;
+
+  /// No description provided for @priceAskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for a price change'**
+  String get priceAskTitle;
+
+  /// No description provided for @priceAskDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'PET Bottles · today ₹45.00/KG, from SMC (Channel). The Collection Head decides; you get a notification.'**
+  String get priceAskDescription;
+
+  /// No description provided for @priceAskNewPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'New price per KG *'**
+  String get priceAskNewPrice;
+
+  /// No description provided for @priceAskMockValue.
+  ///
+  /// In en, this message translates to:
+  /// **'₹ 48.00'**
+  String get priceAskMockValue;
+
+  /// No description provided for @priceAskReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason *'**
+  String get priceAskReason;
+
+  /// No description provided for @priceAskMaxCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 150 Characters'**
+  String get priceAskMaxCharacters;
+
+  /// No description provided for @priceAskSendRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get priceAskSendRequest;
+
+  /// No description provided for @drawerSupervisorPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices'**
+  String get drawerSupervisorPrices;
 }
 
 class _AppLocalizationsDelegate

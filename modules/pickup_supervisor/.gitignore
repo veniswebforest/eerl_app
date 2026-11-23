@@ -12,6 +12,8 @@ migrate_working_dir/
 
 *.swp
 profile
+!assets/images/supervisor/profile/
+!assets/images/supervisor/profile/**
 
 DerivedData/
 

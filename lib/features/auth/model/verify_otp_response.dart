@@ -1,17 +1,25 @@
+import 'package:eerl_app/features/bootstrap/model/bootstrap_response.dart';
+
 class VerifyOtpResponse {
   const VerifyOtpResponse({
     required this.accessToken,
     required this.sessionExpiresAt,
     this.roles = const <String>[],
+    this.me,
   });
 
   final String? accessToken;
   final DateTime? sessionExpiresAt;
   final List<String> roles;
+  final BootstrapMe? me;
 
   factory VerifyOtpResponse.fromJson(Map<String, dynamic> json) {
     final rawToken = json['accessToken'];
     final rawExpiry = json['sessionExpiresAt'];
+    final rawMe = json['me'];
+    final me = rawMe is Map
+        ? BootstrapMe.fromJson(Map<String, dynamic>.from(rawMe))
+        : null;
     final rawUser = json['user'];
     final user = rawUser is Map<String, dynamic> ? rawUser : null;
     return VerifyOtpResponse(
@@ -19,9 +27,18 @@ class VerifyOtpResponse {
       sessionExpiresAt: rawExpiry is String
           ? DateTime.tryParse(rawExpiry)
           : null,
-      roles: _parseRoleKeys(
-        json['roles'] ?? json['role'] ?? user?['roles'] ?? user?['role'],
-      ),
+      roles: me != null
+          ? me.roles
+                .map((role) => role.key)
+                .whereType<String>()
+                .map((role) => role.trim().toUpperCase())
+                .where((role) => role.isNotEmpty)
+                .toSet()
+                .toList(growable: false)
+          : _parseRoleKeys(
+              json['roles'] ?? json['role'] ?? user?['roles'] ?? user?['role'],
+            ),
+      me: me,
     );
   }
 

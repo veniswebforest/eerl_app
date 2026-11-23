@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -69,7 +70,7 @@ class D2dCollectionPhotosStep extends StatelessWidget {
     children: [
       Text(
         context.l10n.collectionCaptureInstructionShort,
-        style: AppTextStyles.mediumSH8_14,
+        style: AppTextStyles.semiboldH9_14,
       ),
       const SizedBox(height: 16),
       BluetoothWeightPanel(provider: weightProvider),
@@ -79,18 +80,28 @@ class D2dCollectionPhotosStep extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 12),
           child: _D2dMaterialCard(
             item: item,
-            name: material.name,
+            name: material.displayName,
+            standardName: material.localName?.trim().isNotEmpty == true
+                ? material.name
+                : null,
+            centreUnitName: material.centreUnitName,
+            unitFactor: material.unitFactor,
             imageUrl: material.imageUrl,
             colour: material.colour,
-            rate: material.rate,
+            rate: material.centreUnitName == null
+                ? material.rate
+                : material.ratePerCentreUnit,
+            baseRate: material.rate,
+            baseUnitLabel: material.unitCode,
             photos: photos[item] ?? const [],
             collectionWeight: collectionWeights[item] ?? '',
             verifiedWeight: verifiedWeights[item] ?? '',
             unit: units[item] ?? defaultCollectionUnit(material),
             bluetoothTarget: weightProvider.targetItem == item,
             onBluetoothTap:
-                (units[item] ?? defaultCollectionUnit(material)) ==
-                    D2dMeasureUnit.kg
+                material.centreUnitName == null &&
+                    (units[item] ?? defaultCollectionUnit(material)) ==
+                        D2dMeasureUnit.kg
                 ? () => weightProvider.selectTarget(item)
                 : null,
             onCollectionWeightChanged: (value) =>
@@ -107,7 +118,7 @@ class D2dCollectionPhotosStep extends StatelessWidget {
         Container(
           key: const Key('d2d-payment-mode'),
           width: double.infinity,
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -115,24 +126,20 @@ class D2dCollectionPhotosStep extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Expanded(
-                child: _PaymentChoice(
-                  choiceKey: const Key('d2d-payment-cash'),
-                  label: context.l10n.collectionPaymentCash,
-                  icon: 'assets/icons/home/wallet.svg',
-                  selected: paymentMode == D2dPaymentMode.cash,
-                  onTap: () => onPaymentModeChanged(D2dPaymentMode.cash),
-                ),
+              _PaymentChoice(
+                choiceKey: const Key('d2d-payment-cash'),
+                label: context.l10n.collectionPaymentCash,
+                icon: 'assets/icons/collection/payment_cash.svg',
+                selected: paymentMode == D2dPaymentMode.cash,
+                onTap: () => onPaymentModeChanged(D2dPaymentMode.cash),
               ),
               const SizedBox(width: 16),
-              Expanded(
-                child: _PaymentChoice(
-                  choiceKey: const Key('d2d-payment-upi'),
-                  label: context.l10n.collectionPaymentUpi,
-                  icon: 'assets/icons/wallet/expense_claim_currency.svg',
-                  selected: paymentMode == D2dPaymentMode.upi,
-                  onTap: () => onPaymentModeChanged(D2dPaymentMode.upi),
-                ),
+              _PaymentChoice(
+                choiceKey: const Key('d2d-payment-upi'),
+                label: context.l10n.collectionPaymentUpi,
+                icon: 'assets/icons/collection/payment_upi.svg',
+                selected: paymentMode == D2dPaymentMode.upi,
+                onTap: () => onPaymentModeChanged(D2dPaymentMode.upi),
               ),
             ],
           ),
@@ -145,9 +152,14 @@ class _D2dMaterialCard extends StatelessWidget {
   const _D2dMaterialCard({
     required this.item,
     required this.name,
+    required this.standardName,
+    required this.centreUnitName,
+    required this.unitFactor,
     required this.imageUrl,
     required this.colour,
     required this.rate,
+    required this.baseRate,
+    required this.baseUnitLabel,
     required this.photos,
     required this.collectionWeight,
     required this.verifiedWeight,
@@ -163,9 +175,14 @@ class _D2dMaterialCard extends StatelessWidget {
 
   final int item;
   final String name;
+  final String? standardName;
+  final String? centreUnitName;
+  final double? unitFactor;
   final String? imageUrl;
   final String? colour;
   final double? rate;
+  final double? baseRate;
+  final String baseUnitLabel;
   final List<XFile> photos;
   final String collectionWeight;
   final String verifiedWeight;
@@ -180,21 +197,39 @@ class _D2dMaterialCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final unitLabel = unit == D2dMeasureUnit.kg
-        ? context.l10n.collectionUnitKg
-        : context.l10n.collectionUnitPcs;
+    final unitLabel =
+        centreUnitName?.toUpperCase() ??
+        (unit == D2dMeasureUnit.kg
+            ? context.l10n.collectionUnitKg
+            : context.l10n.collectionUnitPcs);
+    final headerUnitLabel = centreUnitName == null || unitFactor == null
+        ? unitLabel
+        : '$_displayUnitLabel '
+              '(${_compactNumber(unitFactor!)} ${baseUnitLabel.toLowerCase()})';
     final verifiedQuantity = double.tryParse(verifiedWeight.trim());
+    final collectedQuantity = double.tryParse(collectionWeight.trim());
     final materialTotal = rate == null || verifiedQuantity == null
         ? null
         : rate! * verifiedQuantity;
+    final moneyFormat = NumberFormat('#,##0.00');
     final rateText = rate == null
-        ? '${context.l10n.collectionDetailRate} -'
+        ? null
         : '${context.l10n.collectionDetailRate} '
-              '₹${rate!.toStringAsFixed(2)}/$unitLabel';
+              '₹${moneyFormat.format(rate)}/$_displayUnitLabel';
     final totalText = materialTotal == null
-        ? '${context.l10n.collectionDetailMaterialTotal} -'
+        ? null
         : '${context.l10n.collectionDetailMaterialTotal} '
-              '₹${materialTotal.toStringAsFixed(2)}';
+              '₹${moneyFormat.format(materialTotal)}';
+    final conversionText = centreUnitName == null || unitFactor == null
+        ? null
+        : _conversionText(
+            centreUnitName: centreUnitName!,
+            unitFactor: unitFactor!,
+            baseUnitLabel: baseUnitLabel,
+            collectedQuantity: collectedQuantity,
+            baseRate: baseRate,
+            moneyFormat: moneyFormat,
+          );
     return Container(
       key: Key('d2d-material-card-$item'),
       clipBehavior: Clip.antiAlias,
@@ -209,7 +244,7 @@ class _D2dMaterialCard extends StatelessWidget {
           Container(
             height: 56,
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             color: AppColors.cool200,
             child: Row(
               children: [
@@ -223,16 +258,25 @@ class _D2dMaterialCard extends StatelessWidget {
                   child: Text.rich(
                     TextSpan(
                       text: name,
-                      children: [TextSpan(text: '  •  $unitLabel')],
+                      children: [
+                        TextSpan(text: '  •  $headerUnitLabel'),
+                        if (standardName != null)
+                          TextSpan(
+                            text: '\n$standardName',
+                            style: AppTextStyles.regularB8_12.copyWith(
+                              color: AppColors.neutral600,
+                            ),
+                          ),
+                      ],
                     ),
-                    style: AppTextStyles.regularB7_14,
+                    style: AppTextStyles.semiboldH9_14,
                   ),
                 ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 Row(
@@ -249,7 +293,7 @@ class _D2dMaterialCard extends StatelessWidget {
                         onChanged: onCollectionWeightChanged,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: _MeasureField(
                         fieldKey: Key('d2d-verified-weight-$item'),
@@ -258,6 +302,8 @@ class _D2dMaterialCard extends StatelessWidget {
                         required: true,
                         value: verifiedWeight,
                         unit: unitLabel,
+                        hint:
+                            'ex ${collectionWeight.trim().isEmpty ? '123.00' : collectionWeight.trim()}',
                         bluetoothTarget: bluetoothTarget,
                         onBluetoothTap: onBluetoothTap,
                         onChanged: onVerifiedWeightChanged,
@@ -265,32 +311,53 @@ class _D2dMaterialCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                DottedBorder(
-                  options: const RectDottedBorderOptions(
-                    color: AppColors.cool400,
-                    dashPattern: [6, 5],
-                    padding: EdgeInsets.zero,
-                  ),
-                  child: const SizedBox(width: double.infinity, height: 0),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: Text(rateText, style: AppTextStyles.regularB8_12),
+                if (rateText != null || conversionText != null) ...[
+                  const SizedBox(height: 16),
+                  DottedBorder(
+                    options: const RectDottedBorderOptions(
+                      color: AppColors.cool400,
+                      dashPattern: [6, 5],
+                      padding: EdgeInsets.zero,
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      totalText,
-                      style: AppTextStyles.regularB8_12.copyWith(
-                        color: AppColors.primary500,
+                    child: const SizedBox(width: double.infinity, height: 0),
+                  ),
+                ],
+                if (rateText != null) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          rateText,
+                          style: AppTextStyles.mediumSH8_14,
+                        ),
+                      ),
+                      if (totalText != null) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          totalText,
+                          style: AppTextStyles.semiboldH9_14.copyWith(
+                            color: AppColors.primary500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+                if (conversionText != null) ...[
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      conversionText,
+                      style: AppTextStyles.mediumSH9_12.copyWith(
+                        color: AppColors.neutral600,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 14),
+                  ),
+                ],
+                const SizedBox(height: 16),
                 InkWell(
                   key: Key('d2d-capture-photo-$item'),
                   onTap: photos.length < 2 ? onCapture : null,
@@ -353,21 +420,21 @@ class _D2dMaterialCard extends StatelessWidget {
                                     onTap: () => onPreview(entry.$2),
                                     child: Image.file(
                                       File(entry.$2.path),
-                                      width: 108,
+                                      width: 109,
                                       height: 70,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
                                 ),
                                 Positioned(
-                                  right: 5,
-                                  top: 5,
+                                  right: 8,
+                                  top: 8,
                                   child: InkWell(
                                     onTap: () => onRemove(entry.$1),
                                     child: SvgPicture.asset(
                                       'assets/icons/wallet/expense_remove.svg',
-                                      width: 22,
-                                      height: 22,
+                                      width: 24,
+                                      height: 24,
                                     ),
                                   ),
                                 ),
@@ -385,6 +452,50 @@ class _D2dMaterialCard extends StatelessWidget {
       ),
     );
   }
+
+  String get _displayUnitLabel {
+    final value = centreUnitName?.trim();
+    if (value == null || value.isEmpty) {
+      return unit == D2dMeasureUnit.pcs ? 'Piece' : baseUnitLabel.toUpperCase();
+    }
+    return value[0].toUpperCase() + value.substring(1).toLowerCase();
+  }
+
+  String _conversionText({
+    required String centreUnitName,
+    required double unitFactor,
+    required String baseUnitLabel,
+    required double? collectedQuantity,
+    required double? baseRate,
+    required NumberFormat moneyFormat,
+  }) {
+    final centreUnit = centreUnitName.trim();
+    final parts = <String>[
+      '1 $centreUnit = ${_compactNumber(unitFactor)} '
+          '${baseUnitLabel.toUpperCase()}',
+    ];
+    if (collectedQuantity != null) {
+      final quantityText = _compactNumber(collectedQuantity);
+      final pluralUnit = collectedQuantity == 1 ? centreUnit : '${centreUnit}s';
+      parts.add(
+        '$quantityText $pluralUnit = '
+        '${(collectedQuantity * unitFactor).toStringAsFixed(2)} '
+        '${baseUnitLabel.toUpperCase()}',
+      );
+    }
+    final conversion = parts.join(' · ');
+    return baseRate == null
+        ? conversion
+        : '$conversion '
+              '(₹${moneyFormat.format(baseRate)}/${baseUnitLabel.toUpperCase()})';
+  }
+
+  String _compactNumber(double value) => value == value.roundToDouble()
+      ? value.toStringAsFixed(0)
+      : value
+            .toStringAsFixed(3)
+            .replaceFirst(RegExp(r'0+$'), '')
+            .replaceFirst(RegExp(r'\.$'), '');
 }
 
 class _MaterialThumbnail extends StatelessWidget {
@@ -410,7 +521,7 @@ class _MaterialThumbnail extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(
             color: _parseMaterialColour(colour),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6),
             border: Border.all(color: AppColors.cool400),
           ),
         );
@@ -423,9 +534,9 @@ class _MaterialThumbnail extends StatelessWidget {
             context,
             imageProvider: FileImage(file),
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6),
             child: Image.file(file, width: 40, height: 40, fit: BoxFit.cover),
           ),
         ),
@@ -450,6 +561,7 @@ class _MeasureField extends StatefulWidget {
     required this.value,
     required this.unit,
     required this.onChanged,
+    this.hint,
     this.required = false,
     this.bluetoothTarget = false,
     this.onBluetoothTap,
@@ -460,6 +572,7 @@ class _MeasureField extends StatefulWidget {
   final String label;
   final String value;
   final String unit;
+  final String? hint;
   final ValueChanged<String> onChanged;
   final bool required;
   final bool bluetoothTarget;
@@ -528,11 +641,14 @@ class _MeasureFieldState extends State<_MeasureField> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           style: AppTextStyles.regularB7_14,
           decoration: InputDecoration(
-            hintText: widget.required && widget.value.isEmpty
-                ? '123.00'
-                : '---',
+            hintText:
+                widget.hint ??
+                (widget.required && widget.value.isEmpty ? '123.00' : '---'),
+            hintStyle: AppTextStyles.regularB7_14.copyWith(
+              color: AppColors.cool600,
+            ),
             prefixIcon: Center(
-              child: Text(widget.unit, style: AppTextStyles.semiboldH9_14),
+              child: Text(widget.unit, style: AppTextStyles.semiboldH8_16),
             ),
             prefixIconConstraints: const BoxConstraints(
               minWidth: 42,
@@ -559,7 +675,18 @@ class _MeasureFieldState extends State<_MeasureField> {
                   ),
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.cool400),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.cool400),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppColors.primary500),
+            ),
           ),
         ),
       ),
@@ -586,7 +713,7 @@ class _PaymentChoice extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
     key: choiceKey,
     onTap: onTap,
-    borderRadius: BorderRadius.circular(10),
+    borderRadius: BorderRadius.circular(12),
     child: AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       height: 38,
@@ -596,7 +723,7 @@ class _PaymentChoice extends StatelessWidget {
         border: Border.all(
           color: selected ? AppColors.primary500 : AppColors.cool400,
         ),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
@@ -626,19 +753,13 @@ class _PaymentChoice extends StatelessWidget {
             key: ValueKey('payment-icon-$label'),
             width: 20,
             height: 20,
-            colorFilter: const ColorFilter.mode(
-              AppColors.neutral900,
-              BlendMode.srcIn,
-            ),
           ),
           const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.semiboldH8_16,
-            ),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.semiboldH8_16,
           ),
         ],
       ),

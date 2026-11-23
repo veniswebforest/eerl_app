@@ -6,6 +6,7 @@ import 'package:eerl_app/core/network/app_http_client.dart';
 import 'package:eerl_app/features/bootstrap/model/bootstrap_response.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_log.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 
 class BootstrapApiException implements Exception {
   const BootstrapApiException({
@@ -26,12 +27,22 @@ class BootstrapApiException implements Exception {
 }
 
 class BootstrapRemoteService {
-  BootstrapRemoteService({http.Client? client})
-    : _client = client ?? AppHttpClient.instance.client;
+  BootstrapRemoteService({
+    http.Client? client,
+    Future<String> Function()? appBuildProvider,
+  }) : _client = client ?? AppHttpClient.instance.client,
+       _appBuildProvider = appBuildProvider ?? _loadAppBuild;
 
   static const _timeout = Duration(seconds: 30);
 
   final http.Client _client;
+  final Future<String> Function() _appBuildProvider;
+
+  static Future<String> _loadAppBuild() async {
+    final info = await PackageInfo.fromPlatform();
+    final value = '${info.version}+${info.buildNumber}'.trim();
+    return value.length <= 40 ? value : value.substring(0, 40);
+  }
 
   Future<BootstrapResponse> fetchBootstrap({
     required String accessToken,
@@ -40,6 +51,8 @@ class BootstrapRemoteService {
     final requestId = BootstrapLog.nextRequestId();
     final stopwatch = Stopwatch()..start();
     final query = <String, String>{};
+    final appBuild = await _appBuildProvider();
+    if (appBuild.trim().isNotEmpty) query['appBuild'] = appBuild.trim();
     if (since != null && since.isNotEmpty) {
       query['since'] = since;
     }

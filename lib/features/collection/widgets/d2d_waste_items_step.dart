@@ -175,9 +175,26 @@ class D2dWasteItemsStep extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
-                                      child: Text(
-                                        item.name,
-                                        style: AppTextStyles.regularB7_14,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.displayName,
+                                            style: AppTextStyles.regularB7_14,
+                                          ),
+                                          if (item.localName
+                                                  ?.trim()
+                                                  .isNotEmpty ==
+                                              true)
+                                            Text(
+                                              item.name,
+                                              style: AppTextStyles.regularB8_12
+                                                  .copyWith(
+                                                    color: AppColors.neutral600,
+                                                  ),
+                                            ),
+                                        ],
                                       ),
                                     ),
                                     const SizedBox(width: 12),

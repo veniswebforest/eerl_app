@@ -22,6 +22,8 @@ class BootstrapDatabaseApplier {
     DatabaseTables.centerPeople,
     DatabaseTables.destinations,
     DatabaseTables.transferVehicles,
+    DatabaseTables.zones,
+    DatabaseTables.centerPrices,
   };
 
   static const _referenceWithSyncState = <String>{
@@ -36,6 +38,7 @@ class BootstrapDatabaseApplier {
     DatabaseTables.expenses,
     DatabaseTables.cashRequests,
     DatabaseTables.categoryRequests,
+    DatabaseTables.priceRequests,
     DatabaseTables.transfers,
     DatabaseTables.tasks,
     DatabaseTables.requests,
@@ -71,6 +74,7 @@ class BootstrapDatabaseApplier {
       'channel',
       'status',
       'slip_number',
+      'reference_number',
       'collected_at',
       'vehicle_id',
       'mrf_person_id',
@@ -138,6 +142,25 @@ class BootstrapDatabaseApplier {
       'created_at',
       'sync_state',
     },
+    DatabaseTables.priceRequests: {
+      'id',
+      'center_id',
+      'item_id',
+      'current_rate',
+      'current_from_name',
+      'current_from_level',
+      'requested_rate',
+      'reason',
+      'status',
+      'raised_by_id',
+      'raised_by_name',
+      'raised_at',
+      'decided_by_name',
+      'decided_at',
+      'rejection_reason',
+      'updated_at',
+      'sync_state',
+    },
     DatabaseTables.transfers: {
       'id',
       'center_id',
@@ -163,6 +186,7 @@ class BootstrapDatabaseApplier {
       'vehicle_photo_urls',
       'weighbridge_photo_urls',
       'vehicle_differs',
+      'between_llps',
       'requested_by',
       'requested_by_name',
       'requested_at',
@@ -515,6 +539,7 @@ class BootstrapDatabaseApplier {
     _log('ME apply: roles=${me.roles.length}, centers=${me.centers.length}');
 
     await txn.delete(DatabaseTables.myRoles);
+    await txn.delete(DatabaseTables.myAssignments);
     final roleKeys = <String>[];
     for (final role in me.roles) {
       final key = role.key;
@@ -587,6 +612,15 @@ class BootstrapDatabaseApplier {
           center.slipCounter?.lastCount ?? 0,
         ],
       );
+      for (final assignment in center.assignments) {
+        final channel = assignment.channel?.trim().toUpperCase();
+        if (channel == null || channel.isEmpty) continue;
+        await txn.insert(DatabaseTables.myAssignments, <String, Object?>{
+          'center_id': centerId,
+          'channel': channel,
+          'zone_ids': jsonEncode(assignment.zoneIds),
+        });
+      }
     }
     await _deleteMissingCenters(txn, incomingCenterIds);
 
@@ -717,6 +751,7 @@ class BootstrapDatabaseApplier {
       DatabaseTables.expenses,
       DatabaseTables.cashRequests,
       DatabaseTables.categoryRequests,
+      DatabaseTables.priceRequests,
       DatabaseTables.tasks,
       DatabaseTables.requests,
       DatabaseTables.walletEntries,

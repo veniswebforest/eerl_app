@@ -18,6 +18,7 @@ class MrfDetailsForm extends StatefulWidget {
     this.supervisorName,
     this.supervisorPhone,
     this.supervisorPhotoUrl,
+    this.zoneHint,
   });
 
   final List<MrfPersonModel> people;
@@ -26,6 +27,7 @@ class MrfDetailsForm extends StatefulWidget {
   final String? supervisorName;
   final String? supervisorPhone;
   final String? supervisorPhotoUrl;
+  final String? zoneHint;
 
   @override
   State<MrfDetailsForm> createState() => _MrfDetailsFormState();
@@ -98,6 +100,15 @@ class _MrfDetailsFormState extends State<MrfDetailsForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _FieldLabel(text: context.l10n.collectionMrfLabor, required: true),
+        if (widget.zoneHint != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            widget.zoneHint!,
+            style: AppTextStyles.regularB8_12.copyWith(
+              color: AppColors.neutral600,
+            ),
+          ),
+        ],
         const SizedBox(height: 8),
         if (!_open)
           InkWell(
@@ -362,11 +373,7 @@ class _ContactCard extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SupervisorAvatar(
-          name: fullName,
-          photoUrl: photoUrl,
-          size: 48,
-        ),
+        SupervisorAvatar(name: fullName, photoUrl: photoUrl, size: 48),
         const SizedBox(width: 14),
         Expanded(
           child: Column(

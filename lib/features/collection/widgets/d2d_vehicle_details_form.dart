@@ -26,6 +26,7 @@ class D2dVehicleDetailsForm extends StatefulWidget {
     this.supervisorName,
     this.supervisorPhone,
     this.supervisorPhotoUrl,
+    this.zoneHint,
   });
 
   final List<String> vehicleNumbers;
@@ -40,6 +41,7 @@ class D2dVehicleDetailsForm extends StatefulWidget {
   final String? supervisorName;
   final String? supervisorPhone;
   final String? supervisorPhotoUrl;
+  final String? zoneHint;
 
   @override
   State<D2dVehicleDetailsForm> createState() => _D2dVehicleDetailsFormState();
@@ -48,6 +50,7 @@ class D2dVehicleDetailsForm extends StatefulWidget {
 class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
   late final TextEditingController _vehicleController;
   late final TextEditingController _givenByController;
+  late final ScrollController _vehicleScrollController;
   bool _isVehicleListOpen = false;
 
   @override
@@ -55,6 +58,7 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
     super.initState();
     _vehicleController = TextEditingController(text: widget.selectedVehicle);
     _givenByController = TextEditingController(text: widget.givenBy);
+    _vehicleScrollController = ScrollController();
   }
 
   @override
@@ -71,6 +75,7 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
   void dispose() {
     _vehicleController.dispose();
     _givenByController.dispose();
+    _vehicleScrollController.dispose();
     super.dispose();
   }
 
@@ -154,6 +159,15 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
         ),
         const SizedBox(height: 24),
         _FieldLabel(text: l10n.collectionD2dVehicleNumber),
+        if (widget.zoneHint != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            widget.zoneHint!,
+            style: AppTextStyles.regularB8_12.copyWith(
+              color: AppColors.neutral600,
+            ),
+          ),
+        ],
         const SizedBox(height: 8),
         TextField(
           key: const Key('d2d-vehicle-search'),
@@ -171,8 +185,8 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
             error: noVehicleFound,
             suffixIcon: SvgPicture.asset(
               'assets/icons/wallet/search.svg',
-              width: 20,
-              height: 20,
+              width: 24,
+              height: 24,
             ),
           ),
         ),
@@ -184,6 +198,7 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
             _VehicleDropdown(
               vehicles: filteredVehicles,
               selectedVehicle: widget.selectedVehicle,
+              scrollController: _vehicleScrollController,
               onContactSupervisor: _showSupervisor,
               onSelected: (vehicle) {
                 _vehicleController.text = vehicle;
@@ -193,7 +208,7 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
             ),
         ],
         const SizedBox(height: 24),
-        _FieldLabel(text: l10n.collectionGivenBy),
+        _FieldLabel(text: l10n.collectionGivenBy, required: false),
         const SizedBox(height: 8),
         TextField(
           key: const Key('d2d-given-by'),
@@ -203,86 +218,106 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
           decoration: _inputDecoration(hint: l10n.collectionDriverNameHint),
         ),
         const SizedBox(height: 24),
-        _FieldLabel(text: l10n.collectionCaptureVehiclePhoto),
-        const SizedBox(height: 8),
-        InkWell(
-          key: const Key('d2d-capture-vehicle-photo'),
-          onTap: widget.vehiclePhoto == null ? widget.onCapturePhoto : null,
-          borderRadius: BorderRadius.circular(10),
-          child: DottedBorder(
-            options: const RoundedRectDottedBorderOptions(
-              radius: Radius.circular(10),
-              color: AppColors.primary500,
-              dashPattern: [4, 3],
-              strokeWidth: 1,
-              padding: EdgeInsets.zero,
-            ),
-            child: Container(
-              height: 92,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppColors.primary50,
-                borderRadius: BorderRadius.circular(10),
+        Container(
+          key: const Key('d2d-vehicle-photo-card'),
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: AppColors.cool400),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _FieldLabel(
+                text: l10n.collectionCaptureVehiclePhoto,
+                required: false,
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SvgPicture.asset(
-                    'assets/icons/collection/capture_camera.svg',
-                    width: 24,
-                    height: 24,
+              const SizedBox(height: 8),
+              InkWell(
+                key: const Key('d2d-capture-vehicle-photo'),
+                onTap: widget.vehiclePhoto == null
+                    ? widget.onCapturePhoto
+                    : null,
+                borderRadius: BorderRadius.circular(10),
+                child: DottedBorder(
+                  options: const RoundedRectDottedBorderOptions(
+                    radius: Radius.circular(10),
+                    color: AppColors.primary500,
+                    dashPattern: [4, 3],
+                    strokeWidth: 1,
+                    padding: EdgeInsets.zero,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.collectionCapturePhoto,
-                    style: AppTextStyles.semiboldH9_14.copyWith(
-                      color: AppColors.neutral900,
+                  child: Container(
+                    height: 82,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary50,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/icons/collection/capture_camera.svg',
+                          width: 24,
+                          height: 24,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.collectionCapturePhoto,
+                          style: AppTextStyles.semiboldH9_14.copyWith(
+                            color: AppColors.neutral900,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          l10n.collectionVehiclePhotoHint,
-          style: AppTextStyles.regularB8_12.copyWith(
-            color: AppColors.neutral600,
-          ),
-        ),
-        if (widget.vehiclePhoto != null) ...[
-          const SizedBox(height: 12),
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: InkWell(
-                  onTap: widget.onPreviewPhoto,
-                  child: Image.file(
-                    File(widget.vehiclePhoto!.path),
-                    width: 109,
-                    height: 70,
-                    fit: BoxFit.cover,
-                  ),
                 ),
               ),
-              Positioned(
-                right: 6,
-                top: 6,
-                child: InkWell(
-                  key: const Key('d2d-remove-vehicle-photo'),
-                  onTap: widget.onRemovePhoto,
-                  child: SvgPicture.asset(
-                    'assets/icons/wallet/expense_remove.svg',
-                    width: 22,
-                    height: 22,
-                  ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.collectionVehiclePhotoHint,
+                style: AppTextStyles.regularB8_12.copyWith(
+                  color: AppColors.neutral600,
                 ),
               ),
+              if (widget.vehiclePhoto != null) ...[
+                const SizedBox(height: 16),
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: InkWell(
+                        onTap: widget.onPreviewPhoto,
+                        child: Image.file(
+                          File(widget.vehiclePhoto!.path),
+                          width: 109,
+                          height: 70,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: InkWell(
+                        key: const Key('d2d-remove-vehicle-photo'),
+                        onTap: widget.onRemovePhoto,
+                        child: SvgPicture.asset(
+                          'assets/icons/wallet/expense_remove.svg',
+                          width: 24,
+                          height: 24,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
-        ],
+        ),
       ],
     );
   }
@@ -318,20 +353,23 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
 }
 
 class _FieldLabel extends StatelessWidget {
-  const _FieldLabel({required this.text});
+  const _FieldLabel({required this.text, this.required = true});
 
   final String text;
+  final bool required;
 
   @override
   Widget build(BuildContext context) => Text.rich(
     TextSpan(
       text: text,
-      children: const [
-        TextSpan(
-          text: ' *',
-          style: TextStyle(color: AppColors.red600),
-        ),
-      ],
+      children: required
+          ? const [
+              TextSpan(
+                text: ' *',
+                style: TextStyle(color: AppColors.red600),
+              ),
+            ]
+          : const [],
     ),
     style: AppTextStyles.mediumSH8_14,
   );
@@ -341,18 +379,20 @@ class _VehicleDropdown extends StatelessWidget {
   const _VehicleDropdown({
     required this.vehicles,
     required this.selectedVehicle,
+    required this.scrollController,
     required this.onSelected,
     required this.onContactSupervisor,
   });
 
   final List<String> vehicles;
   final String? selectedVehicle;
+  final ScrollController scrollController;
   final ValueChanged<String> onSelected;
   final VoidCallback onContactSupervisor;
 
   @override
   Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(maxHeight: 250),
+    constraints: const BoxConstraints(maxHeight: 242),
     clipBehavior: Clip.antiAlias,
     decoration: BoxDecoration(
       color: Colors.white,
@@ -363,51 +403,61 @@ class _VehicleDropdown extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Flexible(
-          child: ListView.builder(
-            shrinkWrap: true,
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            itemCount: vehicles.length,
-            itemBuilder: (context, index) {
-              final vehicle = vehicles[index];
-              final selected = selectedVehicle == vehicle;
-              return InkWell(
-                key: ValueKey('d2d-vehicle-$index'),
-                onTap: () => onSelected(vehicle),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 9,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 18,
-                        height: 18,
-                        padding: const EdgeInsets.all(3),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: selected
-                                ? AppColors.primary500
-                                : AppColors.neutral400,
+          child: RawScrollbar(
+            controller: scrollController,
+            thumbVisibility: vehicles.length > 4,
+            thickness: 6,
+            radius: const Radius.circular(8),
+            thumbColor: AppColors.cool300,
+            crossAxisMargin: 7,
+            mainAxisMargin: 16,
+            child: ListView.builder(
+              controller: scrollController,
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(top: 4, right: 12, bottom: 4),
+              itemCount: vehicles.length,
+              itemBuilder: (context, index) {
+                final vehicle = vehicles[index];
+                final selected = selectedVehicle == vehicle;
+                return InkWell(
+                  key: ValueKey('d2d-vehicle-$index'),
+                  onTap: () => onSelected(vehicle),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 9,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 20,
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: selected
+                                  ? AppColors.primary500
+                                  : AppColors.neutral400,
+                            ),
                           ),
+                          child: selected
+                              ? const DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.primary500,
+                                  ),
+                                )
+                              : null,
                         ),
-                        child: selected
-                            ? const DecoratedBox(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.primary500,
-                                ),
-                              )
-                            : null,
-                      ),
-                      const SizedBox(width: 10),
-                      Text(vehicle, style: AppTextStyles.regularB7_14),
-                    ],
+                        const SizedBox(width: 12),
+                        Text(vehicle, style: AppTextStyles.regularB7_14),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
         _ContactSupervisorButton(
@@ -469,7 +519,7 @@ class _ContactSupervisorButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox(
     width: double.infinity,
-    height: 48,
+    height: 52,
     child: ElevatedButton.icon(
       key: const Key('d2d-contact-supervisor'),
       onPressed: onPressed,
@@ -478,12 +528,12 @@ class _ContactSupervisorButton extends StatelessWidget {
         foregroundColor: Colors.white,
         backgroundColor: AppColors.primary500,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        textStyle: AppTextStyles.semiboldH9_14,
+        textStyle: AppTextStyles.boldH7_16,
       ),
       icon: SvgPicture.asset(
         'assets/icons/help_support/call.svg',
-        width: 20,
-        height: 20,
+        width: 24,
+        height: 24,
         colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
       ),
       label: Text(label, overflow: TextOverflow.ellipsis),
@@ -515,11 +565,7 @@ class _SupervisorContactCard extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SupervisorAvatar(
-          name: fullName,
-          photoUrl: photoUrl,
-          size: 48,
-        ),
+        SupervisorAvatar(name: fullName, photoUrl: photoUrl, size: 48),
         const SizedBox(width: 14),
         Expanded(
           child: Column(

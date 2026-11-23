@@ -1688,6 +1688,243 @@ class DriverLocalizationsHi extends DriverLocalizations {
   String get supervisorDrawerPoweredBy => 'ईको विज़न द्वारा संचालित';
 
   @override
+  String get addRouteStep1 => 'चरण 1 में से 2';
+
+  @override
+  String get addRouteStep2 => 'चरण 2 में से 2';
+
+  @override
+  String get addRouteRouteName => 'रूट का नाम';
+
+  @override
+  String get addRouteRouteNameHint => 'उदाहरण के लिए, अडाजन मॉर्निंग';
+
+  @override
+  String get addRouteWarehouse => 'वेयरहाउस';
+
+  @override
+  String get addRouteSelectWarehouse => 'वेयरहाउस चुनें';
+
+  @override
+  String get addRouteShift => 'शिफ्ट';
+
+  @override
+  String get addRouteSelectShift => 'शिफ्ट चुनें';
+
+  @override
+  String get addRouteContinue => 'आगे बढ़ें';
+
+  @override
+  String get addRouteWarehouseAdajan => 'अडाजन सेंट्रल वेयरहाउस';
+
+  @override
+  String get addRouteWarehouseVesu => 'वेसु स्टोरेज हब';
+
+  @override
+  String get addRouteWarehouseKatargam => 'कतारगाम डिपो';
+
+  @override
+  String get addRouteWarehousePal => 'पाल सॉर्टिंग फैसिलिटी';
+
+  @override
+  String get addRouteWarehouseUdhna => 'उधना इंडस्ट्रियल वेयरहाउस';
+
+  @override
+  String get addRouteShiftMorningEarly => 'सुबह · 7 am–3 pm';
+
+  @override
+  String get addRouteShiftMorningLate => 'सुबह · 2 pm–8 pm';
+
+  @override
+  String get addRouteShiftFullDay => 'पूरा दिन (8 am–8 pm)';
+
+  @override
+  String get addRouteSelectVehicle => 'वाहन चुनें';
+
+  @override
+  String get addRouteVehicleLabel => 'वाहन';
+
+  @override
+  String get addRouteVehicleHint => 'पिकअप के लिए वाहन चुनें';
+
+  @override
+  String get addRouteSelectDriver => 'ड्राइवर चुनें';
+
+  @override
+  String get addRouteDriverHint => 'पिकअप के लिए ड्राइवर चुनें';
+
+  @override
+  String get addRouteSelectLabour => 'श्रमिक चुनें';
+
+  @override
+  String get addRouteLabourHint => 'श्रमिक चुनें';
+
+  @override
+  String get addRouteDriverNotFound => 'ड्राइवर नहीं मिला';
+
+  @override
+  String get addRouteDriverNotFoundHint =>
+      'अभी कोई ड्राइवर नहीं जोड़ा गया। जोड़ने के लिए नीचे दबाएँ।';
+
+  @override
+  String get addRouteLabourNotFound => 'श्रमिक नहीं मिला';
+
+  @override
+  String get addRouteLabourNotFoundHint =>
+      'अभी कोई श्रमिक नहीं जोड़ा गया। जोड़ने के लिए नीचे दबाएँ।';
+
+  @override
+  String get addRouteAdd => 'जोड़ें';
+
+  @override
+  String get addRouteVehicleCompany1001 => 'GJ-05-EE-1001';
+
+  @override
+  String get addRouteVehicleCompany1234 => 'GJ-05-BX-1234';
+
+  @override
+  String get addRouteVehicleRental1002 => 'GJ-05-EE-1002';
+
+  @override
+  String get addRouteVehicleRental1001 => 'GJ-05-EE-1001';
+
+  @override
+  String get addRouteCompanyTruck => 'कंपनी ट्रक';
+
+  @override
+  String get addRouteRentalShreeRam => 'श्री राम ट्रांसपोर्ट से किराए पर';
+
+  @override
+  String get addRouteRentalKhodiyar => 'खोडियार ट्रांसपोर्ट से किराए पर';
+
+  @override
+  String get addRouteCapacity => 'क्षमता 3000 KG';
+
+  @override
+  String get addRouteDriverVikram => 'विक्रम सिंह (••• 4321)';
+
+  @override
+  String get addRouteDriverSuresh => 'सुरेश कुमार (••• 5847)';
+
+  @override
+  String get addRouteDriverMahesh => 'महेश परमार (••• 2282)';
+
+  @override
+  String get addRouteDriverRakesh => 'राकेश शर्मा (••• 2458)';
+
+  @override
+  String get addRouteDriverAmit => 'अमित पटेल (••• 9510)';
+
+  @override
+  String get addRouteLabourRavi => 'रवि बिष्ट (••• 5847)';
+
+  @override
+  String get addRouteLabourRam => 'राम सिंह (••• 2282)';
+
+  @override
+  String get addRouteLabourRamesh => 'रमेश यादव (••• 2458)';
+
+  @override
+  String get addRouteLabourArjun => 'अर्जुन जाटव (••• 9510)';
+
+  @override
+  String get addRouteDeactivate => 'निष्क्रिय करें';
+
+  @override
+  String get addRouteDeactivateTitle => 'निष्क्रिय करें?';
+
+  @override
+  String get addRouteDeactivateMessage =>
+      'क्या आप वाकई इस व्यक्ति को निष्क्रिय करना चाहते हैं?';
+
+  @override
+  String get addRouteCancel => 'रद्द करें';
+
+  @override
+  String get addRouteYes => 'हाँ';
+
+  @override
+  String get addRouteAddNewDriverPrefix => 'नया जोड़ें: ';
+
+  @override
+  String get addRouteDriverWord => 'ड्राइवर';
+
+  @override
+  String get addRouteLabourWord => 'श्रमिक';
+
+  @override
+  String get addRouteFullName => 'पूरा नाम';
+
+  @override
+  String get addRouteFullNameHint => 'पूरा नाम दर्ज करें';
+
+  @override
+  String get addRouteMobileNumber => 'मोबाइल नंबर';
+
+  @override
+  String get addRouteMobileNumberHint => 'मोबाइल नंबर दर्ज करें';
+
+  @override
+  String get addRouteCountryCode => '+91';
+
+  @override
+  String get addRouteAadhaarNumber => 'आधार कार्ड नंबर';
+
+  @override
+  String get addRouteAadhaarHint => 'आधार / मतदाता पहचान पत्र';
+
+  @override
+  String get addRouteProfileProof => 'प्रोफ़ाइल फोटो / पहचान प्रमाण';
+
+  @override
+  String get addRouteCapturePhoto => 'फोटो लें';
+
+  @override
+  String get addRoutePhotoHint =>
+      'विवरण दर्ज और सत्यापित करने के लिए फोटो अपलोड करें।';
+
+  @override
+  String get addRouteSaveSelect => 'सहेजें और चुनें';
+
+  @override
+  String get addRouteFullNameRequired => 'कृपया पूरा नाम दर्ज करें।';
+
+  @override
+  String get addRouteFullNameMinLength =>
+      'पूरा नाम कम से कम 2 अक्षरों का होना चाहिए।';
+
+  @override
+  String get addRouteMobileRequired => 'कृपया मोबाइल नंबर दर्ज करें।';
+
+  @override
+  String get addRouteMobileInvalid =>
+      '6–9 से शुरू होने वाला मान्य 10 अंकों का मोबाइल नंबर दर्ज करें।';
+
+  @override
+  String get addRouteReviewShift => 'सुबह (8 am–2 pm)';
+
+  @override
+  String get addRouteReviewVehicle => 'GJ-05-EE-1001';
+
+  @override
+  String get addRouteReviewCompany => '(कंपनी ट्रक)';
+
+  @override
+  String get addRouteReviewDriver => 'विक्रम सिंह (12345 43210)';
+
+  @override
+  String get addRouteReviewLabour => 'रवि बिष्ट (23456 58492)';
+
+  @override
+  String get addRouteAddToRoute => 'रूट में जोड़ें';
+
+  @override
+  String get addRouteSavedTitle => 'सफलतापूर्वक सहेजा गया!';
+
+  @override
+  String get addRouteSavedSubtitle => 'अडाजन मॉर्निंग रूट सहेजा गया';
+
+  @override
   String get sourcesUnassignedTitle => 'बिना असाइन किए स्रोत';
 
   @override
@@ -1827,4 +2064,243 @@ class DriverLocalizationsHi extends DriverLocalizations {
 
   @override
   String get sourcesBackToRequests => 'अनुरोधों पर वापस जाएँ';
+
+  @override
+  String get profileTitle => 'यूज़र प्रोफ़ाइल';
+
+  @override
+  String get profileSubtitle => 'खाते का विवरण और जानकारी';
+
+  @override
+  String get profileLanguageCode => 'हि';
+
+  @override
+  String get profileUserName => 'किरण शाह';
+
+  @override
+  String get profileRole => 'पिकअप सुपरवाइज़र';
+
+  @override
+  String get profileAccountInformation => 'खाता जानकारी';
+
+  @override
+  String get profileMyAreas => 'मेरे क्षेत्र';
+
+  @override
+  String get profileAreasValue => 'अडाजन, वेसु, पाल';
+
+  @override
+  String get profileMobileNumber => 'मोबाइल नंबर';
+
+  @override
+  String get profileMobileValue => '+91 98765 43210';
+
+  @override
+  String get profileRoleLabel => 'भूमिका';
+
+  @override
+  String get profileSessionExpires => 'सत्र समाप्ति';
+
+  @override
+  String get profileSessionValue => '6 घंटे 24 मिनट में समाप्त';
+
+  @override
+  String get profileActions => 'कार्रवाइयाँ';
+
+  @override
+  String get profileSyncData => 'डेटा सिंक करें';
+
+  @override
+  String get profileSyncDataSubtitle => 'अपना ऑफ़लाइन डेटा सिंक करें';
+
+  @override
+  String get profileEndMyDay => 'मेरा दिन समाप्त करें';
+
+  @override
+  String get profileEndMyDaySubtitle =>
+      'ट्रिप पूरी होने के बाद आज का दिन बंद करें';
+
+  @override
+  String get profileAccount => 'खाता';
+
+  @override
+  String get profileLogout => 'लॉगआउट';
+
+  @override
+  String get profileLogoutSubtitle => 'अपने खाते से साइन आउट करें';
+
+  @override
+  String get profileSyncOfflineData => 'ऑफ़लाइन डेटा सिंक करें';
+
+  @override
+  String get profileChangesNotSent => '3 बदलाव अभी भेजे नहीं गए';
+
+  @override
+  String get profileSyncNow => 'अभी सिंक करें';
+
+  @override
+  String get profileDataAlreadySynced => 'डेटा पहले से सिंक है';
+
+  @override
+  String get profileBack => 'वापस';
+
+  @override
+  String get profileLogoutQuestion => 'क्या आप वाकई लॉगआउट करना चाहते हैं?';
+
+  @override
+  String get profileLogoutMessage =>
+      'बिना सिंक किया ऑफ़लाइन डेटा अगले साइन-इन तक इस डिवाइस पर रहेगा।';
+
+  @override
+  String get profileSendChangesWarning =>
+      'ड्राइवरों को सूचित करने के लिए बदलाव भेजें';
+
+  @override
+  String get profileNo => 'नहीं';
+
+  @override
+  String get profileYes => 'हाँ';
+
+  @override
+  String get profileNotifications => 'सूचनाएँ';
+
+  @override
+  String get profileToday => 'आज';
+
+  @override
+  String get profileEarlier => 'पहले';
+
+  @override
+  String get profileOfflineMode => 'ऑफ़लाइन मोड';
+
+  @override
+  String get profileOfflineModeMessage =>
+      'इंटरनेट कनेक्शन नहीं है। कनेक्शन लौटने पर डेटा अपने-आप सिंक होगा।';
+
+  @override
+  String get profileJustNow => 'अभी';
+
+  @override
+  String get profileNewSourceUnassigned => 'नया स्रोत असाइन नहीं है';
+
+  @override
+  String get profileNewSourceMessage =>
+      'ग्लोबल गारमेंट्स (अडाजन) को रूट असाइनमेंट चाहिए।';
+
+  @override
+  String get profileTenMinutesAgo => '10 मिनट पहले';
+
+  @override
+  String get profileDriverEscalation => 'ड्राइवर एस्केलेशन';
+
+  @override
+  String get profileDriverEscalationMessage =>
+      'ड्राइवर रमेश ने पाल स्थान पर गेट प्रवेश में देरी बताई।';
+
+  @override
+  String get profileYesterdayTime => 'कल, 11:30 AM';
+
+  @override
+  String get profilePickupSkipped => 'पिकअप छोड़ा गया';
+
+  @override
+  String get profilePickupSkippedMessage =>
+      'सिद्धगिरी ट्रेडर्स का कलेक्शन छोड़ा गया।';
+
+  @override
+  String get profilePickupSkippedTime => '24 अक्तू, 08:00 AM';
+
+  @override
+  String get profileAllCaughtUp => 'सब पूरा हुआ!';
+
+  @override
+  String get profileNoNotifications =>
+      'आपके पास कोई नई सूचना नहीं है। सिस्टम और एडमिन अपडेट के लिए बाद में देखें।';
+
+  @override
+  String get profileHelpSupport => 'मदद और सहायता';
+
+  @override
+  String get profileCallSupport => 'सहायता को कॉल करें';
+
+  @override
+  String get profileCallSupportSubtitle => 'फील्ड समस्याओं के लिए 24/7 उपलब्ध';
+
+  @override
+  String get profileInstantHelp => 'तुरंत सहायता';
+
+  @override
+  String get profileInstantHelpSubtitle => 'सहायता एजेंट से चैट करें';
+
+  @override
+  String get profileFaqTitle => 'अक्सर पूछे जाने वाले प्रश्न';
+
+  @override
+  String get profileFaqDailyTrips => 'दैनिक ट्रिप कैसे काम करती हैं?';
+
+  @override
+  String get profileFaqDailyTripsAnswer =>
+      'हर सुबह आपके मास्टर रूट से अपने-आप बनती हैं।';
+
+  @override
+  String get profileFaqSwapDriver => 'आज के लिए ड्राइवर कैसे बदलें?';
+
+  @override
+  String get profileFaqSwapDriverAnswer =>
+      'आज का रूट खोलें और ड्राइवर एडिट कार्रवाई चुनें।';
+
+  @override
+  String get profileFaqUnassigned => 'अनअसाइन्ड स्रोत क्या हैं?';
+
+  @override
+  String get profileFaqUnassignedAnswer =>
+      'वे स्रोत जो अभी किसी रूट से जुड़े नहीं हैं।';
+
+  @override
+  String get profileFaqSkipping => 'स्टॉप छोड़ने से क्या होता है?';
+
+  @override
+  String get profileFaqSkippingAnswer =>
+      'वर्तमान ट्रिप में स्टॉप छोड़ा गया दर्ज होता है।';
+
+  @override
+  String get profileTodaysActivitySummary => 'आज की गतिविधि का सारांश';
+
+  @override
+  String get profileTripsCompleted => 'पूरी ट्रिप';
+
+  @override
+  String get profileTripsCompletedValue => '08';
+
+  @override
+  String get profilePendingSources => 'लंबित स्रोत';
+
+  @override
+  String get profilePendingSourcesValue => '01';
+
+  @override
+  String get profileOfflinePendingSync => 'ऑफ़लाइन लंबित सिंक';
+
+  @override
+  String get profileAllSynced => 'सब सिंक है';
+
+  @override
+  String get profileEndDayHelper =>
+      'दिन बंद करने के बाद आप कोई एंट्री जोड़ या बदल नहीं सकेंगे।';
+
+  @override
+  String get profileClosedDayArtwork => 'अब दिन\nबंद करने का समय';
+
+  @override
+  String get profileSubmitShareWhatsapp => 'सबमिट कर WhatsApp पर शेयर करें';
+
+  @override
+  String get profileShareWhatsappMessage =>
+      'यह दिन को संपादन के लिए लॉक करेगा और आपके समूह के लिए WhatsApp संदेश तैयार करेगा।';
+
+  @override
+  String get profileCancel => 'रद्द करें';
+
+  @override
+  String get profileShare => 'शेयर करें';
 }

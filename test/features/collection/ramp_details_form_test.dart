@@ -5,6 +5,56 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('matches step-one zone hint and masked ragpicker row', (
+    tester,
+  ) async {
+    const ragpicker = RagpickerModel(
+      id: 'ragpicker-1',
+      centerId: 'center-1',
+      name: 'Vikram Singh',
+      phone: '9876544321',
+      isActive: true,
+      syncState: 'synced',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: RampDetailsForm(
+              people: const [ragpicker],
+              selectedPersonId: null,
+              zoneHint: 'Ragpickers of your zone: South East',
+              onPersonSelected: (_) {},
+              onAddNewPerson: (_) async {},
+              onDeactivatePerson: (_) {},
+              handoverPhoto: null,
+              onCaptureHandoverPhoto: () {},
+              onRemoveHandoverPhoto: () {},
+              onPreviewHandoverPhoto: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Ragpickers of your zone: South East'), findsOneWidget);
+    expect(find.byKey(const Key('ramp-person-photo-card')), findsOneWidget);
+    expect(find.text('Capture Person Photo *'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('ramp-person-selector')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Vikram Singh (••• 4321)'), findsOneWidget);
+    expect(
+      find.byKey(const Key('ramp-edit-person-ragpicker-1')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('pencil menu deactivates the selected ragpicker record', (
     tester,
   ) async {

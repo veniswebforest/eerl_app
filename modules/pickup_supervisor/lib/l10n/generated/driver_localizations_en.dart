@@ -1693,6 +1693,243 @@ class DriverLocalizationsEn extends DriverLocalizations {
   String get supervisorDrawerPoweredBy => 'Powered by Eco Vision';
 
   @override
+  String get addRouteStep1 => 'Step 1 of 2';
+
+  @override
+  String get addRouteStep2 => 'Step 2 of 2';
+
+  @override
+  String get addRouteRouteName => 'Route name';
+
+  @override
+  String get addRouteRouteNameHint => 'For example, Adajan Morning';
+
+  @override
+  String get addRouteWarehouse => 'Warehouse';
+
+  @override
+  String get addRouteSelectWarehouse => 'Select warehouse';
+
+  @override
+  String get addRouteShift => 'Shift';
+
+  @override
+  String get addRouteSelectShift => 'Select Shift';
+
+  @override
+  String get addRouteContinue => 'Continue';
+
+  @override
+  String get addRouteWarehouseAdajan => 'Adajan Central Warehouse';
+
+  @override
+  String get addRouteWarehouseVesu => 'Vesu Storage Hub';
+
+  @override
+  String get addRouteWarehouseKatargam => 'Katargam Depot';
+
+  @override
+  String get addRouteWarehousePal => 'Pal Sorting Facility';
+
+  @override
+  String get addRouteWarehouseUdhna => 'Udhna Industrial Warehouse';
+
+  @override
+  String get addRouteShiftMorningEarly => 'Morning · 7 am–3 pm';
+
+  @override
+  String get addRouteShiftMorningLate => 'Morning · 2 pm–8 pm';
+
+  @override
+  String get addRouteShiftFullDay => 'Full Day (8 am–8 pm)';
+
+  @override
+  String get addRouteSelectVehicle => 'Select Vehicle';
+
+  @override
+  String get addRouteVehicleLabel => 'Vehicle';
+
+  @override
+  String get addRouteVehicleHint => 'Select Vehicle for Pickup';
+
+  @override
+  String get addRouteSelectDriver => 'Select Driver';
+
+  @override
+  String get addRouteDriverHint => 'Select Driver for Pickup';
+
+  @override
+  String get addRouteSelectLabour => 'Select Labour';
+
+  @override
+  String get addRouteLabourHint => 'Select Labour';
+
+  @override
+  String get addRouteDriverNotFound => 'Driver Not Found';
+
+  @override
+  String get addRouteDriverNotFoundHint =>
+      'No driver added yet. Tap below to add.';
+
+  @override
+  String get addRouteLabourNotFound => 'Labour Not Found';
+
+  @override
+  String get addRouteLabourNotFoundHint =>
+      'No labour added yet. Tap below to add.';
+
+  @override
+  String get addRouteAdd => 'Add';
+
+  @override
+  String get addRouteVehicleCompany1001 => 'GJ-05-EE-1001';
+
+  @override
+  String get addRouteVehicleCompany1234 => 'GJ-05-BX-1234';
+
+  @override
+  String get addRouteVehicleRental1002 => 'GJ-05-EE-1002';
+
+  @override
+  String get addRouteVehicleRental1001 => 'GJ-05-EE-1001';
+
+  @override
+  String get addRouteCompanyTruck => 'Company truck';
+
+  @override
+  String get addRouteRentalShreeRam => 'Hired from Shree ram Transport';
+
+  @override
+  String get addRouteRentalKhodiyar => 'Hired from Khodiyar Transport';
+
+  @override
+  String get addRouteCapacity => 'Capacity 3000 KG';
+
+  @override
+  String get addRouteDriverVikram => 'Vikram Singh (••• 4321)';
+
+  @override
+  String get addRouteDriverSuresh => 'Suresh Kumar (••• 5847)';
+
+  @override
+  String get addRouteDriverMahesh => 'Mahesh Parmar (••• 2282)';
+
+  @override
+  String get addRouteDriverRakesh => 'Rakesh Sharma (••• 2458)';
+
+  @override
+  String get addRouteDriverAmit => 'Amit Patel (••• 9510)';
+
+  @override
+  String get addRouteLabourRavi => 'Ravi Bisht (••• 5847)';
+
+  @override
+  String get addRouteLabourRam => 'Ram Singh (••• 2282)';
+
+  @override
+  String get addRouteLabourRamesh => 'Ramesh Yadav (••• 2458)';
+
+  @override
+  String get addRouteLabourArjun => 'Arjun Jatav (••• 9510)';
+
+  @override
+  String get addRouteDeactivate => 'Deactivate';
+
+  @override
+  String get addRouteDeactivateTitle => 'Deactivate?';
+
+  @override
+  String get addRouteDeactivateMessage =>
+      'Are you sure you want to deactivate this person?';
+
+  @override
+  String get addRouteCancel => 'Cancel';
+
+  @override
+  String get addRouteYes => 'Yes';
+
+  @override
+  String get addRouteAddNewDriverPrefix => 'Add New ';
+
+  @override
+  String get addRouteDriverWord => 'Driver';
+
+  @override
+  String get addRouteLabourWord => 'Labour';
+
+  @override
+  String get addRouteFullName => 'Full Name';
+
+  @override
+  String get addRouteFullNameHint => 'Enter Full Name';
+
+  @override
+  String get addRouteMobileNumber => 'Mobile Number';
+
+  @override
+  String get addRouteMobileNumberHint => 'Enter Mobile number';
+
+  @override
+  String get addRouteCountryCode => '+91';
+
+  @override
+  String get addRouteAadhaarNumber => 'Aadhar card Number';
+
+  @override
+  String get addRouteAadhaarHint => 'Aadhaar / Voter ID';
+
+  @override
+  String get addRouteProfileProof => 'Profile Photo / ID Proof';
+
+  @override
+  String get addRouteCapturePhoto => 'Capture Photo';
+
+  @override
+  String get addRoutePhotoHint =>
+      'Upload a photo to record and verify details.';
+
+  @override
+  String get addRouteSaveSelect => 'Save & Select';
+
+  @override
+  String get addRouteFullNameRequired => 'Please enter the full name.';
+
+  @override
+  String get addRouteFullNameMinLength =>
+      'Full name must be at least 2 characters.';
+
+  @override
+  String get addRouteMobileRequired => 'Please enter the mobile number.';
+
+  @override
+  String get addRouteMobileInvalid =>
+      'Enter a valid 10-digit mobile number starting with 6–9.';
+
+  @override
+  String get addRouteReviewShift => 'Morning (8 am–2 pm)';
+
+  @override
+  String get addRouteReviewVehicle => 'GJ-05-EE-1001';
+
+  @override
+  String get addRouteReviewCompany => '(Company Truck)';
+
+  @override
+  String get addRouteReviewDriver => 'Vikram Singh (12345 43210)';
+
+  @override
+  String get addRouteReviewLabour => 'Ravi Bisht (23456 58492)';
+
+  @override
+  String get addRouteAddToRoute => 'Add to route';
+
+  @override
+  String get addRouteSavedTitle => 'Successfully Saved!';
+
+  @override
+  String get addRouteSavedSubtitle => 'Adajan Morning Route Saved';
+
+  @override
   String get sourcesUnassignedTitle => 'Unassigned sources';
 
   @override
@@ -1832,4 +2069,241 @@ class DriverLocalizationsEn extends DriverLocalizations {
 
   @override
   String get sourcesBackToRequests => 'Back to Requests';
+
+  @override
+  String get profileTitle => 'User Profile';
+
+  @override
+  String get profileSubtitle => 'Account details & info';
+
+  @override
+  String get profileLanguageCode => 'EN';
+
+  @override
+  String get profileUserName => 'Kiran Shah';
+
+  @override
+  String get profileRole => 'Pickup Supervisor';
+
+  @override
+  String get profileAccountInformation => 'Account Information';
+
+  @override
+  String get profileMyAreas => 'My areas';
+
+  @override
+  String get profileAreasValue => 'Adajan, Vesu, Pal';
+
+  @override
+  String get profileMobileNumber => 'Mobile Number';
+
+  @override
+  String get profileMobileValue => '+91 98765 43210';
+
+  @override
+  String get profileRoleLabel => 'Role';
+
+  @override
+  String get profileSessionExpires => 'Session Expires';
+
+  @override
+  String get profileSessionValue => 'Expires in 6h 24m';
+
+  @override
+  String get profileActions => 'Actions';
+
+  @override
+  String get profileSyncData => 'Sync Data';
+
+  @override
+  String get profileSyncDataSubtitle => 'Sync your offline data';
+
+  @override
+  String get profileEndMyDay => 'End My Day';
+
+  @override
+  String get profileEndMyDaySubtitle => 'Close today once your trips are done';
+
+  @override
+  String get profileAccount => 'Account';
+
+  @override
+  String get profileLogout => 'Logout';
+
+  @override
+  String get profileLogoutSubtitle => 'Sign out from your account';
+
+  @override
+  String get profileSyncOfflineData => 'Sync Offline Data';
+
+  @override
+  String get profileChangesNotSent => '3 changes not sent yet';
+
+  @override
+  String get profileSyncNow => 'Sync Now';
+
+  @override
+  String get profileDataAlreadySynced => 'Data Already Synced';
+
+  @override
+  String get profileBack => 'Back';
+
+  @override
+  String get profileLogoutQuestion => 'Are you sure you want to log out?';
+
+  @override
+  String get profileLogoutMessage =>
+      'Any unsynced offline data will remain on this device until your next sign-in.';
+
+  @override
+  String get profileSendChangesWarning => 'Send changes to notify drivers';
+
+  @override
+  String get profileNo => 'No';
+
+  @override
+  String get profileYes => 'Yes';
+
+  @override
+  String get profileNotifications => 'Notifications';
+
+  @override
+  String get profileToday => 'Today';
+
+  @override
+  String get profileEarlier => 'Earlier';
+
+  @override
+  String get profileOfflineMode => 'Offline Mode';
+
+  @override
+  String get profileOfflineModeMessage =>
+      'No internet connection. Data will sync automatically when Connection Restored.';
+
+  @override
+  String get profileJustNow => 'Just now';
+
+  @override
+  String get profileNewSourceUnassigned => 'New Source Unassigned';
+
+  @override
+  String get profileNewSourceMessage =>
+      'Global Garments (Adajan) needs a route assignment.';
+
+  @override
+  String get profileTenMinutesAgo => '10 Mins ago';
+
+  @override
+  String get profileDriverEscalation => 'Driver Escalation';
+
+  @override
+  String get profileDriverEscalationMessage =>
+      'Driver Ramesh reported gate entry delay at Pal spot.';
+
+  @override
+  String get profileYesterdayTime => 'Yesterday, 11:30 AM';
+
+  @override
+  String get profilePickupSkipped => 'Pickup Skipped';
+
+  @override
+  String get profilePickupSkippedMessage =>
+      'Siddhgiri Traders Skipped collection.';
+
+  @override
+  String get profilePickupSkippedTime => '24 Oct, 08:00 AM';
+
+  @override
+  String get profileAllCaughtUp => 'All Caught Up!';
+
+  @override
+  String get profileNoNotifications =>
+      'You have no new notifications. Check back later for system alerts and Admin updates.';
+
+  @override
+  String get profileHelpSupport => 'Help & Support';
+
+  @override
+  String get profileCallSupport => 'Call Support';
+
+  @override
+  String get profileCallSupportSubtitle => 'Available 24/7 for field issues';
+
+  @override
+  String get profileInstantHelp => 'Instant Help';
+
+  @override
+  String get profileInstantHelpSubtitle => 'Chat with a support agent';
+
+  @override
+  String get profileFaqTitle => 'Frequently Asked Questions';
+
+  @override
+  String get profileFaqDailyTrips => 'How do daily trips work?';
+
+  @override
+  String get profileFaqDailyTripsAnswer =>
+      'Generated automatically each morning from your Master Routes.';
+
+  @override
+  String get profileFaqSwapDriver => 'How to swap a driver for today?';
+
+  @override
+  String get profileFaqSwapDriverAnswer =>
+      'Open today\'s route and use the driver edit action.';
+
+  @override
+  String get profileFaqUnassigned => 'What is the unassigned sources?';
+
+  @override
+  String get profileFaqUnassignedAnswer =>
+      'Sources that are not currently attached to a route.';
+
+  @override
+  String get profileFaqSkipping => 'What does Skipping a stop do?';
+
+  @override
+  String get profileFaqSkippingAnswer =>
+      'It records the stop as skipped for the current trip.';
+
+  @override
+  String get profileTodaysActivitySummary => 'Today’s Activity Summary';
+
+  @override
+  String get profileTripsCompleted => 'Trips Completed';
+
+  @override
+  String get profileTripsCompletedValue => '08';
+
+  @override
+  String get profilePendingSources => 'Pending Sources';
+
+  @override
+  String get profilePendingSourcesValue => '01';
+
+  @override
+  String get profileOfflinePendingSync => 'Offline Pending Sync';
+
+  @override
+  String get profileAllSynced => 'All Synced';
+
+  @override
+  String get profileEndDayHelper =>
+      'Once you close the day, you won\'t be able to add or edit any entries.';
+
+  @override
+  String get profileClosedDayArtwork => 'Now Time to\nCLOSED The Day';
+
+  @override
+  String get profileSubmitShareWhatsapp => 'Submit & Share to Whatsapp';
+
+  @override
+  String get profileShareWhatsappMessage =>
+      'This will lock the day for editing and pre-fill a WhatsApp message to your group.';
+
+  @override
+  String get profileCancel => 'Cancel';
+
+  @override
+  String get profileShare => 'Share';
 }

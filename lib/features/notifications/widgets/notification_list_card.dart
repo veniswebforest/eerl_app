@@ -145,6 +145,8 @@ class _NotificationTile extends StatelessWidget {
   String _iconAsset(String type) => switch (type) {
     'OFFLINE' => 'assets/icons/home/online.svg',
     'TRANSFER_REJECTED' => 'assets/icons/wallet/status_flagged.svg',
+    'PRICE_REQUEST_DECIDED' =>
+      'assets/icons/home/supervisor/drawer/tasks_requests.svg',
     _ => 'assets/icons/wallet/status_verified.svg',
   };
 

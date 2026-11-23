@@ -5,6 +5,7 @@ import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 import 'package:pickup_supervisor/supervisor/model/supervisor_bottom_nav_item.dart';
+import 'package:pickup_supervisor/supervisor/view/supervisor_add_route_flow.dart';
 import 'package:pickup_supervisor/supervisor/widgets/supervisor_bottom_navigation.dart';
 
 const _iconRoot = 'assets/icons/supervisor/routes';
@@ -31,6 +32,17 @@ class SupervisorRoutesScreen extends StatefulWidget {
 class _SupervisorRoutesScreenState extends State<SupervisorRoutesScreen> {
   var _selectedFilter = 0;
   var _query = '';
+  var _showSavedBanner = false;
+
+  Future<void> _openAddRoute() async {
+    final saved = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute<bool>(builder: (_) => const SupervisorAddRouteScreen()),
+    );
+    if (saved == true && mounted) {
+      setState(() => _showSavedBanner = true);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,8 +140,18 @@ class _SupervisorRoutesScreenState extends State<SupervisorRoutesScreen> {
                 Positioned(
                   right: 20,
                   bottom: 92,
-                  child: const _AddRouteButton(),
+                  child: _AddRouteButton(onTap: _openAddRoute),
                 ),
+                if (_showSavedBanner)
+                  Positioned(
+                    top: MediaQuery.paddingOf(context).top + 8,
+                    left: 15,
+                    right: 15,
+                    child: _SavedRouteBanner(
+                      l10n: l10n,
+                      onClose: () => setState(() => _showSavedBanner = false),
+                    ),
+                  ),
               ],
             ),
             bottomNavigationBar: widget.showBottomNavigation
@@ -608,7 +630,9 @@ class _DashedDivider extends StatelessWidget {
 }
 
 class _AddRouteButton extends StatelessWidget {
-  const _AddRouteButton();
+  const _AddRouteButton({required this.onTap});
+
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -632,17 +656,89 @@ class _AddRouteButton extends StatelessWidget {
           color: DriverColors.primary500,
           shape: const CircleBorder(),
           elevation: 4,
-          child: Center(
-            child: SvgPicture.asset(
-              'assets/icons/help_support/add.svg',
-              width: 34,
-              height: 34,
-              colorFilter: const ColorFilter.mode(
-                DriverColors.neutral50,
-                BlendMode.srcIn,
+          child: InkWell(
+            key: const Key('add-route-button'),
+            onTap: onTap,
+            customBorder: const CircleBorder(),
+            child: Center(
+              child: SvgPicture.asset(
+                'assets/icons/help_support/add.svg',
+                width: 34,
+                height: 34,
+                colorFilter: const ColorFilter.mode(
+                  DriverColors.neutral50,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SavedRouteBanner extends StatelessWidget {
+  const _SavedRouteBanner({required this.l10n, required this.onClose});
+
+  final DriverLocalizations l10n;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      key: const Key('add-route-saved-banner'),
+      color: DriverColors.primary50,
+      elevation: 3,
+      shadowColor: DriverColors.shadow,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(12, 10, 8, 10),
+        decoration: BoxDecoration(
+          border: Border.all(color: DriverColors.primary200),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            SvgPicture.asset(
+              'assets/icons/supervisor/add_route/success_tick.svg',
+              package: _assetPackage,
+              width: 30,
+              height: 30,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.addRouteSavedTitle,
+                    style: DriverTextStyles.semibold14.copyWith(
+                      color: DriverColors.neutral950,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    l10n.addRouteSavedSubtitle,
+                    style: DriverTextStyles.regular12.copyWith(
+                      color: DriverColors.neutral600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              key: const Key('close-add-route-saved-banner'),
+              onPressed: onClose,
+              visualDensity: VisualDensity.compact,
+              icon: SvgPicture.asset(
+                'assets/icons/supervisor/add_route/close.svg',
+                package: _assetPackage,
+                width: 20,
+                height: 20,
+              ),
+            ),
+          ],
         ),
       ),
     );

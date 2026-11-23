@@ -263,7 +263,6 @@ class _SupervisorAssignSourceRouteScreenState
               l10n.sourcesVehicleGj051824,
               l10n.sourcesMorningTime,
               l10n.sourcesAssignedCount,
-              disabled: true,
             ),
           ];
           return Scaffold(
@@ -335,7 +334,7 @@ class _SupervisorAssignSourceRouteScreenState
                         backgroundColor: DriverColors.primary500,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                        ),
+                        ),padding: EdgeInsetsGeometry.symmetric(horizontal: 2)
                       ),
                       child: Text(
                         l10n.sourcesAssignAnyway,
@@ -969,19 +968,13 @@ class _DetailSection extends StatelessWidget {
 }
 
 class _RouteData {
-  const _RouteData(
-    this.name,
-    this.vehicle,
-    this.time,
-    this.assigned, {
-    this.disabled = false,
-  });
+  const _RouteData(this.name, this.vehicle, this.time, this.assigned);
 
   final String name;
   final String vehicle;
   final String time;
   final String assigned;
-  final bool disabled;
+  final bool disabled = false;
 }
 
 class _RouteChoiceCard extends StatelessWidget {
@@ -1008,7 +1001,8 @@ class _RouteChoiceCard extends StatelessWidget {
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
+            decoration: BoxDecoration(        color: Colors.white,
+
               border: Border.all(
                 color: selected ? DriverColors.primary500 : Colors.transparent,
               ),

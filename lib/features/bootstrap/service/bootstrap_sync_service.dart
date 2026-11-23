@@ -191,10 +191,13 @@ class BootstrapSyncService extends ChangeNotifier {
         '1';
     final cashRequestsNeedRefetch =
         await _database.getSyncMeta('cash_requests_refetch_required') == '1';
+    final fixedPointNeedsRefetch =
+        await _database.getSyncMeta('fixed_point_refetch_required') == '1';
     final schemaRefetchRequired =
         itemImagesNeedRefetch ||
         transferDispatchNeedsRefetch ||
-        cashRequestsNeedRefetch;
+        cashRequestsNeedRefetch ||
+        fixedPointNeedsRefetch;
     var schemaResetDone = false;
     String? cursor = await _database.getSyncMeta('cursor');
     if (cursor != null && cursor.isEmpty) cursor = null;
@@ -291,6 +294,9 @@ class BootstrapSyncService extends ChangeNotifier {
       }
       if (cashRequestsNeedRefetch) {
         await _database.setSyncMeta('cash_requests_refetch_required', '0');
+      }
+      if (fixedPointNeedsRefetch) {
+        await _database.setSyncMeta('fixed_point_refetch_required', '0');
       }
       _log('One-time schema full refetch completed');
     }

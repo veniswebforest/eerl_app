@@ -25,6 +25,14 @@ abstract final class DatabaseSchema {
       )
     ''',
     '''
+      CREATE TABLE ${DatabaseTables.myAssignments} (
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
+        channel TEXT NOT NULL,
+        zone_ids TEXT NOT NULL DEFAULT '[]',
+        PRIMARY KEY (center_id, channel)
+      )
+    ''',
+    '''
       CREATE TABLE ${DatabaseTables.centers} (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -64,6 +72,9 @@ abstract final class DatabaseSchema {
         is_selected INTEGER NOT NULL,
         sort_order INTEGER NOT NULL,
         rate REAL,
+        local_name TEXT,
+        unit_name TEXT,
+        unit_factor REAL,
         sync_state TEXT NOT NULL DEFAULT 'synced',
         PRIMARY KEY (center_id, channel, item_id),
         FOREIGN KEY (center_id, channel) REFERENCES ${DatabaseTables.centerChannels} (center_id, channel)
@@ -76,6 +87,7 @@ abstract final class DatabaseSchema {
         center_id TEXT REFERENCES ${DatabaseTables.centers} (id),
         plate_number TEXT NOT NULL,
         driver_name TEXT,
+        zone_id TEXT REFERENCES ${DatabaseTables.zones} (id),
         is_active INTEGER NOT NULL,
         sync_state TEXT NOT NULL DEFAULT 'synced'
       )
@@ -89,6 +101,7 @@ abstract final class DatabaseSchema {
         phone TEXT,
         id_number TEXT,
         photo_url TEXT,
+        zone_id TEXT REFERENCES ${DatabaseTables.zones} (id),
         is_active INTEGER NOT NULL,
         role TEXT NOT NULL,
         sync_state TEXT NOT NULL DEFAULT 'synced'
@@ -103,6 +116,7 @@ abstract final class DatabaseSchema {
         phone TEXT,
         id_number TEXT,
         photo_url TEXT,
+        zone_id TEXT REFERENCES ${DatabaseTables.zones} (id),
         is_active INTEGER NOT NULL,
         sync_state TEXT NOT NULL DEFAULT 'synced'
       )
@@ -128,7 +142,27 @@ abstract final class DatabaseSchema {
     '''
       CREATE TABLE ${DatabaseTables.destinations} (
         id TEXT PRIMARY KEY,
-        name TEXT NOT NULL
+        name TEXT NOT NULL,
+        company_code TEXT
+      )
+    ''',
+    '''
+      CREATE TABLE ${DatabaseTables.zones} (
+        id TEXT PRIMARY KEY,
+        code TEXT NOT NULL,
+        name TEXT NOT NULL,
+        is_active INTEGER NOT NULL
+      )
+    ''',
+    '''
+      CREATE TABLE ${DatabaseTables.centerPrices} (
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
+        item_id TEXT NOT NULL REFERENCES ${DatabaseTables.items} (id),
+        rate REAL,
+        from_name TEXT,
+        from_level TEXT,
+        own INTEGER NOT NULL,
+        PRIMARY KEY (center_id, item_id)
       )
     ''',
     '''
@@ -150,6 +184,7 @@ abstract final class DatabaseSchema {
         channel TEXT NOT NULL,
         status TEXT NOT NULL,
         slip_number TEXT,
+        reference_number TEXT,
         collected_at TEXT,
         vehicle_id TEXT REFERENCES ${DatabaseTables.vehicles} (id),
         mrf_person_id TEXT REFERENCES ${DatabaseTables.mrfPeople} (id),
@@ -180,7 +215,11 @@ abstract final class DatabaseSchema {
         rate REAL,
         amount REAL,
         photo_urls TEXT NOT NULL DEFAULT '[]',
-        sort_order INTEGER NOT NULL
+        sort_order INTEGER NOT NULL,
+        unit_name TEXT,
+        unit_factor REAL,
+        unit_qty REAL,
+        unit_verified_qty REAL
       )
     ''',
     '''
@@ -240,6 +279,27 @@ abstract final class DatabaseSchema {
       )
     ''',
     '''
+      CREATE TABLE ${DatabaseTables.priceRequests} (
+        id TEXT PRIMARY KEY,
+        center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
+        item_id TEXT NOT NULL REFERENCES ${DatabaseTables.items} (id),
+        current_rate REAL,
+        current_from_name TEXT,
+        current_from_level TEXT,
+        requested_rate REAL NOT NULL,
+        reason TEXT NOT NULL,
+        status TEXT NOT NULL,
+        raised_by_id TEXT NOT NULL,
+        raised_by_name TEXT NOT NULL,
+        raised_at TEXT NOT NULL,
+        decided_by_name TEXT,
+        decided_at TEXT,
+        rejection_reason TEXT,
+        updated_at TEXT NOT NULL,
+        sync_state TEXT NOT NULL DEFAULT 'synced'
+      )
+    ''',
+    '''
       CREATE TABLE ${DatabaseTables.transfers} (
         id TEXT PRIMARY KEY,
         center_id TEXT NOT NULL REFERENCES ${DatabaseTables.centers} (id),
@@ -265,6 +325,7 @@ abstract final class DatabaseSchema {
         vehicle_photo_urls TEXT NOT NULL DEFAULT '[]',
         weighbridge_photo_urls TEXT NOT NULL DEFAULT '[]',
         vehicle_differs INTEGER NOT NULL DEFAULT 0,
+        between_llps INTEGER NOT NULL DEFAULT 0,
         requested_by TEXT NOT NULL,
         requested_by_name TEXT NOT NULL,
         requested_at TEXT NOT NULL,
@@ -430,6 +491,8 @@ abstract final class DatabaseSchema {
     'CREATE INDEX ix_collections_review ON ${DatabaseTables.collections} (center_id, status, collected_at)',
     'CREATE INDEX ix_collection_items ON ${DatabaseTables.collectionItems} (collection_id)',
     'CREATE INDEX ix_center_items ON ${DatabaseTables.centerItems} (center_id, channel, sort_order)',
+    'CREATE INDEX ix_assignments_center ON ${DatabaseTables.myAssignments} (center_id, channel)',
+    'CREATE INDEX ix_price_requests_center ON ${DatabaseTables.priceRequests} (center_id, status, raised_at)',
     'CREATE INDEX ix_ragpickers_center ON ${DatabaseTables.ragpickers} (center_id, is_active, name)',
     'CREATE INDEX ix_mrf_people_center ON ${DatabaseTables.mrfPeople} (center_id, is_active, role)',
     'CREATE INDEX ix_vehicles_center ON ${DatabaseTables.vehicles} (center_id, is_active)',
@@ -456,6 +519,8 @@ abstract final class DatabaseSchema {
     'ix_collections_review',
     'ix_collection_items',
     'ix_center_items',
+    'ix_assignments_center',
+    'ix_price_requests_center',
     'ix_ragpickers_center',
     'ix_mrf_people_center',
     'ix_vehicles_center',

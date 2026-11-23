@@ -287,6 +287,15 @@ class _HomeDrawerState extends State<HomeDrawer> {
           );
         },
       ),
+      _DrawerItem(
+        key: const Key('drawer-supervisor-prices'),
+        label: context.l10n.drawerSupervisorPrices,
+        icon: '$_supervisorDrawerIconPath/stock.svg',
+        onTap: () {
+          _close(context);
+          context.push(AppRoutes.supervisorPrices);
+        },
+      ),
       _SupervisorExpandableItem(
         key: const Key('drawer-supervisor-verification'),
         label: context.l10n.drawerSupervisorVerification,

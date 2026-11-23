@@ -2,6 +2,7 @@ abstract final class DatabaseTables {
   static const syncMeta = 'sync_meta';
   static const myRoles = 'my_roles';
   static const myCenters = 'my_centers';
+  static const myAssignments = 'my_assignments';
   static const centers = 'centers';
   static const items = 'items';
   static const centerChannels = 'center_channels';
@@ -13,11 +14,14 @@ abstract final class DatabaseTables {
   static const centerPeople = 'center_people';
   static const destinations = 'destinations';
   static const transferVehicles = 'transfer_vehicles';
+  static const zones = 'zones';
+  static const centerPrices = 'center_prices';
   static const collections = 'collections';
   static const collectionItems = 'collection_items';
   static const expenses = 'expenses';
   static const cashRequests = 'cash_requests';
   static const categoryRequests = 'category_requests';
+  static const priceRequests = 'price_requests';
   static const transfers = 'transfers';
   static const transferItems = 'transfer_items';
   static const tasks = 'tasks';
@@ -35,6 +39,7 @@ abstract final class DatabaseTables {
     syncMeta,
     myRoles,
     myCenters,
+    myAssignments,
     centers,
     items,
     centerChannels,
@@ -46,11 +51,14 @@ abstract final class DatabaseTables {
     centerPeople,
     destinations,
     transferVehicles,
+    zones,
+    centerPrices,
     collections,
     collectionItems,
     expenses,
     cashRequests,
     categoryRequests,
+    priceRequests,
     transfers,
     transferItems,
     tasks,

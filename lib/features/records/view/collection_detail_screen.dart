@@ -146,6 +146,11 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
               ),
               const SizedBox(height: 10),
               CollectionDetailInfoCard(
+                label: 'Document number',
+                value: collection.referenceNumber ?? 'Given after sync',
+              ),
+              const SizedBox(height: 10),
+              CollectionDetailInfoCard(
                 label: context.l10n.collectionDetailDateTime,
                 value: _date(collection.collectedAt ?? collection.updatedAt),
               ),
