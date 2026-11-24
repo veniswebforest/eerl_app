@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
+import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
@@ -18,11 +19,17 @@ class StockDetailScreen extends StatefulWidget {
     required this.stage,
     this.stockLoader,
     this.centerNameLoader,
+    this.lastSyncedLoader,
+    this.clock,
   });
 
   final StockStage stage;
   final Future<List<StockModel>> Function(String stage)? stockLoader;
   final Future<String?> Function()? centerNameLoader;
+
+  /// When the stock figures were last brought up to date (ISO-8601 UTC).
+  final Future<String?> Function()? lastSyncedLoader;
+  final DateTime Function()? clock;
   @override
   State<StockDetailScreen> createState() => _StockDetailScreenState();
 }
@@ -30,6 +37,7 @@ class StockDetailScreen extends StatefulWidget {
 class _StockDetailScreenState extends State<StockDetailScreen> {
   late final LocalQueryController<List<StockModel>> _controller;
   String? _activeCenterName;
+  DateTime? _lastSyncedAt;
 
   String get _stage => switch (widget.stage) {
     StockStage.rawMaterial => 'RM',
@@ -54,6 +62,22 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
           EerlLocalRepository.instance.getStock(stage: _stage),
     )..load();
     _loadActiveCenterName();
+    _loadLastSynced();
+  }
+
+  Future<void> _loadLastSynced() async {
+    String? raw;
+    try {
+      raw =
+          await (widget.lastSyncedLoader?.call() ??
+              AppDatabase.instance.getSyncMeta('last_bootstrap_at'));
+    } on Object {
+      // Without a sync time the cards simply show no "ago" label.
+      return;
+    }
+    final parsed = raw == null ? null : DateTime.tryParse(raw);
+    if (!mounted || parsed == null) return;
+    setState(() => _lastSyncedAt = parsed);
   }
 
   Future<void> _loadActiveCenterName() async {
@@ -144,6 +168,12 @@ class _StockDetailScreenState extends State<StockDetailScreen> {
                               return StockMaterialCard(
                                 item: item,
                                 fallbackImage: _fallbackImage(item, index),
+                                updatedLabel: _lastSyncedAt == null
+                                    ? null
+                                    : StockMaterialCard.agoLabel(
+                                        _lastSyncedAt!,
+                                        (widget.clock ?? DateTime.now)(),
+                                      ),
                               );
                             },
                           ),

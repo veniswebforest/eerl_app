@@ -1,7 +1,9 @@
 import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:eerl_app/features/agent_status/view/agent_status_screen.dart';
+import 'package:eerl_app/features/auth/presentation/auth_provider.dart';
 import 'package:eerl_app/features/auth/view/app_lock_screen.dart';
 import 'package:eerl_app/features/auth/view/login_screen.dart';
 import 'package:eerl_app/features/auth/view/otp_screen.dart';
@@ -52,8 +54,8 @@ import 'package:eerl_app/features/wallet/view/expense_submitted_screen.dart';
 import 'package:eerl_app/features/wallet/view/log_expense_screen.dart';
 import 'package:eerl_app/features/wallet/view/request_cash_screen.dart';
 import 'package:eerl_app/features/wallet/view/wallet_tab_screen.dart';
-import 'package:pickup_supervisor/driver/view/driver_home_screen.dart';
-import 'package:pickup_supervisor/supervisor/view/supervisor_dashboard_shell.dart';
+import 'package:pickup_supervisor/features/driver/view/driver_home_screen.dart';
+import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervisor_dashboard_shell.dart';
 import 'app_route_data.dart';
 import 'app_routes.dart';
 
@@ -124,13 +126,19 @@ class AppRouter {
       path: AppRoutes.driverHome,
       name: 'driverHome',
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, _) => const DriverHomeScreen(),
+      builder: (_, _) => DriverHomeScreen(
+        onLogout: (context) async {
+          final router = GoRouter.of(context);
+          await context.read<AuthProvider>().logout();
+          router.go(AppRoutes.login);
+        },
+      ),
     ),
     GoRoute(
       path: AppRoutes.pickupSupervisorHome,
       name: 'pickupSupervisorHome',
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, _) => const SupervisorDashboardShell(),
+      builder: (_, _) => const PickupSupervisorDashboardShell(),
     ),
     GoRoute(
       path: AppRoutes.wallet,

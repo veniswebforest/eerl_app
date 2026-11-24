@@ -21,6 +21,8 @@ void main() {
         home: StockDetailScreen(
           stage: StockStage.rawMaterial,
           centerNameLoader: () async => 'EERL – Surat South',
+          lastSyncedLoader: () async => '2026-11-24T05:50:00.000Z',
+          clock: () => DateTime.parse('2026-11-24T06:00:00.000Z'),
           stockLoader: (_) async => const [
             StockModel(
               id: 'stock-1',
@@ -30,6 +32,17 @@ void main() {
               name: 'PET Bottles',
               stage: 'RM',
               qty: 980,
+              unitCode: 'KG',
+              binLabel: 'RM-01',
+            ),
+            StockModel(
+              id: 'stock-2',
+              centerId: 'center-1',
+              centerName: 'EERL – Surat South',
+              itemId: 'glass',
+              name: 'Glass',
+              stage: 'RM',
+              qty: 2100,
               unitCode: 'KG',
             ),
           ],
@@ -42,8 +55,11 @@ void main() {
     expect(find.text('Stock Center : EERL – Surat South'), findsOneWidget);
     expect(find.text('PET Bottles'), findsOneWidget);
     expect(find.text('980.00 KG'), findsOneWidget);
-    expect(find.text('Bin: RM-01'), findsNothing);
-    expect(find.text('10m ago'), findsNothing);
+    expect(find.text('Bin: RM-01'), findsOneWidget);
+    expect(find.text('Bin: RM-02'), findsNothing);
+    expect(find.byKey(const Key('stock-bin-divider')), findsOneWidget);
+    expect(find.text('10m ago'), findsNWidgets(2));
+    expect(find.textContaining('2,100.00'), findsOneWidget);
     expect(find.byKey(const Key('stock-detail-back')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

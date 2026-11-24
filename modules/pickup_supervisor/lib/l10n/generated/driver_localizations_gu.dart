@@ -1070,7 +1070,7 @@ class DriverLocalizationsGu extends DriverLocalizations {
   String get supervisorCollected => 'એકત્રિત';
 
   @override
-  String get supervisorKg => 'કિગ્રા';
+  String get supervisorKg => '0 કિગ્રા';
 
   @override
   String get supervisorMissed => 'ચૂક્યા';
@@ -2301,4 +2301,544 @@ class DriverLocalizationsGu extends DriverLocalizations {
 
   @override
   String get profileShare => 'શેર કરો';
+
+  @override
+  String get driverProfileUserName => 'રમેશ કુમાર';
+
+  @override
+  String get driverProfileWarehouseLabel => 'મારું વેરહાઉસ';
+
+  @override
+  String get driverProfileWarehouseValue => 'મગદલ્લા વેરહાઉસ';
+
+  @override
+  String get driverProfileDriverCodeLabel => 'ડ્રાઇવર કોડ';
+
+  @override
+  String get driverProfileDriverCodeValue => 'SUR-DRV-0007';
+
+  @override
+  String get driverProfileMobileValue => '+91 98765 43226';
+
+  @override
+  String get driverProfileRoleValue => 'ડ્રાઇવર';
+
+  @override
+  String get driverProfileLogoutWarning =>
+      '3 કલેક્શન હજુ મોકલાયા નથી: પહેલા સિંક કરો';
+
+  @override
+  String get dlDriverDirectory => 'ડ્રાઇવર ડિરેક્ટરી';
+
+  @override
+  String get dlLabourDirectory => 'મજૂર ડિરેક્ટરી';
+
+  @override
+  String get dlFilterActive => 'સક્રિય';
+
+  @override
+  String get dlFilterInactive => 'નિષ્ક્રિય';
+
+  @override
+  String dlTabDrivers(int count) {
+    return 'ડ્રાઇવર ($count)';
+  }
+
+  @override
+  String dlTabLabour(int count) {
+    return 'મજૂર ($count)';
+  }
+
+  @override
+  String get dlSearchHint => 'અહીં શોધો...';
+
+  @override
+  String get dlAddDriver => 'ડ્રાઇવર ઉમેરો';
+
+  @override
+  String get dlAddLabour => 'મજૂર ઉમેરો';
+
+  @override
+  String get dlAddLabourer => 'મજૂર ઉમેરો';
+
+  @override
+  String get dlNoDetailsFound => 'કોઈ વિગતો મળી નથી';
+
+  @override
+  String get dlNoPhone => '--';
+
+  @override
+  String get dlAddNewDriver => 'નવો ડ્રાઇવર ઉમેરો';
+
+  @override
+  String get dlAddNewLabour => 'નવો મજૂર ઉમેરો';
+
+  @override
+  String get dlEditDriver => 'ડ્રાઇવર સંપાદિત કરો';
+
+  @override
+  String get dlEditLabour => 'મજૂર સંપાદિત કરો';
+
+  @override
+  String get dlFullName => 'પૂરું નામ';
+
+  @override
+  String get dlEnterFullName => 'પૂરું નામ દાખલ કરો';
+
+  @override
+  String get dlMobileNumber => 'મોબાઇલ નંબર';
+
+  @override
+  String get dlEnterMobileNumber => 'મોબાઇલ નંબર દાખલ કરો';
+
+  @override
+  String get dlCountryCode => '+91';
+
+  @override
+  String get dlAadhaarLabel => 'આધાર કાર્ડ નંબર';
+
+  @override
+  String get dlAadhaarHint => 'આધાર / વોટર ID';
+
+  @override
+  String get dlProfilePhoto => 'પ્રોફાઇલ ફોટો / ID પ્રૂફ';
+
+  @override
+  String get dlCapturePhoto => 'ફોટો લો';
+
+  @override
+  String get dlUploadHint => 'વિગતો નોંધવા અને ચકાસવા ફોટો અપલોડ કરો.';
+
+  @override
+  String get dlCancel => 'રદ કરો';
+
+  @override
+  String get dlSaveSelect => 'સેવ કરો અને પસંદ કરો';
+
+  @override
+  String get dlIdCardNumber => 'ID / કાર્ડ નંબર';
+
+  @override
+  String get dlDateTime => 'તારીખ અને સમય';
+
+  @override
+  String get dlDeactivate => 'નિષ્ક્રિય કરો';
+
+  @override
+  String get dlEdit => 'સંપાદિત કરો';
+
+  @override
+  String get dlReactive => 'ફરી સક્રિય કરો';
+
+  @override
+  String get dlAreYouSure => 'શું તમે ખાતરી છો?';
+
+  @override
+  String get dlDeactivateDriverMessage =>
+      'શું તમે આ ડ્રાઇવરને નિષ્ક્રિય કરવા માંગો છો?';
+
+  @override
+  String get dlDeactivateLabourMessage =>
+      'શું તમે આ મજૂરને નિષ્ક્રિય કરવા માંગો છો?';
+
+  @override
+  String get dlReactiveDriverMessage =>
+      'શું તમે આ ડ્રાઇવરને ફરી સક્રિય કરવા માંગો છો?';
+
+  @override
+  String get dlReactiveLabourMessage =>
+      'શું તમે આ મજૂરને ફરી સક્રિય કરવા માંગો છો?';
+
+  @override
+  String get dlYes => 'હા';
+
+  @override
+  String get dlDeactivatedTitle => 'સફળતાપૂર્વક નિષ્ક્રિય કર્યું!';
+
+  @override
+  String get dlDeactivatedBody => 'પ્રોફાઇલ નિષ્ક્રિય કરી.';
+
+  @override
+  String get dlReactivedTitle => 'સફળતાપૂર્વક ફરી સક્રિય કર્યું!';
+
+  @override
+  String get dlReactivedBody => 'પ્રોફાઇલ ફરી સક્રિય કરી.';
+
+  @override
+  String get supervisorTripsToday => 'આજની ટ્રિપ્સ';
+
+  @override
+  String get tpTitle => 'ટ્રિપ પ્લાન';
+
+  @override
+  String get tpAreas => 'અડાજણ, વેસુ, પાલ';
+
+  @override
+  String get tpChoiceToday => 'આજે';
+
+  @override
+  String get tpChoiceTomorrow => 'આવતીકાલે';
+
+  @override
+  String get tpChoiceWeek => 'આ અઠવાડિયું';
+
+  @override
+  String get tpDateToday => 'ગુરુ 22 ઑક્ટો 2026';
+
+  @override
+  String get tpDateTomorrow => 'શુક્ર 23 ઑક્ટો 2026';
+
+  @override
+  String get tpDateNoTrips => 'રવિ 8 નવે 2026';
+
+  @override
+  String tpTripsStops(int trips, int stops) {
+    return '$trips ટ્રિપ · $stops સ્ટોપ';
+  }
+
+  @override
+  String tpExtraPickups(int count) {
+    return '$count વધારાના પિકઅપ';
+  }
+
+  @override
+  String tpSourcePaused(int count) {
+    return '$count સોર્સ થોભાવેલ';
+  }
+
+  @override
+  String get tpNoTrips => 'કોઈ ટ્રિપ નથી';
+
+  @override
+  String get tpStatusOnRoute => 'રસ્તામાં';
+
+  @override
+  String get tpStatusApproved => 'મંજૂર';
+
+  @override
+  String get tpStatusPlanned => 'આયોજિત';
+
+  @override
+  String get tpOwnVehicle => 'પોતાનું વાહન';
+
+  @override
+  String get tpContractVehicle => 'કરાર વાળું વાહન';
+
+  @override
+  String tpVehicleTag(String plate, String vehicle) {
+    return '$plate · $vehicle';
+  }
+
+  @override
+  String get tpChangedForToday => 'આજ માટે બદલાયું';
+
+  @override
+  String get tpDriverNotUsingApp => 'ડ્રાઇવર એપ વાપરતા નથી';
+
+  @override
+  String tpCoverFor(String substitute, String original) {
+    return '$substitute ($original ની જગ્યાએ)';
+  }
+
+  @override
+  String tpTransporterDriver(String transporter, String driver) {
+    return '$transporter · ડ્રાઇવર $driver';
+  }
+
+  @override
+  String tpStops(int count) {
+    return '$count સ્ટોપ';
+  }
+
+  @override
+  String tpDaily(int count) {
+    return 'દૈનિક $count';
+  }
+
+  @override
+  String tpWeekly(int count) {
+    return 'સાપ્તાહિક $count';
+  }
+
+  @override
+  String tpMonthly(int count) {
+    return 'માસિક $count';
+  }
+
+  @override
+  String tpBiWeekly(int count) {
+    return 'દ્વિ-સાપ્તાહિક $count';
+  }
+
+  @override
+  String tpOnCall(int count) {
+    return 'ઑન કૉલ $count';
+  }
+
+  @override
+  String tpPaused(int count) {
+    return '$count થોભાવેલ';
+  }
+
+  @override
+  String tpCollectedOf(int done, int total) {
+    return '$total માંથી $done એકત્ર';
+  }
+
+  @override
+  String tpRecordedOf(int done, int total) {
+    return '$total માંથી $done એપમાં નોંધાયા';
+  }
+
+  @override
+  String tpCollectedMissed(int collected, int missed) {
+    return '$collected એકત્ર · $missed ચૂકી ગયા';
+  }
+
+  @override
+  String tpWeightKg(String kg) {
+    return '$kg કિગ્રા';
+  }
+
+  @override
+  String get tpCallDriver => 'ડ્રાઇવરને કૉલ કરો';
+
+  @override
+  String tpOwnVehicleCount(int count) {
+    return 'પોતાનું વાહન $count';
+  }
+
+  @override
+  String tpContractCount(int count) {
+    return 'કરાર $count';
+  }
+
+  @override
+  String get tpDay0 => 'ગુરુ 22 ઑક્ટો · આજે';
+
+  @override
+  String get tpDay1 => 'શુક્ર 23 ઑક્ટો';
+
+  @override
+  String get tpDay2 => 'શનિ 24 ઑક્ટો';
+
+  @override
+  String get tpDay3 => 'રવિ 25 ઑક્ટો';
+
+  @override
+  String get tpDay4 => 'સોમ 26 ઑક્ટો';
+
+  @override
+  String get tpDay5 => 'મંગળ 27 ઑક્ટો';
+
+  @override
+  String get tpDay6 => 'બુધ 28 ઑક્ટો';
+
+  @override
+  String get tpEmptyTitle => 'આ દિવસે કોઈ ટ્રિપ નથી';
+
+  @override
+  String get tpEmptyMessage =>
+      'દિવાળી માટે વેરહાઉસ બંધ છે. આજે નિર્ધારિત પિકઅપ સોમ 9 નવે પર ખસેડાય છે (રજાનો નિયમ).';
+
+  @override
+  String get rdNext7Days => 'આગામી 7 દિવસ';
+
+  @override
+  String get rdDateToday => 'ગુરુ, 22 ઑક્ટો 2026';
+
+  @override
+  String get rdDateRange => 'શુક્ર 23 ઑક્ટો – ગુરુ 29 ઑક્ટો';
+
+  @override
+  String rdShift(String time) {
+    return 'સવાર ($time)';
+  }
+
+  @override
+  String rdAssignedSources(int count) {
+    return 'સોંપાયેલા સોર્સ : $count';
+  }
+
+  @override
+  String rdAssignedSourcesPaused(int count, int paused) {
+    return 'સોંપાયેલા સોર્સ : $count ($paused થોભાવેલ)';
+  }
+
+  @override
+  String rdDriverLine(String name, String phone) {
+    return 'ડ્રાઇવર : $name ($phone)';
+  }
+
+  @override
+  String rdLabourLine(String name) {
+    return 'મજૂર : $name';
+  }
+
+  @override
+  String get rdList => 'લિસ્ટ';
+
+  @override
+  String get rdMap => 'નકશો';
+
+  @override
+  String get rdFilterAll => 'બધા';
+
+  @override
+  String get rdFilterCollected => 'એકત્ર';
+
+  @override
+  String get rdFilterPending => 'બાકી';
+
+  @override
+  String get rdFilterZeroKg => '0 કિગ્રા';
+
+  @override
+  String get rdFilterMissed => 'ચૂકી ગયેલ';
+
+  @override
+  String get rdFilterCancelled => 'રદ';
+
+  @override
+  String get rdFilterInactive => 'નિષ્ક્રિય';
+
+  @override
+  String get rdFreqDaily => 'દૈનિક';
+
+  @override
+  String get rdFreqWeekly => 'સાપ્તાહિક';
+
+  @override
+  String get rdTypeSorted => 'સૉર્ટેડ';
+
+  @override
+  String get rdTypeMixed => 'મિશ્ર';
+
+  @override
+  String rdStopTitle(String name, String type) {
+    return '$name · $type';
+  }
+
+  @override
+  String rdSchedEveryDay(String time) {
+    return 'દરરોજ · $time';
+  }
+
+  @override
+  String rdSchedDays(String days, String time) {
+    return '$days · $time';
+  }
+
+  @override
+  String rdSchedExceptSun(String time) {
+    return 'રવિ સિવાય, $time';
+  }
+
+  @override
+  String rdSchedSecondWed(String time) {
+    return 'બીજો બુધ, $time';
+  }
+
+  @override
+  String rdSchedOnce(String date, String time) {
+    return '(એક વાર) $date, $time';
+  }
+
+  @override
+  String rdSchedPausedTill(String date) {
+    return '$date સુધી થોભાવેલ';
+  }
+
+  @override
+  String get rdWeekdayMon => 'સોમ';
+
+  @override
+  String get rdWeekdayThu => 'ગુરુ';
+
+  @override
+  String get rdStatusCollected => 'એકત્ર';
+
+  @override
+  String get rdStatusZeroKg => '0 કિગ્રા';
+
+  @override
+  String get rdStatusCancelledBySource => 'સોર્સ દ્વારા રદ';
+
+  @override
+  String get rdStatusNextStop => 'આગલો સ્ટોપ';
+
+  @override
+  String get rdStatusPending => 'બાકી';
+
+  @override
+  String get rdStatusInactive => 'નિષ્ક્રિય';
+
+  @override
+  String rdAmountKgPcs(String kg, String pcs) {
+    return '$kg કિગ્રા + $pcs નંગ';
+  }
+
+  @override
+  String get rdNoteNoMaterial => 'આજે કોઈ માલ નથી';
+
+  @override
+  String get rdNoteClosedStocktaking => 'સ્ટોક ગણતરી માટે બંધ';
+
+  @override
+  String get rdNotePausedRenovation => 'સોર્સ થોભાવેલ (રિનોવેશન)';
+
+  @override
+  String rdTagCollectedAt(String time) {
+    return '$time એ એકત્ર';
+  }
+
+  @override
+  String rdTagVisitedAt(String time) {
+    return '$time એ મુલાકાત';
+  }
+
+  @override
+  String get rdTagNoteFromDriver => 'ડ્રાઇવરની નોંધ';
+
+  @override
+  String rdTagVoiceNote(String duration) {
+    return 'વૉઇસ નોંધ $duration';
+  }
+
+  @override
+  String get rdLegendCollected => 'એકત્ર';
+
+  @override
+  String get rdLegendZeroKg => '0 કિગ્રા';
+
+  @override
+  String get rdLegendCancelled => 'રદ';
+
+  @override
+  String get rdLegendNextStop => 'આગલો સ્ટોપ';
+
+  @override
+  String get rdLegendPending => 'બાકી';
+
+  @override
+  String get rdLegendPaused => 'થોભાવેલ';
+
+  @override
+  String get rdLegendWarehouse => 'વેરહાઉસ';
+
+  @override
+  String rdMapNext(int number, String name, String time, String distance) {
+    return 'આગલો: $number · $name · $time · $distance દૂર';
+  }
+
+  @override
+  String get rdMapHint =>
+      'સ્ટોપ મુલાકાતના ક્રમમાં. ઘન રેખા પૂર્ણ થઈ છે; ડૅશ રેખા બાકી છે, વેરહાઉસ પર પાછા. સ્ટોપ ખોલવા તેના પર ટૅપ કરો.';
+
+  @override
+  String get rdAddedLastHint =>
+      'તે છેલ્લા સ્ટોપ તરીકે ઉમેરાય છે. તમે રૂટના પેજ પર ક્રમ બદલી શકો છો.';
+
+  @override
+  String get rdAddSources => 'સોર્સ ઉમેરો';
 }

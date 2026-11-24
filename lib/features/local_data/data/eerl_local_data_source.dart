@@ -1538,9 +1538,10 @@ class EerlLocalDataSource {
     if (resolvedCenter == null) return const [];
     final rows = await _database.rawQuery(
       '''
-      SELECT r.*, i.name AS item_name, i.unit_code
+      SELECT r.*, i.name AS item_name, i.unit_code, c.name AS center_name
       FROM ${DatabaseTables.priceRequests} r
       JOIN ${DatabaseTables.items} i ON i.id = r.item_id
+      JOIN ${DatabaseTables.centers} c ON c.id = r.center_id
       WHERE r.center_id = ?
       ORDER BY CASE r.status WHEN 'PENDING' THEN 0 ELSE 1 END,
                r.raised_at DESC
@@ -1548,6 +1549,21 @@ class EerlLocalDataSource {
       [resolvedCenter],
     );
     return rows.map(PriceRequestModel.fromMap).toList(growable: false);
+  }
+
+  Future<PriceRequestModel?> getPriceRequest(String id) async {
+    final rows = await _database.rawQuery(
+      '''
+      SELECT r.*, i.name AS item_name, i.unit_code, c.name AS center_name
+      FROM ${DatabaseTables.priceRequests} r
+      JOIN ${DatabaseTables.items} i ON i.id = r.item_id
+      JOIN ${DatabaseTables.centers} c ON c.id = r.center_id
+      WHERE r.id = ?
+      LIMIT 1
+      ''',
+      [id],
+    );
+    return rows.isEmpty ? null : PriceRequestModel.fromMap(rows.single);
   }
 
   Future<String> savePriceRequest({
@@ -1636,6 +1652,12 @@ class EerlLocalDataSource {
         createdAt: now,
       );
     });
+    AppLogger.sqlite(
+      'PRICE_REQUEST_COMMIT',
+      'Stored price request locally | id=$id | center=$centerId | '
+          'item=$itemId | status=PENDING | sync_state=pending | '
+          'outbox=PUT /price-requests/$id',
+    );
     return id;
   }
 
@@ -1796,12 +1818,16 @@ class EerlLocalDataSource {
       SELECT ci.*, i.name, i.unit_code, i.unit_name,
         ci.unit_name AS centre_unit_name,
         i.image_url AS item_image_url,
+        cit.local_name AS local_name,
         COALESCE(ch.show_price, 0) AS show_price
       FROM ${DatabaseTables.collectionItems} ci
       JOIN ${DatabaseTables.items} i ON i.id = ci.item_id
       JOIN ${DatabaseTables.collections} c ON c.id = ci.collection_id
       LEFT JOIN ${DatabaseTables.centerChannels} ch
         ON ch.center_id = c.center_id AND ch.channel = c.channel
+      LEFT JOIN ${DatabaseTables.centerItems} cit
+        ON cit.center_id = c.center_id AND cit.channel = c.channel
+        AND cit.item_id = ci.item_id
       WHERE ci.collection_id = ? AND c.center_id = ?
       ORDER BY ci.sort_order, i.name COLLATE NOCASE
     ''',
@@ -3940,7 +3966,10 @@ class EerlLocalDataSource {
     if (centerId == null) return const [];
     final rows = await _database.rawQuery(
       '''
-      SELECT ti.*, i.name, i.unit_code
+      SELECT ti.*, i.name, i.unit_code,
+             (SELECT MAX(cn.local_name) FROM ${DatabaseTables.centerItems} cn
+               WHERE cn.center_id = t.center_id AND cn.item_id = ti.item_id)
+               AS local_name
       FROM ${DatabaseTables.transferItems} ti
       LEFT JOIN ${DatabaseTables.items} i ON i.id = ti.item_id
       JOIN ${DatabaseTables.transfers} t ON t.id = ti.transfer_id
@@ -5339,7 +5368,9 @@ class EerlLocalDataSource {
       args.add(stage);
     }
     final rows = await _database.rawQuery('''
-      SELECT s.*, i.name, i.unit_code, i.image_url, c.name AS center_name
+      SELECT s.*, i.name, i.unit_code, i.image_url, c.name AS center_name,
+             (SELECT MAX(cn.local_name) FROM ${DatabaseTables.centerItems} cn
+               WHERE cn.center_id = s.center_id AND cn.item_id = s.item_id) AS local_name
       FROM ${DatabaseTables.stock} s
       JOIN ${DatabaseTables.items} i ON i.id = s.item_id
       JOIN ${DatabaseTables.centers} c ON c.id = s.center_id
@@ -5358,7 +5389,8 @@ class EerlLocalDataSource {
     final rows = await _database.rawQuery(
       '''
       SELECT MIN(s.id) AS id, s.center_id, s.item_id, s.stage,
-             i.name, i.unit_code,
+             i.name, i.unit_code, (SELECT MAX(cn.local_name) FROM ${DatabaseTables.centerItems} cn
+               WHERE cn.center_id = s.center_id AND cn.item_id = s.item_id) AS local_name,
              SUM(s.qty) + COALESCE((
                SELECT SUM(ci.verified_qty)
                FROM ${DatabaseTables.collectionItems} ci

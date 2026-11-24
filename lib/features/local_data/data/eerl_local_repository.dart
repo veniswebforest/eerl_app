@@ -135,6 +135,8 @@ class EerlLocalRepository {
       _local.getCenterPrices(centerId: centerId);
   Future<List<PriceRequestModel>> getPriceRequests({String? centerId}) =>
       _local.getPriceRequests(centerId: centerId);
+  Future<PriceRequestModel?> getPriceRequest(String id) =>
+      _local.getPriceRequest(id);
   Future<String> savePriceRequest({
     required String itemId,
     required double requestedRate,

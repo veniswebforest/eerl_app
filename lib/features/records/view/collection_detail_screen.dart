@@ -116,14 +116,14 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                 leading: InkWell(
                   key: const Key('collection-detail-back'),
                   onTap: () => Navigator.of(context).maybePop(),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   child: Container(
                     width: 40,
                     height: 40,
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: AppColors.primary500,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: SvgPicture.asset(CollectionDetailAssets.back),
                   ),
@@ -141,23 +141,23 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
               ],
               SizedBox(height: isDraft ? 0 : 20),
               CollectionDetailInfoCard(
-                label: context.l10n.collectionReceiptId,
+                label: context.l10n.collectionDetailSlipNumber,
                 value: collection.slipNumber ?? collection.id,
               ),
-              const SizedBox(height: 10),
-              CollectionDetailInfoCard(
-                label: 'Document number',
-                value: collection.referenceNumber ?? 'Given after sync',
-              ),
+              if (collection.documentNumber(
+                    context.l10n.collectionDetailDocumentPending,
+                  )
+                  case final documentNumber?) ...[
+                const SizedBox(height: 10),
+                CollectionDetailInfoCard(
+                  label: context.l10n.collectionDetailDocumentNumber,
+                  value: documentNumber,
+                ),
+              ],
               const SizedBox(height: 10),
               CollectionDetailInfoCard(
                 label: context.l10n.collectionDetailDateTime,
                 value: _date(collection.collectedAt ?? collection.updatedAt),
-              ),
-              const SizedBox(height: 10),
-              CollectionDetailInfoCard(
-                label: context.l10n.collectionDetailAgent,
-                value: collection.agentName,
               ),
               const SizedBox(height: 10),
               CollectionDetailInfoCard(
@@ -176,13 +176,34 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                     ? collection.givenByName!
                     : context.l10n.verificationDetailGivenByValue,
               ),
+              if (collection.vehiclePlateNumber?.trim().isNotEmpty == true) ...[
+                const SizedBox(height: 10),
+                CollectionDetailInfoCard(
+                  label: context.l10n.verificationDetailVehicleNumber,
+                  value: collection.vehiclePlateNumber!.trim(),
+                ),
+              ],
               const SizedBox(height: 10),
               CollectionDetailInfoCard(
-                label: context.l10n.collectionReceiptLabor,
-                value: collection.handedOverBy?.trim().isNotEmpty == true
-                    ? collection.handedOverBy!
-                    : context.l10n.verificationDetailGivenByValue,
+                label: context.l10n.collectionDetailAgent,
+                value: collection.agentName,
               ),
+              if (collection.paidBy?.trim().isNotEmpty == true) ...[
+                const SizedBox(height: 10),
+                CollectionDetailInfoCard(
+                  label: context.l10n.verificationDetailPaymentType,
+                  value: collection.paidBy!.trim(),
+                ),
+              ],
+              if (collection.handedOverBy?.trim().isNotEmpty == true &&
+                  collection.handedOverBy!.trim() !=
+                      collection.givenByName?.trim()) ...[
+                const SizedBox(height: 10),
+                CollectionDetailInfoCard(
+                  label: context.l10n.collectionReceiptLabor,
+                  value: collection.handedOverBy!.trim(),
+                ),
+              ],
               if (collection.handoverPhotoUrls.isNotEmpty) ...[
                 const SizedBox(height: 10),
                 _VehiclePhotoCard(
@@ -354,11 +375,14 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
       centerId: 'preview-center',
       agentId: 'preview-agent',
       agentName: context.l10n.verificationRahulPatel,
-      channel: context.l10n.collectionMrfShort,
+      channel: context.l10n.verificationFilterD2d,
       status: statusValue,
+      slipNumber: 'AAN-261119-07-012',
+      referenceNumber: 'SUR-AAN-2627-COL-0042',
       collectedAt: '2026-10-24T15:45:00',
-      givenByName: 'Chunilal Yadav',
-      handedOverBy: context.l10n.verificationDetailGivenByValue,
+      vehiclePlateNumber: context.l10n.verificationDetailVehicleValue,
+      givenByName: context.l10n.verificationDetailGivenByValue,
+      paidBy: context.l10n.verificationDetailCash,
       totalAmount: 35550,
       totalQty: 890,
       handoverPhotoUrls: const [
@@ -634,11 +658,16 @@ class _StatusBanner extends StatelessWidget {
         : approved
         ? AppColors.primary50
         : AppColors.yellow50;
+    final title = rejected
+        ? context.l10n.verificationRejected
+        : approved
+        ? context.l10n.collectionDetailApproved
+        : context.l10n.collectionDetailPending;
     return AppMessageBanner(
-      height: 52,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      borderRadius: 10,
-      title: status,
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      borderRadius: 12,
+      title: title,
       color: color,
       backgroundColor: background,
       titleStyle: AppTextStyles.semiboldH9_14.copyWith(color: color),

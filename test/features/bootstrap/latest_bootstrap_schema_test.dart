@@ -322,6 +322,11 @@ void main() {
             ],
           },
           'tables': {
+            'centers': {
+              'replace': [
+                {'id': 'center-1', 'name': 'Center One'},
+              ],
+            },
             'zones': {
               'replace': [
                 {
@@ -355,6 +360,25 @@ void main() {
                   'from_name': 'Center One',
                   'from_level': 'CENTER',
                   'own': 1,
+                },
+              ],
+            },
+            'price_requests': {
+              'upserts': [
+                {
+                  'id': 'price-request-fixed',
+                  'center_id': 'center-1',
+                  'item_id': 'item-fixed',
+                  'current_rate': 21.5,
+                  'current_from_name': 'Center One',
+                  'current_from_level': 'CENTER',
+                  'requested_rate': 24,
+                  'reason': 'The local market rate increased.',
+                  'status': 'PENDING',
+                  'raised_by_id': 'supervisor-1',
+                  'raised_by_name': 'Supervisor One',
+                  'raised_at': '2026-11-24T05:00:00.000Z',
+                  'updated_at': '2026-11-24T05:00:00.000Z',
                 },
               ],
             },
@@ -407,6 +431,11 @@ void main() {
         (await database.query(DatabaseTables.centerPrices)).single['rate'],
         21.5,
       );
+      final priceRequest = (await database.query(
+        DatabaseTables.priceRequests,
+      )).single;
+      expect(priceRequest['requested_rate'], 24.0);
+      expect(priceRequest['sync_state'], 'synced');
       expect(
         (await database.query(
           DatabaseTables.destinations,
@@ -415,6 +444,9 @@ void main() {
       );
 
       final local = EerlLocalDataSource(database: database);
+      final priceRequests = await local.getPriceRequests(centerId: 'center-1');
+      expect(priceRequests.single.itemName, 'PET Bottles');
+      expect(priceRequests.single.status, 'PENDING');
       expect(
         (await local.getChannels(
           centerId: 'center-1',

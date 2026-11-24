@@ -565,6 +565,10 @@ class AppLocalizationsGu extends AppLocalizations {
   String get collectionTypes => 'સંગ્રહના પ્રકાર';
 
   @override
+  String get collectionTypesAssignedHint =>
+      'આ કેન્દ્ર પર તમે જે પ્રકારનું કલેક્શન કરો છો તે જ';
+
+  @override
   String get d2d => 'ઘર-ઘર';
 
   @override
@@ -1563,6 +1567,15 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get collectionDetailId => 'કલેક્શન આઈડી:';
+
+  @override
+  String get collectionDetailSlipNumber => 'સ્લિપ નંબર';
+
+  @override
+  String get collectionDetailDocumentNumber => 'દસ્તાવેજ નંબર';
+
+  @override
+  String get collectionDetailDocumentPending => 'સિંક થયા પછી મળશે';
 
   @override
   String get collectionDetailDateTime => 'તારીખ અને સમય';
@@ -4601,4 +4614,85 @@ class AppLocalizationsGu extends AppLocalizations {
 
   @override
   String get drawerSupervisorPrices => 'ભાવ';
+
+  @override
+  String pricesFromSource(String name, String level) {
+    return '$name તરફથી ($level)';
+  }
+
+  @override
+  String get pricesNoMaterials => 'આ કેન્દ્ર માટે કોઈ ભાવ ઉપલબ્ધ નથી.';
+
+  @override
+  String get priceRequestsEmpty => 'અહીં કોઈ ભાવ વિનંતી નથી.';
+
+  @override
+  String priceRequestApprovedByPerson(String name) {
+    return '$name દ્વારા મંજૂર.';
+  }
+
+  @override
+  String priceRequestRejectedByPerson(String name, String time) {
+    return '$name દ્વારા · $time';
+  }
+
+  @override
+  String priceRequestReasonValue(String reason) {
+    return 'કારણ: $reason';
+  }
+
+  @override
+  String get priceRequestAlreadyWaiting =>
+      'આ ભાવમાં ફેરફારની વિનંતી પહેલેથી નિર્ણયની રાહ જોઈ રહી છે.';
+
+  @override
+  String get priceRequestSaved => 'ભાવ બદલવાની વિનંતી સ્થાનિક રીતે સેવ થઈ.';
+
+  @override
+  String get priceRequestLoadFailed => 'ભાવની માહિતી લોડ થઈ શકી નથી.';
+
+  @override
+  String get priceAskInvalidRate =>
+      '0 થી 99,999,999.99 સુધી વધુમાં વધુ 2 દશાંશ સાથે ભાવ દાખલ કરો.';
+
+  @override
+  String get priceAskInvalidReason => '1 થી 1000 અક્ષરનું કારણ દાખલ કરો.';
+
+  @override
+  String get priceAskSubmitFailed => 'ભાવ વિનંતી સેવ થઈ શકી નથી.';
+
+  @override
+  String get priceAskMaxCharacters1000 => 'મહત્તમ 1000 અક્ષરો';
+
+  @override
+  String priceRequestCurrentValueDynamic(
+    String rate,
+    String unit,
+    String source,
+  ) {
+    return '₹$rate/$unit, $source';
+  }
+
+  @override
+  String priceRequestAskedValueDynamic(
+    String rate,
+    String unit,
+    String percent,
+  ) {
+    return '₹$rate/$unit  ($percent)';
+  }
+
+  @override
+  String priceRequestAskedByDynamic(String name, String time) {
+    return '$name · $time';
+  }
+
+  @override
+  String priceRequestWaitingMessageDynamic(
+    String rate,
+    String unit,
+    String item,
+  ) {
+    return 'તેઓ નિર્ણય કરે ત્યારે તમને સૂચના મળશે. ત્યાં સુધી ભાવ ₹$rate/$unit રહેશે અને આ કેન્દ્ર પર $item માટે ફરી વિનંતી કરી શકશો નહીં.';
+  }
 }

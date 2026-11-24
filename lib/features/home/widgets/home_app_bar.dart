@@ -17,17 +17,23 @@ class HomeAppBar extends StatelessWidget {
     this.onWalletTap,
     this.showWalletAction = true,
     this.notificationUnreadCount = 0,
+    this.centerCode,
   });
 
   final VoidCallback? onNotificationTap;
   final VoidCallback? onWalletTap;
   final bool showWalletAction;
   final int notificationUnreadCount;
+  final String? centerCode;
 
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toString();
-    final today = DateFormat('EEE, dd MMM yyyy', locale).format(DateTime.now());
+    final today = DateFormat('EEE, dd MMM', locale).format(DateTime.now());
+    final normalizedCenterCode = centerCode?.trim();
+    final dateAndCenter = normalizedCenterCode?.isNotEmpty == true
+        ? '$today · $normalizedCenterCode'
+        : today;
 
     return ConstrainedBox(
       constraints: const BoxConstraints(
@@ -60,7 +66,7 @@ class HomeAppBar extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  today,
+                  dateAndCenter,
                   key: const Key('home-today-date'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

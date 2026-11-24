@@ -32,7 +32,7 @@ class CollectionDetailInfoCard extends StatelessWidget {
           label,
           style: AppTextStyles.semiboldH8_16.copyWith(color: AppColors.cool600),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Row(
           children: [
             if (icon != null) ...[icon!, const SizedBox(width: 6)],

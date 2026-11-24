@@ -8,17 +8,27 @@ enum PriceRequestState { waiting, approved, rejected }
 class PriceMaterialUiModel {
   const PriceMaterialUiModel({
     required this.kind,
-    required this.amount,
+    required this.itemId,
+    required this.name,
+    required this.categoryName,
+    required this.unitCode,
+    required this.rate,
+    required this.source,
     required this.accent,
     required this.background,
     required this.iconAsset,
     required this.openIconAsset,
-    this.waitingAmount,
+    this.waitingRate,
   });
 
   final PriceMaterialKind kind;
-  final String? amount;
-  final String? waitingAmount;
+  final String itemId;
+  final String name;
+  final String categoryName;
+  final String unitCode;
+  final double? rate;
+  final String source;
+  final double? waitingRate;
   final Color accent;
   final Color background;
   final String iconAsset;
@@ -26,18 +36,20 @@ class PriceMaterialUiModel {
 }
 
 @immutable
-class PriceRequestUiModel {
-  const PriceRequestUiModel({
-    required this.kind,
-    required this.oldRate,
-    required this.newRate,
-    required this.percent,
-    required this.state,
+class PriceRequestContext {
+  const PriceRequestContext({
+    required this.itemId,
+    required this.itemName,
+    required this.unitCode,
+    this.currentRate,
+    this.fromName,
+    this.fromLevel,
   });
 
-  final PriceMaterialKind kind;
-  final String oldRate;
-  final String newRate;
-  final String percent;
-  final PriceRequestState state;
+  final String itemId;
+  final String itemName;
+  final String unitCode;
+  final double? currentRate;
+  final String? fromName;
+  final String? fromLevel;
 }

@@ -64,11 +64,23 @@ class CollectionMaterialCard extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                item.name ?? item.itemId,
-                style: AppTextStyles.boldH8_14.copyWith(
-                  color: AppColors.cool950,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.displayName ?? item.itemId,
+                    style: AppTextStyles.boldH8_14.copyWith(
+                      color: AppColors.cool950,
+                    ),
+                  ),
+                  if (item.standardNameBeneathAlias != null)
+                    Text(
+                      item.standardNameBeneathAlias!,
+                      style: AppTextStyles.regularB8_12.copyWith(
+                        color: AppColors.neutral600,
+                      ),
+                    ),
+                ],
               ),
             ),
           ],

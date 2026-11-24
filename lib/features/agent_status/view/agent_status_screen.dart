@@ -21,12 +21,10 @@ class _AgentStatusScreenState extends State<AgentStatusScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = LocalQueryController(
-      () async {
-        final centerId = await EerlLocalRepository.instance.activeCenterId;
-        return EerlLocalRepository.instance.getAgentStatus(centerId: centerId);
-      },
-    )..load();
+    _controller = LocalQueryController(() async {
+      final centerId = await EerlLocalRepository.instance.activeCenterId;
+      return EerlLocalRepository.instance.getAgentStatus(centerId: centerId);
+    })..load();
     EerlLocalRepository.instance.activeCenterNotifier.addListener(_reload);
   }
 

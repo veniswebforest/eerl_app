@@ -61,12 +61,16 @@ flutter:
     - assets/icons/driver/pickup/
     - assets/icons/driver/issues/
     - assets/icons/driver/home_v2/
+    - assets/icons/driver/profile/
     - assets/icons/driver/stops_v2/
     - assets/icons/driver/correction/
     - assets/icons/driver/stop_detail_v2/
     - assets/icons/driver/location_flow/
     - assets/icons/driver/pickup_success_v2/
     - assets/icons/driver/trip_summary/
+    - assets/icons/driver_labour/
+    - assets/icons/trips_plan/
+    - assets/icons/route_detail/
     - assets/icons/supervisor/home/
     - assets/icons/supervisor/attention/
     - assets/icons/supervisor/flags/
@@ -78,6 +82,8 @@ flutter:
     - assets/icons/supervisor/help_support/
     - assets/icons/supervisor/end_my_day/
     - assets/images/driver/pickup/
+    - assets/images/driver/profile/
+    - assets/images/driver_labour/
     - assets/images/driver/stops_v2/
     - assets/images/driver/location_flow/
     - assets/images/driver/pickup_success_v2/

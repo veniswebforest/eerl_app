@@ -532,6 +532,9 @@ class OutgoingSyncService {
     if (table == DatabaseTables.categoryRequests) {
       return _categoryRequestServerValues(data);
     }
+    if (table == DatabaseTables.priceRequests) {
+      return _priceRequestServerValues(data);
+    }
     if (table == DatabaseTables.ragpickers) {
       return _ragpickerServerValues(data);
     }
@@ -599,6 +602,36 @@ class OutgoingSyncService {
       if (reviewBy is Map && reviewBy['name'] != null)
         'verified_by_name': reviewBy['name'],
       if (review is Map && review['at'] != null) 'verified_at': review['at'],
+    };
+  }
+
+  Map<String, Object?> _priceRequestServerValues(Map<Object?, Object?> data) {
+    final currentFrom = data['currentFrom'];
+    final raisedBy = data['raisedBy'];
+    final decidedBy = data['decidedBy'];
+    return <String, Object?>{
+      if (data['centerId'] != null) 'center_id': data['centerId'],
+      if (data['materialItemId'] != null) 'item_id': data['materialItemId'],
+      if (data.containsKey('currentRate')) 'current_rate': data['currentRate'],
+      if (currentFrom is Map && currentFrom.containsKey('name'))
+        'current_from_name': currentFrom['name'],
+      if (currentFrom is Map && currentFrom.containsKey('level'))
+        'current_from_level': currentFrom['level'],
+      if (data['requestedRate'] != null)
+        'requested_rate': data['requestedRate'],
+      if (data['reason'] != null) 'reason': data['reason'],
+      if (data['status'] != null) 'status': data['status'],
+      if (raisedBy is Map && raisedBy['id'] != null)
+        'raised_by_id': raisedBy['id'],
+      if (raisedBy is Map && raisedBy['name'] != null)
+        'raised_by_name': raisedBy['name'],
+      if (data['raisedAt'] != null) 'raised_at': data['raisedAt'],
+      if (decidedBy is Map && decidedBy['name'] != null)
+        'decided_by_name': decidedBy['name'],
+      if (data.containsKey('decidedAt')) 'decided_at': data['decidedAt'],
+      if (data.containsKey('rejectionReason'))
+        'rejection_reason': data['rejectionReason'],
+      if (data['updatedAt'] != null) 'updated_at': data['updatedAt'],
     };
   }
 
@@ -2046,6 +2079,7 @@ class OutgoingSyncService {
     DatabaseTables.expenses,
     DatabaseTables.cashRequests,
     DatabaseTables.categoryRequests,
+    DatabaseTables.priceRequests,
     DatabaseTables.transfers,
     DatabaseTables.tasks,
     DatabaseTables.requests,

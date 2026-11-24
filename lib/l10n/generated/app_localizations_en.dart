@@ -567,6 +567,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get collectionTypes => 'Collection types';
 
   @override
+  String get collectionTypesAssignedHint =>
+      'Only the types you collect at this centre';
+
+  @override
   String get d2d => 'D2D';
 
   @override
@@ -1563,6 +1567,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionDetailId => 'Collection ID:';
+
+  @override
+  String get collectionDetailSlipNumber => 'Slip number';
+
+  @override
+  String get collectionDetailDocumentNumber => 'Document number';
+
+  @override
+  String get collectionDetailDocumentPending => 'Given after sync';
 
   @override
   String get collectionDetailDateTime => 'Date & Time';
@@ -4626,4 +4639,86 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get drawerSupervisorPrices => 'Prices';
+
+  @override
+  String pricesFromSource(String name, String level) {
+    return 'From $name ($level)';
+  }
+
+  @override
+  String get pricesNoMaterials => 'No prices are available for this centre.';
+
+  @override
+  String get priceRequestsEmpty => 'No price requests here.';
+
+  @override
+  String priceRequestApprovedByPerson(String name) {
+    return 'Approved by $name.';
+  }
+
+  @override
+  String priceRequestRejectedByPerson(String name, String time) {
+    return 'By $name · $time';
+  }
+
+  @override
+  String priceRequestReasonValue(String reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get priceRequestAlreadyWaiting =>
+      'A change of this price is already waiting for a decision.';
+
+  @override
+  String get priceRequestSaved => 'Price change request saved locally.';
+
+  @override
+  String get priceRequestLoadFailed => 'Price data could not be loaded.';
+
+  @override
+  String get priceAskInvalidRate =>
+      'Enter a price from 0 to 99,999,999.99 with up to 2 decimals.';
+
+  @override
+  String get priceAskInvalidReason =>
+      'Enter a reason from 1 to 1000 characters.';
+
+  @override
+  String get priceAskSubmitFailed => 'The price request could not be saved.';
+
+  @override
+  String get priceAskMaxCharacters1000 => 'Max 1000 Characters';
+
+  @override
+  String priceRequestCurrentValueDynamic(
+    String rate,
+    String unit,
+    String source,
+  ) {
+    return '₹$rate/$unit, $source';
+  }
+
+  @override
+  String priceRequestAskedValueDynamic(
+    String rate,
+    String unit,
+    String percent,
+  ) {
+    return '₹$rate/$unit  ($percent)';
+  }
+
+  @override
+  String priceRequestAskedByDynamic(String name, String time) {
+    return '$name · $time';
+  }
+
+  @override
+  String priceRequestWaitingMessageDynamic(
+    String rate,
+    String unit,
+    String item,
+  ) {
+    return 'You get a notification when they decide. Until then the price stays ₹$rate/$unit, and you cannot ask again for $item at this centre.';
+  }
 }

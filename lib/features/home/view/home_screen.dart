@@ -144,26 +144,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             0,
                           ),
                           sliver: SliverToBoxAdapter(
-                            child: FutureBuilder<int>(
-                              future: EerlLocalRepository.instance
-                                  .getActiveRoleUnreadNotificationCount(),
-                              builder: (context, snapshot) =>
-                                  _CenteredHomeContent(
-                                    child: HomeAppBar(
-                                      notificationUnreadCount:
-                                          snapshot.data ?? 0,
-                                      onNotificationTap: () async {
-                                        await context.push(
-                                          AppRoutes.notifications,
-                                        );
-                                        if (mounted) setState(() {});
-                                      },
-                                      onWalletTap: () =>
-                                          context.push(AppRoutes.wallet),
-                                      showWalletAction: !isSupervisor,
-                                    ),
-                                  ),
-                            ),
+                            child:
+                                FutureBuilder<
+                                  ({int unreadCount, String? centerCode})
+                                >(
+                                  future: _homeHeaderContext(),
+                                  builder: (context, snapshot) =>
+                                      _CenteredHomeContent(
+                                        child: HomeAppBar(
+                                          notificationUnreadCount:
+                                              snapshot.data?.unreadCount ?? 0,
+                                          centerCode: snapshot.data?.centerCode,
+                                          onNotificationTap: () async {
+                                            await context.push(
+                                              AppRoutes.notifications,
+                                            );
+                                            if (mounted) setState(() {});
+                                          },
+                                          onWalletTap: () =>
+                                              context.push(AppRoutes.wallet),
+                                          showWalletAction: !isSupervisor,
+                                        ),
+                                      ),
+                                ),
                           ),
                         ),
                         const SliverToBoxAdapter(child: SizedBox(height: 24)),
@@ -442,6 +445,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (center.id == centerId) return center.name;
     }
     return centers.isEmpty ? '' : centers.first.name;
+  }
+
+  Future<({int unreadCount, String? centerCode})> _homeHeaderContext() async {
+    final repository = EerlLocalRepository.instance;
+    final centerId = await repository.activeCenterId;
+    final center = centerId == null
+        ? null
+        : await repository.getCenter(centerId);
+    return (
+      unreadCount: await repository.getActiveRoleUnreadNotificationCount(),
+      centerCode: center?.code,
+    );
   }
 
   Future<({String centerName, bool canSwitchRole})> _homeRoleContext() async {

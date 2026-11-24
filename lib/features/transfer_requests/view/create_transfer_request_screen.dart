@@ -200,9 +200,10 @@ class _CreateTransferRequestScreenState
         .where(
           (stock) =>
               normalizedQuery.isEmpty ||
-              (stock.name ?? stock.itemId).toLowerCase().contains(
+              (stock.displayName ?? stock.itemId).toLowerCase().contains(
                 normalizedQuery,
-              ),
+              ) ||
+              (stock.name ?? '').toLowerCase().contains(normalizedQuery),
         )
         .toList(growable: false);
 
@@ -250,7 +251,8 @@ class _CreateTransferRequestScreenState
                     );
                     return TransferMaterialCard(
                       key: Key('transfer-material-${stock.itemId}'),
-                      name: stock.name ?? stock.itemId,
+                      name: stock.displayName ?? stock.itemId,
+                      standardName: stock.standardNameBeneathAlias,
                       capacity: context.l10n.transferAvailableStock(
                         '${stock.qty.toStringAsFixed(2)} ${stock.unitCode ?? 'KG'}',
                       ),

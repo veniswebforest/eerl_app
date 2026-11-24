@@ -192,6 +192,16 @@ abstract final class DriverColors {
   static const Color surface = neutral50;
   static const Color purple600 = Color(0xFF7A3FD1);
   static const Color purple50 = Color(0xFFF1EAFC);
+  static const Color slate50 = Color(0xFFEEF1F4);
+  static const Color slate600 = Color(0xFF5B6470);
+  static const Color ink900 = Color(0xFF1F2933);
+  static const Color mapBackground = Color(0xFFE7EEE9);
+  static const Color stopZeroBackground = Color(0xFFF6F7F9);
+  static const Color stopZeroBorder = Color(0xFFCFD6DC);
+  static const Color stopCancelledBackground = Color(0xFFFAF7FF);
+  static const Color stopCancelledBorder = Color(0xFFD9C8F4);
+  static const Color stopInactiveBackground = Color(0xFFF1F3F5);
+  static const Color stopInactiveBorder = Color(0xFFDDE2E6);
   static const Color yellow700 = Color(0xFFE09A00);
   static const Color blue600 = Color(0xFF2F6FDB);
   static const Color pink600 = Color(0xFFC2185B);

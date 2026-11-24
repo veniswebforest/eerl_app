@@ -663,7 +663,9 @@ class _InformationCard extends StatelessWidget {
             ],
             showDivider: !isSupervisor || isRejected,
           ),
-          if (!(isSupervisor && isRejected))
+          if (!(isSupervisor && isRejected)) ...[
+            // The design spaces From and To by 12px when no divider sits between.
+            if (isSupervisor && !isRejected) const SizedBox(height: 8),
             TransferDetailRow(
               label: context.l10n.transferDetailToLocation,
               values: [
@@ -674,6 +676,7 @@ class _InformationCard extends StatelessWidget {
                         : '-'),
               ],
             ),
+          ],
           TransferDetailRow(
             label: context.l10n.transferDetailAvailableStock,
             values: [
@@ -693,7 +696,7 @@ class _InformationCard extends StatelessWidget {
             values: [
               transfer == null
                   ? context.l10n.transferDetailDateTimeValue
-                  : _formatTransferDateTime(transfer!.requestedAt),
+                  : _formatRequestDate(transfer!.requestedAt),
             ],
           ),
           TransferDetailRow(
@@ -715,8 +718,8 @@ class _InformationCard extends StatelessWidget {
                 transfer == null
                     ? context.l10n.transferDetailEstimatedExpenseValue
                     : (transfer?.estimatedExpense == null
-                        ? '-'
-                        : '₹ ${transfer!.estimatedExpense! % 1 == 0 ? transfer!.estimatedExpense!.toStringAsFixed(0) : transfer!.estimatedExpense!.toStringAsFixed(2)}'),
+                          ? '-'
+                          : '₹ ${transfer!.estimatedExpense! % 1 == 0 ? transfer!.estimatedExpense!.toStringAsFixed(0) : transfer!.estimatedExpense!.toStringAsFixed(2)}'),
               ],
             ),
           Text(
@@ -1249,11 +1252,23 @@ class _ItemsCard extends StatelessWidget {
               key: ValueKey(items[index].id),
               children: [
                 Expanded(
-                  child: Text(
-                    items[index].name ?? items[index].itemId,
-                    style: AppTextStyles.boldH8_14.copyWith(
-                      color: AppColors.primary500,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        items[index].displayName ?? items[index].itemId,
+                        style: AppTextStyles.boldH8_14.copyWith(
+                          color: AppColors.primary500,
+                        ),
+                      ),
+                      if (items[index].standardNameBeneathAlias != null)
+                        Text(
+                          items[index].standardNameBeneathAlias!,
+                          style: AppTextStyles.mediumSH9_12.copyWith(
+                            color: AppColors.neutral600,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Text(
@@ -1358,6 +1373,12 @@ class _TimelineCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Request Information date, as designed: "22 October • 11:15 AM".
+String _formatRequestDate(String value) {
+  final date = DateTime.tryParse(value)?.toLocal();
+  return date == null ? value : DateFormat('d MMMM • hh:mm a').format(date);
 }
 
 String _formatTransferDateTime(String value) {

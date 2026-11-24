@@ -187,7 +187,7 @@ class _Content extends StatelessWidget {
                   onTap: () => Navigator.of(context).maybePop(),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
               if (approved) ...[
                 _Banner(
                   text: context.l10n.collectionDetailApproved,
@@ -212,9 +212,16 @@ class _Content extends StatelessWidget {
                 const SizedBox(height: 12),
               ],
               CollectionDetailInfoCard(
-                label: context.l10n.collectionDetailId,
+                label: context.l10n.collectionDetailSlipNumber,
                 value: data.collectionNumber,
               ),
+              if (data.documentNumber case final documentNumber?) ...[
+                const SizedBox(height: 10),
+                CollectionDetailInfoCard(
+                  label: context.l10n.collectionDetailDocumentNumber,
+                  value: documentNumber,
+                ),
+              ],
               const SizedBox(height: 10),
               CollectionDetailInfoCard(
                 label: context.l10n.verificationDetailCollectionCenter,
@@ -329,14 +336,14 @@ class _BackButton extends StatelessWidget {
   Widget build(BuildContext context) => InkWell(
     key: const Key('verification-detail-back'),
     onTap: onTap,
-    borderRadius: BorderRadius.circular(10),
+    borderRadius: BorderRadius.circular(12),
     child: Container(
       width: 40,
       height: 40,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: AppColors.primary500,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: SvgPicture.asset(CollectionDetailAssets.back),
     ),
@@ -520,6 +527,7 @@ class _Actions extends StatelessWidget {
 class _Data {
   const _Data({
     required this.collectionNumber,
+    required this.documentNumber,
     required this.center,
     required this.date,
     required this.channel,
@@ -537,6 +545,7 @@ class _Data {
     required this.rejectionRemarks,
   });
   final String collectionNumber;
+  final String? documentNumber;
   final String center;
   final String date;
   final String channel;
@@ -577,6 +586,11 @@ class _Data {
       collectionNumber:
           collection?.slipNumber ??
           context.l10n.verificationDetailCollectionIdValue,
+      documentNumber: collection == null
+          ? context.l10n.collectionDetailDocumentPending
+          : collection.documentNumber(
+              context.l10n.collectionDetailDocumentPending,
+            ),
       center: collection?.centerName ?? context.l10n.verificationSuratSouth,
       date: parsed == null
           ? context.l10n.collectionDetailDateValue

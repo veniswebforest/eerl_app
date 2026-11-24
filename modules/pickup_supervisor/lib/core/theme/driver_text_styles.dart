@@ -17,7 +17,6 @@ abstract final class DriverTextStyles {
     height: 22 / 18,
   );
 
-
   static const semibold16 = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 16,
@@ -36,11 +35,22 @@ abstract final class DriverTextStyles {
     fontWeight: FontWeight.w600,
     height: 16 / 12,
   );
+  static const medium16 = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    height: 20 / 16,
+  );
   static const medium14 = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 14,
     fontWeight: FontWeight.w500,
     height: 18 / 14,
+  );
+  static const medium13 = TextStyle(
+    fontFamily: _fontFamily,
+    fontSize: 13,
+    fontWeight: FontWeight.w500,
   );
   static const medium12 = TextStyle(
     fontFamily: _fontFamily,

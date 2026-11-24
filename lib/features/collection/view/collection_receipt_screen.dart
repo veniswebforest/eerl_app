@@ -1186,9 +1186,14 @@ class _CollectionReceiptScreenState extends State<CollectionReceiptScreen> {
                   TextSpan(
                     children: [
                       TextSpan(
-                        text: item.name ?? item.itemId,
+                        text: item.displayName ?? item.itemId,
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
+                      if (item.standardNameBeneathAlias != null)
+                        TextSpan(
+                          text: '\n${item.standardNameBeneathAlias}',
+                          style: const TextStyle(fontWeight: FontWeight.w400),
+                        ),
                       TextSpan(
                         text: '  $detail',
                         style: const TextStyle(fontWeight: FontWeight.w400),

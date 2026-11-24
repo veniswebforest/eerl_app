@@ -523,8 +523,11 @@ class PriceRequestModel {
     required this.updatedAt,
     required this.syncState,
     this.itemName,
+    this.centerName,
     this.unitCode,
     this.currentRate,
+    this.currentFromName,
+    this.currentFromLevel,
     this.rejectionReason,
     this.decidedByName,
     this.decidedAt,
@@ -532,10 +535,13 @@ class PriceRequestModel {
 
   final String id;
   final String centerId;
+  final String? centerName;
   final String itemId;
   final String? itemName;
   final String? unitCode;
   final double? currentRate;
+  final String? currentFromName;
+  final String? currentFromLevel;
   final double requestedRate;
   final String reason;
   final String status;
@@ -551,10 +557,13 @@ class PriceRequestModel {
   factory PriceRequestModel.fromMap(DbMap map) => PriceRequestModel(
     id: map['id'] as String,
     centerId: map['center_id'] as String,
+    centerName: map['center_name'] as String?,
     itemId: map['item_id'] as String,
     itemName: map['item_name'] as String?,
     unitCode: map['unit_code'] as String?,
     currentRate: (map['current_rate'] as num?)?.toDouble(),
+    currentFromName: map['current_from_name'] as String?,
+    currentFromLevel: map['current_from_level'] as String?,
     requestedRate: _double(map['requested_rate']),
     reason: map['reason'] as String,
     status: map['status'] as String,
@@ -651,6 +660,14 @@ class CollectionModel {
   final String status;
   final String? slipNumber;
   final String? referenceNumber;
+
+  /// What the Document number card says: the number, [pendingLabel] while a
+  /// submitted collection waits to sync, or null (hide the card).
+  String? documentNumber(String pendingLabel) =>
+      referenceNumber ??
+      (status.toUpperCase() != 'DRAFT' && syncState == 'pending'
+          ? pendingLabel
+          : null);
   final String? collectedAt;
   final String? vehicleId;
   final String? vehiclePlateNumber;
@@ -771,6 +788,7 @@ class CollectionItemModel {
     this.unitFactor,
     this.unitQty,
     this.unitVerifiedQty,
+    this.localName,
   });
   final String id;
   final String collectionId;
@@ -789,6 +807,16 @@ class CollectionItemModel {
   final double? unitFactor;
   final double? unitQty;
   final double? unitVerifiedQty;
+  final String? localName;
+
+  /// The centre's own name for the material when it has one, else the standard name.
+  String? get displayName =>
+      localName?.trim().isNotEmpty == true ? localName!.trim() : name;
+
+  /// The standard name, shown small beneath an alias so it can be matched.
+  String? get standardNameBeneathAlias =>
+      localName?.trim().isNotEmpty == true ? name : null;
+
   factory CollectionItemModel.fromMap(DbMap map) => CollectionItemModel(
     id: map['id'] as String,
     collectionId: map['collection_id'] as String,
@@ -807,6 +835,7 @@ class CollectionItemModel {
     unitFactor: (map['unit_factor'] as num?)?.toDouble(),
     unitQty: (map['unit_qty'] as num?)?.toDouble(),
     unitVerifiedQty: (map['unit_verified_qty'] as num?)?.toDouble(),
+    localName: map['local_name'] as String?,
   );
   DbMap toMap() => {
     'id': id,
@@ -1207,6 +1236,7 @@ class TransferItemModel {
     this.dispatchedQty,
     this.name,
     this.unitCode,
+    this.localName,
   });
   final String id;
   final String transferId;
@@ -1215,6 +1245,16 @@ class TransferItemModel {
   final double? dispatchedQty;
   final String? name;
   final String? unitCode;
+  final String? localName;
+
+  /// The centre's own name for the material when it has one, else the standard name.
+  String? get displayName =>
+      localName?.trim().isNotEmpty == true ? localName!.trim() : name;
+
+  /// The standard name, shown small beneath the centre's name.
+  String? get standardNameBeneathAlias =>
+      localName?.trim().isNotEmpty == true ? name : null;
+
   factory TransferItemModel.fromMap(DbMap map) => TransferItemModel(
     id: map['id'] as String,
     transferId: map['transfer_id'] as String,
@@ -1223,6 +1263,7 @@ class TransferItemModel {
     dispatchedQty: (map['dispatched_qty'] as num?)?.toDouble(),
     name: map['name'] as String?,
     unitCode: map['unit_code'] as String?,
+    localName: map['local_name'] as String?,
   );
   DbMap toMap() => {
     'id': id,
@@ -1626,6 +1667,8 @@ class StockModel {
     this.unitCode,
     this.centerName,
     this.imageUrl,
+    this.localName,
+    this.binLabel,
   });
   final String id;
   final String centerId;
@@ -1636,6 +1679,20 @@ class StockModel {
   final String? unitCode;
   final String? centerName;
   final String? imageUrl;
+  final String? localName;
+
+  /// Where the stock sits, e.g. "RM-01". The server does not send one today,
+  /// so this stays null and the card shows no bin until it does.
+  final String? binLabel;
+
+  /// The centre's own name for the material when it has one, else the standard name.
+  String? get displayName =>
+      localName?.trim().isNotEmpty == true ? localName!.trim() : name;
+
+  /// The standard name, shown small beneath the centre's name.
+  String? get standardNameBeneathAlias =>
+      localName?.trim().isNotEmpty == true ? name : null;
+
   factory StockModel.fromMap(DbMap map) => StockModel(
     id: map['id'] as String,
     centerId: map['center_id'] as String,
@@ -1646,6 +1703,8 @@ class StockModel {
     unitCode: map['unit_code'] as String?,
     centerName: map['center_name'] as String?,
     imageUrl: map['image_url'] as String?,
+    localName: map['local_name'] as String?,
+    binLabel: map['bin'] as String?,
   );
   DbMap toMap() => {
     'id': id,

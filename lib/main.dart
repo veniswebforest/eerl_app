@@ -5,7 +5,7 @@ import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pickup_supervisor/driver/services/driver_photo_capture.dart';
+import 'package:pickup_supervisor/features/driver/service/driver_photo_capture.dart';
 import 'package:provider/provider.dart';
 
 import 'core/local_database/app_database.dart';

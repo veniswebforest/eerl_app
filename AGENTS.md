@@ -7,7 +7,7 @@ Before analyzing, planning, answering, editing files, or running commands for **
 1. `docs/project-context/schema-and-queries.md`
 2. `docs/project-context/overall-requirements.md`
 
-Treat these snapshots as the canonical project requirements and implementation reference.
+Treat these snapshots as the canonical project requirements and implementation reference.   
 
 - A direct instruction in the user's current request overrides these snapshots.
 - Within a snapshot, a later-dated change overrides an older conflicting instruction.

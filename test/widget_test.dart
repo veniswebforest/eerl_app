@@ -25,6 +25,8 @@ import 'package:eerl_app/features/records/view/records_tab_screen.dart';
 import 'package:eerl_app/features/wallet/view/wallet_tab_screen.dart';
 import 'package:eerl_app/features/wallet/widgets/expense_claim_card.dart';
 import 'package:eerl_app/features/supervisor_expense/view/supervisor_expense_module_screen.dart';
+import 'package:eerl_app/features/verification/model/verification_entry.dart';
+import 'package:eerl_app/features/verification/view/verification_detail_screen.dart';
 import 'package:eerl_app/features/profile/view/profile_screen.dart';
 import 'package:eerl_app/features/profile/model/logout_data_status.dart';
 import 'package:eerl_app/features/profile/widgets/logout_confirmation_dialog.dart';
@@ -979,6 +981,53 @@ void main() {
       },
     );
   }
+
+  testWidgets('Agent collection detail includes Figma metadata cards', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: CollectionDetailScreen(status: CollectionDetailStatus.approved),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Verified & Approved'), findsOneWidget);
+    expect(find.text('Slip number'), findsOneWidget);
+    expect(find.text('Document number'), findsOneWidget);
+    expect(find.text('Vehicle Number'), findsOneWidget);
+    expect(find.text('Payment Type'), findsOneWidget);
+    expect(find.text('Preview Slip'), findsOneWidget);
+  });
+
+  testWidgets('Supervisor collection detail includes Figma metadata cards', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: VerificationDetailScreen(
+          collectionId: 'figma-preview-collection',
+          initialStatus: VerificationDetailStatus.pending,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Slip number'), findsOneWidget);
+    expect(find.text('Document number'), findsOneWidget);
+    expect(find.text('Collection Center:'), findsOneWidget);
+    expect(find.text('Vehicle Number'), findsOneWidget);
+    expect(find.text('Payment Type'), findsOneWidget);
+    expect(find.byKey(const Key('verification-reject-button')), findsOneWidget);
+    expect(
+      find.byKey(const Key('verification-approve-button')),
+      findsOneWidget,
+    );
+  });
 
   testWidgets(
     'Records history card opens collection detail and hides navigation',

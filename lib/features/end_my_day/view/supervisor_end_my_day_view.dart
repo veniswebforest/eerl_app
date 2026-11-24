@@ -85,7 +85,9 @@ class SupervisorEndMyDayView extends StatelessWidget {
                             key: const Key('supervisor-end-my-day-button'),
                             onPressed: () async {
                               final shouldShare =
-                                  await showSupervisorEndDayConfirmDialog(context);
+                                  await showSupervisorEndDayConfirmDialog(
+                                    context,
+                                  );
                               if (context.mounted && shouldShare == true) {
                                 Navigator.of(context).pop();
                               }

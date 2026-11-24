@@ -5,6 +5,7 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/features/prices/model/price_ui_models.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 
 const pricesAssetPath = 'assets/icons/prices';
 
@@ -106,59 +107,81 @@ class PricesHeader extends StatelessWidget {
 }
 
 class PriceCentreSelector extends StatelessWidget {
-  const PriceCentreSelector({super.key, this.onTap});
-  final VoidCallback? onTap;
+  const PriceCentreSelector({
+    required this.centers,
+    required this.activeCenterId,
+    required this.onSelected,
+    super.key,
+  });
+  final List<CenterModel> centers;
+  final String? activeCenterId;
+  final ValueChanged<String> onSelected;
 
   @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(10),
-    child: Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: AppColors.neutral50,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.primary500),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: AppColors.primary50,
-              shape: BoxShape.circle,
+  Widget build(BuildContext context) {
+    final selected = centers.cast<CenterModel?>().firstWhere(
+      (center) => center?.id == activeCenterId,
+      orElse: () => centers.isEmpty ? null : centers.first,
+    );
+    return PopupMenuButton<String>(
+      enabled: centers.length > 1,
+      onSelected: onSelected,
+      itemBuilder: (_) => [
+        for (final center in centers)
+          PopupMenuItem<String>(value: center.id, child: Text(center.name)),
+      ],
+      child: Container(
+        height: 60,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.neutral50,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: AppColors.primary500),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: AppColors.primary50,
+                shape: BoxShape.circle,
+              ),
+              child: SvgPicture.asset('$pricesAssetPath/centre.svg'),
             ),
-            child: SvgPicture.asset('$pricesAssetPath/centre.svg'),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              context.l10n.pricesCentreSuratSouth,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.semiboldH9_14.copyWith(
-                color: AppColors.neutral950,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                selected?.name ?? context.l10n.pricesCentreSuratSouth,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.semiboldH9_14.copyWith(
+                  color: AppColors.neutral950,
+                ),
               ),
             ),
-          ),
-          RotatedBox(
-            quarterTurns: 1,
-            child: SvgPicture.asset(
-              '$pricesAssetPath/chevron.svg',
-              width: 24,
-              height: 24,
+            RotatedBox(
+              quarterTurns: 1,
+              child: SvgPicture.asset(
+                '$pricesAssetPath/chevron.svg',
+                width: 24,
+                height: 24,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class PriceRequestsBanner extends StatelessWidget {
-  const PriceRequestsBanner({required this.onTap, super.key});
+  const PriceRequestsBanner({
+    required this.waitingCount,
+    required this.onTap,
+    super.key,
+  });
+  final int waitingCount;
   final VoidCallback onTap;
 
   @override
@@ -187,7 +210,7 @@ class PriceRequestsBanner extends StatelessWidget {
             ),
           ),
           Text(
-            context.l10n.pricesWaitingCount(1),
+            context.l10n.pricesWaitingCount(waitingCount),
             style: AppTextStyles.mediumSH8_14.copyWith(
               color: AppColors.neutral600,
             ),
@@ -210,21 +233,6 @@ class PriceMaterialCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final name = switch (material.kind) {
-      PriceMaterialKind.pet => l10n.pricesPetBottles,
-      PriceMaterialKind.hdpe => l10n.pricesHdpeRigid,
-      PriceMaterialKind.pp => l10n.pricesPpHardPlastics,
-      PriceMaterialKind.cardboard => l10n.pricesCardboard,
-    };
-    final type = material.kind == PriceMaterialKind.cardboard
-        ? l10n.pricesPaperType
-        : l10n.pricesPlasticType;
-    final source = switch (material.kind) {
-      PriceMaterialKind.pet => l10n.pricesFromSmc,
-      PriceMaterialKind.hdpe => l10n.pricesOwnPrice,
-      PriceMaterialKind.pp => l10n.pricesFromEvsk,
-      PriceMaterialKind.cardboard => l10n.pricesAskForOne,
-    };
     return Material(
       color: AppColors.neutral50,
       elevation: 3,
@@ -258,13 +266,13 @@ class PriceMaterialCard extends StatelessWidget {
                           TextSpan(
                             children: [
                               TextSpan(
-                                text: name,
+                                text: material.name,
                                 style: AppTextStyles.semiboldH6_20.copyWith(
                                   color: AppColors.neutral950,
                                 ),
                               ),
                               TextSpan(
-                                text: ' $type',
+                                text: ' (${material.categoryName})',
                                 style: AppTextStyles.semiboldH9_14.copyWith(
                                   color: AppColors.neutral900,
                                 ),
@@ -285,22 +293,26 @@ class PriceMaterialCard extends StatelessWidget {
                     runSpacing: 4,
                     children: [
                       Text(
-                        material.amount == null
+                        material.rate == null
                             ? l10n.pricesNoPrice
-                            : l10n.pricesAmountPerKg(material.amount!),
+                            : l10n
+                                  .pricesAmountPerKg(
+                                    material.rate!.toStringAsFixed(2),
+                                  )
+                                  .replaceAll('/KG', '/${material.unitCode}'),
                         style: AppTextStyles.boldH6_20.copyWith(
                           color: AppColors.neutral900,
                         ),
                       ),
                       Text(
-                        source,
+                        material.source,
                         style: AppTextStyles.semiboldH9_14.copyWith(
                           color: material.accent,
                         ),
                       ),
                     ],
                   ),
-                  if (material.waitingAmount case final waiting?) ...[
+                  if (material.waitingRate case final waiting?) ...[
                     const SizedBox(height: 8),
                     DecoratedBox(
                       decoration: BoxDecoration(
@@ -313,7 +325,7 @@ class PriceMaterialCard extends StatelessWidget {
                           vertical: 2,
                         ),
                         child: Text(
-                          l10n.pricesAskedWaiting(waiting),
+                          l10n.pricesAskedWaiting(waiting.toStringAsFixed(2)),
                           style: const TextStyle(
                             fontFamily: AppTextStyles.fontFamily,
                             fontSize: 12,
@@ -346,10 +358,14 @@ class PriceMaterialCard extends StatelessWidget {
 class PriceRequestTabs extends StatelessWidget {
   const PriceRequestTabs({
     required this.index,
+    required this.waitingCount,
+    required this.decidedCount,
     required this.onChanged,
     super.key,
   });
   final int index;
+  final int waitingCount;
+  final int decidedCount;
   final ValueChanged<int> onChanged;
 
   @override
@@ -371,14 +387,14 @@ class PriceRequestTabs extends StatelessWidget {
       children: [
         Expanded(
           child: _PriceRequestTab(
-            label: context.l10n.priceRequestsWaitingTab(1),
+            label: context.l10n.priceRequestsWaitingTab(waitingCount),
             selected: index == 0,
             onTap: () => onChanged(0),
           ),
         ),
         Expanded(
           child: _PriceRequestTab(
-            label: context.l10n.priceRequestsDecidedTab(2),
+            label: context.l10n.priceRequestsDecidedTab(decidedCount),
             selected: index == 1,
             onTap: () => onChanged(1),
           ),
@@ -429,7 +445,7 @@ class PrimaryPriceButton extends StatelessWidget {
     super.key,
   });
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) => SizedBox(

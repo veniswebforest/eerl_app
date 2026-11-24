@@ -9,14 +9,16 @@ import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/features/collection/model/collection_entry_state.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
+import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'home_assets.dart';
 import 'home_styles.dart';
 
 /// List of available collection types: D2D, MRF Station, Ramp.
 class CollectionTypes extends StatefulWidget {
-  const CollectionTypes({super.key, this.onTypeTap});
+  const CollectionTypes({super.key, this.onTypeTap, this.channelLoader});
 
   final ValueChanged<CollectionType>? onTypeTap;
+  final Future<List<CenterChannelModel>> Function()? channelLoader;
 
   @override
   State<CollectionTypes> createState() => _CollectionTypesState();
@@ -51,15 +53,17 @@ class _CollectionTypesState extends State<CollectionTypes> {
 
   Future<void> _load() async {
     try {
-      final channels = await EerlLocalRepository.instance.getChannels();
+      final channels =
+          await (widget.channelLoader?.call() ??
+              EerlLocalRepository.instance.getChannels());
       if (!mounted) return;
       final types = channels
           .map((channel) => _typeFromChannel(channel.channel))
           .whereType<CollectionType>()
           .toList(growable: false);
-      setState(() => _types = types.isEmpty ? CollectionType.values : types);
+      setState(() => _types = types);
     } catch (_) {
-      if (mounted) setState(() => _types = CollectionType.values);
+      if (mounted) setState(() => _types = const []);
     }
   }
 
@@ -78,6 +82,14 @@ class _CollectionTypesState extends State<CollectionTypes> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(context.l10n.collectionTypes, style: HomeStyles.sectionTitle),
+        const SizedBox(height: 8),
+        Text(
+          context.l10n.collectionTypesAssignedHint,
+          style: AppTextStyles.mediumSH9_12.copyWith(
+            fontSize: 13,
+            color: AppColors.neutral500,
+          ),
+        ),
         const SizedBox(height: 16),
         if (types == null)
           const Center(child: CircularProgressIndicator())

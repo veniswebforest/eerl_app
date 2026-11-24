@@ -152,7 +152,8 @@ class DayCloseCollectionUnit {
     final String unitCode;
     final String? unitName;
     if (rawUnit is Map) {
-      unitCode = rawUnit['code']?.toString() ??
+      unitCode =
+          rawUnit['code']?.toString() ??
           rawUnit['unit']?.toString() ??
           rawUnit['name']?.toString() ??
           '';
@@ -162,12 +163,11 @@ class DayCloseCollectionUnit {
       unitName = null;
     }
 
-    final verified = json.containsKey('verifiedQty') && json['verifiedQty'] != null
+    final verified =
+        json.containsKey('verifiedQty') && json['verifiedQty'] != null
         ? _number(json['verifiedQty'])
         : null;
-    final qty = _number(
-      json['verifiedQty'] ?? json['quantity'] ?? json['qty'],
-    );
+    final qty = _number(json['verifiedQty'] ?? json['quantity'] ?? json['qty']);
 
     return DayCloseCollectionUnit(
       unit: unitCode,

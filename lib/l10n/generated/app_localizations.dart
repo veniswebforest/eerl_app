@@ -1150,6 +1150,12 @@ abstract class AppLocalizations {
   /// **'Collection types'**
   String get collectionTypes;
 
+  /// No description provided for @collectionTypesAssignedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the types you collect at this centre'**
+  String get collectionTypesAssignedHint;
+
   /// No description provided for @d2d.
   ///
   /// In en, this message translates to:
@@ -3027,6 +3033,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Collection ID:'**
   String get collectionDetailId;
+
+  /// No description provided for @collectionDetailSlipNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Slip number'**
+  String get collectionDetailSlipNumber;
+
+  /// No description provided for @collectionDetailDocumentNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Document number'**
+  String get collectionDetailDocumentNumber;
+
+  /// No description provided for @collectionDetailDocumentPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Given after sync'**
+  String get collectionDetailDocumentPending;
 
   /// No description provided for @collectionDetailDateTime.
   ///
@@ -8706,6 +8730,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Prices'**
   String get drawerSupervisorPrices;
+
+  /// No description provided for @pricesFromSource.
+  ///
+  /// In en, this message translates to:
+  /// **'From {name} ({level})'**
+  String pricesFromSource(String name, String level);
+
+  /// No description provided for @pricesNoMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'No prices are available for this centre.'**
+  String get pricesNoMaterials;
+
+  /// No description provided for @priceRequestsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No price requests here.'**
+  String get priceRequestsEmpty;
+
+  /// No description provided for @priceRequestApprovedByPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by {name}.'**
+  String priceRequestApprovedByPerson(String name);
+
+  /// No description provided for @priceRequestRejectedByPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'By {name} · {time}'**
+  String priceRequestRejectedByPerson(String name, String time);
+
+  /// No description provided for @priceRequestReasonValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String priceRequestReasonValue(String reason);
+
+  /// No description provided for @priceRequestAlreadyWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'A change of this price is already waiting for a decision.'**
+  String get priceRequestAlreadyWaiting;
+
+  /// No description provided for @priceRequestSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Price change request saved locally.'**
+  String get priceRequestSaved;
+
+  /// No description provided for @priceRequestLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Price data could not be loaded.'**
+  String get priceRequestLoadFailed;
+
+  /// No description provided for @priceAskInvalidRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a price from 0 to 99,999,999.99 with up to 2 decimals.'**
+  String get priceAskInvalidRate;
+
+  /// No description provided for @priceAskInvalidReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a reason from 1 to 1000 characters.'**
+  String get priceAskInvalidReason;
+
+  /// No description provided for @priceAskSubmitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The price request could not be saved.'**
+  String get priceAskSubmitFailed;
+
+  /// No description provided for @priceAskMaxCharacters1000.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 1000 Characters'**
+  String get priceAskMaxCharacters1000;
+
+  /// No description provided for @priceRequestCurrentValueDynamic.
+  ///
+  /// In en, this message translates to:
+  /// **'₹{rate}/{unit}, {source}'**
+  String priceRequestCurrentValueDynamic(
+    String rate,
+    String unit,
+    String source,
+  );
+
+  /// No description provided for @priceRequestAskedValueDynamic.
+  ///
+  /// In en, this message translates to:
+  /// **'₹{rate}/{unit}  ({percent})'**
+  String priceRequestAskedValueDynamic(
+    String rate,
+    String unit,
+    String percent,
+  );
+
+  /// No description provided for @priceRequestAskedByDynamic.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {time}'**
+  String priceRequestAskedByDynamic(String name, String time);
+
+  /// No description provided for @priceRequestWaitingMessageDynamic.
+  ///
+  /// In en, this message translates to:
+  /// **'You get a notification when they decide. Until then the price stays ₹{rate}/{unit}, and you cannot ask again for {item} at this centre.'**
+  String priceRequestWaitingMessageDynamic(
+    String rate,
+    String unit,
+    String item,
+  );
 }
 
 class _AppLocalizationsDelegate

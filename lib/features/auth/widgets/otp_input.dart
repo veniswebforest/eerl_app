@@ -204,7 +204,8 @@ class _OtpInputState extends State<OtpInput> {
                         FilteringTextInputFormatter.digitsOnly,
                         LengthLimitingTextInputFormatter(1),
                       ],
-                      decoration: const InputDecoration(filled: false,
+                      decoration: const InputDecoration(
+                        filled: false,
                         counterText: '',
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,

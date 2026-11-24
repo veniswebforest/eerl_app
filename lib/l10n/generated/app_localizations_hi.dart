@@ -565,6 +565,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get collectionTypes => 'संग्रह के प्रकार';
 
   @override
+  String get collectionTypesAssignedHint =>
+      'इस केंद्र पर केवल आपके कलेक्शन के प्रकार';
+
+  @override
   String get d2d => 'घर-घर';
 
   @override
@@ -1565,6 +1569,15 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get collectionDetailId => 'संग्रह आईडी:';
+
+  @override
+  String get collectionDetailSlipNumber => 'स्लिप नंबर';
+
+  @override
+  String get collectionDetailDocumentNumber => 'दस्तावेज़ नंबर';
+
+  @override
+  String get collectionDetailDocumentPending => 'सिंक के बाद मिलेगा';
 
   @override
   String get collectionDetailDateTime => 'दिनांक और समय';
@@ -4620,4 +4633,86 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get drawerSupervisorPrices => 'मूल्य';
+
+  @override
+  String pricesFromSource(String name, String level) {
+    return '$name से ($level)';
+  }
+
+  @override
+  String get pricesNoMaterials => 'इस केंद्र के लिए कोई मूल्य उपलब्ध नहीं है।';
+
+  @override
+  String get priceRequestsEmpty => 'यहाँ कोई मूल्य अनुरोध नहीं है।';
+
+  @override
+  String priceRequestApprovedByPerson(String name) {
+    return '$name द्वारा स्वीकृत।';
+  }
+
+  @override
+  String priceRequestRejectedByPerson(String name, String time) {
+    return '$name द्वारा · $time';
+  }
+
+  @override
+  String priceRequestReasonValue(String reason) {
+    return 'कारण: $reason';
+  }
+
+  @override
+  String get priceRequestAlreadyWaiting =>
+      'इस मूल्य में बदलाव का अनुरोध पहले से निर्णय की प्रतीक्षा में है।';
+
+  @override
+  String get priceRequestSaved =>
+      'मूल्य बदलाव अनुरोध स्थानीय रूप से सहेजा गया।';
+
+  @override
+  String get priceRequestLoadFailed => 'मूल्य जानकारी लोड नहीं हो सकी।';
+
+  @override
+  String get priceAskInvalidRate =>
+      '0 से 99,999,999.99 तक अधिकतम 2 दशमलव वाला मूल्य दर्ज करें।';
+
+  @override
+  String get priceAskInvalidReason => '1 से 1000 अक्षरों का कारण दर्ज करें।';
+
+  @override
+  String get priceAskSubmitFailed => 'मूल्य अनुरोध सहेजा नहीं जा सका।';
+
+  @override
+  String get priceAskMaxCharacters1000 => 'अधिकतम 1000 अक्षर';
+
+  @override
+  String priceRequestCurrentValueDynamic(
+    String rate,
+    String unit,
+    String source,
+  ) {
+    return '₹$rate/$unit, $source';
+  }
+
+  @override
+  String priceRequestAskedValueDynamic(
+    String rate,
+    String unit,
+    String percent,
+  ) {
+    return '₹$rate/$unit  ($percent)';
+  }
+
+  @override
+  String priceRequestAskedByDynamic(String name, String time) {
+    return '$name · $time';
+  }
+
+  @override
+  String priceRequestWaitingMessageDynamic(
+    String rate,
+    String unit,
+    String item,
+  ) {
+    return 'उनके निर्णय पर आपको सूचना मिलेगी। तब तक मूल्य ₹$rate/$unit रहेगा और इस केंद्र पर $item के लिए दोबारा अनुरोध नहीं कर सकते।';
+  }
 }

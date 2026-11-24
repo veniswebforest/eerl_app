@@ -1073,7 +1073,7 @@ class DriverLocalizationsEn extends DriverLocalizations {
   String get supervisorCollected => 'Collected';
 
   @override
-  String get supervisorKg => 'KG';
+  String get supervisorKg => '0 kg';
 
   @override
   String get supervisorMissed => 'Missed';
@@ -2306,4 +2306,544 @@ class DriverLocalizationsEn extends DriverLocalizations {
 
   @override
   String get profileShare => 'Share';
+
+  @override
+  String get driverProfileUserName => 'Ramesh Kumar';
+
+  @override
+  String get driverProfileWarehouseLabel => 'My warehouse';
+
+  @override
+  String get driverProfileWarehouseValue => 'Magdalla Warehouse';
+
+  @override
+  String get driverProfileDriverCodeLabel => 'Driver code';
+
+  @override
+  String get driverProfileDriverCodeValue => 'SUR-DRV-0007';
+
+  @override
+  String get driverProfileMobileValue => '+91 98765 43226';
+
+  @override
+  String get driverProfileRoleValue => 'Driver';
+
+  @override
+  String get driverProfileLogoutWarning =>
+      '3 collections not sent yet: sync first';
+
+  @override
+  String get dlDriverDirectory => 'Driver Directory';
+
+  @override
+  String get dlLabourDirectory => 'Labour Directory';
+
+  @override
+  String get dlFilterActive => 'Active';
+
+  @override
+  String get dlFilterInactive => 'Inactive';
+
+  @override
+  String dlTabDrivers(int count) {
+    return 'Driver ($count)';
+  }
+
+  @override
+  String dlTabLabour(int count) {
+    return 'Labour ($count)';
+  }
+
+  @override
+  String get dlSearchHint => 'Search Here...';
+
+  @override
+  String get dlAddDriver => 'Add Driver';
+
+  @override
+  String get dlAddLabour => 'Add Labour';
+
+  @override
+  String get dlAddLabourer => 'Add labourer';
+
+  @override
+  String get dlNoDetailsFound => 'No Details Found';
+
+  @override
+  String get dlNoPhone => '--';
+
+  @override
+  String get dlAddNewDriver => 'Add New Driver';
+
+  @override
+  String get dlAddNewLabour => 'Add New Labour';
+
+  @override
+  String get dlEditDriver => 'Edit Driver';
+
+  @override
+  String get dlEditLabour => 'Edit Labour';
+
+  @override
+  String get dlFullName => 'Full Name';
+
+  @override
+  String get dlEnterFullName => 'Enter Full Name';
+
+  @override
+  String get dlMobileNumber => 'Mobile Number';
+
+  @override
+  String get dlEnterMobileNumber => 'Enter Mobile number';
+
+  @override
+  String get dlCountryCode => '+91';
+
+  @override
+  String get dlAadhaarLabel => 'Aadhar card Number';
+
+  @override
+  String get dlAadhaarHint => 'Aadhaar / Voter ID';
+
+  @override
+  String get dlProfilePhoto => 'Profile Photo / ID Proof';
+
+  @override
+  String get dlCapturePhoto => 'Capture Photo';
+
+  @override
+  String get dlUploadHint => 'Upload a photo to record and verify details.';
+
+  @override
+  String get dlCancel => 'Cancel';
+
+  @override
+  String get dlSaveSelect => 'Save & Select';
+
+  @override
+  String get dlIdCardNumber => 'ID / Card Number';
+
+  @override
+  String get dlDateTime => 'Date & Time';
+
+  @override
+  String get dlDeactivate => 'Deactivate';
+
+  @override
+  String get dlEdit => 'Edit';
+
+  @override
+  String get dlReactive => 'Reactive';
+
+  @override
+  String get dlAreYouSure => 'Are you sure?';
+
+  @override
+  String get dlDeactivateDriverMessage =>
+      'Are you sure you want to deactivated this Driver person';
+
+  @override
+  String get dlDeactivateLabourMessage =>
+      'Are you sure you want to deactivated this Labour person';
+
+  @override
+  String get dlReactiveDriverMessage =>
+      'Are you sure you want to reactive this Driver person';
+
+  @override
+  String get dlReactiveLabourMessage =>
+      'Are you sure you want to reactive this Labour person';
+
+  @override
+  String get dlYes => 'Yes';
+
+  @override
+  String get dlDeactivatedTitle => 'Deactivated Successfully!';
+
+  @override
+  String get dlDeactivatedBody => 'Profile deactivated.';
+
+  @override
+  String get dlReactivedTitle => 'Reactive Successfully!';
+
+  @override
+  String get dlReactivedBody => 'Profile reactivated.';
+
+  @override
+  String get supervisorTripsToday => 'Trips today';
+
+  @override
+  String get tpTitle => 'Trips plan';
+
+  @override
+  String get tpAreas => 'Adajan, Vesu, Pal';
+
+  @override
+  String get tpChoiceToday => 'Today';
+
+  @override
+  String get tpChoiceTomorrow => 'Tomorrow';
+
+  @override
+  String get tpChoiceWeek => 'This week';
+
+  @override
+  String get tpDateToday => 'Thu 22 Oct 2026';
+
+  @override
+  String get tpDateTomorrow => 'Fri 23 Oct 2026';
+
+  @override
+  String get tpDateNoTrips => 'Sun 8 Nov 2026';
+
+  @override
+  String tpTripsStops(int trips, int stops) {
+    return '$trips trips · $stops stops';
+  }
+
+  @override
+  String tpExtraPickups(int count) {
+    return '$count extra pickups';
+  }
+
+  @override
+  String tpSourcePaused(int count) {
+    return '$count source paused';
+  }
+
+  @override
+  String get tpNoTrips => 'No trips';
+
+  @override
+  String get tpStatusOnRoute => 'On route';
+
+  @override
+  String get tpStatusApproved => 'Approved';
+
+  @override
+  String get tpStatusPlanned => 'Planned';
+
+  @override
+  String get tpOwnVehicle => 'Own vehicle';
+
+  @override
+  String get tpContractVehicle => 'Contract vehicle';
+
+  @override
+  String tpVehicleTag(String plate, String vehicle) {
+    return '$plate · $vehicle';
+  }
+
+  @override
+  String get tpChangedForToday => 'Changed for today';
+
+  @override
+  String get tpDriverNotUsingApp => 'Driver not using app';
+
+  @override
+  String tpCoverFor(String substitute, String original) {
+    return '$substitute (for $original)';
+  }
+
+  @override
+  String tpTransporterDriver(String transporter, String driver) {
+    return '$transporter · Driver $driver';
+  }
+
+  @override
+  String tpStops(int count) {
+    return '$count stops';
+  }
+
+  @override
+  String tpDaily(int count) {
+    return 'Daily $count';
+  }
+
+  @override
+  String tpWeekly(int count) {
+    return 'Weekly $count';
+  }
+
+  @override
+  String tpMonthly(int count) {
+    return 'Monthly $count';
+  }
+
+  @override
+  String tpBiWeekly(int count) {
+    return 'Bi-weekly $count';
+  }
+
+  @override
+  String tpOnCall(int count) {
+    return 'On call $count';
+  }
+
+  @override
+  String tpPaused(int count) {
+    return '$count paused';
+  }
+
+  @override
+  String tpCollectedOf(int done, int total) {
+    return '$done of $total collected';
+  }
+
+  @override
+  String tpRecordedOf(int done, int total) {
+    return '$done of $total recorded in the app';
+  }
+
+  @override
+  String tpCollectedMissed(int collected, int missed) {
+    return '$collected collected · $missed missed';
+  }
+
+  @override
+  String tpWeightKg(String kg) {
+    return '$kg kg';
+  }
+
+  @override
+  String get tpCallDriver => 'Call driver';
+
+  @override
+  String tpOwnVehicleCount(int count) {
+    return 'Own vehicle $count';
+  }
+
+  @override
+  String tpContractCount(int count) {
+    return 'Contract $count';
+  }
+
+  @override
+  String get tpDay0 => 'Thu 22 Oct · Today';
+
+  @override
+  String get tpDay1 => 'Fri 23 Oct';
+
+  @override
+  String get tpDay2 => 'Sat 24 Oct';
+
+  @override
+  String get tpDay3 => 'Sun 25 Oct';
+
+  @override
+  String get tpDay4 => 'Mon 26 Oct';
+
+  @override
+  String get tpDay5 => 'Tue 27 Oct';
+
+  @override
+  String get tpDay6 => 'Wed 28 Oct';
+
+  @override
+  String get tpEmptyTitle => 'No trips on this day';
+
+  @override
+  String get tpEmptyMessage =>
+      'The warehouses are closed for Diwali. Pickups due today move to Mon 9 Nov (the holiday rule).';
+
+  @override
+  String get rdNext7Days => 'Next 7 Days';
+
+  @override
+  String get rdDateToday => 'Thu, 22 Oct 2026';
+
+  @override
+  String get rdDateRange => 'Fri 23 Oct – Thu 29 Oct';
+
+  @override
+  String rdShift(String time) {
+    return 'Morning ($time)';
+  }
+
+  @override
+  String rdAssignedSources(int count) {
+    return 'Assigned Sources : $count';
+  }
+
+  @override
+  String rdAssignedSourcesPaused(int count, int paused) {
+    return 'Assigned Sources : $count ($paused paused)';
+  }
+
+  @override
+  String rdDriverLine(String name, String phone) {
+    return 'Driver : $name ($phone)';
+  }
+
+  @override
+  String rdLabourLine(String name) {
+    return 'Labour : $name';
+  }
+
+  @override
+  String get rdList => 'List';
+
+  @override
+  String get rdMap => 'Map';
+
+  @override
+  String get rdFilterAll => 'All';
+
+  @override
+  String get rdFilterCollected => 'Collected';
+
+  @override
+  String get rdFilterPending => 'Pending';
+
+  @override
+  String get rdFilterZeroKg => '0 kg';
+
+  @override
+  String get rdFilterMissed => 'Missed';
+
+  @override
+  String get rdFilterCancelled => 'Cancelled';
+
+  @override
+  String get rdFilterInactive => 'Inactive';
+
+  @override
+  String get rdFreqDaily => 'Daily';
+
+  @override
+  String get rdFreqWeekly => 'Weekly';
+
+  @override
+  String get rdTypeSorted => 'Sorted';
+
+  @override
+  String get rdTypeMixed => 'Mixed';
+
+  @override
+  String rdStopTitle(String name, String type) {
+    return '$name · $type';
+  }
+
+  @override
+  String rdSchedEveryDay(String time) {
+    return 'Every day · $time';
+  }
+
+  @override
+  String rdSchedDays(String days, String time) {
+    return '$days · $time';
+  }
+
+  @override
+  String rdSchedExceptSun(String time) {
+    return 'Except Sun, $time';
+  }
+
+  @override
+  String rdSchedSecondWed(String time) {
+    return 'Second Wed, $time';
+  }
+
+  @override
+  String rdSchedOnce(String date, String time) {
+    return '(Once) $date, $time';
+  }
+
+  @override
+  String rdSchedPausedTill(String date) {
+    return 'Paused till $date';
+  }
+
+  @override
+  String get rdWeekdayMon => 'Mon';
+
+  @override
+  String get rdWeekdayThu => 'Thu';
+
+  @override
+  String get rdStatusCollected => 'Collected';
+
+  @override
+  String get rdStatusZeroKg => '0 kg';
+
+  @override
+  String get rdStatusCancelledBySource => 'Cancelled by source';
+
+  @override
+  String get rdStatusNextStop => 'Next stop';
+
+  @override
+  String get rdStatusPending => 'Pending';
+
+  @override
+  String get rdStatusInactive => 'Inactive';
+
+  @override
+  String rdAmountKgPcs(String kg, String pcs) {
+    return '$kg kg + $pcs pcs';
+  }
+
+  @override
+  String get rdNoteNoMaterial => 'No material today';
+
+  @override
+  String get rdNoteClosedStocktaking => 'Closed for stock-taking';
+
+  @override
+  String get rdNotePausedRenovation => 'Source paused (renovation)';
+
+  @override
+  String rdTagCollectedAt(String time) {
+    return 'Collected $time';
+  }
+
+  @override
+  String rdTagVisitedAt(String time) {
+    return 'Visited $time';
+  }
+
+  @override
+  String get rdTagNoteFromDriver => 'Note from driver';
+
+  @override
+  String rdTagVoiceNote(String duration) {
+    return 'Voice note $duration';
+  }
+
+  @override
+  String get rdLegendCollected => 'Collected';
+
+  @override
+  String get rdLegendZeroKg => '0 kg';
+
+  @override
+  String get rdLegendCancelled => 'Cancelled';
+
+  @override
+  String get rdLegendNextStop => 'Next stop';
+
+  @override
+  String get rdLegendPending => 'Pending';
+
+  @override
+  String get rdLegendPaused => 'Paused';
+
+  @override
+  String get rdLegendWarehouse => 'Warehouse';
+
+  @override
+  String rdMapNext(int number, String name, String time, String distance) {
+    return 'Next: $number · $name · $time · $distance away';
+  }
+
+  @override
+  String get rdMapHint =>
+      'Stops in visiting order. The solid line is done; the dashed line is still to go, back to the warehouse. Tap a stop to open it.';
+
+  @override
+  String get rdAddedLastHint =>
+      'It is added as the last stop. You can change the order on the route\'s page.';
+
+  @override
+  String get rdAddSources => 'Add sources';
 }

@@ -332,4 +332,56 @@ void main() {
     expect(find.text('Status Timeline'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('supervisor dispatched detail shows the long number and (AHD) '
+      'destination', (tester) async {
+    tester.view.physicalSize = const Size(375, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const transfer = TransferModel(
+      id: 'transfer-1',
+      centerId: 'center-1',
+      centerName: 'MRF Station Aanjana',
+      type: 'STOCK_TRANSFER',
+      status: 'DISPATCHED',
+      number: 'SUR-AAN-2627-TRF-0001',
+      destinationName: 'Narol Warehouse (AHD)',
+      fixedQty: 1200.6,
+      estimatedExpense: 900,
+      requestedBy: 'user-1',
+      requestedByName: 'Rahul Patel',
+      requestedAt: '2026-10-22T11:15:00.000Z',
+      vehiclePlate: 'GJ-05-BX-1234',
+      syncState: 'synced',
+    );
+    const items = [
+      TransferItemModel(
+        id: 'item-1',
+        transferId: 'transfer-1',
+        itemId: 'pet',
+        name: 'PET Bottles',
+        qty: 270,
+        unitCode: 'KG',
+      ),
+    ];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: TransferRequestDetailScreen(
+          transferId: transfer.id,
+          roleLoader: () async => 'SUPERVISOR',
+          detailLoader: (_) async => (transfer: transfer, items: items),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('SUR-AAN-2627-TRF-0001'), findsOneWidget);
+    expect(find.text('Narol Warehouse (AHD)'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

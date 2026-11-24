@@ -1,0 +1,157 @@
+import 'package:pickup_supervisor/features/trips_plan/model/trips_plan_models.dart';
+
+/// Mock data until trips are read from SQLite.
+abstract final class TripsPlanMockData {
+  static const todayTrips = <TripPlanTrip>[
+    TripPlanTrip(
+      name: 'Adajan Morning',
+      time: '8:00 am – 2:00 pm',
+      status: TripStatus.onRoute,
+      vehicleKind: TripVehicleKind.own,
+      plate: 'GJ-05-BX-1234',
+      alert: TripAlert.changedForToday,
+      crew: TripCrew(
+        driver: 'Suresh Kumar',
+        coveringFor: 'Vikram Singh',
+        helper: 'Ravi Bisht',
+      ),
+      schedule: TripSchedule(stops: 9, daily: 5, weekly: 3, paused: 1),
+      progress: TripProgress(TripProgressKind.collectedOf, 3, 8),
+      weightKg: '740',
+    ),
+    TripPlanTrip(
+      name: 'Pal Gam Morning',
+      time: '12:00 – 5:00 pm',
+      status: TripStatus.onRoute,
+      vehicleKind: TripVehicleKind.own,
+      plate: 'GJ-05-BX-5678',
+      alert: TripAlert.driverNotUsingApp,
+      crew: TripCrew(driver: 'Amit Patel', helper: 'Ram Singh'),
+      schedule: TripSchedule(stops: 8, daily: 4, weekly: 3, onCall: 1),
+      progress: TripProgress(TripProgressKind.recordedOf, 0, 8),
+      weightKg: '0',
+    ),
+    TripPlanTrip(
+      name: 'Punagam FullDay',
+      time: '8:00 am – 2:00 pm',
+      status: TripStatus.approved,
+      vehicleKind: TripVehicleKind.contract,
+      plate: 'GJ-05-EE-1002',
+      crew: TripCrew(driver: 'Kishan', transporter: 'Shree Ram Transport'),
+      schedule: TripSchedule(stops: 8, daily: 6, monthly: 2),
+      progress: TripProgress(TripProgressKind.collectedMissed, 5, 1),
+      weightKg: '1,355',
+    ),
+    TripPlanTrip(
+      name: 'Rander Evening',
+      time: '4:00 – 8:00 pm',
+      status: TripStatus.planned,
+      vehicleKind: TripVehicleKind.contract,
+      plate: 'GJ-05-BX-9012',
+      crew: TripCrew(driver: 'Jignesh', transporter: 'Khodiyar Transport'),
+      schedule: TripSchedule(stops: 8, weekly: 6, biWeekly: 2),
+    ),
+    TripPlanTrip(
+      name: 'Vesu Evening',
+      time: '3:00 – 7:00 pm',
+      status: TripStatus.planned,
+      vehicleKind: TripVehicleKind.own,
+      plate: 'GJ-05-EE-1001',
+      crew: TripCrew(driver: 'Mahesh Patel', helper: 'Ramesh Yadav'),
+      schedule: TripSchedule(stops: 6, daily: 4, onCall: 2),
+    ),
+  ];
+
+  static const tomorrowTrips = <TripPlanTrip>[
+    TripPlanTrip(
+      name: 'Adajan Morning',
+      time: '8:00 am – 2:00 pm',
+      status: TripStatus.planned,
+      vehicleKind: TripVehicleKind.own,
+      plate: 'GJ-05-BX-1234',
+      crew: TripCrew(driver: 'Vikram Singh', helper: 'Ravi Bisht'),
+      schedule: TripSchedule(stops: 7, daily: 5, onCall: 2),
+    ),
+    TripPlanTrip(
+      name: 'Pal Gam Morning',
+      time: '12:00 – 5:00 pm',
+      status: TripStatus.planned,
+      vehicleKind: TripVehicleKind.own,
+      plate: 'GJ-05-BX-5678',
+      crew: TripCrew(driver: 'Amit Patel', helper: 'Ram Singh'),
+      schedule: TripSchedule(stops: 8, daily: 4, weekly: 3, onCall: 1),
+    ),
+    TripPlanTrip(
+      name: 'Punagam FullDay',
+      time: '8:00 am – 2:00 pm',
+      status: TripStatus.planned,
+      vehicleKind: TripVehicleKind.contract,
+      plate: 'GJ-05-EE-1002',
+      crew: TripCrew(driver: 'Kishan', transporter: 'Shree Ram Transport'),
+      schedule: TripSchedule(stops: 8, daily: 6, monthly: 2),
+    ),
+    TripPlanTrip(
+      name: 'Vesu Evening',
+      time: '3:00 – 7:00 pm',
+      status: TripStatus.planned,
+      vehicleKind: TripVehicleKind.own,
+      plate: 'GJ-05-EE-1001',
+      crew: TripCrew(driver: 'Mahesh Patel', helper: 'Ramesh Yadav'),
+      schedule: TripSchedule(stops: 8, daily: 6, onCall: 2),
+    ),
+  ];
+
+  static const weekDays = <TripsPlanDay>[
+    TripsPlanDay(
+      dayIndex: 0,
+      trips: 5,
+      stops: 39,
+      ownVehicles: 3,
+      contractVehicles: 2,
+    ),
+    TripsPlanDay(
+      dayIndex: 1,
+      trips: 4,
+      stops: 31,
+      ownVehicles: 3,
+      contractVehicles: 1,
+    ),
+    TripsPlanDay(
+      dayIndex: 2,
+      trips: 5,
+      stops: 41,
+      ownVehicles: 3,
+      contractVehicles: 2,
+      extraPickups: 2,
+    ),
+    TripsPlanDay(
+      dayIndex: 3,
+      trips: 2,
+      stops: 12,
+      ownVehicles: 1,
+      contractVehicles: 1,
+    ),
+    TripsPlanDay(
+      dayIndex: 4,
+      trips: 5,
+      stops: 44,
+      ownVehicles: 3,
+      contractVehicles: 2,
+    ),
+    TripsPlanDay(
+      dayIndex: 5,
+      trips: 4,
+      stops: 30,
+      ownVehicles: 3,
+      contractVehicles: 1,
+    ),
+    TripsPlanDay(
+      dayIndex: 6,
+      trips: 5,
+      stops: 38,
+      ownVehicles: 3,
+      contractVehicles: 2,
+      pausedSources: 1,
+    ),
+  ];
+}

@@ -9,7 +9,7 @@ import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/features/local_data/presentation/local_query_controller.dart';
 
-/// Dropdown card showing the currently selected EERL zone.
+/// Dropdown card showing the currently selected collection centre.
 class ZoneSelector extends StatefulWidget {
   const ZoneSelector({
     super.key,
@@ -86,16 +86,18 @@ class _ZoneSelectorState extends State<ZoneSelector> {
   @override
   Widget build(BuildContext context) {
     final centers = _query?.data?.centers ?? const <CenterModel>[];
-    final zones =
-        widget.options ?? centers.map((center) => center.name).toList();
-    final safeZones = zones.isEmpty ? [context.l10n.zoneName] : zones;
-    if (_selectedIndex >= safeZones.length) _selectedIndex = 0;
+    final centerLabels =
+        widget.options ?? centers.map(_centerLabel).toList(growable: false);
+    final safeCenterLabels = centerLabels.isEmpty
+        ? [context.l10n.d2dCollectionCenter]
+        : centerLabels;
+    if (_selectedIndex >= safeCenterLabels.length) _selectedIndex = 0;
     final selectedLabel =
         widget.options != null &&
             !_hasSelectedOption &&
             widget.initialLabel != null
         ? widget.initialLabel!
-        : safeZones[_selectedIndex];
+        : safeCenterLabels[_selectedIndex];
 
     return Material(
       type: MaterialType.transparency,
@@ -152,14 +154,21 @@ class _ZoneSelectorState extends State<ZoneSelector> {
           ),
           if (_isExpanded) ...[
             const SizedBox(height: 4),
-            _buildOptions(safeZones, centers),
+            _buildOptions(safeCenterLabels, centers),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildOptions(List<String> zones, List<CenterModel> centers) =>
+  String _centerLabel(CenterModel center) {
+    final code = center.code?.trim();
+    final name = center.name.trim();
+    if (code == null || code.isEmpty || name.startsWith(code)) return name;
+    return '$code $name';
+  }
+
+  Widget _buildOptions(List<String> centerLabels, List<CenterModel> centers) =>
       Container(
         key: widget.optionsKey,
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -171,20 +180,23 @@ class _ZoneSelectorState extends State<ZoneSelector> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: List.generate(
-            zones.length,
+            centerLabels.length,
             (index) => InkWell(
               key: ValueKey('${widget.optionKeyPrefix}-$index'),
-              onTap: () {
+              onTap: () async {
                 setState(() {
                   _selectedIndex = index;
                   _isExpanded = false;
                   _hasSelectedOption = true;
                 });
                 widget.onExpandedChanged?.call(false);
-                widget.onSelected?.call(index);
                 if (widget.options == null && index < centers.length) {
-                  EerlLocalRepository.instance.selectCenter(centers[index].id);
+                  await EerlLocalRepository.instance.selectCenter(
+                    centers[index].id,
+                  );
+                  if (!mounted) return;
                 }
+                widget.onSelected?.call(index);
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -217,7 +229,7 @@ class _ZoneSelectorState extends State<ZoneSelector> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        zones[index],
+                        centerLabels[index],
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.regularB7_14.copyWith(

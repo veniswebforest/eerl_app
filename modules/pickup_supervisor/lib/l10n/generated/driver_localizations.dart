@@ -2101,7 +2101,7 @@ abstract class DriverLocalizations {
   /// No description provided for @supervisorKg.
   ///
   /// In en, this message translates to:
-  /// **'KG'**
+  /// **'0 kg'**
   String get supervisorKg;
 
   /// No description provided for @supervisorMissed.
@@ -4467,6 +4467,918 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'Share'**
   String get profileShare;
+
+  /// No description provided for @driverProfileUserName.
+  ///
+  /// In en, this message translates to:
+  /// **'Ramesh Kumar'**
+  String get driverProfileUserName;
+
+  /// No description provided for @driverProfileWarehouseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'My warehouse'**
+  String get driverProfileWarehouseLabel;
+
+  /// No description provided for @driverProfileWarehouseValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Magdalla Warehouse'**
+  String get driverProfileWarehouseValue;
+
+  /// No description provided for @driverProfileDriverCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver code'**
+  String get driverProfileDriverCodeLabel;
+
+  /// No description provided for @driverProfileDriverCodeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'SUR-DRV-0007'**
+  String get driverProfileDriverCodeValue;
+
+  /// No description provided for @driverProfileMobileValue.
+  ///
+  /// In en, this message translates to:
+  /// **'+91 98765 43226'**
+  String get driverProfileMobileValue;
+
+  /// No description provided for @driverProfileRoleValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get driverProfileRoleValue;
+
+  /// No description provided for @driverProfileLogoutWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'3 collections not sent yet: sync first'**
+  String get driverProfileLogoutWarning;
+
+  /// No description provided for @dlDriverDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Directory'**
+  String get dlDriverDirectory;
+
+  /// No description provided for @dlLabourDirectory.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour Directory'**
+  String get dlLabourDirectory;
+
+  /// No description provided for @dlFilterActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get dlFilterActive;
+
+  /// No description provided for @dlFilterInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get dlFilterInactive;
+
+  /// No description provided for @dlTabDrivers.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver ({count})'**
+  String dlTabDrivers(int count);
+
+  /// No description provided for @dlTabLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour ({count})'**
+  String dlTabLabour(int count);
+
+  /// No description provided for @dlSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Here...'**
+  String get dlSearchHint;
+
+  /// No description provided for @dlAddDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Driver'**
+  String get dlAddDriver;
+
+  /// No description provided for @dlAddLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Labour'**
+  String get dlAddLabour;
+
+  /// No description provided for @dlAddLabourer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add labourer'**
+  String get dlAddLabourer;
+
+  /// No description provided for @dlNoDetailsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Details Found'**
+  String get dlNoDetailsFound;
+
+  /// No description provided for @dlNoPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'--'**
+  String get dlNoPhone;
+
+  /// No description provided for @dlAddNewDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Driver'**
+  String get dlAddNewDriver;
+
+  /// No description provided for @dlAddNewLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Labour'**
+  String get dlAddNewLabour;
+
+  /// No description provided for @dlEditDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Driver'**
+  String get dlEditDriver;
+
+  /// No description provided for @dlEditLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Labour'**
+  String get dlEditLabour;
+
+  /// No description provided for @dlFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get dlFullName;
+
+  /// No description provided for @dlEnterFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Full Name'**
+  String get dlEnterFullName;
+
+  /// No description provided for @dlMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number'**
+  String get dlMobileNumber;
+
+  /// No description provided for @dlEnterMobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Mobile number'**
+  String get dlEnterMobileNumber;
+
+  /// No description provided for @dlCountryCode.
+  ///
+  /// In en, this message translates to:
+  /// **'+91'**
+  String get dlCountryCode;
+
+  /// No description provided for @dlAadhaarLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhar card Number'**
+  String get dlAadhaarLabel;
+
+  /// No description provided for @dlAadhaarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhaar / Voter ID'**
+  String get dlAadhaarHint;
+
+  /// No description provided for @dlProfilePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Photo / ID Proof'**
+  String get dlProfilePhoto;
+
+  /// No description provided for @dlCapturePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Capture Photo'**
+  String get dlCapturePhoto;
+
+  /// No description provided for @dlUploadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a photo to record and verify details.'**
+  String get dlUploadHint;
+
+  /// No description provided for @dlCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get dlCancel;
+
+  /// No description provided for @dlSaveSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Save & Select'**
+  String get dlSaveSelect;
+
+  /// No description provided for @dlIdCardNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'ID / Card Number'**
+  String get dlIdCardNumber;
+
+  /// No description provided for @dlDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & Time'**
+  String get dlDateTime;
+
+  /// No description provided for @dlDeactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get dlDeactivate;
+
+  /// No description provided for @dlEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get dlEdit;
+
+  /// No description provided for @dlReactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactive'**
+  String get dlReactive;
+
+  /// No description provided for @dlAreYouSure.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get dlAreYouSure;
+
+  /// No description provided for @dlDeactivateDriverMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to deactivated this Driver person'**
+  String get dlDeactivateDriverMessage;
+
+  /// No description provided for @dlDeactivateLabourMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to deactivated this Labour person'**
+  String get dlDeactivateLabourMessage;
+
+  /// No description provided for @dlReactiveDriverMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reactive this Driver person'**
+  String get dlReactiveDriverMessage;
+
+  /// No description provided for @dlReactiveLabourMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to reactive this Labour person'**
+  String get dlReactiveLabourMessage;
+
+  /// No description provided for @dlYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get dlYes;
+
+  /// No description provided for @dlDeactivatedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivated Successfully!'**
+  String get dlDeactivatedTitle;
+
+  /// No description provided for @dlDeactivatedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile deactivated.'**
+  String get dlDeactivatedBody;
+
+  /// No description provided for @dlReactivedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactive Successfully!'**
+  String get dlReactivedTitle;
+
+  /// No description provided for @dlReactivedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile reactivated.'**
+  String get dlReactivedBody;
+
+  /// No description provided for @supervisorTripsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips today'**
+  String get supervisorTripsToday;
+
+  /// No description provided for @tpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips plan'**
+  String get tpTitle;
+
+  /// No description provided for @tpAreas.
+  ///
+  /// In en, this message translates to:
+  /// **'Adajan, Vesu, Pal'**
+  String get tpAreas;
+
+  /// No description provided for @tpChoiceToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get tpChoiceToday;
+
+  /// No description provided for @tpChoiceTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get tpChoiceTomorrow;
+
+  /// No description provided for @tpChoiceWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get tpChoiceWeek;
+
+  /// No description provided for @tpDateToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu 22 Oct 2026'**
+  String get tpDateToday;
+
+  /// No description provided for @tpDateTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri 23 Oct 2026'**
+  String get tpDateTomorrow;
+
+  /// No description provided for @tpDateNoTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun 8 Nov 2026'**
+  String get tpDateNoTrips;
+
+  /// No description provided for @tpTripsStops.
+  ///
+  /// In en, this message translates to:
+  /// **'{trips} trips · {stops} stops'**
+  String tpTripsStops(int trips, int stops);
+
+  /// No description provided for @tpExtraPickups.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} extra pickups'**
+  String tpExtraPickups(int count);
+
+  /// No description provided for @tpSourcePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} source paused'**
+  String tpSourcePaused(int count);
+
+  /// No description provided for @tpNoTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips'**
+  String get tpNoTrips;
+
+  /// No description provided for @tpStatusOnRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'On route'**
+  String get tpStatusOnRoute;
+
+  /// No description provided for @tpStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get tpStatusApproved;
+
+  /// No description provided for @tpStatusPlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned'**
+  String get tpStatusPlanned;
+
+  /// No description provided for @tpOwnVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Own vehicle'**
+  String get tpOwnVehicle;
+
+  /// No description provided for @tpContractVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract vehicle'**
+  String get tpContractVehicle;
+
+  /// No description provided for @tpVehicleTag.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} · {vehicle}'**
+  String tpVehicleTag(String plate, String vehicle);
+
+  /// No description provided for @tpChangedForToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed for today'**
+  String get tpChangedForToday;
+
+  /// No description provided for @tpDriverNotUsingApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver not using app'**
+  String get tpDriverNotUsingApp;
+
+  /// No description provided for @tpCoverFor.
+  ///
+  /// In en, this message translates to:
+  /// **'{substitute} (for {original})'**
+  String tpCoverFor(String substitute, String original);
+
+  /// No description provided for @tpTransporterDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'{transporter} · Driver {driver}'**
+  String tpTransporterDriver(String transporter, String driver);
+
+  /// No description provided for @tpStops.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} stops'**
+  String tpStops(int count);
+
+  /// No description provided for @tpDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily {count}'**
+  String tpDaily(int count);
+
+  /// No description provided for @tpWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly {count}'**
+  String tpWeekly(int count);
+
+  /// No description provided for @tpMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly {count}'**
+  String tpMonthly(int count);
+
+  /// No description provided for @tpBiWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Bi-weekly {count}'**
+  String tpBiWeekly(int count);
+
+  /// No description provided for @tpOnCall.
+  ///
+  /// In en, this message translates to:
+  /// **'On call {count}'**
+  String tpOnCall(int count);
+
+  /// No description provided for @tpPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} paused'**
+  String tpPaused(int count);
+
+  /// No description provided for @tpCollectedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} collected'**
+  String tpCollectedOf(int done, int total);
+
+  /// No description provided for @tpRecordedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} recorded in the app'**
+  String tpRecordedOf(int done, int total);
+
+  /// No description provided for @tpCollectedMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'{collected} collected · {missed} missed'**
+  String tpCollectedMissed(int collected, int missed);
+
+  /// No description provided for @tpWeightKg.
+  ///
+  /// In en, this message translates to:
+  /// **'{kg} kg'**
+  String tpWeightKg(String kg);
+
+  /// No description provided for @tpCallDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Call driver'**
+  String get tpCallDriver;
+
+  /// No description provided for @tpOwnVehicleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Own vehicle {count}'**
+  String tpOwnVehicleCount(int count);
+
+  /// No description provided for @tpContractCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract {count}'**
+  String tpContractCount(int count);
+
+  /// No description provided for @tpDay0.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu 22 Oct · Today'**
+  String get tpDay0;
+
+  /// No description provided for @tpDay1.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri 23 Oct'**
+  String get tpDay1;
+
+  /// No description provided for @tpDay2.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat 24 Oct'**
+  String get tpDay2;
+
+  /// No description provided for @tpDay3.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun 25 Oct'**
+  String get tpDay3;
+
+  /// No description provided for @tpDay4.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon 26 Oct'**
+  String get tpDay4;
+
+  /// No description provided for @tpDay5.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue 27 Oct'**
+  String get tpDay5;
+
+  /// No description provided for @tpDay6.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed 28 Oct'**
+  String get tpDay6;
+
+  /// No description provided for @tpEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips on this day'**
+  String get tpEmptyTitle;
+
+  /// No description provided for @tpEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The warehouses are closed for Diwali. Pickups due today move to Mon 9 Nov (the holiday rule).'**
+  String get tpEmptyMessage;
+
+  /// No description provided for @rdNext7Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 7 Days'**
+  String get rdNext7Days;
+
+  /// No description provided for @rdDateToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu, 22 Oct 2026'**
+  String get rdDateToday;
+
+  /// No description provided for @rdDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri 23 Oct – Thu 29 Oct'**
+  String get rdDateRange;
+
+  /// No description provided for @rdShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning ({time})'**
+  String rdShift(String time);
+
+  /// No description provided for @rdAssignedSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Sources : {count}'**
+  String rdAssignedSources(int count);
+
+  /// No description provided for @rdAssignedSourcesPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned Sources : {count} ({paused} paused)'**
+  String rdAssignedSourcesPaused(int count, int paused);
+
+  /// No description provided for @rdDriverLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver : {name} ({phone})'**
+  String rdDriverLine(String name, String phone);
+
+  /// No description provided for @rdLabourLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour : {name}'**
+  String rdLabourLine(String name);
+
+  /// No description provided for @rdList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get rdList;
+
+  /// No description provided for @rdMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get rdMap;
+
+  /// No description provided for @rdFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get rdFilterAll;
+
+  /// No description provided for @rdFilterCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get rdFilterCollected;
+
+  /// No description provided for @rdFilterPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get rdFilterPending;
+
+  /// No description provided for @rdFilterZeroKg.
+  ///
+  /// In en, this message translates to:
+  /// **'0 kg'**
+  String get rdFilterZeroKg;
+
+  /// No description provided for @rdFilterMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get rdFilterMissed;
+
+  /// No description provided for @rdFilterCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get rdFilterCancelled;
+
+  /// No description provided for @rdFilterInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get rdFilterInactive;
+
+  /// No description provided for @rdFreqDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get rdFreqDaily;
+
+  /// No description provided for @rdFreqWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get rdFreqWeekly;
+
+  /// No description provided for @rdTypeSorted.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorted'**
+  String get rdTypeSorted;
+
+  /// No description provided for @rdTypeMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed'**
+  String get rdTypeMixed;
+
+  /// No description provided for @rdStopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {type}'**
+  String rdStopTitle(String name, String type);
+
+  /// No description provided for @rdSchedEveryDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day · {time}'**
+  String rdSchedEveryDay(String time);
+
+  /// No description provided for @rdSchedDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} · {time}'**
+  String rdSchedDays(String days, String time);
+
+  /// No description provided for @rdSchedExceptSun.
+  ///
+  /// In en, this message translates to:
+  /// **'Except Sun, {time}'**
+  String rdSchedExceptSun(String time);
+
+  /// No description provided for @rdSchedSecondWed.
+  ///
+  /// In en, this message translates to:
+  /// **'Second Wed, {time}'**
+  String rdSchedSecondWed(String time);
+
+  /// No description provided for @rdSchedOnce.
+  ///
+  /// In en, this message translates to:
+  /// **'(Once) {date}, {time}'**
+  String rdSchedOnce(String date, String time);
+
+  /// No description provided for @rdSchedPausedTill.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused till {date}'**
+  String rdSchedPausedTill(String date);
+
+  /// No description provided for @rdWeekdayMon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get rdWeekdayMon;
+
+  /// No description provided for @rdWeekdayThu.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get rdWeekdayThu;
+
+  /// No description provided for @rdStatusCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get rdStatusCollected;
+
+  /// No description provided for @rdStatusZeroKg.
+  ///
+  /// In en, this message translates to:
+  /// **'0 kg'**
+  String get rdStatusZeroKg;
+
+  /// No description provided for @rdStatusCancelledBySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by source'**
+  String get rdStatusCancelledBySource;
+
+  /// No description provided for @rdStatusNextStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Next stop'**
+  String get rdStatusNextStop;
+
+  /// No description provided for @rdStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get rdStatusPending;
+
+  /// No description provided for @rdStatusInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get rdStatusInactive;
+
+  /// No description provided for @rdAmountKgPcs.
+  ///
+  /// In en, this message translates to:
+  /// **'{kg} kg + {pcs} pcs'**
+  String rdAmountKgPcs(String kg, String pcs);
+
+  /// No description provided for @rdNoteNoMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'No material today'**
+  String get rdNoteNoMaterial;
+
+  /// No description provided for @rdNoteClosedStocktaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed for stock-taking'**
+  String get rdNoteClosedStocktaking;
+
+  /// No description provided for @rdNotePausedRenovation.
+  ///
+  /// In en, this message translates to:
+  /// **'Source paused (renovation)'**
+  String get rdNotePausedRenovation;
+
+  /// No description provided for @rdTagCollectedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected {time}'**
+  String rdTagCollectedAt(String time);
+
+  /// No description provided for @rdTagVisitedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited {time}'**
+  String rdTagVisitedAt(String time);
+
+  /// No description provided for @rdTagNoteFromDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Note from driver'**
+  String get rdTagNoteFromDriver;
+
+  /// No description provided for @rdTagVoiceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice note {duration}'**
+  String rdTagVoiceNote(String duration);
+
+  /// No description provided for @rdLegendCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get rdLegendCollected;
+
+  /// No description provided for @rdLegendZeroKg.
+  ///
+  /// In en, this message translates to:
+  /// **'0 kg'**
+  String get rdLegendZeroKg;
+
+  /// No description provided for @rdLegendCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get rdLegendCancelled;
+
+  /// No description provided for @rdLegendNextStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Next stop'**
+  String get rdLegendNextStop;
+
+  /// No description provided for @rdLegendPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get rdLegendPending;
+
+  /// No description provided for @rdLegendPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get rdLegendPaused;
+
+  /// No description provided for @rdLegendWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse'**
+  String get rdLegendWarehouse;
+
+  /// No description provided for @rdMapNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {number} · {name} · {time} · {distance} away'**
+  String rdMapNext(int number, String name, String time, String distance);
+
+  /// No description provided for @rdMapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops in visiting order. The solid line is done; the dashed line is still to go, back to the warehouse. Tap a stop to open it.'**
+  String get rdMapHint;
+
+  /// No description provided for @rdAddedLastHint.
+  ///
+  /// In en, this message translates to:
+  /// **'It is added as the last stop. You can change the order on the route\'s page.'**
+  String get rdAddedLastHint;
+
+  /// No description provided for @rdAddSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Add sources'**
+  String get rdAddSources;
 }
 
 class _DriverLocalizationsDelegate

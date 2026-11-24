@@ -81,6 +81,10 @@ abstract final class MobileWriteValidator {
       _categoryRequest(payload);
       return;
     }
+    if (RegExp(r'^/price-requests/[^/]+$').hasMatch(path)) {
+      _priceRequest(payload);
+      return;
+    }
     if (RegExp(r'^/expense-categories/requests/[^/]+/decide$').hasMatch(path)) {
       _decision(payload, allowAmount: false, remarksAllowed: false);
       return;
@@ -324,6 +328,13 @@ abstract final class MobileWriteValidator {
     _requiredText(value, 'centerId');
     _requiredText(value, 'name', min: 2, max: 100);
     _optionalText(value, 'reason', max: 255);
+  }
+
+  static void _priceRequest(Map<String, Object?> value) {
+    _requiredText(value, 'centerId');
+    _requiredText(value, 'materialItemId');
+    _number(value, 'requestedRate', min: 0, max: 99999999.99, decimals: 2);
+    _requiredText(value, 'reason', min: 1, max: 1000);
   }
 
   static void _decision(

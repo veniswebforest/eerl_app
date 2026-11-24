@@ -10,6 +10,7 @@ class TransferMaterialCard extends StatelessWidget {
     super.key,
     required this.name,
     required this.capacity,
+    this.standardName,
     required this.selected,
     required this.onTap,
     this.child,
@@ -17,6 +18,7 @@ class TransferMaterialCard extends StatelessWidget {
 
   final String name;
   final String capacity;
+  final String? standardName;
   final bool selected;
   final VoidCallback onTap;
   final Widget? child;
@@ -52,13 +54,27 @@ class TransferMaterialCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.mediumSH8_14.copyWith(
-                      color: AppColors.neutral950,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.mediumSH8_14.copyWith(
+                          color: AppColors.neutral950,
+                        ),
+                      ),
+                      if (standardName != null)
+                        Text(
+                          standardName!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.mediumSH9_12.copyWith(
+                            color: AppColors.neutral600,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 _SelectionCircle(selected: selected),
