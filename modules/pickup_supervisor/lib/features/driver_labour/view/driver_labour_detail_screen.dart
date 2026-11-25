@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/widgets/module_toast.dart';
 import 'package:pickup_supervisor/core/widgets/module_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
@@ -50,9 +51,9 @@ class _DetailViewState extends State<_DetailView> {
     );
     if (!mounted || !confirmed) return;
     setState(() => _active = false);
-    DriverLabourToast.show(
+    ModuleToast.show(
       context,
-      kind: DriverLabourToastKind.error,
+      kind: ModuleToastKind.error,
       title: l10n.dlDeactivatedTitle,
       message: l10n.dlDeactivatedBody,
     );
@@ -72,9 +73,9 @@ class _DetailViewState extends State<_DetailView> {
     );
     if (!mounted || !confirmed) return;
     setState(() => _active = true);
-    DriverLabourToast.show(
+    ModuleToast.show(
       context,
-      kind: DriverLabourToastKind.success,
+      kind: ModuleToastKind.success,
       title: l10n.dlReactivedTitle,
       message: l10n.dlReactivedBody,
     );

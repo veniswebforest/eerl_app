@@ -1091,14 +1091,13 @@ class DriverLocalizationsEn extends DriverLocalizations {
   String get supervisorTodaysTrips => 'Today’s trips';
 
   @override
-  String get supervisorTripsSubtitle =>
-      'Active and upcoming pickup routes for today';
+  String get supervisorTripsSubtitle => '5 trips today · the next 2 are below';
 
   @override
   String get supervisorAdajanMorning => 'Adajan Morning';
 
   @override
-  String get supervisorVikramProgress => 'Vikram Singh · 3 of 8 collected';
+  String get supervisorVikramProgress => 'Vikram Singh  •  3 of 8 collected';
 
   @override
   String get supervisorOwnVehicle => 'Own vehicle';
@@ -1114,10 +1113,10 @@ class DriverLocalizationsEn extends DriverLocalizations {
 
   @override
   String get supervisorAmitProgress =>
-      'Amit Patel · 0 of 8 recorded in the app';
+      'Amit Patel  •  0 of 8 recorded in the app';
 
   @override
-  String get supervisorDriverNotSetUp => 'Driver hasn’t set up app';
+  String get supervisorDriverNotSetUp => 'Driver not using app';
 
   @override
   String get supervisorSeeTripsPlan => 'See trips plan';
@@ -1148,13 +1147,13 @@ class DriverLocalizationsEn extends DriverLocalizations {
   String get supervisorQuickActions => 'Quick Actions';
 
   @override
-  String get supervisorUnassignedSources => 'Unassigned Sources';
+  String get supervisorUnassignedSources => 'Unassigned sources';
 
   @override
-  String get supervisorManageUnassigned => 'Manage New Unassigned Sources';
+  String get supervisorManageUnassigned => 'Pickup points with no route yet';
 
   @override
-  String get supervisorViewSource => 'View Source';
+  String get supervisorViewSource => 'View sources';
 
   @override
   String get supervisorExtraPickupRequests => 'Extra pickups requests';
@@ -1192,7 +1191,8 @@ class DriverLocalizationsEn extends DriverLocalizations {
   String get attentionApprovalRequests => 'Approval requests';
 
   @override
-  String get attentionApprovalSubtitle => 'From your drivers and pickup points';
+  String get attentionApprovalSubtitle =>
+      'From your drivers and IEC Executives';
 
   @override
   String get attentionToApproveCount => 'To approve 3';
@@ -1212,7 +1212,7 @@ class DriverLocalizationsEn extends DriverLocalizations {
 
   @override
   String get attentionDriverCorrectionDetail =>
-      'PET Bottles 50 kg → 60 kg. Suresh Kumar: “The scale photo shows 60 kg.”';
+      'PET Bottles 50 kg → 60 kg. Vikram Singh: “The scale photo shows 60 kg.”';
 
   @override
   String get attentionSentToday => 'Sent today, 10:05 am';
@@ -1231,7 +1231,7 @@ class DriverLocalizationsEn extends DriverLocalizations {
 
   @override
   String get attentionExtraPickupDetail =>
-      'Sat 25 Oct, 10 am – 12 pm · Medium · fits Adajan Morning';
+      'Sat 25 Oct, 10 am – 12 pm · about 40 kg · fits Adajan Morning';
 
   @override
   String get attentionSent21Oct => 'Sent 21 Oct';
@@ -1255,7 +1255,7 @@ class DriverLocalizationsEn extends DriverLocalizations {
 
   @override
   String get attentionCorrectionApprovedMessage =>
-      'Hotel Rajdhani’s record now shows PET Bottles 60 kg. Suresh Kumar and the pickup point are told.';
+      'Hotel Rajdhani’s record now shows PET Bottles 60 kg. Vikram Singh is told.';
 
   @override
   String get attentionBackToApprovals => 'Back to approval requests';
@@ -2119,12 +2119,6 @@ class DriverLocalizationsEn extends DriverLocalizations {
   String get profileSyncDataSubtitle => 'Sync your offline data';
 
   @override
-  String get profileEndMyDay => 'End My Day';
-
-  @override
-  String get profileEndMyDaySubtitle => 'Close today once your trips are done';
-
-  @override
   String get profileAccount => 'Account';
 
   @override
@@ -2267,45 +2261,7 @@ class DriverLocalizationsEn extends DriverLocalizations {
       'It records the stop as skipped for the current trip.';
 
   @override
-  String get profileTodaysActivitySummary => 'Today’s Activity Summary';
-
-  @override
-  String get profileTripsCompleted => 'Trips Completed';
-
-  @override
-  String get profileTripsCompletedValue => '08';
-
-  @override
-  String get profilePendingSources => 'Pending Sources';
-
-  @override
-  String get profilePendingSourcesValue => '01';
-
-  @override
-  String get profileOfflinePendingSync => 'Offline Pending Sync';
-
-  @override
-  String get profileAllSynced => 'All Synced';
-
-  @override
-  String get profileEndDayHelper =>
-      'Once you close the day, you won\'t be able to add or edit any entries.';
-
-  @override
   String get profileClosedDayArtwork => 'Now Time to\nCLOSED The Day';
-
-  @override
-  String get profileSubmitShareWhatsapp => 'Submit & Share to Whatsapp';
-
-  @override
-  String get profileShareWhatsappMessage =>
-      'This will lock the day for editing and pre-fill a WhatsApp message to your group.';
-
-  @override
-  String get profileCancel => 'Cancel';
-
-  @override
-  String get profileShare => 'Share';
 
   @override
   String get driverProfileUserName => 'Ramesh Kumar';
@@ -2644,7 +2600,7 @@ class DriverLocalizationsEn extends DriverLocalizations {
 
   @override
   String get tpEmptyMessage =>
-      'The warehouses are closed for Diwali. Pickups due today move to Mon 9 Nov (the holiday rule).';
+      'The warehouse is closed that day (holiday). Pickups due that day move to the next working day or are skipped, as each pickup point’s holiday rule says.';
 
   @override
   String get rdNext7Days => 'Next 7 Days';
@@ -2846,4 +2802,599 @@ class DriverLocalizationsEn extends DriverLocalizations {
 
   @override
   String get rdAddSources => 'Add sources';
+
+  @override
+  String get sdAddress => 'Address';
+
+  @override
+  String get sdOpenMaps => 'Open in Google Maps';
+
+  @override
+  String get sdSchedule => 'Schedule';
+
+  @override
+  String get sdPersonAtPickup => 'Person at the pickup point';
+
+  @override
+  String get sdIecExecutive => 'IEC Executive';
+
+  @override
+  String get sdPickupCategory => 'Pickup category';
+
+  @override
+  String get sdMaterial => 'Material';
+
+  @override
+  String get sdPickupStatus => 'Pickup Status';
+
+  @override
+  String get sdWarehouse => 'Warehouse';
+
+  @override
+  String get sdStatusNextStop => 'Next Stop';
+
+  @override
+  String get sdCall => 'Call';
+
+  @override
+  String get sdSkipForToday => 'Skip For Today';
+
+  @override
+  String get sdMaterialsList => 'Milk Pouch, Card Board';
+
+  @override
+  String get sdRoleManager => 'Manager';
+
+  @override
+  String sdContactLine(String name, String role, String phone) {
+    return '$name · $role · $phone';
+  }
+
+  @override
+  String sdIecLine(String name, String phone) {
+    return '$name · $phone';
+  }
+
+  @override
+  String get skTitle => 'Skip Source';
+
+  @override
+  String get skReasonLabel => 'Reason for Skip';
+
+  @override
+  String get skReasonClosed => 'Source closed';
+
+  @override
+  String get skReasonHoliday => 'Holiday';
+
+  @override
+  String get skReasonVehicle => 'Vehicle unavailable';
+
+  @override
+  String get skReasonOther => 'Other';
+
+  @override
+  String get skRemarks => 'Remarks';
+
+  @override
+  String get skMaxChars => 'Max 150 Characters';
+
+  @override
+  String get skConfirm => 'Confirm Skip';
+
+  @override
+  String get skSkippedTitle => 'Source Skipped!';
+
+  @override
+  String get skSkippedBody => 'Resumes tomorrow automatically.';
+
+  @override
+  String get apToApprove => 'To approve';
+
+  @override
+  String get apDone => 'Done';
+
+  @override
+  String get apCorrectionDoneDetail =>
+      'PET Bottles 50 kg → 60 kg. The stop’s record is changed; Vikram Singh is told.';
+
+  @override
+  String get apApprovedToday => 'Approved by you today, 10:20 am';
+
+  @override
+  String get apExtraPickupDoneDetail =>
+      'Sat 25 Oct, 10 am – 12 pm · about 40 kg · added to Adajan Morning';
+
+  @override
+  String get apApproved21Oct => 'Approved by you 21 Oct';
+
+  @override
+  String get apStartPickupsFromIec => 'Start pickups · from IEC';
+
+  @override
+  String get apGreenLeafNisha => 'Green Leaf Hotel · Nisha Mehta';
+
+  @override
+  String get apDeclineReplyDetail =>
+      'Your reply: “No room on Adajan Morning until 1 Dec. Ask again then.”';
+
+  @override
+  String get apDeclined20Oct => 'Declined by you 20 Oct';
+
+  @override
+  String get apDeclineCorrectionTitle => 'Decline the correction';
+
+  @override
+  String get apDeclineCorrectionBody =>
+      'Vikram Singh sees your reply. The stop stays as recorded.';
+
+  @override
+  String get apDeclineCorrectionReply =>
+      'The scale photo shows 50 kg. If it was more, ask the gate team to weigh it again.';
+
+  @override
+  String get apDeclineExtraTitle => 'Decline the extra pickup';
+
+  @override
+  String get apDeclineExtraBody =>
+      'ABC Plastic Manufacture sees your reply. No pickup is added.';
+
+  @override
+  String get apReplyHint => 'Write your reply';
+
+  @override
+  String get apDeclineAndReply => 'Decline and reply';
+
+  @override
+  String get apCancel => 'Cancel';
+
+  @override
+  String get apExtraApprovedTitle => 'Extra pickup approved';
+
+  @override
+  String get apExtraApprovedBody =>
+      'ABC Plastic Manufacture is added to Adajan Morning on Sat 25 Oct.';
+
+  @override
+  String get rpTitle => 'Collection report';
+
+  @override
+  String get rpShare => 'Share';
+
+  @override
+  String get rpCollectedToday => 'Collected today';
+
+  @override
+  String get rpCollectedYesterday => 'Collected yesterday';
+
+  @override
+  String get rpCollectedThisWeek => 'Collected this week';
+
+  @override
+  String get rpCollectedThisMonth => 'Collected this month';
+
+  @override
+  String get rpCollectedTheseDates => 'Collected on these dates';
+
+  @override
+  String rpTotal(String kg, String pcs) {
+    return '$kg kg + $pcs pcs';
+  }
+
+  @override
+  String rpKg(String kg) {
+    return '$kg kg';
+  }
+
+  @override
+  String rpStopsDue(String count) {
+    return '$count stops due';
+  }
+
+  @override
+  String get rpByRoute => 'By route';
+
+  @override
+  String get rpByCategory => 'By pickup category';
+
+  @override
+  String get rpStopsToLook => 'Stops to look at';
+
+  @override
+  String rpOfStops(String done, String total) {
+    return '$done of $total stops';
+  }
+
+  @override
+  String rpStops(String count) {
+    return '$count stops';
+  }
+
+  @override
+  String get rpOwn => 'Own';
+
+  @override
+  String get rpContract => 'Contract';
+
+  @override
+  String get rpCancelledBySource => 'Cancelled by source';
+
+  @override
+  String rpNamesMore(String first, String second, String count) {
+    return '$first, $second and $count more';
+  }
+
+  @override
+  String rpNamesPlus(String first, String second, String count) {
+    return '$first, $second +$count';
+  }
+
+  @override
+  String rpCollectedStops(String label, String done, String total) {
+    return '$label · $done of $total stops';
+  }
+
+  @override
+  String get rpPdfTitle => 'Report PDF';
+
+  @override
+  String rpPdfSubtitle(String range) {
+    return 'Collection report · $range';
+  }
+
+  @override
+  String get rpCompany => 'Ecovision Environmental Resources LLP';
+
+  @override
+  String rpPdfSupervisor(String name, String period, String range) {
+    return 'Pickup Supervisor: $name · $period, $range';
+  }
+
+  @override
+  String get rpPeriodToday => 'Today';
+
+  @override
+  String get rpPeriodYesterday => 'Yesterday';
+
+  @override
+  String get rpPeriodThisWeek => 'This week';
+
+  @override
+  String get rpPeriodThisMonth => 'This month';
+
+  @override
+  String get rpPeriodDates => 'Selected dates';
+
+  @override
+  String rpPdfSummary(
+    String due,
+    String collected,
+    String zero,
+    String missed,
+    String cancelled,
+  ) {
+    return '$due stops due · Collected $collected · 0 kg $zero · Missed $missed · Cancelled $cancelled';
+  }
+
+  @override
+  String get rpColRoute => 'Route';
+
+  @override
+  String get rpColVehicle => 'Vehicle';
+
+  @override
+  String get rpColStops => 'Stops';
+
+  @override
+  String get rpColCollected => 'Collected';
+
+  @override
+  String get rpColCategory => 'Category';
+
+  @override
+  String get rpColOutcome => 'Outcome';
+
+  @override
+  String get rpColPickupPoints => 'Pickup points';
+
+  @override
+  String rpOf(String done, String total) {
+    return '$done of $total';
+  }
+
+  @override
+  String rpPdfMade(String date, String time) {
+    return 'Made $date, $time · Page 1 of 1';
+  }
+
+  @override
+  String get rpPdfPageHint => 'Page 1 of 1 · pinch to zoom';
+
+  @override
+  String get rpSharePdf => 'Share PDF';
+
+  @override
+  String get calClear => 'Clear';
+
+  @override
+  String get calApply => 'Apply';
+
+  @override
+  String get calPrevMonth => 'Previous month';
+
+  @override
+  String get calNextMonth => 'Next month';
+
+  @override
+  String calSelection(String range, String days) {
+    return '$range · $days';
+  }
+
+  @override
+  String calDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calPickDates => 'Pick dates';
+
+  @override
+  String calMonthLong(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'January',
+      '2': 'February',
+      '3': 'March',
+      '4': 'April',
+      '5': 'May',
+      '6': 'June',
+      '7': 'July',
+      '8': 'August',
+      '9': 'September',
+      '10': 'October',
+      '11': 'November',
+      '12': 'December',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String calMonthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'Jan',
+      '2': 'Feb',
+      '3': 'Mar',
+      '4': 'Apr',
+      '5': 'May',
+      '6': 'Jun',
+      '7': 'Jul',
+      '8': 'Aug',
+      '9': 'Sep',
+      '10': 'Oct',
+      '11': 'Nov',
+      '12': 'Dec',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String calWeekday(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      '1': 'M',
+      '2': 'T',
+      '3': 'W',
+      '4': 'T',
+      '5': 'F',
+      '6': 'S',
+      '7': 'S',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get supervisorDrawerCashPayments => 'Cash & payments';
+
+  @override
+  String lkRouteDate(String route, String date) {
+    return '$route · $date';
+  }
+
+  @override
+  String get lkNotOnRoute => 'Not on a route';
+
+  @override
+  String lkContractVehicle(String plate) {
+    return 'Contract vehicle · $plate';
+  }
+
+  @override
+  String lkOwnVehicle(String name) {
+    return 'Own vehicle · driver $name';
+  }
+
+  @override
+  String get lkExtraPickup => 'Extra pickup';
+
+  @override
+  String get lkCalledOffIec => 'Called off by the IEC ahead of time';
+
+  @override
+  String lkCalledOffAtStop(String name) {
+    return 'Called off at the stop · driver $name';
+  }
+
+  @override
+  String get lkCalledOffByYou => 'Called off by you';
+
+  @override
+  String get lkReasonNotRecorded => 'Not recorded by the driver or the gate';
+
+  @override
+  String get lkReasonTripCancelled => 'Its trip was cancelled';
+
+  @override
+  String get lkReasonNoRoute => 'No route that day';
+
+  @override
+  String get lkReasonTakenOff => 'Taken off the trip and not put on another';
+
+  @override
+  String get lkReasonClosedToday => 'Closed today';
+
+  @override
+  String get lkReasonHoliday => 'Holiday';
+
+  @override
+  String get lkReasonShifted => 'Shifted to another day';
+
+  @override
+  String get lkReasonNoMaterial => 'No material';
+
+  @override
+  String get lkReasonNoMaterialToday => 'No material today';
+
+  @override
+  String get lkReasonClosed => 'Closed';
+
+  @override
+  String get lkReasonRefused => 'Refused to give';
+
+  @override
+  String get lkReasonVehicleFull => 'Vehicle full';
+
+  @override
+  String get lkEmpty => 'Nothing to look at for these dates';
+
+  @override
+  String calWeekdayShort(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      '1': 'Mon',
+      '2': 'Tue',
+      '3': 'Wed',
+      '4': 'Thu',
+      '5': 'Fri',
+      '6': 'Sat',
+      '7': 'Sun',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get isTypeSourceProblem => 'Problem at the source';
+
+  @override
+  String isDriverRole(String name) {
+    return '$name (Driver)';
+  }
+
+  @override
+  String isRaised(String time) {
+    return 'Raised $time';
+  }
+
+  @override
+  String get isOpen => 'Open';
+
+  @override
+  String get isEscalated => 'Escalated';
+
+  @override
+  String get isResolved => 'Resolved';
+
+  @override
+  String get isTypeLabel => 'Type :';
+
+  @override
+  String get isDriverNote => 'Driver’s note :';
+
+  @override
+  String get isBy => 'By :';
+
+  @override
+  String isByValue(String name, String time) {
+    return '$name · $time';
+  }
+
+  @override
+  String get isWhatWasDone => 'What was done :';
+
+  @override
+  String get isTold => 'Told :';
+
+  @override
+  String isToldValue(String name) {
+    return 'The office and $name (IEC).';
+  }
+
+  @override
+  String get isEscalate => 'Escalate';
+
+  @override
+  String get isMarkResolved => 'Mark resolved';
+
+  @override
+  String get isSheetTitle => 'Mark as resolved';
+
+  @override
+  String get isSheetBody =>
+      'Say what was done. The driver and the office see it.';
+
+  @override
+  String get isWhatWasDoneLabel => 'What was done';
+
+  @override
+  String get isEscalateTitle => 'Escalate this issue?';
+
+  @override
+  String get isEscalateBody =>
+      'The office and the source’s IEC are told, and it shows as Escalated. Use it when you cannot sort it out yourself.';
+
+  @override
+  String get isResolvedToastTitle => 'Issue Resolved!';
+
+  @override
+  String isResolvedToastBody(String name) {
+    return '$name is told.';
+  }
+
+  @override
+  String get isEscalatedToastTitle => 'Issue Escalated!';
+
+  @override
+  String get isEscalatedToastBody =>
+      'The office and the source’s IEC are told.';
+
+  @override
+  String get tpStatusExpected => 'Expected';
+
+  @override
+  String get tpExpectedInfo =>
+      'Trips are made the day before. This is what the routes and the pickups due that day add up to; the team can still change.';
+
+  @override
+  String tpExtra(int count) {
+    return 'Extra $count';
+  }
+
+  @override
+  String tpTodaySuffix(String date) {
+    return '$date · Today';
+  }
+
+  @override
+  String tpWarehouseClosed(String date) {
+    return '$date · Warehouse closed';
+  }
+
+  @override
+  String get tpNoTripsHoliday => 'No trips · warehouse holiday';
 }

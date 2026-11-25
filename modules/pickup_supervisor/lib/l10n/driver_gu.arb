@@ -6,21 +6,29 @@
   "onlineStatus": "તમે ઑનલાઇન છો",
   "pendingCollections": "{count} કલેક્શન બાકી",
   "@pendingCollections": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "syncNow": "હવે સિંક કરો",
   "todaysSummary": "આજનો સારાંશ",
   "pendingStops": "બાકી સ્ટોપ્સ",
   "pendingStopsCount": "05",
   "collected": "એકત્રિત",
-  "collectedCount": "03",
+  "collectedCount": "એકત્રિત ({count})",
   "todaysTrip": "આજની ટ્રિપ",
   "vehicleRegistration": "GJ-XX-1234",
   "stopsCompleted": "{total} માંથી {completed} સ્ટોપ્સ પૂર્ણ",
   "@stopsCompleted": {
     "placeholders": {
-      "completed": { "type": "int" },
-      "total": { "type": "int" }
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "tripProgress": "37%",
@@ -39,8 +47,12 @@
   "stopCardTitle": "{name} · {material}",
   "@stopCardTitle": {
     "placeholders": {
-      "name": { "type": "String" },
-      "material": { "type": "String" }
+      "name": {
+        "type": "String"
+      },
+      "material": {
+        "type": "String"
+      }
     }
   },
   "abcTextileMills": "ABC ટેક્સટાઇલ મિલ્સ",
@@ -115,7 +127,13 @@
   "zeroKg": "0 કિગ્રા",
   "cancelled": "રદ કરેલ",
   "todaysTripsCount": "આજની ટ્રિપ્સ ({count})",
-  "@todaysTripsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@todaysTripsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "todaysTrips": "આજની ટ્રિપ્સ",
   "tripMorning": "ટ્રિપ 1 · સવાર",
   "tripAfternoon": "ટ્રિપ 2 · બપોર",
@@ -124,7 +142,13 @@
   "afternoonStartTime": "બપોરે 2:00",
   "onTheWay": "માર્ગમાં",
   "startsAt": "{time} વાગ્યે શરૂ",
-  "@startsAt": {"placeholders": {"time": {"type": "String"}}},
+  "@startsAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "delivered": "પહોંચાડ્યું",
   "vehicleCrew": "GJ-XX-1234 · સુરેશ, મહેશ",
   "dropMagdalla": "મગદલ્લા વેરહાઉસ પર ડ્રોપ",
@@ -133,23 +157,71 @@
   "weight420Kg": "420 કિગ્રા",
   "weight180Kg": "180 કિગ્રા",
   "stopsDone": "{total}માંથી {completed} સ્ટોપ્સ પૂર્ણ",
-  "@stopsDone": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@stopsDone": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "seeAllStops": "બધા {count} સ્ટોપ્સ જુઓ",
-  "@seeAllStops": {"placeholders": {"count": {"type": "int"}}},
+  "@seeAllStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nextStopOnTrip": "ટ્રિપ {trip}નો આગામી સ્ટોપ",
-  "@nextStopOnTrip": {"placeholders": {"trip": {"type": "int"}}},
+  "@nextStopOnTrip": {
+    "placeholders": {
+      "trip": {
+        "type": "int"
+      }
+    }
+  },
   "afterThat": "ત્યાર પછી ({count})",
-  "@afterThat": {"placeholders": {"count": {"type": "int"}}},
+  "@afterThat": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "laterToday": "આજે પછી",
   "earlierToday": "આજે અગાઉ",
   "stopPosition": "સ્ટોપ {current} / {total}",
-  "@stopPosition": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@stopPosition": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "nextStop": "આગામી સ્ટોપ",
   "enterCollection": "કલેક્શન દાખલ કરો",
   "opensAfterStop": "સ્ટોપ {stop} પછી ખુલશે",
-  "@opensAfterStop": {"placeholders": {"stop": {"type": "int"}}},
+  "@opensAfterStop": {
+    "placeholders": {
+      "stop": {
+        "type": "int"
+      }
+    }
+  },
   "unlockAfterStop": "સ્ટોપ {stop} પૂર્ણ થાય અથવા તમે આ સ્ટોપ પર પહોંચો (GPS) ત્યારે ખુલશે. સ્થાન તપાસવા ટેપ કરો.",
-  "@unlockAfterStop": {"placeholders": {"stop": {"type": "int"}}},
+  "@unlockAfterStop": {
+    "placeholders": {
+      "stop": {
+        "type": "int"
+      }
+    }
+  },
   "handedOverWeight": "સોંપ્યું · ચોખ્ખું 1,240 કિગ્રા",
   "royalResidency": "રોયલ રેસિડન્સી",
   "shantiNagar": "શાંતિ નગર",
@@ -168,11 +240,29 @@
   "morningTripWindow": "સવાર · 7:00 – 11:00",
   "fiveOfSevenDone": "7 માંથી 5 પૂર્ણ",
   "stillToCollect": "હજુ કલેક્શન બાકી ({count})",
-  "@stillToCollect": {"placeholders": {"count": {"type": "int"}}},
+  "@stillToCollect": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "doneStops": "પૂર્ણ ({count})",
-  "@doneStops": {"placeholders": {"count": {"type": "int"}}},
+  "@doneStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "stopNumber": "સ્ટોપ {number}",
-  "@stopNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@stopNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "hotelRajdhani": "હોટેલ રાજધાની",
   "greenParkSociety": "ગ્રીન પાર્ક સોસાયટી",
   "navratriGroundEvent": "નવરાત્રી ગ્રાઉન્ડ (ઇવેન્ટ)",
@@ -249,9 +339,20 @@
   "startYourCollections": "તમારું કલેક્શન શરૂ કરો",
   "searchHere": "અહીં શોધો...",
   "pendingCount": "બાકી ({count})",
-  "@pendingCount": {"placeholders": {"count": {"type": "int"}}},
-  "collectedCount": "એકત્રિત ({count})",
-  "@collectedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@pendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@collectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "yashTextileHub": "યશ ટેક્સટાઇલ હબ",
   "anjanaFarmAreaSurat": "અંજના ફાર્મ વિસ્તાર, સુરત",
   "collectionWindowNineToTen": "09:00 AM - 10:00 AM",
@@ -264,7 +365,13 @@
   "notHere": "અહીં નથી",
   "startCollection": "કલેક્શન શરૂ કરો",
   "stopsNearby": "નજીકમાં {count} સ્ટોપ્સ",
-  "@stopsNearby": {"placeholders": {"count": {"type": "int"}}},
+  "@stopsNearby": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "whichStopAreYouAt": "તમે કયા સ્ટોપ પર છો?",
   "twoStopsCloseMessage": "તમારી ટ્રિપના બે સ્ટોપ તમારી નજીક છે.",
   "distanceStopSeven": "40 મી દૂર · સ્ટોપ 7",
@@ -296,11 +403,9 @@
   "warehouseDistance": "મગદલ્લા, સુરત · 6.4 કિમી",
   "viewTripSummary": "ટ્રિપ સારાંશ જુઓ",
   "tripOneSummary": "ટ્રિપ 1 સારાંશ",
-  "morningTripWindow": "સવાર · 7:00 – 11:00",
   "allStopsDone": "બધા સ્ટોપ પૂર્ણ",
   "tripCollectedTotal": "1,260 કિગ્રા + 25 નંગ",
   "mixedWaste": "મિશ્ર કચરો",
-  "cardboard": "કાર્ડબોર્ડ",
   "weight635Kg": "635 કિગ્રા",
   "weight270Kg": "270 કિગ્રા",
   "weight85Kg": "85 કિગ્રા",
@@ -310,8 +415,6 @@
   "openInMaps": "નકશામાં ખોલો",
   "callWarehouse": "વેરહાઉસને કૉલ કરો",
   "notCollectedTwo": "સંગ્રહ ન થયું (2)",
-  "cityBakery": "સિટી બેકરી",
-  "cancelledBySource": "સ્રોત દ્વારા રદ",
   "closedForStockTaking": "સ્ટોક ગણતરી માટે બંધ",
   "handOverAtWarehouse": "વેરહાઉસમાં સોંપો",
   "warehouseGateInstruction": "વેરહાઉસ ગેટ પર ટેપ કરો. તમે બેગની સંખ્યા દાખલ કરો; વેરહાઉસ ઇન્ચાર્જ વાહનનું વજન કરે છે.",
@@ -374,15 +477,15 @@
   "supervisorTripsClosed": "બંધ ટ્રિપ્સ",
   "supervisorViewFullReport": "સંપૂર્ણ રિપોર્ટ જુઓ",
   "supervisorTodaysTrips": "આજની ટ્રિપ્સ",
-  "supervisorTripsSubtitle": "આજના સક્રિય અને આગામી પિકઅપ રૂટ્સ",
+  "supervisorTripsSubtitle": "આજે 5 ટ્રિપ્સ · આગામી 2 નીચે છે",
   "supervisorAdajanMorning": "અડાજણ સવાર",
-  "supervisorVikramProgress": "વિક્રમ સિંહ · 8માંથી 3 એકત્રિત",
+  "supervisorVikramProgress": "વિક્રમ સિંહ  •  8માંથી 3 એકત્રિત",
   "supervisorOwnVehicle": "પોતાનું વાહન",
   "supervisorDailyWeekly": "દૈનિક 5 · સાપ્તાહિક 3",
   "supervisorCallDriver": "ડ્રાઇવરને કૉલ કરો",
   "supervisorPalGamMorning": "પાલ ગામ સવાર",
-  "supervisorAmitProgress": "અમિત પટેલ · એપમાં 8માંથી 0 નોંધાયા",
-  "supervisorDriverNotSetUp": "ડ્રાઇવરે એપ સેટ કરી નથી",
+  "supervisorAmitProgress": "અમિત પટેલ  •  એપમાં 8માંથી 0 નોંધાયા",
+  "supervisorDriverNotSetUp": "ડ્રાઇવર એપ વાપરતા નથી",
   "supervisorSeeTripsPlan": "ટ્રિપ પ્લાન જુઓ",
   "supervisorPickupPoints": "મારા પિકઅપ પોઇન્ટ્સ",
   "supervisorPickupPointsSubtitle": "અડાજણ, વેસુ, પાલમાં 79 · કેટેગરી મુજબ",
@@ -393,7 +496,7 @@
   "supervisorOnCall": "કૉલ પર",
   "supervisorQuickActions": "ઝડપી ક્રિયાઓ",
   "supervisorUnassignedSources": "ફાળવ્યા વગરના સ્રોત",
-  "supervisorManageUnassigned": "નવા ફાળવ્યા વગરના સ્રોત સંભાળો",
+  "supervisorManageUnassigned": "હજુ રૂટ વગરના પિકઅપ પોઇન્ટ",
   "supervisorViewSource": "સ્રોત જુઓ",
   "supervisorExtraPickupRequests": "વધારાના પિકઅપની વિનંતીઓ",
   "supervisorManageExtraPickup": "વધારાના પિકઅપ સ્રોત સંભાળો",
@@ -406,26 +509,26 @@
   "supervisorSeeSuggestions": "સૂચનો જુઓ",
   "supervisorHome": "હોમ",
   "attentionApprovalRequests": "મંજૂરી વિનંતીઓ",
-  "attentionApprovalSubtitle": "તમારા ડ્રાઇવરો અને પિકઅપ પોઇન્ટ તરફથી",
+  "attentionApprovalSubtitle": "તમારા ડ્રાઇવરો અને IEC એક્ઝિક્યુટિવ્સ તરફથી",
   "attentionToApproveCount": "મંજૂર કરવા 3",
   "attentionDoneCount": "પૂર્ણ 12",
   "attentionCorrectionFromDriver": "સુધારો · ડ્રાઇવર તરફથી",
   "attentionWaiting": "રાહમાં",
   "attentionHotelRajdhaniStop": "હોટેલ રજધાની · અડાજણ મોર્નિંગ, સ્ટોપ 2",
-  "attentionDriverCorrectionDetail": "PET બોટલ 50 કિગ્રા → 60 કિગ્રા. સુરેશ કુમાર: “વજનના ફોટામાં 60 કિગ્રા દેખાય છે.”",
+  "attentionDriverCorrectionDetail": "PET બોટલ 50 kg → 60 kg. વિક્રમ સિંહ: “વજનકાંટાના ફોટામાં 60 kg દેખાય છે.”",
   "attentionSentToday": "આજે, 10:05 am મોકલ્યું",
   "attentionDecline": "નકારો",
   "attentionApprove": "મંજૂર કરો",
   "attentionExtraPickup": "વધારાનું પિકઅપ",
   "attentionAbcPlastic": "ABC પ્લાસ્ટિક મેન્યુફેક્ચર",
-  "attentionExtraPickupDetail": "શનિ 25 ઑક્ટો, 10 am – 12 pm · મધ્યમ · અડાજણ મોર્નિંગમાં યોગ્ય",
+  "attentionExtraPickupDetail": "શનિ 25 ઑક્ટો, સવારે 10 – બપોરે 12 · લગભગ 40 kg · અડાજણ મોર્નિંગમાં બંધબેસે છે",
   "attentionSent21Oct": "21 ઑક્ટો મોકલ્યું",
   "attentionCorrectionFromPickupPoint": "સુધારો · પિકઅપ પોઇન્ટ તરફથી",
   "attentionGreenParkSociety": "ગ્રીન પાર્ક સોસાયટી",
   "attentionPickupPointCorrectionDetail": "19 ઑક્ટોના પિકઅપમાં કાર્ડબોર્ડ 20 કિગ્રા → 25 કિગ્રા",
   "attentionSent20Oct": "20 ઑક્ટો મોકલ્યું",
   "attentionCorrectionApproved": "સુધારો મંજૂર થયો",
-  "attentionCorrectionApprovedMessage": "હોટેલ રજધાનીના રેકોર્ડમાં હવે PET બોટલ 60 કિગ્રા છે. સુરેશ કુમાર અને પિકઅપ પોઇન્ટને જાણ કરાઈ છે.",
+  "attentionCorrectionApprovedMessage": "હોટેલ રાજધાનીના રેકોર્ડમાં હવે PET બોટલ 60 kg છે. વિક્રમ સિંહને જાણ કરાઈ છે.",
   "attentionBackToApprovals": "મંજૂરી વિનંતીઓ પર પાછા જાઓ",
   "attentionBackToHome": "હોમ પર પાછા જાઓ",
   "attentionMyRequests": "મારી વિનંતીઓ",
@@ -704,8 +807,6 @@
   "profileActions": "ક્રિયાઓ",
   "profileSyncData": "ડેટા સિંક કરો",
   "profileSyncDataSubtitle": "તમારો ઓફલાઇન ડેટા સિંક કરો",
-  "profileEndMyDay": "મારો દિવસ સમાપ્ત કરો",
-  "profileEndMyDaySubtitle": "ટ્રિપ પૂર્ણ થયા પછી આજનો દિવસ બંધ કરો",
   "profileAccount": "એકાઉન્ટ",
   "profileLogout": "લૉગઆઉટ",
   "profileLogoutSubtitle": "તમારા એકાઉન્ટમાંથી સાઇન આઉટ કરો",
@@ -750,19 +851,7 @@
   "profileFaqUnassignedAnswer": "જે સોર્સ હાલમાં કોઈ રૂટ સાથે જોડાયેલા નથી.",
   "profileFaqSkipping": "સ્ટોપ છોડવાથી શું થાય છે?",
   "profileFaqSkippingAnswer": "વર્તમાન ટ્રિપમાં સ્ટોપ છોડ્યો હોવાનું નોંધાય છે.",
-  "profileTodaysActivitySummary": "આજની પ્રવૃત્તિનો સારાંશ",
-  "profileTripsCompleted": "પૂર્ણ ટ્રિપ",
-  "profileTripsCompletedValue": "08",
-  "profilePendingSources": "બાકી સોર્સ",
-  "profilePendingSourcesValue": "01",
-  "profileOfflinePendingSync": "ઓફલાઇન બાકી સિંક",
-  "profileAllSynced": "બધું સિંક છે",
-  "profileEndDayHelper": "દિવસ બંધ કર્યા પછી તમે કોઈ એન્ટ્રી ઉમેરી કે સંપાદિત કરી શકશો નહીં.",
   "profileClosedDayArtwork": "હવે દિવસ\nબંધ કરવાનો સમય",
-  "profileSubmitShareWhatsapp": "સબમિટ કરીને WhatsApp પર શેર કરો",
-  "profileShareWhatsappMessage": "આ દિવસને સંપાદન માટે લૉક કરશે અને તમારા ગ્રુપ માટે WhatsApp મેસેજ તૈયાર કરશે.",
-  "profileCancel": "રદ કરો",
-  "profileShare": "શેર કરો",
   "driverProfileUserName": "રમેશ કુમાર",
   "driverProfileWarehouseLabel": "મારું વેરહાઉસ",
   "driverProfileWarehouseValue": "મગદલ્લા વેરહાઉસ",
@@ -859,7 +948,7 @@
   "tpDay5": "મંગળ 27 ઑક્ટો",
   "tpDay6": "બુધ 28 ઑક્ટો",
   "tpEmptyTitle": "આ દિવસે કોઈ ટ્રિપ નથી",
-  "tpEmptyMessage": "દિવાળી માટે વેરહાઉસ બંધ છે. આજે નિર્ધારિત પિકઅપ સોમ 9 નવે પર ખસેડાય છે (રજાનો નિયમ).",
+  "tpEmptyMessage": "તે દિવસે વેરહાઉસ બંધ છે (રજા). તે દિવસના પિકઅપ દરેક પિકઅપ પોઇન્ટના રજા નિયમ મુજબ આગલા કામકાજના દિવસે જશે અથવા છોડી દેવાશે.",
   "rdNext7Days": "આગામી 7 દિવસ",
   "rdDateToday": "ગુરુ, 22 ઑક્ટો 2026",
   "rdDateRange": "શુક્ર 23 ઑક્ટો – ગુરુ 29 ઑક્ટો",
@@ -914,5 +1003,157 @@
   "rdMapNext": "આગલો: {number} · {name} · {time} · {distance} દૂર",
   "rdMapHint": "સ્ટોપ મુલાકાતના ક્રમમાં. ઘન રેખા પૂર્ણ થઈ છે; ડૅશ રેખા બાકી છે, વેરહાઉસ પર પાછા. સ્ટોપ ખોલવા તેના પર ટૅપ કરો.",
   "rdAddedLastHint": "તે છેલ્લા સ્ટોપ તરીકે ઉમેરાય છે. તમે રૂટના પેજ પર ક્રમ બદલી શકો છો.",
-  "rdAddSources": "સોર્સ ઉમેરો"
+  "rdAddSources": "સોર્સ ઉમેરો",
+  "sdAddress": "સરનામું",
+  "sdOpenMaps": "Google Maps માં ખોલો",
+  "sdSchedule": "સમયપત્રક",
+  "sdPersonAtPickup": "પિકઅપ સ્થળે વ્યક્તિ",
+  "sdIecExecutive": "IEC એક્ઝિક્યુટિવ",
+  "sdPickupCategory": "પિકઅપ શ્રેણી",
+  "sdMaterial": "સામગ્રી",
+  "sdPickupStatus": "પિકઅપ સ્થિતિ",
+  "sdWarehouse": "વેરહાઉસ",
+  "sdStatusNextStop": "આગલો સ્ટોપ",
+  "sdCall": "કૉલ",
+  "sdSkipForToday": "આજ માટે છોડો",
+  "sdMaterialsList": "દૂધની કોથળી, કાર્ડ બોર્ડ",
+  "sdRoleManager": "મેનેજર",
+  "sdContactLine": "{name} · {role} · {phone}",
+  "sdIecLine": "{name} · {phone}",
+  "skTitle": "સોર્સ છોડો",
+  "skReasonLabel": "છોડવાનું કારણ",
+  "skReasonClosed": "સોર્સ બંધ છે",
+  "skReasonHoliday": "રજા",
+  "skReasonVehicle": "વાહન ઉપલબ્ધ નથી",
+  "skReasonOther": "અન્ય",
+  "skRemarks": "ટિપ્પણી",
+  "skMaxChars": "વધુમાં વધુ 150 અક્ષરો",
+  "skConfirm": "છોડવાની પુષ્ટિ કરો",
+  "skSkippedTitle": "સોર્સ છોડાયો!",
+  "skSkippedBody": "કાલે આપોઆપ ફરી શરૂ થશે.",
+  "apToApprove": "મંજૂર કરવાના",
+  "apDone": "પૂર્ણ",
+  "apCorrectionDoneDetail": "PET બોટલ 50 kg → 60 kg. સ્ટોપનો રેકોર્ડ બદલાયો છે; વિક્રમ સિંહને જાણ કરાઈ છે.",
+  "apApprovedToday": "તમે આજે સવારે 10:20 વાગ્યે મંજૂર કર્યું",
+  "apExtraPickupDoneDetail": "શનિ 25 ઑક્ટો, સવારે 10 – બપોરે 12 · લગભગ 40 kg · અડાજણ મોર્નિંગમાં ઉમેરાયું",
+  "apApproved21Oct": "તમે 21 ઑક્ટોએ મંજૂર કર્યું",
+  "apStartPickupsFromIec": "પિકઅપ શરૂ કરો · IEC તરફથી",
+  "apGreenLeafNisha": "ગ્રીન લીફ હોટેલ · નિશા મહેતા",
+  "apDeclineReplyDetail": "તમારો જવાબ: “1 ડિસે. સુધી અડાજણ મોર્નિંગમાં જગ્યા નથી. ત્યારે ફરી પૂછો.”",
+  "apDeclined20Oct": "તમે 20 ઑક્ટોએ નકાર્યું",
+  "apDeclineCorrectionTitle": "સુધારો નકારો",
+  "apDeclineCorrectionBody": "વિક્રમ સિંહ તમારો જવાબ જોશે. સ્ટોપ નોંધ્યા મુજબ જ રહેશે.",
+  "apDeclineCorrectionReply": "વજનકાંટાના ફોટામાં 50 kg દેખાય છે. વધારે હોય તો ગેટ ટીમને ફરી વજન કરવા કહો.",
+  "apDeclineExtraTitle": "વધારાનું પિકઅપ નકારો",
+  "apDeclineExtraBody": "ABC પ્લાસ્ટિક મેન્યુફેક્ચર તમારો જવાબ જોશે. કોઈ પિકઅપ ઉમેરાશે નહીં.",
+  "apReplyHint": "તમારો જવાબ લખો",
+  "apDeclineAndReply": "નકારો અને જવાબ આપો",
+  "apCancel": "રદ કરો",
+  "apExtraApprovedTitle": "વધારાનું પિકઅપ મંજૂર",
+  "apExtraApprovedBody": "ABC પ્લાસ્ટિક મેન્યુફેક્ચર શનિ 25 ઑક્ટોએ અડાજણ મોર્નિંગમાં ઉમેરાયું છે.",
+  "rpTitle": "કલેક્શન રિપોર્ટ",
+  "rpShare": "શેર કરો",
+  "rpCollectedToday": "આજે એકત્રિત",
+  "rpCollectedYesterday": "ગઈકાલે એકત્રિત",
+  "rpCollectedThisWeek": "આ અઠવાડિયે એકત્રિત",
+  "rpCollectedThisMonth": "આ મહિને એકત્રિત",
+  "rpCollectedTheseDates": "આ તારીખોમાં એકત્રિત",
+  "rpTotal": "{kg} kg + {pcs} નંગ",
+  "rpKg": "{kg} kg",
+  "rpStopsDue": "{count} સ્ટોપ બાકી",
+  "rpByRoute": "રૂટ પ્રમાણે",
+  "rpByCategory": "પિકઅપ કેટેગરી પ્રમાણે",
+  "rpStopsToLook": "ધ્યાન આપવાના સ્ટોપ",
+  "rpOfStops": "{total}માંથી {done} સ્ટોપ",
+  "rpStops": "{count} સ્ટોપ",
+  "rpOwn": "પોતાનું",
+  "rpContract": "કોન્ટ્રાક્ટ",
+  "rpCancelledBySource": "સ્રોતે રદ કર્યું",
+  "rpNamesMore": "{first}, {second} અને બીજા {count}",
+  "rpNamesPlus": "{first}, {second} +{count}",
+  "rpCollectedStops": "{label} · {total}માંથી {done} સ્ટોપ",
+  "rpPdfTitle": "રિપોર્ટ PDF",
+  "rpPdfSubtitle": "કલેક્શન રિપોર્ટ · {range}",
+  "rpCompany": "Ecovision Environmental Resources LLP",
+  "rpPdfSupervisor": "પિકઅપ સુપરવાઇઝર: {name} · {period}, {range}",
+  "rpPeriodToday": "આજે",
+  "rpPeriodYesterday": "ગઈકાલે",
+  "rpPeriodThisWeek": "આ અઠવાડિયે",
+  "rpPeriodThisMonth": "આ મહિને",
+  "rpPeriodDates": "પસંદ કરેલી તારીખો",
+  "rpPdfSummary": "{due} સ્ટોપ બાકી · એકત્રિત {collected} · 0 kg {zero} · ચૂકી ગયા {missed} · રદ {cancelled}",
+  "rpColRoute": "રૂટ",
+  "rpColVehicle": "વાહન",
+  "rpColStops": "સ્ટોપ",
+  "rpColCollected": "એકત્રિત",
+  "rpColCategory": "કેટેગરી",
+  "rpColOutcome": "પરિણામ",
+  "rpColPickupPoints": "પિકઅપ પોઇન્ટ",
+  "rpOf": "{total}માંથી {done}",
+  "rpPdfMade": "{date}, {time} એ બનાવ્યું · પાનું 1 માંથી 1",
+  "rpPdfPageHint": "પાનું 1 માંથી 1 · ઝૂમ કરવા પિંચ કરો",
+  "rpSharePdf": "PDF શેર કરો",
+  "calClear": "સાફ કરો",
+  "calApply": "લાગુ કરો",
+  "calPrevMonth": "પાછલો મહિનો",
+  "calNextMonth": "આગલો મહિનો",
+  "calSelection": "{range} · {days}",
+  "calDays": "{count, plural, =1{1 દિવસ} other{{count} દિવસ}}",
+  "calPickDates": "તારીખો પસંદ કરો",
+  "calMonthLong": "{month, select, 1{જાન્યુઆરી} 2{ફેબ્રુઆરી} 3{માર્ચ} 4{એપ્રિલ} 5{મે} 6{જૂન} 7{જુલાઈ} 8{ઑગસ્ટ} 9{સપ્ટેમ્બર} 10{ઑક્ટોબર} 11{નવેમ્બર} 12{ડિસેમ્બર} other{}}",
+  "calMonthShort": "{month, select, 1{જાન્યુ} 2{ફેબ્રુ} 3{માર્ચ} 4{એપ્રિ} 5{મે} 6{જૂન} 7{જુલા} 8{ઑગ} 9{સપ્ટે} 10{ઑક્ટો} 11{નવે} 12{ડિસે} other{}}",
+  "calWeekday": "{day, select, 1{સો} 2{મં} 3{બુ} 4{ગુ} 5{શુ} 6{શ} 7{ર} other{}}",
+  "supervisorDrawerCashPayments": "રોકડ અને ચુકવણી",
+  "lkRouteDate": "{route} · {date}",
+  "lkNotOnRoute": "કોઈ રૂટ પર નથી",
+  "lkContractVehicle": "કોન્ટ્રાક્ટ વાહન · {plate}",
+  "lkOwnVehicle": "પોતાનું વાહન · ડ્રાઇવર {name}",
+  "lkExtraPickup": "વધારાનું પિકઅપ",
+  "lkCalledOffIec": "IEC એ અગાઉથી રદ કર્યું",
+  "lkCalledOffAtStop": "સ્ટોપ પર રદ થયું · ડ્રાઇવર {name}",
+  "lkCalledOffByYou": "તમે રદ કર્યું",
+  "lkReasonNotRecorded": "ડ્રાઇવર કે ગેટે નોંધ્યું નથી",
+  "lkReasonTripCancelled": "તેની ટ્રિપ રદ થઈ હતી",
+  "lkReasonNoRoute": "તે દિવસે કોઈ રૂટ નહોતો",
+  "lkReasonTakenOff": "ટ્રિપમાંથી કાઢ્યું અને બીજીમાં મૂક્યું નહીં",
+  "lkReasonClosedToday": "આજે બંધ",
+  "lkReasonHoliday": "રજા",
+  "lkReasonShifted": "બીજા દિવસે ખસેડ્યું",
+  "lkReasonNoMaterial": "કોઈ માલ નથી",
+  "lkReasonNoMaterialToday": "આજે કોઈ માલ નથી",
+  "lkReasonClosed": "બંધ",
+  "lkReasonRefused": "આપવાની ના પાડી",
+  "lkReasonVehicleFull": "વાહન ભરાઈ ગયું",
+  "lkEmpty": "આ તારીખોમાં ધ્યાન આપવા જેવું કંઈ નથી",
+  "calWeekdayShort": "{day, select, 1{સોમ} 2{મંગળ} 3{બુધ} 4{ગુરુ} 5{શુક્ર} 6{શનિ} 7{રવિ} other{}}",
+  "isTypeSourceProblem": "સ્રોત પર સમસ્યા",
+  "isDriverRole": "{name} (ડ્રાઇવર)",
+  "isRaised": "{time} એ નોંધાવ્યું",
+  "isOpen": "ખુલ્લું",
+  "isEscalated": "આગળ મોકલ્યું",
+  "isResolved": "ઉકેલાયું",
+  "isTypeLabel": "પ્રકાર :",
+  "isDriverNote": "ડ્રાઇવરની નોંધ :",
+  "isBy": "દ્વારા :",
+  "isByValue": "{name} · {time}",
+  "isWhatWasDone": "શું કર્યું :",
+  "isTold": "જાણ કરી :",
+  "isToldValue": "ઑફિસ અને {name} (IEC).",
+  "isEscalate": "આગળ મોકલો",
+  "isMarkResolved": "ઉકેલાયું ગણો",
+  "isSheetTitle": "ઉકેલાયું તરીકે નોંધો",
+  "isSheetBody": "શું કર્યું તે લખો. ડ્રાઇવર અને ઑફિસ તે જોશે.",
+  "isWhatWasDoneLabel": "શું કર્યું",
+  "isEscalateTitle": "આ સમસ્યા આગળ મોકલવી છે?",
+  "isEscalateBody": "ઑફિસ અને સ્રોતના IEC ને જાણ થશે, અને તે આગળ મોકલ્યું તરીકે દેખાશે. જ્યારે તમે જાતે ઉકેલી ન શકો ત્યારે વાપરો.",
+  "isResolvedToastTitle": "સમસ્યા ઉકેલાઈ!",
+  "isResolvedToastBody": "{name} ને જાણ કરાઈ છે.",
+  "isEscalatedToastTitle": "સમસ્યા આગળ મોકલી!",
+  "isEscalatedToastBody": "ઑફિસ અને સ્રોતના IEC ને જાણ કરાઈ છે.",
+  "tpStatusExpected": "અપેક્ષિત",
+  "tpExpectedInfo": "ટ્રિપ્સ આગલા દિવસે બને છે. તે દિવસના રૂટ્સ અને બાકી પિકઅપ મળીને આટલું થાય છે; ટીમ હજુ બદલી શકે છે.",
+  "tpExtra": "વધારાના {count}",
+  "tpTodaySuffix": "{date} · આજે",
+  "tpWarehouseClosed": "{date} · વેરહાઉસ બંધ",
+  "tpNoTripsHoliday": "કોઈ ટ્રિપ નથી · વેરહાઉસ રજા"
 }

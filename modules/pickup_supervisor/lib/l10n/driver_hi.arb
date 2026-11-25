@@ -6,21 +6,29 @@
   "onlineStatus": "आप ऑनलाइन हैं",
   "pendingCollections": "{count} कलेक्शन बाकी",
   "@pendingCollections": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "syncNow": "अभी सिंक करें",
   "todaysSummary": "आज का सारांश",
   "pendingStops": "बाकी स्टॉप",
   "pendingStopsCount": "05",
   "collected": "एकत्रित",
-  "collectedCount": "03",
+  "collectedCount": "एकत्रित ({count})",
   "todaysTrip": "आज की ट्रिप",
   "vehicleRegistration": "GJ-XX-1234",
   "stopsCompleted": "{total} में से {completed} स्टॉप पूरे",
   "@stopsCompleted": {
     "placeholders": {
-      "completed": { "type": "int" },
-      "total": { "type": "int" }
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "tripProgress": "37%",
@@ -39,8 +47,12 @@
   "stopCardTitle": "{name} · {material}",
   "@stopCardTitle": {
     "placeholders": {
-      "name": { "type": "String" },
-      "material": { "type": "String" }
+      "name": {
+        "type": "String"
+      },
+      "material": {
+        "type": "String"
+      }
     }
   },
   "abcTextileMills": "ABC टेक्सटाइल मिल्स",
@@ -115,7 +127,13 @@
   "zeroKg": "0 किग्रा",
   "cancelled": "रद्द",
   "todaysTripsCount": "आज की ट्रिप्स ({count})",
-  "@todaysTripsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@todaysTripsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "todaysTrips": "आज की ट्रिप्स",
   "tripMorning": "ट्रिप 1 · सुबह",
   "tripAfternoon": "ट्रिप 2 · दोपहर",
@@ -124,7 +142,13 @@
   "afternoonStartTime": "दोपहर 2:00",
   "onTheWay": "रास्ते में",
   "startsAt": "{time} बजे शुरू",
-  "@startsAt": {"placeholders": {"time": {"type": "String"}}},
+  "@startsAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "delivered": "पहुंचाया गया",
   "vehicleCrew": "GJ-XX-1234 · सुरेश, महेश",
   "dropMagdalla": "मगदल्ला वेयरहाउस पर ड्रॉप",
@@ -133,23 +157,71 @@
   "weight420Kg": "420 किग्रा",
   "weight180Kg": "180 किग्रा",
   "stopsDone": "{total} में से {completed} स्टॉप पूरे",
-  "@stopsDone": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@stopsDone": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "seeAllStops": "सभी {count} स्टॉप देखें",
-  "@seeAllStops": {"placeholders": {"count": {"type": "int"}}},
+  "@seeAllStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nextStopOnTrip": "ट्रिप {trip} का अगला स्टॉप",
-  "@nextStopOnTrip": {"placeholders": {"trip": {"type": "int"}}},
+  "@nextStopOnTrip": {
+    "placeholders": {
+      "trip": {
+        "type": "int"
+      }
+    }
+  },
   "afterThat": "उसके बाद ({count})",
-  "@afterThat": {"placeholders": {"count": {"type": "int"}}},
+  "@afterThat": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "laterToday": "आज बाद में",
   "earlierToday": "आज पहले",
   "stopPosition": "स्टॉप {current} / {total}",
-  "@stopPosition": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@stopPosition": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "nextStop": "अगला स्टॉप",
   "enterCollection": "कलेक्शन दर्ज करें",
   "opensAfterStop": "स्टॉप {stop} के बाद खुलेगा",
-  "@opensAfterStop": {"placeholders": {"stop": {"type": "int"}}},
+  "@opensAfterStop": {
+    "placeholders": {
+      "stop": {
+        "type": "int"
+      }
+    }
+  },
   "unlockAfterStop": "स्टॉप {stop} पूरा होने या इस स्टॉप पर पहुंचने (GPS) पर खुलेगा। स्थान जांचने के लिए टैप करें।",
-  "@unlockAfterStop": {"placeholders": {"stop": {"type": "int"}}},
+  "@unlockAfterStop": {
+    "placeholders": {
+      "stop": {
+        "type": "int"
+      }
+    }
+  },
   "handedOverWeight": "सौंपा गया · शुद्ध 1,240 किग्रा",
   "royalResidency": "रॉयल रेसिडेंसी",
   "shantiNagar": "शांति नगर",
@@ -168,11 +240,29 @@
   "morningTripWindow": "सुबह · 7:00 – 11:00 बजे",
   "fiveOfSevenDone": "7 में से 5 पूरे",
   "stillToCollect": "अभी संग्रह बाकी ({count})",
-  "@stillToCollect": {"placeholders": {"count": {"type": "int"}}},
+  "@stillToCollect": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "doneStops": "पूर्ण ({count})",
-  "@doneStops": {"placeholders": {"count": {"type": "int"}}},
+  "@doneStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "stopNumber": "स्टॉप {number}",
-  "@stopNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@stopNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "hotelRajdhani": "होटल राजधानी",
   "greenParkSociety": "ग्रीन पार्क सोसायटी",
   "navratriGroundEvent": "नवरात्रि ग्राउंड (कार्यक्रम)",
@@ -249,9 +339,20 @@
   "startYourCollections": "अपना कलेक्शन शुरू करें",
   "searchHere": "यहाँ खोजें...",
   "pendingCount": "बाकी ({count})",
-  "@pendingCount": {"placeholders": {"count": {"type": "int"}}},
-  "collectedCount": "एकत्रित ({count})",
-  "@collectedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@pendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@collectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "yashTextileHub": "यश टेक्सटाइल हब",
   "anjanaFarmAreaSurat": "अंजना फार्म क्षेत्र, सूरत",
   "collectionWindowNineToTen": "09:00 AM - 10:00 AM",
@@ -264,7 +365,13 @@
   "notHere": "यहाँ नहीं",
   "startCollection": "कलेक्शन शुरू करें",
   "stopsNearby": "पास में {count} स्टॉप",
-  "@stopsNearby": {"placeholders": {"count": {"type": "int"}}},
+  "@stopsNearby": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "whichStopAreYouAt": "आप किस स्टॉप पर हैं?",
   "twoStopsCloseMessage": "आपकी यात्रा के दो स्टॉप आपके पास हैं।",
   "distanceStopSeven": "40 मी दूर · स्टॉप 7",
@@ -296,11 +403,9 @@
   "warehouseDistance": "मगदल्ला, सूरत · 6.4 किमी",
   "viewTripSummary": "यात्रा सारांश देखें",
   "tripOneSummary": "ट्रिप 1 सारांश",
-  "morningTripWindow": "सुबह · 7:00 – 11:00 बजे",
   "allStopsDone": "सभी स्टॉप पूरे",
   "tripCollectedTotal": "1,260 किग्रा + 25 नग",
   "mixedWaste": "मिश्रित कचरा",
-  "cardboard": "कार्डबोर्ड",
   "weight635Kg": "635 किग्रा",
   "weight270Kg": "270 किग्रा",
   "weight85Kg": "85 किग्रा",
@@ -310,8 +415,6 @@
   "openInMaps": "मैप में खोलें",
   "callWarehouse": "वेयरहाउस को कॉल करें",
   "notCollectedTwo": "एकत्र नहीं हुआ (2)",
-  "cityBakery": "सिटी बेकरी",
-  "cancelledBySource": "स्रोत द्वारा रद्द",
   "closedForStockTaking": "स्टॉक गिनती के लिए बंद",
   "handOverAtWarehouse": "वेयरहाउस में सौंपें",
   "warehouseGateInstruction": "वेयरहाउस गेट पर टैप करें। आप बैग की संख्या दर्ज करते हैं; वेयरहाउस इंचार्ज वाहन का वजन करता है।",
@@ -374,15 +477,15 @@
   "supervisorTripsClosed": "बंद ट्रिप",
   "supervisorViewFullReport": "पूरी रिपोर्ट देखें",
   "supervisorTodaysTrips": "आज की ट्रिप",
-  "supervisorTripsSubtitle": "आज के सक्रिय और आगामी पिकअप रूट",
+  "supervisorTripsSubtitle": "आज 5 ट्रिप · अगली 2 नीचे हैं",
   "supervisorAdajanMorning": "अडाजन सुबह",
-  "supervisorVikramProgress": "विक्रम सिंह · 8 में से 3 एकत्रित",
+  "supervisorVikramProgress": "विक्रम सिंह  •  8 में से 3 एकत्रित",
   "supervisorOwnVehicle": "अपना वाहन",
   "supervisorDailyWeekly": "दैनिक 5 · साप्ताहिक 3",
   "supervisorCallDriver": "ड्राइवर को कॉल करें",
   "supervisorPalGamMorning": "पाल गाँव सुबह",
-  "supervisorAmitProgress": "अमित पटेल · ऐप में 8 में से 0 दर्ज",
-  "supervisorDriverNotSetUp": "ड्राइवर ने ऐप सेट नहीं किया",
+  "supervisorAmitProgress": "अमित पटेल  •  ऐप में 8 में से 0 दर्ज",
+  "supervisorDriverNotSetUp": "ड्राइवर ऐप का उपयोग नहीं कर रहा",
   "supervisorSeeTripsPlan": "ट्रिप प्लान देखें",
   "supervisorPickupPoints": "मेरे पिकअप पॉइंट",
   "supervisorPickupPointsSubtitle": "अडाजन, वेसु, पाल में 79 · श्रेणी अनुसार",
@@ -393,7 +496,7 @@
   "supervisorOnCall": "कॉल पर",
   "supervisorQuickActions": "त्वरित कार्य",
   "supervisorUnassignedSources": "बिना असाइन स्रोत",
-  "supervisorManageUnassigned": "नए बिना असाइन स्रोत संभालें",
+  "supervisorManageUnassigned": "जिन पिकअप पॉइंट का अभी कोई रूट नहीं",
   "supervisorViewSource": "स्रोत देखें",
   "supervisorExtraPickupRequests": "अतिरिक्त पिकअप अनुरोध",
   "supervisorManageExtraPickup": "अतिरिक्त पिकअप स्रोत संभालें",
@@ -406,26 +509,26 @@
   "supervisorSeeSuggestions": "सुझाव देखें",
   "supervisorHome": "होम",
   "attentionApprovalRequests": "मंज़ूरी अनुरोध",
-  "attentionApprovalSubtitle": "आपके ड्राइवरों और पिकअप पॉइंट से",
+  "attentionApprovalSubtitle": "आपके ड्राइवरों और IEC एक्ज़ीक्यूटिव से",
   "attentionToApproveCount": "मंज़ूरी के लिए 3",
   "attentionDoneCount": "पूर्ण 12",
   "attentionCorrectionFromDriver": "सुधार · ड्राइवर से",
   "attentionWaiting": "प्रतीक्षा में",
   "attentionHotelRajdhaniStop": "होटल राजधानी · अडाजन मॉर्निंग, स्टॉप 2",
-  "attentionDriverCorrectionDetail": "PET बोतल 50 किग्रा → 60 किग्रा। सुरेश कुमार: “स्केल की फोटो में 60 किग्रा दिखता है।”",
+  "attentionDriverCorrectionDetail": "PET बोतलें 50 kg → 60 kg. विक्रम सिंह: “तराज़ू की फ़ोटो में 60 kg दिख रहा है।”",
   "attentionSentToday": "आज, 10:05 am भेजा",
   "attentionDecline": "अस्वीकार करें",
   "attentionApprove": "मंज़ूर करें",
   "attentionExtraPickup": "अतिरिक्त पिकअप",
   "attentionAbcPlastic": "ABC प्लास्टिक मैन्युफैक्चर",
-  "attentionExtraPickupDetail": "शनि 25 अक्तू, 10 am – 12 pm · मध्यम · अडाजन मॉर्निंग में उपयुक्त",
+  "attentionExtraPickupDetail": "शनि 25 अक्टू, सुबह 10 – दोपहर 12 · लगभग 40 kg · अडाजण मॉर्निंग में फ़िट",
   "attentionSent21Oct": "21 अक्तू भेजा",
   "attentionCorrectionFromPickupPoint": "सुधार · पिकअप पॉइंट से",
   "attentionGreenParkSociety": "ग्रीन पार्क सोसायटी",
   "attentionPickupPointCorrectionDetail": "19 अक्तू के पिकअप में कार्डबोर्ड 20 किग्रा → 25 किग्रा",
   "attentionSent20Oct": "20 अक्तू भेजा",
   "attentionCorrectionApproved": "सुधार मंज़ूर हुआ",
-  "attentionCorrectionApprovedMessage": "होटल राजधानी के रिकॉर्ड में अब PET बोतल 60 किग्रा है। सुरेश कुमार और पिकअप पॉइंट को बता दिया गया है।",
+  "attentionCorrectionApprovedMessage": "होटल राजधानी के रिकॉर्ड में अब PET बोतलें 60 kg हैं। विक्रम सिंह को बता दिया गया है।",
   "attentionBackToApprovals": "मंज़ूरी अनुरोध पर वापस जाएँ",
   "attentionBackToHome": "होम पर वापस जाएँ",
   "attentionMyRequests": "मेरे अनुरोध",
@@ -704,8 +807,6 @@
   "profileActions": "कार्रवाइयाँ",
   "profileSyncData": "डेटा सिंक करें",
   "profileSyncDataSubtitle": "अपना ऑफ़लाइन डेटा सिंक करें",
-  "profileEndMyDay": "मेरा दिन समाप्त करें",
-  "profileEndMyDaySubtitle": "ट्रिप पूरी होने के बाद आज का दिन बंद करें",
   "profileAccount": "खाता",
   "profileLogout": "लॉगआउट",
   "profileLogoutSubtitle": "अपने खाते से साइन आउट करें",
@@ -750,19 +851,7 @@
   "profileFaqUnassignedAnswer": "वे स्रोत जो अभी किसी रूट से जुड़े नहीं हैं।",
   "profileFaqSkipping": "स्टॉप छोड़ने से क्या होता है?",
   "profileFaqSkippingAnswer": "वर्तमान ट्रिप में स्टॉप छोड़ा गया दर्ज होता है।",
-  "profileTodaysActivitySummary": "आज की गतिविधि का सारांश",
-  "profileTripsCompleted": "पूरी ट्रिप",
-  "profileTripsCompletedValue": "08",
-  "profilePendingSources": "लंबित स्रोत",
-  "profilePendingSourcesValue": "01",
-  "profileOfflinePendingSync": "ऑफ़लाइन लंबित सिंक",
-  "profileAllSynced": "सब सिंक है",
-  "profileEndDayHelper": "दिन बंद करने के बाद आप कोई एंट्री जोड़ या बदल नहीं सकेंगे।",
   "profileClosedDayArtwork": "अब दिन\nबंद करने का समय",
-  "profileSubmitShareWhatsapp": "सबमिट कर WhatsApp पर शेयर करें",
-  "profileShareWhatsappMessage": "यह दिन को संपादन के लिए लॉक करेगा और आपके समूह के लिए WhatsApp संदेश तैयार करेगा।",
-  "profileCancel": "रद्द करें",
-  "profileShare": "शेयर करें",
   "driverProfileUserName": "रमेश कुमार",
   "driverProfileWarehouseLabel": "मेरा गोदाम",
   "driverProfileWarehouseValue": "मगदल्ला गोदाम",
@@ -859,7 +948,7 @@
   "tpDay5": "मंगल 27 अक्टू",
   "tpDay6": "बुध 28 अक्टू",
   "tpEmptyTitle": "इस दिन कोई ट्रिप नहीं",
-  "tpEmptyMessage": "दिवाली के लिए गोदाम बंद हैं। आज के पिकअप सोम 9 नवं को चले जाते हैं (छुट्टी का नियम)।",
+  "tpEmptyMessage": "उस दिन वेयरहाउस बंद है (छुट्टी)। उस दिन के पिकअप हर पिकअप पॉइंट के छुट्टी नियम के अनुसार अगले कामकाजी दिन पर जाएँगे या छोड़ दिए जाएँगे।",
   "rdNext7Days": "अगले 7 दिन",
   "rdDateToday": "गुरु, 22 अक्टू 2026",
   "rdDateRange": "शुक्र 23 अक्टू – गुरु 29 अक्टू",
@@ -914,5 +1003,157 @@
   "rdMapNext": "अगला: {number} · {name} · {time} · {distance} दूर",
   "rdMapHint": "स्टॉप दौरे के क्रम में। ठोस रेखा पूरी हो चुकी है; बिंदीदार रेखा बाकी है, गोदाम तक वापसी। स्टॉप खोलने के लिए उस पर टैप करें।",
   "rdAddedLastHint": "इसे आख़िरी स्टॉप के रूप में जोड़ा जाता है। आप रूट के पेज पर क्रम बदल सकते हैं।",
-  "rdAddSources": "सोर्स जोड़ें"
+  "rdAddSources": "सोर्स जोड़ें",
+  "sdAddress": "पता",
+  "sdOpenMaps": "Google Maps में खोलें",
+  "sdSchedule": "समय-सारणी",
+  "sdPersonAtPickup": "पिकअप स्थान पर व्यक्ति",
+  "sdIecExecutive": "IEC एग्जीक्यूटिव",
+  "sdPickupCategory": "पिकअप श्रेणी",
+  "sdMaterial": "सामग्री",
+  "sdPickupStatus": "पिकअप स्थिति",
+  "sdWarehouse": "गोदाम",
+  "sdStatusNextStop": "अगला स्टॉप",
+  "sdCall": "कॉल",
+  "sdSkipForToday": "आज के लिए छोड़ें",
+  "sdMaterialsList": "दूध पाउच, कार्ड बोर्ड",
+  "sdRoleManager": "मैनेजर",
+  "sdContactLine": "{name} · {role} · {phone}",
+  "sdIecLine": "{name} · {phone}",
+  "skTitle": "सोर्स छोड़ें",
+  "skReasonLabel": "छोड़ने का कारण",
+  "skReasonClosed": "सोर्स बंद है",
+  "skReasonHoliday": "छुट्टी",
+  "skReasonVehicle": "वाहन उपलब्ध नहीं",
+  "skReasonOther": "अन्य",
+  "skRemarks": "टिप्पणी",
+  "skMaxChars": "अधिकतम 150 अक्षर",
+  "skConfirm": "छोड़ने की पुष्टि करें",
+  "skSkippedTitle": "सोर्स छोड़ा गया!",
+  "skSkippedBody": "कल अपने आप फिर शुरू होगा।",
+  "apToApprove": "मंज़ूरी बाकी",
+  "apDone": "पूरे",
+  "apCorrectionDoneDetail": "PET बोतलें 50 kg → 60 kg. स्टॉप का रिकॉर्ड बदल दिया गया; विक्रम सिंह को बता दिया गया।",
+  "apApprovedToday": "आपने आज सुबह 10:20 बजे मंज़ूर किया",
+  "apExtraPickupDoneDetail": "शनि 25 अक्टू, सुबह 10 – दोपहर 12 · लगभग 40 kg · अडाजण मॉर्निंग में जोड़ा गया",
+  "apApproved21Oct": "आपने 21 अक्टू को मंज़ूर किया",
+  "apStartPickupsFromIec": "पिकअप शुरू करें · IEC से",
+  "apGreenLeafNisha": "ग्रीन लीफ होटल · निशा मेहता",
+  "apDeclineReplyDetail": "आपका जवाब: “1 दिसं. तक अडाजण मॉर्निंग में जगह नहीं है। तब फिर पूछें।”",
+  "apDeclined20Oct": "आपने 20 अक्टू को अस्वीकार किया",
+  "apDeclineCorrectionTitle": "सुधार अस्वीकार करें",
+  "apDeclineCorrectionBody": "विक्रम सिंह आपका जवाब देखेंगे। स्टॉप दर्ज जैसा ही रहेगा।",
+  "apDeclineCorrectionReply": "तराज़ू की फ़ोटो में 50 kg दिख रहा है। अगर ज़्यादा था, तो गेट टीम से दोबारा तौलने को कहें।",
+  "apDeclineExtraTitle": "अतिरिक्त पिकअप अस्वीकार करें",
+  "apDeclineExtraBody": "ABC प्लास्टिक मैन्युफ़ैक्चर आपका जवाब देखेगा। कोई पिकअप नहीं जोड़ा जाएगा।",
+  "apReplyHint": "अपना जवाब लिखें",
+  "apDeclineAndReply": "अस्वीकार करें और जवाब दें",
+  "apCancel": "रद्द करें",
+  "apExtraApprovedTitle": "अतिरिक्त पिकअप मंज़ूर",
+  "apExtraApprovedBody": "ABC प्लास्टिक मैन्युफ़ैक्चर को शनि 25 अक्टू को अडाजण मॉर्निंग में जोड़ दिया गया है।",
+  "rpTitle": "कलेक्शन रिपोर्ट",
+  "rpShare": "शेयर करें",
+  "rpCollectedToday": "आज एकत्रित",
+  "rpCollectedYesterday": "कल एकत्रित",
+  "rpCollectedThisWeek": "इस हफ़्ते एकत्रित",
+  "rpCollectedThisMonth": "इस महीने एकत्रित",
+  "rpCollectedTheseDates": "इन तारीखों में एकत्रित",
+  "rpTotal": "{kg} kg + {pcs} पीस",
+  "rpKg": "{kg} kg",
+  "rpStopsDue": "{count} स्टॉप बाकी",
+  "rpByRoute": "रूट के अनुसार",
+  "rpByCategory": "पिकअप श्रेणी के अनुसार",
+  "rpStopsToLook": "ध्यान देने वाले स्टॉप",
+  "rpOfStops": "{total} में से {done} स्टॉप",
+  "rpStops": "{count} स्टॉप",
+  "rpOwn": "अपना",
+  "rpContract": "कॉन्ट्रैक्ट",
+  "rpCancelledBySource": "स्रोत ने रद्द किया",
+  "rpNamesMore": "{first}, {second} और {count} अन्य",
+  "rpNamesPlus": "{first}, {second} +{count}",
+  "rpCollectedStops": "{label} · {total} में से {done} स्टॉप",
+  "rpPdfTitle": "रिपोर्ट PDF",
+  "rpPdfSubtitle": "कलेक्शन रिपोर्ट · {range}",
+  "rpCompany": "Ecovision Environmental Resources LLP",
+  "rpPdfSupervisor": "पिकअप सुपरवाइज़र: {name} · {period}, {range}",
+  "rpPeriodToday": "आज",
+  "rpPeriodYesterday": "कल",
+  "rpPeriodThisWeek": "इस हफ़्ते",
+  "rpPeriodThisMonth": "इस महीने",
+  "rpPeriodDates": "चुनी गई तारीखें",
+  "rpPdfSummary": "{due} स्टॉप बाकी · एकत्रित {collected} · 0 kg {zero} · छूटे {missed} · रद्द {cancelled}",
+  "rpColRoute": "रूट",
+  "rpColVehicle": "वाहन",
+  "rpColStops": "स्टॉप",
+  "rpColCollected": "एकत्रित",
+  "rpColCategory": "श्रेणी",
+  "rpColOutcome": "नतीजा",
+  "rpColPickupPoints": "पिकअप पॉइंट",
+  "rpOf": "{total} में से {done}",
+  "rpPdfMade": "{date}, {time} को बनाया · पेज 1 में से 1",
+  "rpPdfPageHint": "पेज 1 में से 1 · ज़ूम के लिए पिंच करें",
+  "rpSharePdf": "PDF शेयर करें",
+  "calClear": "साफ़ करें",
+  "calApply": "लागू करें",
+  "calPrevMonth": "पिछला महीना",
+  "calNextMonth": "अगला महीना",
+  "calSelection": "{range} · {days}",
+  "calDays": "{count, plural, =1{1 दिन} other{{count} दिन}}",
+  "calPickDates": "तारीखें चुनें",
+  "calMonthLong": "{month, select, 1{जनवरी} 2{फ़रवरी} 3{मार्च} 4{अप्रैल} 5{मई} 6{जून} 7{जुलाई} 8{अगस्त} 9{सितंबर} 10{अक्टूबर} 11{नवंबर} 12{दिसंबर} other{}}",
+  "calMonthShort": "{month, select, 1{जन} 2{फ़र} 3{मार्च} 4{अप्रै} 5{मई} 6{जून} 7{जुला} 8{अग} 9{सितं} 10{अक्टू} 11{नवं} 12{दिसं} other{}}",
+  "calWeekday": "{day, select, 1{सो} 2{मं} 3{बु} 4{गु} 5{शु} 6{श} 7{र} other{}}",
+  "supervisorDrawerCashPayments": "नकद और भुगतान",
+  "lkRouteDate": "{route} · {date}",
+  "lkNotOnRoute": "किसी रूट पर नहीं",
+  "lkContractVehicle": "कॉन्ट्रैक्ट वाहन · {plate}",
+  "lkOwnVehicle": "अपना वाहन · ड्राइवर {name}",
+  "lkExtraPickup": "अतिरिक्त पिकअप",
+  "lkCalledOffIec": "IEC ने पहले ही रद्द किया",
+  "lkCalledOffAtStop": "स्टॉप पर रद्द हुआ · ड्राइवर {name}",
+  "lkCalledOffByYou": "आपने रद्द किया",
+  "lkReasonNotRecorded": "ड्राइवर या गेट ने दर्ज नहीं किया",
+  "lkReasonTripCancelled": "इसकी ट्रिप रद्द हो गई थी",
+  "lkReasonNoRoute": "उस दिन कोई रूट नहीं था",
+  "lkReasonTakenOff": "ट्रिप से हटाया और किसी दूसरी में नहीं डाला",
+  "lkReasonClosedToday": "आज बंद",
+  "lkReasonHoliday": "छुट्टी",
+  "lkReasonShifted": "दूसरे दिन पर खिसकाया",
+  "lkReasonNoMaterial": "कोई माल नहीं",
+  "lkReasonNoMaterialToday": "आज कोई माल नहीं",
+  "lkReasonClosed": "बंद",
+  "lkReasonRefused": "देने से मना किया",
+  "lkReasonVehicleFull": "वाहन भर गया",
+  "lkEmpty": "इन तारीखों में देखने लायक कुछ नहीं",
+  "calWeekdayShort": "{day, select, 1{सोम} 2{मंगल} 3{बुध} 4{गुरु} 5{शुक्र} 6{शनि} 7{रवि} other{}}",
+  "isTypeSourceProblem": "स्रोत पर समस्या",
+  "isDriverRole": "{name} (ड्राइवर)",
+  "isRaised": "{time} पर दर्ज",
+  "isOpen": "खुला",
+  "isEscalated": "आगे भेजा",
+  "isResolved": "हल हुआ",
+  "isTypeLabel": "प्रकार :",
+  "isDriverNote": "ड्राइवर का नोट :",
+  "isBy": "द्वारा :",
+  "isByValue": "{name} · {time}",
+  "isWhatWasDone": "क्या किया :",
+  "isTold": "सूचित :",
+  "isToldValue": "ऑफ़िस और {name} (IEC).",
+  "isEscalate": "आगे भेजें",
+  "isMarkResolved": "हल हुआ मानें",
+  "isSheetTitle": "हल हुआ दर्ज करें",
+  "isSheetBody": "बताएँ कि क्या किया। ड्राइवर और ऑफ़िस इसे देखेंगे।",
+  "isWhatWasDoneLabel": "क्या किया",
+  "isEscalateTitle": "यह समस्या आगे भेजें?",
+  "isEscalateBody": "ऑफ़िस और स्रोत के IEC को सूचित किया जाएगा, और यह आगे भेजा के रूप में दिखेगा। तब इस्तेमाल करें जब आप खुद इसे सुलझा न सकें।",
+  "isResolvedToastTitle": "समस्या हल हुई!",
+  "isResolvedToastBody": "{name} को बता दिया गया।",
+  "isEscalatedToastTitle": "समस्या आगे भेजी!",
+  "isEscalatedToastBody": "ऑफ़िस और स्रोत के IEC को सूचित कर दिया गया।",
+  "tpStatusExpected": "अपेक्षित",
+  "tpExpectedInfo": "ट्रिप एक दिन पहले बनती हैं। उस दिन के रूट और बाकी पिकअप मिलाकर इतना बनता है; टीम अभी भी बदल सकती है।",
+  "tpExtra": "अतिरिक्त {count}",
+  "tpTodaySuffix": "{date} · आज",
+  "tpWarehouseClosed": "{date} · वेयरहाउस बंद",
+  "tpNoTripsHoliday": "कोई ट्रिप नहीं · वेयरहाउस छुट्टी"
 }

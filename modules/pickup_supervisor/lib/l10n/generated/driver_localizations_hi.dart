@@ -1088,13 +1088,13 @@ class DriverLocalizationsHi extends DriverLocalizations {
   String get supervisorTodaysTrips => 'आज की ट्रिप';
 
   @override
-  String get supervisorTripsSubtitle => 'आज के सक्रिय और आगामी पिकअप रूट';
+  String get supervisorTripsSubtitle => 'आज 5 ट्रिप · अगली 2 नीचे हैं';
 
   @override
   String get supervisorAdajanMorning => 'अडाजन सुबह';
 
   @override
-  String get supervisorVikramProgress => 'विक्रम सिंह · 8 में से 3 एकत्रित';
+  String get supervisorVikramProgress => 'विक्रम सिंह  •  8 में से 3 एकत्रित';
 
   @override
   String get supervisorOwnVehicle => 'अपना वाहन';
@@ -1109,10 +1109,10 @@ class DriverLocalizationsHi extends DriverLocalizations {
   String get supervisorPalGamMorning => 'पाल गाँव सुबह';
 
   @override
-  String get supervisorAmitProgress => 'अमित पटेल · ऐप में 8 में से 0 दर्ज';
+  String get supervisorAmitProgress => 'अमित पटेल  •  ऐप में 8 में से 0 दर्ज';
 
   @override
-  String get supervisorDriverNotSetUp => 'ड्राइवर ने ऐप सेट नहीं किया';
+  String get supervisorDriverNotSetUp => 'ड्राइवर ऐप का उपयोग नहीं कर रहा';
 
   @override
   String get supervisorSeeTripsPlan => 'ट्रिप प्लान देखें';
@@ -1146,7 +1146,8 @@ class DriverLocalizationsHi extends DriverLocalizations {
   String get supervisorUnassignedSources => 'बिना असाइन स्रोत';
 
   @override
-  String get supervisorManageUnassigned => 'नए बिना असाइन स्रोत संभालें';
+  String get supervisorManageUnassigned =>
+      'जिन पिकअप पॉइंट का अभी कोई रूट नहीं';
 
   @override
   String get supervisorViewSource => 'स्रोत देखें';
@@ -1187,7 +1188,8 @@ class DriverLocalizationsHi extends DriverLocalizations {
   String get attentionApprovalRequests => 'मंज़ूरी अनुरोध';
 
   @override
-  String get attentionApprovalSubtitle => 'आपके ड्राइवरों और पिकअप पॉइंट से';
+  String get attentionApprovalSubtitle =>
+      'आपके ड्राइवरों और IEC एक्ज़ीक्यूटिव से';
 
   @override
   String get attentionToApproveCount => 'मंज़ूरी के लिए 3';
@@ -1207,7 +1209,7 @@ class DriverLocalizationsHi extends DriverLocalizations {
 
   @override
   String get attentionDriverCorrectionDetail =>
-      'PET बोतल 50 किग्रा → 60 किग्रा। सुरेश कुमार: “स्केल की फोटो में 60 किग्रा दिखता है।”';
+      'PET बोतलें 50 kg → 60 kg. विक्रम सिंह: “तराज़ू की फ़ोटो में 60 kg दिख रहा है।”';
 
   @override
   String get attentionSentToday => 'आज, 10:05 am भेजा';
@@ -1226,7 +1228,7 @@ class DriverLocalizationsHi extends DriverLocalizations {
 
   @override
   String get attentionExtraPickupDetail =>
-      'शनि 25 अक्तू, 10 am – 12 pm · मध्यम · अडाजन मॉर्निंग में उपयुक्त';
+      'शनि 25 अक्टू, सुबह 10 – दोपहर 12 · लगभग 40 kg · अडाजण मॉर्निंग में फ़िट';
 
   @override
   String get attentionSent21Oct => '21 अक्तू भेजा';
@@ -1249,7 +1251,7 @@ class DriverLocalizationsHi extends DriverLocalizations {
 
   @override
   String get attentionCorrectionApprovedMessage =>
-      'होटल राजधानी के रिकॉर्ड में अब PET बोतल 60 किग्रा है। सुरेश कुमार और पिकअप पॉइंट को बता दिया गया है।';
+      'होटल राजधानी के रिकॉर्ड में अब PET बोतलें 60 kg हैं। विक्रम सिंह को बता दिया गया है।';
 
   @override
   String get attentionBackToApprovals => 'मंज़ूरी अनुरोध पर वापस जाएँ';
@@ -2114,13 +2116,6 @@ class DriverLocalizationsHi extends DriverLocalizations {
   String get profileSyncDataSubtitle => 'अपना ऑफ़लाइन डेटा सिंक करें';
 
   @override
-  String get profileEndMyDay => 'मेरा दिन समाप्त करें';
-
-  @override
-  String get profileEndMyDaySubtitle =>
-      'ट्रिप पूरी होने के बाद आज का दिन बंद करें';
-
-  @override
   String get profileAccount => 'खाता';
 
   @override
@@ -2264,45 +2259,7 @@ class DriverLocalizationsHi extends DriverLocalizations {
       'वर्तमान ट्रिप में स्टॉप छोड़ा गया दर्ज होता है।';
 
   @override
-  String get profileTodaysActivitySummary => 'आज की गतिविधि का सारांश';
-
-  @override
-  String get profileTripsCompleted => 'पूरी ट्रिप';
-
-  @override
-  String get profileTripsCompletedValue => '08';
-
-  @override
-  String get profilePendingSources => 'लंबित स्रोत';
-
-  @override
-  String get profilePendingSourcesValue => '01';
-
-  @override
-  String get profileOfflinePendingSync => 'ऑफ़लाइन लंबित सिंक';
-
-  @override
-  String get profileAllSynced => 'सब सिंक है';
-
-  @override
-  String get profileEndDayHelper =>
-      'दिन बंद करने के बाद आप कोई एंट्री जोड़ या बदल नहीं सकेंगे।';
-
-  @override
   String get profileClosedDayArtwork => 'अब दिन\nबंद करने का समय';
-
-  @override
-  String get profileSubmitShareWhatsapp => 'सबमिट कर WhatsApp पर शेयर करें';
-
-  @override
-  String get profileShareWhatsappMessage =>
-      'यह दिन को संपादन के लिए लॉक करेगा और आपके समूह के लिए WhatsApp संदेश तैयार करेगा।';
-
-  @override
-  String get profileCancel => 'रद्द करें';
-
-  @override
-  String get profileShare => 'शेयर करें';
 
   @override
   String get driverProfileUserName => 'रमेश कुमार';
@@ -2642,7 +2599,7 @@ class DriverLocalizationsHi extends DriverLocalizations {
 
   @override
   String get tpEmptyMessage =>
-      'दिवाली के लिए गोदाम बंद हैं। आज के पिकअप सोम 9 नवं को चले जाते हैं (छुट्टी का नियम)।';
+      'उस दिन वेयरहाउस बंद है (छुट्टी)। उस दिन के पिकअप हर पिकअप पॉइंट के छुट्टी नियम के अनुसार अगले कामकाजी दिन पर जाएँगे या छोड़ दिए जाएँगे।';
 
   @override
   String get rdNext7Days => 'अगले 7 दिन';
@@ -2844,4 +2801,598 @@ class DriverLocalizationsHi extends DriverLocalizations {
 
   @override
   String get rdAddSources => 'सोर्स जोड़ें';
+
+  @override
+  String get sdAddress => 'पता';
+
+  @override
+  String get sdOpenMaps => 'Google Maps में खोलें';
+
+  @override
+  String get sdSchedule => 'समय-सारणी';
+
+  @override
+  String get sdPersonAtPickup => 'पिकअप स्थान पर व्यक्ति';
+
+  @override
+  String get sdIecExecutive => 'IEC एग्जीक्यूटिव';
+
+  @override
+  String get sdPickupCategory => 'पिकअप श्रेणी';
+
+  @override
+  String get sdMaterial => 'सामग्री';
+
+  @override
+  String get sdPickupStatus => 'पिकअप स्थिति';
+
+  @override
+  String get sdWarehouse => 'गोदाम';
+
+  @override
+  String get sdStatusNextStop => 'अगला स्टॉप';
+
+  @override
+  String get sdCall => 'कॉल';
+
+  @override
+  String get sdSkipForToday => 'आज के लिए छोड़ें';
+
+  @override
+  String get sdMaterialsList => 'दूध पाउच, कार्ड बोर्ड';
+
+  @override
+  String get sdRoleManager => 'मैनेजर';
+
+  @override
+  String sdContactLine(String name, String role, String phone) {
+    return '$name · $role · $phone';
+  }
+
+  @override
+  String sdIecLine(String name, String phone) {
+    return '$name · $phone';
+  }
+
+  @override
+  String get skTitle => 'सोर्स छोड़ें';
+
+  @override
+  String get skReasonLabel => 'छोड़ने का कारण';
+
+  @override
+  String get skReasonClosed => 'सोर्स बंद है';
+
+  @override
+  String get skReasonHoliday => 'छुट्टी';
+
+  @override
+  String get skReasonVehicle => 'वाहन उपलब्ध नहीं';
+
+  @override
+  String get skReasonOther => 'अन्य';
+
+  @override
+  String get skRemarks => 'टिप्पणी';
+
+  @override
+  String get skMaxChars => 'अधिकतम 150 अक्षर';
+
+  @override
+  String get skConfirm => 'छोड़ने की पुष्टि करें';
+
+  @override
+  String get skSkippedTitle => 'सोर्स छोड़ा गया!';
+
+  @override
+  String get skSkippedBody => 'कल अपने आप फिर शुरू होगा।';
+
+  @override
+  String get apToApprove => 'मंज़ूरी बाकी';
+
+  @override
+  String get apDone => 'पूरे';
+
+  @override
+  String get apCorrectionDoneDetail =>
+      'PET बोतलें 50 kg → 60 kg. स्टॉप का रिकॉर्ड बदल दिया गया; विक्रम सिंह को बता दिया गया।';
+
+  @override
+  String get apApprovedToday => 'आपने आज सुबह 10:20 बजे मंज़ूर किया';
+
+  @override
+  String get apExtraPickupDoneDetail =>
+      'शनि 25 अक्टू, सुबह 10 – दोपहर 12 · लगभग 40 kg · अडाजण मॉर्निंग में जोड़ा गया';
+
+  @override
+  String get apApproved21Oct => 'आपने 21 अक्टू को मंज़ूर किया';
+
+  @override
+  String get apStartPickupsFromIec => 'पिकअप शुरू करें · IEC से';
+
+  @override
+  String get apGreenLeafNisha => 'ग्रीन लीफ होटल · निशा मेहता';
+
+  @override
+  String get apDeclineReplyDetail =>
+      'आपका जवाब: “1 दिसं. तक अडाजण मॉर्निंग में जगह नहीं है। तब फिर पूछें।”';
+
+  @override
+  String get apDeclined20Oct => 'आपने 20 अक्टू को अस्वीकार किया';
+
+  @override
+  String get apDeclineCorrectionTitle => 'सुधार अस्वीकार करें';
+
+  @override
+  String get apDeclineCorrectionBody =>
+      'विक्रम सिंह आपका जवाब देखेंगे। स्टॉप दर्ज जैसा ही रहेगा।';
+
+  @override
+  String get apDeclineCorrectionReply =>
+      'तराज़ू की फ़ोटो में 50 kg दिख रहा है। अगर ज़्यादा था, तो गेट टीम से दोबारा तौलने को कहें।';
+
+  @override
+  String get apDeclineExtraTitle => 'अतिरिक्त पिकअप अस्वीकार करें';
+
+  @override
+  String get apDeclineExtraBody =>
+      'ABC प्लास्टिक मैन्युफ़ैक्चर आपका जवाब देखेगा। कोई पिकअप नहीं जोड़ा जाएगा।';
+
+  @override
+  String get apReplyHint => 'अपना जवाब लिखें';
+
+  @override
+  String get apDeclineAndReply => 'अस्वीकार करें और जवाब दें';
+
+  @override
+  String get apCancel => 'रद्द करें';
+
+  @override
+  String get apExtraApprovedTitle => 'अतिरिक्त पिकअप मंज़ूर';
+
+  @override
+  String get apExtraApprovedBody =>
+      'ABC प्लास्टिक मैन्युफ़ैक्चर को शनि 25 अक्टू को अडाजण मॉर्निंग में जोड़ दिया गया है।';
+
+  @override
+  String get rpTitle => 'कलेक्शन रिपोर्ट';
+
+  @override
+  String get rpShare => 'शेयर करें';
+
+  @override
+  String get rpCollectedToday => 'आज एकत्रित';
+
+  @override
+  String get rpCollectedYesterday => 'कल एकत्रित';
+
+  @override
+  String get rpCollectedThisWeek => 'इस हफ़्ते एकत्रित';
+
+  @override
+  String get rpCollectedThisMonth => 'इस महीने एकत्रित';
+
+  @override
+  String get rpCollectedTheseDates => 'इन तारीखों में एकत्रित';
+
+  @override
+  String rpTotal(String kg, String pcs) {
+    return '$kg kg + $pcs पीस';
+  }
+
+  @override
+  String rpKg(String kg) {
+    return '$kg kg';
+  }
+
+  @override
+  String rpStopsDue(String count) {
+    return '$count स्टॉप बाकी';
+  }
+
+  @override
+  String get rpByRoute => 'रूट के अनुसार';
+
+  @override
+  String get rpByCategory => 'पिकअप श्रेणी के अनुसार';
+
+  @override
+  String get rpStopsToLook => 'ध्यान देने वाले स्टॉप';
+
+  @override
+  String rpOfStops(String done, String total) {
+    return '$total में से $done स्टॉप';
+  }
+
+  @override
+  String rpStops(String count) {
+    return '$count स्टॉप';
+  }
+
+  @override
+  String get rpOwn => 'अपना';
+
+  @override
+  String get rpContract => 'कॉन्ट्रैक्ट';
+
+  @override
+  String get rpCancelledBySource => 'स्रोत ने रद्द किया';
+
+  @override
+  String rpNamesMore(String first, String second, String count) {
+    return '$first, $second और $count अन्य';
+  }
+
+  @override
+  String rpNamesPlus(String first, String second, String count) {
+    return '$first, $second +$count';
+  }
+
+  @override
+  String rpCollectedStops(String label, String done, String total) {
+    return '$label · $total में से $done स्टॉप';
+  }
+
+  @override
+  String get rpPdfTitle => 'रिपोर्ट PDF';
+
+  @override
+  String rpPdfSubtitle(String range) {
+    return 'कलेक्शन रिपोर्ट · $range';
+  }
+
+  @override
+  String get rpCompany => 'Ecovision Environmental Resources LLP';
+
+  @override
+  String rpPdfSupervisor(String name, String period, String range) {
+    return 'पिकअप सुपरवाइज़र: $name · $period, $range';
+  }
+
+  @override
+  String get rpPeriodToday => 'आज';
+
+  @override
+  String get rpPeriodYesterday => 'कल';
+
+  @override
+  String get rpPeriodThisWeek => 'इस हफ़्ते';
+
+  @override
+  String get rpPeriodThisMonth => 'इस महीने';
+
+  @override
+  String get rpPeriodDates => 'चुनी गई तारीखें';
+
+  @override
+  String rpPdfSummary(
+    String due,
+    String collected,
+    String zero,
+    String missed,
+    String cancelled,
+  ) {
+    return '$due स्टॉप बाकी · एकत्रित $collected · 0 kg $zero · छूटे $missed · रद्द $cancelled';
+  }
+
+  @override
+  String get rpColRoute => 'रूट';
+
+  @override
+  String get rpColVehicle => 'वाहन';
+
+  @override
+  String get rpColStops => 'स्टॉप';
+
+  @override
+  String get rpColCollected => 'एकत्रित';
+
+  @override
+  String get rpColCategory => 'श्रेणी';
+
+  @override
+  String get rpColOutcome => 'नतीजा';
+
+  @override
+  String get rpColPickupPoints => 'पिकअप पॉइंट';
+
+  @override
+  String rpOf(String done, String total) {
+    return '$total में से $done';
+  }
+
+  @override
+  String rpPdfMade(String date, String time) {
+    return '$date, $time को बनाया · पेज 1 में से 1';
+  }
+
+  @override
+  String get rpPdfPageHint => 'पेज 1 में से 1 · ज़ूम के लिए पिंच करें';
+
+  @override
+  String get rpSharePdf => 'PDF शेयर करें';
+
+  @override
+  String get calClear => 'साफ़ करें';
+
+  @override
+  String get calApply => 'लागू करें';
+
+  @override
+  String get calPrevMonth => 'पिछला महीना';
+
+  @override
+  String get calNextMonth => 'अगला महीना';
+
+  @override
+  String calSelection(String range, String days) {
+    return '$range · $days';
+  }
+
+  @override
+  String calDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count दिन',
+      one: '1 दिन',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get calPickDates => 'तारीखें चुनें';
+
+  @override
+  String calMonthLong(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'जनवरी',
+      '2': 'फ़रवरी',
+      '3': 'मार्च',
+      '4': 'अप्रैल',
+      '5': 'मई',
+      '6': 'जून',
+      '7': 'जुलाई',
+      '8': 'अगस्त',
+      '9': 'सितंबर',
+      '10': 'अक्टूबर',
+      '11': 'नवंबर',
+      '12': 'दिसंबर',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String calMonthShort(String month) {
+    String _temp0 = intl.Intl.selectLogic(month, {
+      '1': 'जन',
+      '2': 'फ़र',
+      '3': 'मार्च',
+      '4': 'अप्रै',
+      '5': 'मई',
+      '6': 'जून',
+      '7': 'जुला',
+      '8': 'अग',
+      '9': 'सितं',
+      '10': 'अक्टू',
+      '11': 'नवं',
+      '12': 'दिसं',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String calWeekday(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      '1': 'सो',
+      '2': 'मं',
+      '3': 'बु',
+      '4': 'गु',
+      '5': 'शु',
+      '6': 'श',
+      '7': 'र',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get supervisorDrawerCashPayments => 'नकद और भुगतान';
+
+  @override
+  String lkRouteDate(String route, String date) {
+    return '$route · $date';
+  }
+
+  @override
+  String get lkNotOnRoute => 'किसी रूट पर नहीं';
+
+  @override
+  String lkContractVehicle(String plate) {
+    return 'कॉन्ट्रैक्ट वाहन · $plate';
+  }
+
+  @override
+  String lkOwnVehicle(String name) {
+    return 'अपना वाहन · ड्राइवर $name';
+  }
+
+  @override
+  String get lkExtraPickup => 'अतिरिक्त पिकअप';
+
+  @override
+  String get lkCalledOffIec => 'IEC ने पहले ही रद्द किया';
+
+  @override
+  String lkCalledOffAtStop(String name) {
+    return 'स्टॉप पर रद्द हुआ · ड्राइवर $name';
+  }
+
+  @override
+  String get lkCalledOffByYou => 'आपने रद्द किया';
+
+  @override
+  String get lkReasonNotRecorded => 'ड्राइवर या गेट ने दर्ज नहीं किया';
+
+  @override
+  String get lkReasonTripCancelled => 'इसकी ट्रिप रद्द हो गई थी';
+
+  @override
+  String get lkReasonNoRoute => 'उस दिन कोई रूट नहीं था';
+
+  @override
+  String get lkReasonTakenOff => 'ट्रिप से हटाया और किसी दूसरी में नहीं डाला';
+
+  @override
+  String get lkReasonClosedToday => 'आज बंद';
+
+  @override
+  String get lkReasonHoliday => 'छुट्टी';
+
+  @override
+  String get lkReasonShifted => 'दूसरे दिन पर खिसकाया';
+
+  @override
+  String get lkReasonNoMaterial => 'कोई माल नहीं';
+
+  @override
+  String get lkReasonNoMaterialToday => 'आज कोई माल नहीं';
+
+  @override
+  String get lkReasonClosed => 'बंद';
+
+  @override
+  String get lkReasonRefused => 'देने से मना किया';
+
+  @override
+  String get lkReasonVehicleFull => 'वाहन भर गया';
+
+  @override
+  String get lkEmpty => 'इन तारीखों में देखने लायक कुछ नहीं';
+
+  @override
+  String calWeekdayShort(String day) {
+    String _temp0 = intl.Intl.selectLogic(day, {
+      '1': 'सोम',
+      '2': 'मंगल',
+      '3': 'बुध',
+      '4': 'गुरु',
+      '5': 'शुक्र',
+      '6': 'शनि',
+      '7': 'रवि',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get isTypeSourceProblem => 'स्रोत पर समस्या';
+
+  @override
+  String isDriverRole(String name) {
+    return '$name (ड्राइवर)';
+  }
+
+  @override
+  String isRaised(String time) {
+    return '$time पर दर्ज';
+  }
+
+  @override
+  String get isOpen => 'खुला';
+
+  @override
+  String get isEscalated => 'आगे भेजा';
+
+  @override
+  String get isResolved => 'हल हुआ';
+
+  @override
+  String get isTypeLabel => 'प्रकार :';
+
+  @override
+  String get isDriverNote => 'ड्राइवर का नोट :';
+
+  @override
+  String get isBy => 'द्वारा :';
+
+  @override
+  String isByValue(String name, String time) {
+    return '$name · $time';
+  }
+
+  @override
+  String get isWhatWasDone => 'क्या किया :';
+
+  @override
+  String get isTold => 'सूचित :';
+
+  @override
+  String isToldValue(String name) {
+    return 'ऑफ़िस और $name (IEC).';
+  }
+
+  @override
+  String get isEscalate => 'आगे भेजें';
+
+  @override
+  String get isMarkResolved => 'हल हुआ मानें';
+
+  @override
+  String get isSheetTitle => 'हल हुआ दर्ज करें';
+
+  @override
+  String get isSheetBody => 'बताएँ कि क्या किया। ड्राइवर और ऑफ़िस इसे देखेंगे।';
+
+  @override
+  String get isWhatWasDoneLabel => 'क्या किया';
+
+  @override
+  String get isEscalateTitle => 'यह समस्या आगे भेजें?';
+
+  @override
+  String get isEscalateBody =>
+      'ऑफ़िस और स्रोत के IEC को सूचित किया जाएगा, और यह आगे भेजा के रूप में दिखेगा। तब इस्तेमाल करें जब आप खुद इसे सुलझा न सकें।';
+
+  @override
+  String get isResolvedToastTitle => 'समस्या हल हुई!';
+
+  @override
+  String isResolvedToastBody(String name) {
+    return '$name को बता दिया गया।';
+  }
+
+  @override
+  String get isEscalatedToastTitle => 'समस्या आगे भेजी!';
+
+  @override
+  String get isEscalatedToastBody =>
+      'ऑफ़िस और स्रोत के IEC को सूचित कर दिया गया।';
+
+  @override
+  String get tpStatusExpected => 'अपेक्षित';
+
+  @override
+  String get tpExpectedInfo =>
+      'ट्रिप एक दिन पहले बनती हैं। उस दिन के रूट और बाकी पिकअप मिलाकर इतना बनता है; टीम अभी भी बदल सकती है।';
+
+  @override
+  String tpExtra(int count) {
+    return 'अतिरिक्त $count';
+  }
+
+  @override
+  String tpTodaySuffix(String date) {
+    return '$date · आज';
+  }
+
+  @override
+  String tpWarehouseClosed(String date) {
+    return '$date · वेयरहाउस बंद';
+  }
+
+  @override
+  String get tpNoTripsHoliday => 'कोई ट्रिप नहीं · वेयरहाउस छुट्टी';
 }

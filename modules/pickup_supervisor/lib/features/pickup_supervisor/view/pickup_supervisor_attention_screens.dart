@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/core/widgets/module_count_chip.dart';
+import 'package:pickup_supervisor/core/widgets/module_modal.dart';
+import 'package:pickup_supervisor/features/pickup_supervisor/widgets/pickup_supervisor_approval_widgets.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 
@@ -11,17 +14,31 @@ const _shadow = <BoxShadow>[
   BoxShadow(color: Color(0x1F000000), blurRadius: 5, offset: Offset(0, 2)),
 ];
 
+/// Approval requests opened from "Needs your attention" → Approvals.
+///
+/// "To approve" lists pending requests with Decline (reply sheet) and Approve
+/// (success popup); "Done" lists approved and declined requests.
 class PickupSupervisorApprovalRequestsScreen extends StatefulWidget {
-  const PickupSupervisorApprovalRequestsScreen({super.key});
+  const PickupSupervisorApprovalRequestsScreen({
+    super.key,
+    this.initialShowDone = false,
+  });
+
+  final bool initialShowDone;
 
   @override
   State<PickupSupervisorApprovalRequestsScreen> createState() =>
       _PickupSupervisorApprovalRequestsScreenState();
 }
 
+enum _ApprovalKind { correction, extraPickup }
+
 class _PickupSupervisorApprovalRequestsScreenState
     extends State<PickupSupervisorApprovalRequestsScreen> {
-  var _selectedTab = 0;
+  static const _pendingCount = 2;
+  static const _doneCount = 12;
+
+  late bool _showDone = widget.initialShowDone;
 
   @override
   Widget build(BuildContext context) {
@@ -29,26 +46,6 @@ class _PickupSupervisorApprovalRequestsScreenState
       child: Builder(
         builder: (context) {
           final l10n = DriverLocalizations.of(context);
-          final requests = [
-            _ApprovalRequest(
-              title: l10n.attentionCorrectionFromDriver,
-              source: l10n.attentionHotelRajdhaniStop,
-              detail: l10n.attentionDriverCorrectionDetail,
-              sent: l10n.attentionSentToday,
-            ),
-            _ApprovalRequest(
-              title: l10n.attentionExtraPickup,
-              source: l10n.attentionAbcPlastic,
-              detail: l10n.attentionExtraPickupDetail,
-              sent: l10n.attentionSent21Oct,
-            ),
-            _ApprovalRequest(
-              title: l10n.attentionCorrectionFromPickupPoint,
-              source: l10n.attentionGreenParkSociety,
-              detail: l10n.attentionPickupPointCorrectionDetail,
-              sent: l10n.attentionSent20Oct,
-            ),
-          ];
           return _AttentionScaffold(
             screenKey: const Key('supervisor-approval-requests-screen'),
             header: _AttentionHeader(
@@ -56,26 +53,31 @@ class _PickupSupervisorApprovalRequestsScreenState
               subtitle: l10n.attentionApprovalSubtitle,
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _ChoiceBar(
-                  choices: [
-                    l10n.attentionToApproveCount,
-                    l10n.attentionDoneCount,
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    ModuleCountChip(
+                      key: const Key('approval-tab-pending'),
+                      label: l10n.apToApprove,
+                      count: '$_pendingCount',
+                      selected: !_showDone,
+                      onTap: () => setState(() => _showDone = false),
+                    ),
+                    ModuleCountChip(
+                      key: const Key('approval-tab-done'),
+                      label: l10n.apDone,
+                      count: '$_doneCount',
+                      selected: _showDone,
+                      onTap: () => setState(() => _showDone = true),
+                    ),
                   ],
-                  selected: _selectedTab,
-                  onSelected: (value) => setState(() => _selectedTab = value),
                 ),
                 const SizedBox(height: 16),
-                ...requests.map(
-                  (request) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _ApprovalCard(
-                      request: request,
-                      l10n: l10n,
-                      onApprove: () => _showApprovedDialog(context, l10n),
-                    ),
-                  ),
-                ),
+                ...(_showDone ? _doneCards(l10n) : _pendingCards(context, l10n))
+                    .expand((card) => [card, const SizedBox(height: 16)]),
               ],
             ),
           );
@@ -84,58 +86,111 @@ class _PickupSupervisorApprovalRequestsScreenState
     );
   }
 
-  Future<void> _showApprovedDialog(
+  List<Widget> _pendingCards(BuildContext context, DriverLocalizations l10n) {
+    return [
+      ApprovalRequestCard(
+        key: const Key('approval-request-correction'),
+        title: l10n.attentionCorrectionFromDriver,
+        source: l10n.attentionHotelRajdhaniStop,
+        detail: l10n.attentionDriverCorrectionDetail,
+        time: l10n.attentionSentToday,
+        declineLabel: l10n.attentionDecline,
+        approveLabel: l10n.attentionApprove,
+        onDecline: () => _decline(context, l10n, _ApprovalKind.correction),
+        onApprove: () => _approve(context, l10n, _ApprovalKind.correction),
+      ),
+      ApprovalRequestCard(
+        key: const Key('approval-request-extra'),
+        title: l10n.attentionExtraPickup,
+        source: l10n.attentionAbcPlastic,
+        detail: l10n.attentionExtraPickupDetail,
+        time: l10n.attentionSent21Oct,
+        declineLabel: l10n.attentionDecline,
+        approveLabel: l10n.attentionApprove,
+        onDecline: () => _decline(context, l10n, _ApprovalKind.extraPickup),
+        onApprove: () => _approve(context, l10n, _ApprovalKind.extraPickup),
+      ),
+    ];
+  }
+
+  List<Widget> _doneCards(DriverLocalizations l10n) {
+    Widget approved() => ApprovalStatusTag(
+      status: ApprovalStatus.approved,
+      label: l10n.attentionApproved,
+    );
+    return [
+      ApprovalRequestCard(
+        title: l10n.attentionCorrectionFromDriver,
+        source: l10n.attentionHotelRajdhaniStop,
+        detail: l10n.apCorrectionDoneDetail,
+        time: l10n.apApprovedToday,
+        tag: approved(),
+      ),
+      ApprovalRequestCard(
+        title: l10n.attentionExtraPickup,
+        source: l10n.attentionAbcPlastic,
+        detail: l10n.apExtraPickupDoneDetail,
+        time: l10n.apApproved21Oct,
+        tag: approved(),
+      ),
+      ApprovalRequestCard(
+        title: l10n.apStartPickupsFromIec,
+        source: l10n.apGreenLeafNisha,
+        detail: l10n.apDeclineReplyDetail,
+        time: l10n.apDeclined20Oct,
+        tag: ApprovalStatusTag(
+          status: ApprovalStatus.declined,
+          label: l10n.attentionDeclined,
+        ),
+      ),
+    ];
+  }
+
+  Future<void> _decline(
     BuildContext context,
     DriverLocalizations l10n,
+    _ApprovalKind kind,
   ) {
-    return showDialog<void>(
-      context: context,
-      barrierColor: const Color(0x99000000),
-      builder: (dialogContext) => Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        child: SizedBox(
-          height: 402,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  l10n.attentionCorrectionApproved,
-                  textAlign: TextAlign.center,
-                  style: DriverTextStyles.bold24.copyWith(
-                    color: DriverColors.neutral950,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  l10n.attentionCorrectionApprovedMessage,
-                  textAlign: TextAlign.center,
-                  style: DriverTextStyles.regular14.copyWith(
-                    color: DriverColors.neutral600,
-                    height: 19 / 14,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _WideButton(
-                  label: l10n.attentionBackToApprovals,
-                  onPressed: () => Navigator.pop(dialogContext),
-                ),
-                const SizedBox(height: 12),
-                _WideButton(
-                  label: l10n.attentionBackToHome,
-                  background: DriverColors.cool200,
-                  foreground: DriverColors.neutral950,
-                  onPressed: () {
-                    Navigator.pop(dialogContext);
-                    Navigator.maybePop(context);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
+    final correction = kind == _ApprovalKind.correction;
+    return showModuleSheet<bool>(
+      context,
+      builder: (_) => ApprovalDeclineSheet(
+        title: correction
+            ? l10n.apDeclineCorrectionTitle
+            : l10n.apDeclineExtraTitle,
+        message: correction
+            ? l10n.apDeclineCorrectionBody
+            : l10n.apDeclineExtraBody,
+        initialReply: correction ? l10n.apDeclineCorrectionReply : '',
+        hint: l10n.apReplyHint,
+        confirmLabel: l10n.apDeclineAndReply,
+        cancelLabel: l10n.apCancel,
+      ),
+    );
+  }
+
+  Future<void> _approve(
+    BuildContext context,
+    DriverLocalizations l10n,
+    _ApprovalKind kind,
+  ) {
+    final correction = kind == _ApprovalKind.correction;
+    return showModulePopup<void>(
+      context,
+      builder: (popupContext) => ApprovalSuccessPopup(
+        title: correction
+            ? l10n.attentionCorrectionApproved
+            : l10n.apExtraApprovedTitle,
+        message: correction
+            ? l10n.attentionCorrectionApprovedMessage
+            : l10n.apExtraApprovedBody,
+        primaryLabel: l10n.attentionBackToApprovals,
+        secondaryLabel: l10n.attentionBackToHome,
+        onPrimary: () => Navigator.pop(popupContext),
+        onSecondary: () {
+          Navigator.pop(popupContext);
+          Navigator.maybePop(context);
+        },
       ),
     );
   }
@@ -287,167 +342,6 @@ class PickupSupervisorSuggestionsScreen extends StatelessWidget {
   }
 }
 
-class PickupSupervisorIssuesScreen extends StatelessWidget {
-  const PickupSupervisorIssuesScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return DriverLocalizationScope(
-      child: Builder(
-        builder: (context) {
-          final l10n = DriverLocalizations.of(context);
-          final issues = [
-            _Issue(l10n.attentionVehicleBreakdown, l10n.attentionRameshDriver),
-            _Issue(l10n.attentionSourceClosed, l10n.attentionMohanDriver),
-            _Issue(l10n.attentionVehicleBreakdown, l10n.attentionPrakashDriver),
-          ];
-          return _AttentionScaffold(
-            screenKey: const Key('supervisor-issues-screen'),
-            header: _AttentionHeader(title: l10n.attentionIssues),
-            child: Column(
-              children: List.generate(
-                issues.length,
-                (index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: _IssueTile(
-                    issue: issues[index],
-                    highlighted: index == 0,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                            const PickupSupervisorIssueDetailScreen(),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class PickupSupervisorIssueDetailScreen extends StatelessWidget {
-  const PickupSupervisorIssueDetailScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return DriverLocalizationScope(
-      child: Builder(
-        builder: (context) {
-          final l10n = DriverLocalizations.of(context);
-          return _AttentionScaffold(
-            screenKey: const Key('supervisor-issue-detail-screen'),
-            header: const _AttentionHeader(showTitle: false),
-            child: Column(
-              children: [
-                _Surface(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDDF8E3),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(7),
-                        child: SvgPicture.asset(
-                          '$_assetRoot/truck.svg',
-                          package: _assetPackage,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        l10n.attentionVehicleNumber,
-                        style: DriverTextStyles.semibold16.copyWith(
-                          color: DriverColors.neutral900,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _Surface(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      _DetailField(
-                        label: l10n.attentionDriver,
-                        value: l10n.attentionRameshAhir,
-                      ),
-                      _DetailField(
-                        label: l10n.attentionContactNumber,
-                        value: l10n.attentionPhoneNumber,
-                      ),
-                      _DetailField(
-                        label: l10n.attentionRoute,
-                        value: l10n.attentionAdajanMorning,
-                        last: true,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(15, 14, 15, 20),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: DriverColors.red500),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(text: l10n.attentionReasonFor),
-                            TextSpan(
-                              text: l10n.attentionIssueWord,
-                              style: const TextStyle(
-                                color: DriverColors.red500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        style: DriverTextStyles.semibold18.copyWith(
-                          color: DriverColors.neutral950,
-                        ),
-                      ),
-                      const Divider(height: 22, color: DriverColors.cool400),
-                      Text(
-                        l10n.attentionIssueReason,
-                        style: DriverTextStyles.medium14.copyWith(
-                          color: DriverColors.neutral950,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        l10n.attentionIssueRemarks,
-                        style: DriverTextStyles.medium14.copyWith(
-                          color: DriverColors.neutral950,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
 class _AttentionScaffold extends StatelessWidget {
   const _AttentionScaffold({
     required this.screenKey,
@@ -484,11 +378,10 @@ class _AttentionScaffold extends StatelessWidget {
 }
 
 class _AttentionHeader extends StatelessWidget {
-  const _AttentionHeader({this.title, this.subtitle, this.showTitle = true});
+  const _AttentionHeader({this.title, this.subtitle});
 
   final String? title;
   final String? subtitle;
-  final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -506,7 +399,7 @@ class _AttentionHeader extends StatelessWidget {
               width: 40,
               height: 40,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 child: SvgPicture.asset(
                   '$_assetRoot/back.svg',
                   package: _assetPackage,
@@ -515,7 +408,7 @@ class _AttentionHeader extends StatelessWidget {
             ),
           ),
         ),
-        if (showTitle) ...[
+        ...[
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -528,10 +421,10 @@ class _AttentionHeader extends StatelessWidget {
                   ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 1),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle!,
-                    style: DriverTextStyles.regular12.copyWith(
+                    style: DriverTextStyles.medium12.copyWith(
                       color: DriverColors.neutral600,
                     ),
                   ),
@@ -629,96 +522,6 @@ class _Surface extends StatelessWidget {
         boxShadow: _shadow,
       ),
       child: child,
-    );
-  }
-}
-
-class _ApprovalRequest {
-  const _ApprovalRequest({
-    required this.title,
-    required this.source,
-    required this.detail,
-    required this.sent,
-  });
-
-  final String title;
-  final String source;
-  final String detail;
-  final String sent;
-}
-
-class _ApprovalCard extends StatelessWidget {
-  const _ApprovalCard({
-    required this.request,
-    required this.l10n,
-    required this.onApprove,
-  });
-
-  final _ApprovalRequest request;
-  final DriverLocalizations l10n;
-  final VoidCallback onApprove;
-
-  @override
-  Widget build(BuildContext context) {
-    return _Surface(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  request.title,
-                  style: DriverTextStyles.semibold16.copyWith(
-                    color: DriverColors.neutral950,
-                  ),
-                ),
-              ),
-              _StatusChip(
-                label: l10n.attentionWaiting,
-                asset: '$_assetRoot/waiting.svg',
-                foreground: const Color(0xFFB26A00),
-                background: const Color(0xFFFFF4E0),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(request.source, style: DriverTextStyles.medium14),
-          const SizedBox(height: 5),
-          Text(
-            request.detail,
-            style: DriverTextStyles.regular12.copyWith(
-              color: DriverColors.neutral600,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            request.sent,
-            style: DriverTextStyles.regular12.copyWith(
-              color: DriverColors.neutral500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: _WideButton(
-                  label: l10n.attentionDecline,
-                  outlined: true,
-                  onPressed: () {},
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _WideButton(
-                  label: l10n.attentionApprove,
-                  onPressed: onApprove,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }
@@ -983,139 +786,16 @@ class _SuggestionCard extends StatelessWidget {
   }
 }
 
-class _Issue {
-  const _Issue(this.title, this.driver);
-
-  final String title;
-  final String driver;
-}
-
-class _IssueTile extends StatelessWidget {
-  const _IssueTile({
-    required this.issue,
-    required this.highlighted,
-    required this.onTap,
-  });
-
-  final _Issue issue;
-  final bool highlighted;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = highlighted ? DriverColors.primary500 : DriverColors.cool400;
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 76),
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: color),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  color: highlighted
-                      ? const Color(0xFFFFEEEE)
-                      : DriverColors.cool200,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: SvgPicture.asset(
-                  highlighted
-                      ? '$_assetRoot/issue_red.svg'
-                      : '$_assetRoot/issue_muted.svg',
-                  package: _assetPackage,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      issue.title,
-                      style: DriverTextStyles.semibold16.copyWith(
-                        color: DriverColors.neutral700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      issue.driver,
-                      style: DriverTextStyles.medium14.copyWith(
-                        color: DriverColors.neutral600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.north_east, color: color, size: 22),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DetailField extends StatelessWidget {
-  const _DetailField({
-    required this.label,
-    required this.value,
-    this.last = false,
-  });
-
-  final String label;
-  final String value;
-  final bool last;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: DriverTextStyles.medium14.copyWith(
-            color: DriverColors.neutral600,
-          ),
-        ),
-        const SizedBox(height: 3),
-        Text(
-          '  •  $value',
-          style: DriverTextStyles.medium14.copyWith(
-            color: DriverColors.neutral950,
-          ),
-        ),
-        if (!last) const Divider(height: 14, color: DriverColors.cool400),
-      ],
-    );
-  }
-}
-
 class _WideButton extends StatelessWidget {
   const _WideButton({
     required this.label,
     required this.onPressed,
     this.outlined = false,
-    this.background = DriverColors.primary500,
-    this.foreground = Colors.white,
   });
 
   final String label;
   final VoidCallback onPressed;
   final bool outlined;
-  final Color background;
-  final Color foreground;
 
   @override
   Widget build(BuildContext context) {
@@ -1138,8 +818,8 @@ class _WideButton extends StatelessWidget {
       onPressed: onPressed,
       style: FilledButton.styleFrom(
         minimumSize: const Size.fromHeight(44),
-        backgroundColor: background,
-        foregroundColor: foreground,
+        backgroundColor: DriverColors.primary500,
+        foregroundColor: Colors.white,
         shape: shape,
       ),
       child: Text(label, style: DriverTextStyles.semibold16),

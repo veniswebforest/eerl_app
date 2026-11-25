@@ -2137,7 +2137,7 @@ abstract class DriverLocalizations {
   /// No description provided for @supervisorTripsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Active and upcoming pickup routes for today'**
+  /// **'5 trips today · the next 2 are below'**
   String get supervisorTripsSubtitle;
 
   /// No description provided for @supervisorAdajanMorning.
@@ -2149,7 +2149,7 @@ abstract class DriverLocalizations {
   /// No description provided for @supervisorVikramProgress.
   ///
   /// In en, this message translates to:
-  /// **'Vikram Singh · 3 of 8 collected'**
+  /// **'Vikram Singh  •  3 of 8 collected'**
   String get supervisorVikramProgress;
 
   /// No description provided for @supervisorOwnVehicle.
@@ -2179,13 +2179,13 @@ abstract class DriverLocalizations {
   /// No description provided for @supervisorAmitProgress.
   ///
   /// In en, this message translates to:
-  /// **'Amit Patel · 0 of 8 recorded in the app'**
+  /// **'Amit Patel  •  0 of 8 recorded in the app'**
   String get supervisorAmitProgress;
 
   /// No description provided for @supervisorDriverNotSetUp.
   ///
   /// In en, this message translates to:
-  /// **'Driver hasn’t set up app'**
+  /// **'Driver not using app'**
   String get supervisorDriverNotSetUp;
 
   /// No description provided for @supervisorSeeTripsPlan.
@@ -2245,19 +2245,19 @@ abstract class DriverLocalizations {
   /// No description provided for @supervisorUnassignedSources.
   ///
   /// In en, this message translates to:
-  /// **'Unassigned Sources'**
+  /// **'Unassigned sources'**
   String get supervisorUnassignedSources;
 
   /// No description provided for @supervisorManageUnassigned.
   ///
   /// In en, this message translates to:
-  /// **'Manage New Unassigned Sources'**
+  /// **'Pickup points with no route yet'**
   String get supervisorManageUnassigned;
 
   /// No description provided for @supervisorViewSource.
   ///
   /// In en, this message translates to:
-  /// **'View Source'**
+  /// **'View sources'**
   String get supervisorViewSource;
 
   /// No description provided for @supervisorExtraPickupRequests.
@@ -2329,7 +2329,7 @@ abstract class DriverLocalizations {
   /// No description provided for @attentionApprovalSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'From your drivers and pickup points'**
+  /// **'From your drivers and IEC Executives'**
   String get attentionApprovalSubtitle;
 
   /// No description provided for @attentionToApproveCount.
@@ -2365,7 +2365,7 @@ abstract class DriverLocalizations {
   /// No description provided for @attentionDriverCorrectionDetail.
   ///
   /// In en, this message translates to:
-  /// **'PET Bottles 50 kg → 60 kg. Suresh Kumar: “The scale photo shows 60 kg.”'**
+  /// **'PET Bottles 50 kg → 60 kg. Vikram Singh: “The scale photo shows 60 kg.”'**
   String get attentionDriverCorrectionDetail;
 
   /// No description provided for @attentionSentToday.
@@ -2401,7 +2401,7 @@ abstract class DriverLocalizations {
   /// No description provided for @attentionExtraPickupDetail.
   ///
   /// In en, this message translates to:
-  /// **'Sat 25 Oct, 10 am – 12 pm · Medium · fits Adajan Morning'**
+  /// **'Sat 25 Oct, 10 am – 12 pm · about 40 kg · fits Adajan Morning'**
   String get attentionExtraPickupDetail;
 
   /// No description provided for @attentionSent21Oct.
@@ -2443,7 +2443,7 @@ abstract class DriverLocalizations {
   /// No description provided for @attentionCorrectionApprovedMessage.
   ///
   /// In en, this message translates to:
-  /// **'Hotel Rajdhani’s record now shows PET Bottles 60 kg. Suresh Kumar and the pickup point are told.'**
+  /// **'Hotel Rajdhani’s record now shows PET Bottles 60 kg. Vikram Singh is told.'**
   String get attentionCorrectionApprovedMessage;
 
   /// No description provided for @attentionBackToApprovals.
@@ -4114,18 +4114,6 @@ abstract class DriverLocalizations {
   /// **'Sync your offline data'**
   String get profileSyncDataSubtitle;
 
-  /// No description provided for @profileEndMyDay.
-  ///
-  /// In en, this message translates to:
-  /// **'End My Day'**
-  String get profileEndMyDay;
-
-  /// No description provided for @profileEndMyDaySubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Close today once your trips are done'**
-  String get profileEndMyDaySubtitle;
-
   /// No description provided for @profileAccount.
   ///
   /// In en, this message translates to:
@@ -4390,83 +4378,11 @@ abstract class DriverLocalizations {
   /// **'It records the stop as skipped for the current trip.'**
   String get profileFaqSkippingAnswer;
 
-  /// No description provided for @profileTodaysActivitySummary.
-  ///
-  /// In en, this message translates to:
-  /// **'Today’s Activity Summary'**
-  String get profileTodaysActivitySummary;
-
-  /// No description provided for @profileTripsCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Trips Completed'**
-  String get profileTripsCompleted;
-
-  /// No description provided for @profileTripsCompletedValue.
-  ///
-  /// In en, this message translates to:
-  /// **'08'**
-  String get profileTripsCompletedValue;
-
-  /// No description provided for @profilePendingSources.
-  ///
-  /// In en, this message translates to:
-  /// **'Pending Sources'**
-  String get profilePendingSources;
-
-  /// No description provided for @profilePendingSourcesValue.
-  ///
-  /// In en, this message translates to:
-  /// **'01'**
-  String get profilePendingSourcesValue;
-
-  /// No description provided for @profileOfflinePendingSync.
-  ///
-  /// In en, this message translates to:
-  /// **'Offline Pending Sync'**
-  String get profileOfflinePendingSync;
-
-  /// No description provided for @profileAllSynced.
-  ///
-  /// In en, this message translates to:
-  /// **'All Synced'**
-  String get profileAllSynced;
-
-  /// No description provided for @profileEndDayHelper.
-  ///
-  /// In en, this message translates to:
-  /// **'Once you close the day, you won\'t be able to add or edit any entries.'**
-  String get profileEndDayHelper;
-
   /// No description provided for @profileClosedDayArtwork.
   ///
   /// In en, this message translates to:
   /// **'Now Time to\nCLOSED The Day'**
   String get profileClosedDayArtwork;
-
-  /// No description provided for @profileSubmitShareWhatsapp.
-  ///
-  /// In en, this message translates to:
-  /// **'Submit & Share to Whatsapp'**
-  String get profileSubmitShareWhatsapp;
-
-  /// No description provided for @profileShareWhatsappMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'This will lock the day for editing and pre-fill a WhatsApp message to your group.'**
-  String get profileShareWhatsappMessage;
-
-  /// No description provided for @profileCancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get profileCancel;
-
-  /// No description provided for @profileShare.
-  ///
-  /// In en, this message translates to:
-  /// **'Share'**
-  String get profileShare;
 
   /// No description provided for @driverProfileUserName.
   ///
@@ -5047,7 +4963,7 @@ abstract class DriverLocalizations {
   /// No description provided for @tpEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'The warehouses are closed for Diwali. Pickups due today move to Mon 9 Nov (the holiday rule).'**
+  /// **'The warehouse is closed that day (holiday). Pickups due that day move to the next working day or are skipped, as each pickup point’s holiday rule says.'**
   String get tpEmptyMessage;
 
   /// No description provided for @rdNext7Days.
@@ -5379,6 +5295,924 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'Add sources'**
   String get rdAddSources;
+
+  /// No description provided for @sdAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get sdAddress;
+
+  /// No description provided for @sdOpenMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Google Maps'**
+  String get sdOpenMaps;
+
+  /// No description provided for @sdSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get sdSchedule;
+
+  /// No description provided for @sdPersonAtPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Person at the pickup point'**
+  String get sdPersonAtPickup;
+
+  /// No description provided for @sdIecExecutive.
+  ///
+  /// In en, this message translates to:
+  /// **'IEC Executive'**
+  String get sdIecExecutive;
+
+  /// No description provided for @sdPickupCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup category'**
+  String get sdPickupCategory;
+
+  /// No description provided for @sdMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'Material'**
+  String get sdMaterial;
+
+  /// No description provided for @sdPickupStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Status'**
+  String get sdPickupStatus;
+
+  /// No description provided for @sdWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse'**
+  String get sdWarehouse;
+
+  /// No description provided for @sdStatusNextStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Stop'**
+  String get sdStatusNextStop;
+
+  /// No description provided for @sdCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get sdCall;
+
+  /// No description provided for @sdSkipForToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip For Today'**
+  String get sdSkipForToday;
+
+  /// No description provided for @sdMaterialsList.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk Pouch, Card Board'**
+  String get sdMaterialsList;
+
+  /// No description provided for @sdRoleManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager'**
+  String get sdRoleManager;
+
+  /// No description provided for @sdContactLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {role} · {phone}'**
+  String sdContactLine(String name, String role, String phone);
+
+  /// No description provided for @sdIecLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {phone}'**
+  String sdIecLine(String name, String phone);
+
+  /// No description provided for @skTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip Source'**
+  String get skTitle;
+
+  /// No description provided for @skReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason for Skip'**
+  String get skReasonLabel;
+
+  /// No description provided for @skReasonClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Source closed'**
+  String get skReasonClosed;
+
+  /// No description provided for @skReasonHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday'**
+  String get skReasonHoliday;
+
+  /// No description provided for @skReasonVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle unavailable'**
+  String get skReasonVehicle;
+
+  /// No description provided for @skReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get skReasonOther;
+
+  /// No description provided for @skRemarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Remarks'**
+  String get skRemarks;
+
+  /// No description provided for @skMaxChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Max 150 Characters'**
+  String get skMaxChars;
+
+  /// No description provided for @skConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Skip'**
+  String get skConfirm;
+
+  /// No description provided for @skSkippedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Source Skipped!'**
+  String get skSkippedTitle;
+
+  /// No description provided for @skSkippedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Resumes tomorrow automatically.'**
+  String get skSkippedBody;
+
+  /// No description provided for @apToApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'To approve'**
+  String get apToApprove;
+
+  /// No description provided for @apDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get apDone;
+
+  /// No description provided for @apCorrectionDoneDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'PET Bottles 50 kg → 60 kg. The stop’s record is changed; Vikram Singh is told.'**
+  String get apCorrectionDoneDetail;
+
+  /// No description provided for @apApprovedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by you today, 10:20 am'**
+  String get apApprovedToday;
+
+  /// No description provided for @apExtraPickupDoneDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat 25 Oct, 10 am – 12 pm · about 40 kg · added to Adajan Morning'**
+  String get apExtraPickupDoneDetail;
+
+  /// No description provided for @apApproved21Oct.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by you 21 Oct'**
+  String get apApproved21Oct;
+
+  /// No description provided for @apStartPickupsFromIec.
+  ///
+  /// In en, this message translates to:
+  /// **'Start pickups · from IEC'**
+  String get apStartPickupsFromIec;
+
+  /// No description provided for @apGreenLeafNisha.
+  ///
+  /// In en, this message translates to:
+  /// **'Green Leaf Hotel · Nisha Mehta'**
+  String get apGreenLeafNisha;
+
+  /// No description provided for @apDeclineReplyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Your reply: “No room on Adajan Morning until 1 Dec. Ask again then.”'**
+  String get apDeclineReplyDetail;
+
+  /// No description provided for @apDeclined20Oct.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined by you 20 Oct'**
+  String get apDeclined20Oct;
+
+  /// No description provided for @apDeclineCorrectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline the correction'**
+  String get apDeclineCorrectionTitle;
+
+  /// No description provided for @apDeclineCorrectionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Vikram Singh sees your reply. The stop stays as recorded.'**
+  String get apDeclineCorrectionBody;
+
+  /// No description provided for @apDeclineCorrectionReply.
+  ///
+  /// In en, this message translates to:
+  /// **'The scale photo shows 50 kg. If it was more, ask the gate team to weigh it again.'**
+  String get apDeclineCorrectionReply;
+
+  /// No description provided for @apDeclineExtraTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline the extra pickup'**
+  String get apDeclineExtraTitle;
+
+  /// No description provided for @apDeclineExtraBody.
+  ///
+  /// In en, this message translates to:
+  /// **'ABC Plastic Manufacture sees your reply. No pickup is added.'**
+  String get apDeclineExtraBody;
+
+  /// No description provided for @apReplyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your reply'**
+  String get apReplyHint;
+
+  /// No description provided for @apDeclineAndReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline and reply'**
+  String get apDeclineAndReply;
+
+  /// No description provided for @apCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get apCancel;
+
+  /// No description provided for @apExtraApprovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra pickup approved'**
+  String get apExtraApprovedTitle;
+
+  /// No description provided for @apExtraApprovedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'ABC Plastic Manufacture is added to Adajan Morning on Sat 25 Oct.'**
+  String get apExtraApprovedBody;
+
+  /// No description provided for @rpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection report'**
+  String get rpTitle;
+
+  /// No description provided for @rpShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get rpShare;
+
+  /// No description provided for @rpCollectedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected today'**
+  String get rpCollectedToday;
+
+  /// No description provided for @rpCollectedYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected yesterday'**
+  String get rpCollectedYesterday;
+
+  /// No description provided for @rpCollectedThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected this week'**
+  String get rpCollectedThisWeek;
+
+  /// No description provided for @rpCollectedThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected this month'**
+  String get rpCollectedThisMonth;
+
+  /// No description provided for @rpCollectedTheseDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected on these dates'**
+  String get rpCollectedTheseDates;
+
+  /// No description provided for @rpTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{kg} kg + {pcs} pcs'**
+  String rpTotal(String kg, String pcs);
+
+  /// No description provided for @rpKg.
+  ///
+  /// In en, this message translates to:
+  /// **'{kg} kg'**
+  String rpKg(String kg);
+
+  /// No description provided for @rpStopsDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} stops due'**
+  String rpStopsDue(String count);
+
+  /// No description provided for @rpByRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'By route'**
+  String get rpByRoute;
+
+  /// No description provided for @rpByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'By pickup category'**
+  String get rpByCategory;
+
+  /// No description provided for @rpStopsToLook.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops to look at'**
+  String get rpStopsToLook;
+
+  /// No description provided for @rpOfStops.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} stops'**
+  String rpOfStops(String done, String total);
+
+  /// No description provided for @rpStops.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} stops'**
+  String rpStops(String count);
+
+  /// No description provided for @rpOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'Own'**
+  String get rpOwn;
+
+  /// No description provided for @rpContract.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract'**
+  String get rpContract;
+
+  /// No description provided for @rpCancelledBySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled by source'**
+  String get rpCancelledBySource;
+
+  /// No description provided for @rpNamesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second} and {count} more'**
+  String rpNamesMore(String first, String second, String count);
+
+  /// No description provided for @rpNamesPlus.
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second} +{count}'**
+  String rpNamesPlus(String first, String second, String count);
+
+  /// No description provided for @rpCollectedStops.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} · {done} of {total} stops'**
+  String rpCollectedStops(String label, String done, String total);
+
+  /// No description provided for @rpPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report PDF'**
+  String get rpPdfTitle;
+
+  /// No description provided for @rpPdfSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection report · {range}'**
+  String rpPdfSubtitle(String range);
+
+  /// No description provided for @rpCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Ecovision Environmental Resources LLP'**
+  String get rpCompany;
+
+  /// No description provided for @rpPdfSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Supervisor: {name} · {period}, {range}'**
+  String rpPdfSupervisor(String name, String period, String range);
+
+  /// No description provided for @rpPeriodToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get rpPeriodToday;
+
+  /// No description provided for @rpPeriodYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get rpPeriodYesterday;
+
+  /// No description provided for @rpPeriodThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get rpPeriodThisWeek;
+
+  /// No description provided for @rpPeriodThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'This month'**
+  String get rpPeriodThisMonth;
+
+  /// No description provided for @rpPeriodDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected dates'**
+  String get rpPeriodDates;
+
+  /// No description provided for @rpPdfSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{due} stops due · Collected {collected} · 0 kg {zero} · Missed {missed} · Cancelled {cancelled}'**
+  String rpPdfSummary(
+    String due,
+    String collected,
+    String zero,
+    String missed,
+    String cancelled,
+  );
+
+  /// No description provided for @rpColRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get rpColRoute;
+
+  /// No description provided for @rpColVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get rpColVehicle;
+
+  /// No description provided for @rpColStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops'**
+  String get rpColStops;
+
+  /// No description provided for @rpColCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get rpColCollected;
+
+  /// No description provided for @rpColCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get rpColCategory;
+
+  /// No description provided for @rpColOutcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Outcome'**
+  String get rpColOutcome;
+
+  /// No description provided for @rpColPickupPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup points'**
+  String get rpColPickupPoints;
+
+  /// No description provided for @rpOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total}'**
+  String rpOf(String done, String total);
+
+  /// No description provided for @rpPdfMade.
+  ///
+  /// In en, this message translates to:
+  /// **'Made {date}, {time} · Page 1 of 1'**
+  String rpPdfMade(String date, String time);
+
+  /// No description provided for @rpPdfPageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Page 1 of 1 · pinch to zoom'**
+  String get rpPdfPageHint;
+
+  /// No description provided for @rpSharePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Share PDF'**
+  String get rpSharePdf;
+
+  /// No description provided for @calClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get calClear;
+
+  /// No description provided for @calApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get calApply;
+
+  /// No description provided for @calPrevMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get calPrevMonth;
+
+  /// No description provided for @calNextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get calNextMonth;
+
+  /// No description provided for @calSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'{range} · {days}'**
+  String calSelection(String range, String days);
+
+  /// No description provided for @calDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String calDays(int count);
+
+  /// No description provided for @calPickDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick dates'**
+  String get calPickDates;
+
+  /// No description provided for @calMonthLong.
+  ///
+  /// In en, this message translates to:
+  /// **'{month, select, 1{January} 2{February} 3{March} 4{April} 5{May} 6{June} 7{July} 8{August} 9{September} 10{October} 11{November} 12{December} other{}}'**
+  String calMonthLong(String month);
+
+  /// No description provided for @calMonthShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} 12{Dec} other{}}'**
+  String calMonthShort(String month);
+
+  /// No description provided for @calWeekday.
+  ///
+  /// In en, this message translates to:
+  /// **'{day, select, 1{M} 2{T} 3{W} 4{T} 5{F} 6{S} 7{S} other{}}'**
+  String calWeekday(String day);
+
+  /// No description provided for @supervisorDrawerCashPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash & payments'**
+  String get supervisorDrawerCashPayments;
+
+  /// No description provided for @lkRouteDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} · {date}'**
+  String lkRouteDate(String route, String date);
+
+  /// No description provided for @lkNotOnRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Not on a route'**
+  String get lkNotOnRoute;
+
+  /// No description provided for @lkContractVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract vehicle · {plate}'**
+  String lkContractVehicle(String plate);
+
+  /// No description provided for @lkOwnVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Own vehicle · driver {name}'**
+  String lkOwnVehicle(String name);
+
+  /// No description provided for @lkExtraPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra pickup'**
+  String get lkExtraPickup;
+
+  /// No description provided for @lkCalledOffIec.
+  ///
+  /// In en, this message translates to:
+  /// **'Called off by the IEC ahead of time'**
+  String get lkCalledOffIec;
+
+  /// No description provided for @lkCalledOffAtStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Called off at the stop · driver {name}'**
+  String lkCalledOffAtStop(String name);
+
+  /// No description provided for @lkCalledOffByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Called off by you'**
+  String get lkCalledOffByYou;
+
+  /// No description provided for @lkReasonNotRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded by the driver or the gate'**
+  String get lkReasonNotRecorded;
+
+  /// No description provided for @lkReasonTripCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Its trip was cancelled'**
+  String get lkReasonTripCancelled;
+
+  /// No description provided for @lkReasonNoRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'No route that day'**
+  String get lkReasonNoRoute;
+
+  /// No description provided for @lkReasonTakenOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken off the trip and not put on another'**
+  String get lkReasonTakenOff;
+
+  /// No description provided for @lkReasonClosedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed today'**
+  String get lkReasonClosedToday;
+
+  /// No description provided for @lkReasonHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday'**
+  String get lkReasonHoliday;
+
+  /// No description provided for @lkReasonShifted.
+  ///
+  /// In en, this message translates to:
+  /// **'Shifted to another day'**
+  String get lkReasonShifted;
+
+  /// No description provided for @lkReasonNoMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'No material'**
+  String get lkReasonNoMaterial;
+
+  /// No description provided for @lkReasonNoMaterialToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No material today'**
+  String get lkReasonNoMaterialToday;
+
+  /// No description provided for @lkReasonClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get lkReasonClosed;
+
+  /// No description provided for @lkReasonRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Refused to give'**
+  String get lkReasonRefused;
+
+  /// No description provided for @lkReasonVehicleFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle full'**
+  String get lkReasonVehicleFull;
+
+  /// No description provided for @lkEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to look at for these dates'**
+  String get lkEmpty;
+
+  /// No description provided for @calWeekdayShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{day, select, 1{Mon} 2{Tue} 3{Wed} 4{Thu} 5{Fri} 6{Sat} 7{Sun} other{}}'**
+  String calWeekdayShort(String day);
+
+  /// No description provided for @isTypeSourceProblem.
+  ///
+  /// In en, this message translates to:
+  /// **'Problem at the source'**
+  String get isTypeSourceProblem;
+
+  /// No description provided for @isDriverRole.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (Driver)'**
+  String isDriverRole(String name);
+
+  /// No description provided for @isRaised.
+  ///
+  /// In en, this message translates to:
+  /// **'Raised {time}'**
+  String isRaised(String time);
+
+  /// No description provided for @isOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get isOpen;
+
+  /// No description provided for @isEscalated.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalated'**
+  String get isEscalated;
+
+  /// No description provided for @isResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get isResolved;
+
+  /// No description provided for @isTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type :'**
+  String get isTypeLabel;
+
+  /// No description provided for @isDriverNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver’s note :'**
+  String get isDriverNote;
+
+  /// No description provided for @isBy.
+  ///
+  /// In en, this message translates to:
+  /// **'By :'**
+  String get isBy;
+
+  /// No description provided for @isByValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {time}'**
+  String isByValue(String name, String time);
+
+  /// No description provided for @isWhatWasDone.
+  ///
+  /// In en, this message translates to:
+  /// **'What was done :'**
+  String get isWhatWasDone;
+
+  /// No description provided for @isTold.
+  ///
+  /// In en, this message translates to:
+  /// **'Told :'**
+  String get isTold;
+
+  /// No description provided for @isToldValue.
+  ///
+  /// In en, this message translates to:
+  /// **'The office and {name} (IEC).'**
+  String isToldValue(String name);
+
+  /// No description provided for @isEscalate.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalate'**
+  String get isEscalate;
+
+  /// No description provided for @isMarkResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark resolved'**
+  String get isMarkResolved;
+
+  /// No description provided for @isSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as resolved'**
+  String get isSheetTitle;
+
+  /// No description provided for @isSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what was done. The driver and the office see it.'**
+  String get isSheetBody;
+
+  /// No description provided for @isWhatWasDoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What was done'**
+  String get isWhatWasDoneLabel;
+
+  /// No description provided for @isEscalateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Escalate this issue?'**
+  String get isEscalateTitle;
+
+  /// No description provided for @isEscalateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The office and the source’s IEC are told, and it shows as Escalated. Use it when you cannot sort it out yourself.'**
+  String get isEscalateBody;
+
+  /// No description provided for @isResolvedToastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Resolved!'**
+  String get isResolvedToastTitle;
+
+  /// No description provided for @isResolvedToastBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is told.'**
+  String isResolvedToastBody(String name);
+
+  /// No description provided for @isEscalatedToastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Escalated!'**
+  String get isEscalatedToastTitle;
+
+  /// No description provided for @isEscalatedToastBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The office and the source’s IEC are told.'**
+  String get isEscalatedToastBody;
+
+  /// No description provided for @tpStatusExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected'**
+  String get tpStatusExpected;
+
+  /// No description provided for @tpExpectedInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips are made the day before. This is what the routes and the pickups due that day add up to; the team can still change.'**
+  String get tpExpectedInfo;
+
+  /// No description provided for @tpExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra {count}'**
+  String tpExtra(int count);
+
+  /// No description provided for @tpTodaySuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · Today'**
+  String tpTodaySuffix(String date);
+
+  /// No description provided for @tpWarehouseClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · Warehouse closed'**
+  String tpWarehouseClosed(String date);
+
+  /// No description provided for @tpNoTripsHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips · warehouse holiday'**
+  String get tpNoTripsHoliday;
 }
 
 class _DriverLocalizationsDelegate

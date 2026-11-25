@@ -4,6 +4,7 @@ import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_page.dart';
 import 'package:pickup_supervisor/core/widgets/module_tag.dart';
+import 'package:pickup_supervisor/features/route_detail/model/route_detail_models.dart';
 import 'package:pickup_supervisor/features/route_detail/view/route_detail_screen.dart';
 import 'package:pickup_supervisor/features/trips_plan/model/trips_plan_models.dart';
 import 'package:pickup_supervisor/features/trips_plan/widgets/trips_plan_assets.dart';
@@ -257,7 +258,8 @@ class TripsPlanTripCard extends StatelessWidget {
     final status = switch (trip.status) {
       TripStatus.onRoute => (l10n.tpStatusOnRoute, ModuleTagTone.blue),
       TripStatus.approved => (l10n.tpStatusApproved, ModuleTagTone.green),
-      TripStatus.planned => (l10n.tpStatusPlanned, ModuleTagTone.pink),
+      TripStatus.planned => (l10n.tpStatusPlanned, ModuleTagTone.grey),
+      TripStatus.expected => (l10n.tpStatusExpected, ModuleTagTone.grey),
     };
     final isOwn = trip.vehicleKind == TripVehicleKind.own;
     final vehicleLabel = l10n.tpVehicleTag(
@@ -268,7 +270,14 @@ class TripsPlanTripCard extends StatelessWidget {
     return TripsPlanCard(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute<void>(builder: (_) => const RouteDetailScreen()),
+        // Real trips open the route; an expected day opens its next 7 days.
+        MaterialPageRoute<void>(
+          builder: (_) => RouteDetailScreen(
+            initialPeriod: trip.status == TripStatus.expected
+                ? RouteDetailPeriod.next7Days
+                : RouteDetailPeriod.today,
+          ),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -378,6 +387,7 @@ class TripsPlanTripCard extends StatelessWidget {
       if (s.biWeekly > 0) l10n.tpBiWeekly(s.biWeekly),
       if (s.onCall > 0) l10n.tpOnCall(s.onCall),
       if (s.paused > 0) l10n.tpPaused(s.paused),
+      if (s.extra > 0) l10n.tpExtra(s.extra),
     ].join(' · ');
   }
 
@@ -471,6 +481,7 @@ class TripsPlanDayCard extends StatelessWidget {
     required this.ownVehicles,
     required this.contractVehicles,
     this.onTap,
+    this.showVehicles = true,
   });
 
   final String title;
@@ -478,6 +489,9 @@ class TripsPlanDayCard extends StatelessWidget {
   final int ownVehicles;
   final int contractVehicles;
   final VoidCallback? onTap;
+
+  /// False for a day with no trips (warehouse holiday).
+  final bool showVehicles;
 
   @override
   Widget build(BuildContext context) {
@@ -512,27 +526,62 @@ class TripsPlanDayCard extends StatelessWidget {
               _icon(TripsPlanAssets.chevronRight, 20),
             ],
           ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              ModuleTag(
-                label: l10n.tpOwnVehicleCount(ownVehicles),
-                tone: ModuleTagTone.blue,
-                iconAsset: TripsPlanAssets.ownVehicle,
-              ),
-              ModuleTag(
-                label: l10n.tpContractCount(contractVehicles),
-                tone: ModuleTagTone.pink,
-                iconAsset: TripsPlanAssets.contractVehicle,
-              ),
-            ],
-          ),
+          if (showVehicles) ...[
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                ModuleTag(
+                  label: l10n.tpOwnVehicleCount(ownVehicles),
+                  tone: ModuleTagTone.blue,
+                  iconAsset: TripsPlanAssets.ownVehicle,
+                ),
+                ModuleTag(
+                  label: l10n.tpContractCount(contractVehicles),
+                  tone: ModuleTagTone.pink,
+                  iconAsset: TripsPlanAssets.contractVehicle,
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
   }
+}
+
+/// Amber note above an expected day's trips.
+class TripsPlanInfoBanner extends StatelessWidget {
+  const TripsPlanInfoBanner({super.key, required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    decoration: BoxDecoration(
+      color: DriverColors.infoBannerBg,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: DriverColors.infoBannerBorder),
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _icon(TripsPlanAssets.info, 20),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            message,
+            style: DriverTextStyles.medium12.copyWith(
+              color: DriverColors.infoBannerText,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 /// "No trips on this day" empty state.
@@ -552,7 +601,7 @@ class TripsPlanEmptyState extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 60, 16, 40),
       child: Column(
         children: [
-          _icon(TripsPlanAssets.emptyCircle, 120),
+          const _EmptyIcon(),
           const SizedBox(height: 10),
           Text(
             title,
@@ -568,6 +617,47 @@ class TripsPlanEmptyState extends StatelessWidget {
             style: DriverTextStyles.medium14.copyWith(
               color: DriverColors.neutral600,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Green calendar in two soft rings (Figma 100 / 84 / 70 px).
+class _EmptyIcon extends StatelessWidget {
+  const _EmptyIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget ring(double size, Color color) => Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+    return SizedBox.square(
+      dimension: 100,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ring(100, DriverColors.primary200),
+          ring(84, DriverColors.primary300),
+          Container(
+            width: 70,
+            height: 70,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: DriverColors.primary500,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x1F000000),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: _icon(TripsPlanAssets.emptyCalendar, 32),
           ),
         ],
       ),

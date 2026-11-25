@@ -105,7 +105,7 @@ void main() {
     await tester.tap(find.byKey(const Key('driver-labour-dialog-confirm')));
     await tester.pumpAndSettle();
     expect(find.text('Reactive Successfully!'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('driver-labour-toast-close')));
+    await tester.tap(find.byKey(const Key('module-toast-close')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('driver-labour-edit')), findsOneWidget);
   });

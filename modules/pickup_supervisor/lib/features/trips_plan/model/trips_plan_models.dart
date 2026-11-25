@@ -1,6 +1,7 @@
 enum TripsPlanChoice { today, tomorrow, week, date }
 
-enum TripStatus { onRoute, approved, planned }
+/// [expected] is a day after tomorrow: trips are made the day before.
+enum TripStatus { onRoute, approved, planned, expected }
 
 enum TripVehicleKind { own, contract }
 
@@ -34,6 +35,7 @@ class TripSchedule {
     this.biWeekly = 0,
     this.onCall = 0,
     this.paused = 0,
+    this.extra = 0,
   });
 
   final int stops;
@@ -43,6 +45,9 @@ class TripSchedule {
   final int biWeekly;
   final int onCall;
   final int paused;
+
+  /// Extra pickups added to the route that day.
+  final int extra;
 }
 
 class TripProgress {
@@ -89,10 +94,14 @@ class TripsPlanDay {
     required this.contractVehicles,
     this.extraPickups = 0,
     this.pausedSources = 0,
+    this.closed = false,
   });
 
-  /// 0 = Thu 22 Oct (today) … 6 = Wed 28 Oct.
+  /// Days from today: 0 = Thu 22 Oct (today), 1 = tomorrow, …
   final int dayIndex;
+
+  /// Warehouse holiday: no trips that day.
+  final bool closed;
   final int trips;
   final int stops;
   final int ownVehicles;

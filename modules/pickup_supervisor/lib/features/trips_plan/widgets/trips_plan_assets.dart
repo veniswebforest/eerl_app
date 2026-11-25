@@ -15,4 +15,6 @@ abstract final class TripsPlanAssets {
   static const phone = '$_icons/phone.svg';
   static const chevronRight = '$_icons/chevron_right.svg';
   static const emptyCircle = '$_icons/empty_circle.svg';
+  static const emptyCalendar = '$_icons/empty_calendar.svg';
+  static const info = '$_icons/info.svg';
 }

@@ -1,4 +1,3 @@
-import 'package:eerl_app/features/home/widgets/home_assets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
@@ -38,6 +37,11 @@ class PickupSupervisorHomeDrawer extends StatelessWidget {
         keyName: 'issues',
         label: l10n.supervisorDrawerIssues,
         icon: '$_iconRoot/issues.svg',
+      ),
+      _DrawerItemData(
+        keyName: 'cash-payments',
+        label: l10n.supervisorDrawerCashPayments,
+        icon: '$_iconRoot/cash_payments.svg',
       ),
       _DrawerItemData(
         keyName: 'extra-pickup',
@@ -207,8 +211,9 @@ class _DrawerNavigationItem extends StatelessWidget {
         key: Key('supervisor-drawer-${item.keyName}'),
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
-        child: SizedBox(
+        child: Container(
           height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
             children: [
               SvgPicture.asset(
@@ -228,13 +233,16 @@ class _DrawerNavigationItem extends StatelessWidget {
                   ),
                 ),
               ),
-              SvgPicture.asset(
-                item.isDestructive
-                    ? '$_iconRoot/logout_chevron.svg'
-                    : HomeAssets.drawerChevronRight,
-                package: _assetPackage,
-                width: 24,
-                height: 24,
+              RotatedBox(
+                quarterTurns: 3,
+                child: SvgPicture.asset(
+                  item.isDestructive
+                      ? '$_iconRoot/logout_chevron.svg'
+                      : '$_iconRoot/chevron_right.svg',
+                  package: _assetPackage,
+                  width: 24,
+                  height: 24,
+                ),
               ),
             ],
           ),

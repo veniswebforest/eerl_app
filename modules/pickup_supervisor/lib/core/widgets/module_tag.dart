@@ -4,7 +4,7 @@ import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 
 /// Pill tag with an optional leading icon.
-enum ModuleTagTone { blue, pink, yellow, red, green }
+enum ModuleTagTone { blue, pink, yellow, red, green, grey }
 
 class ModuleTag extends StatelessWidget {
   const ModuleTag({
@@ -24,6 +24,7 @@ class ModuleTag extends StatelessWidget {
     ModuleTagTone.yellow => (DriverColors.yellow50, DriverColors.yellow700),
     ModuleTagTone.red => (DriverColors.red100, DriverColors.red600),
     ModuleTagTone.green => (DriverColors.primary50, DriverColors.primary500),
+    ModuleTagTone.grey => (DriverColors.tagGrey, DriverColors.pdfMuted),
   };
 
   @override

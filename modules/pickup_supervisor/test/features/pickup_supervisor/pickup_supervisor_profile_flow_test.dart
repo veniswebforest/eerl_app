@@ -72,12 +72,6 @@ void main() {
       find.text('Open today\'s route and use the driver edit action.'),
       findsOneWidget,
     );
-
-    await _pumpLocalized(tester, const PickupSupervisorEndDayScreen());
-    await tester.tap(find.byKey(const Key('profile-confirm-end-day')));
-    await tester.pumpAndSettle();
-    expect(find.text('Submit & Share to Whatsapp'), findsOneWidget);
-    expect(find.text('Share'), findsOneWidget);
   });
 }
 

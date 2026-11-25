@@ -3,12 +3,14 @@ import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_page.dart';
 import 'package:pickup_supervisor/core/widgets/module_segmented_switch.dart';
+import 'package:pickup_supervisor/core/widgets/module_toast.dart';
 import 'package:pickup_supervisor/features/driver/widgets/driver_dashboard_widgets.dart';
 import 'package:pickup_supervisor/features/route_detail/model/route_detail_mock_data.dart';
 import 'package:pickup_supervisor/features/route_detail/model/route_detail_models.dart';
 import 'package:pickup_supervisor/features/route_detail/widgets/route_detail_header_widgets.dart';
 import 'package:pickup_supervisor/features/route_detail/widgets/route_detail_map_widgets.dart';
 import 'package:pickup_supervisor/features/route_detail/widgets/route_detail_stop_widgets.dart';
+import 'package:pickup_supervisor/features/stop_detail/view/stop_detail_screen.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 
@@ -49,6 +51,22 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
   late RouteDetailPeriod _period = widget.initialPeriod;
   late RouteDetailView _view = widget.initialView;
   StopFilter _filter = StopFilter.all;
+  bool _skipped = false;
+
+  Future<void> _openStop(RouteStop stop) async {
+    final skipped = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => StopDetailScreen(stop: stop)),
+    );
+    if (skipped != true || !mounted) return;
+    setState(() => _skipped = true);
+    final l10n = DriverLocalizations.of(context);
+    ModuleToast.show(
+      context,
+      kind: ModuleToastKind.error,
+      title: l10n.skSkippedTitle,
+      message: l10n.skSkippedBody,
+    );
+  }
 
   bool get _isToday => _period == RouteDetailPeriod.today;
 
@@ -138,6 +156,7 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
           RouteDetailStopCard(
             key: Key('route-detail-stop-${visible[i].name}-$i'),
             stop: visible[i],
+            onTap: () => _openStop(visible[i]),
           ),
         ],
       ],
@@ -145,7 +164,9 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
   }
 
   List<Widget> _upcomingContent(DriverLocalizations l10n) {
-    final stops = RouteDetailMockData.nextSevenDaysStops;
+    final stops = _skipped
+        ? RouteDetailMockData.nextSevenDaysAfterSkip
+        : RouteDetailMockData.nextSevenDaysStops;
     return [
       for (var i = 0; i < stops.length; i++) ...[
         if (i > 0) const SizedBox(height: 16),
@@ -153,6 +174,7 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
           stop: stops[i],
           highlighted: i == 0,
           once: stops[i].schedule.kind == StopScheduleKind.once,
+          onTap: () => _openStop(stops[i]),
         ),
       ],
       const SizedBox(height: 16),

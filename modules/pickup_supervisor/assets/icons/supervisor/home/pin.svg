@@ -1,6 +1,6 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="icon/pin">
-<path id="Vector" d="M18.3333 9.16667C18.3333 14.6667 11 20.1667 11 20.1667C11 20.1667 3.66667 14.6667 3.66667 9.16667C3.66667 7.22175 4.43928 5.35648 5.81455 3.98122C7.18982 2.60595 9.05508 1.83333 11 1.83333C12.9449 1.83333 14.8102 2.60595 16.1855 3.98122C17.5607 5.35648 18.3333 7.22175 18.3333 9.16667Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="#39AE51"/>
-<path id="Vector_2" d="M13.75 9.16667C13.75 10.6854 12.5188 11.9167 11 11.9167C9.48122 11.9167 8.25 10.6854 8.25 9.16667C8.25 7.64788 9.48122 6.41667 11 6.41667C12.5188 6.41667 13.75 7.64788 13.75 9.16667Z" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="#39AE51"/>
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame">
+<path id="Vector" d="M20 10.0002C20 16.0002 12 22.0002 12 22.0002C12 22.0002 4 16.0002 4 10.0002C4 7.87845 4.84286 5.84361 6.34315 4.34332C7.84344 2.84303 9.87827 2.00018 12 2.00018C14.1217 2.00018 16.1566 2.84303 17.6569 4.34332C19.1571 5.84361 20 7.87845 20 10.0002Z" stroke-width="1.63636" stroke-linecap="round" stroke-linejoin="round" stroke="#39AE51"/>
+<path id="Vector_2" d="M15 9.99982C15 11.6567 13.6569 12.9998 12 12.9998C10.3431 12.9998 9 11.6567 9 9.99982C9 8.34297 10.3431 6.99982 12 6.99982C13.6569 6.99982 15 8.34297 15 9.99982Z" stroke-width="1.63636" stroke-linecap="round" stroke-linejoin="round" stroke="#39AE51"/>
 </g>
 </svg>

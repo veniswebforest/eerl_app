@@ -6,21 +6,29 @@
   "onlineStatus": "You’re Online",
   "pendingCollections": "{count} collection Pending",
   "@pendingCollections": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "syncNow": "Sync Now",
   "todaysSummary": "Todays Summary",
   "pendingStops": "Pending Stops",
   "pendingStopsCount": "05",
   "collected": "Collected",
-  "collectedCount": "03",
+  "collectedCount": "Collected ({count})",
   "todaysTrip": "Today’s Trip",
   "vehicleRegistration": "GJ-XX-1234",
   "stopsCompleted": "{completed} of {total} stops completed",
   "@stopsCompleted": {
     "placeholders": {
-      "completed": { "type": "int" },
-      "total": { "type": "int" }
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "tripProgress": "37%",
@@ -39,8 +47,12 @@
   "stopCardTitle": "{name} · {material}",
   "@stopCardTitle": {
     "placeholders": {
-      "name": { "type": "String" },
-      "material": { "type": "String" }
+      "name": {
+        "type": "String"
+      },
+      "material": {
+        "type": "String"
+      }
     }
   },
   "abcTextileMills": "ABC Textile Mills",
@@ -115,7 +127,13 @@
   "zeroKg": "0 kg",
   "cancelled": "Cancelled",
   "todaysTripsCount": "Today’s Trips ({count})",
-  "@todaysTripsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@todaysTripsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "todaysTrips": "Today’s Trips",
   "tripMorning": "Trip 1 · Morning",
   "tripAfternoon": "Trip 2 · Afternoon",
@@ -124,7 +142,13 @@
   "afternoonStartTime": "2:00 pm",
   "onTheWay": "On the way",
   "startsAt": "Starts {time}",
-  "@startsAt": {"placeholders": {"time": {"type": "String"}}},
+  "@startsAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "delivered": "Delivered",
   "vehicleCrew": "GJ-XX-1234 · Suresh, Mahesh",
   "dropMagdalla": "Drop at Magdalla Warehouse",
@@ -133,23 +157,71 @@
   "weight420Kg": "420 kg",
   "weight180Kg": "180 kg",
   "stopsDone": "{completed} of {total} stops done",
-  "@stopsDone": {"placeholders": {"completed": {"type": "int"}, "total": {"type": "int"}}},
+  "@stopsDone": {
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "seeAllStops": "See all {count} stops",
-  "@seeAllStops": {"placeholders": {"count": {"type": "int"}}},
+  "@seeAllStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "nextStopOnTrip": "Next stop on Trip {trip}",
-  "@nextStopOnTrip": {"placeholders": {"trip": {"type": "int"}}},
+  "@nextStopOnTrip": {
+    "placeholders": {
+      "trip": {
+        "type": "int"
+      }
+    }
+  },
   "afterThat": "After that ({count})",
-  "@afterThat": {"placeholders": {"count": {"type": "int"}}},
+  "@afterThat": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "laterToday": "Later today",
   "earlierToday": "Earlier today",
   "stopPosition": "Stop {current} of {total}",
-  "@stopPosition": {"placeholders": {"current": {"type": "int"}, "total": {"type": "int"}}},
+  "@stopPosition": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "nextStop": "Next stop",
   "enterCollection": "Enter collection",
   "opensAfterStop": "Opens after stop {stop}",
-  "@opensAfterStop": {"placeholders": {"stop": {"type": "int"}}},
+  "@opensAfterStop": {
+    "placeholders": {
+      "stop": {
+        "type": "int"
+      }
+    }
+  },
   "unlockAfterStop": "Unlocks when stop {stop} is done, or when you reach this stop (GPS). Tap to check your location.",
-  "@unlockAfterStop": {"placeholders": {"stop": {"type": "int"}}},
+  "@unlockAfterStop": {
+    "placeholders": {
+      "stop": {
+        "type": "int"
+      }
+    }
+  },
   "handedOverWeight": "Handed over · 1,240 kg net",
   "royalResidency": "Royal Residency",
   "shantiNagar": "Shanti Nagar",
@@ -168,11 +240,29 @@
   "morningTripWindow": "Morning · 7:00 – 11:00 am",
   "fiveOfSevenDone": "5 of 7 done",
   "stillToCollect": "Still to collect ({count})",
-  "@stillToCollect": {"placeholders": {"count": {"type": "int"}}},
+  "@stillToCollect": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "doneStops": "Done ({count})",
-  "@doneStops": {"placeholders": {"count": {"type": "int"}}},
+  "@doneStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "stopNumber": "Stop {number}",
-  "@stopNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@stopNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "hotelRajdhani": "Hotel Rajdhani",
   "greenParkSociety": "Green Park Society",
   "navratriGroundEvent": "Navratri Ground (event)",
@@ -249,9 +339,20 @@
   "startYourCollections": "Start your collections",
   "searchHere": "Search Here...",
   "pendingCount": "Pending ({count})",
-  "@pendingCount": {"placeholders": {"count": {"type": "int"}}},
-  "collectedCount": "Collected ({count})",
-  "@collectedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@pendingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@collectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "yashTextileHub": "Yash Textile Hub",
   "anjanaFarmAreaSurat": "Anjana Farm Area, Surat",
   "collectionWindowNineToTen": "09:00 AM - 10:00 AM",
@@ -264,7 +365,13 @@
   "notHere": "Not Here",
   "startCollection": "Start collection",
   "stopsNearby": "{count} stops nearby",
-  "@stopsNearby": {"placeholders": {"count": {"type": "int"}}},
+  "@stopsNearby": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "whichStopAreYouAt": "Which stop are you at?",
   "twoStopsCloseMessage": "Two stops on your trip are close to you.",
   "distanceStopSeven": "40 m away · Stop 7",
@@ -296,11 +403,9 @@
   "warehouseDistance": "Magdalla, Surat · 6.4 km",
   "viewTripSummary": "View trip summary",
   "tripOneSummary": "Trip 1 summary",
-  "morningTripWindow": "Morning · 7:00 – 11:00 am",
   "allStopsDone": "All stops done",
   "tripCollectedTotal": "1,260 kg + 25 pcs",
   "mixedWaste": "Mixed waste",
-  "cardboard": "Cardboard",
   "weight635Kg": "635 kg",
   "weight270Kg": "270 kg",
   "weight85Kg": "85 kg",
@@ -310,8 +415,6 @@
   "openInMaps": "Open in Maps",
   "callWarehouse": "Call warehouse",
   "notCollectedTwo": "Not collected (2)",
-  "cityBakery": "City Bakery",
-  "cancelledBySource": "Cancelled by source",
   "closedForStockTaking": "Closed for stock-taking",
   "handOverAtWarehouse": "Hand over at the warehouse",
   "warehouseGateInstruction": "Tap at the warehouse gate. You enter the number of bags; the Warehouse Incharge weighs the vehicle.",
@@ -374,15 +477,15 @@
   "supervisorTripsClosed": "Trips closed",
   "supervisorViewFullReport": "View full report",
   "supervisorTodaysTrips": "Today’s trips",
-  "supervisorTripsSubtitle": "Active and upcoming pickup routes for today",
+  "supervisorTripsSubtitle": "5 trips today · the next 2 are below",
   "supervisorAdajanMorning": "Adajan Morning",
-  "supervisorVikramProgress": "Vikram Singh · 3 of 8 collected",
+  "supervisorVikramProgress": "Vikram Singh  •  3 of 8 collected",
   "supervisorOwnVehicle": "Own vehicle",
   "supervisorDailyWeekly": "Daily 5 · Weekly 3",
   "supervisorCallDriver": "Call driver",
   "supervisorPalGamMorning": "Pal Gam Morning",
-  "supervisorAmitProgress": "Amit Patel · 0 of 8 recorded in the app",
-  "supervisorDriverNotSetUp": "Driver hasn’t set up app",
+  "supervisorAmitProgress": "Amit Patel  •  0 of 8 recorded in the app",
+  "supervisorDriverNotSetUp": "Driver not using app",
   "supervisorSeeTripsPlan": "See trips plan",
   "supervisorPickupPoints": "My pickup points",
   "supervisorPickupPointsSubtitle": "79 in Adajan, Vesu, Pal · by category",
@@ -392,9 +495,9 @@
   "supervisorMonthly": "Monthly",
   "supervisorOnCall": "On call",
   "supervisorQuickActions": "Quick Actions",
-  "supervisorUnassignedSources": "Unassigned Sources",
-  "supervisorManageUnassigned": "Manage New Unassigned Sources",
-  "supervisorViewSource": "View Source",
+  "supervisorUnassignedSources": "Unassigned sources",
+  "supervisorManageUnassigned": "Pickup points with no route yet",
+  "supervisorViewSource": "View sources",
   "supervisorExtraPickupRequests": "Extra pickups requests",
   "supervisorManageExtraPickup": "Manage Extra Pickup Sources",
   "supervisorViewPickups": "View Pickups",
@@ -406,26 +509,26 @@
   "supervisorSeeSuggestions": "See suggestions",
   "supervisorHome": "Home",
   "attentionApprovalRequests": "Approval requests",
-  "attentionApprovalSubtitle": "From your drivers and pickup points",
+  "attentionApprovalSubtitle": "From your drivers and IEC Executives",
   "attentionToApproveCount": "To approve 3",
   "attentionDoneCount": "Done 12",
   "attentionCorrectionFromDriver": "Correction · from driver",
   "attentionWaiting": "Waiting",
   "attentionHotelRajdhaniStop": "Hotel Rajdhani · Adajan Morning, stop 2",
-  "attentionDriverCorrectionDetail": "PET Bottles 50 kg → 60 kg. Suresh Kumar: “The scale photo shows 60 kg.”",
+  "attentionDriverCorrectionDetail": "PET Bottles 50 kg → 60 kg. Vikram Singh: “The scale photo shows 60 kg.”",
   "attentionSentToday": "Sent today, 10:05 am",
   "attentionDecline": "Decline",
   "attentionApprove": "Approve",
   "attentionExtraPickup": "Extra pickup",
   "attentionAbcPlastic": "ABC Plastic Manufacture",
-  "attentionExtraPickupDetail": "Sat 25 Oct, 10 am – 12 pm · Medium · fits Adajan Morning",
+  "attentionExtraPickupDetail": "Sat 25 Oct, 10 am – 12 pm · about 40 kg · fits Adajan Morning",
   "attentionSent21Oct": "Sent 21 Oct",
   "attentionCorrectionFromPickupPoint": "Correction · from pickup point",
   "attentionGreenParkSociety": "Green Park Society",
   "attentionPickupPointCorrectionDetail": "Cardboard 20 kg → 25 kg on the 19 Oct pickup",
   "attentionSent20Oct": "Sent 20 Oct",
   "attentionCorrectionApproved": "Correction approved",
-  "attentionCorrectionApprovedMessage": "Hotel Rajdhani’s record now shows PET Bottles 60 kg. Suresh Kumar and the pickup point are told.",
+  "attentionCorrectionApprovedMessage": "Hotel Rajdhani’s record now shows PET Bottles 60 kg. Vikram Singh is told.",
   "attentionBackToApprovals": "Back to approval requests",
   "attentionBackToHome": "Back to home",
   "attentionMyRequests": "My requests",
@@ -704,8 +807,6 @@
   "profileActions": "Actions",
   "profileSyncData": "Sync Data",
   "profileSyncDataSubtitle": "Sync your offline data",
-  "profileEndMyDay": "End My Day",
-  "profileEndMyDaySubtitle": "Close today once your trips are done",
   "profileAccount": "Account",
   "profileLogout": "Logout",
   "profileLogoutSubtitle": "Sign out from your account",
@@ -750,19 +851,7 @@
   "profileFaqUnassignedAnswer": "Sources that are not currently attached to a route.",
   "profileFaqSkipping": "What does Skipping a stop do?",
   "profileFaqSkippingAnswer": "It records the stop as skipped for the current trip.",
-  "profileTodaysActivitySummary": "Today’s Activity Summary",
-  "profileTripsCompleted": "Trips Completed",
-  "profileTripsCompletedValue": "08",
-  "profilePendingSources": "Pending Sources",
-  "profilePendingSourcesValue": "01",
-  "profileOfflinePendingSync": "Offline Pending Sync",
-  "profileAllSynced": "All Synced",
-  "profileEndDayHelper": "Once you close the day, you won't be able to add or edit any entries.",
   "profileClosedDayArtwork": "Now Time to\nCLOSED The Day",
-  "profileSubmitShareWhatsapp": "Submit & Share to Whatsapp",
-  "profileShareWhatsappMessage": "This will lock the day for editing and pre-fill a WhatsApp message to your group.",
-  "profileCancel": "Cancel",
-  "profileShare": "Share",
   "driverProfileUserName": "Ramesh Kumar",
   "driverProfileWarehouseLabel": "My warehouse",
   "driverProfileWarehouseValue": "Magdalla Warehouse",
@@ -776,9 +865,21 @@
   "dlFilterActive": "Active",
   "dlFilterInactive": "Inactive",
   "dlTabDrivers": "Driver ({count})",
-  "@dlTabDrivers": { "placeholders": { "count": { "type": "int" } } },
+  "@dlTabDrivers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "dlTabLabour": "Labour ({count})",
-  "@dlTabLabour": { "placeholders": { "count": { "type": "int" } } },
+  "@dlTabLabour": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "dlSearchHint": "Search Here...",
   "dlAddDriver": "Add Driver",
   "dlAddLabour": "Add Labour",
@@ -826,11 +927,32 @@
   "tpDateTomorrow": "Fri 23 Oct 2026",
   "tpDateNoTrips": "Sun 8 Nov 2026",
   "tpTripsStops": "{trips} trips · {stops} stops",
-  "@tpTripsStops": {"placeholders": {"trips": {"type": "int"}, "stops": {"type": "int"}}},
+  "@tpTripsStops": {
+    "placeholders": {
+      "trips": {
+        "type": "int"
+      },
+      "stops": {
+        "type": "int"
+      }
+    }
+  },
   "tpExtraPickups": "{count} extra pickups",
-  "@tpExtraPickups": {"placeholders": {"count": {"type": "int"}}},
+  "@tpExtraPickups": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpSourcePaused": "{count} source paused",
-  "@tpSourcePaused": {"placeholders": {"count": {"type": "int"}}},
+  "@tpSourcePaused": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpNoTrips": "No trips",
   "tpStatusOnRoute": "On route",
   "tpStatusApproved": "Approved",
@@ -838,40 +960,154 @@
   "tpOwnVehicle": "Own vehicle",
   "tpContractVehicle": "Contract vehicle",
   "tpVehicleTag": "{plate} · {vehicle}",
-  "@tpVehicleTag": {"placeholders": {"plate": {"type": "String"}, "vehicle": {"type": "String"}}},
+  "@tpVehicleTag": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      },
+      "vehicle": {
+        "type": "String"
+      }
+    }
+  },
   "tpChangedForToday": "Changed for today",
   "tpDriverNotUsingApp": "Driver not using app",
   "tpCoverFor": "{substitute} (for {original})",
-  "@tpCoverFor": {"placeholders": {"substitute": {"type": "String"}, "original": {"type": "String"}}},
+  "@tpCoverFor": {
+    "placeholders": {
+      "substitute": {
+        "type": "String"
+      },
+      "original": {
+        "type": "String"
+      }
+    }
+  },
   "tpTransporterDriver": "{transporter} · Driver {driver}",
-  "@tpTransporterDriver": {"placeholders": {"transporter": {"type": "String"}, "driver": {"type": "String"}}},
+  "@tpTransporterDriver": {
+    "placeholders": {
+      "transporter": {
+        "type": "String"
+      },
+      "driver": {
+        "type": "String"
+      }
+    }
+  },
   "tpStops": "{count} stops",
-  "@tpStops": {"placeholders": {"count": {"type": "int"}}},
+  "@tpStops": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpDaily": "Daily {count}",
-  "@tpDaily": {"placeholders": {"count": {"type": "int"}}},
+  "@tpDaily": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpWeekly": "Weekly {count}",
-  "@tpWeekly": {"placeholders": {"count": {"type": "int"}}},
+  "@tpWeekly": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpMonthly": "Monthly {count}",
-  "@tpMonthly": {"placeholders": {"count": {"type": "int"}}},
+  "@tpMonthly": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpBiWeekly": "Bi-weekly {count}",
-  "@tpBiWeekly": {"placeholders": {"count": {"type": "int"}}},
+  "@tpBiWeekly": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpOnCall": "On call {count}",
-  "@tpOnCall": {"placeholders": {"count": {"type": "int"}}},
+  "@tpOnCall": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpPaused": "{count} paused",
-  "@tpPaused": {"placeholders": {"count": {"type": "int"}}},
+  "@tpPaused": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpCollectedOf": "{done} of {total} collected",
-  "@tpCollectedOf": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@tpCollectedOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "tpRecordedOf": "{done} of {total} recorded in the app",
-  "@tpRecordedOf": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@tpRecordedOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "tpCollectedMissed": "{collected} collected · {missed} missed",
-  "@tpCollectedMissed": {"placeholders": {"collected": {"type": "int"}, "missed": {"type": "int"}}},
+  "@tpCollectedMissed": {
+    "placeholders": {
+      "collected": {
+        "type": "int"
+      },
+      "missed": {
+        "type": "int"
+      }
+    }
+  },
   "tpWeightKg": "{kg} kg",
-  "@tpWeightKg": {"placeholders": {"kg": {"type": "String"}}},
+  "@tpWeightKg": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
   "tpCallDriver": "Call driver",
   "tpOwnVehicleCount": "Own vehicle {count}",
-  "@tpOwnVehicleCount": {"placeholders": {"count": {"type": "int"}}},
+  "@tpOwnVehicleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpContractCount": "Contract {count}",
-  "@tpContractCount": {"placeholders": {"count": {"type": "int"}}},
+  "@tpContractCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tpDay0": "Thu 22 Oct · Today",
   "tpDay1": "Fri 23 Oct",
   "tpDay2": "Sat 24 Oct",
@@ -880,20 +1116,56 @@
   "tpDay5": "Tue 27 Oct",
   "tpDay6": "Wed 28 Oct",
   "tpEmptyTitle": "No trips on this day",
-  "tpEmptyMessage": "The warehouses are closed for Diwali. Pickups due today move to Mon 9 Nov (the holiday rule).",
+  "tpEmptyMessage": "The warehouse is closed that day (holiday). Pickups due that day move to the next working day or are skipped, as each pickup point’s holiday rule says.",
   "rdNext7Days": "Next 7 Days",
   "rdDateToday": "Thu, 22 Oct 2026",
   "rdDateRange": "Fri 23 Oct – Thu 29 Oct",
   "rdShift": "Morning ({time})",
-  "@rdShift": {"placeholders": {"time": {"type": "String"}}},
+  "@rdShift": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "rdAssignedSources": "Assigned Sources : {count}",
-  "@rdAssignedSources": {"placeholders": {"count": {"type": "int"}}},
+  "@rdAssignedSources": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "rdAssignedSourcesPaused": "Assigned Sources : {count} ({paused} paused)",
-  "@rdAssignedSourcesPaused": {"placeholders": {"count": {"type": "int"}, "paused": {"type": "int"}}},
+  "@rdAssignedSourcesPaused": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "paused": {
+        "type": "int"
+      }
+    }
+  },
   "rdDriverLine": "Driver : {name} ({phone})",
-  "@rdDriverLine": {"placeholders": {"name": {"type": "String"}, "phone": {"type": "String"}}},
+  "@rdDriverLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
   "rdLabourLine": "Labour : {name}",
-  "@rdLabourLine": {"placeholders": {"name": {"type": "String"}}},
+  "@rdLabourLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "rdList": "List",
   "rdMap": "Map",
   "rdFilterAll": "All",
@@ -908,19 +1180,70 @@
   "rdTypeSorted": "Sorted",
   "rdTypeMixed": "Mixed",
   "rdStopTitle": "{name} · {type}",
-  "@rdStopTitle": {"placeholders": {"name": {"type": "String"}, "type": {"type": "String"}}},
+  "@rdStopTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "type": {
+        "type": "String"
+      }
+    }
+  },
   "rdSchedEveryDay": "Every day · {time}",
-  "@rdSchedEveryDay": {"placeholders": {"time": {"type": "String"}}},
+  "@rdSchedEveryDay": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "rdSchedDays": "{days} · {time}",
-  "@rdSchedDays": {"placeholders": {"days": {"type": "String"}, "time": {"type": "String"}}},
+  "@rdSchedDays": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "rdSchedExceptSun": "Except Sun, {time}",
-  "@rdSchedExceptSun": {"placeholders": {"time": {"type": "String"}}},
+  "@rdSchedExceptSun": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "rdSchedSecondWed": "Second Wed, {time}",
-  "@rdSchedSecondWed": {"placeholders": {"time": {"type": "String"}}},
+  "@rdSchedSecondWed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "rdSchedOnce": "(Once) {date}, {time}",
-  "@rdSchedOnce": {"placeholders": {"date": {"type": "String"}, "time": {"type": "String"}}},
+  "@rdSchedOnce": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "rdSchedPausedTill": "Paused till {date}",
-  "@rdSchedPausedTill": {"placeholders": {"date": {"type": "String"}}},
+  "@rdSchedPausedTill": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "rdWeekdayMon": "Mon",
   "rdWeekdayThu": "Thu",
   "rdStatusCollected": "Collected",
@@ -930,17 +1253,44 @@
   "rdStatusPending": "Pending",
   "rdStatusInactive": "Inactive",
   "rdAmountKgPcs": "{kg} kg + {pcs} pcs",
-  "@rdAmountKgPcs": {"placeholders": {"kg": {"type": "String"}, "pcs": {"type": "String"}}},
+  "@rdAmountKgPcs": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      },
+      "pcs": {
+        "type": "String"
+      }
+    }
+  },
   "rdNoteNoMaterial": "No material today",
   "rdNoteClosedStocktaking": "Closed for stock-taking",
   "rdNotePausedRenovation": "Source paused (renovation)",
   "rdTagCollectedAt": "Collected {time}",
-  "@rdTagCollectedAt": {"placeholders": {"time": {"type": "String"}}},
+  "@rdTagCollectedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "rdTagVisitedAt": "Visited {time}",
-  "@rdTagVisitedAt": {"placeholders": {"time": {"type": "String"}}},
+  "@rdTagVisitedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "rdTagNoteFromDriver": "Note from driver",
   "rdTagVoiceNote": "Voice note {duration}",
-  "@rdTagVoiceNote": {"placeholders": {"duration": {"type": "String"}}},
+  "@rdTagVoiceNote": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "rdLegendCollected": "Collected",
   "rdLegendZeroKg": "0 kg",
   "rdLegendCancelled": "Cancelled",
@@ -949,8 +1299,472 @@
   "rdLegendPaused": "Paused",
   "rdLegendWarehouse": "Warehouse",
   "rdMapNext": "Next: {number} · {name} · {time} · {distance} away",
-  "@rdMapNext": {"placeholders": {"number": {"type": "int"}, "name": {"type": "String"}, "time": {"type": "String"}, "distance": {"type": "String"}}},
+  "@rdMapNext": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
   "rdMapHint": "Stops in visiting order. The solid line is done; the dashed line is still to go, back to the warehouse. Tap a stop to open it.",
   "rdAddedLastHint": "It is added as the last stop. You can change the order on the route's page.",
-  "rdAddSources": "Add sources"
+  "rdAddSources": "Add sources",
+  "sdAddress": "Address",
+  "sdOpenMaps": "Open in Google Maps",
+  "sdSchedule": "Schedule",
+  "sdPersonAtPickup": "Person at the pickup point",
+  "sdIecExecutive": "IEC Executive",
+  "sdPickupCategory": "Pickup category",
+  "sdMaterial": "Material",
+  "sdPickupStatus": "Pickup Status",
+  "sdWarehouse": "Warehouse",
+  "sdStatusNextStop": "Next Stop",
+  "sdCall": "Call",
+  "sdSkipForToday": "Skip For Today",
+  "sdMaterialsList": "Milk Pouch, Card Board",
+  "sdRoleManager": "Manager",
+  "sdContactLine": "{name} · {role} · {phone}",
+  "@sdContactLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "sdIecLine": "{name} · {phone}",
+  "@sdIecLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "skTitle": "Skip Source",
+  "skReasonLabel": "Reason for Skip",
+  "skReasonClosed": "Source closed",
+  "skReasonHoliday": "Holiday",
+  "skReasonVehicle": "Vehicle unavailable",
+  "skReasonOther": "Other",
+  "skRemarks": "Remarks",
+  "skMaxChars": "Max 150 Characters",
+  "skConfirm": "Confirm Skip",
+  "skSkippedTitle": "Source Skipped!",
+  "skSkippedBody": "Resumes tomorrow automatically.",
+  "apToApprove": "To approve",
+  "apDone": "Done",
+  "apCorrectionDoneDetail": "PET Bottles 50 kg → 60 kg. The stop’s record is changed; Vikram Singh is told.",
+  "apApprovedToday": "Approved by you today, 10:20 am",
+  "apExtraPickupDoneDetail": "Sat 25 Oct, 10 am – 12 pm · about 40 kg · added to Adajan Morning",
+  "apApproved21Oct": "Approved by you 21 Oct",
+  "apStartPickupsFromIec": "Start pickups · from IEC",
+  "apGreenLeafNisha": "Green Leaf Hotel · Nisha Mehta",
+  "apDeclineReplyDetail": "Your reply: “No room on Adajan Morning until 1 Dec. Ask again then.”",
+  "apDeclined20Oct": "Declined by you 20 Oct",
+  "apDeclineCorrectionTitle": "Decline the correction",
+  "apDeclineCorrectionBody": "Vikram Singh sees your reply. The stop stays as recorded.",
+  "apDeclineCorrectionReply": "The scale photo shows 50 kg. If it was more, ask the gate team to weigh it again.",
+  "apDeclineExtraTitle": "Decline the extra pickup",
+  "apDeclineExtraBody": "ABC Plastic Manufacture sees your reply. No pickup is added.",
+  "apReplyHint": "Write your reply",
+  "apDeclineAndReply": "Decline and reply",
+  "apCancel": "Cancel",
+  "apExtraApprovedTitle": "Extra pickup approved",
+  "apExtraApprovedBody": "ABC Plastic Manufacture is added to Adajan Morning on Sat 25 Oct.",
+  "rpTitle": "Collection report",
+  "rpShare": "Share",
+  "rpCollectedToday": "Collected today",
+  "rpCollectedYesterday": "Collected yesterday",
+  "rpCollectedThisWeek": "Collected this week",
+  "rpCollectedThisMonth": "Collected this month",
+  "rpCollectedTheseDates": "Collected on these dates",
+  "rpTotal": "{kg} kg + {pcs} pcs",
+  "@rpTotal": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      },
+      "pcs": {
+        "type": "String"
+      }
+    }
+  },
+  "rpKg": "{kg} kg",
+  "@rpKg": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "rpStopsDue": "{count} stops due",
+  "@rpStopsDue": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "rpByRoute": "By route",
+  "rpByCategory": "By pickup category",
+  "rpStopsToLook": "Stops to look at",
+  "rpOfStops": "{done} of {total} stops",
+  "@rpOfStops": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "rpStops": "{count} stops",
+  "@rpStops": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "rpOwn": "Own",
+  "rpContract": "Contract",
+  "rpCancelledBySource": "Cancelled by source",
+  "rpNamesMore": "{first}, {second} and {count} more",
+  "@rpNamesMore": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "rpNamesPlus": "{first}, {second} +{count}",
+  "@rpNamesPlus": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "second": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "rpCollectedStops": "{label} · {done} of {total} stops",
+  "@rpCollectedStops": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "rpPdfTitle": "Report PDF",
+  "rpPdfSubtitle": "Collection report · {range}",
+  "@rpPdfSubtitle": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "rpCompany": "Ecovision Environmental Resources LLP",
+  "rpPdfSupervisor": "Pickup Supervisor: {name} · {period}, {range}",
+  "@rpPdfSupervisor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      },
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "rpPeriodToday": "Today",
+  "rpPeriodYesterday": "Yesterday",
+  "rpPeriodThisWeek": "This week",
+  "rpPeriodThisMonth": "This month",
+  "rpPeriodDates": "Selected dates",
+  "rpPdfSummary": "{due} stops due · Collected {collected} · 0 kg {zero} · Missed {missed} · Cancelled {cancelled}",
+  "@rpPdfSummary": {
+    "placeholders": {
+      "due": {
+        "type": "String"
+      },
+      "collected": {
+        "type": "String"
+      },
+      "zero": {
+        "type": "String"
+      },
+      "missed": {
+        "type": "String"
+      },
+      "cancelled": {
+        "type": "String"
+      }
+    }
+  },
+  "rpColRoute": "Route",
+  "rpColVehicle": "Vehicle",
+  "rpColStops": "Stops",
+  "rpColCollected": "Collected",
+  "rpColCategory": "Category",
+  "rpColOutcome": "Outcome",
+  "rpColPickupPoints": "Pickup points",
+  "rpOf": "{done} of {total}",
+  "@rpOf": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "rpPdfMade": "Made {date}, {time} · Page 1 of 1",
+  "@rpPdfMade": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "rpPdfPageHint": "Page 1 of 1 · pinch to zoom",
+  "rpSharePdf": "Share PDF",
+  "calClear": "Clear",
+  "calApply": "Apply",
+  "calPrevMonth": "Previous month",
+  "calNextMonth": "Next month",
+  "calSelection": "{range} · {days}",
+  "@calSelection": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "calDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@calDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calPickDates": "Pick dates",
+  "calMonthLong": "{month, select, 1{January} 2{February} 3{March} 4{April} 5{May} 6{June} 7{July} 8{August} 9{September} 10{October} 11{November} 12{December} other{}}",
+  "@calMonthLong": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "calMonthShort": "{month, select, 1{Jan} 2{Feb} 3{Mar} 4{Apr} 5{May} 6{Jun} 7{Jul} 8{Aug} 9{Sep} 10{Oct} 11{Nov} 12{Dec} other{}}",
+  "@calMonthShort": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "calWeekday": "{day, select, 1{M} 2{T} 3{W} 4{T} 5{F} 6{S} 7{S} other{}}",
+  "@calWeekday": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "supervisorDrawerCashPayments": "Cash & payments",
+  "lkRouteDate": "{route} · {date}",
+  "@lkRouteDate": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "lkNotOnRoute": "Not on a route",
+  "lkContractVehicle": "Contract vehicle · {plate}",
+  "@lkContractVehicle": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "lkOwnVehicle": "Own vehicle · driver {name}",
+  "@lkOwnVehicle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "lkExtraPickup": "Extra pickup",
+  "lkCalledOffIec": "Called off by the IEC ahead of time",
+  "lkCalledOffAtStop": "Called off at the stop · driver {name}",
+  "@lkCalledOffAtStop": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "lkCalledOffByYou": "Called off by you",
+  "lkReasonNotRecorded": "Not recorded by the driver or the gate",
+  "lkReasonTripCancelled": "Its trip was cancelled",
+  "lkReasonNoRoute": "No route that day",
+  "lkReasonTakenOff": "Taken off the trip and not put on another",
+  "lkReasonClosedToday": "Closed today",
+  "lkReasonHoliday": "Holiday",
+  "lkReasonShifted": "Shifted to another day",
+  "lkReasonNoMaterial": "No material",
+  "lkReasonNoMaterialToday": "No material today",
+  "lkReasonClosed": "Closed",
+  "lkReasonRefused": "Refused to give",
+  "lkReasonVehicleFull": "Vehicle full",
+  "lkEmpty": "Nothing to look at for these dates",
+  "calWeekdayShort": "{day, select, 1{Mon} 2{Tue} 3{Wed} 4{Thu} 5{Fri} 6{Sat} 7{Sun} other{}}",
+  "@calWeekdayShort": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "isTypeSourceProblem": "Problem at the source",
+  "isDriverRole": "{name} (Driver)",
+  "@isDriverRole": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "isRaised": "Raised {time}",
+  "@isRaised": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "isOpen": "Open",
+  "isEscalated": "Escalated",
+  "isResolved": "Resolved",
+  "isTypeLabel": "Type :",
+  "isDriverNote": "Driver’s note :",
+  "isBy": "By :",
+  "isByValue": "{name} · {time}",
+  "@isByValue": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "isWhatWasDone": "What was done :",
+  "isTold": "Told :",
+  "isToldValue": "The office and {name} (IEC).",
+  "@isToldValue": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "isEscalate": "Escalate",
+  "isMarkResolved": "Mark resolved",
+  "isSheetTitle": "Mark as resolved",
+  "isSheetBody": "Say what was done. The driver and the office see it.",
+  "isWhatWasDoneLabel": "What was done",
+  "isEscalateTitle": "Escalate this issue?",
+  "isEscalateBody": "The office and the source’s IEC are told, and it shows as Escalated. Use it when you cannot sort it out yourself.",
+  "isResolvedToastTitle": "Issue Resolved!",
+  "isResolvedToastBody": "{name} is told.",
+  "@isResolvedToastBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "isEscalatedToastTitle": "Issue Escalated!",
+  "isEscalatedToastBody": "The office and the source’s IEC are told.",
+  "tpStatusExpected": "Expected",
+  "tpExpectedInfo": "Trips are made the day before. This is what the routes and the pickups due that day add up to; the team can still change.",
+  "tpExtra": "Extra {count}",
+  "@tpExtra": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tpTodaySuffix": "{date} · Today",
+  "@tpTodaySuffix": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "tpWarehouseClosed": "{date} · Warehouse closed",
+  "@tpWarehouseClosed": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "tpNoTripsHoliday": "No trips · warehouse holiday"
 }

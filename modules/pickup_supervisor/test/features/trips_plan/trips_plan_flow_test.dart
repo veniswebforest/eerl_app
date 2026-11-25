@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervisor_home_screen.dart';
 import 'package:pickup_supervisor/features/trips_plan/model/trips_plan_models.dart';
 import 'package:pickup_supervisor/features/trips_plan/view/trips_plan_screen.dart';
@@ -20,6 +21,7 @@ void main() {
     WidgetTester tester, {
     Locale? locale,
     Size size = const Size(375, 812),
+    TripsPlanChoice choice = TripsPlanChoice.today,
   }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = size;
@@ -29,7 +31,7 @@ void main() {
         locale: locale,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
         supportedLocales: const [Locale('en'), Locale('gu'), Locale('hi')],
-        home: const TripsPlanScreen(),
+        home: TripsPlanScreen(initialChoice: choice),
       ),
     );
     await tester.pumpAndSettle();
@@ -81,13 +83,108 @@ void main() {
     await tester.tap(find.byKey(const Key('trips-plan-choice-week')));
     await tester.pumpAndSettle();
     expect(find.text('Thu 22 Oct · Today'), findsOneWidget);
-    expect(find.text('5 trips · 41 stops · 2 extra pickups'), findsOneWidget);
+    expect(find.text('4 trips · 33 stops · 2 extra pickups'), findsOneWidget);
     expect(find.text('Own vehicle 3'), findsWidgets);
+  });
 
+  testWidgets('a later week day opens the expected view', (tester) async {
+    await pumpPlan(tester, choice: TripsPlanChoice.week);
+    await tester.tap(find.byKey(const Key('trips-plan-day-2')));
+    await tester.pumpAndSettle();
+    expect(find.text('Sat 24 Oct 2026'), findsOneWidget);
+    expect(find.text('4 trips · 33 stops'), findsOneWidget);
+    expect(
+      find.textContaining('Trips are made the day before'),
+      findsOneWidget,
+    );
+    expect(find.text('Expected'), findsWidgets);
+    expect(
+      find.text('9 stops · Daily 5 · On call 2 · Extra 2'),
+      findsOneWidget,
+    );
+
+    // Tapping a chip leaves the day view.
+    await tester.tap(find.byKey(const Key('trips-plan-choice-week')));
+    await tester.pumpAndSettle();
+    expect(find.text('Thu 22 Oct · Today'), findsOneWidget);
+  });
+
+  testWidgets('pick dates shows the chosen days and the holiday', (
+    tester,
+  ) async {
+    await pumpPlan(tester, choice: TripsPlanChoice.week);
     await tester.tap(find.byKey(const Key('trips-plan-choice-date')));
     await tester.pumpAndSettle();
-    expect(find.text('Sun 8 Nov 2026'), findsOneWidget);
+    expect(find.text('October 2026'), findsOneWidget);
+    // Past days cannot be picked.
+    await tester.tap(find.byKey(const Key('date-range-day-10-20')));
+    await tester.pump();
+    expect(find.text('Pick dates'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('date-range-day-10-26')));
+    await tester.tap(find.byKey(const Key('date-range-day-10-31')));
+    await tester.pump();
+    expect(find.text('Mon 26 Oct – Sat 31 Oct · 6 days'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('date-range-apply')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mon 26 Oct'), findsOneWidget);
+    expect(find.text('Thu 29 Oct'), findsOneWidget);
+    expect(find.text('Fri 30 Oct · Warehouse closed'), findsOneWidget);
+    expect(find.text('No trips · warehouse holiday'), findsOneWidget);
+    expect(find.text('Sat 31 Oct'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('trips-plan-day-8')));
+    await tester.pumpAndSettle();
+    expect(find.text('Fri 30 Oct 2026'), findsOneWidget);
     expect(find.text('No trips on this day'), findsOneWidget);
+    expect(find.textContaining('holiday rule'), findsOneWidget);
+    // The calendar chip stays selected on the day's detail.
+    final chip = tester.widget<Material>(
+      find
+          .descendant(
+            of: find.byKey(const Key('trips-plan-choice-date')),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+    expect(chip.color, DriverColors.primary500);
+  });
+
+  testWidgets('today chosen on the calendar keeps the calendar chip', (
+    tester,
+  ) async {
+    await pumpPlan(tester, choice: TripsPlanChoice.week);
+    await tester.tap(find.byKey(const Key('trips-plan-choice-date')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('date-range-day-10-22')));
+    await tester.tap(find.byKey(const Key('date-range-day-10-24')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('date-range-apply')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('trips-plan-day-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('Thu 22 Oct 2026'), findsOneWidget);
+    expect(find.text('On route'), findsWidgets);
+    expect(find.text('Today'), findsOneWidget);
+    final today = tester.widget<Material>(
+      find
+          .descendant(
+            of: find.byKey(const Key('trips-plan-choice-today')),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+    final dates = tester.widget<Material>(
+      find
+          .descendant(
+            of: find.byKey(const Key('trips-plan-choice-date')),
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+    expect(dates.color, DriverColors.primary500);
+    expect(today.color, DriverColors.neutral50);
   });
 
   testWidgets('a week day opens its day list', (tester) async {
@@ -144,6 +241,24 @@ void main() {
             child: child!,
           ),
           home: TripsPlanScreen(initialChoice: choice),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
+    for (final day in [2, 8]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(1.3)),
+            child: child!,
+          ),
+          home: TripsPlanScreen(
+            initialChoice: TripsPlanChoice.week,
+            initialDay: day,
+          ),
         ),
       );
       await tester.pumpAndSettle();

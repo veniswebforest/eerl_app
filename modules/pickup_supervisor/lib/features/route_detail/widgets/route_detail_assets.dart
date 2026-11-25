@@ -26,6 +26,10 @@ abstract final class RouteDetailAssets {
   static const tagNote = '$_i/tag_note.svg';
   static const tagVoice = '$_i/tag_voice.svg';
 
+  static const upcomingCollected =
+      'assets/icons/stop_detail/status_collected.svg';
+  static const upcomingNext = 'assets/icons/stop_detail/status_next.svg';
+
   static const sevenPin = '$_i/seven_pin.svg';
   static const sevenPending = '$_i/seven_pending.svg';
   static const sevenPendingAlt = '$_i/seven_pending_alt.svg';

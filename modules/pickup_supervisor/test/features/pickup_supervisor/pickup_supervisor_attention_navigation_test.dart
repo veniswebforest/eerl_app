@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervisor_attention_screens.dart';
+import 'package:pickup_supervisor/features/issues/model/issue_mock_data.dart';
+import 'package:pickup_supervisor/features/issues/view/issue_detail_screen.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervisor_home_screen.dart';
 
 void main() {
@@ -64,16 +65,16 @@ void main() {
     expect(find.text('GJ-05-BX-1234'), findsOneWidget);
   });
 
-  testWidgets('see suggestions quick action opens suggestions design', (
+  testWidgets('view sources quick action opens the sources screen', (
     tester,
   ) async {
     await pumpHome(tester);
 
-    final suggestionsButton = find.byKey(
-      const Key('supervisor-quick-action-See suggestions'),
+    final viewSources = find.byKey(
+      const Key('supervisor-quick-action-View sources'),
     );
     await tester.scrollUntilVisible(
-      suggestionsButton,
+      viewSources,
       500,
       scrollable: find
           .descendant(
@@ -83,14 +84,10 @@ void main() {
           .first,
     );
     await tester.pumpAndSettle();
-    await tester.tap(suggestionsButton);
+    await tester.tap(viewSources);
     await tester.pumpAndSettle();
-    expect(
-      find.byKey(const Key('supervisor-suggestions-screen')),
-      findsOneWidget,
-    );
-    expect(find.text('Suggestions'), findsOneWidget);
-    expect(find.text('All 3'), findsOneWidget);
+    expect(find.text('Unassigned sources'), findsWidgets);
+    expect(find.byKey(const Key('supervisor-home-screen')), findsNothing);
   });
 
   testWidgets('attention screens can be constructed directly', (tester) async {
@@ -100,9 +97,13 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      const MaterialApp(home: PickupSupervisorIssueDetailScreen()),
+      MaterialApp(
+        home: PickupSupervisorIssueDetailScreen(
+          issue: IssueMockData.issues.first,
+        ),
+      ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Reason : No Vehicle Available'), findsOneWidget);
+    expect(find.text('Reason for Issue'), findsOneWidget);
   });
 }

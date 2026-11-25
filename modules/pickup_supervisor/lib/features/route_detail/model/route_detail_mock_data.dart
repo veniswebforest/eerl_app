@@ -179,6 +179,61 @@ abstract final class RouteDetailMockData {
     ),
   ];
 
+  /// "Next 7 Days" list after a source has been skipped (statuses shown in
+  /// the Source Skipped design).
+  static const nextSevenDaysAfterSkip = <RouteStop>[
+    RouteStop(
+      name: 'ABC Textile Mills',
+      type: StopType.sorted,
+      address: 'U 9, 10, Siddhgiri Tower, B/H Navyug Society, Adajan',
+      schedule: StopSchedule(
+        StopScheduleKind.days,
+        days: [1, 4],
+        time: '8–10 am',
+      ),
+      status: StopStatus.collected,
+    ),
+    RouteStop(
+      name: 'Shree Sai Dairy',
+      type: StopType.mixed,
+      address: 'X 3, 10, Embrane Zone, navyug plus Society, Adajan',
+      schedule: StopSchedule(StopScheduleKind.exceptSunday, time: '9–11 am'),
+      status: StopStatus.collected,
+    ),
+    RouteStop(
+      name: 'Shree Sai Dairy',
+      type: StopType.sorted,
+      address: 'U 9, 10, Siddhgiri Tower, B/H Navyug Society, Adajan',
+      schedule: StopSchedule(
+        StopScheduleKind.secondWednesday,
+        time: '10–11 am',
+      ),
+      status: StopStatus.nextStop,
+    ),
+    RouteStop(
+      name: 'Shree Sai Dairy',
+      type: StopType.mixed,
+      address: 'X 3, 10, Embrane Zone, navyug plus Society, Adajan',
+      schedule: StopSchedule(
+        StopScheduleKind.once,
+        date: 'Sat 24 Oct',
+        time: '11–12 pm',
+      ),
+      status: StopStatus.pending,
+    ),
+    RouteStop(
+      name: 'Shree Sai Dairy',
+      type: StopType.sorted,
+      address: 'U 9, 10, Siddhgiri Tower, B/H Navyug Society, Adajan',
+      schedule: StopSchedule(
+        StopScheduleKind.once,
+        date: 'Sat 24 Oct',
+        time: '11–12 pm',
+      ),
+      status: StopStatus.pending,
+    ),
+  ];
+
   static const mapStops = <MapStopPoint>[
     MapStopPoint(1, 43, 318, StopStatus.collected),
     MapStopPoint(2, 93, 270, StopStatus.collected),

@@ -106,6 +106,8 @@ void main() {
     expect(find.text('Pickup Supervisor'), findsOneWidget);
     expect(find.text('Unassigned sources'), findsOneWidget);
     expect(find.text('Drivers and labour'), findsOneWidget);
+    expect(find.text('Cash & payments'), findsOneWidget);
+    expect(find.text('Logout'), findsOneWidget);
     expect(find.text('Powered by Eco Vision'), findsOneWidget);
 
     await tester.tap(

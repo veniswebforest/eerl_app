@@ -2,11 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/core/utils/module_date_format.dart';
+import 'package:pickup_supervisor/core/widgets/module_date_range_sheet.dart';
+import 'package:pickup_supervisor/features/collection_report/model/collection_report_mock_data.dart';
+import 'package:pickup_supervisor/features/collection_report/model/collection_report_models.dart';
+import 'package:pickup_supervisor/features/collection_report/view/collection_report_screen.dart';
+import 'package:pickup_supervisor/features/collection_report/view/stops_to_look_at_screen.dart';
+import 'package:pickup_supervisor/features/issues/view/issues_screen.dart';
+import 'package:pickup_supervisor/features/collection_report/widgets/collection_report_text.dart';
+import 'package:pickup_supervisor/features/collection_report/widgets/collection_report_widgets.dart';
 import 'package:pickup_supervisor/features/trips_plan/view/trips_plan_screen.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervisor_attention_screens.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervisor_flags_screens.dart';
+import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervisor_sources_screens.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/model/pickup_supervisor_bottom_nav_item.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/widgets/pickup_supervisor_bottom_navigation.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/widgets/pickup_supervisor_home_drawer.dart';
@@ -110,6 +120,23 @@ class _PickupSupervisorHomePage extends StatefulWidget {
 class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
   late bool _summaryExpanded = widget.initialSummaryExpanded;
 
+  /// "View sources" opens the Sources tab inside the dashboard shell, or the
+  /// sources screen on its own when the home is shown standalone.
+  void _openSources() {
+    final select = widget.onNavigationSelected;
+    if (select != null) {
+      select(1);
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            const PickupSupervisorSourcesScreen(showBottomNavigation: false),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
@@ -119,7 +146,17 @@ class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
       extendBody: true,
       backgroundColor: DriverColors.background,
       drawer: widget.onMenuPressed == null
-          ? const PickupSupervisorHomeDrawer()
+          ? PickupSupervisorHomeDrawer(
+              onItemSelected: (item) {
+                if (item == 'issues') {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const PickupSupervisorIssuesScreen(),
+                    ),
+                  );
+                }
+              },
+            )
           : null,
       drawerScrimColor: Colors.black.withValues(alpha: .6),
       // Same page background as the main app's home screen.
@@ -161,8 +198,9 @@ class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
                   ),
                   sliver: SliverList.list(
                     children: [
+                      const SizedBox(height: 24),
                       _TripsCard(l10n: l10n),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       _PickupPointsCard(l10n: l10n),
                       const SizedBox(height: 24),
                       Text(
@@ -179,14 +217,7 @@ class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
                         subtitle: l10n.supervisorManageUnassigned,
                         button: l10n.supervisorViewSource,
                         badge: '5',
-                      ),
-                      const SizedBox(height: 16),
-                      _QuickActionCard(
-                        icon: '$_assetRoot/extra_pickup.svg',
-                        iconBackground: DriverColors.purpleLight,
-                        title: l10n.supervisorExtraPickupRequests,
-                        subtitle: l10n.supervisorManageExtraPickup,
-                        button: l10n.supervisorViewPickups,
+                        onPressed: _openSources,
                       ),
                       const SizedBox(height: 16),
                       _QuickActionCard(
@@ -195,21 +226,6 @@ class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
                         title: l10n.supervisorAskCollectionHead,
                         subtitle: l10n.supervisorAskCollectionHeadSubtitle,
                         button: l10n.supervisorNewRequest,
-                      ),
-                      const SizedBox(height: 16),
-                      _QuickActionCard(
-                        icon: '$_assetRoot/suggestion.svg',
-                        iconBackground: DriverColors.yellow50,
-                        title: l10n.supervisorSuggestions,
-                        subtitle: l10n.supervisorSuggestionsSubtitle,
-                        button: l10n.supervisorSeeSuggestions,
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (_) =>
-                                const PickupSupervisorSuggestionsScreen(),
-                          ),
-                        ),
                       ),
                     ],
                   ),
@@ -475,9 +491,9 @@ class _AttentionCard extends StatelessWidget {
       _AttentionData(
         l10n.supervisorFlags,
         '03',
-        '$_assetRoot/flag.svg',
-        DriverColors.red100,
-        DriverColors.red600,
+        '$_assetRoot/flag_attention.svg',
+        DriverColors.yellow50,
+        DriverColors.amber800,
         () => Navigator.push(
           context,
           MaterialPageRoute<void>(
@@ -619,6 +635,7 @@ class _StatTile extends StatelessWidget {
 }
 
 /// Two-column tile layout without clipping (a GridView would cut the shadows).
+/// An odd last tile spans the full width, as in the Figma summary.
 class _StatTileGrid extends StatelessWidget {
   const _StatTileGrid({required this.tiles});
 
@@ -630,85 +647,132 @@ class _StatTileGrid extends StatelessWidget {
       children: [
         for (var i = 0; i < tiles.length; i += 2) ...[
           if (i > 0) const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(child: tiles[i]),
-              const SizedBox(width: 8),
-              Expanded(
-                child: i + 1 < tiles.length ? tiles[i + 1] : const SizedBox(),
-              ),
-            ],
-          ),
+          if (i + 1 < tiles.length)
+            Row(
+              children: [
+                Expanded(child: tiles[i]),
+                const SizedBox(width: 8),
+                Expanded(child: tiles[i + 1]),
+              ],
+            )
+          else
+            tiles[i],
         ],
       ],
     );
   }
 }
 
-class _CollectionSummary extends StatelessWidget {
+/// Collection summary on the home screen. The period pills switch the mock
+/// figures; View full report and the Collected tile open the report for the
+/// chosen period, and the calendar pill opens Pick dates.
+class _CollectionSummary extends StatefulWidget {
   const _CollectionSummary({required this.l10n});
 
   final DriverLocalizations l10n;
 
   @override
+  State<_CollectionSummary> createState() => _CollectionSummaryState();
+}
+
+class _CollectionSummaryState extends State<_CollectionSummary> {
+  var _period = ReportPeriod.today;
+  DateTimeRange? _range;
+
+  CollectionReportData get _data =>
+      CollectionReportMockData.forPeriod(_period, customRange: _range);
+
+  void _openReport() => Navigator.push(
+    context,
+    MaterialPageRoute<void>(
+      builder: (_) =>
+          CollectionReportScreen(initialPeriod: _period, initialRange: _range),
+    ),
+  );
+
+  void _openLookAt(LookAtOutcome outcome) => Navigator.push(
+    context,
+    MaterialPageRoute<void>(
+      builder: (_) => StopsToLookAtScreen(data: _data, initialOutcome: outcome),
+    ),
+  );
+
+  Future<void> _pickDates() async {
+    final range = await showModuleDateRangeSheet(
+      context,
+      initialRange: _range,
+      lastDate: CollectionReportMockData.today,
+    );
+    if (range == null || !mounted) return;
+    setState(() {
+      _period = ReportPeriod.custom;
+      _range = range;
+    });
+    _openReport();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    final data = _data;
+    String two(int v) => v.toString().padLeft(2, '0');
     final outcomes = [
       _OutcomeData(
         l10n.supervisorCollected,
-        '12',
+        two(data.collected),
         DriverColors.primary500,
         '$_assetRoot/check.svg',
         DriverColors.primary50,
+        _openReport,
       ),
       _OutcomeData(
         l10n.supervisorKg,
-        '02',
+        two(data.zeroKg),
         DriverColors.slate600,
         '$_assetRoot/scale.svg',
         DriverColors.slate50,
+        () => _openLookAt(LookAtOutcome.zeroKg),
       ),
       _OutcomeData(
         l10n.supervisorMissed,
-        '01',
+        two(data.missed),
         DriverColors.red600,
         '$_assetRoot/alert.svg',
         DriverColors.red100,
+        () => _openLookAt(LookAtOutcome.missed),
       ),
       _OutcomeData(
         l10n.supervisorCancelled,
-        '01',
+        two(data.cancelled),
         DriverColors.purple600,
         '$_assetRoot/ban.svg',
         DriverColors.purple50,
+        () => _openLookAt(LookAtOutcome.cancelledBySource),
       ),
       _OutcomeData(
         l10n.supervisorTripsToday,
         '05',
-        DriverColors.pink600,
-        '$_assetRoot/request.svg',
-        DriverColors.pink100,
-      ),
-      _OutcomeData(
-        l10n.supervisorFlags,
-        '01',
-        DriverColors.red600,
-        '$_assetRoot/flag.svg',
-        DriverColors.red100,
+        DriverColors.blue600,
+        '$_assetRoot/trips_today.svg',
+        DriverColors.secondary100,
       ),
     ];
 
     return Column(
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              _PeriodChip(label: l10n.supervisorToday, selected: true),
-              _PeriodChip(label: l10n.supervisorYesterday),
-              _PeriodChip(label: l10n.supervisorWeek),
-              _PeriodChip(label: l10n.supervisorMonth),
-              const _CalendarChip(),
-            ],
+        Align(
+          alignment: Alignment.centerLeft,
+          child: ReportPeriodChips(
+            keyPrefix: 'supervisor-period',
+            selected: _period,
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+            calendarPadding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 5,
+            ),
+            calendarAsset: '$_assetRoot/calendar.svg',
+            onSelected: (p) => setState(() => _period = p),
+            onPickDates: _pickDates,
           ),
         ),
         const SizedBox(height: 16),
@@ -723,7 +787,7 @@ class _CollectionSummary extends StatelessWidget {
             children: [
               const _IconTile(
                 asset: '$_assetRoot/package.svg',
-                background: Colors.white,
+                background: DriverColors.primary50,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -731,14 +795,19 @@ class _CollectionSummary extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n.supervisorCollectedToday,
+                      key: const Key('supervisor-summary-label'),
+                      l10n.rpCollectedStops(
+                        l10n.collectedPeriodLabel(_period),
+                        l10n.number(data.collected),
+                        l10n.number(data.due),
+                      ),
                       style: DriverTextStyles.medium12.copyWith(
                         color: DriverColors.neutral900,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.supervisorCollectedTotal,
+                      l10n.totalText(data),
                       style: DriverTextStyles.bold20.copyWith(
                         color: DriverColors.neutral950,
                       ),
@@ -754,11 +823,13 @@ class _CollectionSummary extends StatelessWidget {
           tiles: [
             for (final item in outcomes)
               _StatTile(
+                key: Key('supervisor-outcome-${item.asset.split('/').last}'),
                 label: item.label,
                 value: item.value,
                 asset: item.asset,
                 iconBackground: item.background,
                 valueColor: item.color,
+                onTap: item.onTap,
               ),
           ],
         ),
@@ -767,7 +838,7 @@ class _CollectionSummary extends StatelessWidget {
           width: double.infinity,
           child: OutlinedButton.icon(
             key: const Key('supervisor-view-full-report'),
-            onPressed: () {},
+            onPressed: _openReport,
             style: OutlinedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: DriverColors.primary500,
@@ -795,59 +866,16 @@ class _OutcomeData {
     this.value,
     this.color,
     this.asset,
-    this.background,
-  );
+    this.background, [
+    this.onTap,
+  ]);
 
   final String label;
   final String value;
   final Color color;
   final String asset;
   final Color background;
-}
-
-class _PeriodChip extends StatelessWidget {
-  const _PeriodChip({required this.label, this.selected = false});
-
-  final String label;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? DriverColors.primary500 : Colors.white,
-          borderRadius: BorderRadius.circular(48),
-          border: selected ? null : Border.all(color: DriverColors.border),
-        ),
-        child: Text(
-          label,
-          style: DriverTextStyles.semibold12.copyWith(
-            color: selected ? Colors.white : DriverColors.neutral900,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CalendarChip extends StatelessWidget {
-  const _CalendarChip();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(48),
-        border: Border.all(color: DriverColors.border),
-      ),
-      child: const _Svg('$_assetRoot/calendar.svg', size: 14),
-    );
-  }
+  final VoidCallback? onTap;
 }
 
 class _TripsCard extends StatelessWidget {
@@ -891,7 +919,7 @@ class _TripsCard extends StatelessWidget {
             secondTagWarning: true,
             button: l10n.supervisorCallDriver,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           FilledButton(
             key: const Key('supervisor-see-trips-plan'),
             onPressed: () => Navigator.push(
@@ -902,12 +930,12 @@ class _TripsCard extends StatelessWidget {
               minimumSize: const Size.fromHeight(52),
               backgroundColor: DriverColors.primary500,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
             child: Text(
               l10n.supervisorSeeTripsPlan,
-              style: DriverTextStyles.semibold14.copyWith(color: Colors.white),
+              style: DriverTextStyles.bold16.copyWith(color: Colors.white),
             ),
           ),
         ],
@@ -988,10 +1016,10 @@ class _TripTile extends StatelessWidget {
                 icon: secondTagWarning ? '$_assetRoot/phone_red.svg' : null,
                 background: secondTagWarning
                     ? DriverColors.red100
-                    : DriverColors.cool300,
+                    : DriverColors.slate50,
                 foreground: secondTagWarning
                     ? DriverColors.red600
-                    : DriverColors.neutral800,
+                    : DriverColors.slate600,
               ),
             ],
           ),
@@ -999,15 +1027,16 @@ class _TripTile extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () {},
             style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(34),
+              minimumSize: const Size.fromHeight(44),
+              backgroundColor: Colors.white,
               foregroundColor: DriverColors.primary500,
               side: const BorderSide(color: DriverColors.primary500),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            icon: const _Svg('$_assetRoot/phone_green.svg', size: 18),
-            label: Text(button, style: DriverTextStyles.semibold12),
+            icon: const _Svg('$_assetRoot/phone_green.svg', size: 20),
+            label: Text(button, style: DriverTextStyles.bold16),
           ),
         ],
       ),
@@ -1107,10 +1136,10 @@ class _PickupPointsCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           for (final row in rows) ...[
             _ProgressRow(label: row.$1, value: row.$2, fraction: row.$3),
-            if (row != rows.last) const SizedBox(height: 8),
+            if (row != rows.last) const SizedBox(height: 12),
           ],
         ],
       ),
@@ -1150,13 +1179,13 @@ class _ProgressRow extends StatelessWidget {
               value: fraction,
               minHeight: 8,
               color: DriverColors.primary500,
-              backgroundColor: DriverColors.cool300,
+              backgroundColor: DriverColors.slate50,
             ),
           ),
         ),
         const SizedBox(width: 10),
         SizedBox(
-          width: 22,
+          width: 24,
           child: Text(
             '$value',
             textAlign: TextAlign.right,
@@ -1240,7 +1269,7 @@ class _QuickActionCard extends StatelessWidget {
           ),
           if (badge != null)
             Positioned(
-              right: -2,
+              right: -4,
               top: -4,
               child: Container(
                 width: 28,

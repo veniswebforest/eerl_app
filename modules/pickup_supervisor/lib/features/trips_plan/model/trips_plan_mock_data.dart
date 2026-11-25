@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:pickup_supervisor/features/trips_plan/model/trips_plan_models.dart';
 
 /// Mock data until trips are read from SQLite.
@@ -118,10 +119,10 @@ abstract final class TripsPlanMockData {
     ),
     TripsPlanDay(
       dayIndex: 2,
-      trips: 5,
-      stops: 41,
+      trips: 4,
+      stops: 33,
       ownVehicles: 3,
-      contractVehicles: 2,
+      contractVehicles: 1,
       extraPickups: 2,
     ),
     TripsPlanDay(
@@ -152,6 +153,104 @@ abstract final class TripsPlanMockData {
       ownVehicles: 3,
       contractVehicles: 2,
       pausedSources: 1,
+    ),
+  ];
+
+  /// "Today" in the mock data (Thu 22 Oct 2026).
+  static final today = DateTime(2026, 10, 22);
+
+  static DateTime dateOf(int dayIndex) =>
+      DateTime(today.year, today.month, today.day + dayIndex);
+
+  static int indexOf(DateTime date) =>
+      DateUtils.dateOnly(date).difference(today).inDays;
+
+  /// Range shown when "Chosen dates" opens without a picked range.
+  static final defaultRange = DateTimeRange(
+    start: DateTime(2026, 10, 26),
+    end: DateTime(2026, 10, 31),
+  );
+
+  static const _laterDays = <int, TripsPlanDay>{
+    7: TripsPlanDay(
+      dayIndex: 7,
+      trips: 5,
+      stops: 40,
+      ownVehicles: 3,
+      contractVehicles: 2,
+    ),
+    8: TripsPlanDay(
+      dayIndex: 8,
+      trips: 0,
+      stops: 0,
+      ownVehicles: 0,
+      contractVehicles: 0,
+      closed: true,
+    ),
+    9: TripsPlanDay(
+      dayIndex: 9,
+      trips: 4,
+      stops: 29,
+      ownVehicles: 3,
+      contractVehicles: 1,
+    ),
+  };
+
+  /// Summary for any day from today on. Days past the known ones repeat
+  /// the week's pattern.
+  static TripsPlanDay dayAt(int index) {
+    if (index >= 0 && index < weekDays.length) return weekDays[index];
+    final known = _laterDays[index];
+    if (known != null) return known;
+    final base = weekDays[index % weekDays.length];
+    return TripsPlanDay(
+      dayIndex: index,
+      trips: base.trips,
+      stops: base.stops,
+      ownVehicles: base.ownVehicles,
+      contractVehicles: base.contractVehicles,
+      extraPickups: base.extraPickups,
+      pausedSources: base.pausedSources,
+    );
+  }
+
+  /// What the routes and pickups due on a later day add up to.
+  static const expectedTrips = <TripPlanTrip>[
+    TripPlanTrip(
+      name: 'Adajan Morning',
+      time: '8:00 am – 2:00 pm',
+      status: TripStatus.expected,
+      vehicleKind: TripVehicleKind.own,
+      plate: 'GJ-05-BX-1234',
+      crew: TripCrew(driver: 'Vikram Singh', helper: 'Ravi Bisht'),
+      schedule: TripSchedule(stops: 9, daily: 5, onCall: 2, extra: 2),
+    ),
+    TripPlanTrip(
+      name: 'Pal Gam Morning',
+      time: '12:00 – 5:00 pm',
+      status: TripStatus.expected,
+      vehicleKind: TripVehicleKind.own,
+      plate: 'GJ-05-BX-5678',
+      crew: TripCrew(driver: 'Amit Patel', helper: 'Ram Singh'),
+      schedule: TripSchedule(stops: 8, daily: 4, weekly: 3, onCall: 1),
+    ),
+    TripPlanTrip(
+      name: 'Punagam FullDay',
+      time: '8:00 am – 2:00 pm',
+      status: TripStatus.expected,
+      vehicleKind: TripVehicleKind.contract,
+      plate: 'GJ-05-EE-1002',
+      crew: TripCrew(driver: 'Kishan', transporter: 'Shree Ram Transport'),
+      schedule: TripSchedule(stops: 8, daily: 6, monthly: 2),
+    ),
+    TripPlanTrip(
+      name: 'Vesu Evening',
+      time: '3:00 – 7:00 pm',
+      status: TripStatus.expected,
+      vehicleKind: TripVehicleKind.own,
+      plate: 'GJ-05-EE-1001',
+      crew: TripCrew(driver: 'Mahesh Patel', helper: 'Ramesh Yadav'),
+      schedule: TripSchedule(stops: 8, daily: 6, onCall: 2),
     ),
   ];
 }

@@ -4,6 +4,7 @@ import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 import 'package:pickup_supervisor/features/driver_labour/view/driver_labour_directory_screen.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/model/pickup_supervisor_bottom_nav_item.dart';
+import 'package:pickup_supervisor/features/issues/view/issues_screen.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervisor_home_screen.dart';
 import 'package:pickup_supervisor/features/profile/view/pickup_supervisor_profile_screens.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervisor_routes_screen.dart';
@@ -70,6 +71,12 @@ class _PickupSupervisorDashboardShellState
                       ),
                     ),
                   );
+                } else if (item == 'issues') {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const PickupSupervisorIssuesScreen(),
+                    ),
+                  );
                 } else if (item == 'drivers-labour') {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
@@ -112,6 +119,7 @@ class _PickupSupervisorDashboardShellState
       page: PickupSupervisorHomeScreen(
         showBottomNavigation: false,
         onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        onNavigationSelected: (index) => setState(() => _selectedIndex = index),
       ),
       pageKey: 'home',
       roles: const {PickupSupervisorModuleRole.pickupSupervisor},
