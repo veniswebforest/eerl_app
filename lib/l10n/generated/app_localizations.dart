@@ -8844,6 +8844,90 @@ abstract class AppLocalizations {
     String unit,
     String item,
   );
+
+  /// No description provided for @validationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get validationRequired;
+
+  /// No description provided for @validationMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least {min} characters.'**
+  String validationMinLength(int min);
+
+  /// No description provided for @validationMaxLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter no more than {max} characters.'**
+  String validationMaxLength(int max);
+
+  /// No description provided for @validationInvalidNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number.'**
+  String get validationInvalidNumber;
+
+  /// No description provided for @validationMaxDecimals.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter up to {places} decimal places.'**
+  String validationMaxDecimals(int places);
+
+  /// No description provided for @validationGreaterThanZero.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a value greater than 0.'**
+  String get validationGreaterThanZero;
+
+  /// No description provided for @validationMaxValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a value up to {max}.'**
+  String validationMaxValue(String max);
+
+  /// No description provided for @validationWholeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number.'**
+  String get validationWholeNumber;
+
+  /// No description provided for @requestAddPhotoPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Photo'**
+  String get requestAddPhotoPlain;
+
+  /// No description provided for @transferBalesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bales / boris'**
+  String get transferBalesLabel;
+
+  /// No description provided for @supervisorTransferTransporterPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Transporter'**
+  String get supervisorTransferTransporterPlain;
+
+  /// No description provided for @supervisorTaskTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a task title.'**
+  String get supervisorTaskTitleRequired;
+
+  /// No description provided for @validationVehiclePlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid vehicle number, e.g. GJ-05-BX-1234.'**
+  String get validationVehiclePlate;
+
+  /// No description provided for @validationVehicleNumberLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a vehicle number of 4 to 20 characters.'**
+  String get validationVehicleNumberLength;
 }
 
 class _AppLocalizationsDelegate

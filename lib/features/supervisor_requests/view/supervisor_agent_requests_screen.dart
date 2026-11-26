@@ -116,6 +116,7 @@ class _SupervisorAgentRequestsScreenState
                     SizedBox(
                       height: 55,
                       child: TextField(
+                        textInputAction: TextInputAction.search,
                         key: const Key('supervisor-agent-request-search'),
                         onChanged: (value) {
                           _query = value;

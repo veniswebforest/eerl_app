@@ -110,6 +110,7 @@ class _MyTasksScreenState extends State<MyTasksScreen> {
                         SizedBox(
                           height: 56,
                           child: TextField(
+                            textInputAction: TextInputAction.search,
                             key: const Key('task-search-field'),
                             onChanged: (value) {
                               _query = value;

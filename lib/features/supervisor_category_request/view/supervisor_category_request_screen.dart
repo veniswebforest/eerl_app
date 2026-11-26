@@ -1,3 +1,5 @@
+import 'package:eerl_app/core/utils/input_formatters.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -828,12 +830,21 @@ class _CategoryRequestRejectScreenState
                             maxLength: 150,
                             minLines: 5,
                             maxLines: 5,
+                            keyboardType: AppKeyboards.multiline,
+                            textInputAction: TextInputAction.newline,
+                            textCapitalization: TextCapitalization.sentences,
                             onChanged: (_) => setState(() {}),
                             style: AppTextStyles.mediumSH8_14,
                             decoration: InputDecoration(
                               hintText: l.expenseRejectReasonLabel,
                               hintStyle: AppTextStyles.mediumSH8_14.copyWith(
                                 color: AppColors.neutral400,
+                              ),
+                              errorText: InputValidators.text(
+                                _reasonController.text,
+                                l,
+                                minLength: 3,
+                                maxLength: AppInputLimits.longText,
                               ),
                               filled: true,
                               fillColor: Colors.white,

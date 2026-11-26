@@ -10,6 +10,9 @@ import 'package:pickup_supervisor/features/collection_report/model/collection_re
 import 'package:pickup_supervisor/features/collection_report/model/collection_report_models.dart';
 import 'package:pickup_supervisor/features/collection_report/widgets/collection_report_text.dart';
 import 'package:pickup_supervisor/features/collection_report/widgets/look_at_widgets.dart';
+import 'package:pickup_supervisor/features/route_detail/model/route_detail_mock_data.dart';
+import 'package:pickup_supervisor/features/route_detail/model/route_detail_models.dart';
+import 'package:pickup_supervisor/features/stop_detail/view/stop_detail_screen.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 
@@ -47,6 +50,23 @@ class _StopsToLookAtViewState extends State<_StopsToLookAtView> {
 
   int _count(LookAtOutcome o) =>
       widget.data.lookAt.firstWhere((r) => r.outcome == o).count;
+
+  void _openStop(LookAtStop s) {
+    final found = RouteDetailMockData.lookAtStop(s.name, switch (_outcome) {
+      LookAtOutcome.missed => StopStatus.missed,
+      LookAtOutcome.cancelledBySource => StopStatus.cancelledBySource,
+      LookAtOutcome.zeroKg => StopStatus.zeroKg,
+    });
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => StopDetailScreen(
+          stop: found.stop,
+          tripState: found.state,
+          summary: found.summary,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +123,12 @@ class _StopsToLookAtViewState extends State<_StopsToLookAtView> {
                   ),
                 for (final (i, s) in stops.indexed) ...[
                   if (i > 0) const SizedBox(height: 16),
-                  LookAtStopCard(stop: s, outcome: _outcome),
+                  LookAtStopCard(
+                    key: Key('look-at-stop-$i'),
+                    stop: s,
+                    outcome: _outcome,
+                    onTap: () => _openStop(s),
+                  ),
                 ],
               ],
             ),

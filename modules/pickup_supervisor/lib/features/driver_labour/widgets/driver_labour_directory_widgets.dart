@@ -41,6 +41,7 @@ class DriverLabourSearchField extends StatelessWidget {
               key: const Key('driver-labour-search'),
               controller: controller,
               onChanged: onChanged,
+              textInputAction: TextInputAction.search,
               style: DriverTextStyles.regular14.copyWith(
                 color: DriverColors.neutral950,
               ),

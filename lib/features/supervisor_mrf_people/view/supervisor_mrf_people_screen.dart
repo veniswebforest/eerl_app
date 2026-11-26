@@ -1,9 +1,12 @@
+import 'package:eerl_app/core/utils/input_formatters.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:eerl_app/features/bootstrap/service/outgoing_sync_service.dart';
 import 'package:eerl_app/features/local_data/data/eerl_local_repository.dart';
 import 'package:eerl_app/features/local_data/model/eerl_models.dart';
 import 'package:eerl_app/core/utils/uuid_generator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -288,6 +291,8 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
 
   String? _formValidationError() {
     if (_nameController.text.trim().isEmpty) return 'Full name is required.';
+    final nameError = _nameLengthError(_nameController.text);
+    if (nameError != null) return nameError;
     if (!_isValidPhone(_phoneController.text)) {
       return 'Enter a valid 10-digit supervisor mobile number.';
     }
@@ -300,12 +305,22 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
       if (labor.name.text.trim().isEmpty) {
         return 'Labor ${index + 1} full name is required.';
       }
+      final laborNameError = _nameLengthError(labor.name.text);
+      if (laborNameError != null) return laborNameError;
       if (!_isValidPhone(labor.phone.text)) {
         return 'Enter a valid 10-digit mobile number for Labor ${index + 1}.';
       }
     }
     return null;
   }
+
+  /// Names are 2–255 characters after trimming (PUT /mrf-people).
+  String? _nameLengthError(String value) => InputValidators.text(
+    value,
+    context.l10n,
+    minLength: 2,
+    maxLength: AppInputLimits.personName,
+  );
 
   bool _isValidPhone(String value) {
     return RegExp(r'^[6-9][0-9]{9}$').hasMatch(value.trim());
@@ -508,6 +523,9 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
                         label: context.l10n.supervisorMrfMobileNumber,
                         hint: context.l10n.supervisorMrfEnterMobile,
                         controller: _phoneController,
+                        textInputAction: _labors.isEmpty
+                            ? TextInputAction.done
+                            : TextInputAction.next,
                         onChanged: (_) => setState(() {}),
                       ),
                       const SizedBox(height: 24),
@@ -541,6 +559,7 @@ class _SupervisorMrfPeopleScreenState extends State<SupervisorMrfPeopleScreen> {
                         _LaborCard(
                           index: index,
                           labor: _labors[index],
+                          isLast: index == _labors.length - 1,
                           onRemove: () => _removeLabor(index),
                           onChanged: () => setState(() {}),
                         ),
@@ -832,6 +851,7 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
     height: 55,
     child: TextField(
+      textInputAction: TextInputAction.search,
       key: const Key('supervisor-mrf-search'),
       controller: controller,
       onChanged: onChanged,
@@ -1073,12 +1093,14 @@ class _PhoneField extends StatelessWidget {
     required this.hint,
     required this.controller,
     required this.onChanged,
+    this.textInputAction = TextInputAction.next,
   });
 
   final String label;
   final String hint;
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final TextInputAction textInputAction;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -1089,6 +1111,7 @@ class _PhoneField extends StatelessWidget {
       AppMobileNumberField(
         controller: controller,
         hintText: hint,
+        textInputAction: textInputAction,
         onChanged: onChanged,
       ),
     ],
@@ -1112,6 +1135,11 @@ class _TextBox extends StatelessWidget {
     child: TextField(
       controller: controller,
       onChanged: onChanged,
+      textCapitalization: TextCapitalization.words,
+      textInputAction: TextInputAction.next,
+      inputFormatters: [
+        LengthLimitingTextInputFormatter(AppInputLimits.personName),
+      ],
       style: AppTextStyles.regularB7_14,
       decoration: InputDecoration(
         hintText: hint,
@@ -1258,9 +1286,11 @@ class _LaborCard extends StatelessWidget {
     required this.labor,
     required this.onRemove,
     required this.onChanged,
+    this.isLast = false,
   });
 
   final int index;
+  final bool isLast;
   final _LaborControllers labor;
   final VoidCallback onRemove;
   final VoidCallback onChanged;
@@ -1308,6 +1338,7 @@ class _LaborCard extends StatelessWidget {
           label: context.l10n.supervisorMrfMobileNumber,
           hint: context.l10n.supervisorMrfEnterMobile,
           controller: labor.phone,
+          textInputAction: isLast ? TextInputAction.done : TextInputAction.next,
           onChanged: (_) => onChanged(),
         ),
       ],

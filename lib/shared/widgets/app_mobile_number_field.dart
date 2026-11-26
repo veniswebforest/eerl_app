@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
 
 /// App-wide Indian mobile-number control with a fixed country-code box.
 class AppMobileNumberField extends StatefulWidget {
@@ -17,6 +17,8 @@ class AppMobileNumberField extends StatefulWidget {
     this.onCountryCodeTap,
     this.countryCodeKey,
     this.phoneFieldKey,
+    this.textInputAction = TextInputAction.done,
+    this.onSubmitted,
   });
 
   final TextEditingController controller;
@@ -28,6 +30,10 @@ class AppMobileNumberField extends StatefulWidget {
   final VoidCallback? onCountryCodeTap;
   final Key? countryCodeKey;
   final Key? phoneFieldKey;
+
+  /// Keyboard action; use [TextInputAction.next] when another field follows.
+  final TextInputAction textInputAction;
+  final ValueChanged<String>? onSubmitted;
 
   @override
   State<AppMobileNumberField> createState() => _AppMobileNumberFieldState();
@@ -112,14 +118,13 @@ class _AppMobileNumberFieldState extends State<AppMobileNumberField> {
               key: widget.phoneFieldKey,
               controller: widget.controller,
               focusNode: _focusNode,
-              keyboardType: TextInputType.phone,
+              keyboardType: AppKeyboards.phone,
+              textInputAction: widget.textInputAction,
               autofillHints: const [AutofillHints.telephoneNumberNational],
-              maxLength: 10,
+              maxLength: AppInputLimits.mobileDigits,
               onChanged: widget.onChanged,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(10),
-              ],
+              onSubmitted: widget.onSubmitted,
+              inputFormatters: AppInputFormatters.mobile,
               style: AppTextStyles.regularB7_14.copyWith(
                 color: palette.neutral950,
               ),

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/core/utils/input_validators.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -33,6 +35,7 @@ class _RequestCashScreenState extends State<RequestCashScreen> {
   bool get _canSubmit =>
       !_isSubmitting &&
       (double.tryParse(_amountController.text.trim()) ?? 0) > 0 &&
+      InputValidators.money(_amountController.text, context.l10n) == null &&
       _selectedReason != null;
 
   @override
@@ -100,7 +103,11 @@ class _RequestCashScreenState extends State<RequestCashScreen> {
                                   ),
                                 ),
                               ),
-                              keyboardType: TextInputType.number,
+                              keyboardType: AppKeyboards.decimal,
+                              textInputAction: TextInputAction.done,
+                              inputFormatters: AppInputFormatters.money(
+                                maxValue: AppInputLimits.maxWalletAmount,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 24),

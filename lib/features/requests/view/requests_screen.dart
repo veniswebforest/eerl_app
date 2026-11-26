@@ -119,6 +119,7 @@ class _RequestsScreenState extends State<RequestsScreen> {
                         SizedBox(
                           height: 52,
                           child: TextField(
+                            textInputAction: TextInputAction.search,
                             key: const Key('request-search-field'),
                             onChanged: (value) {
                               _query = value;

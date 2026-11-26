@@ -7,6 +7,7 @@ abstract final class RouteDetailAssets {
   static const back = '$_i/back.svg';
   static const more = '$_i/more.svg';
   static const ownVehicle = '$_i/own_vehicle.svg';
+  static const contractVehicle = 'assets/icons/trips_plan/contract_vehicle.svg';
   static const plate = '$_i/plate.svg';
   static const clock = '$_i/clock.svg';
   static const sources = '$_i/sources.svg';
@@ -25,17 +26,16 @@ abstract final class RouteDetailAssets {
   static const tagClock = '$_i/tag_clock.svg';
   static const tagNote = '$_i/tag_note.svg';
   static const tagVoice = '$_i/tag_voice.svg';
-
-  static const upcomingCollected =
-      'assets/icons/stop_detail/status_collected.svg';
-  static const upcomingNext = 'assets/icons/stop_detail/status_next.svg';
+  static const tagGate = '$_i/tag_gate.svg';
+  static const chipMissed = '$_i/chip_missed.svg';
+  static const actionTeam = '$_i/action_team.svg';
+  static const actionMessage = '$_i/action_message.svg';
+  static const driverApp = 'assets/icons/route_actions/driver_app.svg';
+  static const callWhite = 'assets/icons/stop_detail/call_white.svg';
+  static const changed = 'assets/icons/trips_plan/changed.svg';
+  static const sheetChevron = 'assets/icons/trips_plan/chevron_right.svg';
 
   static const sevenPin = '$_i/seven_pin.svg';
-  static const sevenPending = '$_i/seven_pending.svg';
-  static const sevenPendingAlt = '$_i/seven_pending_alt.svg';
-  static const sevenSwap = '$_i/seven_swap.svg';
-  static const sevenArrowGreen = '$_i/seven_arrow_green.svg';
-  static const sevenArrowMuted = '$_i/seven_arrow_muted.svg';
 
   static const river = '$_i/river.svg';
   static const roadH1 = '$_i/road_h1.svg';

@@ -290,6 +290,9 @@ class _RemarksField extends StatelessWidget {
           TextField(
             key: const Key('driver-issue-remarks'),
             controller: controller,
+            keyboardType: TextInputType.multiline,
+            textInputAction: TextInputAction.newline,
+            textCapitalization: TextCapitalization.sentences,
             maxLength: 150,
             maxLines: null,
             expands: true,

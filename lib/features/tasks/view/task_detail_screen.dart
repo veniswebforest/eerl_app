@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/core/utils/input_validators.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
@@ -47,8 +49,15 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late TaskModel _task;
   bool _isCompleting = false;
 
+  // POST /tasks/{id}/complete: note and photos are optional (note up to 255,
+  // photos up to 5).
   bool get _canComplete =>
-      _proofImages.isNotEmpty && _descriptionController.text.trim().isNotEmpty;
+      InputValidators.text(
+        _descriptionController.text,
+        context.l10n,
+        maxLength: AppInputLimits.shortText,
+      ) ==
+      null;
 
   String get _cameraRecoveryId => 'task.resolve.${_task.id}';
 
@@ -225,7 +234,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       ],
                       const SizedBox(height: 24),
                       _sectionLabel(
-                        context.l10n.taskCompletionProof,
+                        context.l10n.taskCompletionProofPlain,
                         style: AppTextStyles.mediumSH8_14,
                       ),
                       const SizedBox(height: 8),
@@ -251,7 +260,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       ),
                       const SizedBox(height: 20),
                       _sectionLabel(
-                        context.l10n.taskDescriptionLabel,
+                        context.l10n.taskDescriptionPlain,
                         style: AppTextStyles.mediumSH8_14,
                       ),
                       const SizedBox(height: 8),
@@ -261,6 +270,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                         minLines: 5,
                         maxLines: 5,
                         maxLength: 150,
+                        keyboardType: TextInputType.multiline,
+                        textInputAction: TextInputAction.newline,
+                        textCapitalization: TextCapitalization.sentences,
                         onChanged: (_) => setState(() {}),
                         style: AppTextStyles.regularB7_14,
                         decoration: InputDecoration(

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
+import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 
 typedef TransferRejection = ({List<String> reasons, String? remarks});
@@ -43,6 +46,16 @@ class _SupervisorTransferRejectScreenState
     super.dispose();
   }
 
+  /// "Other" still needs Remarks (23 Oct 2026 rule).
+  bool get _otherSelected => _selected.contains(_reasons.length - 1);
+
+  String? get _remarksError => InputValidators.text(
+    _remarksController.text,
+    context.l10n,
+    isRequired: _otherSelected,
+    maxLength: AppInputLimits.longText,
+  );
+
   Future<void> _confirm() async {
     final indexes = _selected.toList()..sort();
     final remarks = _remarksController.text.trim();
@@ -75,7 +88,9 @@ class _SupervisorTransferRejectScreenState
           height: 52,
           child: ElevatedButton(
             key: const Key('supervisor-transfer-confirm-rejection'),
-            onPressed: _selected.isEmpty || _submitting ? null : _confirm,
+            onPressed: _selected.isEmpty || _remarksError != null || _submitting
+                ? null
+                : _confirm,
             style: ElevatedButton.styleFrom(
               elevation: 0,
               disabledBackgroundColor: AppColors.red200,
@@ -149,10 +164,15 @@ class _SupervisorTransferRejectScreenState
                 minLines: 5,
                 maxLines: 5,
                 maxLength: 1000,
+                keyboardType: AppKeyboards.multiline,
+                textInputAction: TextInputAction.newline,
+                textCapitalization: TextCapitalization.sentences,
+                onChanged: (_) => setState(() {}),
                 style: AppTextStyles.regularB7_14.copyWith(
                   color: AppColors.neutral950,
                 ),
                 decoration: InputDecoration(
+                  errorText: _otherSelected ? _remarksError : null,
                   counterText: 'Max 1000 Characters',
                   counterStyle: AppTextStyles.regularB8_12.copyWith(
                     color: AppColors.neutral400,

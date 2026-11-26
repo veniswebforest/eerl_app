@@ -449,6 +449,7 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
     height: 55,
     child: TextField(
+      textInputAction: TextInputAction.search,
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hint,

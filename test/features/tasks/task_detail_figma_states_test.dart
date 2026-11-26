@@ -20,16 +20,18 @@ void main() {
     expect(find.byKey(const ValueKey('preview-task-photo-0')), findsOneWidget);
     await tester.drag(find.byType(ListView), const Offset(0, -320));
     await tester.pump();
+    // POST /tasks/{id}/complete: note and photos are optional.
+    expect(find.text('Task Completion Proof'), findsOneWidget);
     expect(
       find.text('Task Completion Proof *', findRichText: true),
-      findsOneWidget,
+      findsNothing,
     );
     expect(find.text('Max 150 Characters'), findsOneWidget);
 
     final button = tester.widget<ElevatedButton>(
       find.byKey(const Key('mark-task-completed-button')),
     );
-    expect(button.onPressed, isNull);
+    expect(button.onPressed, isNotNull);
     expect(tester.takeException(), isNull);
   });
 

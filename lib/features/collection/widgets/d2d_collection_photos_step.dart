@@ -4,6 +4,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
@@ -306,6 +307,7 @@ class _D2dMaterialCard extends StatelessWidget {
                             'ex ${collectionWeight.trim().isEmpty ? '123.00' : collectionWeight.trim()}',
                         bluetoothTarget: bluetoothTarget,
                         onBluetoothTap: onBluetoothTap,
+                        textInputAction: TextInputAction.done,
                         onChanged: onVerifiedWeightChanged,
                       ),
                     ),
@@ -565,6 +567,7 @@ class _MeasureField extends StatefulWidget {
     this.required = false,
     this.bluetoothTarget = false,
     this.onBluetoothTap,
+    this.textInputAction = TextInputAction.next,
   });
 
   final Key fieldKey;
@@ -577,6 +580,7 @@ class _MeasureField extends StatefulWidget {
   final bool required;
   final bool bluetoothTarget;
   final VoidCallback? onBluetoothTap;
+  final TextInputAction textInputAction;
 
   @override
   State<_MeasureField> createState() => _MeasureFieldState();
@@ -638,7 +642,9 @@ class _MeasureFieldState extends State<_MeasureField> {
           controller: _controller,
           focusNode: _focusNode,
           onChanged: widget.onChanged,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: AppKeyboards.decimal,
+          textInputAction: widget.textInputAction,
+          inputFormatters: AppInputFormatters.quantity(),
           style: AppTextStyles.regularB7_14,
           decoration: InputDecoration(
             hintText:

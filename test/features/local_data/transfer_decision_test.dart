@@ -197,6 +197,25 @@ void main() {
     });
   });
 
+  test('other hired truck may leave the transporter empty', () async {
+    // POST /transfers/{id}/approve, choice 2: transporterName is optional.
+    await repository.approveTransfer(
+      transferId: 'transfer-1',
+      destinationId: 'destination-1',
+      vehicleNumber: 'GJ-05-XY-7788',
+      transporterName: '  ',
+      transferFee: 1800,
+    );
+
+    final outbox = (await database.query(DatabaseTables.outbox)).single;
+    final body = jsonDecode(outbox['body']! as String) as Map<String, Object?>;
+    expect(body['vehicle'], {
+      'vehicleNumber': 'GJ-05-XY-7788',
+      'transporterName': null,
+      'transferFee': 1800.0,
+    });
+  });
+
   test('approval rejects a past arrival without changing local data', () async {
     await expectLater(
       repository.approveTransfer(

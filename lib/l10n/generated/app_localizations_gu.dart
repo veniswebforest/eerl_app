@@ -4695,4 +4695,57 @@ class AppLocalizationsGu extends AppLocalizations {
   ) {
     return 'તેઓ નિર્ણય કરે ત્યારે તમને સૂચના મળશે. ત્યાં સુધી ભાવ ₹$rate/$unit રહેશે અને આ કેન્દ્ર પર $item માટે ફરી વિનંતી કરી શકશો નહીં.';
   }
+
+  @override
+  String get validationRequired => 'આ ફીલ્ડ જરૂરી છે.';
+
+  @override
+  String validationMinLength(int min) {
+    return 'ઓછામાં ઓછા $min અક્ષરો દાખલ કરો.';
+  }
+
+  @override
+  String validationMaxLength(int max) {
+    return '$max કરતાં વધુ અક્ષરો દાખલ કરશો નહીં.';
+  }
+
+  @override
+  String get validationInvalidNumber => 'માન્ય સંખ્યા દાખલ કરો.';
+
+  @override
+  String validationMaxDecimals(int places) {
+    return 'દશાંશ પછી વધુમાં વધુ $places અંક દાખલ કરો.';
+  }
+
+  @override
+  String get validationGreaterThanZero => '0 કરતાં વધુ મૂલ્ય દાખલ કરો.';
+
+  @override
+  String validationMaxValue(String max) {
+    return '$max સુધીનું મૂલ્ય દાખલ કરો.';
+  }
+
+  @override
+  String get validationWholeNumber => 'પૂર્ણ સંખ્યા દાખલ કરો.';
+
+  @override
+  String get requestAddPhotoPlain => 'ફોટો ઉમેરો';
+
+  @override
+  String get transferBalesLabel => 'ગાંસડી / બોરી';
+
+  @override
+  String get supervisorTransferTransporterPlain => 'ટ્રાન્સપોર્ટર';
+
+  @override
+  String get supervisorTaskTitleRequired =>
+      'કૃપા કરીને કાર્યનું શીર્ષક દાખલ કરો.';
+
+  @override
+  String get validationVehiclePlate =>
+      'માન્ય વાહન નંબર દાખલ કરો, દા.ત. GJ-05-BX-1234.';
+
+  @override
+  String get validationVehicleNumberLength =>
+      '4 થી 20 અક્ષરોનો વાહન નંબર દાખલ કરો.';
 }

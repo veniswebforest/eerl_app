@@ -38,15 +38,33 @@ class _DetailViewState extends State<_DetailView> {
 
   bool get _isDriver => widget.person.kind == DriverLabourKind.driver;
 
+  String get _warehouse => widget.person.warehouse ?? '';
+
   Future<void> _deactivate(DriverLocalizations l10n) async {
+    final person = widget.person;
+    final route = person.inUseRoute;
+    if (route != null) {
+      // On a route or coming trip: the server refuses (IN_USE).
+      await showDriverLabourConfirmDialog(
+        context,
+        title: l10n.dlInUseTitle,
+        message: _isDriver
+            ? l10n.dlInUseDriverBody(person.name, route)
+            : l10n.dlInUseLabourBody(person.name, route),
+        confirmLabel: l10n.dlOk,
+        confirmColor: DriverColors.primary500,
+        confirmRadius: 12,
+      );
+      return;
+    }
     final confirmed = await showDriverLabourConfirmDialog(
       context,
-      title: l10n.dlAreYouSure,
-      message: _isDriver
-          ? l10n.dlDeactivateDriverMessage
-          : l10n.dlDeactivateLabourMessage,
+      title: _isDriver
+          ? l10n.dlDeactivateDriverTitle
+          : l10n.dlDeactivateLabourTitle,
+      message: l10n.dlDeactivateBody(person.name, _warehouse),
       cancelLabel: l10n.dlCancel,
-      confirmLabel: l10n.dlYes,
+      confirmLabel: l10n.dlDeactivate,
       confirmColor: DriverColors.red500,
     );
     if (!mounted || !confirmed) return;
@@ -54,20 +72,21 @@ class _DetailViewState extends State<_DetailView> {
     ModuleToast.show(
       context,
       kind: ModuleToastKind.error,
-      title: l10n.dlDeactivatedTitle,
-      message: l10n.dlDeactivatedBody,
+      title: _isDriver ? l10n.dlDriverDeactivated : l10n.dlLabourDeactivated,
+      message: l10n.dlOffWarehouse(person.name, _warehouse),
     );
   }
 
   Future<void> _reactivate(DriverLocalizations l10n) async {
+    final person = widget.person;
     final confirmed = await showDriverLabourConfirmDialog(
       context,
-      title: l10n.dlAreYouSure,
-      message: _isDriver
-          ? l10n.dlReactiveDriverMessage
-          : l10n.dlReactiveLabourMessage,
+      title: _isDriver
+          ? l10n.dlReactivateDriverTitle
+          : l10n.dlReactivateLabourTitle,
+      message: l10n.dlReactivateBody(person.name, _warehouse),
       cancelLabel: l10n.dlCancel,
-      confirmLabel: l10n.dlYes,
+      confirmLabel: l10n.dlReactivate,
       confirmColor: DriverColors.primary500,
       confirmRadius: 12,
     );
@@ -76,8 +95,8 @@ class _DetailViewState extends State<_DetailView> {
     ModuleToast.show(
       context,
       kind: ModuleToastKind.success,
-      title: l10n.dlReactivedTitle,
-      message: l10n.dlReactivedBody,
+      title: _isDriver ? l10n.dlDriverReactivated : l10n.dlLabourReactivated,
+      message: l10n.dlBackAtWarehouse(person.name, _warehouse),
     );
   }
 
@@ -127,7 +146,7 @@ class _DetailViewState extends State<_DetailView> {
           : DriverPrimaryButton(
               key: const Key('driver-labour-reactive'),
               radius: 12,
-              label: l10n.dlReactive,
+              label: l10n.dlReactivate,
               icon: SvgPicture.asset(
                 DriverLabourAssets.reactivate,
                 package: DriverLabourAssets.package,
@@ -137,6 +156,7 @@ class _DetailViewState extends State<_DetailView> {
               onPressed: () => _reactivate(l10n),
             ),
       child: ListView(
+        clipBehavior: Clip.none,
         padding: EdgeInsets.zero,
         children: [
           const ModuleBackButton(),
@@ -158,10 +178,10 @@ class _DetailViewState extends State<_DetailView> {
           DriverLabourInfoCard(
             muted: muted,
             rows: [
-              DriverLabourInfoRowData(l10n.dlFullName, person.name),
-              DriverLabourInfoRowData(l10n.dlMobileNumber, phone),
-              DriverLabourInfoRowData(l10n.dlIdCardNumber, person.idNumber),
-              DriverLabourInfoRowData(l10n.dlDateTime, person.dateTime),
+              DriverLabourInfoRowData(l10n.dlFullNameLower, person.name),
+              DriverLabourInfoRowData(l10n.dlMobileLower, phone),
+              DriverLabourInfoRowData(l10n.dlIdNumber, person.idNumber),
+              DriverLabourInfoRowData(l10n.dlAddedOn, person.dateTime),
             ],
           ),
           const SizedBox(height: 16),

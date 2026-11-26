@@ -71,6 +71,8 @@ flutter:
     - assets/icons/driver_labour/
     - assets/icons/trips_plan/
     - assets/icons/route_detail/
+    - assets/icons/route_actions/
+    - assets/icons/cash_payments/
     - assets/icons/stop_detail/
     - assets/icons/supervisor/home/
     - assets/icons/supervisor/attention/
@@ -92,6 +94,8 @@ flutter:
     - assets/images/supervisor/drawer/
     - assets/images/supervisor/profile/
     - assets/images/supervisor/approvals/
+    - assets/images/stop_detail/
+    - assets/images/route_actions/no_trips/
     - assets/icons/supervisor/approvals/
     - assets/icons/report/
     - assets/icons/look_at/

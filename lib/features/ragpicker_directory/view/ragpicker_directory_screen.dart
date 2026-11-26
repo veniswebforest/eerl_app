@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -10,6 +11,8 @@ import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/core/utils/uuid_generator.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_sync_service.dart';
@@ -65,6 +68,11 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
   bool _loading = true;
   RagpickerModel? _selectedItem;
   RagpickerModel? _editingItem;
+
+  /// PUT /ragpickers needs a phone, but PATCH does not: an old ragpicker
+  /// saved without one can still be edited without adding one.
+  bool get _phoneRequired =>
+      _editingItem == null || (_editingItem!.phone ?? '').trim().isNotEmpty;
   String _query = '';
   String? _nameError;
   List<String> _photoSources = const [];
@@ -336,6 +344,7 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                               child: TextField(
                                 key: const Key('ragpicker-search-field'),
                                 controller: _searchController,
+                                textInputAction: TextInputAction.search,
                                 onChanged: (value) =>
                                     setState(() => _query = value),
                                 style: AppTextStyles.regularB7_14,
@@ -567,6 +576,13 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                       hint: context.l10n.ragpickerNameHint,
                       controller: _nameController,
                       errorText: _nameError,
+                      textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.next,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(
+                          AppInputLimits.personName,
+                        ),
+                      ],
                       onChanged: (value) {
                         final error = _nameValidationError(
                           value,
@@ -579,7 +595,9 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                     ),
                     const SizedBox(height: 16),
                     _MobileField(
-                      label: context.l10n.ragpickerMobileLabel,
+                      label: _phoneRequired
+                          ? context.l10n.mobileNumberRequired
+                          : context.l10n.ragpickerMobileLabel,
                       hint: context.l10n.ragpickerPhoneHint,
                       controller: _phoneController,
                     ),
@@ -588,6 +606,13 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
                       label: context.l10n.ragpickerAadhaarLabel,
                       hint: context.l10n.ragpickerAadhaarHint,
                       controller: _identityController,
+                      textCapitalization: TextCapitalization.characters,
+                      textInputAction: TextInputAction.done,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(
+                          AppInputLimits.idNumber,
+                        ),
+                      ],
                     ),
                     if (widget.isSupervisor) ...[
                       const SizedBox(height: 16),
@@ -656,8 +681,15 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
       return;
     }
     final existing = _editingItem;
-    if (phone.isNotEmpty && phone.length != 10) {
-      AppSnackbar.error(context, message: context.l10n.ragpickerInvalidMobile);
+    // PUT /ragpickers: phone required, 10 digits starting 6–9. Editing an
+    // old ragpicker with no phone (PATCH): optional, checked when typed.
+    final phoneError = InputValidators.mobile(
+      phone,
+      context.l10n,
+      isRequired: _phoneRequired,
+    );
+    if (phoneError != null) {
+      AppSnackbar.error(context, message: phoneError);
       return;
     }
     if (_centers.isEmpty) return;
@@ -739,6 +771,15 @@ class _RagpickerDirectoryScreenState extends State<RagpickerDirectoryScreen> {
     if (name.isEmpty) {
       return showRequired ? context.l10n.ragpickerNameRequired : null;
     }
+    if (showRequired) {
+      final lengthError = InputValidators.text(
+        name,
+        context.l10n,
+        minLength: 2,
+        maxLength: AppInputLimits.personName,
+      );
+      if (lengthError != null) return lengthError;
+    }
     final existing = _editingItem;
     final normalizedName = _normalizeRagpickerName(name);
     final nameAlreadyExists = _allItems.any(
@@ -814,6 +855,7 @@ class _MobileField extends StatelessWidget {
       AppMobileNumberField(
         controller: controller,
         hintText: hint,
+        textInputAction: TextInputAction.next,
         countryCodeKey: const Key('ragpicker-country-code-box'),
         phoneFieldKey: const Key('ragpicker-mobile-number-field'),
       ),

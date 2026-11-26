@@ -1498,5 +1498,19 @@
   "priceRequestCurrentValueDynamic": "₹{rate}/{unit}, {source}",
   "priceRequestAskedValueDynamic": "₹{rate}/{unit}  ({percent})",
   "priceRequestAskedByDynamic": "{name} · {time}",
-  "priceRequestWaitingMessageDynamic": "તેઓ નિર્ણય કરે ત્યારે તમને સૂચના મળશે. ત્યાં સુધી ભાવ ₹{rate}/{unit} રહેશે અને આ કેન્દ્ર પર {item} માટે ફરી વિનંતી કરી શકશો નહીં."
+  "priceRequestWaitingMessageDynamic": "તેઓ નિર્ણય કરે ત્યારે તમને સૂચના મળશે. ત્યાં સુધી ભાવ ₹{rate}/{unit} રહેશે અને આ કેન્દ્ર પર {item} માટે ફરી વિનંતી કરી શકશો નહીં.",
+  "validationRequired": "આ ફીલ્ડ જરૂરી છે.",
+  "validationMinLength": "ઓછામાં ઓછા {min} અક્ષરો દાખલ કરો.",
+  "validationMaxLength": "{max} કરતાં વધુ અક્ષરો દાખલ કરશો નહીં.",
+  "validationInvalidNumber": "માન્ય સંખ્યા દાખલ કરો.",
+  "validationMaxDecimals": "દશાંશ પછી વધુમાં વધુ {places} અંક દાખલ કરો.",
+  "validationGreaterThanZero": "0 કરતાં વધુ મૂલ્ય દાખલ કરો.",
+  "validationMaxValue": "{max} સુધીનું મૂલ્ય દાખલ કરો.",
+  "validationWholeNumber": "પૂર્ણ સંખ્યા દાખલ કરો.",
+  "requestAddPhotoPlain": "ફોટો ઉમેરો",
+  "transferBalesLabel": "ગાંસડી / બોરી",
+  "supervisorTransferTransporterPlain": "ટ્રાન્સપોર્ટર",
+  "supervisorTaskTitleRequired": "કૃપા કરીને કાર્યનું શીર્ષક દાખલ કરો.",
+  "validationVehiclePlate": "માન્ય વાહન નંબર દાખલ કરો, દા.ત. GJ-05-BX-1234.",
+  "validationVehicleNumberLength": "4 થી 20 અક્ષરોનો વાહન નંબર દાખલ કરો."
 }

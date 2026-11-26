@@ -108,11 +108,12 @@ void main() {
     await tester.tap(find.byKey(const Key('route-detail-period-1')));
     await tester.pumpAndSettle();
     expect(find.text('Fri 23 Oct – Thu 29 Oct'), findsOneWidget);
-    expect(find.text('Assigned Sources : 8'), findsOneWidget);
-    expect(find.text('Except Sun, 9–11 am'), findsOneWidget);
-    expect(find.text('Second Wed, 10–11 am'), findsOneWidget);
-    expect(find.text('(Once) Sat 24 Oct, 11–12 pm'), findsWidgets);
-    expect(find.text('Pending'), findsNWidgets(5));
+    expect(find.text('Assigned Sources : 9 (1 paused)'), findsOneWidget);
+    expect(find.text('Started 8:05 am (Start trip)'), findsNothing);
+    expect(find.text('Next: Mon 26, Thu 29 Oct'), findsOneWidget);
+    expect(find.text('Every day · 7 visits'), findsOneWidget);
+    expect(find.text('Next: Thu 29 Oct'), findsNWidgets(2));
+    expect(find.text('Inactive'), findsOneWidget);
     expect(
       find.text(
         "It is added as the last stop. You can change the order on the route's page.",

@@ -4,11 +4,13 @@ import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/utils/module_date_format.dart';
 import 'package:pickup_supervisor/core/widgets/module_date_range_sheet.dart';
+import 'package:pickup_supervisor/features/cash_payments/view/cash_payments_screen.dart';
 import 'package:pickup_supervisor/features/collection_report/model/collection_report_mock_data.dart';
 import 'package:pickup_supervisor/features/collection_report/model/collection_report_models.dart';
 import 'package:pickup_supervisor/features/collection_report/view/collection_report_screen.dart';
 import 'package:pickup_supervisor/features/collection_report/view/stops_to_look_at_screen.dart';
 import 'package:pickup_supervisor/features/issues/view/issues_screen.dart';
+import 'package:pickup_supervisor/features/route_detail/view/route_detail_screen.dart';
 import 'package:pickup_supervisor/features/collection_report/widgets/collection_report_text.dart';
 import 'package:pickup_supervisor/features/collection_report/widgets/collection_report_widgets.dart';
 import 'package:pickup_supervisor/features/trips_plan/view/trips_plan_screen.dart';
@@ -20,6 +22,7 @@ import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervi
 import 'package:pickup_supervisor/features/pickup_supervisor/model/pickup_supervisor_bottom_nav_item.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/widgets/pickup_supervisor_bottom_navigation.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/widgets/pickup_supervisor_home_drawer.dart';
+import 'package:pickup_supervisor/features/route_actions/view/ask_collection_head_screen.dart';
 
 const _assetRoot = 'assets/icons/supervisor/home';
 const _assetPackage = 'pickup_supervisor';
@@ -154,6 +157,12 @@ class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
                       builder: (_) => const PickupSupervisorIssuesScreen(),
                     ),
                   );
+                } else if (item == 'cash-payments') {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const CashPaymentsScreen(),
+                    ),
+                  );
                 }
               },
             )
@@ -226,6 +235,11 @@ class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
                         title: l10n.supervisorAskCollectionHead,
                         subtitle: l10n.supervisorAskCollectionHeadSubtitle,
                         button: l10n.supervisorNewRequest,
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const AskCollectionHeadScreen(),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -963,82 +977,91 @@ class _TripTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: DriverColors.cool100,
+    // An on-route trip opens its Trip details.
+    return Material(
+      color: DriverColors.cool100,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        key: Key('supervisor-trip-$title'),
         borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute<void>(builder: (_) => const RouteDetailScreen()),
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _IconTile(
-                asset: '$_assetRoot/trip.svg',
-                background: Colors.white,
-                size: 30,
-                iconSize: 20,
-                rounded: true,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  title,
-                  style: DriverTextStyles.semibold16.copyWith(
-                    color: DriverColors.primary800,
+              Row(
+                children: [
+                  const _IconTile(
+                    asset: '$_assetRoot/trip.svg',
+                    background: Colors.white,
+                    size: 30,
+                    iconSize: 20,
+                    rounded: true,
                   ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: DriverTextStyles.semibold16.copyWith(
+                        color: DriverColors.primary800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                progress,
+                style: DriverTextStyles.regular14.copyWith(
+                  color: DriverColors.neutral700,
                 ),
               ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  _Tag(
+                    label: firstTag,
+                    icon: '$_assetRoot/own_vehicle.svg',
+                    background: DriverColors.secondary100,
+                    foreground: DriverColors.blue600,
+                  ),
+                  _Tag(
+                    label: secondTag,
+                    icon: secondTagWarning ? '$_assetRoot/phone_red.svg' : null,
+                    background: secondTagWarning
+                        ? DriverColors.red100
+                        : DriverColors.slate50,
+                    foreground: secondTagWarning
+                        ? DriverColors.red600
+                        : DriverColors.slate600,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () {},
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(44),
+                  backgroundColor: Colors.white,
+                  foregroundColor: DriverColors.primary500,
+                  side: const BorderSide(color: DriverColors.primary500),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                icon: const _Svg('$_assetRoot/phone_green.svg', size: 20),
+                label: Text(button, style: DriverTextStyles.bold16),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            progress,
-            style: DriverTextStyles.regular14.copyWith(
-              color: DriverColors.neutral700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              _Tag(
-                label: firstTag,
-                icon: '$_assetRoot/own_vehicle.svg',
-                background: DriverColors.secondary100,
-                foreground: DriverColors.blue600,
-              ),
-              _Tag(
-                label: secondTag,
-                icon: secondTagWarning ? '$_assetRoot/phone_red.svg' : null,
-                background: secondTagWarning
-                    ? DriverColors.red100
-                    : DriverColors.slate50,
-                foreground: secondTagWarning
-                    ? DriverColors.red600
-                    : DriverColors.slate600,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () {},
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(44),
-              backgroundColor: Colors.white,
-              foregroundColor: DriverColors.primary500,
-              side: const BorderSide(color: DriverColors.primary500),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            icon: const _Svg('$_assetRoot/phone_green.svg', size: 20),
-            label: Text(button, style: DriverTextStyles.bold16),
-          ),
-        ],
+        ),
       ),
     );
   }

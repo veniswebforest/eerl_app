@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:dotted_border/dotted_border.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -15,6 +17,7 @@ import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -217,10 +220,19 @@ class _AssignSupervisorTaskScreenState
                   controller: _titleController,
                   hint: context.l10n.supervisorTaskTitleHint,
                   height: 55,
+                  textInputAction: TextInputAction.next,
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(AppInputLimits.shortText),
+                  ],
                   onChanged: (_) => setState(() {}),
                 ),
                 const SizedBox(height: 24),
-                _requiredLabel(context.l10n.supervisorTaskDescriptionLabel),
+                Text(
+                  context.l10n.supervisorTaskDescriptionLabel,
+                  style: AppTextStyles.mediumSH8_14.copyWith(
+                    color: AppColors.neutral950,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 _TaskTextField(
                   fieldKey: const Key('supervisor-task-description-field'),
@@ -442,8 +454,18 @@ class _AssignSupervisorTaskScreenState
       await _showError(context.l10n.supervisorTaskAgentRequired);
       return;
     }
-    if (title.isEmpty || description.isEmpty) {
-      await _showError(context.l10n.supervisorTaskTextRequired);
+    // PUT /tasks: title is required (3–255); description is optional
+    // (up to 2000).
+    final titleError = InputValidators.text(
+      title,
+      context.l10n,
+      isRequired: true,
+      requiredMessage: context.l10n.supervisorTaskTitleRequired,
+      minLength: 3,
+      maxLength: AppInputLimits.shortText,
+    );
+    if (titleError != null) {
+      await _showError(titleError);
       return;
     }
     if (dueDate == null) {
@@ -686,6 +708,7 @@ class _AgentSelectorState extends State<_AgentSelector> {
                 TextField(
                   key: ValueKey('${widget.optionKeyPrefix}-search'),
                   controller: _searchController,
+                  textInputAction: TextInputAction.search,
                   onChanged: (_) => setState(() {}),
                   style: AppTextStyles.regularB8_12,
                   decoration: InputDecoration(
@@ -842,6 +865,8 @@ class _TaskTextField extends StatelessWidget {
     this.maxLength,
     this.expands = false,
     this.counterText,
+    this.textInputAction,
+    this.inputFormatters,
   });
 
   final Key fieldKey;
@@ -852,6 +877,8 @@ class _TaskTextField extends StatelessWidget {
   final int? maxLength;
   final bool expands;
   final String? counterText;
+  final TextInputAction? textInputAction;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -862,6 +889,12 @@ class _TaskTextField extends StatelessWidget {
       maxLength: maxLength,
       maxLines: expands ? null : 1,
       expands: expands,
+      keyboardType: expands ? TextInputType.multiline : TextInputType.text,
+      textInputAction:
+          textInputAction ??
+          (expands ? TextInputAction.newline : TextInputAction.done),
+      textCapitalization: TextCapitalization.sentences,
+      inputFormatters: inputFormatters,
       textAlignVertical: TextAlignVertical.top,
       onChanged: onChanged,
       style: AppTextStyles.regularB7_14,

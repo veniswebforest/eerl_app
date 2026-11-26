@@ -4,6 +4,7 @@ import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_danger_button.dart';
 import 'package:pickup_supervisor/core/widgets/module_page.dart';
+import 'package:pickup_supervisor/core/widgets/module_text_fields.dart';
 import 'package:pickup_supervisor/features/stop_detail/model/stop_detail_models.dart';
 import 'package:pickup_supervisor/features/stop_detail/widgets/stop_detail_widgets.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
@@ -58,6 +59,16 @@ class _SkipSourceViewState extends State<_SkipSourceView> {
   );
 
   @override
+  void initState() {
+    super.initState();
+    _remarks.addListener(() => setState(() {}));
+  }
+
+  bool get _canConfirm =>
+      _reasons.isNotEmpty &&
+      (!_reasons.contains(SkipReason.other) || _remarks.text.trim().isNotEmpty);
+
+  @override
   void dispose() {
     _remarks.dispose();
     super.dispose();
@@ -67,7 +78,10 @@ class _SkipSourceViewState extends State<_SkipSourceView> {
       switch (reason) {
         SkipReason.sourceClosed => l10n.skReasonClosed,
         SkipReason.holiday => l10n.skReasonHoliday,
+        SkipReason.sourceAsked => l10n.skReasonSourceAsked,
         SkipReason.vehicleUnavailable => l10n.skReasonVehicle,
+        SkipReason.capacityFull => l10n.skReasonCapacity,
+        SkipReason.notEnoughTime => l10n.skReasonShift,
         SkipReason.other => l10n.skReasonOther,
       };
 
@@ -78,11 +92,11 @@ class _SkipSourceViewState extends State<_SkipSourceView> {
       bottom: ModuleDangerButton(
         key: const Key('skip-source-confirm'),
         label: l10n.skConfirm,
-        onPressed: _reasons.isEmpty
-            ? null
-            : () => Navigator.of(context).pop(true),
+        // One or more reasons; Other needs a note.
+        onPressed: !_canConfirm ? null : () => Navigator.of(context).pop(true),
       ),
       child: ListView(
+        clipBehavior: Clip.none,
         key: const Key('skip-source-scroll'),
         padding: EdgeInsets.zero,
         children: [
@@ -137,7 +151,11 @@ class _SkipSourceViewState extends State<_SkipSourceView> {
             ),
           ),
           const SizedBox(height: 8),
-          _RemarksField(controller: _remarks, maxChars: _maxChars),
+          ModuleRemarksField(
+            controller: _remarks,
+            maxChars: _maxChars,
+            fieldKey: const Key('skip-remarks'),
+          ),
         ],
       ),
     );
@@ -253,63 +271,4 @@ class _ReasonRow extends StatelessWidget {
       ),
     ),
   );
-}
-
-class _RemarksField extends StatelessWidget {
-  const _RemarksField({required this.controller, required this.maxChars});
-
-  final TextEditingController controller;
-  final int maxChars;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = DriverLocalizations.of(context);
-    return Container(
-      height: 159,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: DriverColors.neutral50,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: DriverColors.cool400),
-      ),
-      child: Column(
-        children: [
-          Expanded(
-            child: TextField(
-              key: const Key('skip-remarks'),
-              controller: controller,
-              maxLength: maxChars,
-              maxLines: null,
-              expands: true,
-              textAlignVertical: TextAlignVertical.top,
-              style: DriverTextStyles.regular14.copyWith(
-                color: DriverColors.neutral900,
-              ),
-              decoration: const InputDecoration(
-                isDense: true,
-                filled: false,
-                counterText: '',
-                contentPadding: EdgeInsets.zero,
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-              ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              l10n.skMaxChars,
-              style: DriverTextStyles.regular12.copyWith(
-                color: const Color(0xFF888888),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

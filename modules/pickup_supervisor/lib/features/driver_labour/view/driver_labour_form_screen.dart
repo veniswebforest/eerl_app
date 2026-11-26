@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/forms/module_input_rules.dart';
 import 'package:pickup_supervisor/core/widgets/module_page.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
@@ -37,19 +38,51 @@ class _FormView extends StatefulWidget {
 class _FormViewState extends State<_FormView> {
   late final _name = TextEditingController(text: widget.person?.name ?? '');
   late final _mobile = TextEditingController(
-    text:
-        widget.person?.phone
-            ?.replaceAll(RegExp(r'\D'), '')
-            .replaceFirst(RegExp(r'^91'), '') ??
-        '',
+    // Keep the "98250 12458" grouping; drop the +91 shown in its own box.
+    text: widget.person?.phone?.replaceFirst(RegExp(r'^\+91\s*'), '') ?? '',
   );
   late final _aadhaar = TextEditingController(
     text: widget.person?.idNumber ?? '',
   );
   final _removedPhotos = <String>{};
 
+  /// Errors show after the first Save, then update as the user types.
+  var _submitted = false;
+
   bool get _isEdit => widget.person != null;
   bool get _isDriver => widget.kind == DriverLabourKind.driver;
+
+  @override
+  void initState() {
+    super.initState();
+    for (final c in [_name, _mobile, _aadhaar]) {
+      c.addListener(_revalidate);
+    }
+  }
+
+  void _revalidate() {
+    if (_submitted) setState(() {});
+  }
+
+  String? _nameError(DriverLocalizations l10n) =>
+      ModuleValidators.fullName(l10n, _name.text);
+
+  /// Drivers sign in with their phone, so it is required for them only.
+  String? _mobileError(DriverLocalizations l10n) =>
+      ModuleValidators.phone(l10n, _mobile.text, required: _isDriver);
+
+  String? _idError(DriverLocalizations l10n) =>
+      ModuleValidators.idNumber(l10n, _aadhaar.text);
+
+  void _save(DriverLocalizations l10n) {
+    FocusScope.of(context).unfocus();
+    setState(() => _submitted = true);
+    final valid =
+        _nameError(l10n) == null &&
+        _mobileError(l10n) == null &&
+        _idError(l10n) == null;
+    if (valid) Navigator.of(context).maybePop();
+  }
 
   @override
   void dispose() {
@@ -65,10 +98,38 @@ class _FormViewState extends State<_FormView> {
     final title = _isEdit
         ? (_isDriver ? l10n.dlEditDriver : l10n.dlEditLabour)
         : (_isDriver ? l10n.dlAddNewDriver : l10n.dlAddNewLabour);
-    final photos = [
-      DriverLabourAssets.profilePhoto,
-      DriverLabourAssets.idCard,
-    ].where((p) => !_removedPhotos.contains(p)).toList();
+    // Edit starts with both photos on file; Add starts with none.
+    bool has(String photo) => _isEdit && !_removedPhotos.contains(photo);
+    Widget photoSection(String label, String photo, String keyName) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: DriverTextStyles.medium14.copyWith(
+            color: DriverColors.neutral950,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DriverCaptureArea(
+          captureKey: Key('driver-labour-capture-$keyName'),
+          label: l10n.dlCapturePhoto,
+          icon: has(photo)
+              ? DriverLabourAssets.cameraAddDisabled
+              : DriverLabourAssets.cameraAdd,
+          active: !has(photo),
+        ),
+        if (has(photo)) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: 139,
+            child: DriverLabourPhotoTile(
+              asset: photo,
+              onRemove: () => setState(() => _removedPhotos.add(photo)),
+            ),
+          ),
+        ],
+      ],
+    );
 
     return ModulePage(
       bottom: Row(
@@ -85,13 +146,14 @@ class _FormViewState extends State<_FormView> {
             child: DriverPrimaryButton(
               key: const Key('driver-labour-form-save'),
               radius: 12,
-              label: l10n.dlSaveSelect,
-              onPressed: () => Navigator.of(context).maybePop(),
+              label: l10n.dlSave,
+              onPressed: () => _save(l10n),
             ),
           ),
         ],
       ),
       child: ListView(
+        clipBehavior: Clip.none,
         padding: EdgeInsets.zero,
         children: [
           const ModuleBackButton(),
@@ -108,6 +170,9 @@ class _FormViewState extends State<_FormView> {
             hint: l10n.dlEnterFullName,
             controller: _name,
             required: true,
+            kind: ModuleInputKind.name,
+            fieldKey: const Key('driver-labour-name'),
+            errorText: _submitted ? _nameError(l10n) : null,
           ),
           const SizedBox(height: 16),
           DriverLabourMobileField(
@@ -116,50 +181,35 @@ class _FormViewState extends State<_FormView> {
             hint: l10n.dlEnterMobileNumber,
             controller: _mobile,
             required: _isDriver,
+            fieldKey: const Key('driver-labour-mobile'),
+            errorText: _submitted ? _mobileError(l10n) : null,
           ),
           const SizedBox(height: 16),
           DriverLabourTextField(
-            label: l10n.dlAadhaarLabel,
-            hint: l10n.dlAadhaarHint,
+            label: l10n.dlIdNumberLabel,
+            hint: l10n.dlIdNumberHint,
             controller: _aadhaar,
+            kind: ModuleInputKind.idNumber,
+            // Last typed field: Done closes the keyboard.
+            textInputAction: TextInputAction.done,
+            fieldKey: const Key('driver-labour-id'),
+            errorText: _submitted ? _idError(l10n) : null,
           ),
           const SizedBox(height: 16),
-          Text(
-            l10n.dlProfilePhoto,
-            style: DriverTextStyles.medium14.copyWith(
-              color: DriverColors.neutral950,
-            ),
+          photoSection(
+            l10n.dlProfilePhotoLabel,
+            DriverLabourAssets.profilePhoto,
+            'profile',
+          ),
+          const SizedBox(height: 16),
+          photoSection(
+            l10n.dlIdProofPhoto,
+            DriverLabourAssets.idCard,
+            'id-proof',
           ),
           const SizedBox(height: 8),
-          DriverCaptureArea(
-            captureKey: const Key('driver-labour-capture'),
-            label: l10n.dlCapturePhoto,
-            icon: _isEdit
-                ? DriverLabourAssets.cameraAddDisabled
-                : DriverLabourAssets.cameraAdd,
-            active: !_isEdit,
-          ),
-          if (_isEdit && photos.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                for (var i = 0; i < photos.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 8),
-                  Expanded(
-                    child: DriverLabourPhotoTile(
-                      asset: photos[i],
-                      onRemove: () =>
-                          setState(() => _removedPhotos.add(photos[i])),
-                    ),
-                  ),
-                ],
-                if (photos.length == 1) const Spacer(),
-              ],
-            ),
-          ],
-          const SizedBox(height: 8),
           Text(
-            l10n.dlUploadHint,
+            l10n.dlBothOptional,
             style: DriverTextStyles.regular12.copyWith(
               color: DriverColors.neutral600,
             ),

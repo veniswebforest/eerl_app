@@ -2,12 +2,14 @@ import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:eerl_app/shared/widgets/supervisor_avatar.dart';
 
@@ -172,6 +174,8 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
         TextField(
           key: const Key('d2d-vehicle-search'),
           controller: _vehicleController,
+          textCapitalization: TextCapitalization.characters,
+          textInputAction: TextInputAction.next,
           onTap: () => setState(() => _isVehicleListOpen = true),
           onChanged: (value) {
             if (value != widget.selectedVehicle) {
@@ -208,11 +212,17 @@ class _D2dVehicleDetailsFormState extends State<D2dVehicleDetailsForm> {
             ),
         ],
         const SizedBox(height: 24),
-        _FieldLabel(text: l10n.collectionGivenBy, required: false),
+        // POST /collections/{id}/submit: D2D needs givenByName.
+        _FieldLabel(text: l10n.collectionGivenBy),
         const SizedBox(height: 8),
         TextField(
           key: const Key('d2d-given-by'),
           controller: _givenByController,
+          textCapitalization: TextCapitalization.words,
+          textInputAction: TextInputAction.done,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(AppInputLimits.personName),
+          ],
           onChanged: widget.onGivenByChanged,
           style: AppTextStyles.regularB7_14,
           decoration: _inputDecoration(hint: l10n.collectionDriverNameHint),

@@ -99,8 +99,10 @@ class _MixedWasteFormViewState extends State<_MixedWasteFormView> {
           minimum: const EdgeInsets.fromLTRB(20, 8, 20, 10),
           child: DriverFormButton(
             label: l10n.savePickup,
+            // The weight is required and must be more than 0.
             enabled:
-                _photos.isNotEmpty && _weightController.text.trim().isNotEmpty,
+                _photos.isNotEmpty &&
+                (double.tryParse(_weightController.text.trim()) ?? 0) > 0,
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) =>

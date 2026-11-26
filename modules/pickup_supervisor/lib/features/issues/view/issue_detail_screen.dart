@@ -141,6 +141,7 @@ class _IssueDetailViewState extends State<_IssueDetailView> {
         IssueStatus.resolved => null,
       },
       child: ListView(
+        clipBehavior: Clip.none,
         padding: EdgeInsets.zero,
         children: [
           const ModuleBackButton(),

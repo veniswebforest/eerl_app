@@ -49,9 +49,10 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
 
   bool get _canSave =>
       _photos.every((photos) => photos.isNotEmpty) &&
-      _collectedControllers.every(
-        (controller) => controller.text.trim().isNotEmpty,
-      );
+      // Each amount is required and must be more than 0.
+      _collectedControllers.every((controller) => _positive(controller.text));
+
+  static bool _positive(String text) => (double.tryParse(text.trim()) ?? 0) > 0;
 
   @override
   void initState() {

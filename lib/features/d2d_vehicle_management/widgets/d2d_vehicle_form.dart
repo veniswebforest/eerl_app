@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/core/utils/vehicle_registration_number.dart';
 import 'package:eerl_app/shared/widgets/app_labeled_dropdown.dart';
 import 'package:eerl_app/shared/widgets/app_square_back_button.dart';
@@ -21,6 +23,8 @@ class D2dVehicleForm extends StatelessWidget {
     required this.onBack,
     required this.onCancel,
     required this.onSave,
+    this.numberErrorText,
+    this.onNumberChanged,
   });
 
   final bool editing;
@@ -34,6 +38,10 @@ class D2dVehicleForm extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onCancel;
   final VoidCallback onSave;
+
+  /// Inline plate error (PUT/PATCH /vehicles `plateNumber` pattern).
+  final String? numberErrorText;
+  final ValueChanged<String>? onNumberChanged;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -103,6 +111,8 @@ class D2dVehicleForm extends StatelessWidget {
                         controller: numberController,
                         textCapitalization: TextCapitalization.characters,
                         keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.next,
+                        onChanged: onNumberChanged,
                         inputFormatters: const [
                           VehicleRegistrationInputFormatter(),
                         ],
@@ -134,6 +144,16 @@ class D2dVehicleForm extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (numberErrorText != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        numberErrorText!,
+                        key: const Key('d2d-vehicle-number-error'),
+                        style: AppTextStyles.regularB8_12.copyWith(
+                          color: AppColors.red500,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 8),
                     Text(
                       context.l10n.d2dVehicleNumberExample,
@@ -155,6 +175,12 @@ class D2dVehicleForm extends StatelessWidget {
                         key: const Key('d2d-driver-name-field'),
                         controller: driverNameController,
                         textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.done,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(
+                            AppInputLimits.vehicleDriverName,
+                          ),
+                        ],
                         style: AppTextStyles.regularB7_14.copyWith(
                           color: AppColors.neutral950,
                         ),

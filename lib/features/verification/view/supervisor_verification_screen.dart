@@ -423,6 +423,7 @@ class _VerificationSearchField extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
     height: 55,
     child: TextField(
+      textInputAction: TextInputAction.search,
       key: const Key('verification-search-field'),
       onChanged: onChanged,
       decoration: InputDecoration(

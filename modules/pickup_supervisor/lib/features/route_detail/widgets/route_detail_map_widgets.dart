@@ -132,7 +132,7 @@ class _MapCanvas extends StatelessWidget {
     StopStatus.zeroKg => RouteDetailAssets.stopZero,
     StopStatus.cancelledBySource => RouteDetailAssets.stopCancelled,
     StopStatus.nextStop => RouteDetailAssets.stopNext,
-    StopStatus.pending => RouteDetailAssets.stopPending,
+    StopStatus.pending || StopStatus.missed => RouteDetailAssets.stopPending,
     StopStatus.inactive => RouteDetailAssets.stopPaused,
   };
 

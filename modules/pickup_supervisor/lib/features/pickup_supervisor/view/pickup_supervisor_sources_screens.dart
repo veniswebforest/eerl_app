@@ -470,6 +470,7 @@ class _SourceSearch extends StatelessWidget {
       child: TextField(
         key: const Key('supervisor-source-search'),
         onChanged: onChanged,
+        textInputAction: TextInputAction.search,
         style: DriverTextStyles.regular14,
         decoration: InputDecoration(
           hintText: hint,

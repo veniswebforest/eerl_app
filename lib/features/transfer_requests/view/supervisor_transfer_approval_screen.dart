@@ -1,5 +1,7 @@
 import 'dart:ui' as ui;
 
+import 'package:eerl_app/core/utils/input_formatters.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -83,15 +85,31 @@ class _SupervisorTransferApprovalScreenState
     );
   }
 
+  /// Truck fee: 0 to 9,999,999 with at most 2 decimals.
+  bool get _feeValid =>
+      (double.tryParse(_fee.text.trim()) ?? -1) >= 0 &&
+      InputValidators.money(_fee.text, context.l10n, allowZero: true) == null;
+
+  /// Shown once the number was edited (POST /transfers/{id}/approve,
+  /// `vehicle.vehicleNumber`: 4–20 characters, stored in capitals).
+  bool _vehicleNumberEdited = false;
+
+  String? get _vehicleNumberError => _vehicleNumberEdited
+      ? InputValidators.transferVehicleNumber(_vehicleNumber.text, context.l10n)
+      : null;
+
   bool get _vehicleReady {
     if (_otherHired) {
-      return _vehicleNumber.text.trim().length >= 4 &&
-          _transporter.text.trim().isNotEmpty &&
-          (double.tryParse(_fee.text.trim()) ?? -1) >= 0;
+      // POST /transfers/{id}/approve, choice 2: transporterName is optional.
+      return InputValidators.transferVehicleNumber(
+                _vehicleNumber.text,
+                context.l10n,
+              ) ==
+              null &&
+          _feeValid;
     }
     if (_selectedVehicle == null) return false;
-    return !_selectedVehicle!.isHired ||
-        (double.tryParse(_fee.text.trim()) ?? -1) >= 0;
+    return !_selectedVehicle!.isHired || _feeValid;
   }
 
   bool get _canSubmit => _selectedDestination != null && !_submitting;
@@ -207,14 +225,23 @@ class _SupervisorTransferApprovalScreenState
           hint: context.l10n.transferVehiclePlateInputHint,
           controller: _vehicleNumber,
           helper: context.l10n.transferVehicleNumberExample,
-          onChanged: (_) => setState(() {}),
+          textCapitalization: TextCapitalization.characters,
+          textInputAction: TextInputAction.next,
+          inputFormatters: const [UpperCaseTextInputFormatter()],
+          errorText: _vehicleNumberError,
+          onChanged: (_) => setState(() => _vehicleNumberEdited = true),
         ),
         const SizedBox(height: 24),
         _ApprovalTextField(
           fieldKey: const Key('supervisor-transfer-other-transporter'),
-          label: context.l10n.supervisorTransferTransporter,
+          label: context.l10n.supervisorTransferTransporterPlain,
           hint: context.l10n.supervisorTransferTransporterHint,
           controller: _transporter,
+          textCapitalization: TextCapitalization.words,
+          textInputAction: TextInputAction.next,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(AppInputLimits.personName),
+          ],
           onChanged: (_) => setState(() {}),
         ),
       ],
@@ -226,10 +253,11 @@ class _SupervisorTransferApprovalScreenState
           hint: '0',
           controller: _fee,
           prefixText: '₹  ',
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-          ],
+          keyboardType: AppKeyboards.decimal,
+          textInputAction: TextInputAction.done,
+          inputFormatters: AppInputFormatters.money(
+            maxValue: AppInputLimits.maxWalletAmount,
+          ),
           onChanged: (_) => setState(() {}),
         ),
       ],
@@ -361,6 +389,9 @@ class _SupervisorTransferApprovalScreenState
         minLines: 4,
         maxLines: 4,
         maxLength: 150,
+        keyboardType: AppKeyboards.multiline,
+        textInputAction: TextInputAction.newline,
+        textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(
           hintText: context.l10n.supervisorTransferDescriptionHint,
           counterText: context.l10n.supervisorTransferMaxCharacters,
@@ -635,8 +666,12 @@ class _ApprovalTextField extends StatelessWidget {
     this.prefixText,
     this.keyboardType,
     this.inputFormatters,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.errorText,
   });
   final String label;
+  final String? errorText;
   final String hint;
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
@@ -645,6 +680,8 @@ class _ApprovalTextField extends StatelessWidget {
   final String? prefixText;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -659,6 +696,8 @@ class _ApprovalTextField extends StatelessWidget {
           controller: controller,
           onChanged: onChanged,
           keyboardType: keyboardType,
+          textInputAction: textInputAction,
+          textCapitalization: textCapitalization,
           inputFormatters: inputFormatters,
           style: AppTextStyles.regularB7_14,
           decoration: InputDecoration(
@@ -685,6 +724,13 @@ class _ApprovalTextField extends StatelessWidget {
           ),
         ),
       ),
+      if (errorText != null) ...[
+        const SizedBox(height: 6),
+        Text(
+          errorText!,
+          style: AppTextStyles.regularB8_12.copyWith(color: AppColors.red500),
+        ),
+      ],
       if (helper != null) ...[
         const SizedBox(height: 6),
         Text(

@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/core/utils/input_formatters.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
@@ -50,11 +52,20 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
   ProfileModel? _profile;
   bool _submitting = false;
 
+  // Photos are optional (PUT /requests: photoUrls "No", up to 5).
   bool get _canSubmit =>
-      _photoPaths.isNotEmpty &&
       _followupDateTime != null &&
       _descriptionController.text.trim().isNotEmpty &&
+      _descriptionError == null &&
       !_submitting;
+
+  /// Shown once something is typed; an empty box only disables Submit.
+  String? get _descriptionError => InputValidators.text(
+    _descriptionController.text,
+    context.l10n,
+    minLength: 3,
+    maxLength: AppInputLimits.veryLongText,
+  );
 
   @override
   void initState() {
@@ -248,6 +259,9 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                         maxLength: 150,
                         minLines: 5,
                         maxLines: 5,
+                        keyboardType: AppKeyboards.multiline,
+                        textInputAction: TextInputAction.newline,
+                        textCapitalization: TextCapitalization.sentences,
                         textAlignVertical: TextAlignVertical.top,
                         onChanged: (_) => setState(() {}),
                         style: AppTextStyles.regularB7_14,
@@ -258,6 +272,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                           hintStyle: AppTextStyles.regularB7_14.copyWith(
                             color: AppColors.cool500,
                           ),
+                          errorText: _descriptionError,
                           counterText: context.l10n.requestDescriptionCounter,
                           counterStyle: AppTextStyles.regularB8_12.copyWith(
                             color: AppColors.neutral600,
@@ -286,7 +301,7 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
                     ),
                     const SizedBox(height: 24),
                     AppRequiredText(
-                      context.l10n.requestAddPhoto,
+                      context.l10n.requestAddPhotoPlain,
                       style: AppTextStyles.mediumSH8_14,
                     ),
                     const SizedBox(height: 8),

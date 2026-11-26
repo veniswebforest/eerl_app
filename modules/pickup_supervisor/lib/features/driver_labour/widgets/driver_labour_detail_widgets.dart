@@ -92,7 +92,7 @@ class DriverLabourInfoRowData {
   final String value;
 }
 
-/// Labelled bullet values separated by dividers (name, mobile, ID, date).
+/// Label over value rows separated by dividers (name, mobile, ID, added on).
 class DriverLabourInfoCard extends StatelessWidget {
   const DriverLabourInfoCard({
     super.key,
@@ -105,7 +105,6 @@ class DriverLabourInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labelColor = DriverColors.neutral600;
     final valueColor = muted
         ? DriverColors.neutral600
         : DriverColors.neutral950;
@@ -117,29 +116,14 @@ class DriverLabourInfoCard extends StatelessWidget {
           for (var i = 0; i < rows.length; i++) ...[
             Text(
               rows[i].label,
-              style: DriverTextStyles.semibold14.copyWith(color: labelColor),
+              style: DriverTextStyles.medium12.copyWith(
+                color: DriverColors.mutedText,
+              ),
             ),
             const SizedBox(height: 4),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(width: 8),
-                Text(
-                  '•',
-                  style: DriverTextStyles.semibold14.copyWith(
-                    color: valueColor,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    rows[i].value,
-                    style: DriverTextStyles.semibold14.copyWith(
-                      color: valueColor,
-                    ),
-                  ),
-                ),
-              ],
+            Text(
+              rows[i].value,
+              style: DriverTextStyles.semibold14.copyWith(color: valueColor),
             ),
             if (i != rows.length - 1) ...[
               const SizedBox(height: 12),

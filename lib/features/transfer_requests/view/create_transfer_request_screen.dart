@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -94,10 +96,13 @@ class _CreateTransferRequestScreenState
   double? get _estimatedExpense =>
       double.tryParse(_estimatedExpenseController.text.trim());
 
+  /// PUT /transfers: estimatedExpense is optional, 0 to 9,999,999.
   bool get _hasValidExpense =>
-      _estimatedExpense != null &&
-      _estimatedExpense!.isFinite &&
-      _estimatedExpense! >= 0;
+      _estimatedExpenseController.text.trim().isEmpty ||
+      (_estimatedExpense != null &&
+          _estimatedExpense!.isFinite &&
+          _estimatedExpense! >= 0 &&
+          _estimatedExpense! <= AppInputLimits.maxWalletAmount);
 
   Map<String, double> get _selectedQuantities {
     final itemId = _selectedItemId;
@@ -117,7 +122,7 @@ class _CreateTransferRequestScreenState
     try {
       await EerlLocalRepository.instance.saveTransferRequest(
         itemQuantities: _selectedQuantities,
-        estimatedExpense: _estimatedExpense!,
+        estimatedExpense: _estimatedExpense,
         note: _noteController.text,
       );
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
@@ -299,14 +304,18 @@ class _TransferRequestFields extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       AppRequiredText(
-        context.l10n.transferEstimatedExpenseLabel,
+        context.l10n.transferDetailEstimatedExpense,
         style: AppTextStyles.mediumSH8_14.copyWith(color: AppColors.neutral950),
       ),
       const SizedBox(height: 8),
       TextField(
         key: const Key('transfer-estimated-expense'),
         controller: estimatedExpenseController,
-        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        keyboardType: AppKeyboards.decimal,
+        textInputAction: TextInputAction.next,
+        inputFormatters: AppInputFormatters.money(
+          maxValue: AppInputLimits.maxWalletAmount,
+        ),
         decoration: _inputDecoration(context.l10n.transferEstimatedExpenseHint),
       ),
       const SizedBox(height: 16),
@@ -319,6 +328,12 @@ class _TransferRequestFields extends StatelessWidget {
         key: const Key('transfer-note'),
         controller: noteController,
         maxLines: 3,
+        keyboardType: AppKeyboards.multiline,
+        textInputAction: TextInputAction.newline,
+        textCapitalization: TextCapitalization.sentences,
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(AppInputLimits.shortText),
+        ],
         decoration: _inputDecoration(context.l10n.transferNoteHint),
       ),
     ],
@@ -350,6 +365,7 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
     height: 55,
     child: TextField(
+      textInputAction: TextInputAction.search,
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hint,
@@ -400,7 +416,9 @@ class _QuantityField extends StatelessWidget {
         child: TextField(
           key: Key('transfer-item-kg-$itemId'),
           controller: controller,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: AppKeyboards.decimal,
+          textInputAction: TextInputAction.next,
+          inputFormatters: AppInputFormatters.quantity(),
           style: AppTextStyles.regularB7_14,
           decoration: InputDecoration(
             errorText: errorText,

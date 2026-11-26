@@ -234,6 +234,9 @@ class _ApprovalDeclineSheetState extends State<ApprovalDeclineSheet> {
           child: TextField(
             key: const Key('approval-decline-reply'),
             controller: _reply,
+            keyboardType: TextInputType.multiline,
+            textInputAction: TextInputAction.newline,
+            textCapitalization: TextCapitalization.sentences,
             expands: true,
             maxLines: null,
             textAlignVertical: TextAlignVertical.top,
@@ -286,17 +289,19 @@ class ApprovalSuccessPopup extends StatelessWidget {
     required this.title,
     required this.message,
     required this.primaryLabel,
-    required this.secondaryLabel,
     required this.onPrimary,
-    required this.onSecondary,
+    this.secondaryLabel,
+    this.onSecondary,
   });
 
   final String title;
   final String message;
   final String primaryLabel;
-  final String secondaryLabel;
   final VoidCallback onPrimary;
-  final VoidCallback onSecondary;
+
+  /// Optional second (neutral) button.
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
 
   @override
   Widget build(BuildContext context) {
@@ -335,13 +340,15 @@ class ApprovalSuccessPopup extends StatelessWidget {
           semibold: true,
           onPressed: onPrimary,
         ),
-        const SizedBox(height: 12),
-        ModuleButton(
-          key: const Key('approval-success-home'),
-          label: secondaryLabel,
-          variant: ModuleButtonVariant.neutral,
-          onPressed: onSecondary,
-        ),
+        if (secondaryLabel != null) ...[
+          const SizedBox(height: 12),
+          ModuleButton(
+            key: const Key('approval-success-home'),
+            label: secondaryLabel!,
+            variant: ModuleButtonVariant.neutral,
+            onPressed: onSecondary ?? () {},
+          ),
+        ],
       ],
     );
   }

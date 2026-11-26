@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/l10n/generated/app_localizations.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
@@ -79,7 +82,12 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
       _selectedCategory! < _categories.length &&
       (double.tryParse(_amountController.text.trim()) ?? 0) > 0 &&
       !_amountExceedsBalance &&
-      _receiptPhotos.isNotEmpty;
+      _amountFormatError(context.l10n) == null;
+
+  /// Amount: more than 0, at most 9,999,999, 2 decimals (PUT /expenses).
+  /// Empty only disables Submit; the message shows once something is typed.
+  String? _amountFormatError(AppLocalizations l10n) =>
+      InputValidators.money(_amountController.text, l10n, isRequired: false);
 
   @override
   void initState() {
@@ -233,7 +241,7 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
         ? l10n.expenseAmountExceedsWalletBalance(
             _walletBalance!.toStringAsFixed(2),
           )
-        : null;
+        : _amountFormatError(l10n);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
@@ -303,14 +311,19 @@ class _LogExpenseScreenState extends State<LogExpenseScreen> {
                         child: LogExpenseInput(
                           controller: _amountController,
                           hint: l10n.expenseAmountHint,
-                          keyboardType: TextInputType.number,
+                          keyboardType: AppKeyboards.decimal,
+                          textInputAction: TextInputAction.next,
+                          inputFormatters: AppInputFormatters.money(
+                            maxValue: AppInputLimits.maxWalletAmount,
+                          ),
                           errorText: amountError,
                         ),
                       ),
                       const SizedBox(height: 24),
                       LogExpenseField(
                         label: l10n.uploadReceiptLabel,
-                        requiredField: _receiptPhotos.isEmpty,
+                        // PUT /expenses: photoUrls is optional (up to 5).
+                        requiredField: false,
                         child: ReceiptUploadSection(
                           captureLabel: l10n.capturePhoto,
                           helperText: l10n.receiptSupportMessage,

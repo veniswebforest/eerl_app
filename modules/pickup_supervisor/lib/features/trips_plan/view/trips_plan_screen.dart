@@ -135,6 +135,7 @@ class _TripsPlanViewState extends State<_TripsPlanView> {
     final l10n = DriverLocalizations.of(context);
     return ModulePage(
       child: ListView(
+        clipBehavior: Clip.none,
         key: const Key('trips-plan-scroll'),
         padding: EdgeInsets.zero,
         children: [

@@ -211,6 +211,12 @@ abstract final class DriverColors {
   static const Color pdfMuted = Color(0xFF5C5E63);
   static const Color missedCard = Color(0xFFFFF6F6);
   static const Color missedCardBorder = Color(0xFFF2B8B8);
+  static const Color notUsingAppText = Color(0xFF5D2A2A);
+
+  // Flags (PS-M06): icon tiles and the grey labels in a flag's detail.
+  static const Color flagAmberTile = Color(0xFFFFF2DB);
+  static const Color flagBlueTile = Color(0xFFE8F0FF);
+  static const Color flagLabel = Color(0xFF878787);
   static const Color cancelledCard = Color(0xFFFAF7FE);
   static const Color cancelledCardBorder = Color(0xFFE4D8F7);
   static const Color zeroKgCardBorder = Color(0xFFE3E7EC);
@@ -219,6 +225,12 @@ abstract final class DriverColors {
   static const Color escalatedBorder = Color(0xFFEDA833);
   static const Color resolvedText = Color(0xFF238B3D);
   static const Color tagGrey = Color(0xFFEDF0F2);
+  static const Color outcomePendingBg = Color(0xFFFFF7E5);
+  static const Color outcomePendingBorder = Color(0xFFF7D694);
+  static const Color outcomePendingText = Color(0xFFB87305);
+  static const Color outcomeNextBg = Color(0xFFF0FAF2);
+  static const Color outcomeNextBorder = Color(0xFFB2E0BD);
+  static const Color outcomeNextText = Color(0xFF298C40);
   static const Color infoBannerBg = Color(0xFFFFF8E6);
   static const Color infoBannerBorder = Color(0xFFF5D48A);
   static const Color infoBannerText = Color(0xFF5D4300);

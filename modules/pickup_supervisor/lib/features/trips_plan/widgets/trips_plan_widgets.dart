@@ -4,6 +4,7 @@ import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_page.dart';
 import 'package:pickup_supervisor/core/widgets/module_tag.dart';
+import 'package:pickup_supervisor/features/route_actions/model/route_actions_mock_data.dart';
 import 'package:pickup_supervisor/features/route_detail/model/route_detail_models.dart';
 import 'package:pickup_supervisor/features/route_detail/view/route_detail_screen.dart';
 import 'package:pickup_supervisor/features/trips_plan/model/trips_plan_models.dart';
@@ -273,9 +274,23 @@ class TripsPlanTripCard extends StatelessWidget {
         // Real trips open the route; an expected day opens its next 7 days.
         MaterialPageRoute<void>(
           builder: (_) => RouteDetailScreen(
+            tripState: switch (trip.status) {
+              TripStatus.planned => TripState.planned,
+              TripStatus.approved => TripState.approved,
+              TripStatus.onRoute || TripStatus.expected => TripState.onRoute,
+            },
             initialPeriod: trip.status == TripStatus.expected
                 ? RouteDetailPeriod.next7Days
                 : RouteDetailPeriod.today,
+            driverNotUsingApp:
+                trip.alert == TripAlert.driverNotUsingApp &&
+                trip.status == TripStatus.onRoute,
+            // Changed before it started: the swap shows on the trip.
+            teamChange:
+                trip.alert == TripAlert.changedForToday &&
+                    trip.status == TripStatus.onRoute
+                ? RouteActionsMockData.adajanTodayChange
+                : null,
           ),
         ),
       ),

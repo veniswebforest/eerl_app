@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
 
@@ -50,6 +52,9 @@ class RequestCashInput extends StatelessWidget {
     this.maxLength,
     this.counterText,
     this.onChanged,
+    this.textInputAction,
+    this.textCapitalization,
+    this.inputFormatters,
   });
 
   final TextEditingController controller;
@@ -61,12 +66,24 @@ class RequestCashInput extends StatelessWidget {
   final String? counterText;
   final ValueChanged<String>? onChanged;
 
+  /// Defaults: newline for multi-line boxes, otherwise the platform default.
+  final TextInputAction? textInputAction;
+  final TextCapitalization? textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
+
   @override
   Widget build(BuildContext context) {
     final hasInsideCounter = counterText?.isNotEmpty ?? false;
+    final multiline = maxLines > 1;
     final input = TextField(
       controller: controller,
-      keyboardType: keyboardType,
+      keyboardType: keyboardType ?? (multiline ? AppKeyboards.multiline : null),
+      textInputAction:
+          textInputAction ?? (multiline ? TextInputAction.newline : null),
+      textCapitalization:
+          textCapitalization ??
+          (multiline ? TextCapitalization.sentences : TextCapitalization.none),
+      inputFormatters: inputFormatters,
       maxLines: maxLines,
       maxLength: maxLength,
       onChanged: onChanged,

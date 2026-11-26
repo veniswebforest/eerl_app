@@ -283,6 +283,9 @@ class _CorrectionNoteField extends StatelessWidget {
         TextField(
           key: const Key('driver-correction-note'),
           controller: controller,
+          keyboardType: TextInputType.multiline,
+          textInputAction: TextInputAction.newline,
+          textCapitalization: TextCapitalization.sentences,
           maxLines: null,
           expands: true,
           maxLength: 150,

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pickup_supervisor/core/forms/module_input_rules.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 
@@ -237,10 +238,11 @@ class DriverEditableValueField extends StatelessWidget {
                 decimal: allowDecimal,
               ),
               inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  allowDecimal ? RegExp(r'^\d*\.?\d{0,2}') : RegExp(r'^\d*'),
-                ),
+                allowDecimal
+                    ? const ModuleDecimalFormatter(2)
+                    : FilteringTextInputFormatter.digitsOnly,
               ],
+              textInputAction: TextInputAction.next,
               textAlignVertical: TextAlignVertical.center,
               style: DriverTextStyles.regular14.copyWith(
                 color: DriverColors.neutral950,
@@ -290,6 +292,9 @@ class DriverSupervisorNoteField extends StatelessWidget {
           child: TextField(
             key: const Key('driver-supervisor-note'),
             controller: controller,
+            keyboardType: TextInputType.multiline,
+            textInputAction: TextInputAction.newline,
+            textCapitalization: TextCapitalization.sentences,
             maxLength: 150,
             maxLines: null,
             expands: true,

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pickup_supervisor/core/widgets/module_text_fields.dart';
+import 'package:pickup_supervisor/core/forms/module_input_rules.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/features/driver/service/driver_photo_capture.dart';
@@ -38,6 +40,13 @@ class _GateTeamEntryViewState extends State<_GateTeamEntryView> {
   static const _recoveryId = 'driver.pickup.gate_team';
 
   final TextEditingController _weightController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _weightController.addListener(() => setState(() {}));
+  }
+
   final TextEditingController _noteController = TextEditingController();
   final List<XFile> _photos = [];
   bool _restoredPhoto = false;
@@ -122,7 +131,14 @@ class _GateTeamEntryViewState extends State<_GateTeamEntryView> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          _WeightField(controller: _weightController),
+                          // Optional; a typed weight must be more than 0.
+                          ModuleFieldError(
+                            errorText: ModuleValidators.positiveDecimal(
+                              l10n,
+                              _weightController.text,
+                            ),
+                            child: _WeightField(controller: _weightController),
+                          ),
                           const SizedBox(height: 8),
                           Text(
                             l10n.gateWeightHelp,
@@ -190,7 +206,16 @@ class _GateTeamEntryViewState extends State<_GateTeamEntryView> {
                             key: const Key('driver-mark-gate-team'),
                             label: l10n.markForGateTeam,
                             radius: 12,
-                            onPressed: () => Navigator.of(context).pop(),
+                            onPressed: () {
+                              if (ModuleValidators.positiveDecimal(
+                                    l10n,
+                                    _weightController.text,
+                                  ) !=
+                                  null) {
+                                return;
+                              }
+                              Navigator.of(context).pop();
+                            },
                           ),
                         ],
                       ),
@@ -275,9 +300,8 @@ class _WeightField extends StatelessWidget {
         key: const Key('driver-gate-weight'),
         controller: controller,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,3}')),
-        ],
+        textInputAction: TextInputAction.next,
+        inputFormatters: [const ModuleDecimalFormatter(3)],
         style: DriverTextStyles.regular14.copyWith(
           color: DriverColors.neutral950,
         ),
@@ -323,6 +347,9 @@ class _GateNoteField extends StatelessWidget {
       child: TextField(
         key: const Key('driver-gate-note'),
         controller: controller,
+        keyboardType: TextInputType.multiline,
+        textInputAction: TextInputAction.newline,
+        textCapitalization: TextCapitalization.sentences,
         maxLength: 150,
         maxLines: null,
         expands: true,

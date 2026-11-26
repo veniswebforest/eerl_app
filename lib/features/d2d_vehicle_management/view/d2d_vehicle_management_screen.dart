@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -145,14 +146,19 @@ class _D2dVehicleManagementScreenState
       _formCenterExpanded = false;
       _vehicleNumberController.text = existing?.plateNumber ?? '';
       _driverNameController.text = existing?.driverName ?? '';
+      _plateChecked = false;
     });
   }
+
+  /// Set once Save was pressed, so the plate error then follows typing.
+  bool _plateChecked = false;
 
   Future<void> _saveForm() async {
     final plate = VehicleRegistrationNumber.normalize(
       _vehicleNumberController.text,
     );
     if (plate == null) {
+      setState(() => _plateChecked = true);
       AppTopNotification.show(
         context,
         title: context.l10n.d2dInvalidVehicleNumberTitle,
@@ -462,6 +468,15 @@ class _D2dVehicleManagementScreenState
   Widget _buildForm() => D2dVehicleForm(
     editing: _editingForm,
     numberController: _vehicleNumberController,
+    numberErrorText: _plateChecked
+        ? InputValidators.vehiclePlate(
+            _vehicleNumberController.text,
+            context.l10n,
+          )
+        : null,
+    onNumberChanged: (_) {
+      if (_plateChecked) setState(() {});
+    },
     centerOptions: _centerOptions,
     selectedCenter: _formCenter,
     centerExpanded: _formCenterExpanded,
@@ -527,6 +542,7 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
     height: 55,
     child: TextField(
+      textInputAction: TextInputAction.search,
       key: const Key('d2d-vehicle-search'),
       controller: controller,
       onChanged: onChanged,

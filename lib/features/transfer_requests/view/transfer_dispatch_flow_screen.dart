@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/core/utils/input_validators.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -23,7 +25,6 @@ import 'package:eerl_app/shared/widgets/custom_app_bar.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
-import '../../../core/utils/vehicle_registration_number.dart';
 import '../widgets/transfer_dispatch_date_time_picker.dart';
 
 class TransferDispatchFlowScreen extends StatefulWidget {
@@ -75,13 +76,25 @@ class _TransferDispatchFlowScreenState
   TextEditingController get _loadedQuantityController =>
       _usePieces ? _piecesController : _weightController;
 
+  /// POST /transfers/{id}/handover `vehicleNumber`: required, 4–20
+  /// characters. Shown once the field was edited.
+  bool _vehicleNumberEdited = false;
+
   bool get _formReady =>
-      _vehicleController.text.trim().length >= 4 &&
-      _vehicleController.text.trim().length <= 20 &&
+      InputValidators.transferVehicleNumber(
+            _vehicleController.text,
+            context.l10n,
+          ) ==
+          null &&
       _driverController.text.trim().isNotEmpty &&
       (double.tryParse(_loadedQuantityController.text.trim()) ?? 0) > 0 &&
-      ((int.tryParse(_balesController.text.trim()) ?? 0) >= 1 &&
-          (int.tryParse(_balesController.text.trim()) ?? 10000) <= 9999) &&
+      // POST /transfers/{id}/handover: baleCount is optional, 1 to 9,999.
+      InputValidators.wholeNumber(
+            _balesController.text,
+            context.l10n,
+            max: AppInputLimits.maxBaleCount,
+          ) ==
+          null &&
       _loadedAt != null &&
       _vehiclePhotos.isNotEmpty &&
       _dispatchPhotos.length <= 5 &&
@@ -260,10 +273,17 @@ class _TransferDispatchFlowScreenState
               _DispatchField(
                 label: context.l10n.transferVehicleNumberRequired,
                 hint: context.l10n.transferVehiclePlateInputHint,
-                inputFormatters: const [VehicleRegistrationInputFormatter()],
-
+                inputFormatters: const [UpperCaseTextInputFormatter()],
+                textCapitalization: TextCapitalization.characters,
+                textInputAction: TextInputAction.next,
                 controller: _vehicleController,
-                onChanged: (_) => setState(() {}),
+                errorText: _vehicleNumberEdited
+                    ? InputValidators.transferVehicleNumber(
+                        _vehicleController.text,
+                        context.l10n,
+                      )
+                    : null,
+                onChanged: (_) => setState(() => _vehicleNumberEdited = true),
               ),
 
               // textCapitalization: TextCapitalization.characters,
@@ -283,6 +303,11 @@ class _TransferDispatchFlowScreenState
                 label: context.l10n.transferDriverDetailRequired,
                 hint: context.l10n.transferSelectDriverName,
                 controller: _driverController,
+                textCapitalization: TextCapitalization.words,
+                textInputAction: TextInputAction.next,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(AppInputLimits.personName),
+                ],
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 8),
@@ -307,18 +332,20 @@ class _TransferDispatchFlowScreenState
                 prefix: _usePieces
                     ? context.l10n.collectionUnitPcs
                     : context.l10n.transferKgPrefix,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
+                keyboardType: AppKeyboards.decimal,
+                textInputAction: TextInputAction.next,
+                inputFormatters: AppInputFormatters.quantity(),
                 errorText: _loadedQuantityError,
                 onChanged: _onLoadedQuantityChanged,
               ),
               const SizedBox(height: 8),
               _DispatchField(
-                label: context.l10n.transferBalesRequired,
+                label: context.l10n.transferBalesLabel,
                 hint: context.l10n.transferBalesCountHint,
                 controller: _balesController,
-                keyboardType: TextInputType.number,
+                keyboardType: AppKeyboards.number,
+                textInputAction: TextInputAction.done,
+                inputFormatters: AppInputFormatters.digits(maxLength: 4),
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 8),
@@ -380,7 +407,9 @@ class _TransferDispatchFlowScreenState
         vehicleNumber: _vehicleController.text,
         driverName: _driverController.text,
         dispatchedWeight: loadedQuantity,
-        baleCount: int.parse(_balesController.text.trim()),
+        baleCount: _balesController.text.trim().isEmpty
+            ? null
+            : int.parse(_balesController.text.trim()),
         piecesLoaded: _usePieces ? loadedQuantity : null,
       );
       unawaited(BootstrapSyncService.instance.triggerAfterLocalMutation());
@@ -631,12 +660,16 @@ class _DispatchField extends StatelessWidget {
     this.showLabel = true,
     this.errorText,
     this.inputFormatters,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   final String label;
   final String hint;
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
   final String? prefix;
   final TextInputType? keyboardType;
   final bool showLabel;
@@ -656,6 +689,8 @@ class _DispatchField extends StatelessWidget {
         child: TextField(
           controller: controller,
           keyboardType: keyboardType,
+          textInputAction: textInputAction,
+          textCapitalization: textCapitalization,
           onChanged: onChanged,
           inputFormatters: inputFormatters,
           style: AppTextStyles.regularB7_14,

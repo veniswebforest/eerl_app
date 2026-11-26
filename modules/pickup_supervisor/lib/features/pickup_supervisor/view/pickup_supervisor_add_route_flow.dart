@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pickup_supervisor/core/widgets/module_text_fields.dart';
+import 'package:pickup_supervisor/core/forms/module_input_rules.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/features/driver/service/driver_photo_capture.dart';
@@ -81,6 +83,8 @@ class _PickupSupervisorAddRouteScreenState
                   key: const Key('add-route-name'),
                   controller: _routeNameController,
                   hint: l10n.addRouteRouteNameHint,
+                  // The only typed field here; warehouse and shift are lists.
+                  textInputAction: TextInputAction.done,
                   onChanged: (_) => setState(() {}),
                 ),
                 const SizedBox(height: 24),
@@ -173,6 +177,12 @@ class _PickupSupervisorAddRouteAssignmentScreenState
     extends State<PickupSupervisorAddRouteAssignmentScreen> {
   final _driverController = TextEditingController();
   final _labourController = TextEditingController();
+  // Hired truck: typed details instead of an app driver.
+  final _truckNumber = TextEditingController();
+  final _transporter = TextEditingController();
+  final _hiredDriver = TextEditingController();
+  final _hiredPhone = TextEditingController();
+  final _capacity = TextEditingController();
   _VehicleOption? _vehicle;
   String? _driver;
   String? _labour;
@@ -187,6 +197,15 @@ class _PickupSupervisorAddRouteAssignmentScreenState
   void dispose() {
     _driverController.dispose();
     _labourController.dispose();
+    for (final c in [
+      _truckNumber,
+      _transporter,
+      _hiredDriver,
+      _hiredPhone,
+      _capacity,
+    ]) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -209,8 +228,19 @@ class _PickupSupervisorAddRouteAssignmentScreenState
             l10n.addRouteLabourRamesh,
             l10n.addRouteLabourArjun,
           ].where((name) => !_deactivatedLabours.contains(name)).toList();
+          final hired = _vehicle?.hired ?? false;
+          // Labour is optional; a hired truck needs its number, not a driver.
+          final hiredValid =
+              ModuleValidators.vehicleNumber(
+                    l10n,
+                    _truckNumber.text,
+                    required: true,
+                  ) ==
+                  null &&
+              ModuleValidators.phone(l10n, _hiredPhone.text) == null &&
+              ModuleValidators.positiveInteger(l10n, _capacity.text) == null;
           final enabled =
-              _vehicle != null && _driver != null && _labour != null;
+              _vehicle != null && (hired ? hiredValid : _driver != null);
           return _FlowScaffold(
             screenKey: const Key('supervisor-add-route-step-2'),
             bottom: _PrimaryButton(
@@ -233,11 +263,17 @@ class _PickupSupervisorAddRouteAssignmentScreenState
                   key: const Key('add-route-vehicle'),
                   value: _vehicle == null
                       ? null
-                      : '${_vehicle!.number}  •  ${_vehicle!.shortType}',
+                      : hired
+                      ? _vehicle!.number
+                      : '${_vehicle!.number}  •  ',
+                  valueSuffix: _vehicle == null || hired
+                      ? null
+                      : _vehicle!.shortType,
                   hint: l10n.addRouteVehicleHint,
                   onTap: () => _showVehiclePicker(context, l10n),
                 ),
-                if (_vehicle != null) ...[
+                if (hired) ..._hiredDetails(l10n),
+                if (_vehicle != null && !hired) ...[
                   const SizedBox(height: 7),
                   Text(
                     l10n.addRouteCapacity,
@@ -246,46 +282,48 @@ class _PickupSupervisorAddRouteAssignmentScreenState
                     ),
                   ),
                 ],
-                const SizedBox(height: 24),
-                _FieldLabel(label: l10n.addRouteSelectDriver, required: true),
-                const SizedBox(height: 8),
-                _SearchSelectionField(
-                  key: const Key('add-route-driver'),
-                  controller: _driverController,
-                  hint: l10n.addRouteDriverHint,
-                  onTap: () => setState(() {
-                    _driverOpen = true;
-                    _labourOpen = false;
-                  }),
-                  onChanged: (value) => setState(() {
-                    _driverSearch = value;
-                    _driverOpen = true;
-                  }),
-                ),
-                if (_driverOpen)
-                  _PersonOptions(
-                    keyPrefix: 'driver-option',
-                    items: _filtered(drivers, _driverSearch),
-                    selected: _driver,
-                    emptyTitle: l10n.addRouteDriverNotFound,
-                    emptyMessage: l10n.addRouteDriverNotFoundHint,
-                    addLabel: l10n.addRouteAdd,
-                    deactivateLabel: l10n.addRouteDeactivate,
-                    onSelected: (value) => setState(() {
-                      _driver = value;
-                      _driverController.text = value;
-                      _driverOpen = false;
-                      _driverSearch = '';
+                if (!hired) ...[
+                  const SizedBox(height: 24),
+                  _FieldLabel(label: l10n.addRouteSelectDriver, required: true),
+                  const SizedBox(height: 8),
+                  _SearchSelectionField(
+                    key: const Key('add-route-driver'),
+                    controller: _driverController,
+                    hint: l10n.addRouteDriverHint,
+                    onTap: () => setState(() {
+                      _driverOpen = true;
+                      _labourOpen = false;
                     }),
-                    onAdd: () => _showAddPerson(context, driver: true),
-                    onDeactivate: (value) => _showDeactivateDialog(
-                      context,
-                      person: value,
-                      driver: true,
-                    ),
+                    onChanged: (value) => setState(() {
+                      _driverSearch = value;
+                      _driverOpen = true;
+                    }),
                   ),
+                  if (_driverOpen)
+                    _PersonOptions(
+                      keyPrefix: 'driver-option',
+                      items: _filtered(drivers, _driverSearch),
+                      selected: _driver,
+                      emptyTitle: l10n.addRouteDriverNotFound,
+                      emptyMessage: l10n.addRouteDriverNotFoundHint,
+                      addLabel: l10n.addRouteAdd,
+                      deactivateLabel: l10n.addRouteDeactivate,
+                      onSelected: (value) => setState(() {
+                        _driver = value;
+                        _driverController.text = value;
+                        _driverOpen = false;
+                        _driverSearch = '';
+                      }),
+                      onAdd: () => _showAddPerson(context, driver: true),
+                      onDeactivate: (value) => _showDeactivateDialog(
+                        context,
+                        person: value,
+                        driver: true,
+                      ),
+                    ),
+                ],
                 const SizedBox(height: 24),
-                _FieldLabel(label: l10n.addRouteSelectLabour, required: true),
+                _FieldLabel(label: l10n.addRouteSelectLabour),
                 const SizedBox(height: 8),
                 _SearchSelectionField(
                   key: const Key('add-route-labour'),
@@ -330,6 +368,100 @@ class _PickupSupervisorAddRouteAssignmentScreenState
     );
   }
 
+  /// "Hired truck details": typed number, transporter, driver and capacity.
+  List<Widget> _hiredDetails(DriverLocalizations l10n) {
+    Widget field(
+      String label,
+      String hint,
+      TextEditingController controller,
+      String key, {
+      bool required = false,
+      ModuleInputKind kind = ModuleInputKind.text,
+      TextInputAction action = TextInputAction.next,
+      String? error,
+    }) => Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _FieldLabel(label: label, required: required),
+          const SizedBox(height: 8),
+          _TextEntry(
+            key: Key(key),
+            controller: controller,
+            hint: hint,
+            kind: kind,
+            textInputAction: action,
+            errorText: error,
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+      ),
+    );
+    return [
+      const SizedBox(height: 24),
+      Text(
+        l10n.arHiredDetails,
+        style: DriverTextStyles.semibold16.copyWith(
+          color: DriverColors.neutral950,
+        ),
+      ),
+      field(
+        l10n.arTruckNumber,
+        l10n.arTruckNumberHint,
+        _truckNumber,
+        'add-route-truck-number',
+        required: true,
+        kind: ModuleInputKind.vehicle,
+        error: _truckNumber.text.trim().isEmpty
+            ? null
+            : ModuleValidators.vehicleNumber(l10n, _truckNumber.text),
+      ),
+      field(
+        l10n.arTransporter,
+        l10n.arTransporterHint,
+        _transporter,
+        'add-route-transporter',
+      ),
+      field(
+        l10n.arDriverName,
+        l10n.arDriverNameHint,
+        _hiredDriver,
+        'add-route-hired-driver',
+        kind: ModuleInputKind.name,
+      ),
+      field(
+        l10n.arDriverPhone,
+        l10n.arDriverPhoneHint,
+        _hiredPhone,
+        'add-route-hired-phone',
+        kind: ModuleInputKind.phone,
+        error: ModuleValidators.phone(l10n, _hiredPhone.text),
+      ),
+      field(
+        l10n.arCapacityKg,
+        l10n.arCapacityHint,
+        _capacity,
+        'add-route-capacity',
+        kind: ModuleInputKind.integer,
+        // Last typed field before the labour search.
+        action: TextInputAction.done,
+        error: ModuleValidators.positiveInteger(
+          l10n,
+          _capacity.text,
+          positiveMessage: l10n.vlCapacityPositive,
+        ),
+      ),
+      const SizedBox(height: 8),
+      Text(
+        l10n.arHiredNote,
+        style: DriverTextStyles.medium12.copyWith(
+          color: DriverColors.neutral600,
+        ),
+      ),
+    ];
+  }
+
   List<String> _filtered(List<String> values, String query) {
     if (query.trim().isEmpty) return values;
     return values
@@ -353,15 +485,9 @@ class _PickupSupervisorAddRouteAssignmentScreenState
         shortType: l10n.addRouteCompanyTruck,
       ),
       _VehicleOption(
-        number: l10n.addRouteVehicleRental1002,
-        type: l10n.addRouteRentalShreeRam,
-        shortType: l10n.addRouteRentalShreeRam,
-        hired: true,
-      ),
-      _VehicleOption(
-        number: l10n.addRouteVehicleRental1001,
-        type: l10n.addRouteRentalKhodiyar,
-        shortType: l10n.addRouteRentalKhodiyar,
+        number: l10n.arHiredTruck,
+        type: l10n.arHiredTruckHint,
+        shortType: l10n.arHiredTruck,
         hired: true,
       ),
     ];
@@ -446,6 +572,9 @@ class _PickupSupervisorAddRouteAssignmentScreenState
   }
 
   Future<void> _openReview(BuildContext context) async {
+    final l10n = DriverLocalizations.of(context);
+    final hired = _vehicle!.hired;
+    String typed(TextEditingController c) => c.text.trim();
     final saved = await Navigator.push<bool>(
       context,
       MaterialPageRoute<bool>(
@@ -453,9 +582,29 @@ class _PickupSupervisorAddRouteAssignmentScreenState
           routeName: widget.routeName,
           warehouse: widget.warehouse,
           shift: widget.shift,
-          vehicle: _vehicle!,
-          driver: _driver!,
-          labour: _labour!,
+          vehicle: hired
+              ? _VehicleOption(
+                  number: typed(_truckNumber),
+                  type: typed(_transporter),
+                  shortType: typed(_transporter).isEmpty
+                      ? l10n.arHiredTruck
+                      : typed(_transporter),
+                  hired: true,
+                )
+              : _vehicle!,
+          capacity: hired
+              ? (typed(_capacity).isEmpty
+                    ? null
+                    : l10n.arCapacityValue(typed(_capacity)))
+              : l10n.addRouteCapacity,
+          driver: hired
+              ? (typed(_hiredDriver).isEmpty
+                    ? l10n.rdLabourNone
+                    : typed(_hiredPhone).isEmpty
+                    ? typed(_hiredDriver)
+                    : '${typed(_hiredDriver)} (${typed(_hiredPhone)})')
+              : _driver!,
+          labour: _labour ?? l10n.rdLabourNone,
         ),
       ),
     );
@@ -471,12 +620,16 @@ class _PickupSupervisorAddRouteReviewScreen extends StatelessWidget {
     required this.vehicle,
     required this.driver,
     required this.labour,
+    this.capacity,
   });
 
   final String routeName;
   final String warehouse;
   final String shift;
   final _VehicleOption vehicle;
+
+  /// "Capacity 3000 KG"; null hides the line (hired truck left blank).
+  final String? capacity;
   final String driver;
   final String labour;
 
@@ -508,7 +661,7 @@ class _PickupSupervisorAddRouteReviewScreen extends StatelessWidget {
                 _ReviewVehicleCard(
                   label: l10n.addRouteVehicleLabel,
                   vehicle: vehicle,
-                  capacity: l10n.addRouteCapacity,
+                  capacity: capacity,
                 ),
                 const SizedBox(height: 12),
                 _ReviewCard(label: l10n.addRouteDriverWord, value: driver),
@@ -661,45 +814,61 @@ class _TextEntry extends StatelessWidget {
     required this.controller,
     required this.hint,
     this.onChanged,
+    this.kind = ModuleInputKind.text,
+    this.textInputAction = TextInputAction.next,
+    this.errorText,
   });
 
   final TextEditingController controller;
   final String hint;
   final ValueChanged<String>? onChanged;
+  final ModuleInputKind kind;
+  final TextInputAction textInputAction;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      style: DriverTextStyles.regular14.copyWith(
-        color: DriverColors.neutral950,
+    return ModuleFieldError(
+      errorText: errorText,
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        keyboardType: ModuleInputRules.keyboard(kind),
+        textCapitalization: ModuleInputRules.capitalization(kind),
+        inputFormatters: ModuleInputRules.formatters(kind),
+        textInputAction: textInputAction,
+        style: DriverTextStyles.regular14.copyWith(
+          color: DriverColors.neutral950,
+        ),
+        decoration: _inputDecoration(hint, error: errorText != null),
       ),
-      decoration: _inputDecoration(hint),
     );
   }
 }
 
-InputDecoration _inputDecoration(String hint, {Widget? suffixIcon}) =>
-    InputDecoration(
-      hintText: hint,
-      hintStyle: DriverTextStyles.regular14.copyWith(
-        color: DriverColors.cool500,
-      ),
-      suffixIcon: suffixIcon,
-      filled: true,
-      fillColor: DriverColors.neutral50,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      constraints: const BoxConstraints(minHeight: 55),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: _fieldBorder),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(color: DriverColors.primary500),
-      ),
-    );
+InputDecoration _inputDecoration(
+  String hint, {
+  Widget? suffixIcon,
+  bool error = false,
+}) => InputDecoration(
+  hintText: hint,
+  hintStyle: DriverTextStyles.regular14.copyWith(color: DriverColors.cool500),
+  suffixIcon: suffixIcon,
+  filled: true,
+  fillColor: DriverColors.neutral50,
+  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+  constraints: const BoxConstraints(minHeight: 55),
+  enabledBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    borderSide: BorderSide(color: error ? DriverColors.red600 : _fieldBorder),
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10),
+    borderSide: BorderSide(
+      color: error ? DriverColors.red600 : DriverColors.primary500,
+    ),
+  ),
+);
 
 class _SelectionField extends StatelessWidget {
   const _SelectionField({
@@ -708,8 +877,11 @@ class _SelectionField extends StatelessWidget {
     required this.hint,
     required this.onTap,
     this.expanded = false,
+    this.valueSuffix,
   });
 
+  /// Grey text after [value] ("Company Truck").
+  final String? valueSuffix;
   final String? value;
   final String hint;
   final VoidCallback onTap;
@@ -733,8 +905,17 @@ class _SelectionField extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  value ?? hint,
+                child: Text.rich(
+                  TextSpan(
+                    text: value ?? hint,
+                    children: [
+                      if (valueSuffix != null)
+                        TextSpan(
+                          text: valueSuffix,
+                          style: const TextStyle(color: DriverColors.cool500),
+                        ),
+                    ],
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: DriverTextStyles.regular14.copyWith(
@@ -781,6 +962,8 @@ class _SearchSelectionField extends StatelessWidget {
       controller: controller,
       onTap: onTap,
       onChanged: onChanged,
+      textInputAction: TextInputAction.search,
+      textCapitalization: TextCapitalization.words,
       style: DriverTextStyles.regular14.copyWith(
         color: DriverColors.neutral950,
       ),
@@ -1259,6 +1442,8 @@ class _AddPersonDialogState extends State<_AddPersonDialog> {
                   key: const Key('add-person-name'),
                   controller: _fullNameController,
                   textCapitalization: TextCapitalization.words,
+                  keyboardType: TextInputType.name,
+                  textInputAction: TextInputAction.next,
                   maxLength: 255,
                   buildCounter: _hideCounter,
                   validator: (value) => _validateName(value, l10n),
@@ -1295,6 +1480,10 @@ class _AddPersonDialogState extends State<_AddPersonDialog> {
                         key: const Key('add-person-mobile'),
                         controller: _mobileController,
                         keyboardType: TextInputType.phone,
+                        // Labour has no ID field after it: Done there.
+                        textInputAction: widget.driver
+                            ? TextInputAction.next
+                            : TextInputAction.done,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(10),
@@ -1319,6 +1508,13 @@ class _AddPersonDialogState extends State<_AddPersonDialog> {
                     controller: _aadhaarController,
                     maxLength: 100,
                     buildCounter: _hideCounter,
+                    keyboardType: ModuleInputRules.keyboard(
+                      ModuleInputKind.idNumber,
+                    ),
+                    textCapitalization: TextCapitalization.characters,
+                    textInputAction: TextInputAction.done,
+                    validator: (value) =>
+                        ModuleValidators.idNumber(l10n, value),
                     decoration: _inputDecoration(l10n.addRouteAadhaarHint),
                   ),
                   const SizedBox(height: 24),
@@ -1626,7 +1822,7 @@ class _ReviewVehicleCard extends StatelessWidget {
 
   final String label;
   final _VehicleOption vehicle;
-  final String capacity;
+  final String? capacity;
 
   @override
   Widget build(BuildContext context) {
@@ -1673,24 +1869,26 @@ class _ReviewVehicleCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              SvgPicture.asset(
-                '$_iconRoot/capacity.svg',
-                package: _assetPackage,
-                width: 20,
-                height: 20,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                capacity,
-                style: DriverTextStyles.semibold14.copyWith(
-                  color: DriverColors.neutral950,
+          if (capacity != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                SvgPicture.asset(
+                  '$_iconRoot/capacity.svg',
+                  package: _assetPackage,
+                  width: 20,
+                  height: 20,
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 6),
+                Text(
+                  capacity!,
+                  style: DriverTextStyles.semibold14.copyWith(
+                    color: DriverColors.neutral950,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

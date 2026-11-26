@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pickup_supervisor/core/widgets/module_text_fields.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_button.dart';
@@ -386,12 +387,7 @@ class _ResolveIssueSheetState extends State<ResolveIssueSheet> {
           ),
         ),
         const SizedBox(height: 24),
-        Text(
-          '${l10n.isWhatWasDoneLabel} *',
-          style: DriverTextStyles.medium14.copyWith(
-            color: DriverColors.neutral950,
-          ),
-        ),
+        ModuleFieldLabel(l10n.isWhatWasDoneLabel, required: true),
         const SizedBox(height: 8),
         Container(
           height: 133,
@@ -407,6 +403,9 @@ class _ResolveIssueSheetState extends State<ResolveIssueSheet> {
                 child: TextField(
                   key: const Key('issue-resolve-text'),
                   controller: _text,
+                  keyboardType: TextInputType.multiline,
+                  textInputAction: TextInputAction.newline,
+                  textCapitalization: TextCapitalization.sentences,
                   maxLength: 150,
                   maxLines: null,
                   expands: true,

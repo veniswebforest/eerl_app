@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -27,7 +29,18 @@ class _RequestNewExpenseCategoryDialogState
   final _descriptionController = TextEditingController();
   bool _saving = false;
 
-  bool get _canSubmit => !_saving && _categoryController.text.trim().isNotEmpty;
+  bool get _canSubmit =>
+      !_saving &&
+      _categoryController.text.trim().isNotEmpty &&
+      _nameError == null;
+
+  /// Category name: 2–100 characters (PUT /expense-categories/requests).
+  String? get _nameError => InputValidators.text(
+    _categoryController.text,
+    context.l10n,
+    minLength: 2,
+    maxLength: 100,
+  );
 
   @override
   void initState() {
@@ -107,6 +120,10 @@ class _RequestNewExpenseCategoryDialogState
                   child: LogExpenseInput(
                     controller: _categoryController,
                     hint: l10n.expenseCategoryNameHint,
+                    errorText: _nameError,
+                    textCapitalization: TextCapitalization.words,
+                    textInputAction: TextInputAction.next,
+                    inputFormatters: [LengthLimitingTextInputFormatter(100)],
                   ),
                 ),
                 const SizedBox(height: 16),

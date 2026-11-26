@@ -43,6 +43,7 @@ class _IssuesViewState extends State<_IssuesView> {
     return ModulePage(
       key: const Key('supervisor-issues-screen'),
       child: ListView(
+        clipBehavior: Clip.none,
         padding: EdgeInsets.zero,
         children: [
           Row(

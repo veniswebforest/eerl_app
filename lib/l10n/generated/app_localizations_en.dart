@@ -4721,4 +4721,56 @@ class AppLocalizationsEn extends AppLocalizations {
   ) {
     return 'You get a notification when they decide. Until then the price stays ₹$rate/$unit, and you cannot ask again for $item at this centre.';
   }
+
+  @override
+  String get validationRequired => 'This field is required.';
+
+  @override
+  String validationMinLength(int min) {
+    return 'Enter at least $min characters.';
+  }
+
+  @override
+  String validationMaxLength(int max) {
+    return 'Enter no more than $max characters.';
+  }
+
+  @override
+  String get validationInvalidNumber => 'Enter a valid number.';
+
+  @override
+  String validationMaxDecimals(int places) {
+    return 'Enter up to $places decimal places.';
+  }
+
+  @override
+  String get validationGreaterThanZero => 'Enter a value greater than 0.';
+
+  @override
+  String validationMaxValue(String max) {
+    return 'Enter a value up to $max.';
+  }
+
+  @override
+  String get validationWholeNumber => 'Enter a whole number.';
+
+  @override
+  String get requestAddPhotoPlain => 'Add Photo';
+
+  @override
+  String get transferBalesLabel => 'Bales / boris';
+
+  @override
+  String get supervisorTransferTransporterPlain => 'Transporter';
+
+  @override
+  String get supervisorTaskTitleRequired => 'Please enter a task title.';
+
+  @override
+  String get validationVehiclePlate =>
+      'Enter a valid vehicle number, e.g. GJ-05-BX-1234.';
+
+  @override
+  String get validationVehicleNumberLength =>
+      'Enter a vehicle number of 4 to 20 characters.';
 }

@@ -1581,5 +1581,19 @@
   "priceRequestCurrentValueDynamic": "₹{rate}/{unit}, {source}",
   "priceRequestAskedValueDynamic": "₹{rate}/{unit}  ({percent})",
   "priceRequestAskedByDynamic": "{name} · {time}",
-  "priceRequestWaitingMessageDynamic": "उनके निर्णय पर आपको सूचना मिलेगी। तब तक मूल्य ₹{rate}/{unit} रहेगा और इस केंद्र पर {item} के लिए दोबारा अनुरोध नहीं कर सकते।"
+  "priceRequestWaitingMessageDynamic": "उनके निर्णय पर आपको सूचना मिलेगी। तब तक मूल्य ₹{rate}/{unit} रहेगा और इस केंद्र पर {item} के लिए दोबारा अनुरोध नहीं कर सकते।",
+  "validationRequired": "यह फ़ील्ड आवश्यक है।",
+  "validationMinLength": "कम से कम {min} अक्षर दर्ज करें।",
+  "validationMaxLength": "{max} से अधिक अक्षर दर्ज न करें।",
+  "validationInvalidNumber": "मान्य संख्या दर्ज करें।",
+  "validationMaxDecimals": "दशमलव के बाद अधिकतम {places} अंक दर्ज करें।",
+  "validationGreaterThanZero": "0 से अधिक मान दर्ज करें।",
+  "validationMaxValue": "{max} तक का मान दर्ज करें।",
+  "validationWholeNumber": "पूर्ण संख्या दर्ज करें।",
+  "requestAddPhotoPlain": "फ़ोटो जोड़ें",
+  "transferBalesLabel": "गांठें / बोरियाँ",
+  "supervisorTransferTransporterPlain": "ट्रांसपोर्टर",
+  "supervisorTaskTitleRequired": "कृपया कार्य का शीर्षक दर्ज करें।",
+  "validationVehiclePlate": "मान्य वाहन नंबर दर्ज करें, जैसे GJ-05-BX-1234।",
+  "validationVehicleNumberLength": "4 से 20 अक्षरों का वाहन नंबर दर्ज करें।"
 }

@@ -4715,4 +4715,56 @@ class AppLocalizationsHi extends AppLocalizations {
   ) {
     return 'उनके निर्णय पर आपको सूचना मिलेगी। तब तक मूल्य ₹$rate/$unit रहेगा और इस केंद्र पर $item के लिए दोबारा अनुरोध नहीं कर सकते।';
   }
+
+  @override
+  String get validationRequired => 'यह फ़ील्ड आवश्यक है।';
+
+  @override
+  String validationMinLength(int min) {
+    return 'कम से कम $min अक्षर दर्ज करें।';
+  }
+
+  @override
+  String validationMaxLength(int max) {
+    return '$max से अधिक अक्षर दर्ज न करें।';
+  }
+
+  @override
+  String get validationInvalidNumber => 'मान्य संख्या दर्ज करें।';
+
+  @override
+  String validationMaxDecimals(int places) {
+    return 'दशमलव के बाद अधिकतम $places अंक दर्ज करें।';
+  }
+
+  @override
+  String get validationGreaterThanZero => '0 से अधिक मान दर्ज करें।';
+
+  @override
+  String validationMaxValue(String max) {
+    return '$max तक का मान दर्ज करें।';
+  }
+
+  @override
+  String get validationWholeNumber => 'पूर्ण संख्या दर्ज करें।';
+
+  @override
+  String get requestAddPhotoPlain => 'फ़ोटो जोड़ें';
+
+  @override
+  String get transferBalesLabel => 'गांठें / बोरियाँ';
+
+  @override
+  String get supervisorTransferTransporterPlain => 'ट्रांसपोर्टर';
+
+  @override
+  String get supervisorTaskTitleRequired => 'कृपया कार्य का शीर्षक दर्ज करें।';
+
+  @override
+  String get validationVehiclePlate =>
+      'मान्य वाहन नंबर दर्ज करें, जैसे GJ-05-BX-1234।';
+
+  @override
+  String get validationVehicleNumberLength =>
+      '4 से 20 अक्षरों का वाहन नंबर दर्ज करें।';
 }

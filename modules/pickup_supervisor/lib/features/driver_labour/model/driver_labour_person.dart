@@ -11,6 +11,7 @@ class DriverLabourPerson {
     this.phone,
     this.warehouse,
     this.active = true,
+    this.inUseRoute,
   });
 
   final String name;
@@ -21,4 +22,8 @@ class DriverLabourPerson {
   final String? warehouse;
   final DriverLabourKind kind;
   final bool active;
+
+  /// The route this person is on (or a coming trip of): deactivating is
+  /// refused (IN_USE) until the route's team changes.
+  final String? inUseRoute;
 }

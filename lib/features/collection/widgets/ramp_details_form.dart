@@ -263,6 +263,7 @@ class _RampDetailsFormState extends State<RampDetailsForm> {
       children: [
         Expanded(
           child: TextField(
+            textInputAction: TextInputAction.search,
             controller: _personSearchController,
             autofocus: true,
             onChanged: (_) => setState(() {}),

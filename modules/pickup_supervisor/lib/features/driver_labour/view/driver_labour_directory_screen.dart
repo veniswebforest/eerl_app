@@ -126,25 +126,36 @@ class _DirectoryViewState extends State<_DirectoryView> {
             controller: _search,
             onChanged: (_) => setState(() {}),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Expanded(
             child: people.isEmpty
-                ? DriverLabourEmptyState(message: l10n.dlNoDetailsFound)
-                : ListView.separated(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    itemCount: people.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 16),
-                    itemBuilder: (_, index) {
-                      final person = people[index];
-                      return DriverLabourPersonCard(
-                        key: Key('driver-labour-person-$index'),
-                        name: person.name,
-                        phone: person.phone ?? l10n.dlNoPhone,
-                        inactive: !person.active,
-                        onTap: () =>
-                            _open(DriverLabourDetailScreen(person: person)),
-                      );
-                    },
+                ? DriverLabourEmptyState(
+                    // A search with no match keeps the generic message.
+                    message: _showActive || query.isNotEmpty
+                        ? l10n.dlNoDetailsFound
+                        : isDriver
+                        ? l10n.dlNoInactiveDrivers
+                        : l10n.dlNoInactiveLabour,
+                  )
+                : ModuleSideBleed(
+                    child: ListView.separated(
+                      clipBehavior: Clip.none,
+                      // Room for the first card's top shadow.
+                      padding: const EdgeInsets.only(top: 4, bottom: 8),
+                      itemCount: people.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 16),
+                      itemBuilder: (_, index) {
+                        final person = people[index];
+                        return DriverLabourPersonCard(
+                          key: Key('driver-labour-person-$index'),
+                          name: person.name,
+                          phone: person.phone ?? l10n.dlNoPhone,
+                          inactive: !person.active,
+                          onTap: () =>
+                              _open(DriverLabourDetailScreen(person: person)),
+                        );
+                      },
+                    ),
                   ),
           ),
         ],

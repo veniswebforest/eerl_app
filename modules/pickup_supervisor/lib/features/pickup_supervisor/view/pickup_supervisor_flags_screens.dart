@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/core/widgets/module_button.dart';
+import 'package:pickup_supervisor/core/widgets/module_page.dart';
+import 'package:pickup_supervisor/core/widgets/module_toast.dart';
+import 'package:pickup_supervisor/features/pickup_supervisor/model/pickup_supervisor_flags.dart';
+import 'package:pickup_supervisor/features/pickup_supervisor/view/pickup_supervisor_routes_screen.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
+
+export 'package:pickup_supervisor/features/pickup_supervisor/model/pickup_supervisor_flags.dart'
+    show PickupSupervisorFlagDetailType;
 
 const _assetRoot = 'assets/icons/supervisor/flags';
 const _assetPackage = 'pickup_supervisor';
@@ -11,96 +19,192 @@ const _shadow = <BoxShadow>[
   BoxShadow(color: Color(0x1F000000), blurRadius: 5, offset: Offset(0, 2)),
 ];
 
-enum PickupSupervisorFlagDetailType {
-  scheduleChanged,
-  sourcePaused,
-  newSource,
-  extraPickup,
-  sourceMoved,
-}
-
+/// PS-M06 Flags (Home › Flags tile). Each card opens its flag; Mark done
+/// takes it off the list with a toast. With no open flag it shows
+/// "Nothing to check".
 class PickupSupervisorFlagsScreen extends StatelessWidget {
   const PickupSupervisorFlagsScreen({super.key, this.showEmpty = false});
 
   final bool showEmpty;
 
   @override
+  Widget build(BuildContext context) =>
+      DriverLocalizationScope(child: _FlagsView(showEmpty: showEmpty));
+}
+
+class _FlagsView extends StatefulWidget {
+  const _FlagsView({required this.showEmpty});
+
+  final bool showEmpty;
+
+  @override
+  State<_FlagsView> createState() => _FlagsViewState();
+}
+
+class _FlagsViewState extends State<_FlagsView> {
+  /// Flags marked done in this visit.
+  final _done = <PickupSupervisorFlagDetailType>{};
+
+  Future<void> _open(PickupFlag flag) async {
+    final done = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PickupSupervisorFlagDetailScreen(type: flag.type),
+      ),
+    );
+    if (done != true || !mounted) return;
+    final l10n = DriverLocalizations.of(context);
+    setState(() => _done.add(flag.type));
+    ModuleToast.show(
+      context,
+      kind: ModuleToastKind.success,
+      title: l10n.fgDoneTitle,
+      message: l10n.fgDoneBody(flag.name),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DriverLocalizationScope(
-      child: Builder(
-        builder: (context) {
-          final l10n = DriverLocalizations.of(context);
-          return Scaffold(
-            key: Key(
-              showEmpty ? 'supervisor-flags-empty' : 'supervisor-flags-list',
-            ),
-            backgroundColor: DriverColors.background,
-            body: SafeArea(
-              bottom: false,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                    child: _FlagsHeader(title: l10n.supervisorFlags),
-                  ),
-                  if (showEmpty)
-                    Expanded(child: _EmptyFlags(l10n: l10n))
-                  else
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.fromLTRB(
-                          20,
-                          25,
-                          20,
-                          MediaQuery.paddingOf(context).bottom + 24,
-                        ),
-                        child: _FlagsList(l10n: l10n),
+    final l10n = DriverLocalizations.of(context);
+    final flags = widget.showEmpty
+        ? const <PickupFlag>[]
+        : PickupFlagsMockData.all(
+            l10n,
+          ).where((f) => !_done.contains(f.type)).toList();
+    return Scaffold(
+      key: Key(
+        flags.isEmpty ? 'supervisor-flags-empty' : 'supervisor-flags-list',
+      ),
+      backgroundColor: DriverColors.background,
+      body: SafeArea(
+        bottom: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                  child: _FlagsHeader(title: l10n.supervisorFlags),
+                ),
+                if (flags.isEmpty)
+                  Expanded(child: _EmptyFlags(l10n: l10n))
+                else
+                  Expanded(
+                    child: ListView.separated(
+                      key: const Key('supervisor-flags-scroll'),
+                      padding: EdgeInsets.fromLTRB(
+                        20,
+                        24,
+                        20,
+                        MediaQuery.paddingOf(context).bottom + 24,
+                      ),
+                      itemCount: flags.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 16),
+                      itemBuilder: (_, i) => _FlagTile(
+                        flag: flags[i],
+                        onTap: () => _open(flags[i]),
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 }
 
+/// One flag: its "what happened" box, what to do, and Mark done. Pops with
+/// `true` when the flag is marked done.
 class PickupSupervisorFlagDetailScreen extends StatelessWidget {
   const PickupSupervisorFlagDetailScreen({super.key, required this.type});
 
   final PickupSupervisorFlagDetailType type;
 
   @override
-  Widget build(BuildContext context) {
-    return DriverLocalizationScope(
-      child: Builder(
-        builder: (context) {
-          final l10n = DriverLocalizations.of(context);
-          return Scaffold(
-            key: Key('supervisor-flag-detail-${type.name}'),
-            backgroundColor: DriverColors.background,
-            body: SafeArea(
-              bottom: false,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const _FlagsBackButton(),
-                    const SizedBox(height: 24),
-                    _FlagDetailCard(type: type, l10n: l10n),
-                  ],
+  Widget build(BuildContext context) => DriverLocalizationScope(
+    child: Builder(
+      builder: (context) {
+        final l10n = DriverLocalizations.of(context);
+        final flag = PickupFlagsMockData.of(l10n, type);
+        final actionLabel = switch (flag.action) {
+          FlagAction.openRoutes => l10n.fgOpenRoutes,
+          FlagAction.checkRoute => l10n.fgCheckRoute,
+          FlagAction.addToRoute => l10n.fgAddToRoute,
+        };
+        return ModulePage(
+          key: Key('supervisor-flag-detail-${type.name}'),
+          bottom: Row(
+            children: [
+              Expanded(
+                child: ModuleButton(
+                  key: const Key('supervisor-flag-action'),
+                  label: actionLabel,
+                  variant: ModuleButtonVariant.outline,
+                  height: 52,
+                  // Static: every follow-up opens Routes.
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(
+                      builder: (_) => const PickupSupervisorRoutesScreen(
+                        showBottomNavigation: false,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-            bottomNavigationBar: _FlagDetailActions(type: type, l10n: l10n),
-          );
-        },
-      ),
-    );
-  }
+              const SizedBox(width: 12),
+              Expanded(
+                child: ModuleButton(
+                  key: const Key('supervisor-flag-mark-done'),
+                  label: l10n.flagMarkDone,
+                  height: 52,
+                  onPressed: () => Navigator.pop(context, true),
+                ),
+              ),
+            ],
+          ),
+          child: ListView(
+            clipBehavior: Clip.none,
+            padding: EdgeInsets.zero,
+            children: [
+              Row(
+                children: [
+                  const _FlagsBackButton(),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      flag.title,
+                      style: DriverTextStyles.semibold20.copyWith(
+                        color: DriverColors.neutral950,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _FlagPointCard(flag: flag),
+              const SizedBox(height: 16),
+              _WhatToDoCard(label: l10n.fgWhatToDo, text: flag.whatToDo),
+              if (flag.closesByItself) ...[
+                const SizedBox(height: 16),
+                Text(
+                  l10n.fgClosesByItself,
+                  style: DriverTextStyles.medium12.copyWith(
+                    fontSize: 13,
+                    color: DriverColors.slate600,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    ),
+  );
 }
 
 class _FlagsHeader extends StatelessWidget {
@@ -164,150 +268,85 @@ class _FlagsBackButton extends StatelessWidget {
   }
 }
 
-class _FlagsList extends StatelessWidget {
-  const _FlagsList({required this.l10n});
-
-  final DriverLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    final flags = [
-      _FlagData(l10n.flagTimeClash, l10n.flagHotelRajdhaniTime),
-      _FlagData(l10n.flagOffRoute, l10n.flagSunriseOffRoute),
-      _FlagData(
-        l10n.flagScheduleChanged,
-        l10n.flagAdajanTextileSorted,
-        type: PickupSupervisorFlagDetailType.scheduleChanged,
-        highlighted: true,
-      ),
-      _FlagData(
-        l10n.flagSourcePaused,
-        l10n.flagClosedForDiwali,
-        type: PickupSupervisorFlagDetailType.sourcePaused,
-      ),
-      _FlagData(
-        l10n.flagNewSourceNoRoute,
-        l10n.flagAbcTextileMills,
-        type: PickupSupervisorFlagDetailType.newSource,
-      ),
-      _FlagData(
-        l10n.flagExtraPickupNoRoute,
-        l10n.flagShreeSaiSorted,
-        type: PickupSupervisorFlagDetailType.extraPickup,
-      ),
-      _FlagData(
-        l10n.flagSourceMovedToYou,
-        l10n.flagRkTrading,
-        type: PickupSupervisorFlagDetailType.sourceMoved,
-      ),
-    ];
-    return Column(
-      children: List.generate(
-        flags.length,
-        (index) => Padding(
-          padding: EdgeInsets.only(bottom: index == flags.length - 1 ? 0 : 16),
-          child: _FlagTile(data: flags[index]),
-        ),
-      ),
-    );
-  }
-}
-
-class _FlagData {
-  const _FlagData(
-    this.title,
-    this.subtitle, {
-    this.type,
-    this.highlighted = false,
-  });
-
-  final String title;
-  final String subtitle;
-  final PickupSupervisorFlagDetailType? type;
-  final bool highlighted;
-}
-
 class _FlagTile extends StatelessWidget {
-  const _FlagTile({required this.data});
+  const _FlagTile({required this.flag, required this.onTap});
 
-  final _FlagData data;
+  final PickupFlag flag;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = data.highlighted
-        ? DriverColors.primary500
-        : Colors.transparent;
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        key: Key('supervisor-flag-${data.title}'),
-        onTap: data.type == null
-            ? null
-            : () => Navigator.push(
-                context,
-                MaterialPageRoute<void>(
-                  builder: (_) =>
-                      PickupSupervisorFlagDetailScreen(type: data.type!),
-                ),
-              ),
+    final (icon, tile) = flag.icon;
+    return DecoratedBox(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 75),
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: borderColor),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: _shadow,
-          ),
-          child: Row(
+        boxShadow: _shadow,
+      ),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          key: Key('supervisor-flag-${flag.type.name}'),
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Stack(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEF2F2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: SvgPicture.asset(
-                  '$_assetRoot/flag_issue.svg',
-                  package: _assetPackage,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      data.title,
-                      style: DriverTextStyles.semibold16.copyWith(
-                        color: DriverColors.neutral900,
+                    Container(
+                      width: 40,
+                      height: 40,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: tile,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: SvgPicture.asset(
+                        '$_assetRoot/$icon.svg',
+                        package: _assetPackage,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      data.subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: DriverTextStyles.medium14.copyWith(
-                        color: DriverColors.neutral600,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              flag.name,
+                              style: DriverTextStyles.semibold16.copyWith(
+                                color: DriverColors.neutral900,
+                                height: 20 / 16,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              flag.summary,
+                              style: DriverTextStyles.medium14.copyWith(
+                                color: DriverColors.neutral700,
+                                height: 20 / 14,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              SvgPicture.asset(
-                data.highlighted
-                    ? '$_assetRoot/arrow_green.svg'
-                    : '$_assetRoot/arrow_muted.svg',
-                package: _assetPackage,
-                width: 13,
-                height: 13,
+              Positioned(
+                top: 15,
+                right: 15,
+                child: SvgPicture.asset(
+                  '$_assetRoot/arrow_muted.svg',
+                  package: _assetPackage,
+                  width: 12,
+                  height: 12,
+                ),
               ),
             ],
           ),
@@ -451,262 +490,139 @@ class _EmptyFlagsIllustration extends StatelessWidget {
   }
 }
 
-class _FlagDetailCard extends StatelessWidget {
-  const _FlagDetailCard({required this.type, required this.l10n});
+/// White card: pickup point name, address and the grey "what happened" box.
+class _FlagPointCard extends StatelessWidget {
+  const _FlagPointCard({required this.flag});
 
-  final PickupSupervisorFlagDetailType type;
-  final DriverLocalizations l10n;
+  final PickupFlag flag;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: _shadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.flagShreeSaiDairy,
-            style: DriverTextStyles.semibold18.copyWith(
-              color: DriverColors.neutral900,
-            ),
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          flag.name,
+          style: DriverTextStyles.semibold18.copyWith(
+            color: DriverColors.neutral900,
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              SvgPicture.asset(
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              padding: const EdgeInsets.all(5),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: SvgPicture.asset(
                 '$_assetRoot/location.svg',
                 package: _assetPackage,
-                width: 20,
-                height: 20,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  l10n.flagShreeSaiAddress,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: DriverTextStyles.medium14.copyWith(
-                    color: DriverColors.neutral700,
-                  ),
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                flag.address,
+                style: DriverTextStyles.medium14.copyWith(
+                  color: DriverColors.neutral700,
                 ),
               ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          key: const Key('supervisor-flag-facts'),
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: DriverColors.cool100,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final (i, row) in flag.rows.indexed) ...[
+                if (i > 0) const SizedBox(height: 12),
+                _LabelValue(label: row.$1, value: row.$2),
+              ],
             ],
           ),
-          const SizedBox(height: 12),
-          if (type == PickupSupervisorFlagDetailType.scheduleChanged)
-            _ScheduleChangedPanel(l10n: l10n)
-          else
-            _FlagStatusPanel(type: type, l10n: l10n),
-          if (type == PickupSupervisorFlagDetailType.scheduleChanged) ...[
-            const SizedBox(height: 8),
-            Text(
-              l10n.flagFromMon2Nov,
-              style: DriverTextStyles.semibold14.copyWith(
-                color: DriverColors.primary500,
-              ),
-            ),
-          ] else if (type == PickupSupervisorFlagDetailType.sourcePaused) ...[
-            const SizedBox(height: 8),
-            Text(
-              l10n.flagReasonClosedForDiwali,
-              style: DriverTextStyles.semibold14.copyWith(
-                color: DriverColors.primary500,
-              ),
-            ),
-          ] else if (type == PickupSupervisorFlagDetailType.sourceMoved) ...[
-            const SizedBox(height: 8),
-            Text(
-              l10n.flagMovedFromVesu,
-              style: DriverTextStyles.semibold14.copyWith(
-                color: DriverColors.primary500,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 }
 
-class _ScheduleChangedPanel extends StatelessWidget {
-  const _ScheduleChangedPanel({required this.l10n});
+class _LabelValue extends StatelessWidget {
+  const _LabelValue({required this.label, required this.value});
 
-  final DriverLocalizations l10n;
+  final String label;
+  final String value;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 116,
-      decoration: BoxDecoration(
-        color: DriverColors.cool100,
-        borderRadius: BorderRadius.circular(12),
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: DriverTextStyles.medium12.copyWith(
+          color: DriverColors.flagLabel,
+        ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            l10n.flagWas,
-            style: DriverTextStyles.semibold12.copyWith(
-              color: DriverColors.neutral400,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            l10n.flagOldSchedule,
-            style: DriverTextStyles.semibold14.copyWith(
-              color: DriverColors.neutral700,
-            ),
-          ),
-          const SizedBox(height: 4),
-          SvgPicture.asset(
-            '$_assetRoot/down_arrow.svg',
-            package: _assetPackage,
-            width: 16,
-            height: 20,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            l10n.flagNow,
-            style: DriverTextStyles.semibold12.copyWith(
-              color: DriverColors.neutral400,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            l10n.flagNewSchedule,
-            style: DriverTextStyles.semibold14.copyWith(
-              color: DriverColors.neutral700,
-            ),
-          ),
-        ],
+      const SizedBox(height: 4),
+      Text(
+        value,
+        style: DriverTextStyles.semibold14.copyWith(
+          color: DriverColors.neutral900,
+        ),
       ),
-    );
-  }
+    ],
+  );
 }
 
-class _FlagStatusPanel extends StatelessWidget {
-  const _FlagStatusPanel({required this.type, required this.l10n});
+class _WhatToDoCard extends StatelessWidget {
+  const _WhatToDoCard({required this.label, required this.text});
 
-  final PickupSupervisorFlagDetailType type;
-  final DriverLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    final (label, icon) = switch (type) {
-      PickupSupervisorFlagDetailType.sourcePaused => (
-        l10n.flagPausedDates,
-        'paused',
-      ),
-      PickupSupervisorFlagDetailType.newSource => (
-        l10n.flagNewSourceNoRoute,
-        'no_route',
-      ),
-      PickupSupervisorFlagDetailType.extraPickup => (
-        l10n.flagExtraPickupNoRouteDetail,
-        'no_route',
-      ),
-      PickupSupervisorFlagDetailType.sourceMoved => (
-        l10n.flagSourceMovedToYou,
-        'moved',
-      ),
-      PickupSupervisorFlagDetailType.scheduleChanged => ('', 'no_route'),
-    };
-    return Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(minHeight: 54),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: DriverColors.cool100,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            padding: const EdgeInsets.all(5),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-            child: SvgPicture.asset(
-              '$_assetRoot/$icon.svg',
-              package: _assetPackage,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              label,
-              style: DriverTextStyles.semibold14.copyWith(
-                color: DriverColors.neutral700,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FlagDetailActions extends StatelessWidget {
-  const _FlagDetailActions({required this.type, required this.l10n});
-
-  final PickupSupervisorFlagDetailType type;
-  final DriverLocalizations l10n;
+  final String label;
+  final String text;
 
   @override
-  Widget build(BuildContext context) {
-    final single = type == PickupSupervisorFlagDetailType.sourcePaused;
-    final secondary = type == PickupSupervisorFlagDetailType.scheduleChanged
-        ? l10n.flagCheckRoute
-        : l10n.flagAddToRoute;
-    return SafeArea(
-      minimum: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-      child: Row(
-        children: [
-          if (!single) ...[
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
-                  foregroundColor: DriverColors.primary500,
-                  side: const BorderSide(color: DriverColors.primary500),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(secondary, style: DriverTextStyles.bold16),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            child: FilledButton(
-              onPressed: () => Navigator.maybePop(context),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                backgroundColor: DriverColors.primary500,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: Text(
-                single ? l10n.flagDone : l10n.flagMarkDone,
-                style: DriverTextStyles.bold16.copyWith(color: Colors.white),
-              ),
-            ),
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: DriverTextStyles.medium12.copyWith(
+            color: DriverColors.flagLabel,
           ),
-        ],
-      ),
-    );
-  }
+        ),
+        const SizedBox(height: 4),
+        Text(
+          text,
+          style: DriverTextStyles.medium14.copyWith(
+            color: DriverColors.neutral900,
+            height: 20 / 14,
+          ),
+        ),
+      ],
+    ),
+  );
 }

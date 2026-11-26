@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
+import 'package:pickup_supervisor/features/cash_payments/view/cash_payments_screen.dart';
 import 'package:pickup_supervisor/features/driver_labour/view/driver_labour_directory_screen.dart';
 import 'package:pickup_supervisor/features/pickup_supervisor/model/pickup_supervisor_bottom_nav_item.dart';
 import 'package:pickup_supervisor/features/issues/view/issues_screen.dart';
@@ -75,6 +76,12 @@ class _PickupSupervisorDashboardShellState
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const PickupSupervisorIssuesScreen(),
+                    ),
+                  );
+                } else if (item == 'cash-payments') {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const CashPaymentsScreen(),
                     ),
                   );
                 } else if (item == 'drivers-labour') {

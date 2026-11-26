@@ -147,6 +147,7 @@ class _MrfDetailsFormState extends State<MrfDetailsForm> {
           )
         else ...[
           TextField(
+            textInputAction: TextInputAction.search,
             key: const Key('mrf-labor-search'),
             controller: _search,
             onChanged: (_) => setState(() {}),

@@ -1,3 +1,5 @@
+import 'package:eerl_app/core/utils/input_formatters.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -545,6 +547,7 @@ class _ExpenseSearchField extends StatelessWidget {
   Widget build(BuildContext context) => SizedBox(
     height: 55,
     child: TextField(
+      textInputAction: TextInputAction.search,
       onChanged: onChanged,
       style: AppTextStyles.mediumSH8_14,
       decoration: InputDecoration(
@@ -1300,6 +1303,15 @@ class _RejectExpenseScreenState extends State<_RejectExpenseScreen> {
     super.dispose();
   }
 
+  /// "Other" alone becomes the whole reason, which the server needs to be at
+  /// least 3 characters.
+  String? _otherReasonError() => InputValidators.text(
+    _otherController.text,
+    context.l10n,
+    minLength: selected.length == 1 ? 3 : null,
+    maxLength: AppInputLimits.longText,
+  );
+
   Future<void> _confirm(List<String> reasons) async {
     final otherIndex = reasons.length - 1;
     final sortedSelection = selected.toList()..sort();
@@ -1446,9 +1458,12 @@ class _RejectExpenseScreenState extends State<_RejectExpenseScreen> {
                               ),
                               controller: _otherController,
                               maxLength: 150,
+                              textCapitalization: TextCapitalization.sentences,
+                              textInputAction: TextInputAction.next,
                               onChanged: (_) => setState(() {}),
                               decoration: InputDecoration(
                                 labelText: l.verificationRejectOther,
+                                errorText: _otherReasonError(),
                                 filled: true,
                                 fillColor: Colors.white,
                                 border: OutlineInputBorder(
@@ -1478,6 +1493,10 @@ class _RejectExpenseScreenState extends State<_RejectExpenseScreen> {
                                   maxLength: 150,
                                   minLines: 4,
                                   maxLines: 4,
+                                  keyboardType: AppKeyboards.multiline,
+                                  textInputAction: TextInputAction.newline,
+                                  textCapitalization:
+                                      TextCapitalization.sentences,
                                   style: AppTextStyles.mediumSH8_14,
                                   decoration: InputDecoration(
                                     hintText: widget.cashRequest
@@ -1525,7 +1544,8 @@ class _RejectExpenseScreenState extends State<_RejectExpenseScreen> {
                       onPressed:
                           selected.isEmpty ||
                               (selected.contains(reasons.length - 1) &&
-                                  _otherController.text.trim().isEmpty) ||
+                                  (_otherController.text.trim().isEmpty ||
+                                      _otherReasonError() != null)) ||
                               _submitting
                           ? null
                           : () => _confirm(reasons),

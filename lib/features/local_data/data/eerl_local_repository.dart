@@ -295,7 +295,7 @@ class EerlLocalRepository {
   );
   Future<String> saveTransferRequest({
     required Map<String, double> itemQuantities,
-    required double estimatedExpense,
+    double? estimatedExpense,
     String? note,
   }) => _local.saveTransferRequest(
     itemQuantities: itemQuantities,

@@ -328,12 +328,6 @@ abstract class DriverLocalizations {
   /// **'Pending'**
   String get pendingStatus;
 
-  /// No description provided for @skippedStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Skipped'**
-  String get skippedStatus;
-
   /// No description provided for @stopDetail.
   ///
   /// In en, this message translates to:
@@ -2812,100 +2806,10 @@ abstract class DriverLocalizations {
   /// **'Remarks : All yard trucks are currently out. Try after 2 PM.'**
   String get attentionIssueRemarks;
 
-  /// No description provided for @flagTimeClash.
-  ///
-  /// In en, this message translates to:
-  /// **'Time clash'**
-  String get flagTimeClash;
-
-  /// No description provided for @flagHotelRajdhaniTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Hotel Rajdhani · 1:30 pm vs 9–11 am'**
-  String get flagHotelRajdhaniTime;
-
-  /// No description provided for @flagOffRoute.
-  ///
-  /// In en, this message translates to:
-  /// **'Off the route'**
-  String get flagOffRoute;
-
-  /// No description provided for @flagSunriseOffRoute.
-  ///
-  /// In en, this message translates to:
-  /// **'Sunrise School · 4.2 km off route'**
-  String get flagSunriseOffRoute;
-
-  /// No description provided for @flagScheduleChanged.
-  ///
-  /// In en, this message translates to:
-  /// **'Schedule changed'**
-  String get flagScheduleChanged;
-
-  /// No description provided for @flagAdajanTextileSorted.
-  ///
-  /// In en, this message translates to:
-  /// **'Adajan Textile Mill · Sorted'**
-  String get flagAdajanTextileSorted;
-
-  /// No description provided for @flagSourcePaused.
-  ///
-  /// In en, this message translates to:
-  /// **'Source paused'**
-  String get flagSourcePaused;
-
-  /// No description provided for @flagClosedForDiwali.
-  ///
-  /// In en, this message translates to:
-  /// **'Closed for Diwali'**
-  String get flagClosedForDiwali;
-
-  /// No description provided for @flagNewSourceNoRoute.
-  ///
-  /// In en, this message translates to:
-  /// **'New source, no route'**
-  String get flagNewSourceNoRoute;
-
-  /// No description provided for @flagAbcTextileMills.
-  ///
-  /// In en, this message translates to:
-  /// **'ABC Textile Mills'**
-  String get flagAbcTextileMills;
-
-  /// No description provided for @flagExtraPickupNoRoute.
-  ///
-  /// In en, this message translates to:
-  /// **'Extra Pickup, no route'**
-  String get flagExtraPickupNoRoute;
-
-  /// No description provided for @flagExtraPickupNoRouteDetail.
-  ///
-  /// In en, this message translates to:
-  /// **'Extra pickup, no route'**
-  String get flagExtraPickupNoRouteDetail;
-
-  /// No description provided for @flagShreeSaiSorted.
-  ///
-  /// In en, this message translates to:
-  /// **'Shree Sai Dairy · Sorted'**
-  String get flagShreeSaiSorted;
-
-  /// No description provided for @flagSourceMovedToYou.
-  ///
-  /// In en, this message translates to:
-  /// **'Source moved to you'**
-  String get flagSourceMovedToYou;
-
-  /// No description provided for @flagRkTrading.
-  ///
-  /// In en, this message translates to:
-  /// **'R.K trading and co.'**
-  String get flagRkTrading;
-
   /// No description provided for @flagNothingToCheck.
   ///
   /// In en, this message translates to:
-  /// **'Nothing to check!'**
+  /// **'Nothing to check'**
   String get flagNothingToCheck;
 
   /// No description provided for @flagOctober.
@@ -2917,92 +2821,14 @@ abstract class DriverLocalizations {
   /// No description provided for @flagNothingToCheckSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'You don’t have any new notifications or pending action items right now.'**
+  /// **'No flags right now. Schedule changes, pauses and pickup points without a route show up here.'**
   String get flagNothingToCheckSubtitle;
-
-  /// No description provided for @flagShreeSaiDairy.
-  ///
-  /// In en, this message translates to:
-  /// **'Shree Sai Dairy'**
-  String get flagShreeSaiDairy;
-
-  /// No description provided for @flagShreeSaiAddress.
-  ///
-  /// In en, this message translates to:
-  /// **'U 9, 10, Siddhgiri Tower, B/H Navyug...'**
-  String get flagShreeSaiAddress;
-
-  /// No description provided for @flagWas.
-  ///
-  /// In en, this message translates to:
-  /// **'Was'**
-  String get flagWas;
-
-  /// No description provided for @flagOldSchedule.
-  ///
-  /// In en, this message translates to:
-  /// **'Mon, Thu · 8–10 am'**
-  String get flagOldSchedule;
-
-  /// No description provided for @flagNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Now'**
-  String get flagNow;
-
-  /// No description provided for @flagNewSchedule.
-  ///
-  /// In en, this message translates to:
-  /// **'Mon, Wed · 9–11 am'**
-  String get flagNewSchedule;
-
-  /// No description provided for @flagFromMon2Nov.
-  ///
-  /// In en, this message translates to:
-  /// **'From : Mon 2 Nov'**
-  String get flagFromMon2Nov;
-
-  /// No description provided for @flagPausedDates.
-  ///
-  /// In en, this message translates to:
-  /// **'Paused 20–26 Oct'**
-  String get flagPausedDates;
-
-  /// No description provided for @flagReasonClosedForDiwali.
-  ///
-  /// In en, this message translates to:
-  /// **'Reason: Closed for Diwali'**
-  String get flagReasonClosedForDiwali;
-
-  /// No description provided for @flagMovedFromVesu.
-  ///
-  /// In en, this message translates to:
-  /// **'Moved from Vesu area'**
-  String get flagMovedFromVesu;
-
-  /// No description provided for @flagCheckRoute.
-  ///
-  /// In en, this message translates to:
-  /// **'Check route'**
-  String get flagCheckRoute;
-
-  /// No description provided for @flagAddToRoute.
-  ///
-  /// In en, this message translates to:
-  /// **'Add to route'**
-  String get flagAddToRoute;
 
   /// No description provided for @flagMarkDone.
   ///
   /// In en, this message translates to:
   /// **'Mark done'**
   String get flagMarkDone;
-
-  /// No description provided for @flagDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Done'**
-  String get flagDone;
 
   /// No description provided for @sourcesNavLabel.
   ///
@@ -3466,35 +3292,11 @@ abstract class DriverLocalizations {
   /// **'GJ-05-BX-1234'**
   String get addRouteVehicleCompany1234;
 
-  /// No description provided for @addRouteVehicleRental1002.
-  ///
-  /// In en, this message translates to:
-  /// **'GJ-05-EE-1002'**
-  String get addRouteVehicleRental1002;
-
-  /// No description provided for @addRouteVehicleRental1001.
-  ///
-  /// In en, this message translates to:
-  /// **'GJ-05-EE-1001'**
-  String get addRouteVehicleRental1001;
-
   /// No description provided for @addRouteCompanyTruck.
   ///
   /// In en, this message translates to:
   /// **'Company truck'**
   String get addRouteCompanyTruck;
-
-  /// No description provided for @addRouteRentalShreeRam.
-  ///
-  /// In en, this message translates to:
-  /// **'Hired from Shree ram Transport'**
-  String get addRouteRentalShreeRam;
-
-  /// No description provided for @addRouteRentalKhodiyar.
-  ///
-  /// In en, this message translates to:
-  /// **'Hired from Khodiyar Transport'**
-  String get addRouteRentalKhodiyar;
 
   /// No description provided for @addRouteCapacity.
   ///
@@ -4489,7 +4291,7 @@ abstract class DriverLocalizations {
   /// No description provided for @dlAddLabourer.
   ///
   /// In en, this message translates to:
-  /// **'Add labourer'**
+  /// **'Add labour'**
   String get dlAddLabourer;
 
   /// No description provided for @dlNoDetailsFound.
@@ -4558,18 +4360,6 @@ abstract class DriverLocalizations {
   /// **'+91'**
   String get dlCountryCode;
 
-  /// No description provided for @dlAadhaarLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Aadhar card Number'**
-  String get dlAadhaarLabel;
-
-  /// No description provided for @dlAadhaarHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Aadhaar / Voter ID'**
-  String get dlAadhaarHint;
-
   /// No description provided for @dlProfilePhoto.
   ///
   /// In en, this message translates to:
@@ -4582,35 +4372,11 @@ abstract class DriverLocalizations {
   /// **'Capture Photo'**
   String get dlCapturePhoto;
 
-  /// No description provided for @dlUploadHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Upload a photo to record and verify details.'**
-  String get dlUploadHint;
-
   /// No description provided for @dlCancel.
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
   String get dlCancel;
-
-  /// No description provided for @dlSaveSelect.
-  ///
-  /// In en, this message translates to:
-  /// **'Save & Select'**
-  String get dlSaveSelect;
-
-  /// No description provided for @dlIdCardNumber.
-  ///
-  /// In en, this message translates to:
-  /// **'ID / Card Number'**
-  String get dlIdCardNumber;
-
-  /// No description provided for @dlDateTime.
-  ///
-  /// In en, this message translates to:
-  /// **'Date & Time'**
-  String get dlDateTime;
 
   /// No description provided for @dlDeactivate.
   ///
@@ -4623,72 +4389,6 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'Edit'**
   String get dlEdit;
-
-  /// No description provided for @dlReactive.
-  ///
-  /// In en, this message translates to:
-  /// **'Reactive'**
-  String get dlReactive;
-
-  /// No description provided for @dlAreYouSure.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure?'**
-  String get dlAreYouSure;
-
-  /// No description provided for @dlDeactivateDriverMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to deactivated this Driver person'**
-  String get dlDeactivateDriverMessage;
-
-  /// No description provided for @dlDeactivateLabourMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to deactivated this Labour person'**
-  String get dlDeactivateLabourMessage;
-
-  /// No description provided for @dlReactiveDriverMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to reactive this Driver person'**
-  String get dlReactiveDriverMessage;
-
-  /// No description provided for @dlReactiveLabourMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to reactive this Labour person'**
-  String get dlReactiveLabourMessage;
-
-  /// No description provided for @dlYes.
-  ///
-  /// In en, this message translates to:
-  /// **'Yes'**
-  String get dlYes;
-
-  /// No description provided for @dlDeactivatedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Deactivated Successfully!'**
-  String get dlDeactivatedTitle;
-
-  /// No description provided for @dlDeactivatedBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Profile deactivated.'**
-  String get dlDeactivatedBody;
-
-  /// No description provided for @dlReactivedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Reactive Successfully!'**
-  String get dlReactivedTitle;
-
-  /// No description provided for @dlReactivedBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Profile reactivated.'**
-  String get dlReactivedBody;
 
   /// No description provided for @supervisorTripsToday.
   ///
@@ -5302,12 +5002,6 @@ abstract class DriverLocalizations {
   /// **'Address'**
   String get sdAddress;
 
-  /// No description provided for @sdOpenMaps.
-  ///
-  /// In en, this message translates to:
-  /// **'Open in Google Maps'**
-  String get sdOpenMaps;
-
   /// No description provided for @sdSchedule.
   ///
   /// In en, this message translates to:
@@ -5325,54 +5019,6 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'IEC Executive'**
   String get sdIecExecutive;
-
-  /// No description provided for @sdPickupCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Pickup category'**
-  String get sdPickupCategory;
-
-  /// No description provided for @sdMaterial.
-  ///
-  /// In en, this message translates to:
-  /// **'Material'**
-  String get sdMaterial;
-
-  /// No description provided for @sdPickupStatus.
-  ///
-  /// In en, this message translates to:
-  /// **'Pickup Status'**
-  String get sdPickupStatus;
-
-  /// No description provided for @sdWarehouse.
-  ///
-  /// In en, this message translates to:
-  /// **'Warehouse'**
-  String get sdWarehouse;
-
-  /// No description provided for @sdStatusNextStop.
-  ///
-  /// In en, this message translates to:
-  /// **'Next Stop'**
-  String get sdStatusNextStop;
-
-  /// No description provided for @sdCall.
-  ///
-  /// In en, this message translates to:
-  /// **'Call'**
-  String get sdCall;
-
-  /// No description provided for @sdSkipForToday.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip For Today'**
-  String get sdSkipForToday;
-
-  /// No description provided for @sdMaterialsList.
-  ///
-  /// In en, this message translates to:
-  /// **'Milk Pouch, Card Board'**
-  String get sdMaterialsList;
 
   /// No description provided for @sdRoleManager.
   ///
@@ -5395,7 +5041,7 @@ abstract class DriverLocalizations {
   /// No description provided for @skTitle.
   ///
   /// In en, this message translates to:
-  /// **'Skip Source'**
+  /// **'Skip this pickup'**
   String get skTitle;
 
   /// No description provided for @skReasonLabel.
@@ -5445,18 +5091,6 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'Confirm Skip'**
   String get skConfirm;
-
-  /// No description provided for @skSkippedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Source Skipped!'**
-  String get skSkippedTitle;
-
-  /// No description provided for @skSkippedBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Resumes tomorrow automatically.'**
-  String get skSkippedBody;
 
   /// No description provided for @apToApprove.
   ///
@@ -6213,6 +5847,2374 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'No trips · warehouse holiday'**
   String get tpNoTripsHoliday;
+
+  /// No description provided for @rdTripDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip details'**
+  String get rdTripDetails;
+
+  /// No description provided for @rdThisTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'This trip'**
+  String get rdThisTrip;
+
+  /// No description provided for @rdStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Started {time} (Start trip)'**
+  String rdStarted(String time);
+
+  /// No description provided for @rdLabourNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get rdLabourNone;
+
+  /// No description provided for @rdAtWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'At the warehouse'**
+  String get rdAtWarehouse;
+
+  /// No description provided for @rdWeighbridge.
+  ///
+  /// In en, this message translates to:
+  /// **'Weighbridge net :'**
+  String get rdWeighbridge;
+
+  /// No description provided for @rdDriversTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver’s total :'**
+  String get rdDriversTotal;
+
+  /// No description provided for @rdBagsReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Bags received :'**
+  String get rdBagsReceived;
+
+  /// No description provided for @rdApprovedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved by :'**
+  String get rdApprovedBy;
+
+  /// No description provided for @rdDriversTotalValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{kg} kg · difference {diff} kg ({pct}%)'**
+  String rdDriversTotalValue(String kg, String diff, String pct);
+
+  /// No description provided for @rdApprovedByValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {time}'**
+  String rdApprovedByValue(String name, String time);
+
+  /// No description provided for @rdTagGate.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered at gate · {time}'**
+  String rdTagGate(String time);
+
+  /// No description provided for @rdStatusMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get rdStatusMissed;
+
+  /// No description provided for @rdNoteNotRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded by the driver'**
+  String get rdNoteNotRecorded;
+
+  /// No description provided for @rdNoteNoMaterialDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'No material, per the driver'**
+  String get rdNoteNoMaterialDriver;
+
+  /// No description provided for @rdNoteAskedToSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked to skip today'**
+  String get rdNoteAskedToSkip;
+
+  /// No description provided for @rdNextVisits.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {dates}'**
+  String rdNextVisits(String dates);
+
+  /// No description provided for @rdEveryDayVisits.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day · {count} visits'**
+  String rdEveryDayVisits(String count);
+
+  /// No description provided for @rdStatusApprovedTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get rdStatusApprovedTrip;
+
+  /// No description provided for @raOnRouteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} · on route'**
+  String raOnRouteTitle(String route);
+
+  /// No description provided for @raOnRouteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The trip has started, so its team and stops can’t change.'**
+  String get raOnRouteBody;
+
+  /// No description provided for @raCompleteTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete trip for the driver'**
+  String get raCompleteTrip;
+
+  /// No description provided for @raCompleteTripBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The driver can’t finish it in the app'**
+  String get raCompleteTripBody;
+
+  /// No description provided for @raAskHeadBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Need another vehicle or more labour'**
+  String get raAskHeadBody;
+
+  /// No description provided for @raPlannedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} · planned'**
+  String raPlannedTitle(String route);
+
+  /// No description provided for @raPlannedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The trip hasn’t started, so you can still change it.'**
+  String get raPlannedBody;
+
+  /// No description provided for @raChangeTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Change driver or labour'**
+  String get raChangeTeam;
+
+  /// No description provided for @raChangeTeamBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick another driver or labourer for this trip'**
+  String get raChangeTeamBody;
+
+  /// No description provided for @raMoveStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Move stops to another trip'**
+  String get raMoveStops;
+
+  /// No description provided for @raMoveStopsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Send some pickups to a different trip'**
+  String get raMoveStopsBody;
+
+  /// No description provided for @raSwitchOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch off this trip'**
+  String get raSwitchOff;
+
+  /// No description provided for @raSwitchOffBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No trip that day; its pickups are skipped'**
+  String get raSwitchOffBody;
+
+  /// No description provided for @sdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop detail'**
+  String get sdTitle;
+
+  /// No description provided for @sdRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get sdRoute;
+
+  /// No description provided for @sdDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get sdDue;
+
+  /// No description provided for @sdOnTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'On the trip'**
+  String get sdOnTrip;
+
+  /// No description provided for @sdStopOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop {number} of {total}'**
+  String sdStopOf(String number, String total);
+
+  /// No description provided for @sdStopOfDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop {number} of {total} · {km} km from the last stop'**
+  String sdStopOfDistance(String number, String total, String km);
+
+  /// No description provided for @sdDueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today · {time}'**
+  String sdDueToday(String time);
+
+  /// No description provided for @sdDueOn.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {time}'**
+  String sdDueOn(String date, String time);
+
+  /// No description provided for @sdCallPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Call the person at the pickup point'**
+  String get sdCallPerson;
+
+  /// No description provided for @sdTripStartedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The trip has started. The driver records what happens at this stop.'**
+  String get sdTripStartedNote;
+
+  /// No description provided for @sdSkipThisPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this pickup'**
+  String get sdSkipThisPickup;
+
+  /// No description provided for @sdRouteVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} · {plate} · {vehicle}'**
+  String sdRouteVehicle(String route, String plate, String vehicle);
+
+  /// No description provided for @sdRoutePlanned.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} · {date} · {plate}'**
+  String sdRoutePlanned(String route, String date, String plate);
+
+  /// No description provided for @sdOwnVehicleLower.
+  ///
+  /// In en, this message translates to:
+  /// **'own vehicle'**
+  String get sdOwnVehicleLower;
+
+  /// No description provided for @sdContractVehicleLower.
+  ///
+  /// In en, this message translates to:
+  /// **'contract vehicle'**
+  String get sdContractVehicleLower;
+
+  /// No description provided for @sdRoleOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get sdRoleOwner;
+
+  /// No description provided for @skReasonSourceAsked.
+  ///
+  /// In en, this message translates to:
+  /// **'Source asked'**
+  String get skReasonSourceAsked;
+
+  /// No description provided for @skReasonCapacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity full at warehouse'**
+  String get skReasonCapacity;
+
+  /// No description provided for @skReasonShift.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough time in shift'**
+  String get skReasonShift;
+
+  /// No description provided for @skPickupSkippedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup Skipped!'**
+  String get skPickupSkippedTitle;
+
+  /// No description provided for @skPickupSkippedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is off {date}’s trip. Next visit: {next}.'**
+  String skPickupSkippedBody(String name, String date, String next);
+
+  /// No description provided for @rdDateTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri, 23 Oct 2026'**
+  String get rdDateTomorrow;
+
+  /// No description provided for @rdFreqMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get rdFreqMonthly;
+
+  /// No description provided for @rdSchedFirstOfMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'1st of the month · {time}'**
+  String rdSchedFirstOfMonth(String time);
+
+  /// No description provided for @sdRoleStoreManager.
+  ///
+  /// In en, this message translates to:
+  /// **'Store manager'**
+  String get sdRoleStoreManager;
+
+  /// No description provided for @sdRoleOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Office'**
+  String get sdRoleOffice;
+
+  /// No description provided for @sdRouteVehicleTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} · {plate} · {vehicle} ({transport})'**
+  String sdRouteVehicleTransport(
+    String route,
+    String plate,
+    String vehicle,
+    String transport,
+  );
+
+  /// No description provided for @sxCollectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected · {amount}'**
+  String sxCollectedTitle(String amount);
+
+  /// No description provided for @sxCollectedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected at'**
+  String get sxCollectedAt;
+
+  /// No description provided for @sxVisitedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Visited at'**
+  String get sxVisitedAt;
+
+  /// No description provided for @sxAtDate.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} · {date}'**
+  String sxAtDate(String time, String date);
+
+  /// No description provided for @sxFromSlip.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} · {date} (from the driver’s slip)'**
+  String sxFromSlip(String time, String date);
+
+  /// No description provided for @sxDataEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Data entry'**
+  String get sxDataEntry;
+
+  /// No description provided for @sxByDriverApp.
+  ///
+  /// In en, this message translates to:
+  /// **'By {name} (driver), in the app · {time}'**
+  String sxByDriverApp(String name, String time);
+
+  /// No description provided for @sxByGate.
+  ///
+  /// In en, this message translates to:
+  /// **'By {name} (back office), at the gate · {time}'**
+  String sxByGate(String name, String time);
+
+  /// No description provided for @sxEnteredApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered in the app'**
+  String get sxEnteredApp;
+
+  /// No description provided for @sxEnteredGate.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered at gate'**
+  String get sxEnteredGate;
+
+  /// No description provided for @sxGps.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS location'**
+  String get sxGps;
+
+  /// No description provided for @sxGpsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{coords} · {meters} m from the pickup point'**
+  String sxGpsValue(String coords, String meters);
+
+  /// No description provided for @sxGpsNotRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not recorded (entered at the gate, not at the source)'**
+  String get sxGpsNotRecorded;
+
+  /// No description provided for @sxLocationMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Location matched'**
+  String get sxLocationMatched;
+
+  /// No description provided for @sxViewOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'View on map'**
+  String get sxViewOnMap;
+
+  /// No description provided for @sxNoteFromDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Note from driver'**
+  String get sxNoteFromDriver;
+
+  /// No description provided for @sxQuoted.
+  ///
+  /// In en, this message translates to:
+  /// **'“{text}”'**
+  String sxQuoted(String text);
+
+  /// No description provided for @sxCollectedItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected items'**
+  String get sxCollectedItems;
+
+  /// No description provided for @sxCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected'**
+  String get sxCollected;
+
+  /// No description provided for @sxKg.
+  ///
+  /// In en, this message translates to:
+  /// **'KG'**
+  String get sxKg;
+
+  /// No description provided for @sxPcs.
+  ///
+  /// In en, this message translates to:
+  /// **'PCS'**
+  String get sxPcs;
+
+  /// No description provided for @sxKgBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'KG Block'**
+  String get sxKgBlock;
+
+  /// No description provided for @sxPcsBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'PCS Block'**
+  String get sxPcsBlock;
+
+  /// No description provided for @sxTotalCollected.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Collected'**
+  String get sxTotalCollected;
+
+  /// No description provided for @sxTotalKg.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} KG.'**
+  String sxTotalKg(String amount);
+
+  /// No description provided for @sxTotalPcs.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} PCS'**
+  String sxTotalPcs(String amount);
+
+  /// No description provided for @sxZeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'0 kg · No material today'**
+  String get sxZeroTitle;
+
+  /// No description provided for @sxPhotoFromDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo from the driver'**
+  String get sxPhotoFromDriver;
+
+  /// No description provided for @sxAddExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an extra pickup'**
+  String get sxAddExtra;
+
+  /// No description provided for @sxAddExtraTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an extra pickup tomorrow'**
+  String get sxAddExtraTomorrow;
+
+  /// No description provided for @sxCallDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Call the driver'**
+  String get sxCallDriver;
+
+  /// No description provided for @sxMissedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed · not recorded'**
+  String get sxMissedTitle;
+
+  /// No description provided for @sxWhatHappened.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened'**
+  String get sxWhatHappened;
+
+  /// No description provided for @sxMissedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The trip reached {warehouse} at {time} and the gate entered every other stop, but not this one.'**
+  String sxMissedBody(String warehouse, String time);
+
+  /// No description provided for @sxVehicleDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle and driver'**
+  String get sxVehicleDriver;
+
+  /// No description provided for @sxVehicleDriverValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} · {driver} ({transport}) · {phone}'**
+  String sxVehicleDriverValue(
+    String plate,
+    String driver,
+    String transport,
+    String phone,
+  );
+
+  /// No description provided for @sxReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get sxReason;
+
+  /// No description provided for @sxCalledOffBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Called off by'**
+  String get sxCalledOffBy;
+
+  /// No description provided for @sxCalledOffValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{source} (source), through {iec} (IEC) · {when}'**
+  String sxCalledOffValue(String source, String iec, String when);
+
+  /// No description provided for @sxNextPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Next pickup'**
+  String get sxNextPickup;
+
+  /// No description provided for @sxPausedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused {range}'**
+  String sxPausedTitle(String range);
+
+  /// No description provided for @sxReasonRenovation.
+  ///
+  /// In en, this message translates to:
+  /// **'Renovation'**
+  String get sxReasonRenovation;
+
+  /// No description provided for @sxAskedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked by'**
+  String get sxAskedBy;
+
+  /// No description provided for @sxAskedByValue.
+  ///
+  /// In en, this message translates to:
+  /// **'The source, on {date} · approved by {iec} (IEC)'**
+  String sxAskedByValue(String date, String iec);
+
+  /// No description provided for @sxWhatHappens.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens'**
+  String get sxWhatHappens;
+
+  /// No description provided for @sxPausedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Not on any trip until the pause ends. The next pickup is {date}.'**
+  String sxPausedBody(String date);
+
+  /// No description provided for @sxAskRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask to restart pickups'**
+  String get sxAskRestart;
+
+  /// No description provided for @exIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {address}. It joins the trip that covers that day, or waits in Unassigned.'**
+  String exIntro(String name, String address);
+
+  /// No description provided for @exDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup date and time'**
+  String get exDateLabel;
+
+  /// No description provided for @exAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'About how much? (kg)'**
+  String get exAmountLabel;
+
+  /// No description provided for @exSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add extra pickup'**
+  String get exSubmit;
+
+  /// No description provided for @exAddedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra pickup added'**
+  String get exAddedTitle;
+
+  /// No description provided for @exAddedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} on {date}, {time}. It joins tomorrow’s {route} trip, and the driver sees it there.'**
+  String exAddedBody(String name, String date, String time, String route);
+
+  /// No description provided for @exBackToStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the stop'**
+  String get exBackToStop;
+
+  /// No description provided for @taSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} · {date}'**
+  String taSheetTitle(String route, String date);
+
+  /// No description provided for @taSheetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes here are for this trip only. The route stays as it is.'**
+  String get taSheetBody;
+
+  /// No description provided for @taChangeTeamBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone is absent today'**
+  String get taChangeTeamBody;
+
+  /// No description provided for @taMoveStops.
+  ///
+  /// In en, this message translates to:
+  /// **'Move stops to another vehicle'**
+  String get taMoveStops;
+
+  /// No description provided for @taMoveStopsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown, or the vehicle isn’t available'**
+  String get taMoveStopsBody;
+
+  /// No description provided for @taCancelTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this trip'**
+  String get taCancelTrip;
+
+  /// No description provided for @taCancelTripBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No trip on {date}. The route stays on.'**
+  String taCancelTripBody(String date);
+
+  /// No description provided for @taSwitchOffRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch off the route'**
+  String get taSwitchOffRoute;
+
+  /// No description provided for @taSwitchOffRouteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips until you switch it on'**
+  String get taSwitchOffRouteBody;
+
+  /// No description provided for @ctTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change for this trip'**
+  String get ctTitle;
+
+  /// No description provided for @ctInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this trip changes. The route keeps its own team. To change the team for good, edit the route.'**
+  String get ctInfo;
+
+  /// No description provided for @ctOnRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'On the route'**
+  String get ctOnRoute;
+
+  /// No description provided for @ctDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get ctDriver;
+
+  /// No description provided for @ctLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour'**
+  String get ctLabour;
+
+  /// No description provided for @ctAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get ctAbsent;
+
+  /// No description provided for @ctPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (••• {tail})'**
+  String ctPerson(String name, String tail);
+
+  /// No description provided for @ctPersonNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{person} · {note}'**
+  String ctPersonNote(String person, String note);
+
+  /// No description provided for @ctDriverForTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver for this trip'**
+  String get ctDriverForTrip;
+
+  /// No description provided for @ctLabourForTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour for this trip'**
+  String get ctLabourForTrip;
+
+  /// No description provided for @ctReplaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaces {name} (absent)'**
+  String ctReplaces(String name);
+
+  /// No description provided for @ctNoChange.
+  ///
+  /// In en, this message translates to:
+  /// **'No change'**
+  String get ctNoChange;
+
+  /// No description provided for @ctFreeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Free today'**
+  String get ctFreeToday;
+
+  /// No description provided for @ctReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get ctReason;
+
+  /// No description provided for @ctOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get ctOther;
+
+  /// No description provided for @ctSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save for this trip'**
+  String get ctSave;
+
+  /// No description provided for @ctFreeOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Free on {date}, {time}'**
+  String ctFreeOn(String date, String time);
+
+  /// No description provided for @ctBusyAtTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Busy at this time'**
+  String get ctBusyAtTime;
+
+  /// No description provided for @ctFreeUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'{route}, {time}: free until then'**
+  String ctFreeUntil(String route, String time);
+
+  /// No description provided for @ctBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Busy: {route}, {time}'**
+  String ctBusy(String route, String time);
+
+  /// No description provided for @ctBusyDriverNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still choose a busy driver. The app warns you about the clash.'**
+  String get ctBusyDriverNote;
+
+  /// No description provided for @ctBusyLabourNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still choose a busy labour. The app warns you about the clash.'**
+  String get ctBusyLabourNote;
+
+  /// No description provided for @ctSavedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved for this trip!'**
+  String get ctSavedTitle;
+
+  /// No description provided for @ctSavedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} drives on {date}. Both drivers are told.'**
+  String ctSavedBody(String name, String date);
+
+  /// No description provided for @rdChangedOnlyTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver: {driver} for {absent} (absent). Only this trip.'**
+  String rdChangedOnlyTrip(String driver, String absent);
+
+  /// No description provided for @rdChangedTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver: {driver} for {absent} (absent). Tomorrow the route’s own team is back.'**
+  String rdChangedTomorrow(String driver, String absent);
+
+  /// No description provided for @rdForPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'for {name}'**
+  String rdForPerson(String name);
+
+  /// No description provided for @rdTodayForPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'today, for {name}'**
+  String rdTodayForPerson(String name);
+
+  /// No description provided for @rdStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get rdStatusCancelled;
+
+  /// No description provided for @rdStatusSwitchedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched off'**
+  String get rdStatusSwitchedOff;
+
+  /// No description provided for @rdShiftEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening ({time})'**
+  String rdShiftEvening(String time);
+
+  /// No description provided for @msTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move stops'**
+  String get msTitle;
+
+  /// No description provided for @msWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why?'**
+  String get msWhy;
+
+  /// No description provided for @msBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Breakdown'**
+  String get msBreakdown;
+
+  /// No description provided for @msVehicleNa.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle not available'**
+  String get msVehicleNa;
+
+  /// No description provided for @msDriverAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver absent'**
+  String get msDriverAbsent;
+
+  /// No description provided for @msMoveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to'**
+  String get msMoveTo;
+
+  /// No description provided for @msTripLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} · {driver} · {time}'**
+  String msTripLine(String plate, String driver, String time);
+
+  /// No description provided for @msContract.
+  ///
+  /// In en, this message translates to:
+  /// **'Contract'**
+  String get msContract;
+
+  /// No description provided for @msStopsToMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops to move ({count} ticked)'**
+  String msStopsToMove(int count);
+
+  /// No description provided for @msStopLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {frequency} · {time}'**
+  String msStopLine(String name, String frequency, String time);
+
+  /// No description provided for @msHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The stops join the end of the chosen trip. Moving every stop cancels this trip.'**
+  String get msHint;
+
+  /// No description provided for @msMove.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Move 1 stop} other{Move {count} stops}}'**
+  String msMove(int count);
+
+  /// No description provided for @msMovedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 Stop Moved} other{{count} Stops Moved}}'**
+  String msMovedTitle(int count);
+
+  /// No description provided for @msMovedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} are now at the end of {trip} ({date}). Both drivers are told.'**
+  String msMovedBody(String names, String trip, String date);
+
+  /// No description provided for @msAnd.
+  ///
+  /// In en, this message translates to:
+  /// **'{first} and {last}'**
+  String msAnd(String first, String last);
+
+  /// No description provided for @msOpenTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Open {trip}’s trip'**
+  String msOpenTrip(String trip);
+
+  /// No description provided for @msBackToTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the trip'**
+  String get msBackToTrip;
+
+  /// No description provided for @ahSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing changes until they approve'**
+  String get ahSubtitle;
+
+  /// No description provided for @ahWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you need?'**
+  String get ahWhat;
+
+  /// No description provided for @ahForTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'For a trip'**
+  String get ahForTrip;
+
+  /// No description provided for @ahVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get ahVehicle;
+
+  /// No description provided for @ahLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour'**
+  String get ahLabour;
+
+  /// No description provided for @ahForPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'For a pickup point'**
+  String get ahForPoint;
+
+  /// No description provided for @ahChangeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Change details'**
+  String get ahChangeDetails;
+
+  /// No description provided for @ahStartPickups.
+  ///
+  /// In en, this message translates to:
+  /// **'Start pickups'**
+  String get ahStartPickups;
+
+  /// No description provided for @ahStopPickups.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop pickups'**
+  String get ahStopPickups;
+
+  /// No description provided for @ahPausePickups.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause pickups'**
+  String get ahPausePickups;
+
+  /// No description provided for @ahFor.
+  ///
+  /// In en, this message translates to:
+  /// **'For'**
+  String get ahFor;
+
+  /// No description provided for @ahDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates'**
+  String get ahDates;
+
+  /// No description provided for @ahDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details and reason'**
+  String get ahDetails;
+
+  /// No description provided for @ahRouteLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} · {plate}'**
+  String ahRouteLine(String route, String plate);
+
+  /// No description provided for @ahInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Goes to Arvind Desai (Collection Head). They answer in the web panel; you see the reply in My requests.'**
+  String get ahInfo;
+
+  /// No description provided for @ahSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get ahSend;
+
+  /// No description provided for @ahWhich.
+  ///
+  /// In en, this message translates to:
+  /// **'Which trip or route?'**
+  String get ahWhich;
+
+  /// No description provided for @ahWhichPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Which pickup point?'**
+  String get ahWhichPoint;
+
+  /// No description provided for @ahYourRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Your routes'**
+  String get ahYourRoutes;
+
+  /// No description provided for @ahYourPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Your pickup points'**
+  String get ahYourPoints;
+
+  /// No description provided for @ahRouteOption.
+  ///
+  /// In en, this message translates to:
+  /// **'{plate} · {vehicle} · {time}'**
+  String ahRouteOption(String plate, String vehicle, String time);
+
+  /// No description provided for @ahSheetNote.
+  ///
+  /// In en, this message translates to:
+  /// **'For a pickup point request, this list shows your pickup points instead.'**
+  String get ahSheetNote;
+
+  /// No description provided for @ahSheetNotePoint.
+  ///
+  /// In en, this message translates to:
+  /// **'For a trip request, this list shows your routes instead.'**
+  String get ahSheetNotePoint;
+
+  /// No description provided for @ahSentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get ahSentTitle;
+
+  /// No description provided for @ahSentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Arvind Desai (Collection Head) answers in the web panel. You see the reply in My requests.'**
+  String get ahSentBody;
+
+  /// No description provided for @ahSeeRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'See my requests'**
+  String get ahSeeRequests;
+
+  /// No description provided for @ahBackHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to home'**
+  String get ahBackHome;
+
+  /// No description provided for @ahDayRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – {end}'**
+  String ahDayRange(String start, String end);
+
+  /// No description provided for @cxTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this trip?'**
+  String get cxTitle;
+
+  /// No description provided for @cxBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} won’t run on {date}. Its {count} stops go to Unassigned for that day.'**
+  String cxBody(String route, String date, int count);
+
+  /// No description provided for @cxKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the trip'**
+  String get cxKeep;
+
+  /// No description provided for @cxConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel trip'**
+  String get cxConfirm;
+
+  /// No description provided for @cxDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip Cancelled!'**
+  String get cxDoneTitle;
+
+  /// No description provided for @cxDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} won’t run on {date}. {driver} is told.'**
+  String cxDoneBody(String route, String date, String driver);
+
+  /// No description provided for @cxNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This trip is cancelled ({reason}). Its {count} stops are in Unassigned for {date}.'**
+  String cxNote(String reason, int count, String date);
+
+  /// No description provided for @soTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch off the route?'**
+  String get soTitle;
+
+  /// No description provided for @soBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} makes no trips until you switch it on. Its {count} pickup points go to Unassigned.'**
+  String soBody(String route, int count);
+
+  /// No description provided for @soConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch off'**
+  String get soConfirm;
+
+  /// No description provided for @soDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Route Switched Off!'**
+  String get soDoneTitle;
+
+  /// No description provided for @soDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} makes no trips until you switch it on.'**
+  String soDoneBody(String route);
+
+  /// No description provided for @soEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched off. No trips are made; its {count} pickup points show in Unassigned until you switch it on.'**
+  String soEmpty(int count);
+
+  /// No description provided for @soNoTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips'**
+  String get soNoTrips;
+
+  /// No description provided for @soSwitchOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch on this route'**
+  String get soSwitchOn;
+
+  /// No description provided for @onTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch on the route?'**
+  String get onTitle;
+
+  /// No description provided for @onBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} makes trips again from its pickups. The team is checked first.'**
+  String onBody(String route);
+
+  /// No description provided for @onConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch on'**
+  String get onConfirm;
+
+  /// No description provided for @onDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Route Switched On!'**
+  String get onDoneTitle;
+
+  /// No description provided for @onDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} makes trips again from today.'**
+  String onDoneBody(String route);
+
+  /// No description provided for @routesSwitchedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Switched off'**
+  String get routesSwitchedOff;
+
+  /// No description provided for @routesNoTripsUntilOn.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips until switched on'**
+  String get routesNoTripsUntilOn;
+
+  /// No description provided for @rdFreqOnCall.
+  ///
+  /// In en, this message translates to:
+  /// **'On call'**
+  String get rdFreqOnCall;
+
+  /// No description provided for @rdSchedCalledIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Called in · today {time}'**
+  String rdSchedCalledIn(String time);
+
+  /// No description provided for @rdNotUsingAppBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{driver} hasn’t started the trip in the app. The shift started at {time}.'**
+  String rdNotUsingAppBody(String driver, String time);
+
+  /// No description provided for @rdMoreStopsPending.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{and 1 more stop, still pending} other{and {count} more stops, all still pending}}'**
+  String rdMoreStopsPending(int count);
+
+  /// No description provided for @rdSchedEveryDayExceptSun.
+  ///
+  /// In en, this message translates to:
+  /// **'Every day except Sun · {time}'**
+  String rdSchedEveryDayExceptSun(String time);
+
+  /// No description provided for @dlNoInactiveDrivers.
+  ///
+  /// In en, this message translates to:
+  /// **'No inactive drivers'**
+  String get dlNoInactiveDrivers;
+
+  /// No description provided for @dlNoInactiveLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'No inactive labour'**
+  String get dlNoInactiveLabour;
+
+  /// No description provided for @dlIdNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ID number (Aadhaar or Voter ID)'**
+  String get dlIdNumberLabel;
+
+  /// No description provided for @dlIdNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 1234 5678 9012'**
+  String get dlIdNumberHint;
+
+  /// No description provided for @dlProfilePhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo'**
+  String get dlProfilePhotoLabel;
+
+  /// No description provided for @dlIdProofPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'ID proof photo'**
+  String get dlIdProofPhoto;
+
+  /// No description provided for @dlBothOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Both optional.'**
+  String get dlBothOptional;
+
+  /// No description provided for @dlSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get dlSave;
+
+  /// No description provided for @dlFullNameLower.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get dlFullNameLower;
+
+  /// No description provided for @dlMobileLower.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile number'**
+  String get dlMobileLower;
+
+  /// No description provided for @dlIdNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'ID number'**
+  String get dlIdNumber;
+
+  /// No description provided for @dlAddedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Added on'**
+  String get dlAddedOn;
+
+  /// No description provided for @dlReactivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate'**
+  String get dlReactivate;
+
+  /// No description provided for @dlDeactivateDriverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate driver?'**
+  String get dlDeactivateDriverTitle;
+
+  /// No description provided for @dlDeactivateLabourTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate labour?'**
+  String get dlDeactivateLabourTitle;
+
+  /// No description provided for @dlDeactivateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is taken off {warehouse} and can’t be put on its routes. You can reactivate them later.'**
+  String dlDeactivateBody(String name, String warehouse);
+
+  /// No description provided for @dlReactivateDriverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate driver?'**
+  String get dlReactivateDriverTitle;
+
+  /// No description provided for @dlReactivateLabourTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reactivate labour?'**
+  String get dlReactivateLabourTitle;
+
+  /// No description provided for @dlReactivateBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is back at {warehouse} and can be put on its routes again.'**
+  String dlReactivateBody(String name, String warehouse);
+
+  /// No description provided for @dlInUseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t deactivate yet'**
+  String get dlInUseTitle;
+
+  /// No description provided for @dlInUseDriverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} drives {route}. Change the route’s driver first, then deactivate.'**
+  String dlInUseDriverBody(String name, String route);
+
+  /// No description provided for @dlInUseLabourBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} works on {route}. Change the route’s labour first, then deactivate.'**
+  String dlInUseLabourBody(String name, String route);
+
+  /// No description provided for @dlOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get dlOk;
+
+  /// No description provided for @dlDriverDeactivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Deactivated!'**
+  String get dlDriverDeactivated;
+
+  /// No description provided for @dlLabourDeactivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour Deactivated!'**
+  String get dlLabourDeactivated;
+
+  /// No description provided for @dlDriverReactivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Reactivated!'**
+  String get dlDriverReactivated;
+
+  /// No description provided for @dlLabourReactivated.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour Reactivated!'**
+  String get dlLabourReactivated;
+
+  /// No description provided for @dlOffWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is off {warehouse}.'**
+  String dlOffWarehouse(String name, String warehouse);
+
+  /// No description provided for @dlBackAtWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is back at {warehouse}.'**
+  String dlBackAtWarehouse(String name, String warehouse);
+
+  /// No description provided for @fgTimeClashLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Time clash · gets there about {arrive}, the window ends at {ends}'**
+  String fgTimeClashLine(String arrive, String ends);
+
+  /// No description provided for @fgOffRouteLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Off the route · {km} km from {route}'**
+  String fgOffRouteLine(String km, String route);
+
+  /// No description provided for @fgScheduleLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule changed · now {schedule}'**
+  String fgScheduleLine(String schedule);
+
+  /// No description provided for @fgPausedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Source paused · {dates}, {reason}'**
+  String fgPausedLine(String dates, String reason);
+
+  /// No description provided for @fgNewSourceLine.
+  ///
+  /// In en, this message translates to:
+  /// **'New source, no route yet'**
+  String get fgNewSourceLine;
+
+  /// No description provided for @fgExtraLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra pickup, no route · {date}'**
+  String fgExtraLine(String date);
+
+  /// No description provided for @fgMovedLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Source moved to you · {area}'**
+  String fgMovedLine(String area);
+
+  /// No description provided for @fgTimeClash.
+  ///
+  /// In en, this message translates to:
+  /// **'Time clash'**
+  String get fgTimeClash;
+
+  /// No description provided for @fgOffRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Off the route'**
+  String get fgOffRoute;
+
+  /// No description provided for @fgScheduleChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule changed'**
+  String get fgScheduleChanged;
+
+  /// No description provided for @fgSourcePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Source paused'**
+  String get fgSourcePaused;
+
+  /// No description provided for @fgNewSource.
+  ///
+  /// In en, this message translates to:
+  /// **'New source, no route'**
+  String get fgNewSource;
+
+  /// No description provided for @fgExtraPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra pickup, no route'**
+  String get fgExtraPickup;
+
+  /// No description provided for @fgSourceMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Source moved to you'**
+  String get fgSourceMoved;
+
+  /// No description provided for @fgRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get fgRoute;
+
+  /// No description provided for @fgPickupWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup window'**
+  String get fgPickupWindow;
+
+  /// No description provided for @fgTripGetsThere.
+  ///
+  /// In en, this message translates to:
+  /// **'The trip gets there'**
+  String get fgTripGetsThere;
+
+  /// No description provided for @fgDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get fgDistance;
+
+  /// No description provided for @fgExtraTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra time'**
+  String get fgExtraTime;
+
+  /// No description provided for @fgWas.
+  ///
+  /// In en, this message translates to:
+  /// **'Was'**
+  String get fgWas;
+
+  /// No description provided for @fgNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get fgNow;
+
+  /// No description provided for @fgFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get fgFrom;
+
+  /// No description provided for @fgPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get fgPaused;
+
+  /// No description provided for @fgReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get fgReason;
+
+  /// No description provided for @fgSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get fgSchedule;
+
+  /// No description provided for @fgExtraPickupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra pickup'**
+  String get fgExtraPickupLabel;
+
+  /// No description provided for @fgWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Why'**
+  String get fgWhy;
+
+  /// No description provided for @fgWhatToDo.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do'**
+  String get fgWhatToDo;
+
+  /// No description provided for @fgRouteVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'{route} · {plate}'**
+  String fgRouteVehicle(String route, String plate);
+
+  /// No description provided for @fgArrivalLate.
+  ///
+  /// In en, this message translates to:
+  /// **'About {time}, {minutes} min after the window'**
+  String fgArrivalLate(String time, String minutes);
+
+  /// No description provided for @fgKmOffRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km off the route'**
+  String fgKmOffRoute(String km);
+
+  /// No description provided for @fgMinutesMore.
+  ///
+  /// In en, this message translates to:
+  /// **'About {minutes} min more on each trip'**
+  String fgMinutesMore(String minutes);
+
+  /// No description provided for @fgReasonRenovation.
+  ///
+  /// In en, this message translates to:
+  /// **'Renovation'**
+  String get fgReasonRenovation;
+
+  /// No description provided for @fgReasonRenovationLower.
+  ///
+  /// In en, this message translates to:
+  /// **'renovation'**
+  String get fgReasonRenovationLower;
+
+  /// No description provided for @fgNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'None yet'**
+  String get fgNoneYet;
+
+  /// No description provided for @fgExtraValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {time} · about {kg} kg'**
+  String fgExtraValue(String date, String time, String kg);
+
+  /// No description provided for @fgAreaNowYours.
+  ///
+  /// In en, this message translates to:
+  /// **'The {area} area is now yours'**
+  String fgAreaNowYours(String area);
+
+  /// No description provided for @fgDoTimeClash.
+  ///
+  /// In en, this message translates to:
+  /// **'Move it earlier in the stop order, or onto a trip that gets there sooner.'**
+  String get fgDoTimeClash;
+
+  /// No description provided for @fgDoOffRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it if the extra time is fine, or move it to a route that passes nearby.'**
+  String get fgDoOffRoute;
+
+  /// No description provided for @fgDoSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Check that {route} still reaches it on the new days and in the new time.'**
+  String fgDoSchedule(String route);
+
+  /// No description provided for @fgDoPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to change. It stays off every trip until the pause ends. The next pickup is {date}.'**
+  String fgDoPaused(String date);
+
+  /// No description provided for @fgDoNewSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Add it to a route so its pickups get on a trip.'**
+  String get fgDoNewSource;
+
+  /// No description provided for @fgDoExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the pickup point to a route so Saturday’s pickup gets on a trip.'**
+  String get fgDoExtra;
+
+  /// No description provided for @fgDoMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Its pickups are yours from now on. Add it to one of your routes.'**
+  String get fgDoMoved;
+
+  /// No description provided for @fgClosesByItself.
+  ///
+  /// In en, this message translates to:
+  /// **'This flag closes by itself once it is on a route.'**
+  String get fgClosesByItself;
+
+  /// No description provided for @fgOpenRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Open your routes'**
+  String get fgOpenRoutes;
+
+  /// No description provided for @fgCheckRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the route'**
+  String get fgCheckRoute;
+
+  /// No description provided for @fgAddToRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to a route'**
+  String get fgAddToRoute;
+
+  /// No description provided for @fgDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Flag marked done'**
+  String get fgDoneTitle;
+
+  /// No description provided for @fgDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is off your list'**
+  String fgDoneBody(String name);
+
+  /// No description provided for @fgSecondWed.
+  ///
+  /// In en, this message translates to:
+  /// **'2nd Wed of the month · {time}'**
+  String fgSecondWed(String time);
+
+  /// No description provided for @cpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash & Payments'**
+  String get cpTitle;
+
+  /// No description provided for @cpCashInHand.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash in hand'**
+  String get cpCashInHand;
+
+  /// No description provided for @cpPaidThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid this week'**
+  String get cpPaidThisWeek;
+
+  /// No description provided for @cpRequestCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Request cash'**
+  String get cpRequestCash;
+
+  /// No description provided for @cpPointsToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup points to pay'**
+  String get cpPointsToPay;
+
+  /// No description provided for @cpPointsOwed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} are owed {amount} in all. Pay them from your cash in hand.'**
+  String cpPointsOwed(int count, String amount);
+
+  /// No description provided for @cpSeeWhoToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'See who to pay'**
+  String get cpSeeWhoToPay;
+
+  /// No description provided for @cpRecentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity'**
+  String get cpRecentActivity;
+
+  /// No description provided for @cpPaymentsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Payments'**
+  String get cpPaymentsTab;
+
+  /// No description provided for @cpCashRequestsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash requests'**
+  String get cpCashRequestsTab;
+
+  /// No description provided for @cpToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get cpToday;
+
+  /// No description provided for @cpWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'{day} • {time}'**
+  String cpWhen(String day, String time);
+
+  /// No description provided for @cpWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the office'**
+  String get cpWaiting;
+
+  /// No description provided for @cpAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your cash'**
+  String get cpAdded;
+
+  /// No description provided for @cpRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected by the office'**
+  String get cpRejected;
+
+  /// No description provided for @cpAskedSent.
+  ///
+  /// In en, this message translates to:
+  /// **'You asked for {asked}. The office sent {sent}.'**
+  String cpAskedSent(String asked, String sent);
+
+  /// No description provided for @cpOfficeSaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Office: “{text}”'**
+  String cpOfficeSaid(String text);
+
+  /// No description provided for @cpTagCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get cpTagCash;
+
+  /// No description provided for @cpTagUpiRef.
+  ///
+  /// In en, this message translates to:
+  /// **'UPI · ref {ref}'**
+  String cpTagUpiRef(String ref);
+
+  /// No description provided for @cpTagBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank transfer'**
+  String get cpTagBank;
+
+  /// No description provided for @cpAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount (₹)'**
+  String get cpAmountLabel;
+
+  /// No description provided for @cpReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get cpReason;
+
+  /// No description provided for @cpMaxChars.
+  ///
+  /// In en, this message translates to:
+  /// **'Max {count} characters'**
+  String cpMaxChars(int count);
+
+  /// No description provided for @cpRequestInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to your cash in hand once the office approves.'**
+  String get cpRequestInfo;
+
+  /// No description provided for @cpSendRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get cpSendRequest;
+
+  /// No description provided for @cpRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get cpRequestSent;
+
+  /// No description provided for @cpRequestSentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request for {amount} is with the office. You see the answer under Cash & Payments.'**
+  String cpRequestSentBody(String amount);
+
+  /// No description provided for @cpBackToCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Cash & Payments'**
+  String get cpBackToCash;
+
+  /// No description provided for @cpOwedHold.
+  ///
+  /// In en, this message translates to:
+  /// **'{owed} owed · you hold {hold}'**
+  String cpOwedHold(String owed, String hold);
+
+  /// No description provided for @cpSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or area'**
+  String get cpSearchHint;
+
+  /// No description provided for @cpFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get cpFilterAll;
+
+  /// No description provided for @cpFilterDueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today'**
+  String get cpFilterDueToday;
+
+  /// No description provided for @cpDueOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String cpDueOn(String date);
+
+  /// No description provided for @cpPointTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {type}'**
+  String cpPointTitle(String name, String type);
+
+  /// No description provided for @cpPerKg.
+  ///
+  /// In en, this message translates to:
+  /// **'Per kg {amount}'**
+  String cpPerKg(String amount);
+
+  /// No description provided for @cpFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed {amount}'**
+  String cpFixed(String amount);
+
+  /// No description provided for @cpPerItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Per item'**
+  String get cpPerItem;
+
+  /// No description provided for @cpWeeklyOn.
+  ///
+  /// In en, this message translates to:
+  /// **'weekly on {day}'**
+  String cpWeeklyOn(String day);
+
+  /// No description provided for @cpMonthly30th.
+  ///
+  /// In en, this message translates to:
+  /// **'monthly on the 30th'**
+  String get cpMonthly30th;
+
+  /// No description provided for @cpMonthlyLastDay.
+  ///
+  /// In en, this message translates to:
+  /// **'monthly, last day'**
+  String get cpMonthlyLastDay;
+
+  /// No description provided for @cpMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'cash'**
+  String get cpMethodCash;
+
+  /// No description provided for @cpMethodUpi.
+  ///
+  /// In en, this message translates to:
+  /// **'UPI'**
+  String get cpMethodUpi;
+
+  /// No description provided for @cpMethodBank.
+  ///
+  /// In en, this message translates to:
+  /// **'bank'**
+  String get cpMethodBank;
+
+  /// No description provided for @cpTermsLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate} · {schedule} · {method}'**
+  String cpTermsLine(String rate, String schedule, String method);
+
+  /// No description provided for @cpOwed.
+  ///
+  /// In en, this message translates to:
+  /// **'Owed {amount}'**
+  String cpOwed(String amount);
+
+  /// No description provided for @cpOwedLastPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Owed {amount} · last paid {date}'**
+  String cpOwedLastPaid(String amount, String date);
+
+  /// No description provided for @cpPayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay {name}'**
+  String cpPayTitle(String name);
+
+  /// No description provided for @cpHowPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'How did you pay?'**
+  String get cpHowPaid;
+
+  /// No description provided for @cpChipCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get cpChipCash;
+
+  /// No description provided for @cpChipUpi.
+  ///
+  /// In en, this message translates to:
+  /// **'UPI'**
+  String get cpChipUpi;
+
+  /// No description provided for @cpChipBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Bank'**
+  String get cpChipBank;
+
+  /// No description provided for @cpReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference (UPI or bank)'**
+  String get cpReference;
+
+  /// No description provided for @cpPaidOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid on'**
+  String get cpPaidOn;
+
+  /// No description provided for @cpTodayDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Today, {date}'**
+  String cpTodayDate(String date);
+
+  /// No description provided for @cpReceiptPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt photo'**
+  String get cpReceiptPhoto;
+
+  /// No description provided for @cpReceiptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. A photo of the receipt or the UPI screen.'**
+  String get cpReceiptHint;
+
+  /// No description provided for @cpNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get cpNote;
+
+  /// No description provided for @cpPayInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Owed {owed} · you hold {hold}. You can’t pay more than either.'**
+  String cpPayInfo(String owed, String hold);
+
+  /// No description provided for @cpRecordPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Record payment'**
+  String get cpRecordPayment;
+
+  /// No description provided for @cpPaymentRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment recorded'**
+  String get cpPaymentRecorded;
+
+  /// No description provided for @cpPaymentRecordedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} to {name}. You now hold {hold}.'**
+  String cpPaymentRecordedBody(String amount, String name, String hold);
+
+  /// No description provided for @cpBackToPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to pickup points to pay'**
+  String get cpBackToPoints;
+
+  /// No description provided for @cpNothingToPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody is owed right now.'**
+  String get cpNothingToPay;
+
+  /// No description provided for @cpDayName.
+  ///
+  /// In en, this message translates to:
+  /// **'{day, select, 1{Monday} 2{Tuesday} 3{Wednesday} 4{Thursday} 5{Friday} 6{Saturday} 7{Sunday} other{}}'**
+  String cpDayName(String day);
+
+  /// No description provided for @arHiredTruck.
+  ///
+  /// In en, this message translates to:
+  /// **'Hired truck'**
+  String get arHiredTruck;
+
+  /// No description provided for @arHiredTruckHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type its number, transporter and driver'**
+  String get arHiredTruckHint;
+
+  /// No description provided for @arHiredDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Hired truck details'**
+  String get arHiredDetails;
+
+  /// No description provided for @arTruckNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Truck number'**
+  String get arTruckNumber;
+
+  /// No description provided for @arTruckNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. GJ-05-EE-1002'**
+  String get arTruckNumberHint;
+
+  /// No description provided for @arTransporter.
+  ///
+  /// In en, this message translates to:
+  /// **'Transporter'**
+  String get arTransporter;
+
+  /// No description provided for @arTransporterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport company name'**
+  String get arTransporterHint;
+
+  /// No description provided for @arDriverName.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver’s name'**
+  String get arDriverName;
+
+  /// No description provided for @arDriverNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter driver’s name'**
+  String get arDriverNameHint;
+
+  /// No description provided for @arDriverPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver’s phone'**
+  String get arDriverPhone;
+
+  /// No description provided for @arDriverPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter mobile number'**
+  String get arDriverPhoneHint;
+
+  /// No description provided for @arCapacityKg.
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity (KG)'**
+  String get arCapacityKg;
+
+  /// No description provided for @arCapacityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 3000'**
+  String get arCapacityHint;
+
+  /// No description provided for @arHiredNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A hired truck’s driver has no app: they keep a slip and the gate team enters the stops at the warehouse.'**
+  String get arHiredNote;
+
+  /// No description provided for @arCapacityValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity {kg} KG'**
+  String arCapacityValue(String kg);
+
+  /// No description provided for @vlRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required.'**
+  String get vlRequired;
+
+  /// No description provided for @vlNumbersOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter numbers only.'**
+  String get vlNumbersOnly;
+
+  /// No description provided for @vlAmountPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount more than 0.'**
+  String get vlAmountPositive;
+
+  /// No description provided for @vlWeightPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a weight more than 0.'**
+  String get vlWeightPositive;
+
+  /// No description provided for @vlCapacityPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a capacity more than 0.'**
+  String get vlCapacityPositive;
+
+  /// No description provided for @vlMaxDecimals.
+  ///
+  /// In en, this message translates to:
+  /// **'Use up to {count} decimal places.'**
+  String vlMaxDecimals(int count);
+
+  /// No description provided for @vlMaxAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Can’t be more than {amount}.'**
+  String vlMaxAmount(String amount);
+
+  /// No description provided for @vlIdNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a 12-digit Aadhaar number or a valid Voter ID.'**
+  String get vlIdNumber;
+
+  /// No description provided for @vlVehicleNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid vehicle number, e.g. GJ-05-EE-1002.'**
+  String get vlVehicleNumber;
 }
 
 class _DriverLocalizationsDelegate

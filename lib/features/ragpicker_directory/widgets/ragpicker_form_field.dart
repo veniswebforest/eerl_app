@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
@@ -14,6 +15,9 @@ class RagpickerFormField extends StatelessWidget {
     this.readOnly = false,
     this.errorText,
     this.onChanged,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
   });
 
   final String label;
@@ -23,6 +27,9 @@ class RagpickerFormField extends StatelessWidget {
   final bool readOnly;
   final String? errorText;
   final ValueChanged<String>? onChanged;
+  final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -34,6 +41,9 @@ class RagpickerFormField extends StatelessWidget {
         controller: controller,
         readOnly: readOnly,
         keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        textCapitalization: textCapitalization,
+        inputFormatters: inputFormatters,
         onChanged: onChanged,
         style: AppTextStyles.regularB7_14.copyWith(color: AppColors.neutral950),
         decoration: InputDecoration(

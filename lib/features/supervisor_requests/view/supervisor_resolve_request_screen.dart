@@ -245,6 +245,9 @@ class _SupervisorResolveRequestScreenState
                           expands: true,
                           maxLines: null,
                           maxLength: 150,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          textCapitalization: TextCapitalization.sentences,
                           textAlignVertical: TextAlignVertical.top,
                           onChanged: (_) => setState(() {}),
                           style: AppTextStyles.regularB7_14.copyWith(

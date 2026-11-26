@@ -113,6 +113,7 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
                             SizedBox(
                               height: 55,
                               child: TextField(
+                                textInputAction: TextInputAction.search,
                                 key: const Key('supervisor-task-search'),
                                 onChanged: (value) {
                                   _query = value;

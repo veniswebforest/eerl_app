@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
@@ -1122,9 +1123,9 @@ class _AddCollectionScreenState extends State<AddCollectionScreen> {
               ? _selected.isNotEmpty
               : _photosComplete
         : _type == CollectionType.d2d
-        ? _vehicleNumber != null &&
-              _givenBy.trim().isNotEmpty &&
-              (_photos[_vehiclePhotoKey]?.isNotEmpty ?? false)
+        // D2D: vehicle and givenByName are required; the vehicle photo is
+        // optional (handoverPhotoUrls, "D2D: optional (vehicle)").
+        ? _vehicleNumber != null && _givenBy.trim().isNotEmpty
         : _type == CollectionType.mrfStation
         ? _mrfSupervisor != null && _mrfLaborId != null
         : _type == CollectionType.ramp
@@ -2060,7 +2061,11 @@ class _WeightBox extends StatelessWidget {
           key: ValueKey('$label-$value'),
           initialValue: value,
           onChanged: onChanged,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          keyboardType: AppKeyboards.decimal,
+          textInputAction: label == context.l10n.collectionWeight
+              ? TextInputAction.next
+              : TextInputAction.done,
+          inputFormatters: AppInputFormatters.quantity(),
           style: AppTextStyles.regularB7_14,
           decoration: InputDecoration(
             hintText: '---',

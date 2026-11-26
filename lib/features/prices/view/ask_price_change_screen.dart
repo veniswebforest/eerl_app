@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'package:eerl_app/core/utils/input_formatters.dart';
 import 'package:eerl_app/core/extensions/context_extensions.dart';
 import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
@@ -56,7 +58,11 @@ class _AskPriceChangeScreenState extends State<AskPriceChangeScreen> {
           _PriceField(
             controller: _rateController,
             label: context.l10n.priceAskNewPrice,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: AppKeyboards.decimal,
+            textInputAction: TextInputAction.next,
+            inputFormatters: AppInputFormatters.money(
+              maxValue: AppInputLimits.maxRate,
+            ),
             validator: _validateRate,
           ),
           const SizedBox(height: 24),
@@ -66,6 +72,9 @@ class _AskPriceChangeScreenState extends State<AskPriceChangeScreen> {
             helper: context.l10n.priceAskMaxCharacters1000,
             maxLines: 4,
             maxLength: 1000,
+            keyboardType: AppKeyboards.multiline,
+            textInputAction: TextInputAction.newline,
+            textCapitalization: TextCapitalization.sentences,
             validator: _validateReason,
           ),
         ],
@@ -148,6 +157,9 @@ class _PriceField extends StatelessWidget {
     this.maxLines = 1,
     this.maxLength,
     this.validator,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
   });
 
   final TextEditingController controller;
@@ -157,6 +169,9 @@ class _PriceField extends StatelessWidget {
   final int maxLines;
   final int? maxLength;
   final String? Function(String?)? validator;
+  final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -170,6 +185,9 @@ class _PriceField extends StatelessWidget {
       TextFormField(
         controller: controller,
         keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        textCapitalization: textCapitalization,
+        inputFormatters: inputFormatters,
         maxLines: maxLines,
         maxLength: maxLength,
         validator: validator,

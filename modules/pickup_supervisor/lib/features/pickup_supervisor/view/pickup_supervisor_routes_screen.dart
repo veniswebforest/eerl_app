@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/core/widgets/module_toast.dart';
+import 'package:pickup_supervisor/features/route_actions/model/route_actions_mock_data.dart';
+import 'package:pickup_supervisor/features/route_actions/model/route_actions_models.dart';
+import 'package:pickup_supervisor/features/route_detail/model/route_detail_mock_data.dart';
+import 'package:pickup_supervisor/features/route_detail/model/route_detail_models.dart';
+import 'package:pickup_supervisor/features/route_detail/view/route_detail_screen.dart';
 import 'package:pickup_supervisor/features/trips_plan/view/trips_plan_screen.dart';
 import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
@@ -37,10 +43,75 @@ class _PickupSupervisorRoutesScreenState
   var _query = '';
   var _showSavedBanner = false;
 
-  void _openTripsPlan() => Navigator.push(
-    context,
-    MaterialPageRoute<void>(builder: (_) => const TripsPlanScreen()),
-  );
+  /// A context inside [DriverLocalizationScope], for the switch toast.
+  BuildContext? _scopedContext;
+  final _listController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    RouteSwitchStore.off.addListener(_refresh);
+    RouteSwitchStore.event.addListener(_showSwitchToast);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showSwitchToast());
+  }
+
+  @override
+  void dispose() {
+    RouteSwitchStore.off.removeListener(_refresh);
+    RouteSwitchStore.event.removeListener(_showSwitchToast);
+    _listController.dispose();
+    super.dispose();
+  }
+
+  void _refresh() {
+    if (mounted) setState(() {});
+  }
+
+  /// "Route Switched Off / On!" once, after a trip screen changed a route.
+  void _showSwitchToast() {
+    final event = RouteSwitchStore.event.value;
+    if (event == null || !mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final scoped = _scopedContext;
+      if (!mounted || scoped == null || !scoped.mounted) return;
+      if (RouteSwitchStore.event.value == null) return;
+      RouteSwitchStore.event.value = null;
+      final l10n = DriverLocalizations.of(scoped);
+      final name = _routeName(l10n, event.$1);
+      final on = event.$2 == RouteSwitchEvent.switchedOn;
+      // A route switched on moves to the top: show it.
+      if (on && _listController.hasClients) _listController.jumpTo(0);
+      ModuleToast.show(
+        scoped,
+        kind: on ? ModuleToastKind.success : ModuleToastKind.error,
+        title: on ? l10n.onDoneTitle : l10n.soDoneTitle,
+        message: on ? l10n.onDoneBody(name) : l10n.soDoneBody(name),
+      );
+    });
+  }
+
+  void _openRoute(_RouteItem route) {
+    if (route.status != _RouteStatus.switchedOff) {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(builder: (_) => const TripsPlanScreen()),
+      );
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => RouteDetailScreen(
+          tripState: TripState.planned,
+          switchedOff: true,
+          routeKey: route.keyName,
+          summary: route.keyName == RouteSwitchStore.rander
+              ? RouteActionsMockData.randerSummary
+              : RouteDetailMockData.plannedSummary,
+        ),
+      ),
+    );
+  }
 
   Future<void> _openAddRoute() async {
     final saved = await Navigator.push<bool>(
@@ -59,6 +130,7 @@ class _PickupSupervisorRoutesScreenState
     return DriverLocalizationScope(
       child: Builder(
         builder: (context) {
+          _scopedContext = context;
           final l10n = DriverLocalizations.of(context);
           final routes = _routes(l10n)
               .where((route) {
@@ -128,6 +200,7 @@ class _PickupSupervisorRoutesScreenState
                         Expanded(
                           child: ListView.separated(
                             key: const Key('supervisor-routes-list'),
+                            controller: _listController,
                             padding: EdgeInsets.fromLTRB(
                               20,
                               0,
@@ -140,7 +213,7 @@ class _PickupSupervisorRoutesScreenState
                             itemBuilder: (_, index) => _RouteCard(
                               route: routes[index],
                               highlighted: routes[index].highlighted,
-                              onTap: _openTripsPlan,
+                              onTap: () => _openRoute(routes[index]),
                             ),
                           ),
                         ),
@@ -233,6 +306,7 @@ class _RoutesSearch extends StatelessWidget {
       child: TextField(
         key: const Key('supervisor-route-search'),
         onChanged: onChanged,
+        textInputAction: TextInputAction.search,
         style: DriverTextStyles.regular14,
         decoration: InputDecoration(
           hintText: hint,
@@ -806,9 +880,63 @@ class _RouteItem {
   final bool driverNotUsingApp;
   final bool highlighted;
   final double progress;
+
+  _RouteItem copyWith({
+    _RouteStatus? status,
+    String? statusText,
+    String? progressText,
+    bool? highlighted,
+    double? progress,
+  }) => _RouteItem(
+    keyName: keyName,
+    title: title,
+    vehicleType: vehicleType,
+    secondaryTag: secondaryTag,
+    vehicleNumber: vehicleNumber,
+    time: time,
+    status: status ?? this.status,
+    statusText: statusText ?? this.statusText,
+    progressText: progressText ?? this.progressText,
+    isContract: isContract,
+    driverNotUsingApp: driverNotUsingApp,
+    highlighted: highlighted ?? this.highlighted,
+    progress: progress ?? this.progress,
+  );
 }
 
-List<_RouteItem> _routes(DriverLocalizations l10n) => [
+String _routeName(DriverLocalizations l10n, String key) =>
+    _baseRoutes(l10n).firstWhere((r) => r.keyName == key).title;
+
+/// The mock routes with the switched off / on state applied. A route
+/// switched on in this session moves to the top as Planned.
+List<_RouteItem> _routes(DriverLocalizations l10n) {
+  final off = RouteSwitchStore.off.value;
+  final items = [
+    for (final r in _baseRoutes(l10n))
+      if (off.contains(r.keyName))
+        r.copyWith(
+          status: _RouteStatus.switchedOff,
+          statusText: l10n.routesSwitchedOff,
+          progressText: l10n.routesNoTripsUntilOn,
+          progress: 0,
+        )
+      else if (r.status == _RouteStatus.switchedOff)
+        r.copyWith(
+          status: _RouteStatus.planned,
+          statusText: l10n.routesPlanned,
+          progressText: l10n.routesCollectedZero,
+          highlighted: true,
+        )
+      else
+        r,
+  ];
+  final first = items
+      .where((r) => RouteSwitchStore.switchedOnNow.contains(r.keyName))
+      .toList();
+  return [...first, ...items.where((r) => !first.contains(r))];
+}
+
+List<_RouteItem> _baseRoutes(DriverLocalizations l10n) => [
   _RouteItem(
     keyName: 'pal-gam',
     title: l10n.routesPalGamMorning,
@@ -856,7 +984,7 @@ List<_RouteItem> _routes(DriverLocalizations l10n) => [
     vehicleNumber: l10n.routesVehicle9012,
     time: l10n.routesEveningTime,
     status: _RouteStatus.switchedOff,
-    statusText: l10n.routesSwitchOff,
+    statusText: l10n.routesSwitchedOff,
     progressText: l10n.routesCollectedZero,
     isContract: true,
   ),

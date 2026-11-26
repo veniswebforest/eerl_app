@@ -32,8 +32,8 @@ void main() {
     );
 
     expect(find.text('Vehicles of your zones: South East'), findsOneWidget);
-    expect(find.text('Given By'), findsOneWidget);
-    expect(find.text('Given By *'), findsNothing);
+    // POST /collections/{id}/submit: D2D needs givenByName.
+    expect(find.text('Given By *'), findsOneWidget);
     expect(find.text('Capture Vehicle Photo'), findsOneWidget);
     expect(find.text('Capture Vehicle Photo *'), findsNothing);
     expect(find.byKey(const Key('d2d-vehicle-photo-card')), findsOneWidget);

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -11,6 +12,8 @@ import 'package:eerl_app/core/theme/app_text_styles.dart';
 import 'package:eerl_app/shared/widgets/app_required_text.dart';
 import 'package:eerl_app/shared/widgets/app_mobile_number_field.dart';
 import 'package:eerl_app/core/utils/image_compressor.dart';
+import 'package:eerl_app/core/utils/input_formatters.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/shared/widgets/app_image_preview_dialog.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/in_app_camera_screen.dart';
@@ -123,12 +126,32 @@ class _AddNewRagpickerBottomSheetState
   Future<void> _handleSave() async {
     final name = _fullNameController.text.trim();
     final phone = _mobileController.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final l10n = context.l10n;
     if (name.isEmpty) {
-      AppSnackbar.error(context, message: context.l10n.ragpickerNameRequired);
+      AppSnackbar.error(context, message: l10n.ragpickerNameRequired);
+      return;
+    }
+    final nameError = InputValidators.text(
+      name,
+      l10n,
+      minLength: 2,
+      maxLength: AppInputLimits.personName,
+    );
+    if (nameError != null) {
+      AppSnackbar.error(context, message: nameError);
       return;
     }
     if (!RegExp(r'^[6-9][0-9]{9}$').hasMatch(phone)) {
-      AppSnackbar.error(context, message: context.l10n.invalidMobileNumber);
+      AppSnackbar.error(context, message: l10n.invalidMobileNumber);
+      return;
+    }
+    final idError = InputValidators.text(
+      _aadharController.text,
+      l10n,
+      maxLength: AppInputLimits.idNumber,
+    );
+    if (idError != null) {
+      AppSnackbar.error(context, message: idError);
       return;
     }
     if (_saving) return;
@@ -177,6 +200,11 @@ class _AddNewRagpickerBottomSheetState
             _buildTextField(
               controller: _fullNameController,
               hintText: l10n.enterFullName,
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.next,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(AppInputLimits.personName),
+              ],
             ),
             const SizedBox(height: 24),
 
@@ -186,6 +214,7 @@ class _AddNewRagpickerBottomSheetState
             AppMobileNumberField(
               controller: _mobileController,
               hintText: l10n.enterMobileNumber,
+              textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 24),
 
@@ -195,6 +224,11 @@ class _AddNewRagpickerBottomSheetState
             _buildTextField(
               controller: _aadharController,
               hintText: l10n.aadhaarVoterIdPlaceholder,
+              textCapitalization: TextCapitalization.characters,
+              textInputAction: TextInputAction.done,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(AppInputLimits.idNumber),
+              ],
             ),
             const SizedBox(height: 24),
 
@@ -302,6 +336,9 @@ class _AddNewRagpickerBottomSheetState
     required TextEditingController controller,
     required String hintText,
     TextInputType keyboardType = TextInputType.text,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+    TextInputAction? textInputAction,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     const borderSide = BorderSide(color: AppColors.cool400);
     final border = OutlineInputBorder(
@@ -314,6 +351,9 @@ class _AddNewRagpickerBottomSheetState
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
+        textCapitalization: textCapitalization,
+        textInputAction: textInputAction,
+        inputFormatters: inputFormatters,
         style: AppTextStyles.regularB7_14.copyWith(color: AppColors.neutral950),
         decoration: InputDecoration(
           isDense: true,

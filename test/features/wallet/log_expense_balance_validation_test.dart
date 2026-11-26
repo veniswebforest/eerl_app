@@ -42,4 +42,39 @@ void main() {
     expect(submit.onPressed, isNull);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('receipt photo is optional (PUT /expenses photoUrls)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: LogExpenseScreen(
+          initialCategories: const [
+            ExpenseCategoryModel(
+              id: 'category-1',
+              centerId: 'center-1',
+              name: 'Fuel',
+              isActive: true,
+            ),
+          ],
+          walletBalanceLoader: () async => 100,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Upload Receipt *', findRichText: true), findsNothing);
+
+    await tester.tap(find.byKey(const Key('expense-category-selector')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('expense-category-0')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, '50');
+    await tester.pump();
+    final submit = tester.widget<ElevatedButton>(
+      find.byKey(const Key('submit-expense-button')),
+    );
+    expect(submit.onPressed, isNotNull);
+  });
 }

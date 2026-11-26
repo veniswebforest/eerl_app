@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pickup_supervisor/core/forms/module_input_rules.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/core/widgets/module_text_fields.dart';
 import 'package:pickup_supervisor/features/driver/widgets/driver_pickup_form_widgets.dart';
 import 'package:pickup_supervisor/features/driver_labour/widgets/driver_labour_assets.dart';
 import 'package:pickup_supervisor/features/driver_labour/widgets/driver_labour_common_widgets.dart';
 
-BoxDecoration _fieldDecoration() => BoxDecoration(
+BoxDecoration _fieldDecoration({bool error = false}) => BoxDecoration(
   color: DriverColors.neutral50,
-  border: Border.all(color: DriverColors.cool400),
+  border: Border.all(color: error ? DriverColors.red600 : DriverColors.cool400),
   borderRadius: BorderRadius.circular(10),
 );
 
@@ -23,14 +25,24 @@ class DriverLabourTextField extends StatelessWidget {
     this.required = false,
     this.keyboardType,
     this.inputFormatters,
+    this.kind = ModuleInputKind.text,
+    this.textInputAction = TextInputAction.next,
+    this.errorText,
+    this.fieldKey,
   });
 
   final String label;
   final String hint;
   final TextEditingController controller;
   final bool required;
+
+  /// Override [kind]'s keyboard / formatters when set.
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final ModuleInputKind kind;
+  final TextInputAction textInputAction;
+  final String? errorText;
+  final Key? fieldKey;
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +51,18 @@ class DriverLabourTextField extends StatelessWidget {
       children: [
         _FieldLabel(label: label, required: required),
         const SizedBox(height: 8),
-        _InputBox(
-          controller: controller,
-          hint: hint,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
+        ModuleFieldError(
+          errorText: errorText,
+          child: _InputBox(
+            fieldKey: fieldKey,
+            controller: controller,
+            hint: hint,
+            kind: kind,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            textInputAction: textInputAction,
+            error: errorText != null,
+          ),
         ),
       ],
     );
@@ -59,6 +78,9 @@ class DriverLabourMobileField extends StatelessWidget {
     required this.hint,
     required this.controller,
     this.required = false,
+    this.textInputAction = TextInputAction.next,
+    this.errorText,
+    this.fieldKey,
   });
 
   final String label;
@@ -66,6 +88,9 @@ class DriverLabourMobileField extends StatelessWidget {
   final String hint;
   final TextEditingController controller;
   final bool required;
+  final TextInputAction textInputAction;
+  final String? errorText;
+  final Key? fieldKey;
 
   @override
   Widget build(BuildContext context) {
@@ -74,33 +99,35 @@ class DriverLabourMobileField extends StatelessWidget {
       children: [
         _FieldLabel(label: label, required: required),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            Container(
-              width: 55,
-              height: 55,
-              alignment: Alignment.center,
-              decoration: _fieldDecoration(),
-              child: Text(
-                countryCode,
-                style: DriverTextStyles.medium14.copyWith(
-                  color: DriverColors.neutral900,
+        ModuleFieldError(
+          errorText: errorText,
+          child: Row(
+            children: [
+              Container(
+                width: 55,
+                height: 55,
+                alignment: Alignment.center,
+                decoration: _fieldDecoration(),
+                child: Text(
+                  countryCode,
+                  style: DriverTextStyles.medium14.copyWith(
+                    color: DriverColors.neutral900,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: _InputBox(
-                controller: controller,
-                hint: hint,
-                keyboardType: TextInputType.phone,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                ],
+              const SizedBox(width: 6),
+              Expanded(
+                child: _InputBox(
+                  fieldKey: fieldKey,
+                  controller: controller,
+                  hint: hint,
+                  kind: ModuleInputKind.phone,
+                  textInputAction: textInputAction,
+                  error: errorText != null,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -128,14 +155,22 @@ class _InputBox extends StatelessWidget {
   const _InputBox({
     required this.controller,
     required this.hint,
+    required this.kind,
     this.keyboardType,
     this.inputFormatters,
+    this.textInputAction,
+    this.error = false,
+    this.fieldKey,
   });
 
   final TextEditingController controller;
   final String hint;
+  final ModuleInputKind kind;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final TextInputAction? textInputAction;
+  final bool error;
+  final Key? fieldKey;
 
   @override
   Widget build(BuildContext context) {
@@ -143,11 +178,14 @@ class _InputBox extends StatelessWidget {
       height: 55,
       alignment: Alignment.centerLeft,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: _fieldDecoration(),
+      decoration: _fieldDecoration(error: error),
       child: TextField(
+        key: fieldKey,
         controller: controller,
-        keyboardType: keyboardType,
-        inputFormatters: inputFormatters,
+        keyboardType: keyboardType ?? ModuleInputRules.keyboard(kind),
+        textCapitalization: ModuleInputRules.capitalization(kind),
+        textInputAction: textInputAction,
+        inputFormatters: inputFormatters ?? ModuleInputRules.formatters(kind),
         style: DriverTextStyles.regular14.copyWith(
           color: DriverColors.neutral950,
         ),

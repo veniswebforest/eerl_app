@@ -29,6 +29,7 @@ class TransferRequestFilterBar extends StatelessWidget {
       SizedBox(
         height: 52,
         child: TextField(
+          textInputAction: TextInputAction.search,
           key: const Key('transfer-request-search'),
           controller: searchController,
           onChanged: onSearchChanged,

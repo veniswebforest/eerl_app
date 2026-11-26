@@ -3680,12 +3680,8 @@ class EerlLocalDataSource {
         'Vehicle arrival date and time cannot be in the past.',
       );
     }
-    if (ownership != 'COMPANY' &&
-        (normalizedTransporter == null || normalizedTransporter.isEmpty)) {
-      throw const TransferDecisionValidationException(
-        'Enter the transporter name for this hired truck.',
-      );
-    }
+    // transporterName is optional on approval (POST /transfers/{id}/approve,
+    // choice 2); only its length is checked above.
 
     final profile = await getProfile();
     final now = DateTime.now().toUtc().toIso8601String();
@@ -3812,7 +3808,8 @@ class EerlLocalDataSource {
 
   Future<String> saveTransferRequest({
     required Map<String, double> itemQuantities,
-    required double estimatedExpense,
+    // Optional per PUT /transfers; null is sent as "not given".
+    double? estimatedExpense,
     String? note,
   }) async {
     // Also repair an already-open version-1 database (for example after a hot
@@ -3841,9 +3838,10 @@ class EerlLocalDataSource {
         );
       }
     }
-    if (!estimatedExpense.isFinite ||
-        estimatedExpense < 0 ||
-        estimatedExpense > 9999999) {
+    if (estimatedExpense != null &&
+        (!estimatedExpense.isFinite ||
+            estimatedExpense < 0 ||
+            estimatedExpense > 9999999)) {
       throw ArgumentError.value(
         estimatedExpense,
         'estimatedExpense',

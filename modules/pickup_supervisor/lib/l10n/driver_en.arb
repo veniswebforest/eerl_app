@@ -65,7 +65,6 @@
   "pickupSchedule": "Thu · 8:00–10:00 am",
   "noSchedule": "--",
   "pendingStatus": "Pending",
-  "skippedStatus": "Skipped",
   "stopDetail": "Stop Detail",
   "driverPhoneNumber": "+91 98765 432145",
   "call": "Call",
@@ -590,38 +589,10 @@
   "attentionIssueWord": "Issue",
   "attentionIssueReason": "Reason : No Vehicle Available",
   "attentionIssueRemarks": "Remarks : All yard trucks are currently out. Try after 2 PM.",
-  "flagTimeClash": "Time clash",
-  "flagHotelRajdhaniTime": "Hotel Rajdhani · 1:30 pm vs 9–11 am",
-  "flagOffRoute": "Off the route",
-  "flagSunriseOffRoute": "Sunrise School · 4.2 km off route",
-  "flagScheduleChanged": "Schedule changed",
-  "flagAdajanTextileSorted": "Adajan Textile Mill · Sorted",
-  "flagSourcePaused": "Source paused",
-  "flagClosedForDiwali": "Closed for Diwali",
-  "flagNewSourceNoRoute": "New source, no route",
-  "flagAbcTextileMills": "ABC Textile Mills",
-  "flagExtraPickupNoRoute": "Extra Pickup, no route",
-  "flagExtraPickupNoRouteDetail": "Extra pickup, no route",
-  "flagShreeSaiSorted": "Shree Sai Dairy · Sorted",
-  "flagSourceMovedToYou": "Source moved to you",
-  "flagRkTrading": "R.K trading and co.",
-  "flagNothingToCheck": "Nothing to check!",
+  "flagNothingToCheck": "Nothing to check",
   "flagOctober": "october",
-  "flagNothingToCheckSubtitle": "You don’t have any new notifications or pending action items right now.",
-  "flagShreeSaiDairy": "Shree Sai Dairy",
-  "flagShreeSaiAddress": "U 9, 10, Siddhgiri Tower, B/H Navyug...",
-  "flagWas": "Was",
-  "flagOldSchedule": "Mon, Thu · 8–10 am",
-  "flagNow": "Now",
-  "flagNewSchedule": "Mon, Wed · 9–11 am",
-  "flagFromMon2Nov": "From : Mon 2 Nov",
-  "flagPausedDates": "Paused 20–26 Oct",
-  "flagReasonClosedForDiwali": "Reason: Closed for Diwali",
-  "flagMovedFromVesu": "Moved from Vesu area",
-  "flagCheckRoute": "Check route",
-  "flagAddToRoute": "Add to route",
+  "flagNothingToCheckSubtitle": "No flags right now. Schedule changes, pauses and pickup points without a route show up here.",
   "flagMarkDone": "Mark done",
-  "flagDone": "Done",
   "sourcesNavLabel": "Sources",
   "sourcesRoutesNavLabel": "Route",
   "sourcesProfileNavLabel": "Profile",
@@ -699,11 +670,7 @@
   "addRouteAdd": "Add",
   "addRouteVehicleCompany1001": "GJ-05-EE-1001",
   "addRouteVehicleCompany1234": "GJ-05-BX-1234",
-  "addRouteVehicleRental1002": "GJ-05-EE-1002",
-  "addRouteVehicleRental1001": "GJ-05-EE-1001",
   "addRouteCompanyTruck": "Company truck",
-  "addRouteRentalShreeRam": "Hired from Shree ram Transport",
-  "addRouteRentalKhodiyar": "Hired from Khodiyar Transport",
   "addRouteCapacity": "Capacity 3000 KG",
   "addRouteDriverVikram": "Vikram Singh (••• 4321)",
   "addRouteDriverSuresh": "Suresh Kumar (••• 5847)",
@@ -883,7 +850,7 @@
   "dlSearchHint": "Search Here...",
   "dlAddDriver": "Add Driver",
   "dlAddLabour": "Add Labour",
-  "dlAddLabourer": "Add labourer",
+  "dlAddLabourer": "Add labour",
   "dlNoDetailsFound": "No Details Found",
   "dlNoPhone": "--",
   "dlAddNewDriver": "Add New Driver",
@@ -895,28 +862,11 @@
   "dlMobileNumber": "Mobile Number",
   "dlEnterMobileNumber": "Enter Mobile number",
   "dlCountryCode": "+91",
-  "dlAadhaarLabel": "Aadhar card Number",
-  "dlAadhaarHint": "Aadhaar / Voter ID",
   "dlProfilePhoto": "Profile Photo / ID Proof",
   "dlCapturePhoto": "Capture Photo",
-  "dlUploadHint": "Upload a photo to record and verify details.",
   "dlCancel": "Cancel",
-  "dlSaveSelect": "Save & Select",
-  "dlIdCardNumber": "ID / Card Number",
-  "dlDateTime": "Date & Time",
   "dlDeactivate": "Deactivate",
   "dlEdit": "Edit",
-  "dlReactive": "Reactive",
-  "dlAreYouSure": "Are you sure?",
-  "dlDeactivateDriverMessage": "Are you sure you want to deactivated this Driver person",
-  "dlDeactivateLabourMessage": "Are you sure you want to deactivated this Labour person",
-  "dlReactiveDriverMessage": "Are you sure you want to reactive this Driver person",
-  "dlReactiveLabourMessage": "Are you sure you want to reactive this Labour person",
-  "dlYes": "Yes",
-  "dlDeactivatedTitle": "Deactivated Successfully!",
-  "dlDeactivatedBody": "Profile deactivated.",
-  "dlReactivedTitle": "Reactive Successfully!",
-  "dlReactivedBody": "Profile reactivated.",
   "supervisorTripsToday": "Trips today",
   "tpTitle": "Trips plan",
   "tpAreas": "Adajan, Vesu, Pal",
@@ -1319,18 +1269,9 @@
   "rdAddedLastHint": "It is added as the last stop. You can change the order on the route's page.",
   "rdAddSources": "Add sources",
   "sdAddress": "Address",
-  "sdOpenMaps": "Open in Google Maps",
   "sdSchedule": "Schedule",
   "sdPersonAtPickup": "Person at the pickup point",
   "sdIecExecutive": "IEC Executive",
-  "sdPickupCategory": "Pickup category",
-  "sdMaterial": "Material",
-  "sdPickupStatus": "Pickup Status",
-  "sdWarehouse": "Warehouse",
-  "sdStatusNextStop": "Next Stop",
-  "sdCall": "Call",
-  "sdSkipForToday": "Skip For Today",
-  "sdMaterialsList": "Milk Pouch, Card Board",
   "sdRoleManager": "Manager",
   "sdContactLine": "{name} · {role} · {phone}",
   "@sdContactLine": {
@@ -1357,7 +1298,7 @@
       }
     }
   },
-  "skTitle": "Skip Source",
+  "skTitle": "Skip this pickup",
   "skReasonLabel": "Reason for Skip",
   "skReasonClosed": "Source closed",
   "skReasonHoliday": "Holiday",
@@ -1366,8 +1307,6 @@
   "skRemarks": "Remarks",
   "skMaxChars": "Max 150 Characters",
   "skConfirm": "Confirm Skip",
-  "skSkippedTitle": "Source Skipped!",
-  "skSkippedBody": "Resumes tomorrow automatically.",
   "apToApprove": "To approve",
   "apDone": "Done",
   "apCorrectionDoneDetail": "PET Bottles 50 kg → 60 kg. The stop’s record is changed; Vikram Singh is told.",
@@ -1766,5 +1705,1469 @@
       }
     }
   },
-  "tpNoTripsHoliday": "No trips · warehouse holiday"
+  "tpNoTripsHoliday": "No trips · warehouse holiday",
+  "rdTripDetails": "Trip details",
+  "rdThisTrip": "This trip",
+  "rdStarted": "Started {time} (Start trip)",
+  "@rdStarted": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "rdLabourNone": "None",
+  "rdAtWarehouse": "At the warehouse",
+  "rdWeighbridge": "Weighbridge net :",
+  "rdDriversTotal": "Driver’s total :",
+  "rdBagsReceived": "Bags received :",
+  "rdApprovedBy": "Approved by :",
+  "rdDriversTotalValue": "{kg} kg · difference {diff} kg ({pct}%)",
+  "@rdDriversTotalValue": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      },
+      "diff": {
+        "type": "String"
+      },
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "rdApprovedByValue": "{name} · {time}",
+  "@rdApprovedByValue": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "rdTagGate": "Entered at gate · {time}",
+  "@rdTagGate": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "rdStatusMissed": "Missed",
+  "rdNoteNotRecorded": "Not recorded by the driver",
+  "rdNoteNoMaterialDriver": "No material, per the driver",
+  "rdNoteAskedToSkip": "Asked to skip today",
+  "rdNextVisits": "Next: {dates}",
+  "@rdNextVisits": {
+    "placeholders": {
+      "dates": {
+        "type": "String"
+      }
+    }
+  },
+  "rdEveryDayVisits": "Every day · {count} visits",
+  "@rdEveryDayVisits": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "rdStatusApprovedTrip": "Approved",
+  "raOnRouteTitle": "{route} · on route",
+  "@raOnRouteTitle": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "raOnRouteBody": "The trip has started, so its team and stops can’t change.",
+  "raCompleteTrip": "Complete trip for the driver",
+  "raCompleteTripBody": "The driver can’t finish it in the app",
+  "raAskHeadBody": "Need another vehicle or more labour",
+  "raPlannedTitle": "{route} · planned",
+  "@raPlannedTitle": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "raPlannedBody": "The trip hasn’t started, so you can still change it.",
+  "raChangeTeam": "Change driver or labour",
+  "raChangeTeamBody": "Pick another driver or labourer for this trip",
+  "raMoveStops": "Move stops to another trip",
+  "raMoveStopsBody": "Send some pickups to a different trip",
+  "raSwitchOff": "Switch off this trip",
+  "raSwitchOffBody": "No trip that day; its pickups are skipped",
+  "sdTitle": "Stop detail",
+  "sdRoute": "Route",
+  "sdDue": "Due",
+  "sdOnTrip": "On the trip",
+  "sdStopOf": "Stop {number} of {total}",
+  "@sdStopOf": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "sdStopOfDistance": "Stop {number} of {total} · {km} km from the last stop",
+  "@sdStopOfDistance": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "sdDueToday": "Today · {time}",
+  "@sdDueToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sdDueOn": "{date} · {time}",
+  "@sdDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sdCallPerson": "Call the person at the pickup point",
+  "sdTripStartedNote": "The trip has started. The driver records what happens at this stop.",
+  "sdSkipThisPickup": "Skip this pickup",
+  "sdRouteVehicle": "{route} · {plate} · {vehicle}",
+  "@sdRouteVehicle": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "plate": {
+        "type": "String"
+      },
+      "vehicle": {
+        "type": "String"
+      }
+    }
+  },
+  "sdRoutePlanned": "{route} · {date} · {plate}",
+  "@sdRoutePlanned": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "sdOwnVehicleLower": "own vehicle",
+  "sdContractVehicleLower": "contract vehicle",
+  "sdRoleOwner": "Owner",
+  "skReasonSourceAsked": "Source asked",
+  "skReasonCapacity": "Capacity full at warehouse",
+  "skReasonShift": "Not enough time in shift",
+  "skPickupSkippedTitle": "Pickup Skipped!",
+  "skPickupSkippedBody": "{name} is off {date}’s trip. Next visit: {next}.",
+  "@skPickupSkippedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "next": {
+        "type": "String"
+      }
+    }
+  },
+  "rdDateTomorrow": "Fri, 23 Oct 2026",
+  "rdFreqMonthly": "Monthly",
+  "rdSchedFirstOfMonth": "1st of the month · {time}",
+  "@rdSchedFirstOfMonth": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sdRoleStoreManager": "Store manager",
+  "sdRoleOffice": "Office",
+  "sdRouteVehicleTransport": "{route} · {plate} · {vehicle} ({transport})",
+  "@sdRouteVehicleTransport": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "plate": {
+        "type": "String"
+      },
+      "vehicle": {
+        "type": "String"
+      },
+      "transport": {
+        "type": "String"
+      }
+    }
+  },
+  "sxCollectedTitle": "Collected · {amount}",
+  "@sxCollectedTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "sxCollectedAt": "Collected at",
+  "sxVisitedAt": "Visited at",
+  "sxAtDate": "{time} · {date}",
+  "@sxAtDate": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sxFromSlip": "{time} · {date} (from the driver’s slip)",
+  "@sxFromSlip": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sxDataEntry": "Data entry",
+  "sxByDriverApp": "By {name} (driver), in the app · {time}",
+  "@sxByDriverApp": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sxByGate": "By {name} (back office), at the gate · {time}",
+  "@sxByGate": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sxEnteredApp": "Entered in the app",
+  "sxEnteredGate": "Entered at gate",
+  "sxGps": "GPS location",
+  "sxGpsValue": "{coords} · {meters} m from the pickup point",
+  "@sxGpsValue": {
+    "placeholders": {
+      "coords": {
+        "type": "String"
+      },
+      "meters": {
+        "type": "String"
+      }
+    }
+  },
+  "sxGpsNotRecorded": "Not recorded (entered at the gate, not at the source)",
+  "sxLocationMatched": "Location matched",
+  "sxViewOnMap": "View on map",
+  "sxNoteFromDriver": "Note from driver",
+  "sxQuoted": "“{text}”",
+  "@sxQuoted": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "sxCollectedItems": "Collected items",
+  "sxCollected": "Collected",
+  "sxKg": "KG",
+  "sxPcs": "PCS",
+  "sxKgBlock": "KG Block",
+  "sxPcsBlock": "PCS Block",
+  "sxTotalCollected": "Total Collected",
+  "sxTotalKg": "{amount} KG.",
+  "@sxTotalKg": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "sxTotalPcs": "{amount} PCS",
+  "@sxTotalPcs": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "sxZeroTitle": "0 kg · No material today",
+  "sxPhotoFromDriver": "Photo from the driver",
+  "sxAddExtra": "Add an extra pickup",
+  "sxAddExtraTomorrow": "Add an extra pickup tomorrow",
+  "sxCallDriver": "Call the driver",
+  "sxMissedTitle": "Missed · not recorded",
+  "sxWhatHappened": "What happened",
+  "sxMissedBody": "The trip reached {warehouse} at {time} and the gate entered every other stop, but not this one.",
+  "@sxMissedBody": {
+    "placeholders": {
+      "warehouse": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "sxVehicleDriver": "Vehicle and driver",
+  "sxVehicleDriverValue": "{plate} · {driver} ({transport}) · {phone}",
+  "@sxVehicleDriverValue": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      },
+      "driver": {
+        "type": "String"
+      },
+      "transport": {
+        "type": "String"
+      },
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "sxReason": "Reason",
+  "sxCalledOffBy": "Called off by",
+  "sxCalledOffValue": "{source} (source), through {iec} (IEC) · {when}",
+  "@sxCalledOffValue": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "iec": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "sxNextPickup": "Next pickup",
+  "sxPausedTitle": "Paused {range}",
+  "@sxPausedTitle": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "sxReasonRenovation": "Renovation",
+  "sxAskedBy": "Asked by",
+  "sxAskedByValue": "The source, on {date} · approved by {iec} (IEC)",
+  "@sxAskedByValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "iec": {
+        "type": "String"
+      }
+    }
+  },
+  "sxWhatHappens": "What happens",
+  "sxPausedBody": "Not on any trip until the pause ends. The next pickup is {date}.",
+  "@sxPausedBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sxAskRestart": "Ask to restart pickups",
+  "exIntro": "{name} · {address}. It joins the trip that covers that day, or waits in Unassigned.",
+  "@exIntro": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "exDateLabel": "Pickup date and time",
+  "exAmountLabel": "About how much? (kg)",
+  "exSubmit": "Add extra pickup",
+  "exAddedTitle": "Extra pickup added",
+  "exAddedBody": "{name} on {date}, {time}. It joins tomorrow’s {route} trip, and the driver sees it there.",
+  "@exAddedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "exBackToStop": "Back to the stop",
+  "taSheetTitle": "{route} · {date}",
+  "@taSheetTitle": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "taSheetBody": "Changes here are for this trip only. The route stays as it is.",
+  "taChangeTeamBody": "Someone is absent today",
+  "taMoveStops": "Move stops to another vehicle",
+  "taMoveStopsBody": "Breakdown, or the vehicle isn’t available",
+  "taCancelTrip": "Cancel this trip",
+  "taCancelTripBody": "No trip on {date}. The route stays on.",
+  "@taCancelTripBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "taSwitchOffRoute": "Switch off the route",
+  "taSwitchOffRouteBody": "No trips until you switch it on",
+  "ctTitle": "Change for this trip",
+  "ctInfo": "Only this trip changes. The route keeps its own team. To change the team for good, edit the route.",
+  "ctOnRoute": "On the route",
+  "ctDriver": "Driver",
+  "ctLabour": "Labour",
+  "ctAbsent": "Absent",
+  "ctPerson": "{name} (••• {tail})",
+  "@ctPerson": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "tail": {
+        "type": "String"
+      }
+    }
+  },
+  "ctPersonNote": "{person} · {note}",
+  "@ctPersonNote": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      },
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "ctDriverForTrip": "Driver for this trip",
+  "ctLabourForTrip": "Labour for this trip",
+  "ctReplaces": "Replaces {name} (absent)",
+  "@ctReplaces": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ctNoChange": "No change",
+  "ctFreeToday": "Free today",
+  "ctReason": "Reason",
+  "ctOther": "Other",
+  "ctSave": "Save for this trip",
+  "ctFreeOn": "Free on {date}, {time}",
+  "@ctFreeOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ctBusyAtTime": "Busy at this time",
+  "ctFreeUntil": "{route}, {time}: free until then",
+  "@ctFreeUntil": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ctBusy": "Busy: {route}, {time}",
+  "@ctBusy": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ctBusyDriverNote": "You can still choose a busy driver. The app warns you about the clash.",
+  "ctBusyLabourNote": "You can still choose a busy labour. The app warns you about the clash.",
+  "ctSavedTitle": "Saved for this trip!",
+  "ctSavedBody": "{name} drives on {date}. Both drivers are told.",
+  "@ctSavedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rdChangedOnlyTrip": "Driver: {driver} for {absent} (absent). Only this trip.",
+  "@rdChangedOnlyTrip": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      },
+      "absent": {
+        "type": "String"
+      }
+    }
+  },
+  "rdChangedTomorrow": "Driver: {driver} for {absent} (absent). Tomorrow the route’s own team is back.",
+  "@rdChangedTomorrow": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      },
+      "absent": {
+        "type": "String"
+      }
+    }
+  },
+  "rdForPerson": "for {name}",
+  "@rdForPerson": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rdTodayForPerson": "today, for {name}",
+  "@rdTodayForPerson": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rdStatusCancelled": "Cancelled",
+  "rdStatusSwitchedOff": "Switched off",
+  "rdShiftEvening": "Evening ({time})",
+  "@rdShiftEvening": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "msTitle": "Move stops",
+  "msWhy": "Why?",
+  "msBreakdown": "Breakdown",
+  "msVehicleNa": "Vehicle not available",
+  "msDriverAbsent": "Driver absent",
+  "msMoveTo": "Move to",
+  "msTripLine": "{plate} · {driver} · {time}",
+  "@msTripLine": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      },
+      "driver": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "msContract": "Contract",
+  "msStopsToMove": "Stops to move ({count} ticked)",
+  "@msStopsToMove": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "msStopLine": "{name} · {frequency} · {time}",
+  "@msStopLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "frequency": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "msHint": "The stops join the end of the chosen trip. Moving every stop cancels this trip.",
+  "msMove": "{count, plural, =1{Move 1 stop} other{Move {count} stops}}",
+  "@msMove": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "msMovedTitle": "{count, plural, =1{1 Stop Moved} other{{count} Stops Moved}}",
+  "@msMovedTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "msMovedBody": "{names} are now at the end of {trip} ({date}). Both drivers are told.",
+  "@msMovedBody": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      },
+      "trip": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "msAnd": "{first} and {last}",
+  "@msAnd": {
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "msOpenTrip": "Open {trip}’s trip",
+  "@msOpenTrip": {
+    "placeholders": {
+      "trip": {
+        "type": "String"
+      }
+    }
+  },
+  "msBackToTrip": "Back to the trip",
+  "ahSubtitle": "Nothing changes until they approve",
+  "ahWhat": "What do you need?",
+  "ahForTrip": "For a trip",
+  "ahVehicle": "Vehicle",
+  "ahLabour": "Labour",
+  "ahForPoint": "For a pickup point",
+  "ahChangeDetails": "Change details",
+  "ahStartPickups": "Start pickups",
+  "ahStopPickups": "Stop pickups",
+  "ahPausePickups": "Pause pickups",
+  "ahFor": "For",
+  "ahDates": "Dates",
+  "ahDetails": "Details and reason",
+  "ahRouteLine": "{route} · {plate}",
+  "@ahRouteLine": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "ahInfo": "Goes to Arvind Desai (Collection Head). They answer in the web panel; you see the reply in My requests.",
+  "ahSend": "Send request",
+  "ahWhich": "Which trip or route?",
+  "ahWhichPoint": "Which pickup point?",
+  "ahYourRoutes": "Your routes",
+  "ahYourPoints": "Your pickup points",
+  "ahRouteOption": "{plate} · {vehicle} · {time}",
+  "@ahRouteOption": {
+    "placeholders": {
+      "plate": {
+        "type": "String"
+      },
+      "vehicle": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ahSheetNote": "For a pickup point request, this list shows your pickup points instead.",
+  "ahSheetNotePoint": "For a trip request, this list shows your routes instead.",
+  "ahSentTitle": "Request sent",
+  "ahSentBody": "Arvind Desai (Collection Head) answers in the web panel. You see the reply in My requests.",
+  "ahSeeRequests": "See my requests",
+  "ahBackHome": "Back to home",
+  "ahDayRange": "{start} – {end}",
+  "@ahDayRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "cxTitle": "Cancel this trip?",
+  "cxBody": "{route} won’t run on {date}. Its {count} stops go to Unassigned for that day.",
+  "@cxBody": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cxKeep": "Keep the trip",
+  "cxConfirm": "Cancel trip",
+  "cxDoneTitle": "Trip Cancelled!",
+  "cxDoneBody": "{route} won’t run on {date}. {driver} is told.",
+  "@cxDoneBody": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "driver": {
+        "type": "String"
+      }
+    }
+  },
+  "cxNote": "This trip is cancelled ({reason}). Its {count} stops are in Unassigned for {date}.",
+  "@cxNote": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "soTitle": "Switch off the route?",
+  "soBody": "{route} makes no trips until you switch it on. Its {count} pickup points go to Unassigned.",
+  "@soBody": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "soConfirm": "Switch off",
+  "soDoneTitle": "Route Switched Off!",
+  "soDoneBody": "{route} makes no trips until you switch it on.",
+  "@soDoneBody": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "soEmpty": "Switched off. No trips are made; its {count} pickup points show in Unassigned until you switch it on.",
+  "@soEmpty": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "soNoTrips": "No trips",
+  "soSwitchOn": "Switch on this route",
+  "onTitle": "Switch on the route?",
+  "onBody": "{route} makes trips again from its pickups. The team is checked first.",
+  "@onBody": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "onConfirm": "Switch on",
+  "onDoneTitle": "Route Switched On!",
+  "onDoneBody": "{route} makes trips again from today.",
+  "@onDoneBody": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "routesSwitchedOff": "Switched off",
+  "routesNoTripsUntilOn": "No trips until switched on",
+  "rdFreqOnCall": "On call",
+  "rdSchedCalledIn": "Called in · today {time}",
+  "rdNotUsingAppBody": "{driver} hasn’t started the trip in the app. The shift started at {time}.",
+  "rdMoreStopsPending": "{count, plural, =1{and 1 more stop, still pending} other{and {count} more stops, all still pending}}",
+  "@rdSchedCalledIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@rdNotUsingAppBody": {
+    "placeholders": {
+      "driver": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@rdMoreStopsPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "rdSchedEveryDayExceptSun": "Every day except Sun · {time}",
+  "@rdSchedEveryDayExceptSun": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "dlNoInactiveDrivers": "No inactive drivers",
+  "dlNoInactiveLabour": "No inactive labour",
+  "dlIdNumberLabel": "ID number (Aadhaar or Voter ID)",
+  "dlIdNumberHint": "e.g. 1234 5678 9012",
+  "dlProfilePhotoLabel": "Profile photo",
+  "dlIdProofPhoto": "ID proof photo",
+  "dlBothOptional": "Both optional.",
+  "dlSave": "Save",
+  "dlFullNameLower": "Full name",
+  "dlMobileLower": "Mobile number",
+  "dlIdNumber": "ID number",
+  "dlAddedOn": "Added on",
+  "dlReactivate": "Reactivate",
+  "dlDeactivateDriverTitle": "Deactivate driver?",
+  "dlDeactivateLabourTitle": "Deactivate labour?",
+  "dlDeactivateBody": "{name} is taken off {warehouse} and can’t be put on its routes. You can reactivate them later.",
+  "dlReactivateDriverTitle": "Reactivate driver?",
+  "dlReactivateLabourTitle": "Reactivate labour?",
+  "dlReactivateBody": "{name} is back at {warehouse} and can be put on its routes again.",
+  "dlInUseTitle": "Can’t deactivate yet",
+  "dlInUseDriverBody": "{name} drives {route}. Change the route’s driver first, then deactivate.",
+  "dlInUseLabourBody": "{name} works on {route}. Change the route’s labour first, then deactivate.",
+  "dlOk": "OK",
+  "dlDriverDeactivated": "Driver Deactivated!",
+  "dlLabourDeactivated": "Labour Deactivated!",
+  "dlDriverReactivated": "Driver Reactivated!",
+  "dlLabourReactivated": "Labour Reactivated!",
+  "dlOffWarehouse": "{name} is off {warehouse}.",
+  "dlBackAtWarehouse": "{name} is back at {warehouse}.",
+  "@dlDeactivateBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "warehouse": {
+        "type": "String"
+      }
+    }
+  },
+  "@dlReactivateBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "warehouse": {
+        "type": "String"
+      }
+    }
+  },
+  "@dlInUseDriverBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "@dlInUseLabourBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "@dlOffWarehouse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "warehouse": {
+        "type": "String"
+      }
+    }
+  },
+  "@dlBackAtWarehouse": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "warehouse": {
+        "type": "String"
+      }
+    }
+  },
+  "fgTimeClashLine": "Time clash · gets there about {arrive}, the window ends at {ends}",
+  "fgOffRouteLine": "Off the route · {km} km from {route}",
+  "fgScheduleLine": "Schedule changed · now {schedule}",
+  "fgPausedLine": "Source paused · {dates}, {reason}",
+  "fgNewSourceLine": "New source, no route yet",
+  "fgExtraLine": "Extra pickup, no route · {date}",
+  "fgMovedLine": "Source moved to you · {area}",
+  "fgTimeClash": "Time clash",
+  "fgOffRoute": "Off the route",
+  "fgScheduleChanged": "Schedule changed",
+  "fgSourcePaused": "Source paused",
+  "fgNewSource": "New source, no route",
+  "fgExtraPickup": "Extra pickup, no route",
+  "fgSourceMoved": "Source moved to you",
+  "fgRoute": "Route",
+  "fgPickupWindow": "Pickup window",
+  "fgTripGetsThere": "The trip gets there",
+  "fgDistance": "Distance",
+  "fgExtraTime": "Extra time",
+  "fgWas": "Was",
+  "fgNow": "Now",
+  "fgFrom": "From",
+  "fgPaused": "Paused",
+  "fgReason": "Reason",
+  "fgSchedule": "Schedule",
+  "fgExtraPickupLabel": "Extra pickup",
+  "fgWhy": "Why",
+  "fgWhatToDo": "What to do",
+  "fgRouteVehicle": "{route} · {plate}",
+  "fgArrivalLate": "About {time}, {minutes} min after the window",
+  "fgKmOffRoute": "{km} km off the route",
+  "fgMinutesMore": "About {minutes} min more on each trip",
+  "fgReasonRenovation": "Renovation",
+  "fgReasonRenovationLower": "renovation",
+  "fgNoneYet": "None yet",
+  "fgExtraValue": "{date} · {time} · about {kg} kg",
+  "fgAreaNowYours": "The {area} area is now yours",
+  "fgDoTimeClash": "Move it earlier in the stop order, or onto a trip that gets there sooner.",
+  "fgDoOffRoute": "Keep it if the extra time is fine, or move it to a route that passes nearby.",
+  "fgDoSchedule": "Check that {route} still reaches it on the new days and in the new time.",
+  "fgDoPaused": "Nothing to change. It stays off every trip until the pause ends. The next pickup is {date}.",
+  "fgDoNewSource": "Add it to a route so its pickups get on a trip.",
+  "fgDoExtra": "Add the pickup point to a route so Saturday’s pickup gets on a trip.",
+  "fgDoMoved": "Its pickups are yours from now on. Add it to one of your routes.",
+  "fgClosesByItself": "This flag closes by itself once it is on a route.",
+  "fgOpenRoutes": "Open your routes",
+  "fgCheckRoute": "Check the route",
+  "fgAddToRoute": "Add to a route",
+  "fgDoneTitle": "Flag marked done",
+  "fgDoneBody": "{name} is off your list",
+  "@fgTimeClashLine": {
+    "placeholders": {
+      "arrive": {
+        "type": "String"
+      },
+      "ends": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgOffRouteLine": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      },
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgScheduleLine": {
+    "placeholders": {
+      "schedule": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgPausedLine": {
+    "placeholders": {
+      "dates": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgExtraLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgMovedLine": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgRouteVehicle": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      },
+      "plate": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgArrivalLate": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgKmOffRoute": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgMinutesMore": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgExtraValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgAreaNowYours": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgDoSchedule": {
+    "placeholders": {
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgDoPaused": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@fgDoneBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fgSecondWed": "2nd Wed of the month · {time}",
+  "@fgSecondWed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "cpTitle": "Cash & Payments",
+  "cpCashInHand": "Cash in hand",
+  "cpPaidThisWeek": "Paid this week",
+  "cpRequestCash": "Request cash",
+  "cpPointsToPay": "Pickup points to pay",
+  "cpPointsOwed": "{count} are owed {amount} in all. Pay them from your cash in hand.",
+  "cpSeeWhoToPay": "See who to pay",
+  "cpRecentActivity": "Recent activity",
+  "cpPaymentsTab": "Payments",
+  "cpCashRequestsTab": "Cash requests",
+  "cpToday": "Today",
+  "cpWhen": "{day} • {time}",
+  "cpWaiting": "Waiting for the office",
+  "cpAdded": "Added to your cash",
+  "cpRejected": "Rejected by the office",
+  "cpAskedSent": "You asked for {asked}. The office sent {sent}.",
+  "cpOfficeSaid": "Office: “{text}”",
+  "cpTagCash": "Cash",
+  "cpTagUpiRef": "UPI · ref {ref}",
+  "cpTagBank": "Bank transfer",
+  "cpAmountLabel": "Amount (₹)",
+  "cpReason": "Reason",
+  "cpMaxChars": "Max {count} characters",
+  "cpRequestInfo": "Added to your cash in hand once the office approves.",
+  "cpSendRequest": "Send request",
+  "cpRequestSent": "Request sent",
+  "cpRequestSentBody": "Your request for {amount} is with the office. You see the answer under Cash & Payments.",
+  "cpBackToCash": "Back to Cash & Payments",
+  "cpOwedHold": "{owed} owed · you hold {hold}",
+  "cpSearchHint": "Search by name or area",
+  "cpFilterAll": "All",
+  "cpFilterDueToday": "Due today",
+  "cpDueOn": "Due {date}",
+  "cpPointTitle": "{name} · {type}",
+  "cpPerKg": "Per kg {amount}",
+  "cpFixed": "Fixed {amount}",
+  "cpPerItem": "Per item",
+  "cpWeeklyOn": "weekly on {day}",
+  "cpMonthly30th": "monthly on the 30th",
+  "cpMonthlyLastDay": "monthly, last day",
+  "cpMethodCash": "cash",
+  "cpMethodUpi": "UPI",
+  "cpMethodBank": "bank",
+  "cpTermsLine": "{rate} · {schedule} · {method}",
+  "cpOwed": "Owed {amount}",
+  "cpOwedLastPaid": "Owed {amount} · last paid {date}",
+  "cpPayTitle": "Pay {name}",
+  "cpHowPaid": "How did you pay?",
+  "cpChipCash": "Cash",
+  "cpChipUpi": "UPI",
+  "cpChipBank": "Bank",
+  "cpReference": "Reference (UPI or bank)",
+  "cpPaidOn": "Paid on",
+  "cpTodayDate": "Today, {date}",
+  "cpReceiptPhoto": "Receipt photo",
+  "cpReceiptHint": "Optional. A photo of the receipt or the UPI screen.",
+  "cpNote": "Note",
+  "cpPayInfo": "Owed {owed} · you hold {hold}. You can’t pay more than either.",
+  "cpRecordPayment": "Record payment",
+  "cpPaymentRecorded": "Payment recorded",
+  "cpPaymentRecordedBody": "{amount} to {name}. You now hold {hold}.",
+  "cpBackToPoints": "Back to pickup points to pay",
+  "cpNothingToPay": "Nobody is owed right now.",
+  "cpDayName": "{day, select, 1{Monday} 2{Tuesday} 3{Wednesday} 4{Thursday} 5{Friday} 6{Saturday} 7{Sunday} other{}}",
+  "@cpPointsOwed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpWhen": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpAskedSent": {
+    "placeholders": {
+      "asked": {
+        "type": "String"
+      },
+      "sent": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpOfficeSaid": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpTagUpiRef": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpMaxChars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@cpRequestSentBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpOwedHold": {
+    "placeholders": {
+      "owed": {
+        "type": "String"
+      },
+      "hold": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpPointTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpPerKg": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpFixed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpWeeklyOn": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpTermsLine": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "schedule": {
+        "type": "String"
+      },
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpOwed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpOwedLastPaid": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpPayTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpTodayDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpPayInfo": {
+    "placeholders": {
+      "owed": {
+        "type": "String"
+      },
+      "hold": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpPaymentRecordedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      },
+      "hold": {
+        "type": "String"
+      }
+    }
+  },
+  "@cpDayName": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "arHiredTruck": "Hired truck",
+  "arHiredTruckHint": "Type its number, transporter and driver",
+  "arHiredDetails": "Hired truck details",
+  "arTruckNumber": "Truck number",
+  "arTruckNumberHint": "e.g. GJ-05-EE-1002",
+  "arTransporter": "Transporter",
+  "arTransporterHint": "Transport company name",
+  "arDriverName": "Driver’s name",
+  "arDriverNameHint": "Enter driver’s name",
+  "arDriverPhone": "Driver’s phone",
+  "arDriverPhoneHint": "Enter mobile number",
+  "arCapacityKg": "Capacity (KG)",
+  "arCapacityHint": "e.g. 3000",
+  "arHiredNote": "A hired truck’s driver has no app: they keep a slip and the gate team enters the stops at the warehouse.",
+  "arCapacityValue": "Capacity {kg} KG",
+  "@arCapacityValue": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "vlRequired": "This field is required.",
+  "vlNumbersOnly": "Enter numbers only.",
+  "vlAmountPositive": "Enter an amount more than 0.",
+  "vlWeightPositive": "Enter a weight more than 0.",
+  "vlCapacityPositive": "Enter a capacity more than 0.",
+  "vlMaxDecimals": "Use up to {count} decimal places.",
+  "vlMaxAmount": "Can’t be more than {amount}.",
+  "vlIdNumber": "Enter a 12-digit Aadhaar number or a valid Voter ID.",
+  "vlVehicleNumber": "Enter a valid vehicle number, e.g. GJ-05-EE-1002.",
+  "@vlMaxDecimals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@vlMaxAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -35,6 +35,11 @@ String routeStopScheduleText(DriverLocalizations l10n, StopSchedule s) =>
       StopScheduleKind.secondWednesday => l10n.rdSchedSecondWed(s.time),
       StopScheduleKind.once => l10n.rdSchedOnce(s.date, s.time),
       StopScheduleKind.pausedTill => l10n.rdSchedPausedTill(s.date),
+      StopScheduleKind.firstOfMonth => l10n.rdSchedFirstOfMonth(s.time),
+      StopScheduleKind.calledIn => l10n.rdSchedCalledIn(s.time),
+      StopScheduleKind.everyDayExceptSun => l10n.rdSchedEveryDayExceptSun(
+        s.time,
+      ),
     };
 
 /// Stop filter pills with counts (All, Collected, Pending, 0 kg, …).
@@ -176,6 +181,11 @@ _StatusStyle _statusStyle(StopStatus status) => switch (status) {
     DriverColors.cool200,
     DriverColors.neutral400,
   ),
+  StopStatus.missed => const _StatusStyle(
+    RouteDetailAssets.chipMissed,
+    DriverColors.red100,
+    DriverColors.red600,
+  ),
 };
 
 String routeStopStatusLabel(DriverLocalizations l10n, StopStatus status) =>
@@ -186,14 +196,33 @@ String routeStopStatusLabel(DriverLocalizations l10n, StopStatus status) =>
       StopStatus.nextStop => l10n.rdStatusNextStop,
       StopStatus.pending => l10n.rdStatusPending,
       StopStatus.inactive => l10n.rdStatusInactive,
+      StopStatus.missed => l10n.rdStatusMissed,
+    };
+
+/// "Daily" / "Weekly" / "Monthly".
+String routeStopFrequencyLabel(DriverLocalizations l10n, StopFrequency f) =>
+    switch (f) {
+      StopFrequency.daily => l10n.rdFreqDaily,
+      StopFrequency.weekly => l10n.rdFreqWeekly,
+      StopFrequency.monthly => l10n.rdFreqMonthly,
+      StopFrequency.onCall => l10n.rdFreqOnCall,
     };
 
 /// A stop in today's list, styled by its status.
 class RouteDetailStopCard extends StatelessWidget {
-  const RouteDetailStopCard({super.key, required this.stop, this.onTap});
+  const RouteDetailStopCard({
+    super.key,
+    required this.stop,
+    this.onTap,
+    this.upcoming = false,
+  });
 
   final RouteStop stop;
   final VoidCallback? onTap;
+
+  /// Next 7 Days: shows the coming visits instead of today's status (an
+  /// inactive stop still shows its status).
+  final bool upcoming;
 
   @override
   Widget build(BuildContext context) {
@@ -227,6 +256,11 @@ class RouteDetailStopCard extends StatelessWidget {
         DriverColors.neutral50,
         DriverColors.primary500,
         2.0,
+      ),
+      StopStatus.missed => (
+        DriverColors.missedCard,
+        DriverColors.missedCardBorder,
+        1.0,
       ),
       _ => (DriverColors.neutral50, null, 0.0),
     };
@@ -277,9 +311,7 @@ class RouteDetailStopCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(48),
                           ),
                           child: Text(
-                            frequency == StopFrequency.daily
-                                ? l10n.rdFreqDaily
-                                : l10n.rdFreqWeekly,
+                            routeStopFrequencyLabel(l10n, frequency),
                             style: DriverTextStyles.semibold12.copyWith(
                               color: DriverColors.neutral700,
                             ),
@@ -301,20 +333,30 @@ class RouteDetailStopCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      RouteStatusChip(
-                        icon: style.icon,
-                        label: routeStopStatusLabel(l10n, status),
-                        background: style.background,
-                        foreground: style.foreground,
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(child: _Trailing(stop: stop)),
-                    ],
-                  ),
+                  if (_showsVisits) ...[
+                    const SizedBox(height: 10),
+                    _RecordTag(
+                      label: stop.nextVisits != null
+                          ? l10n.rdNextVisits(stop.nextVisits!)
+                          : l10n.rdEveryDayVisits('${stop.visitsThisWeek}'),
+                      tone: _TagTone.grey,
+                    ),
+                  ] else ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        RouteStatusChip(
+                          icon: style.icon,
+                          label: routeStopStatusLabel(l10n, status),
+                          background: style.background,
+                          foreground: style.foreground,
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(child: _Trailing(stop: stop)),
+                      ],
+                    ),
+                  ],
                   if (_hasRecord) ...[
                     const SizedBox(height: 10),
                     Wrap(
@@ -335,13 +377,19 @@ class RouteDetailStopCard extends StatelessWidget {
                           _RecordTag(
                             icon: RouteDetailAssets.tagNote,
                             label: l10n.rdTagNoteFromDriver,
-                            blue: true,
+                            tone: _TagTone.blue,
                           ),
                         if (stop.voiceNote != null)
                           _RecordTag(
                             icon: RouteDetailAssets.tagVoice,
                             label: l10n.rdTagVoiceNote(stop.voiceNote!),
-                            blue: true,
+                            tone: _TagTone.blue,
+                          ),
+                        if (stop.gateEntryAt != null)
+                          _RecordTag(
+                            icon: RouteDetailAssets.tagGate,
+                            label: l10n.rdTagGate(stop.gateEntryAt!),
+                            tone: _TagTone.amber,
                           ),
                       ],
                     ),
@@ -355,11 +403,18 @@ class RouteDetailStopCard extends StatelessWidget {
     );
   }
 
+  bool get _showsVisits =>
+      upcoming &&
+      stop.status != StopStatus.inactive &&
+      (stop.nextVisits != null || stop.visitsThisWeek != null);
+
   bool get _hasRecord =>
-      stop.collectedAt != null ||
-      stop.visitedAt != null ||
-      stop.hasDriverNote ||
-      stop.voiceNote != null;
+      !upcoming &&
+      (stop.collectedAt != null ||
+          stop.visitedAt != null ||
+          stop.hasDriverNote ||
+          stop.voiceNote != null ||
+          stop.gateEntryAt != null);
 }
 
 class _Trailing extends StatelessWidget {
@@ -384,6 +439,9 @@ class _Trailing extends StatelessWidget {
       StopNote.noMaterial => l10n.rdNoteNoMaterial,
       StopNote.closedForStocktaking => l10n.rdNoteClosedStocktaking,
       StopNote.pausedForRenovation => l10n.rdNotePausedRenovation,
+      StopNote.notRecordedByDriver => l10n.rdNoteNotRecorded,
+      StopNote.noMaterialPerDriver => l10n.rdNoteNoMaterialDriver,
+      StopNote.askedToSkipToday => l10n.rdNoteAskedToSkip,
       null => null,
     };
     if (note == null) return const SizedBox.shrink();
@@ -396,21 +454,16 @@ class _Trailing extends StatelessWidget {
 }
 
 class _DetailsBox extends StatelessWidget {
-  const _DetailsBox({
-    required this.rows,
-    this.white = false,
-    this.padding = 10,
-  });
+  const _DetailsBox({required this.rows, this.white = false});
 
   final List<(String, String)> rows;
   final bool white;
-  final double padding;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(padding),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: white ? DriverColors.neutral50 : DriverColors.cool100,
         borderRadius: BorderRadius.circular(12),
@@ -495,173 +548,50 @@ class RouteStatusChip extends StatelessWidget {
   }
 }
 
+enum _TagTone { plain, blue, amber, grey }
+
 class _RecordTag extends StatelessWidget {
   const _RecordTag({
-    required this.icon,
     required this.label,
-    this.blue = false,
+    this.icon,
+    this.tone = _TagTone.plain,
   });
 
-  final String icon;
+  final String? icon;
   final String label;
-  final bool blue;
+  final _TagTone tone;
 
   @override
   Widget build(BuildContext context) {
+    final (Color bg, Color fg) = switch (tone) {
+      _TagTone.plain => (DriverColors.neutral50, DriverColors.neutral700),
+      _TagTone.blue => (DriverColors.secondary100, DriverColors.blue600),
+      _TagTone.amber => (DriverColors.escalatedBg, DriverColors.amber800),
+      _TagTone.grey => (DriverColors.cool100, DriverColors.neutral700),
+    };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: blue ? DriverColors.secondary100 : DriverColors.neutral50,
-        border: blue
-            ? null
-            : Border.all(color: DriverColors.stopInactiveBorder),
+        color: bg,
+        border: tone == _TagTone.plain
+            ? Border.all(color: DriverColors.stopInactiveBorder)
+            : null,
         borderRadius: BorderRadius.circular(48),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          routeDetailIcon(icon, 14),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: DriverTextStyles.semibold12.copyWith(
-              color: blue ? DriverColors.blue600 : DriverColors.neutral700,
+          if (icon != null) ...[
+            routeDetailIcon(icon!, 14),
+            const SizedBox(width: 4),
+          ],
+          Flexible(
+            child: Text(
+              label,
+              style: DriverTextStyles.semibold12.copyWith(color: fg),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// A stop in the "Next 7 Days" list.
-class RouteDetailUpcomingCard extends StatelessWidget {
-  const RouteDetailUpcomingCard({
-    super.key,
-    required this.stop,
-    this.highlighted = false,
-    this.once = false,
-    this.onTap,
-  });
-
-  final RouteStop stop;
-  final bool highlighted;
-  final bool once;
-  final VoidCallback? onTap;
-
-  Widget _upcomingChip(DriverLocalizations l10n) => switch (stop.status) {
-    StopStatus.collected => RouteStatusChip(
-      large: true,
-      radius: 8,
-      icon: RouteDetailAssets.upcomingCollected,
-      label: l10n.rdStatusCollected,
-      background: DriverColors.primary100,
-      foreground: DriverColors.primary500,
-    ),
-    StopStatus.nextStop => RouteStatusChip(
-      large: true,
-      icon: RouteDetailAssets.upcomingNext,
-      label: l10n.sdStatusNextStop,
-      background: DriverColors.secondary100,
-      foreground: DriverColors.secondary500,
-    ),
-    _ => RouteStatusChip(
-      large: true,
-      icon: once
-          ? RouteDetailAssets.sevenPendingAlt
-          : RouteDetailAssets.sevenPending,
-      label: l10n.rdStatusPending,
-      background: DriverColors.yellow50,
-      foreground: DriverColors.yellow600,
-    ),
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = DriverLocalizations.of(context);
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: DriverColors.neutral50,
-        borderRadius: BorderRadius.circular(12),
-        border: highlighted ? Border.all(color: DriverColors.primary500) : null,
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x1F000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Stack(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: Text(
-                        routeStopTitle(l10n, stop),
-                        style: DriverTextStyles.semibold18.copyWith(
-                          color: DriverColors.neutral900,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _DetailsBox(
-                      padding: 12,
-                      rows: [
-                        (RouteDetailAssets.sevenPin, stop.address),
-                        (
-                          RouteDetailAssets.clock,
-                          routeStopScheduleText(l10n, stop.schedule),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _upcomingChip(l10n),
-                        Container(
-                          width: 32,
-                          height: 32,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: DriverColors.cool200,
-                            borderRadius: BorderRadius.circular(5.12),
-                          ),
-                          child: routeDetailIcon(
-                            RouteDetailAssets.sevenSwap,
-                            24,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: routeDetailIcon(
-                    highlighted
-                        ? RouteDetailAssets.sevenArrowGreen
-                        : RouteDetailAssets.sevenArrowMuted,
-                    10,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

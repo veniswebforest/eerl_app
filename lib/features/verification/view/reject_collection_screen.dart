@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:eerl_app/core/utils/input_formatters.dart';
+import 'package:eerl_app/core/utils/input_validators.dart';
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -35,6 +37,15 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
     _remarksController.dispose();
     super.dispose();
   }
+
+  /// "Other" alone becomes the whole reason, which the server needs to be at
+  /// least 3 characters.
+  String? _otherReasonError() => InputValidators.text(
+    _otherController.text,
+    context.l10n,
+    minLength: _selectedReasons.length == 1 ? 3 : null,
+    maxLength: AppInputLimits.longText,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -109,9 +120,12 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                     key: const Key('verification-reject-other'),
                     controller: _otherController,
                     maxLength: 150,
+                    textCapitalization: TextCapitalization.sentences,
+                    textInputAction: TextInputAction.next,
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
                       labelText: context.l10n.verificationRejectOther,
+                      errorText: _otherReasonError(),
                       filled: true,
                       fillColor: AppColors.neutral50,
                     ),
@@ -131,6 +145,9 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                   maxLength: 150,
                   minLines: 5,
                   maxLines: 5,
+                  keyboardType: AppKeyboards.multiline,
+                  textInputAction: TextInputAction.newline,
+                  textCapitalization: TextCapitalization.sentences,
                   style: AppTextStyles.regularB7_14.copyWith(
                     color: AppColors.neutral950,
                   ),
@@ -165,7 +182,8 @@ class _RejectCollectionScreenState extends State<RejectCollectionScreen> {
                     onPressed:
                         _selectedReasons.isEmpty ||
                             (_selectedReasons.contains(reasons.length - 1) &&
-                                _otherController.text.trim().isEmpty)
+                                (_otherController.text.trim().isEmpty ||
+                                    _otherReasonError() != null))
                         ? null
                         : () {
                             final selected = _selectedReasons.toList()..sort();

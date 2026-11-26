@@ -23,7 +23,9 @@ class ModulePage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(child: child),
+                  // Lists inside draw past their sides (Clip.none) so card
+                  // shadows are not cut; this clips top and bottom only.
+                  Expanded(child: ModuleSideBleed(child: child)),
                   if (bottom != null) ...[const SizedBox(height: 16), bottom!],
                 ],
               ),
@@ -33,6 +35,33 @@ class ModulePage extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Clips [child] at its top and bottom but lets it paint [bleed] px past
+/// its left and right edges, so card shadows inside a padded scroll view
+/// (with `clipBehavior: Clip.none`) are not cut off.
+class ModuleSideBleed extends StatelessWidget {
+  const ModuleSideBleed({super.key, required this.child, this.bleed = 20});
+
+  final Widget child;
+  final double bleed;
+
+  @override
+  Widget build(BuildContext context) =>
+      ClipRect(clipper: _SideBleedClipper(bleed), child: child);
+}
+
+class _SideBleedClipper extends CustomClipper<Rect> {
+  const _SideBleedClipper(this.bleed);
+
+  final double bleed;
+
+  @override
+  Rect getClip(Size size) =>
+      Rect.fromLTRB(-bleed, 0, size.width + bleed, size.height);
+
+  @override
+  bool shouldReclip(_SideBleedClipper oldClipper) => oldClipper.bleed != bleed;
 }
 
 /// Green 40px square back button used by the module's detail screens.

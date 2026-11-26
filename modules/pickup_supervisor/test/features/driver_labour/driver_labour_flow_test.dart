@@ -27,6 +27,16 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> openPerson(WidgetTester tester, int index) async {
+    await tester.tap(find.byKey(Key('driver-labour-person-$index')));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> clearToast(WidgetTester tester) async {
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('driver directory lists drivers with counts and add button', (
     tester,
   ) async {
@@ -34,7 +44,8 @@ void main() {
     expect(find.text('Driver Directory'), findsOneWidget);
     expect(find.text('Driver (12)'), findsOneWidget);
     expect(find.text('Labour (5)'), findsOneWidget);
-    expect(find.text('Ramesh Bhai Patel'), findsOneWidget);
+    expect(find.text('Vikram Singh'), findsOneWidget);
+    expect(find.text('+91 98250 12458'), findsOneWidget);
     expect(find.text('Add Driver'), findsOneWidget);
   });
 
@@ -45,96 +56,148 @@ void main() {
     await tester.tap(find.byKey(const Key('driver-labour-tab-1')));
     await tester.pumpAndSettle();
     expect(find.text('Labour Directory'), findsOneWidget);
-    expect(find.text('Neel Prakash'), findsOneWidget);
-    expect(find.text('--'), findsWidgets);
+    expect(find.text('Ramesh Yadav'), findsOneWidget);
+    expect(find.text('--'), findsOneWidget);
     expect(find.text('Add Labour'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('driver-labour-filter')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Inactive').last);
     await tester.pumpAndSettle();
-    expect(find.text('No Details Found'), findsOneWidget);
-    expect(find.text('Add labourer'), findsOneWidget);
+    expect(find.text('No inactive labour'), findsOneWidget);
+    expect(find.text('Add labour'), findsOneWidget);
+  });
+
+  testWidgets('inactive drivers are listed', (tester) async {
+    await pumpDirectory(tester, active: false);
+    expect(find.text('Vikas Prajapati'), findsOneWidget);
+    expect(find.text('+91 98250 58830'), findsOneWidget);
+    expect(find.byKey(const Key('driver-labour-add')), findsNothing);
   });
 
   testWidgets('search filters the list', (tester) async {
     await pumpDirectory(tester);
     await tester.enterText(
       find.byKey(const Key('driver-labour-search')),
-      'umesh',
+      'rakesh',
     );
     await tester.pumpAndSettle();
-    expect(find.text('Umesh Yadav'), findsOneWidget);
-    expect(find.text('Ramesh Bhai Patel'), findsNothing);
+    expect(find.text('Rakesh Sharma'), findsOneWidget);
+    expect(find.text('Vikram Singh'), findsNothing);
   });
 
-  testWidgets('add driver form opens and cancels', (tester) async {
+  testWidgets('add driver form: two optional photos and Save', (tester) async {
     await pumpDirectory(tester);
     await tester.tap(find.byKey(const Key('driver-labour-add')));
     await tester.pumpAndSettle();
     expect(find.text('Add New Driver'), findsOneWidget);
-    expect(find.text('Capture Photo'), findsOneWidget);
-    expect(find.text('Save & Select'), findsOneWidget);
+    expect(find.text('ID number (Aadhaar or Voter ID)'), findsOneWidget);
+    expect(find.text('Profile photo'), findsOneWidget);
+    expect(find.text('ID proof photo'), findsOneWidget);
+    expect(find.text('Capture Photo'), findsNWidgets(2));
+    expect(find.text('Both optional.'), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
     await tester.tap(find.byKey(const Key('driver-labour-form-cancel')));
     await tester.pumpAndSettle();
     expect(find.text('Driver Directory'), findsOneWidget);
   });
 
-  testWidgets('detail → deactivate → reactive shows both toasts', (
+  testWidgets('driver detail → deactivate → reactivate shows both toasts', (
     tester,
   ) async {
     await pumpDirectory(tester);
-    await tester.tap(find.byKey(const Key('driver-labour-person-0')));
-    await tester.pumpAndSettle();
+    await openPerson(tester, 2);
     expect(find.text('SUR-DRV-0089'), findsOneWidget);
     expect(find.text('Adajan Central Warehouse'), findsOneWidget);
+    for (final t in ['Full name', 'Mobile number', 'ID number', 'Added on']) {
+      expect(find.text(t), findsOneWidget, reason: t);
+    }
 
     await tester.tap(find.byKey(const Key('driver-labour-deactivate')));
     await tester.pumpAndSettle();
-    expect(find.text('Are you sure?'), findsOneWidget);
+    expect(find.text('Deactivate driver?'), findsOneWidget);
+    expect(find.textContaining('Rakesh Sharma is taken off'), findsOneWidget);
     await tester.tap(find.byKey(const Key('driver-labour-dialog-confirm')));
     await tester.pumpAndSettle();
-    expect(find.text('Deactivated Successfully!'), findsOneWidget);
+    expect(find.text('Driver Deactivated!'), findsOneWidget);
+    expect(
+      find.text('Rakesh Sharma is off Adajan Central Warehouse.'),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('driver-labour-reactive')), findsOneWidget);
-    await tester.pump(const Duration(seconds: 4));
-    await tester.pumpAndSettle();
-    expect(find.text('Deactivated Successfully!'), findsNothing);
+    await clearToast(tester);
 
     await tester.tap(find.byKey(const Key('driver-labour-reactive')));
     await tester.pumpAndSettle();
+    expect(find.text('Reactivate driver?'), findsOneWidget);
     await tester.tap(find.byKey(const Key('driver-labour-dialog-confirm')));
     await tester.pumpAndSettle();
-    expect(find.text('Reactive Successfully!'), findsOneWidget);
+    expect(find.text('Driver Reactivated!'), findsOneWidget);
     await tester.tap(find.byKey(const Key('module-toast-close')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('driver-labour-edit')), findsOneWidget);
+  });
+
+  testWidgets('a driver on a route cannot be deactivated yet', (tester) async {
+    await pumpDirectory(tester);
+    await openPerson(tester, 0);
+    await tester.tap(find.byKey(const Key('driver-labour-deactivate')));
+    await tester.pumpAndSettle();
+    expect(find.text('Can’t deactivate yet'), findsOneWidget);
+    expect(
+      find.text(
+        'Vikram Singh drives Adajan Morning. Change the route’s driver '
+        'first, then deactivate.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('driver-labour-dialog-cancel')), findsNothing);
+    await tester.tap(find.byKey(const Key('driver-labour-dialog-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('driver-labour-deactivate')), findsOneWidget);
+    expect(find.byKey(const Key('module-toast')), findsNothing);
   });
 
   testWidgets('edit opens prefilled form and photos can be removed', (
     tester,
   ) async {
     await pumpDirectory(tester);
-    await tester.tap(find.byKey(const Key('driver-labour-person-0')));
-    await tester.pumpAndSettle();
+    await openPerson(tester, 2);
     await tester.tap(find.byKey(const Key('driver-labour-edit')));
     await tester.pumpAndSettle();
     expect(find.text('Edit Driver'), findsOneWidget);
-    expect(find.text('Ramesh Bhai Patel'), findsOneWidget);
+    expect(find.text('Rakesh Sharma'), findsOneWidget);
     final remove = find.byWidgetPredicate(
       (w) => w.key.toString().contains('driver-labour-remove-'),
     );
     expect(remove, findsNWidgets(2));
+    await tester.ensureVisible(remove.first);
     await tester.tap(remove.first);
     await tester.pumpAndSettle();
     expect(remove, findsOneWidget);
   });
 
-  testWidgets('labour detail has no warehouse card', (tester) async {
+  testWidgets('labour detail shows the warehouse; deactivate and back', (
+    tester,
+  ) async {
     await pumpDirectory(tester, kind: DriverLabourKind.labour);
-    await tester.tap(find.byKey(const Key('driver-labour-person-0')));
-    await tester.pumpAndSettle();
+    await openPerson(tester, 1);
     expect(find.text('SCH-LAB-0090'), findsOneWidget);
-    expect(find.text('Adajan Central Warehouse'), findsNothing);
+    expect(find.text('Adajan Central Warehouse'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('driver-labour-deactivate')));
+    await tester.pumpAndSettle();
+    expect(find.text('Deactivate labour?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('driver-labour-dialog-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.text('Labour Deactivated!'), findsOneWidget);
+    await clearToast(tester);
+    await tester.tap(find.byKey(const Key('driver-labour-reactive')));
+    await tester.pumpAndSettle();
+    expect(find.text('Reactivate labour?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('driver-labour-dialog-confirm')));
+    await tester.pumpAndSettle();
+    expect(find.text('Labour Reactivated!'), findsOneWidget);
+    await clearToast(tester);
   });
 
   for (final entry in {

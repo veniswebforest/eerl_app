@@ -220,5 +220,41 @@ void main() {
     );
     expect(continueButton.onPressed, isNull);
     expect(tester.takeException(), isNull);
+
+    // POST /transfers/{id}/approve, choice 2: vehicleNumber 4–20 characters
+    // stored in capitals; transporterName optional; transferFee required.
+    expect(find.text('Transporter *', findRichText: true), findsNothing);
+    final number = find.byKey(
+      const Key('supervisor-transfer-other-vehicle-number'),
+    );
+    await tester.enterText(number, 'gj1');
+    await tester.pump();
+    expect(
+      find.text('Enter a vehicle number of 4 to 20 characters.'),
+      findsOneWidget,
+    );
+    await tester.enterText(number, '');
+    await tester.pump();
+    expect(find.text('This field is required.'), findsOneWidget);
+    await tester.enterText(number, 'gj05xy7788');
+    await tester.pump();
+    expect(tester.widget<TextField>(number).controller!.text, 'GJ05XY7788');
+    expect(
+      find.text('Enter a vehicle number of 4 to 20 characters.'),
+      findsNothing,
+    );
+    await tester.enterText(
+      find.byKey(const Key('supervisor-transfer-other-fee')),
+      '1800',
+    );
+    await tester.pump();
+    expect(
+      tester
+          .widget<ElevatedButton>(
+            find.byKey(const Key('supervisor-transfer-continue')),
+          )
+          .onPressed,
+      isNotNull,
+    );
   });
 }

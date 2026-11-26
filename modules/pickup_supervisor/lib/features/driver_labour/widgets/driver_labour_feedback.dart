@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 
-/// "Are you sure?" confirmation popup. Resolves to `true` on confirm.
+/// Confirmation popup (Deactivate / Reactivate). Resolves to `true` on
+/// confirm. Without [cancelLabel] it is a one-button notice ("OK").
 Future<bool> showDriverLabourConfirmDialog(
   BuildContext context, {
   required String title,
   required String message,
-  required String cancelLabel,
+  String? cancelLabel,
   required String confirmLabel,
   required Color confirmColor,
   double confirmRadius = 14,
@@ -62,27 +63,29 @@ Future<bool> showDriverLabourConfirmDialog(
                       const SizedBox(height: 24),
                       Row(
                         children: [
-                          Expanded(
-                            child: SizedBox(
-                              height: 52,
-                              child: FilledButton(
-                                key: const Key('driver-labour-dialog-cancel'),
-                                onPressed: () =>
-                                    Navigator.of(dialogContext).pop(false),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: DriverColors.cool200,
-                                  foregroundColor: DriverColors.neutral950,
-                                  padding: EdgeInsets.zero,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                          if (cancelLabel != null) ...[
+                            Expanded(
+                              child: SizedBox(
+                                height: 52,
+                                child: FilledButton(
+                                  key: const Key('driver-labour-dialog-cancel'),
+                                  onPressed: () =>
+                                      Navigator.of(dialogContext).pop(false),
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: DriverColors.cool200,
+                                    foregroundColor: DriverColors.neutral950,
+                                    padding: EdgeInsets.zero,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    textStyle: DriverTextStyles.semibold16,
                                   ),
-                                  textStyle: DriverTextStyles.semibold16,
+                                  child: Text(cancelLabel),
                                 ),
-                                child: Text(cancelLabel),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
+                            const SizedBox(width: 12),
+                          ],
                           Expanded(
                             child: SizedBox(
                               height: 52,

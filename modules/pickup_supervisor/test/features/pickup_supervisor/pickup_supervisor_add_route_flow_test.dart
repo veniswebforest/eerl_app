@@ -210,4 +210,83 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Ravi Bisht (23456 58492)'), findsNothing);
   });
+
+  Future<void> pumpStep2(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(375, 1300);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: PickupSupervisorAddRouteAssignmentScreen(
+          routeName: 'Adajan Morning',
+          warehouse: 'Adajan Central Warehouse',
+          shift: 'Morning · 7 am–3 pm',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('company truck: labour is optional', (tester) async {
+    await pumpStep2(tester);
+    expect(find.text('Select Labour *'), findsNothing);
+    await tester.tap(find.byKey(const Key('add-route-vehicle')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('vehicle-option-0')));
+    await tester.pumpAndSettle();
+    expect(find.text('Capacity 3000 KG'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('add-route-driver')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('driver-option-0')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('add-route-step2-continue')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('supervisor-add-route-review')),
+      findsOneWidget,
+    );
+    expect(find.text('None'), findsOneWidget);
+  });
+
+  testWidgets('hired truck: typed details, no app driver', (tester) async {
+    await pumpStep2(tester);
+    await tester.tap(find.byKey(const Key('add-route-vehicle')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('vehicle-option-2')));
+    await tester.pumpAndSettle();
+    expect(find.text('Hired truck'), findsOneWidget);
+    expect(find.text('Hired truck details'), findsOneWidget);
+    expect(find.byKey(const Key('add-route-driver')), findsNothing);
+    expect(
+      find.textContaining('A hired truck’s driver has no app'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('add-route-step2-continue')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('supervisor-add-route-review')), findsNothing);
+
+    for (final (key, text) in [
+      ('add-route-truck-number', 'GJ-05-EE-1002'),
+      ('add-route-transporter', 'Shree Ram Transport'),
+      ('add-route-hired-driver', 'Kishan'),
+      ('add-route-hired-phone', '99780 44120'),
+      ('add-route-capacity', '3000'),
+    ]) {
+      await tester.enterText(find.byKey(Key(key)), text);
+    }
+    await tester.pump();
+    await tester.ensureVisible(
+      find.byKey(const Key('add-route-step2-continue')),
+    );
+    await tester.tap(find.byKey(const Key('add-route-step2-continue')));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('supervisor-add-route-review')),
+      findsOneWidget,
+    );
+    expect(find.text('GJ-05-EE-1002  (Shree Ram Transport)'), findsOneWidget);
+    expect(find.text('Capacity 3000 KG'), findsOneWidget);
+    expect(find.text('Kishan (99780 44120)'), findsOneWidget);
+  });
 }

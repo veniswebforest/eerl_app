@@ -385,6 +385,9 @@ class _NoteField extends StatelessWidget {
         TextField(
           key: const Key('driver-zero-note'),
           controller: controller,
+          keyboardType: TextInputType.multiline,
+          textInputAction: TextInputAction.newline,
+          textCapitalization: TextCapitalization.sentences,
           expands: true,
           maxLines: null,
           maxLength: 150,

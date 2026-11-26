@@ -84,14 +84,27 @@ void main() {
     },
   );
 
-  test('vehicle number normalization uses the required plate format', () {
-    expect(VehicleRegistrationNumber.normalize('gj05bx1234'), 'GJ-05-BX-1234');
+  test('vehicle number follows the documented plate pattern', () {
+    // PUT /vehicles: ^[A-Z]{2}[-\s]?[0-9]{1,2}[-\s]?[A-Z]{1,2}[-\s]?[0-9]{4}$,
+    // stored uppercased, as typed.
+    expect(VehicleRegistrationNumber.normalize('gj05bx1234'), 'GJ05BX1234');
     expect(
-      VehicleRegistrationNumber.normalize('GJ 05 BX 1234'),
+      VehicleRegistrationNumber.normalize(' GJ 05 BX 1234 '),
+      'GJ 05 BX 1234',
+    );
+    expect(
+      VehicleRegistrationNumber.normalize('GJ-05-BX-1234'),
       'GJ-05-BX-1234',
     );
-    expect(VehicleRegistrationNumber.normalize('GK-4-SW1224'), isNull);
+    expect(VehicleRegistrationNumber.normalize('GK-4-SW1224'), 'GK-4-SW1224');
+    expect(VehicleRegistrationNumber.normalize('GJ-5-B-1234'), 'GJ-5-B-1234');
     expect(VehicleRegistrationNumber.normalize('GJ-05-1234'), isNull);
+    expect(VehicleRegistrationNumber.normalize('GJ--05-BX-1234'), isNull);
+    expect(VehicleRegistrationNumber.normalize('GJ-123-BX-1234'), isNull);
+    expect(
+      VehicleRegistrationNumber.formatPartial('gj-05/bx#1234'),
+      'GJ-05BX1234',
+    );
   });
 
   test('D2D selector reads active vehicles from the vehicles table', () async {
@@ -147,7 +160,8 @@ void main() {
     const vehicle = VehicleModel(
       id: 'invalid-vehicle',
       centerId: 'center-1',
-      plateNumber: 'GK-4-SW1224',
+      // Fails the documented pattern (no series letters).
+      plateNumber: 'GJ-05-1234',
       isActive: true,
       syncState: 'pending',
     );
@@ -561,6 +575,7 @@ void main() {
       find.byKey(const Key('d2d-vehicle-number-field')),
       'gj05bx1234',
     );
-    expect(number.text, 'GJ-05-BX-1234');
+    // Uppercased as typed (PUT /vehicles plateNumber).
+    expect(number.text, 'GJ05BX1234');
   });
 }
