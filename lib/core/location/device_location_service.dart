@@ -91,6 +91,40 @@ class DeviceLocationService {
     }
   }
 
+  /// Permission and GPS switch only (no fix). With [request], a "denied"
+  /// permission is asked for once; "denied forever" needs app Settings.
+  Future<HomeLocationState> checkAccess({bool request = false}) async {
+    try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied && request) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.deniedForever) {
+        return HomeLocationState.permissionDeniedForever;
+      }
+      if (permission == LocationPermission.denied) {
+        return HomeLocationState.permissionDenied;
+      }
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        return HomeLocationState.serviceDisabled;
+      }
+      return HomeLocationState.ready;
+    } catch (error) {
+      _log('Access check failed: $error');
+      // Never lock the app out because the plugin itself failed.
+      return HomeLocationState.ready;
+    }
+  }
+
+  /// Fires when the phone's location switch is turned on or off.
+  Stream<bool> serviceEnabledChanges() => Geolocator.getServiceStatusStream()
+      .map((status) => status == ServiceStatus.enabled);
+
+  /// Refreshes the cached fix in the background once access is granted.
+  Future<void> warmUpFix() async {
+    await _captureAndCache() ?? await _lastKnownAndCache();
+  }
+
   /// Returns a fresh fix when permission and GPS are available, falling back
   /// to the platform or SQLite cached fix. Collection submission passes
   /// [requestPermission] so the API is never queued before location access has

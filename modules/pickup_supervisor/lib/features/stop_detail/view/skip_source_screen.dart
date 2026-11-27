@@ -1,4 +1,7 @@
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
+import 'package:eerl_app/features/outbound/data/outbound_writes.dart';
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
@@ -19,15 +22,20 @@ class SkipSourceScreen extends StatelessWidget {
     required this.sourceName,
     this.initialReasons = const {},
     this.initialRemarks = '',
+    this.duePickupId,
   });
 
   final String sourceName;
   final Set<SkipReason> initialReasons;
   final String initialRemarks;
 
+  /// The live pickup; with a session, Confirm queues the skip.
+  final String? duePickupId;
+
   @override
   Widget build(BuildContext context) => DriverLocalizationScope(
     child: _SkipSourceView(
+      duePickupId: duePickupId,
       sourceName: sourceName,
       initialReasons: initialReasons,
       initialRemarks: initialRemarks,
@@ -37,11 +45,13 @@ class SkipSourceScreen extends StatelessWidget {
 
 class _SkipSourceView extends StatefulWidget {
   const _SkipSourceView({
+    this.duePickupId,
     required this.sourceName,
     required this.initialReasons,
     required this.initialRemarks,
   });
 
+  final String? duePickupId;
   final String sourceName;
   final Set<SkipReason> initialReasons;
   final String initialRemarks;
@@ -62,6 +72,48 @@ class _SkipSourceViewState extends State<_SkipSourceView> {
   void initState() {
     super.initState();
     _remarks.addListener(() => setState(() {}));
+  }
+
+  static const _codes = {
+    SkipReason.sourceClosed: 'SOURCE_CLOSED',
+    SkipReason.holiday: 'HOLIDAY',
+    SkipReason.sourceAsked: 'SOURCE_ASKED',
+    SkipReason.vehicleUnavailable: 'VEHICLE_UNAVAILABLE',
+    SkipReason.capacityFull: 'CAPACITY_FULL',
+    SkipReason.notEnoughTime: 'NOT_ENOUGH_TIME',
+    SkipReason.other: 'OTHER',
+  };
+
+  /// Live: queue the skip (outbound doc, Pickup Supervisor writes); it
+  /// leaves its trip. Then pop `true` as the design does.
+  Future<void> _confirm() async {
+    final navigator = Navigator.of(context);
+    final session = OutboundLiveSession.of(context);
+    final id = widget.duePickupId;
+    if (session != null && id != null) {
+      try {
+        final note = _remarks.text.trim();
+        await session.change(
+          () => session.writes.decidePickup(
+            duePickupId: id,
+            action: PickupDecision.skip,
+            skipReasons: [
+              for (final reason in SkipReason.values)
+                if (_reasons.contains(reason)) _codes[reason]!,
+            ],
+            skipNote: note.isEmpty ? null : note,
+          ),
+        );
+      } on LocalWriteValidationException catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.maybeOf(
+            context,
+          )?.showSnackBar(SnackBar(content: Text(error.message)));
+        }
+        return;
+      }
+    }
+    navigator.pop(true);
   }
 
   bool get _canConfirm =>
@@ -93,7 +145,7 @@ class _SkipSourceViewState extends State<_SkipSourceView> {
         key: const Key('skip-source-confirm'),
         label: l10n.skConfirm,
         // One or more reasons; Other needs a note.
-        onPressed: !_canConfirm ? null : () => Navigator.of(context).pop(true),
+        onPressed: !_canConfirm ? null : _confirm,
       ),
       child: ListView(
         clipBehavior: Clip.none,

@@ -1,6 +1,13 @@
 import 'dart:math' as math;
 
+import 'dart:io';
+
+import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_live_data.dart';
+import 'package:pickup_supervisor/features/driver/model/driver_pickup_stop.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
@@ -17,16 +24,74 @@ const _stopAssets = 'assets/icons/driver/stops_v2';
 const _stopImages = 'assets/images/driver/stops_v2';
 
 class DriverCollectedStopDetailScreen extends StatelessWidget {
-  const DriverCollectedStopDetailScreen({super.key});
+  const DriverCollectedStopDetailScreen({super.key, this.stopId});
+
+  /// The live stop; null shows the design preview.
+  final String? stopId;
 
   @override
   Widget build(BuildContext context) {
-    return const DriverLocalizationScope(child: _CollectedStopDetailView());
+    final id = stopId;
+    return DriverLocalizationScope(
+      child: id == null
+          ? const _CollectedStopDetailView()
+          : OutboundLiveBuilder<_LiveRecord?>(
+              load: (session) => _LiveRecord.load(session, id),
+              fallback: const _CollectedStopDetailView(),
+              builder: (context, data, _) =>
+                  _CollectedStopDetailView(live: data),
+            ),
+    );
+  }
+}
+
+/// A saved stop, read-only (outbound doc, Driver screens · Collection
+/// record): what was saved, when, and its photos.
+class _LiveRecord {
+  const _LiveRecord(this.stop, this.photos, this.correctionRequested);
+
+  final DriverStopLive stop;
+
+  /// Local file paths or server URLs.
+  final List<String> photos;
+  final bool correctionRequested;
+
+  static Future<_LiveRecord?> load(
+    OutboundLiveSession session,
+    String id,
+  ) async {
+    final row = await session.queries.driverStop(id);
+    if (row == null) return null;
+    final stop = DriverStopLive.fromRow(row, totalStops: 0);
+    final photos = <String>[];
+    for (final ref in stop.photoUrls) {
+      if (ref.startsWith('http')) {
+        photos.add(ref);
+        continue;
+      }
+      final rows = await AppDatabase.instance.query(
+        'photos',
+        columns: const ['local_path', 'remote_url'],
+        where: 'id = ?',
+        whereArgs: [ref],
+      );
+      final path = rows.isEmpty
+          ? null
+          : (rows.single['local_path'] ?? rows.single['remote_url']) as String?;
+      if (path != null) photos.add(path);
+    }
+    return _LiveRecord(
+      stop,
+      photos,
+      await session.queries.correctionRequested(id),
+    );
   }
 }
 
 class _CollectedStopDetailView extends StatelessWidget {
-  const _CollectedStopDetailView();
+  const _CollectedStopDetailView({this.live});
+
+  final _LiveRecord? live;
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +127,11 @@ class _CollectedStopDetailView extends StatelessWidget {
                             onBack: () => Navigator.of(context).pop(),
                           ),
                           const SizedBox(height: 24),
-                          const _CollectionStatusCard(),
+                          _CollectionStatusCard(live: live),
                           const SizedBox(height: 16),
-                          const _SavedWeightCard(),
+                          _SavedWeightCard(live: live?.stop),
                           const SizedBox(height: 16),
-                          const _PhotosCard(),
+                          _PhotosCard(photos: live?.photos),
                           const SizedBox(height: 16),
                           DriverPrimaryButton(
                             label: l10n.askSupervisorToCorrect,
@@ -100,7 +165,9 @@ class _CollectedStopDetailView extends StatelessWidget {
 }
 
 class _CollectionStatusCard extends StatelessWidget {
-  const _CollectionStatusCard();
+  const _CollectionStatusCard({this.live});
+
+  final _LiveRecord? live;
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +180,17 @@ class _CollectionStatusCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  l10n.stopCardTitle(l10n.hotelRajdhani, l10n.sortedMaterial),
+                  live != null
+                      ? l10n.stopCardTitle(
+                          live!.stop.sourceName,
+                          live!.stop.pickupType == DriverPickupType.sorted
+                              ? l10n.sortedMaterial
+                              : l10n.mixedMaterial,
+                        )
+                      : l10n.stopCardTitle(
+                          l10n.hotelRajdhani,
+                          l10n.sortedMaterial,
+                        ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: DriverTextStyles.semibold16.copyWith(
@@ -161,7 +238,7 @@ class _CollectionStatusCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  l10n.savedAt,
+                  live != null ? _savedAt(context, live!.stop) : l10n.savedAt,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: DriverTextStyles.medium14.copyWith(
@@ -177,8 +254,17 @@ class _CollectionStatusCard extends StatelessWidget {
   }
 }
 
+String _savedAt(BuildContext context, DriverStopLive stop) {
+  final at = DateTime.tryParse(stop.recordedAt ?? '');
+  if (at == null) return '';
+  final ist = at.toUtc().add(const Duration(hours: 5, minutes: 30));
+  return DateFormat('d MMM, h:mm a').format(ist);
+}
+
 class _SavedWeightCard extends StatelessWidget {
-  const _SavedWeightCard();
+  const _SavedWeightCard({this.live});
+
+  final DriverStopLive? live;
 
   @override
   Widget build(BuildContext context) {
@@ -196,18 +282,39 @@ class _SavedWeightCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            l10n.hotelRajdhaniWeight,
+            live != null
+                ? l10n.liveKg(formatKg(_kg(live!)))
+                : l10n.hotelRajdhaniWeight,
             style: DriverTextStyles.bold24.copyWith(
               color: DriverColors.neutral950,
             ),
           ),
           const SizedBox(height: 8),
-          _MaterialRow(l10n.petBottles, l10n.petBottlesWeight),
-          _MaterialRow(l10n.cardboard, l10n.cardboardWeight),
+          if (live == null) ...[
+            _MaterialRow(l10n.petBottles, l10n.petBottlesWeight),
+            _MaterialRow(l10n.cardboard, l10n.cardboardWeight),
+          ] else
+            for (final line in live!.entryLines.whereType<Map>())
+              _MaterialRow(
+                '${line['item_name'] ?? ''}',
+                '${formatKg((line['quantity'] as num?)?.toDouble() ?? 0)} '
+                    '${line['unit'] == 'KG' ? 'kg' : 'pcs'}',
+              ),
         ],
       ),
     );
   }
+}
+
+double _kg(DriverStopLive stop) {
+  if (stop.totalKg != null) return stop.totalKg!;
+  var total = 0.0;
+  for (final line in stop.entryLines.whereType<Map>()) {
+    if (line['unit'] == 'KG') {
+      total += (line['quantity'] as num?)?.toDouble() ?? 0;
+    }
+  }
+  return total;
 }
 
 class _MaterialRow extends StatelessWidget {
@@ -244,7 +351,10 @@ class _MaterialRow extends StatelessWidget {
 }
 
 class _PhotosCard extends StatelessWidget {
-  const _PhotosCard();
+  const _PhotosCard({this.photos});
+
+  /// Live photos (paths or URLs); null shows the design samples.
+  final List<String>? photos;
 
   @override
   Widget build(BuildContext context) {
@@ -261,13 +371,38 @@ class _PhotosCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: const [
-              _Photo('$_stopImages/material.png'),
-              SizedBox(width: 12),
-              _Photo('$_stopImages/scale.png'),
-            ],
-          ),
+          if (photos == null)
+            Row(
+              children: const [
+                _Photo('$_stopImages/material.png'),
+                SizedBox(width: 12),
+                _Photo('$_stopImages/scale.png'),
+              ],
+            )
+          else
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                for (final photo in photos!)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: photo.startsWith('http')
+                        ? Image.network(
+                            photo,
+                            width: 109,
+                            height: 70,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.file(
+                            File(photo),
+                            width: 109,
+                            height: 70,
+                            fit: BoxFit.cover,
+                          ),
+                  ),
+              ],
+            ),
         ],
       ),
     );

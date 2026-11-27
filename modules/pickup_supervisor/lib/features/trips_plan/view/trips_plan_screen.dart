@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
+import 'package:pickup_supervisor/features/trips_plan/data/trips_plan_live_data.dart';
 import 'package:pickup_supervisor/core/utils/module_date_format.dart';
 import 'package:pickup_supervisor/core/widgets/module_date_range_sheet.dart';
 import 'package:pickup_supervisor/core/widgets/module_page.dart';
@@ -33,13 +35,28 @@ class TripsPlanScreen extends StatelessWidget {
   final int? initialDay;
 
   @override
-  Widget build(BuildContext context) => DriverLocalizationScope(
-    child: _TripsPlanView(
+  Widget build(BuildContext context) {
+    final preview = _TripsPlanView(
       initialChoice: initialChoice,
       initialRange: initialRange,
       initialDay: initialDay,
-    ),
-  );
+    );
+    return DriverLocalizationScope(
+      child: OutboundLiveBuilder<LiveTripsPlan>(
+        load: LiveTripsPlan.load,
+        fallback: preview,
+        builder: (context, plan, session) => _TripsPlanView(
+          initialChoice: initialChoice == TripsPlanChoice.tomorrow
+              ? TripsPlanChoice.tomorrow
+              : TripsPlanChoice.today,
+          initialRange: initialRange,
+          initialDay: null,
+          live: plan,
+          liveToday: DateTime.parse(session.clock.today),
+        ),
+      ),
+    );
+  }
 }
 
 class _TripsPlanView extends StatefulWidget {
@@ -47,11 +64,17 @@ class _TripsPlanView extends StatefulWidget {
     required this.initialChoice,
     required this.initialRange,
     required this.initialDay,
+    this.live,
+    this.liveToday,
   });
 
   final TripsPlanChoice initialChoice;
   final DateTimeRange? initialRange;
   final int? initialDay;
+
+  /// Today's and tomorrow's trips from SQLite; null shows the samples.
+  final LiveTripsPlan? live;
+  final DateTime? liveToday;
 
   @override
   State<_TripsPlanView> createState() => _TripsPlanViewState();
@@ -150,6 +173,30 @@ class _TripsPlanViewState extends State<_TripsPlanView> {
   }
 
   List<Widget> _content(DriverLocalizations l10n) {
+    final live = widget.live;
+    if (live != null) {
+      final today = widget.liveToday ?? DateTime.now();
+      switch (_choice) {
+        case TripsPlanChoice.today:
+          return _tripList(
+            l10n,
+            date: _dayMonthYear(l10n, today),
+            trips: live.today,
+            stops: live.stopsOf(live.today),
+          );
+        case TripsPlanChoice.tomorrow:
+          return _tripList(
+            l10n,
+            date: _dayMonthYear(l10n, today.add(const Duration(days: 1))),
+            trips: live.tomorrow,
+            stops: live.stopsOf(live.tomorrow),
+          );
+        case TripsPlanChoice.week:
+        case TripsPlanChoice.date:
+          // This week and chosen dates are GET /trips-plan (online).
+          return [TripsPlanInfoBanner(message: l10n.liveNeedsConnection)];
+      }
+    }
     final day = _day;
     if (day != null) return _singleDay(l10n, TripsPlanMockData.dayAt(day));
     switch (_choice) {

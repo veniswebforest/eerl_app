@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
+import 'package:eerl_app/core/local_database/outbound/outbound_tables.dart';
 import 'package:eerl_app/features/bootstrap/model/bootstrap_response.dart';
 import 'package:eerl_app/features/bootstrap/service/bootstrap_log.dart';
 import 'package:eerl_app/features/dashboard/model/bottom_nav_item_model.dart';
+import 'package:eerl_app/features/outbound/data/outbound_sync_applier.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -269,11 +271,15 @@ class BootstrapDatabaseApplier {
         // enforcement is intentionally disabled at the connection level.
         await _validateIncomingRows(txn, data.tables);
         await _applyMe(txn, data.me);
+        final me = data.me;
+        if (me != null) await OutboundSyncApplier.applyMe(txn, me);
         await _applyReferenceTables(txn, data.tables);
         await _applyRecordUpserts(txn, data.tables);
         await _applyChildSets(txn, data.tables);
         await _applyNormalDeletes(txn, data.tables);
         await _applyParentDeletes(txn, data.tables);
+        // Outbound lines go into the same steps, in the same transaction.
+        await OutboundSyncApplier.applyTables(txn, data.tables);
         await _savePageMeta(txn, data);
         // Missing relations are diagnostic only: report exact details without
         // blocking a server-owned Bootstrap page from being committed.
@@ -382,7 +388,15 @@ class BootstrapDatabaseApplier {
   }
 
   Future<void> _logForeignKeyViolations(Transaction txn) async {
-    final violations = await txn.rawQuery('PRAGMA foreign_key_check');
+    // Outbound links a phone cannot always follow (a driver's phone holds no
+    // routes, vans or pickup points; people live on the server) are normal,
+    // not sync errors (outbound SQLite doc, "Links a phone cannot always
+    // follow"), so only fixed-point tables are reported.
+    final violations = (await txn.rawQuery('PRAGMA foreign_key_check'))
+        .where(
+          (row) => !OutboundTables.values.contains(row['table']?.toString()),
+        )
+        .toList(growable: false);
     if (violations.isEmpty) return;
 
     final descriptions = <String>[];

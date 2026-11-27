@@ -273,25 +273,28 @@ class TripsPlanTripCard extends StatelessWidget {
         context,
         // Real trips open the route; an expected day opens its next 7 days.
         MaterialPageRoute<void>(
-          builder: (_) => RouteDetailScreen(
-            tripState: switch (trip.status) {
-              TripStatus.planned => TripState.planned,
-              TripStatus.approved => TripState.approved,
-              TripStatus.onRoute || TripStatus.expected => TripState.onRoute,
-            },
-            initialPeriod: trip.status == TripStatus.expected
-                ? RouteDetailPeriod.next7Days
-                : RouteDetailPeriod.today,
-            driverNotUsingApp:
-                trip.alert == TripAlert.driverNotUsingApp &&
-                trip.status == TripStatus.onRoute,
-            // Changed before it started: the swap shows on the trip.
-            teamChange:
-                trip.alert == TripAlert.changedForToday &&
-                    trip.status == TripStatus.onRoute
-                ? RouteActionsMockData.adajanTodayChange
-                : null,
-          ),
+          builder: (_) => trip.id != null
+              ? RouteDetailScreen(tripId: trip.id)
+              : RouteDetailScreen(
+                  tripState: switch (trip.status) {
+                    TripStatus.planned => TripState.planned,
+                    TripStatus.approved => TripState.approved,
+                    TripStatus.onRoute ||
+                    TripStatus.expected => TripState.onRoute,
+                  },
+                  initialPeriod: trip.status == TripStatus.expected
+                      ? RouteDetailPeriod.next7Days
+                      : RouteDetailPeriod.today,
+                  driverNotUsingApp:
+                      trip.alert == TripAlert.driverNotUsingApp &&
+                      trip.status == TripStatus.onRoute,
+                  // Changed before it started: the swap shows on the trip.
+                  teamChange:
+                      trip.alert == TripAlert.changedForToday &&
+                          trip.status == TripStatus.onRoute
+                      ? RouteActionsMockData.adajanTodayChange
+                      : null,
+                ),
         ),
       ),
       child: Column(

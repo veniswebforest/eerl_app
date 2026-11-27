@@ -1,4 +1,7 @@
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
+import 'package:pickup_supervisor/features/pickup_supervisor/data/sources_live_data.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
@@ -41,107 +44,145 @@ class _PickupSupervisorSourcesScreenState
   Widget build(BuildContext context) {
     return DriverLocalizationScope(
       child: Builder(
-        builder: (context) {
-          final l10n = DriverLocalizations.of(context);
-          final items = _sourceItems(l10n);
-          final visibleItems = items
-              .where((item) {
-                if (_selectedTab != item.tab) return false;
-                return _query.isEmpty ||
-                    item.title.toLowerCase().contains(_query.toLowerCase());
-              })
-              .toList(growable: false);
-          return Scaffold(
-            key: const Key('supervisor-sources-screen'),
-            extendBody: true,
-            backgroundColor: DriverColors.background,
-            body: Stack(
-              children: [
-                const Positioned.fill(
-                  child: ColoredBox(color: DriverColors.background),
-                ),
-                const Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: 150,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [Color(0xFFB9F0C4), DriverColors.background],
-                      ),
+        builder: (context) => OutboundLiveBuilder<LiveUnassigned>(
+          load: LiveUnassigned.load,
+          fallback: _page(null),
+          builder: (context, live, _) => _page(live),
+        ),
+      ),
+    );
+  }
+
+  Widget _page(LiveUnassigned? live) {
+    return Builder(
+      builder: (context) {
+        final l10n = DriverLocalizations.of(context);
+        final items = live == null
+            ? _sourceItems(l10n)
+            : [
+                for (final s in live.sources)
+                  _SourceItem(
+                    title:
+                        '${s.name} · '
+                        '${s.mixed ? l10n.sourcesMixed : l10n.sourcesSorted}',
+                    address: s.address,
+                    schedule: s.schedule,
+                    detailName: s.name,
+                    mixed: s.mixed,
+                    liveId: s.id,
+                  ),
+                for (final p in live.pickups)
+                  _SourceItem(
+                    title: p.name,
+                    address: '',
+                    schedule: p.when,
+                    detailName: p.name,
+                    tab: 1,
+                  ),
+              ];
+        final visibleItems = items
+            .where((item) {
+              if (_selectedTab != item.tab) return false;
+              return _query.isEmpty ||
+                  item.title.toLowerCase().contains(_query.toLowerCase());
+            })
+            .toList(growable: false);
+        return Scaffold(
+          key: const Key('supervisor-sources-screen'),
+          extendBody: true,
+          backgroundColor: DriverColors.background,
+          body: Stack(
+            children: [
+              const Positioned.fill(
+                child: ColoredBox(color: DriverColors.background),
+              ),
+              const Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 150,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [Color(0xFFB9F0C4), DriverColors.background],
                     ),
                   ),
                 ),
-                SafeArea(
-                  bottom: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-                        child: _SourcesHeader(l10n: l10n),
+              ),
+              SafeArea(
+                bottom: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                      child: _SourcesHeader(l10n: l10n),
+                    ),
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _SourceSearch(
+                        hint: l10n.sourcesSearchHint,
+                        onChanged: (value) => setState(() => _query = value),
                       ),
-                      const SizedBox(height: 24),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: _SourceSearch(
-                          hint: l10n.sourcesSearchHint,
-                          onChanged: (value) => setState(() => _query = value),
-                        ),
+                    ),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _SourcesTabs(
+                        l10n: l10n,
+                        labels: live == null
+                            ? null
+                            : [
+                                l10n.liveSourcesTab(live.sources.length),
+                                l10n.livePickupsTab(live.pickups.length),
+                              ],
+                        selected: _selectedTab,
+                        onSelected: (index) =>
+                            setState(() => _selectedTab = index),
                       ),
-                      const SizedBox(height: 16),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: _SourcesTabs(
-                          l10n: l10n,
-                          selected: _selectedTab,
-                          onSelected: (index) =>
-                              setState(() => _selectedTab = index),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Expanded(
-                        child: widget.showEmpty
-                            ? _EmptySources(l10n: l10n)
-                            : ListView.separated(
-                                key: const Key('supervisor-sources-list'),
-                                padding: EdgeInsets.fromLTRB(
-                                  20,
-                                  0,
-                                  20,
-                                  MediaQuery.paddingOf(context).bottom +
-                                      (widget.showBottomNavigation ? 112 : 24),
-                                ),
-                                itemCount: visibleItems.length,
-                                separatorBuilder: (_, _) =>
-                                    const SizedBox(height: 16),
-                                itemBuilder: (_, index) => _SourceCard(
-                                  item: visibleItems[index],
-                                  highlighted: index == 0,
-                                  onTap: () =>
-                                      _openSource(context, visibleItems[index]),
-                                ),
+                    ),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: widget.showEmpty
+                          ? _EmptySources(l10n: l10n)
+                          : ListView.separated(
+                              key: const Key('supervisor-sources-list'),
+                              padding: EdgeInsets.fromLTRB(
+                                20,
+                                0,
+                                20,
+                                MediaQuery.paddingOf(context).bottom +
+                                    (widget.showBottomNavigation ? 112 : 24),
                               ),
-                      ),
-                    ],
-                  ),
+                              itemCount: visibleItems.length,
+                              separatorBuilder: (_, _) =>
+                                  const SizedBox(height: 16),
+                              itemBuilder: (_, index) => _SourceCard(
+                                item: visibleItems[index],
+                                highlighted: index == 0,
+                                onTap: () =>
+                                    _openSource(context, visibleItems[index]),
+                              ),
+                            ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            bottomNavigationBar: widget.showBottomNavigation
-                ? PickupSupervisorBottomNavigation(
-                    items: _standaloneNavigationItems(l10n),
-                    selectedIndex: 1,
-                    onItemSelected: (index) =>
-                        widget.onNavigationSelected?.call(index),
-                  )
-                : null,
-          );
-        },
-      ),
+              ),
+            ],
+          ),
+          bottomNavigationBar: widget.showBottomNavigation
+              ? PickupSupervisorBottomNavigation(
+                  items: _standaloneNavigationItems(l10n),
+                  selectedIndex: 1,
+                  onItemSelected: (index) =>
+                      widget.onNavigationSelected?.call(index),
+                )
+              : null,
+        );
+      },
     );
   }
 
@@ -153,6 +194,7 @@ class _PickupSupervisorSourcesScreenState
         builder: (_) => PickupSupervisorSourceDetailScreen(
           mixed: item.mixed,
           sourceName: item.detailName,
+          sourceId: item.liveId,
         ),
       ),
     );
@@ -164,73 +206,93 @@ class PickupSupervisorSourceDetailScreen extends StatelessWidget {
     super.key,
     required this.mixed,
     required this.sourceName,
+    this.sourceId,
   });
 
   final bool mixed;
   final String sourceName;
 
+  /// The live pickup point; null shows the design sample.
+  final String? sourceId;
+
   @override
   Widget build(BuildContext context) {
+    final id = sourceId;
     return DriverLocalizationScope(
-      child: Builder(
-        builder: (context) {
-          final l10n = DriverLocalizations.of(context);
-          return Scaffold(
-            key: Key('supervisor-source-detail-${mixed ? 'mixed' : 'sorted'}'),
-            backgroundColor: DriverColors.background,
-            body: SafeArea(
-              bottom: false,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-                child: Column(
-                  children: [
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: _SourcesBackButton(),
-                    ),
-                    const SizedBox(height: 24),
-                    _SourceDetailCard(
-                      l10n: l10n,
-                      sourceName: sourceName,
-                      mixed: mixed,
-                    ),
-                  ],
-                ),
+      child: id == null
+          ? _page(null)
+          : OutboundLiveBuilder<LiveSource?>(
+              load: (session) => LiveSource.load(session, id),
+              fallback: _page(null),
+              builder: (context, live, _) => _page(live),
+            ),
+    );
+  }
+
+  Widget _page(LiveSource? live) {
+    return Builder(
+      builder: (context) {
+        final l10n = DriverLocalizations.of(context);
+        final isMixed = live?.mixed ?? mixed;
+        return Scaffold(
+          key: Key('supervisor-source-detail-${isMixed ? 'mixed' : 'sorted'}'),
+          backgroundColor: DriverColors.background,
+          body: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+              child: Column(
+                children: [
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: _SourcesBackButton(),
+                  ),
+                  const SizedBox(height: 24),
+                  _SourceDetailCard(
+                    l10n: l10n,
+                    sourceName: live?.name ?? sourceName,
+                    mixed: isMixed,
+                    live: live,
+                  ),
+                ],
               ),
             ),
-            bottomNavigationBar: SafeArea(
-              minimum: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-              child: FilledButton(
-                key: const Key('source-add-to-route'),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        const PickupSupervisorAssignSourceRouteScreen(),
-                  ),
-                ),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
-                  backgroundColor: DriverColors.primary500,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  l10n.sourcesAddToRoute,
-                  style: DriverTextStyles.bold16.copyWith(color: Colors.white),
+          ),
+          bottomNavigationBar: SafeArea(
+            minimum: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: FilledButton(
+              key: const Key('source-add-to-route'),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      PickupSupervisorAssignSourceRouteScreen(source: live),
                 ),
               ),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                backgroundColor: DriverColors.primary500,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                l10n.sourcesAddToRoute,
+                style: DriverTextStyles.bold16.copyWith(color: Colors.white),
+              ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
 
 class PickupSupervisorAssignSourceRouteScreen extends StatefulWidget {
-  const PickupSupervisorAssignSourceRouteScreen({super.key});
+  const PickupSupervisorAssignSourceRouteScreen({super.key, this.source});
+
+  /// The live pickup point to add; null shows the design sample.
+  final LiveSource? source;
 
   @override
   State<PickupSupervisorAssignSourceRouteScreen> createState() =>
@@ -240,123 +302,182 @@ class PickupSupervisorAssignSourceRouteScreen extends StatefulWidget {
 class _PickupSupervisorAssignSourceRouteScreenState
     extends State<PickupSupervisorAssignSourceRouteScreen> {
   var _selectedRoute = 0;
+  bool _saving = false;
 
   @override
   Widget build(BuildContext context) {
     return DriverLocalizationScope(
       child: Builder(
-        builder: (context) {
-          final l10n = DriverLocalizations.of(context);
-          final routes = [
-            _RouteData(
-              l10n.sourcesAdajanMorning,
-              l10n.sourcesVehicleGj051824,
-              l10n.sourcesMorningTime,
-              l10n.sourcesAssignedCount,
-            ),
-            _RouteData(
-              l10n.sourcesPalGamMorning,
-              l10n.sourcesVehicleGj052564,
-              l10n.sourcesPalGamTime,
-              l10n.sourcesAssignedCount,
-            ),
-            _RouteData(
-              l10n.sourcesVesuEvening,
-              l10n.sourcesVehicleGj051824,
-              l10n.sourcesMorningTime,
-              l10n.sourcesAssignedCount,
-            ),
-          ];
-          return Scaffold(
-            key: const Key('supervisor-assign-source-route-screen'),
-            backgroundColor: DriverColors.background,
-            body: SafeArea(
-              bottom: false,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const _SourcesBackButton(),
-                    const SizedBox(height: 24),
-                    ...List.generate(routes.length, (index) {
-                      final selected = index == _selectedRoute;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Column(
-                          children: [
-                            _RouteChoiceCard(
-                              data: routes[index],
-                              selected: selected,
-                              onTap: routes[index].disabled
-                                  ? null
-                                  : () =>
-                                        setState(() => _selectedRoute = index),
-                            ),
-                            if (index == 0 && selected) ...[
-                              const SizedBox(height: 16),
-                              _RouteWarning(l10n: l10n),
-                            ],
-                          ],
-                        ),
-                      );
-                    }),
-                  ],
-                ),
+        builder: (context) => widget.source == null
+            ? _page(null)
+            : OutboundLiveBuilder<List<LiveRouteChoice>>(
+                load: LiveRouteChoice.loadActive,
+                fallback: _page(null),
+                builder: (context, live, _) => _page(live),
               ),
-            ),
-            bottomNavigationBar: SafeArea(
-              minimum: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        foregroundColor: DriverColors.primary500,
-                        side: const BorderSide(color: DriverColors.primary500),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        l10n.sourcesAddNew,
-                        style: DriverTextStyles.bold16,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton(
-                      key: const Key('source-assign-anyway'),
-                      onPressed: () => _showSuccess(context, l10n),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        backgroundColor: DriverColors.primary500,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsetsGeometry.symmetric(horizontal: 2),
-                      ),
-                      child: Text(
-                        l10n.sourcesAssignAnyway,
-                        style: DriverTextStyles.bold16.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
       ),
     );
   }
 
-  Future<void> _showSuccess(BuildContext context, DriverLocalizations l10n) {
+  /// Live: re-save the chosen route with this pickup point added last.
+  Future<void> _assign(
+    BuildContext context,
+    DriverLocalizations l10n,
+    LiveRouteChoice route,
+  ) async {
+    final session = OutboundLiveSession.of(context);
+    final source = widget.source;
+    if (session == null || source == null) return;
+    setState(() => _saving = true);
+    try {
+      await addSourceToRoute(session, routeId: route.id, sourceId: source.id);
+    } on LocalWriteValidationException catch (error) {
+      if (!context.mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.maybeOf(
+        context,
+      )?.showSnackBar(SnackBar(content: Text(error.message)));
+      return;
+    }
+    if (!context.mounted) return;
+    setState(() => _saving = false);
+    await _showSuccess(
+      context,
+      l10n,
+      message: l10n.liveSourceAdded(source.name, route.name),
+    );
+  }
+
+  Widget _page(List<LiveRouteChoice>? live) {
+    return Builder(
+      builder: (context) {
+        final l10n = DriverLocalizations.of(context);
+        final routes = live != null
+            ? [
+                for (final r in live)
+                  _RouteData(
+                    r.name,
+                    r.vehicle,
+                    r.time,
+                    l10n.liveAssignedCount(r.sources),
+                  ),
+              ]
+            : [
+                _RouteData(
+                  l10n.sourcesAdajanMorning,
+                  l10n.sourcesVehicleGj051824,
+                  l10n.sourcesMorningTime,
+                  l10n.sourcesAssignedCount,
+                ),
+                _RouteData(
+                  l10n.sourcesPalGamMorning,
+                  l10n.sourcesVehicleGj052564,
+                  l10n.sourcesPalGamTime,
+                  l10n.sourcesAssignedCount,
+                ),
+                _RouteData(
+                  l10n.sourcesVesuEvening,
+                  l10n.sourcesVehicleGj051824,
+                  l10n.sourcesMorningTime,
+                  l10n.sourcesAssignedCount,
+                ),
+              ];
+        return Scaffold(
+          key: const Key('supervisor-assign-source-route-screen'),
+          backgroundColor: DriverColors.background,
+          body: SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _SourcesBackButton(),
+                  const SizedBox(height: 24),
+                  ...List.generate(routes.length, (index) {
+                    final selected = index == _selectedRoute;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        children: [
+                          _RouteChoiceCard(
+                            data: routes[index],
+                            selected: selected,
+                            onTap: routes[index].disabled
+                                ? null
+                                : () => setState(() => _selectedRoute = index),
+                          ),
+                          if (live == null && index == 0 && selected) ...[
+                            const SizedBox(height: 16),
+                            _RouteWarning(l10n: l10n),
+                          ],
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+          bottomNavigationBar: SafeArea(
+            minimum: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                      foregroundColor: DriverColors.primary500,
+                      side: const BorderSide(color: DriverColors.primary500),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      l10n.sourcesAddNew,
+                      style: DriverTextStyles.bold16,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    key: const Key('source-assign-anyway'),
+                    onPressed: live == null
+                        ? () => _showSuccess(context, l10n)
+                        : (_saving || live.isEmpty)
+                        ? null
+                        : () => _assign(context, l10n, live[_selectedRoute]),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                      backgroundColor: DriverColors.primary500,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsetsGeometry.symmetric(horizontal: 2),
+                    ),
+                    child: Text(
+                      l10n.sourcesAssignAnyway,
+                      style: DriverTextStyles.bold16.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showSuccess(
+    BuildContext context,
+    DriverLocalizations l10n, {
+    String? message,
+  }) {
     return showDialog<void>(
       context: context,
       barrierColor: const Color(0x99000000),
@@ -380,7 +501,7 @@ class _PickupSupervisorAssignSourceRouteScreenState
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  l10n.sourcesAddedMessage,
+                  message ?? l10n.sourcesAddedMessage,
                   textAlign: TextAlign.center,
                   style: DriverTextStyles.regular14.copyWith(
                     color: DriverColors.neutral600,
@@ -506,15 +627,19 @@ class _SourcesTabs extends StatelessWidget {
     required this.l10n,
     required this.selected,
     required this.onSelected,
+    this.labels,
   });
 
+  /// Live tab labels with their counts; null shows the design's.
+  final List<String>? labels;
   final DriverLocalizations l10n;
   final int selected;
   final ValueChanged<int> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    final labels = [l10n.sourcesTabCount, l10n.sourcesExtraTabCount];
+    final labels =
+        this.labels ?? [l10n.sourcesTabCount, l10n.sourcesExtraTabCount];
     return Container(
       height: 52,
       padding: const EdgeInsets.all(4),
@@ -565,8 +690,11 @@ class _SourceItem {
     required this.detailName,
     this.tab = 0,
     this.mixed = false,
+    this.liveId,
   });
 
+  /// The live pickup point id; null in the design samples.
+  final String? liveId;
   final String title;
   final String address;
   final String schedule;
@@ -819,11 +947,13 @@ class _SourceDetailCard extends StatelessWidget {
     required this.l10n,
     required this.sourceName,
     required this.mixed,
+    this.live,
   });
 
   final DriverLocalizations l10n;
   final String sourceName;
   final bool mixed;
+  final LiveSource? live;
 
   @override
   Widget build(BuildContext context) {
@@ -847,7 +977,7 @@ class _SourceDetailCard extends StatelessWidget {
           const Divider(height: 18, color: DriverColors.cool400),
           _DetailSection(
             label: l10n.sourcesAddress,
-            value: l10n.sourcesFullAddress,
+            value: live?.address ?? l10n.sourcesFullAddress,
             action: Row(
               children: [
                 SvgPicture.asset(
@@ -871,12 +1001,12 @@ class _SourceDetailCard extends StatelessWidget {
           const Divider(height: 18, color: DriverColors.cool400),
           _DetailSection(
             label: l10n.sourcesSchedule,
-            value: l10n.sourcesMonThuSchedule,
+            value: live?.schedule ?? l10n.sourcesMonThuSchedule,
           ),
           const Divider(height: 18, color: DriverColors.cool400),
           _DetailSection(
             label: l10n.sourcesContactNumber,
-            value: l10n.sourcesPhone,
+            value: live?.phone ?? l10n.sourcesPhone,
           ),
           const Divider(height: 18, color: DriverColors.cool400),
           Text(l10n.sourcesMaterial, style: DriverTextStyles.semibold14),
@@ -905,7 +1035,7 @@ class _SourceDetailCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    l10n.sourcesMaterialsList,
+                    live?.items.join(', ') ?? l10n.sourcesMaterialsList,
                     style: DriverTextStyles.regular14,
                   ),
                 ),

@@ -12,7 +12,11 @@ const _profileIcons = 'assets/icons/supervisor/profile';
 const _helpIcons = 'assets/icons/supervisor/help_support';
 
 class PickupSupervisorProfileScreen extends StatefulWidget {
-  const PickupSupervisorProfileScreen({super.key});
+  const PickupSupervisorProfileScreen({super.key, this.onLogout});
+
+  /// Called when the user confirms logout (Yes). The host signs out and
+  /// navigates; without it, Yes only closes the dialog.
+  final Future<void> Function(BuildContext context)? onLogout;
 
   @override
   State<PickupSupervisorProfileScreen> createState() =>
@@ -104,7 +108,12 @@ class _PickupSupervisorProfileScreenState
                   context: context,
                   barrierColor: Colors.black.withValues(alpha: .58),
                   builder: (_) => DriverLocalizationScope(
-                    child: _LogoutDialog(showPendingWarning: _hasPendingSync),
+                    child: _LogoutDialog(
+                      showPendingWarning: _hasPendingSync,
+                      onLogout: widget.onLogout == null
+                          ? null
+                          : () => widget.onLogout!(this.context),
+                    ),
                   ),
                 ),
               ),
@@ -572,8 +581,9 @@ class _AlreadySyncedDialog extends StatelessWidget {
 }
 
 class _LogoutDialog extends StatelessWidget {
-  const _LogoutDialog({required this.showPendingWarning});
+  const _LogoutDialog({required this.showPendingWarning, this.onLogout});
   final bool showPendingWarning;
+  final Future<void> Function()? onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -656,9 +666,15 @@ class _LogoutDialog extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _PrimaryButton(
+                      key: const Key('profile-logout-yes'),
                       label: l10n.profileYes,
                       color: DriverColors.red500,
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () async {
+                        // Close the dialog first, then let the host sign out.
+                        final logout = onLogout;
+                        Navigator.pop(context);
+                        if (logout != null) await logout();
+                      },
                     ),
                   ),
                 ],

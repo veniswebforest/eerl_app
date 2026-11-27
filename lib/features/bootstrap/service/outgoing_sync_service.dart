@@ -5,11 +5,13 @@ import 'dart:io';
 import 'package:eerl_app/core/constants/app_constants.dart';
 import 'package:eerl_app/core/local_database/app_database.dart';
 import 'package:eerl_app/core/local_database/database_tables.dart';
+import 'package:eerl_app/core/local_database/outbound/outbound_tables.dart';
 import 'package:eerl_app/core/logging/app_logger.dart';
 import 'package:eerl_app/core/network/app_http_client.dart';
 import 'package:eerl_app/core/network/internet_connectivity_service.dart';
 import 'package:eerl_app/features/auth/data/auth_session_storage.dart';
 import 'package:eerl_app/features/bootstrap/service/item_image_cache_service.dart';
+import 'package:eerl_app/features/outbound/data/outbound_sync_applier.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 
@@ -297,6 +299,15 @@ class OutgoingSyncService {
           await _retryRequestAnswerPhotos(item)) {
         return;
       }
+      if (response.statusCode == 409 &&
+          OutboundTables.tablesWithSyncState.contains(item['entity']) &&
+          _outboundMovedOnCodes.contains(code)) {
+        // "The record moved on": not failed. Drop the write; the next
+        // /bootstrap brings the server's copy (outbound doc, Handle the answer).
+        await _dropOutboundMovedOn(item);
+        _log('DROPPED #$seq 409 $code (outbound record moved on)');
+        return;
+      }
       if (successful) {
         await _complete(item, responseBody);
         _log('DONE #$seq status=${response.statusCode}');
@@ -463,6 +474,25 @@ class OutgoingSyncService {
         whereArgs: [seq],
       );
 
+      if (OutboundTables.tablesWithSyncState.contains(entity)) {
+        final left = Sqflite.firstIntValue(
+          await txn.rawQuery(
+            'SELECT COUNT(*) FROM ${DatabaseTables.outbox} '
+            'WHERE entity = ? AND entity_id = ?',
+            [entity, entityId],
+          ),
+        );
+        // A trip has many writes: it stays pending until the last is
+        // answered; the next /bootstrap brings it whole.
+        if (left != 0) return;
+        await OutboundSyncApplier.applyAnswer(
+          txn,
+          entity: entity,
+          entityId: entityId,
+          data: response['data'],
+        );
+        return;
+      }
       if (!_tablesWithSyncState.contains(entity)) return;
       final remaining = Sqflite.firstIntValue(
         await txn.rawQuery(
@@ -996,7 +1026,8 @@ class OutgoingSyncService {
         whereArgs: [item['seq']],
       );
       final entity = item['entity']! as String;
-      if (_tablesWithSyncState.contains(entity) &&
+      if ((_tablesWithSyncState.contains(entity) ||
+              OutboundTables.tablesWithSyncState.contains(entity)) &&
           entity != DatabaseTables.centerItems) {
         await txn.update(
           entity,
@@ -2069,6 +2100,46 @@ class OutgoingSyncService {
       (statusCode >= 200 && statusCode < 300) ||
       (statusCode == 409 &&
           (code == 'NOT_PENDING' || code == 'ALREADY_CLOSED'));
+
+  /// 409 answers that mean "the record moved on" for outbound writes: drop
+  /// the write and sync (outbound SQLite doc, Handle the answer).
+  static const _outboundMovedOnCodes = <String>{
+    'WRONG_STATE',
+    'DATE_PASSED',
+    'NOT_TODAY',
+    'PAUSE_OVER',
+    'PAUSE_CANCELLED',
+    'SOURCE_ENDED',
+    'NOT_APPROVED',
+    'SOURCE_NOT_ACTIVE',
+    'ALREADY_RECORDED',
+    'NOT_STARTED',
+    'NOT_READY',
+    'RECORDED_BY_DRIVER',
+    'TRIP_APPROVED',
+    'ALREADY_ASKED',
+    'TOO_SOON',
+    'NOT_YET',
+    'NOT_ALLOWED',
+  };
+
+  Future<void> _dropOutboundMovedOn(Map<String, Object?> item) async {
+    final entity = item['entity']! as String;
+    final entityId = item['entity_id']! as String;
+    await _database.runInTransaction((txn) async {
+      await txn.delete(
+        DatabaseTables.outboxPhotos,
+        where: 'outbox_seq = ?',
+        whereArgs: [item['seq']],
+      );
+      await txn.delete(
+        DatabaseTables.outbox,
+        where: 'seq = ?',
+        whereArgs: [item['seq']],
+      );
+      await OutboundSyncApplier.markSynced(txn, entity, entityId);
+    });
+  }
 
   static const _tablesWithSyncState = <String>{
     DatabaseTables.centerItems,

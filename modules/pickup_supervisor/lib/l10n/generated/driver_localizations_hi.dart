@@ -4679,4 +4679,224 @@ class DriverLocalizationsHi extends DriverLocalizations {
 
   @override
   String get vlVehicleNumber => 'मान्य वाहन नंबर लिखें, उदा. GJ-05-EE-1002।';
+
+  @override
+  String get dhDateAdajan => 'गुरु, 22 अक्टू · अडाजण';
+
+  @override
+  String get dhEverythingSynced => 'सब कुछ सिंक हो गया है';
+
+  @override
+  String get dhNotStarted => 'शुरू नहीं हुई';
+
+  @override
+  String get dhStartTrip => 'ट्रिप शुरू करें';
+
+  @override
+  String get dhStartTripHint =>
+      'वेयरहाउस छोड़ते समय टैप करें। आपके सुपरवाइज़र समय और जगह देखते हैं।';
+
+  @override
+  String dhMorningTripTime(int count) {
+    return 'सुबह 8:00 – दोपहर 2:00 · $count स्टॉप';
+  }
+
+  @override
+  String get dhVehicleCrew => 'GJ-05-BX-1234 · विक्रम, रवि';
+
+  @override
+  String get dhDropAdajan => 'अडाजण सेंट्रल वेयरहाउस पर उतारें';
+
+  @override
+  String get dhZeroSoFar => 'अब तक 0 kg';
+
+  @override
+  String liveTripTitle(int index, String shift) {
+    return 'ट्रिप $index · $shift';
+  }
+
+  @override
+  String liveTripTime(String start, String end, int count) {
+    return '$start – $end · $count स्टॉप';
+  }
+
+  @override
+  String liveDropAt(String warehouse) {
+    return '$warehouse पर उतारें';
+  }
+
+  @override
+  String liveKgSoFar(String kg) {
+    return 'अब तक $kg kg';
+  }
+
+  @override
+  String liveKg(String kg) {
+    return '$kg kg';
+  }
+
+  @override
+  String get liveAnyTime => 'किसी भी समय';
+
+  @override
+  String liveHandedOverNet(String kg) {
+    return 'सौंप दिया · $kg kg नेट';
+  }
+
+  @override
+  String get liveHandedOver => 'सौंप दिया';
+
+  @override
+  String get liveNoSupervisor => 'कोई सुपरवाइज़र नहीं';
+
+  @override
+  String liveDateAndPlace(String date, String place) {
+    return '$date · $place';
+  }
+
+  @override
+  String get liveNeedsConnection => 'कनेक्शन चाहिए';
+
+  @override
+  String get liveSaved => 'सहेजा गया। ऑनलाइन होने पर भेजा जाएगा।';
+
+  @override
+  String liveCollectedOf(String name, int done, int total) {
+    return '$name  •  $total में से $done एकत्र';
+  }
+
+  @override
+  String get liveRentedTruck => 'किराये का ट्रक';
+
+  @override
+  String liveNotSent(int count) {
+    return '$count बदलाव अभी भेजे नहीं गए';
+  }
+
+  @override
+  String get liveAllSent => 'सब भेज दिया गया है';
+
+  @override
+  String get liveNoTripsToday => 'आज कोई ट्रिप नहीं';
+
+  @override
+  String liveTripsTodayCount(int count) {
+    return 'आज $count ट्रिप';
+  }
+
+  @override
+  String livePickupPointsByCategory(int count, String areas) {
+    return '$areas में $count · श्रेणी के अनुसार';
+  }
+
+  @override
+  String get liveAtGate => 'गेट पर';
+
+  @override
+  String get liveReasonHoliday => 'छुट्टी';
+
+  @override
+  String get liveReasonShifted => 'दूसरे दिन किया गया';
+
+  @override
+  String get liveNotVisitedHint =>
+      'जिन स्टॉप तक वाहन नहीं पहुँचा उन्हें चुनें। वे फिर से बिना-असाइन हो जाएँगे; बाकी गेट टीम का इंतज़ार करेंगे।';
+
+  @override
+  String liveCollectedCount(int done, int total) {
+    return '$total में से $done एकत्र';
+  }
+
+  @override
+  String get liveNoTripToday => 'आज कोई ट्रिप नहीं';
+
+  @override
+  String get liveKindVehicle => 'वाहन';
+
+  @override
+  String get liveKindLabour => 'मज़दूर';
+
+  @override
+  String get liveKindPointChange => 'पिकअप पॉइंट बदलाव';
+
+  @override
+  String get liveKindStart => 'पिकअप शुरू करें';
+
+  @override
+  String get liveKindStop => 'पिकअप बंद करें';
+
+  @override
+  String get liveKindPause => 'पिकअप रोकें';
+
+  @override
+  String get liveKindSchedule => 'शेड्यूल बदलाव';
+
+  @override
+  String get liveKindRoute => 'रूट या वाहन';
+
+  @override
+  String get liveKindOther => 'अन्य';
+
+  @override
+  String get liveKindCorrection => 'सुधार';
+
+  @override
+  String liveKindFrom(String kind, String who) {
+    return '$kind · $who से';
+  }
+
+  @override
+  String liveKindFor(String kind, String target) {
+    return '$kind · $target';
+  }
+
+  @override
+  String liveAllCount(int count) {
+    return 'सभी $count';
+  }
+
+  @override
+  String liveWaitingCount(int count) {
+    return 'प्रतीक्षा $count';
+  }
+
+  @override
+  String liveApprovedCount(int count) {
+    return 'स्वीकृत $count';
+  }
+
+  @override
+  String liveDeclinedCount(int count) {
+    return 'अस्वीकृत $count';
+  }
+
+  @override
+  String liveSentOn(String date) {
+    return '$date भेजा';
+  }
+
+  @override
+  String liveAnsweredBy(String name, String date) {
+    return '$name · $date';
+  }
+
+  @override
+  String liveSourcesTab(int count) {
+    return 'स्रोत ($count)';
+  }
+
+  @override
+  String livePickupsTab(int count) {
+    return 'पिकअप ($count)';
+  }
+
+  @override
+  String liveSourceAdded(String source, String route) {
+    return '$source अब $route पर है।';
+  }
+
+  @override
+  String liveAssignedCount(int count) {
+    return '$count पिकअप पॉइंट';
+  }
 }

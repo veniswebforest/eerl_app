@@ -56,7 +56,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _locationCheckRunning = false;
-  bool _waitingForLocationSettings = false;
   late bool _showInitialLoginLoader = widget.showInitialLoginLoader;
 
   @override
@@ -80,9 +79,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _waitingForLocationSettings) {
-      _waitingForLocationSettings = false;
-      _ensureLocation();
+    // Back in the app: refresh the fix quietly (no message).
+    if (state == AppLifecycleState.resumed) {
+      _ensureLocation(quiet: true);
     }
   }
 
@@ -367,73 +366,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _ensureLocation() async {
+  /// Captures a GPS fix for collections. Permission and the GPS switch are
+  /// handled app-wide by [LocationGate], so this never prompts or opens
+  /// Settings itself; it only reports a fix that can't be taken right now.
+  Future<void> _ensureLocation({bool quiet = false}) async {
     if (_locationCheckRunning || !mounted) return;
     _locationCheckRunning = true;
-    final state = await DeviceLocationService.instance.requestOnHomeOpen();
+    final service = DeviceLocationService.instance;
+    final access = await service.checkAccess();
+    final state = access == HomeLocationState.ready
+        ? await service.requestOnHomeOpen()
+        : access;
     _locationCheckRunning = false;
     if (!mounted) return;
-    switch (state) {
-      case HomeLocationState.serviceDisabled:
-        await _showLocationSettingsDialog(
-          title: context.l10n.locationServiceTitle,
-          message: context.l10n.locationServiceMessage,
-          openSettings: DeviceLocationService.instance.openLocationSettings,
-        );
-      case HomeLocationState.permissionDeniedForever:
-        await _showLocationSettingsDialog(
-          title: context.l10n.locationPermissionTitle,
-          message: context.l10n.locationPermissionSettingsMessage,
-          openSettings: DeviceLocationService.instance.openAppSettings,
-        );
-      case HomeLocationState.permissionDenied:
-        if (mounted) {
-          AppSnackbar.error(
-            context,
-            message: context.l10n.locationPermissionDenied,
-          );
-        }
-      case HomeLocationState.unavailable:
-        if (mounted) {
-          AppSnackbar.error(context, message: context.l10n.locationUnavailable);
-        }
-      case HomeLocationState.ready:
-        break;
-    }
-  }
-
-  Future<void> _showLocationSettingsDialog({
-    required String title,
-    required String message,
-    required Future<bool> Function() openSettings,
-  }) async {
-    final shouldOpen = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(context.l10n.locationNotNow),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(context.l10n.locationOpenSettings),
-          ),
-        ],
-      ),
-    );
-    if (shouldOpen != true || !mounted) return;
-    _waitingForLocationSettings = true;
-    final opened = await openSettings();
-    if (!opened && mounted) {
-      _waitingForLocationSettings = false;
-      AppSnackbar.error(
-        context,
-        message: context.l10n.locationSettingsUnavailable,
-      );
+    if (state == HomeLocationState.unavailable && !quiet) {
+      AppSnackbar.error(context, message: context.l10n.locationUnavailable);
     }
   }
 

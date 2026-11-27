@@ -8120,29 +8120,11 @@ abstract class AppLocalizations {
   /// **'Turn on location'**
   String get locationServiceTitle;
 
-  /// No description provided for @locationServiceMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Location is off. Turn it on so collection records can include GPS coordinates, even when the app is offline.'**
-  String get locationServiceMessage;
-
   /// No description provided for @locationPermissionTitle.
   ///
   /// In en, this message translates to:
   /// **'Location permission required'**
   String get locationPermissionTitle;
-
-  /// No description provided for @locationPermissionSettingsMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Allow location access in app settings so collection records can include GPS coordinates.'**
-  String get locationPermissionSettingsMessage;
-
-  /// No description provided for @locationPermissionDenied.
-  ///
-  /// In en, this message translates to:
-  /// **'Location permission was not granted. GPS will not be included until permission is allowed.'**
-  String get locationPermissionDenied;
 
   /// No description provided for @locationUnavailable.
   ///
@@ -8192,23 +8174,11 @@ abstract class AppLocalizations {
   /// **'This collection has already been submitted. A duplicate entry was not created.'**
   String get collectionAlreadySubmitted;
 
-  /// No description provided for @locationNotNow.
-  ///
-  /// In en, this message translates to:
-  /// **'Not now'**
-  String get locationNotNow;
-
   /// No description provided for @locationOpenSettings.
   ///
   /// In en, this message translates to:
   /// **'Open settings'**
   String get locationOpenSettings;
-
-  /// No description provided for @locationSettingsUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Location settings could not be opened.'**
-  String get locationSettingsUnavailable;
 
   /// No description provided for @supervisorTransferReject.
   ///
@@ -8928,6 +8898,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a vehicle number of 4 to 20 characters.'**
   String get validationVehicleNumberLength;
+
+  /// No description provided for @locationGateAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location'**
+  String get locationGateAllow;
+
+  /// No description provided for @locationGateTurnOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location'**
+  String get locationGateTurnOn;
+
+  /// No description provided for @locationGatePermissionMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'EERL records where each collection happens, so it needs your location. Allow location access to continue.'**
+  String get locationGatePermissionMessage;
+
+  /// No description provided for @locationGateServiceMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone’s location (GPS) is off. Turn it on to continue; it works offline too.'**
+  String get locationGateServiceMessage;
+
+  /// No description provided for @locationGateSettingsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Location access is turned off for EERL. Open Settings, allow location, then come back.'**
+  String get locationGateSettingsMessage;
 }
 
 class _AppLocalizationsDelegate

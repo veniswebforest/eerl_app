@@ -20,10 +20,15 @@ class PickupSupervisorDashboardShell extends StatefulWidget {
     super.key,
     this.activeRole = PickupSupervisorModuleRole.pickupSupervisor,
     this.grantedPermissions = const <String>{},
+    this.onLogout,
   });
 
   final PickupSupervisorModuleRole activeRole;
   final Set<String> grantedPermissions;
+
+  /// Called when the user confirms logout on the profile. The host signs
+  /// out and navigates (e.g. to Login); the module only asks.
+  final Future<void> Function(BuildContext context)? onLogout;
 
   @override
   State<PickupSupervisorDashboardShell> createState() =>
@@ -151,7 +156,7 @@ class _PickupSupervisorDashboardShellState
       title: l10n.sourcesProfileNavLabel,
       selectedIcon: '$_assetRoot/nav_profile.svg',
       unselectedIcon: '$_assetRoot/nav_profile.svg',
-      page: const PickupSupervisorProfileScreen(),
+      page: PickupSupervisorProfileScreen(onLogout: widget.onLogout),
       pageKey: 'profile',
       roles: const {PickupSupervisorModuleRole.pickupSupervisor},
     ),

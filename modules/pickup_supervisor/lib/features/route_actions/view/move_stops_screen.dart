@@ -1,4 +1,7 @@
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_live_data.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_button.dart';
@@ -24,21 +27,54 @@ class MoveStopsScreen extends StatelessWidget {
     required this.routeName,
     required this.stops,
     this.tripDate = RouteActionsMockData.tripDate,
+    this.tripId,
   });
 
   final String routeName;
   final List<RouteStop> stops;
   final String tripDate;
 
+  /// The live trip the stops leave; null shows the design preview.
+  final String? tripId;
+
   @override
-  Widget build(BuildContext context) =>
-      DriverLocalizationScope(child: _MoveStopsView(screen: this));
+  Widget build(BuildContext context) {
+    final id = tripId;
+    return DriverLocalizationScope(
+      child: id == null
+          ? _MoveStopsView(screen: this)
+          : OutboundLiveBuilder<List<MoveTargetTrip>>(
+              load: (session) => _targets(session, id),
+              fallback: _MoveStopsView(screen: this),
+              builder: (context, targets, _) =>
+                  _MoveStopsView(screen: this, liveTargets: targets),
+            ),
+    );
+  }
+
+  /// Another of my Planned trips, the same day and warehouse.
+  static Future<List<MoveTargetTrip>> _targets(
+    OutboundLiveSession session,
+    String tripId,
+  ) async => [
+    for (final t in await session.queries.moveStopsTargets(tripId))
+      MoveTargetTrip(
+        id: t['id']! as String,
+        name: t['route_name'] as String? ?? '',
+        plate: t['vehicle'] as String? ?? '',
+        driver: t['driver_name'] as String? ?? '',
+        time: formatClock(t['shift_start'] as String? ?? ''),
+      ),
+  ];
 }
 
 class _MoveStopsView extends StatefulWidget {
-  const _MoveStopsView({required this.screen});
+  const _MoveStopsView({required this.screen, this.liveTargets});
 
   final MoveStopsScreen screen;
+
+  /// Live move targets; null shows the design samples.
+  final List<MoveTargetTrip>? liveTargets;
 
   @override
   State<_MoveStopsView> createState() => _MoveStopsViewState();
@@ -46,13 +82,25 @@ class _MoveStopsView extends StatefulWidget {
 
 class _MoveStopsViewState extends State<_MoveStopsView> {
   MoveReason? _reason = MoveReason.breakdown;
-  MoveTargetTrip? _target = RouteActionsMockData.moveTargets.first;
+  List<MoveTargetTrip> get _targets =>
+      widget.liveTargets ?? RouteActionsMockData.moveTargets;
+  late MoveTargetTrip? _target = _targets.isEmpty ? null : _targets.first;
   late final Set<String> _ticked = {
-    for (final s in widget.screen.stops)
-      if (RouteActionsMockData.initiallyMoved.contains(s.name)) s.name,
+    if (widget.liveTargets == null)
+      for (final s in widget.screen.stops)
+        if (RouteActionsMockData.initiallyMoved.contains(s.name)) s.name,
   };
+  bool _saving = false;
 
-  bool get _canMove => _reason != null && _target != null && _ticked.isNotEmpty;
+  bool get _canMove =>
+      !_saving && _reason != null && _target != null && _ticked.isNotEmpty;
+
+  static const _reasonCodes = {
+    MoveReason.breakdown: 'BREAKDOWN',
+    MoveReason.vehicleNotAvailable: 'VEHICLE_UNAVAILABLE',
+    MoveReason.driverAbsent: 'ABSENT',
+    MoveReason.other: 'OTHER',
+  };
 
   String _names(DriverLocalizations l10n, List<String> names) =>
       names.length < 2
@@ -67,6 +115,33 @@ class _MoveStopsViewState extends State<_MoveStopsView> {
         if (_ticked.contains(s.name)) s.name,
     ];
     final target = _target!;
+    final session = OutboundLiveSession.of(context);
+    final fromTrip = widget.screen.tripId;
+    if (session != null && fromTrip != null && target.id != null) {
+      setState(() => _saving = true);
+      try {
+        await session.change(
+          () => session.writes.moveStops(
+            tripId: fromTrip,
+            toTripId: target.id!,
+            duePickupIds: [
+              for (final s in widget.screen.stops)
+                if (_ticked.contains(s.name) && s.id != null) s.id!,
+            ],
+            reason: _reasonCodes[_reason],
+          ),
+        );
+      } on LocalWriteValidationException catch (error) {
+        if (mounted) {
+          setState(() => _saving = false);
+          ScaffoldMessenger.maybeOf(
+            context,
+          )?.showSnackBar(SnackBar(content: Text(error.message)));
+        }
+        return;
+      }
+      if (!mounted) return;
+    }
     await showModulePopup<void>(
       context,
       builder: (popupContext) => DriverLocalizationScope(
@@ -126,8 +201,7 @@ class _MoveStopsViewState extends State<_MoveStopsView> {
                 const SizedBox(height: 20),
                 ModuleFieldLabel(l10n.msMoveTo, required: true),
                 const SizedBox(height: 8),
-                for (final (i, t)
-                    in RouteActionsMockData.moveTargets.indexed) ...[
+                for (final (i, t) in _targets.indexed) ...[
                   if (i > 0) const SizedBox(height: 8),
                   ModuleRadioCard(
                     key: Key('move-target-$i'),

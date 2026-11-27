@@ -111,4 +111,61 @@ void main() {
     expect(find.textContaining('Total:'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('bag total and conversion follow the Verified value', (
+    tester,
+  ) async {
+    const item = ItemModel(
+      id: 'pet',
+      name: 'PET Bottles',
+      categoryName: 'Plastic',
+      materialType: 'PLASTIC',
+      unitCode: 'KG',
+      unitName: 'Kilogram',
+      centreUnitName: 'Bag',
+      unitFactor: 25,
+      rate: 45,
+      ratePerCentreUnit: 1125,
+      colour: '#39AE51',
+    );
+
+    Widget step(String verified) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: D2dCollectionPhotosStep(
+            weightProvider: BluetoothWeightProvider.instance,
+            selectedItems: const [0],
+            items: const [item],
+            photos: const {},
+            collectionWeights: const {0: '11'},
+            verifiedWeights: {0: verified},
+            units: const {0: D2dMeasureUnit.kg},
+            paymentMode: D2dPaymentMode.cash,
+            onCollectionWeightChanged: (_, _) {},
+            onVerifiedWeightChanged: (_, _) {},
+            onCapture: (_) {},
+            onRemove: (_, _) {},
+            onPreview: (_) {},
+            onPaymentModeChanged: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(step('10'));
+    await tester.pumpAndSettle();
+    expect(find.text('Total: ₹11,250.00'), findsOneWidget);
+    expect(
+      find.text('1 Bag = 25 KG · 10 Bags = 250.00 KG (₹45.00/KG)'),
+      findsOneWidget,
+    );
+
+    await tester.pumpWidget(step(''));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Total:'), findsNothing);
+    expect(find.text('1 Bag = 25 KG (₹45.00/KG)'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 }

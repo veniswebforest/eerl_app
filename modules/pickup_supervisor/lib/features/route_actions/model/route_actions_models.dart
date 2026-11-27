@@ -3,11 +3,19 @@ import 'package:flutter/foundation.dart';
 /// A driver or labourer offered for one trip.
 class TeamPerson {
   const TeamPerson({
+    this.id,
+    this.phone,
     required this.name,
     required this.phoneTail,
     this.freeUntil,
     this.busyWith,
   });
+
+  /// Live: the driver's user id or the labourer's id.
+  final String? id;
+
+  /// Live: the full phone number.
+  final String? phone;
 
   final String name;
 
@@ -32,6 +40,7 @@ enum MoveReason { breakdown, vehicleNotAvailable, driverAbsent, other }
 /// A planned trip of the same day and warehouse that can take stops.
 class MoveTargetTrip {
   const MoveTargetTrip({
+    this.id,
     required this.name,
     required this.plate,
     required this.driver,
@@ -39,6 +48,8 @@ class MoveTargetTrip {
     this.contract = false,
   });
 
+  /// Live: the trip id.
+  final String? id;
   final String name;
   final String plate;
 
@@ -63,6 +74,7 @@ enum AskNeed {
 /// One choice in the "For" sheet: a route, or a pickup point.
 class AskTarget {
   const AskTarget({
+    this.id,
     required this.name,
     required this.detail,
     this.plate,
@@ -70,6 +82,8 @@ class AskTarget {
     this.time,
   });
 
+  /// Live: the route id or the pickup point id.
+  final String? id;
   final String name;
 
   /// Pickup point address (pickup point targets only).

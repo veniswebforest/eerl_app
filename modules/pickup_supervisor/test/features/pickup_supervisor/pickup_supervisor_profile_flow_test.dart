@@ -38,6 +38,41 @@ void main() {
     expect(find.text('Send changes to notify drivers'), findsNothing);
   });
 
+  testWidgets('Logout: No keeps you in, Yes calls the host sign-out', (
+    tester,
+  ) async {
+    _setDesignSize(tester);
+    var loggedOut = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PickupSupervisorDashboardShell(
+          onLogout: (_) async => loggedOut++,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('supervisor-nav-profile')));
+    await tester.pumpAndSettle();
+
+    Future<void> openLogout() async {
+      await tester.ensureVisible(find.byKey(const Key('profile-logout')));
+      await tester.tap(find.byKey(const Key('profile-logout')));
+      await tester.pumpAndSettle();
+    }
+
+    await openLogout();
+    await tester.tap(find.text('No'));
+    await tester.pumpAndSettle();
+    expect(loggedOut, 0);
+    expect(find.text('Are you sure you want to log out?'), findsNothing);
+
+    await openLogout();
+    await tester.tap(find.byKey(const Key('profile-logout-yes')));
+    await tester.pumpAndSettle();
+    expect(loggedOut, 1);
+    expect(find.text('Are you sure you want to log out?'), findsNothing);
+  });
+
   testWidgets('notifications list and empty state match both designs', (
     tester,
   ) async {

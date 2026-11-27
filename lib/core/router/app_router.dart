@@ -138,7 +138,13 @@ class AppRouter {
       path: AppRoutes.pickupSupervisorHome,
       name: 'pickupSupervisorHome',
       parentNavigatorKey: rootNavigatorKey,
-      builder: (_, _) => const PickupSupervisorDashboardShell(),
+      builder: (_, _) => PickupSupervisorDashboardShell(
+        onLogout: (context) async {
+          final router = GoRouter.of(context);
+          await context.read<AuthProvider>().logout();
+          router.go(AppRoutes.login);
+        },
+      ),
     ),
     GoRoute(
       path: AppRoutes.wallet,

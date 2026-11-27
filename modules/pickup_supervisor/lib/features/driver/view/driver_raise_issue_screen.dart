@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/features/driver/widgets/driver_stops_widgets.dart';
@@ -15,16 +17,23 @@ const _issueAssetRoot = 'assets/icons/driver/issues';
 enum _DriverIssueType { vehicleBreakdown, accident, sourceProblem, other }
 
 class DriverRaiseIssueScreen extends StatelessWidget {
-  const DriverRaiseIssueScreen({super.key});
+  const DriverRaiseIssueScreen({super.key, this.tripId});
+
+  /// The trip it is about, if any (a trip the driver drives).
+  final String? tripId;
 
   @override
   Widget build(BuildContext context) {
-    return const DriverLocalizationScope(child: _DriverRaiseIssueView());
+    return DriverLocalizationScope(
+      child: _DriverRaiseIssueView(tripId: tripId),
+    );
   }
 }
 
 class _DriverRaiseIssueView extends StatefulWidget {
-  const _DriverRaiseIssueView();
+  const _DriverRaiseIssueView({this.tripId});
+
+  final String? tripId;
 
   @override
   State<_DriverRaiseIssueView> createState() => _DriverRaiseIssueViewState();
@@ -40,6 +49,46 @@ class _DriverRaiseIssueViewState extends State<_DriverRaiseIssueView> {
   void dispose() {
     _remarksController.dispose();
     super.dispose();
+  }
+
+  bool _saving = false;
+
+  static const _typeCodes = {
+    _DriverIssueType.vehicleBreakdown: 'VEHICLE_BREAKDOWN',
+    _DriverIssueType.accident: 'ACCIDENT',
+    _DriverIssueType.sourceProblem: 'SOURCE_PROBLEM',
+    _DriverIssueType.other: 'OTHER',
+  };
+
+  /// Raise an issue: queued `PUT /trip-issues/{id}`; it goes to the trip's
+  /// supervisor, else the driver's reporting manager.
+  Future<void> _submit() async {
+    final session = OutboundLiveSession.of(context);
+    if (session == null) return;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final l10n = DriverLocalizations.of(context);
+    final navigator = Navigator.of(context);
+    setState(() => _saving = true);
+    try {
+      final note = _remarksController.text.trim();
+      await session.change(
+        () => session.writes.raiseIssue(
+          id: session.newId(),
+          tripId: widget.tripId,
+          types: [
+            for (final type in _DriverIssueType.values)
+              if (_selectedIssues.contains(type)) _typeCodes[type]!,
+          ],
+          note: note.isEmpty ? null : note,
+        ),
+      );
+      messenger?.showSnackBar(SnackBar(content: Text(l10n.liveSaved)));
+      navigator.pop();
+    } on LocalWriteValidationException catch (error) {
+      messenger?.showSnackBar(SnackBar(content: Text(error.message)));
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   void _toggleIssue(_DriverIssueType issue) {
@@ -146,7 +195,11 @@ class _DriverRaiseIssueViewState extends State<_DriverRaiseIssueView> {
                             height: 52,
                             child: FilledButton(
                               key: const Key('driver-submit-issue'),
-                              onPressed: _selectedIssues.isEmpty ? null : () {},
+                              onPressed: _selectedIssues.isEmpty || _saving
+                                  ? null
+                                  : (OutboundLiveSession.of(context) == null
+                                        ? () {}
+                                        : _submit),
                               style: FilledButton.styleFrom(
                                 padding: EdgeInsets.zero,
                                 backgroundColor: DriverColors.red500,

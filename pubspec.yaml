@@ -18,17 +18,9 @@ dependencies:
 
   # Icons
   cupertino_icons: ^1.0.8
-
-  # Localization
   intl: any
-
-  # State Management
   provider: ^6.1.2
-
-  # Local Storage
   shared_preferences: ^2.3.4
-
-  # Navigation
   go_router: ^14.8.1
   flutter_svg: ^2.3.0
   image_picker: ^1.2.1

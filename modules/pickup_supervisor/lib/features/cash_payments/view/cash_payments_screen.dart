@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/utils/module_money.dart';
@@ -26,14 +27,116 @@ class CashPaymentsScreen extends StatelessWidget {
   final CashActivityTab initialTab;
 
   @override
-  Widget build(BuildContext context) =>
-      DriverLocalizationScope(child: _CashView(initialTab: initialTab));
+  Widget build(BuildContext context) => DriverLocalizationScope(
+    child: OutboundLiveBuilder<_LiveCash>(
+      load: _LiveCash.load,
+      fallback: _CashView(initialTab: initialTab),
+      builder: (context, cash, _) =>
+          _CashView(initialTab: initialTab, live: cash),
+    ),
+  );
+}
+
+/// Cash in hand, what pickup points are owed, payments and cash requests
+/// from SQLite (outbound doc, Pickup Supervisor screens · Cash & Payments).
+class _LiveCash {
+  const _LiveCash({
+    required this.cashInHand,
+    required this.paidThisWeek,
+    required this.owedCount,
+    required this.owed,
+    required this.payments,
+    required this.requests,
+  });
+
+  final int cashInHand;
+  final int paidThisWeek;
+  final int owedCount;
+  final int owed;
+  final List<PaymentActivity> payments;
+  final List<CashRequest> requests;
+
+  static ActivityWhen _when(String? iso, String today) {
+    final at = DateTime.tryParse(iso ?? '');
+    if (at == null) return const ActivityWhen(time: '');
+    final ist = at.toUtc().add(const Duration(hours: 5, minutes: 30));
+    final day =
+        '${ist.year}-${ist.month.toString().padLeft(2, '0')}-'
+        '${ist.day.toString().padLeft(2, '0')}';
+    final hour = ist.hour % 12 == 0 ? 12 : ist.hour % 12;
+    final time =
+        '$hour:${ist.minute.toString().padLeft(2, '0')} '
+        '${ist.hour < 12 ? 'AM' : 'PM'}';
+    return ActivityWhen(time: time, day: day == today ? null : day);
+  }
+
+  static Future<_LiveCash> load(OutboundLiveSession session) async {
+    final q = session.queries;
+    final today = session.clock.today;
+    final weekStart = session.clock.weekStart;
+    final dues = await q.sourceDues();
+    final owing = dues.where((d) => ((d['balance'] as num?) ?? 0) > 0);
+    final payments = await q.sourcePayments();
+    return _LiveCash(
+      cashInHand: (await q.cashInHand()).round(),
+      paidThisWeek: payments
+          .where(
+            (p) => (p['paid_on'] as String? ?? '').compareTo(weekStart) >= 0,
+          )
+          .fold<num>(0, (sum, p) => sum + ((p['amount'] as num?) ?? 0))
+          .round(),
+      owedCount: owing.length,
+      owed: owing
+          .fold<num>(0, (sum, d) => sum + ((d['balance'] as num?) ?? 0))
+          .round(),
+      payments: [
+        for (final p in payments)
+          PaymentActivity(
+            name: p['source_name'] as String? ?? '',
+            when: ActivityWhen(
+              time: '',
+              day: p['paid_on'] == today ? null : p['paid_on'] as String?,
+            ),
+            amount: ((p['amount'] as num?) ?? 0).round(),
+            method: switch (p['method']) {
+              'UPI' => PayMethod.upi,
+              'BANK' => PayMethod.bank,
+              _ => PayMethod.cash,
+            },
+            reference: p['reference'] as String?,
+          ),
+      ],
+      requests: [
+        for (final r in await q.cashRequests())
+          CashRequest(
+            title: r['reason'] as String? ?? '',
+            when: _when(r['created_at'] as String?, today),
+            amount: (((r['approved_amount'] ?? r['amount']) as num?) ?? 0)
+                .round(),
+            status: switch (r['status']) {
+              'APPROVED' => CashRequestStatus.added,
+              'REJECTED' => CashRequestStatus.rejected,
+              _ => CashRequestStatus.waiting,
+            },
+            asked:
+                r['approved_amount'] != null &&
+                    r['approved_amount'] != r['amount']
+                ? ((r['amount'] as num?) ?? 0).round()
+                : null,
+            officeNote: r['rejection_reason'] as String?,
+          ),
+      ],
+    );
+  }
 }
 
 class _CashView extends StatefulWidget {
-  const _CashView({required this.initialTab});
+  const _CashView({required this.initialTab, this.live});
 
   final CashActivityTab initialTab;
+
+  /// Live figures; null shows the design samples.
+  final _LiveCash? live;
 
   @override
   State<_CashView> createState() => _CashViewState();
@@ -55,10 +158,12 @@ class _CashViewState extends State<_CashView> {
         CashPaymentsStore.paid,
       ]),
       builder: (context, _) {
+        final live = widget.live;
         final owedPoints = CashPaymentsMockData.pointsToPay
             .where((p) => !CashPaymentsStore.paid.value.contains(p.name))
             .toList();
-        final owed = owedPoints.fold(0, (sum, p) => sum + p.owed);
+        final int owed =
+            live?.owed ?? owedPoints.fold<int>(0, (sum, p) => sum + p.owed);
         return ModulePage(
           key: const Key('cash-payments-screen'),
           child: ListView(
@@ -81,13 +186,15 @@ class _CashViewState extends State<_CashView> {
               ),
               const SizedBox(height: 24),
               CashSummaryCard(
-                cashInHand: CashPaymentsStore.cashInHand.value,
-                paidThisWeek: CashPaymentsMockData.paidThisWeek,
+                cashInHand:
+                    live?.cashInHand ?? CashPaymentsStore.cashInHand.value,
+                paidThisWeek:
+                    live?.paidThisWeek ?? CashPaymentsMockData.paidThisWeek,
                 onRequestCash: () => _push(const RequestCashScreen()),
               ),
               const SizedBox(height: 24),
               PointsToPayCard(
-                count: owedPoints.length,
+                count: live?.owedCount ?? owedPoints.length,
                 owed: owed,
                 onTap: () => _push(const PointsToPayScreen()),
               ),
@@ -119,7 +226,7 @@ class _CashViewState extends State<_CashView> {
   }
 
   List<Widget> _payments(DriverLocalizations l10n) => [
-    for (final p in CashPaymentsMockData.payments)
+    for (final p in widget.live?.payments ?? CashPaymentsMockData.payments)
       CashActivityCard(
         title: p.name,
         when: cashWhen(l10n, p.when),
@@ -136,7 +243,7 @@ class _CashViewState extends State<_CashView> {
   ];
 
   List<Widget> _requests(DriverLocalizations l10n) => [
-    for (final r in CashPaymentsMockData.cashRequests)
+    for (final r in widget.live?.requests ?? CashPaymentsMockData.cashRequests)
       CashActivityCard(
         title: r.title,
         when: cashWhen(l10n, r.when),

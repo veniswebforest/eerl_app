@@ -1,4 +1,8 @@
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
+import 'package:eerl_app/features/outbound/data/outbound_writes.dart';
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
+import 'package:pickup_supervisor/features/pickup_supervisor/data/requests_live_data.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
@@ -40,53 +44,103 @@ class _PickupSupervisorApprovalRequestsScreenState
 
   late bool _showDone = widget.initialShowDone;
 
+  /// Live approvals: (to approve, done); null shows the design samples.
+  (List<LiveApproval>, List<LiveApproval>)? _live;
+
   @override
   Widget build(BuildContext context) {
     return DriverLocalizationScope(
       child: Builder(
         builder: (context) {
           final l10n = DriverLocalizations.of(context);
-          return _AttentionScaffold(
-            screenKey: const Key('supervisor-approval-requests-screen'),
-            header: _AttentionHeader(
-              title: l10n.attentionApprovalRequests,
-              subtitle: l10n.attentionApprovalSubtitle,
+          return OutboundLiveBuilder<(List<LiveApproval>, List<LiveApproval>)>(
+            load: (session) async => (
+              await LiveApproval.load(session, l10n, toApprove: true),
+              await LiveApproval.load(session, l10n, toApprove: false),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    ModuleCountChip(
-                      key: const Key('approval-tab-pending'),
-                      label: l10n.apToApprove,
-                      count: '$_pendingCount',
-                      selected: !_showDone,
-                      onTap: () => setState(() => _showDone = false),
-                    ),
-                    ModuleCountChip(
-                      key: const Key('approval-tab-done'),
-                      label: l10n.apDone,
-                      count: '$_doneCount',
-                      selected: _showDone,
-                      onTap: () => setState(() => _showDone = true),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                ...(_showDone ? _doneCards(l10n) : _pendingCards(context, l10n))
-                    .expand((card) => [card, const SizedBox(height: 16)]),
-              ],
-            ),
+            fallback: _page(context, l10n, null),
+            builder: (context, live, _) => _page(context, l10n, live),
           );
         },
       ),
     );
   }
 
+  Widget _page(
+    BuildContext context,
+    DriverLocalizations l10n,
+    (List<LiveApproval>, List<LiveApproval>)? live,
+  ) {
+    _live = live;
+    return _AttentionScaffold(
+      screenKey: const Key('supervisor-approval-requests-screen'),
+      header: _AttentionHeader(
+        title: l10n.attentionApprovalRequests,
+        subtitle: l10n.attentionApprovalSubtitle,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              ModuleCountChip(
+                key: const Key('approval-tab-pending'),
+                label: l10n.apToApprove,
+                count: '${live?.$1.length ?? _pendingCount}',
+                selected: !_showDone,
+                onTap: () => setState(() => _showDone = false),
+              ),
+              ModuleCountChip(
+                key: const Key('approval-tab-done'),
+                label: l10n.apDone,
+                count: '${live?.$2.length ?? _doneCount}',
+                selected: _showDone,
+                onTap: () => setState(() => _showDone = true),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...(_showDone ? _doneCards(l10n) : _pendingCards(context, l10n))
+              .expand((card) => [card, const SizedBox(height: 16)]),
+        ],
+      ),
+    );
+  }
+
   List<Widget> _pendingCards(BuildContext context, DriverLocalizations l10n) {
+    final live = _live;
+    if (live != null) {
+      return [
+        for (final a in live.$1)
+          ApprovalRequestCard(
+            key: Key('approval-request-${a.id}'),
+            title: a.title,
+            source: a.source,
+            detail: a.detail,
+            time: a.time,
+            declineLabel: l10n.attentionDecline,
+            approveLabel: l10n.attentionApprove,
+            onDecline: () => _decline(
+              context,
+              l10n,
+              a.isExtraPickup
+                  ? _ApprovalKind.extraPickup
+                  : _ApprovalKind.correction,
+              live: a,
+            ),
+            onApprove: () => _approve(
+              context,
+              l10n,
+              a.isExtraPickup
+                  ? _ApprovalKind.extraPickup
+                  : _ApprovalKind.correction,
+              live: a,
+            ),
+          ),
+      ];
+    }
     return [
       ApprovalRequestCard(
         key: const Key('approval-request-correction'),
@@ -118,6 +172,24 @@ class _PickupSupervisorApprovalRequestsScreenState
       status: ApprovalStatus.approved,
       label: l10n.attentionApproved,
     );
+    final live = _live;
+    if (live != null) {
+      return [
+        for (final a in live.$2)
+          ApprovalRequestCard(
+            title: a.title,
+            source: a.source,
+            detail: a.detail,
+            time: a.time,
+            tag: a.declined
+                ? ApprovalStatusTag(
+                    status: ApprovalStatus.declined,
+                    label: l10n.attentionDeclined,
+                  )
+                : approved(),
+          ),
+      ];
+    }
     return [
       ApprovalRequestCard(
         title: l10n.attentionCorrectionFromDriver,
@@ -146,13 +218,51 @@ class _PickupSupervisorApprovalRequestsScreenState
     ];
   }
 
+  /// Live: queue the answer. A request sent to me is decided
+  /// (`/outbound-requests/{id}/decide`); an extra pickup is accepted or
+  /// declined (`/due-pickups/{id}/accept|decline`). False when refused.
+  Future<bool> _decide(
+    LiveApproval approval, {
+    required bool approve,
+    String? reply,
+  }) async {
+    final session = OutboundLiveSession.of(context);
+    if (session == null) return true;
+    try {
+      await session.change(
+        () => approval.isExtraPickup
+            ? session.writes.decidePickup(
+                duePickupId: approval.id,
+                action: approve
+                    ? PickupDecision.accept
+                    : PickupDecision.decline,
+                declineReason: reply,
+              )
+            : session.writes.answerRequest(
+                requestId: approval.id,
+                approve: approve,
+                reply: reply,
+              ),
+      );
+      return true;
+    } on LocalWriteValidationException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.maybeOf(
+          context,
+        )?.showSnackBar(SnackBar(content: Text(error.message)));
+      }
+      return false;
+    }
+  }
+
   Future<void> _decline(
     BuildContext context,
     DriverLocalizations l10n,
-    _ApprovalKind kind,
-  ) {
+    _ApprovalKind kind, {
+    LiveApproval? live,
+  }) async {
     final correction = kind == _ApprovalKind.correction;
-    return showModuleSheet<bool>(
+    final reply = await showModuleSheet<String>(
       context,
       builder: (_) => ApprovalDeclineSheet(
         title: correction
@@ -167,14 +277,19 @@ class _PickupSupervisorApprovalRequestsScreenState
         cancelLabel: l10n.apCancel,
       ),
     );
+    if (reply == null || live == null || !mounted) return;
+    await _decide(live, approve: false, reply: reply);
   }
 
   Future<void> _approve(
     BuildContext context,
     DriverLocalizations l10n,
-    _ApprovalKind kind,
-  ) {
+    _ApprovalKind kind, {
+    LiveApproval? live,
+  }) async {
     final correction = kind == _ApprovalKind.correction;
+    if (live != null && !await _decide(live, approve: true)) return;
+    if (!context.mounted) return;
     return showModulePopup<void>(
       context,
       builder: (popupContext) => ApprovalSuccessPopup(
@@ -214,7 +329,37 @@ class _PickupSupervisorMyRequestsScreenState
       child: Builder(
         builder: (context) {
           final l10n = DriverLocalizations.of(context);
-          final requests = [
+          return OutboundLiveBuilder<List<LiveMyRequest>>(
+            load: (session) => LiveMyRequest.load(session, l10n),
+            fallback: _page(context, l10n, null),
+            builder: (context, live, _) => _page(context, l10n, live),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _page(
+    BuildContext context,
+    DriverLocalizations l10n,
+    List<LiveMyRequest>? live,
+  ) {
+    final requests = live != null
+        ? [
+            for (final r in live)
+              _MyRequest(
+                title: r.title,
+                status: switch (r.status) {
+                  'APPROVED' => _RequestStatus.approved,
+                  'DECLINED' => _RequestStatus.declined,
+                  _ => _RequestStatus.waiting,
+                },
+                description: r.description,
+                response: r.response,
+                sent: r.sent,
+              ),
+          ]
+        : [
             _MyRequest(
               title: l10n.attentionVehicleAdajan,
               status: _RequestStatus.waiting,
@@ -244,42 +389,46 @@ class _PickupSupervisorMyRequestsScreenState
               sent: l10n.attentionSent16Oct,
             ),
           ];
-          final visible = _selectedFilter == 0
-              ? requests
-              : requests
-                    .where((item) => item.status.index == _selectedFilter - 1)
-                    .toList();
-          return _AttentionScaffold(
-            screenKey: const Key('supervisor-my-requests-screen'),
-            header: _AttentionHeader(
-              title: l10n.attentionMyRequests,
-              subtitle: l10n.attentionToCollectionHead,
-            ),
-            child: Column(
-              children: [
-                _ChoiceBar(
-                  choices: [
+    int count(_RequestStatus s) => requests.where((r) => r.status == s).length;
+    final visible = _selectedFilter == 0
+        ? requests
+        : requests
+              .where((item) => item.status.index == _selectedFilter - 1)
+              .toList();
+    return _AttentionScaffold(
+      screenKey: const Key('supervisor-my-requests-screen'),
+      header: _AttentionHeader(
+        title: l10n.attentionMyRequests,
+        subtitle: l10n.attentionToCollectionHead,
+      ),
+      child: Column(
+        children: [
+          _ChoiceBar(
+            choices: live == null
+                ? [
                     l10n.attentionAll4,
                     l10n.attentionWaiting1,
                     l10n.attentionApproved2,
                     l10n.attentionDeclined1,
+                  ]
+                : [
+                    l10n.liveAllCount(requests.length),
+                    l10n.liveWaitingCount(count(_RequestStatus.waiting)),
+                    l10n.liveApprovedCount(count(_RequestStatus.approved)),
+                    l10n.liveDeclinedCount(count(_RequestStatus.declined)),
                   ],
-                  selected: _selectedFilter,
-                  onSelected: (value) =>
-                      setState(() => _selectedFilter = value),
-                  compact: true,
-                ),
-                const SizedBox(height: 16),
-                ...visible.map(
-                  (request) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: _MyRequestCard(request: request, l10n: l10n),
-                  ),
-                ),
-              ],
+            selected: _selectedFilter,
+            onSelected: (value) => setState(() => _selectedFilter = value),
+            compact: true,
+          ),
+          const SizedBox(height: 16),
+          ...visible.map(
+            (request) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: _MyRequestCard(request: request, l10n: l10n),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

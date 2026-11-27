@@ -40,6 +40,7 @@ String routeStopScheduleText(DriverLocalizations l10n, StopSchedule s) =>
       StopScheduleKind.everyDayExceptSun => l10n.rdSchedEveryDayExceptSun(
         s.time,
       ),
+      StopScheduleKind.text => s.time,
     };
 
 /// Stop filter pills with counts (All, Collected, Pending, 0 kg, …).
@@ -442,7 +443,7 @@ class _Trailing extends StatelessWidget {
       StopNote.notRecordedByDriver => l10n.rdNoteNotRecorded,
       StopNote.noMaterialPerDriver => l10n.rdNoteNoMaterialDriver,
       StopNote.askedToSkipToday => l10n.rdNoteAskedToSkip,
-      null => null,
+      null => stop.noteText,
     };
     if (note == null) return const SizedBox.shrink();
     return Text(

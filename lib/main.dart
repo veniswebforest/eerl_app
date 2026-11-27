@@ -5,10 +5,12 @@ import 'package:eerl_app/l10n/generated/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/features/driver/service/driver_photo_capture.dart';
 import 'package:provider/provider.dart';
 
 import 'core/local_database/app_database.dart';
+import 'core/location/location_gate.dart';
 import 'core/logging/app_logger.dart';
 import 'core/providers/app_lock_provider.dart';
 import 'core/providers/bluetooth_weight_provider.dart';
@@ -124,11 +126,15 @@ class _EerlAppState extends State<EerlApp> with WidgetsBindingObserver {
       unawaited(() async {
         final token = await AuthSessionStorage().getAccessToken();
         // ignore: avoid_print
-        print('════════════════════════════════════════════════════════════════');
+        print(
+          '════════════════════════════════════════════════════════════════',
+        );
         // ignore: avoid_print
         print('🔑 [APP_RESUMED] ACCESS_TOKEN: ${token ?? 'not_found'}');
         // ignore: avoid_print
-        print('════════════════════════════════════════════════════════════════');
+        print(
+          '════════════════════════════════════════════════════════════════',
+        );
       }());
       unawaited(
         BootstrapSyncService.instance.triggerBootstrap(
@@ -162,7 +168,16 @@ class _EerlAppState extends State<EerlApp> with WidgetsBindingObserver {
                 ),
             recover: ImageCompressor.claimRecoveredImage,
           ),
-          child: NetworkStatusOverlay(child: SafeAreaWrapper(child: child!)),
+          // GPS is required: the app stays behind the location page until
+          // permission is granted and location is on.
+          // Driver and Pickup Supervisor screens read SQLite through it.
+          child: OutboundLiveScope(
+            child: LocationGate(
+              child: NetworkStatusOverlay(
+                child: SafeAreaWrapper(child: child!),
+              ),
+            ),
+          ),
         );
       },
       // ── App Info ─────────────────────────────────────────────────

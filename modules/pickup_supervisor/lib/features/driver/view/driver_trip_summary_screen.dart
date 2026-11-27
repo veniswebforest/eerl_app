@@ -3,7 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_live_data.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/features/driver/widgets/driver_dashboard_widgets.dart';
 import 'package:pickup_supervisor/features/driver/widgets/driver_pickup_form_widgets.dart';
@@ -17,31 +20,100 @@ const _assets = 'assets/icons/driver/trip_summary';
 enum DriverWarehouseHandoverStatus { form, waiting, received }
 
 class DriverTripSummaryScreen extends StatelessWidget {
-  const DriverTripSummaryScreen({super.key});
+  const DriverTripSummaryScreen({super.key, this.tripId});
+
+  /// The live trip; null shows the design preview.
+  final String? tripId;
 
   @override
   Widget build(BuildContext context) {
-    return const DriverLocalizationScope(child: _TripSummaryView());
+    final id = tripId;
+    return DriverLocalizationScope(
+      child: id == null
+          ? const _TripSummaryView()
+          : OutboundLiveBuilder<_LiveTripSummary?>(
+              load: (session) => _LiveTripSummary.load(session, id),
+              fallback: const _TripSummaryView(),
+              builder: (context, data, _) => _TripSummaryView(live: data),
+            ),
+    );
+  }
+}
+
+/// The trip's totals for Trip summary and Hand over (outbound doc, Driver
+/// screens · Trip summary, Hand over, Waiting, Received).
+class _LiveTripSummary {
+  const _LiveTripSummary({
+    required this.trip,
+    required this.lines,
+    required this.status,
+    required this.mixedKg,
+  });
+
+  final DriverTripLive trip;
+
+  /// Mixed stops recorded on this phone: weight only, no line yet.
+  final double mixedKg;
+
+  /// "Your count (from the stops)": KG items first, then pieces; a Mixed
+  /// stop counts by its weight until the server's line arrives.
+  final List<(String, String)> lines;
+
+  /// The hand-over row: status, weighbridge and the comparison.
+  final Map<String, Object?> status;
+
+  double get totalKg => trip.collectedKg + mixedKg;
+
+  static Future<_LiveTripSummary?> load(
+    OutboundLiveSession session,
+    String tripId,
+  ) async {
+    final q = session.queries;
+    final tripRow = await q.driverTrip(tripId);
+    if (tripRow == null) return null;
+    final counts = await q.handOverCount(tripId);
+    final stops = await loadDriverTripStops(session, tripId);
+    final mixed = stops
+        .where((s) => s.status == 'COLLECTED' && s.entryLines.isEmpty)
+        .fold<double>(0, (sum, s) => sum + (s.totalKg ?? 0));
+    return _LiveTripSummary(
+      mixedKg: mixed,
+      trip: DriverTripLive.fromRow(tripRow),
+      lines: [
+        if (mixed > 0) ('Mixed', '${formatKg(mixed)} kg'),
+        for (final row in counts)
+          (
+            row['item_name'] as String? ?? '',
+            '${formatKg((row['quantity'] as num?)?.toDouble() ?? 0)} '
+                '${row['unit'] == 'KG' ? 'kg' : 'pcs'}',
+          ),
+      ],
+      status: await q.handOverStatus(tripId) ?? const {},
+    );
   }
 }
 
 class _TripSummaryView extends StatelessWidget {
-  const _TripSummaryView();
+  const _TripSummaryView({this.live});
+
+  final _LiveTripSummary? live;
 
   @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
     return _DriverWarehousePage(
       scrollKey: const Key('driver-trip-summary'),
-      title: l10n.tripOneSummary,
+      title: live?.trip.routeName ?? l10n.tripOneSummary,
       onBack: () => Navigator.of(context).pop(),
       children: [
         const _TripStatusCard(status: _TripVisualStatus.done, showCounts: true),
         const SizedBox(height: 16),
         _MaterialTotalsCard(
           label: l10n.collectedOnTrip,
-          total: l10n.tripCollectedTotal,
-          rows: _tripMaterialRows(l10n),
+          total: live != null
+              ? l10n.liveKg(formatKg(live!.totalKg))
+              : l10n.tripCollectedTotal,
+          rows: live?.lines ?? _tripMaterialRows(l10n),
         ),
         const SizedBox(height: 16),
         const _WarehouseCard(),
@@ -55,7 +127,8 @@ class _TripSummaryView extends StatelessWidget {
           radius: 12,
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (_) => const DriverWarehouseHandoverScreen(),
+              builder: (_) =>
+                  DriverWarehouseHandoverScreen(tripId: live?.trip.id),
             ),
           ),
         ),
@@ -70,22 +143,43 @@ class DriverWarehouseHandoverScreen extends StatelessWidget {
   const DriverWarehouseHandoverScreen({
     super.key,
     this.initialStatus = DriverWarehouseHandoverStatus.form,
+    this.tripId,
   });
 
   final DriverWarehouseHandoverStatus initialStatus;
 
+  /// The live trip; null shows the design preview.
+  final String? tripId;
+
   @override
   Widget build(BuildContext context) {
+    final id = tripId;
     return DriverLocalizationScope(
-      child: _WarehouseHandoverView(initialStatus: initialStatus),
+      child: id == null
+          ? _WarehouseHandoverView(initialStatus: initialStatus)
+          : OutboundLiveBuilder<_LiveTripSummary?>(
+              load: (session) => _LiveTripSummary.load(session, id),
+              fallback: _WarehouseHandoverView(initialStatus: initialStatus),
+              builder: (context, data, session) => _WarehouseHandoverView(
+                initialStatus: initialStatus,
+                live: data,
+                session: session,
+              ),
+            ),
     );
   }
 }
 
 class _WarehouseHandoverView extends StatefulWidget {
-  const _WarehouseHandoverView({required this.initialStatus});
+  const _WarehouseHandoverView({
+    required this.initialStatus,
+    this.live,
+    this.session,
+  });
 
   final DriverWarehouseHandoverStatus initialStatus;
+  final _LiveTripSummary? live;
+  final OutboundLiveSession? session;
 
   @override
   State<_WarehouseHandoverView> createState() => _WarehouseHandoverViewState();
@@ -94,14 +188,57 @@ class _WarehouseHandoverView extends StatefulWidget {
 class _WarehouseHandoverViewState extends State<_WarehouseHandoverView> {
   late DriverWarehouseHandoverStatus _status = widget.initialStatus;
   late final TextEditingController _bagsController = TextEditingController(
-    text: DriverLocalizations.of(context).bagsCount,
+    text: widget.live == null ? DriverLocalizations.of(context).bagsCount : '',
   );
+  bool _saving = false;
+
+  /// The live screen follows the trip: handed over → Waiting until the
+  /// warehouse weighs it (`weighed_at`), then Received.
+  DriverWarehouseHandoverStatus get _shown {
+    final live = widget.live;
+    if (live == null) return _status;
+    if (live.status['weighed_at'] != null) {
+      return DriverWarehouseHandoverStatus.received;
+    }
+    if (live.trip.handedOver) return DriverWarehouseHandoverStatus.waiting;
+    return _status;
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_bagsController.text.isEmpty) {
+    if (widget.live == null && _bagsController.text.isEmpty) {
       _bagsController.text = DriverLocalizations.of(context).bagsCount;
+    }
+  }
+
+  /// Hand over at the warehouse: Number of bags (0–10,000) is required.
+  Future<void> _handOver() async {
+    final live = widget.live;
+    final session = widget.session;
+    if (live == null || session == null) {
+      setState(() => _status = DriverWarehouseHandoverStatus.waiting);
+      return;
+    }
+    final bags = int.tryParse(_bagsController.text.trim());
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final l10n = DriverLocalizations.of(context);
+    if (bags == null || bags < 0 || bags > 10000) {
+      messenger?.showSnackBar(SnackBar(content: Text(l10n.numberOfBags)));
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      await session.change(
+        () => session.writes.handOver(tripId: live.trip.id, bags: bags),
+      );
+      if (mounted) {
+        setState(() => _status = DriverWarehouseHandoverStatus.waiting);
+      }
+    } on LocalWriteValidationException catch (error) {
+      messenger?.showSnackBar(SnackBar(content: Text(error.message)));
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -114,7 +251,7 @@ class _WarehouseHandoverViewState extends State<_WarehouseHandoverView> {
   @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
-    return switch (_status) {
+    return switch (_shown) {
       DriverWarehouseHandoverStatus.form => _buildForm(l10n),
       DriverWarehouseHandoverStatus.waiting => _buildWaiting(l10n),
       DriverWarehouseHandoverStatus.received => _buildReceived(l10n),
@@ -124,15 +261,17 @@ class _WarehouseHandoverViewState extends State<_WarehouseHandoverView> {
   Widget _buildForm(DriverLocalizations l10n) {
     return _DriverWarehousePage(
       scrollKey: const Key('driver-warehouse-handover-form'),
-      title: l10n.handOverTripOne,
+      title: widget.live?.trip.routeName ?? l10n.handOverTripOne,
       onBack: () => Navigator.of(context).pop(),
       children: [
         const _TripStatusCard(status: _TripVisualStatus.done),
         const SizedBox(height: 16),
         _MaterialTotalsCard(
           label: l10n.yourCountFromStops,
-          total: l10n.tripCollectedTotal,
-          rows: _tripMaterialRows(l10n),
+          total: widget.live != null
+              ? l10n.liveKg(formatKg(widget.live!.totalKg))
+              : l10n.tripCollectedTotal,
+          rows: widget.live?.lines ?? _tripMaterialRows(l10n),
         ),
         const SizedBox(height: 16),
         const _WarehouseCard(),
@@ -167,8 +306,7 @@ class _WarehouseHandoverViewState extends State<_WarehouseHandoverView> {
           label: l10n.handOver,
           icon: SvgPicture.asset('$_assets/check_white.svg', package: _package),
           radius: 12,
-          onPressed: () =>
-              setState(() => _status = DriverWarehouseHandoverStatus.waiting),
+          onPressed: _saving ? null : _handOver,
         ),
         const SizedBox(height: 12),
         _FooterHint(text: l10n.warehouseWeighInstruction),
@@ -186,8 +324,10 @@ class _WarehouseHandoverViewState extends State<_WarehouseHandoverView> {
         const SizedBox(height: 16),
         _MaterialTotalsCard(
           label: l10n.youHandedOver,
-          total: l10n.handedOverTotal,
-          rows: _tripMaterialRows(l10n),
+          total: widget.live != null
+              ? l10n.liveKg(formatKg(widget.live!.totalKg))
+              : l10n.handedOverTotal,
+          rows: widget.live?.lines ?? _tripMaterialRows(l10n),
         ),
         const SizedBox(height: 16),
         const _WarehouseCard(),
@@ -214,14 +354,35 @@ class _WarehouseHandoverViewState extends State<_WarehouseHandoverView> {
         const SizedBox(height: 16),
         _MaterialTotalsCard(
           label: l10n.weighbridgeEnteredByWarehouse,
-          total: l10n.warehouseReceivedTotal,
-          rows: [
-            (l10n.withLoadGross, l10n.weight8940Kg),
-            (l10n.emptyVehicle, l10n.weight7700Kg),
-            (l10n.netWeight, l10n.weight1240Kg),
-            (l10n.bagsReceived, l10n.bagsCount),
-            (l10n.eWasteCounted, l10n.count25Pcs),
-          ],
+          total: widget.live != null
+              ? l10n.liveKg(_kg(widget.live!.status['net_kg']))
+              : l10n.warehouseReceivedTotal,
+          rows: widget.live != null
+              ? [
+                  (
+                    l10n.withLoadGross,
+                    l10n.liveKg(_kg(widget.live!.status['gross_kg'])),
+                  ),
+                  (
+                    l10n.emptyVehicle,
+                    l10n.liveKg(_kg(widget.live!.status['empty_kg'])),
+                  ),
+                  (
+                    l10n.netWeight,
+                    l10n.liveKg(_kg(widget.live!.status['net_kg'])),
+                  ),
+                  (
+                    l10n.bagsReceived,
+                    '${widget.live!.status['bags_received'] ?? '—'}',
+                  ),
+                ]
+              : [
+                  (l10n.withLoadGross, l10n.weight8940Kg),
+                  (l10n.emptyVehicle, l10n.weight7700Kg),
+                  (l10n.netWeight, l10n.weight1240Kg),
+                  (l10n.bagsReceived, l10n.bagsCount),
+                  (l10n.eWasteCounted, l10n.count25Pcs),
+                ],
         ),
         const SizedBox(height: 16),
         _ComparisonCard(l10n: l10n),
@@ -237,6 +398,9 @@ class _WarehouseHandoverViewState extends State<_WarehouseHandoverView> {
       ],
     );
   }
+
+  static String _kg(Object? value) =>
+      value is num ? formatKg(value.toDouble()) : '—';
 
   void _backHome(BuildContext context) {
     Navigator.of(context).popUntil((route) => route.isFirst);

@@ -66,7 +66,8 @@ class _StopDetailView extends StatelessWidget {
   Future<void> _skip(BuildContext context) async {
     final skipped = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => SkipSourceScreen(sourceName: stop.name),
+        builder: (_) =>
+            SkipSourceScreen(sourceName: stop.name, duePickupId: stop.id),
       ),
     );
     if (skipped == true && context.mounted) Navigator.of(context).pop(true);
@@ -83,6 +84,9 @@ class _StopDetailView extends StatelessWidget {
       ),
     ),
   );
+
+  String _contactRole(DriverLocalizations l10n, StopContact contact) =>
+      contact.roleText ?? _role(l10n, contact.role);
 
   String _role(DriverLocalizations l10n, ContactRole role) => switch (role) {
     ContactRole.owner => l10n.sdRoleOwner,
@@ -161,7 +165,7 @@ class _StopDetailView extends StatelessWidget {
                 l10n.sdPersonAtPickup,
                 l10n.sdContactLine(
                   contact.name,
-                  _role(l10n, contact.role),
+                  _contactRole(l10n, contact),
                   contact.phone,
                 ),
               ),

@@ -8215,6 +8215,342 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'Enter a valid vehicle number, e.g. GJ-05-EE-1002.'**
   String get vlVehicleNumber;
+
+  /// No description provided for @dhDateAdajan.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu, 22 Oct · Adajan'**
+  String get dhDateAdajan;
+
+  /// No description provided for @dhEverythingSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is synced'**
+  String get dhEverythingSynced;
+
+  /// No description provided for @dhNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get dhNotStarted;
+
+  /// No description provided for @dhStartTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Start trip'**
+  String get dhStartTrip;
+
+  /// No description provided for @dhStartTripHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap when you leave the warehouse. Your supervisor sees the time and place.'**
+  String get dhStartTripHint;
+
+  /// No description provided for @dhMorningTripTime.
+  ///
+  /// In en, this message translates to:
+  /// **'8:00 am – 2:00 pm · {count} stops'**
+  String dhMorningTripTime(int count);
+
+  /// No description provided for @dhVehicleCrew.
+  ///
+  /// In en, this message translates to:
+  /// **'GJ-05-BX-1234 · Vikram, Ravi'**
+  String get dhVehicleCrew;
+
+  /// No description provided for @dhDropAdajan.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop at Adajan Central Warehouse'**
+  String get dhDropAdajan;
+
+  /// No description provided for @dhZeroSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'0 kg so far'**
+  String get dhZeroSoFar;
+
+  /// No description provided for @liveTripTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip {index} · {shift}'**
+  String liveTripTitle(int index, String shift);
+
+  /// No description provided for @liveTripTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – {end} · {count} stops'**
+  String liveTripTime(String start, String end, int count);
+
+  /// No description provided for @liveDropAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop at {warehouse}'**
+  String liveDropAt(String warehouse);
+
+  /// No description provided for @liveKgSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'{kg} kg so far'**
+  String liveKgSoFar(String kg);
+
+  /// No description provided for @liveKg.
+  ///
+  /// In en, this message translates to:
+  /// **'{kg} kg'**
+  String liveKg(String kg);
+
+  /// No description provided for @liveAnyTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Any time'**
+  String get liveAnyTime;
+
+  /// No description provided for @liveHandedOverNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Handed over · {kg} kg net'**
+  String liveHandedOverNet(String kg);
+
+  /// No description provided for @liveHandedOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Handed over'**
+  String get liveHandedOver;
+
+  /// No description provided for @liveNoSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'No supervisor set'**
+  String get liveNoSupervisor;
+
+  /// No description provided for @liveDateAndPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {place}'**
+  String liveDateAndPlace(String date, String place);
+
+  /// No description provided for @liveNeedsConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a connection'**
+  String get liveNeedsConnection;
+
+  /// No description provided for @liveSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. It will be sent when online.'**
+  String get liveSaved;
+
+  /// No description provided for @liveCollectedOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}  •  {done} of {total} collected'**
+  String liveCollectedOf(String name, int done, int total);
+
+  /// No description provided for @liveRentedTruck.
+  ///
+  /// In en, this message translates to:
+  /// **'Rented truck'**
+  String get liveRentedTruck;
+
+  /// No description provided for @liveNotSent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} changes not sent yet'**
+  String liveNotSent(int count);
+
+  /// No description provided for @liveAllSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is sent'**
+  String get liveAllSent;
+
+  /// No description provided for @liveNoTripsToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No trips today'**
+  String get liveNoTripsToday;
+
+  /// No description provided for @liveTripsTodayCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} trips today'**
+  String liveTripsTodayCount(int count);
+
+  /// No description provided for @livePickupPointsByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} in {areas} · by category'**
+  String livePickupPointsByCategory(int count, String areas);
+
+  /// No description provided for @liveAtGate.
+  ///
+  /// In en, this message translates to:
+  /// **'At the gate'**
+  String get liveAtGate;
+
+  /// No description provided for @liveReasonHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday'**
+  String get liveReasonHoliday;
+
+  /// No description provided for @liveReasonShifted.
+  ///
+  /// In en, this message translates to:
+  /// **'Moved to another day'**
+  String get liveReasonShifted;
+
+  /// No description provided for @liveNotVisitedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the stops the vehicle did not reach. They go back to Unassigned; the others wait for the gate team.'**
+  String get liveNotVisitedHint;
+
+  /// No description provided for @liveCollectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} collected'**
+  String liveCollectedCount(int done, int total);
+
+  /// No description provided for @liveNoTripToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No trip today'**
+  String get liveNoTripToday;
+
+  /// No description provided for @liveKindVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get liveKindVehicle;
+
+  /// No description provided for @liveKindLabour.
+  ///
+  /// In en, this message translates to:
+  /// **'Labour'**
+  String get liveKindLabour;
+
+  /// No description provided for @liveKindPointChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup point change'**
+  String get liveKindPointChange;
+
+  /// No description provided for @liveKindStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start pickups'**
+  String get liveKindStart;
+
+  /// No description provided for @liveKindStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop pickups'**
+  String get liveKindStop;
+
+  /// No description provided for @liveKindPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause pickups'**
+  String get liveKindPause;
+
+  /// No description provided for @liveKindSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule change'**
+  String get liveKindSchedule;
+
+  /// No description provided for @liveKindRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route or vehicle'**
+  String get liveKindRoute;
+
+  /// No description provided for @liveKindOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get liveKindOther;
+
+  /// No description provided for @liveKindCorrection.
+  ///
+  /// In en, this message translates to:
+  /// **'Correction'**
+  String get liveKindCorrection;
+
+  /// No description provided for @liveKindFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} · from {who}'**
+  String liveKindFrom(String kind, String who);
+
+  /// No description provided for @liveKindFor.
+  ///
+  /// In en, this message translates to:
+  /// **'{kind} · {target}'**
+  String liveKindFor(String kind, String target);
+
+  /// No description provided for @liveAllCount.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String liveAllCount(int count);
+
+  /// No description provided for @liveWaitingCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting {count}'**
+  String liveWaitingCount(int count);
+
+  /// No description provided for @liveApprovedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved {count}'**
+  String liveApprovedCount(int count);
+
+  /// No description provided for @liveDeclinedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined {count}'**
+  String liveDeclinedCount(int count);
+
+  /// No description provided for @liveSentOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent {date}'**
+  String liveSentOn(String date);
+
+  /// No description provided for @liveAnsweredBy.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {date}'**
+  String liveAnsweredBy(String name, String date);
+
+  /// No description provided for @liveSourcesTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources ({count})'**
+  String liveSourcesTab(int count);
+
+  /// No description provided for @livePickupsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickups ({count})'**
+  String livePickupsTab(int count);
+
+  /// No description provided for @liveSourceAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{source} is now on {route}.'**
+  String liveSourceAdded(String source, String route);
+
+  /// No description provided for @liveAssignedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pickup points'**
+  String liveAssignedCount(int count);
 }
 
 class _DriverLocalizationsDelegate

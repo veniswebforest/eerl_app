@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:eerl_app/features/outbound/data/outbound_writes.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_stop_entry.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/features/driver/service/driver_photo_capture.dart';
@@ -27,16 +29,23 @@ enum _NothingReason {
 }
 
 class DriverNothingToCollectScreen extends StatelessWidget {
-  const DriverNothingToCollectScreen({super.key});
+  const DriverNothingToCollectScreen({super.key, this.target});
+
+  /// The live stop; null shows the design preview.
+  final DriverStopTarget? target;
 
   @override
   Widget build(BuildContext context) {
-    return const DriverLocalizationScope(child: _NothingToCollectView());
+    return DriverLocalizationScope(
+      child: _NothingToCollectView(target: target),
+    );
   }
 }
 
 class _NothingToCollectView extends StatefulWidget {
-  const _NothingToCollectView();
+  const _NothingToCollectView({this.target});
+
+  final DriverStopTarget? target;
 
   @override
   State<_NothingToCollectView> createState() => _NothingToCollectViewState();
@@ -49,6 +58,33 @@ class _NothingToCollectViewState extends State<_NothingToCollectView> {
   final TextEditingController _noteController = TextEditingController();
   final List<XFile> _photos = [];
   _NothingReason _reason = _NothingReason.noMaterial;
+  bool _saving = false;
+
+  static const _reasonCodes = {
+    _NothingReason.closed: 'CLOSED',
+    _NothingReason.noMaterial: 'NO_MATERIAL',
+    _NothingReason.refused: 'REFUSED',
+    _NothingReason.notReachable: 'NOT_REACHABLE',
+    _NothingReason.vehicleFull: 'VEHICLE_FULL',
+    _NothingReason.other: 'OTHER',
+  };
+
+  /// Saves the stop as 0 kg with its reason.
+  Future<void> _saveLive(DriverStopTarget target) async {
+    setState(() => _saving = true);
+    final saved = await recordDriverStop(
+      context,
+      target: target,
+      outcome: StopOutcome.zeroKg,
+      zeroKgReason: _reasonCodes[_reason],
+      photoPaths: [for (final photo in _photos) photo.path],
+      note: _noteController.text,
+    );
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (saved) Navigator.of(context).pop();
+  }
+
   bool _restoredPhoto = false;
 
   @override
@@ -131,7 +167,12 @@ class _NothingToCollectViewState extends State<_NothingToCollectView> {
                             onBack: () => Navigator.of(context).pop(),
                           ),
                           const SizedBox(height: 24),
-                          const _ZeroKgStopCard(),
+                          _ZeroKgStopCard(
+                            title: widget.target == null
+                                ? null
+                                : '${widget.target!.sourceName} · '
+                                      '${l10n.stopPosition(widget.target!.stopOrder, widget.target!.totalStops)}',
+                          ),
                           const SizedBox(height: 20),
                           _RequiredLabel(
                             key: const Key('driver-zero-reason-label'),
@@ -219,7 +260,11 @@ class _NothingToCollectViewState extends State<_NothingToCollectView> {
                           DriverPrimaryButton(
                             label: l10n.saveAsZeroKg,
                             radius: 12,
-                            onPressed: () => Navigator.of(context).pop(),
+                            onPressed: _saving
+                                ? null
+                                : widget.target != null
+                                ? () => _saveLive(widget.target!)
+                                : () => Navigator.of(context).pop(),
                           ),
                         ],
                       ),
@@ -236,7 +281,10 @@ class _NothingToCollectViewState extends State<_NothingToCollectView> {
 }
 
 class _ZeroKgStopCard extends StatelessWidget {
-  const _ZeroKgStopCard();
+  const _ZeroKgStopCard({this.title});
+
+  /// "Source · Stop n of m"; null shows the design sample.
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -268,7 +316,7 @@ class _ZeroKgStopCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  l10n.abcStopSixOfSeven,
+                  title ?? l10n.abcStopSixOfSeven,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: DriverTextStyles.semibold16.copyWith(

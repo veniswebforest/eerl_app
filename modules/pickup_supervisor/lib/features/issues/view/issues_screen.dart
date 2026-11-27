@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
+import 'package:pickup_supervisor/features/issues/data/issue_live_data.dart';
+import 'package:pickup_supervisor/features/issues/model/issue_models.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_page.dart';
 import 'package:pickup_supervisor/features/issues/model/issue_mock_data.dart';
@@ -14,19 +17,28 @@ class PickupSupervisorIssuesScreen extends StatelessWidget {
   const PickupSupervisorIssuesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) =>
-      const DriverLocalizationScope(child: _IssuesView());
+  Widget build(BuildContext context) => DriverLocalizationScope(
+    child: OutboundLiveBuilder<List<SupervisorIssue>>(
+      load: loadLiveIssues,
+      fallback: const _IssuesView(),
+      builder: (context, issues, _) =>
+          _IssuesView(key: ValueKey(issues), issues: issues),
+    ),
+  );
 }
 
 class _IssuesView extends StatefulWidget {
-  const _IssuesView();
+  const _IssuesView({super.key, this.issues});
+
+  /// Live issues; null shows the design samples.
+  final List<SupervisorIssue>? issues;
 
   @override
   State<_IssuesView> createState() => _IssuesViewState();
 }
 
 class _IssuesViewState extends State<_IssuesView> {
-  final _issues = [...IssueMockData.issues];
+  late final _issues = [...(widget.issues ?? IssueMockData.issues)];
 
   void _open(int index) => Navigator.of(context).push(
     MaterialPageRoute<void>(

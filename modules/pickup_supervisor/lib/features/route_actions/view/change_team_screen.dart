@@ -1,4 +1,7 @@
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
+import 'package:eerl_app/features/outbound/data/outbound_writes.dart';
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_button.dart';
@@ -21,36 +24,211 @@ class ChangeTeamScreen extends StatelessWidget {
     super.key,
     required this.routeName,
     this.tripDate = RouteActionsMockData.tripDate,
+    this.tripId,
   });
 
   final String routeName;
   final String tripDate;
 
+  /// The live trip; null shows the design preview.
+  final String? tripId;
+
   @override
-  Widget build(BuildContext context) =>
-      DriverLocalizationScope(child: _ChangeTeamView(screen: this));
+  Widget build(BuildContext context) {
+    final id = tripId;
+    return DriverLocalizationScope(
+      child: id == null
+          ? _ChangeTeamView(screen: this)
+          : OutboundLiveBuilder<_LiveTeam?>(
+              load: (session) => _LiveTeam.load(session, id),
+              fallback: _ChangeTeamView(screen: this),
+              builder: (context, team, _) =>
+                  _ChangeTeamView(screen: this, live: team),
+            ),
+    );
+  }
+}
+
+String _tail(String? phone) {
+  final digits = (phone ?? '').replaceAll(RegExp(r'\D'), '');
+  return digits.length <= 4 ? digits : digits.substring(digits.length - 4);
+}
+
+/// The trip's team and who is free that day and shift, from SQLite
+/// (outbound doc, Change Driver or Labour). Online, the free-staff call
+/// also sees other supervisors' trips.
+class _LiveTeam {
+  const _LiveTeam({
+    required this.trip,
+    required this.driver,
+    required this.labour,
+    required this.drivers,
+    required this.labourers,
+    required this.stopIds,
+  });
+
+  final Map<String, Object?> trip;
+  final TeamPerson driver;
+  final TeamPerson? labour;
+  final List<TeamPerson> drivers;
+  final List<TeamPerson> labourers;
+
+  /// The trip's stops in order: a team change keeps them.
+  final List<String> stopIds;
+
+  static Future<_LiveTeam?> load(OutboundLiveSession session, String id) async {
+    final q = session.queries;
+    final trip = await q.driverTrip(id);
+    if (trip == null) return null;
+    TeamPerson person(String? id, String? name, String? phone) => TeamPerson(
+      id: id,
+      phone: phone,
+      name: name ?? '',
+      phoneTail: _tail(phone),
+    );
+    return _LiveTeam(
+      trip: trip,
+      driver: person(
+        trip['driver_id'] as String?,
+        trip['driver_name'] as String?,
+        trip['driver_phone'] as String?,
+      ),
+      labour: trip['labour_id'] == null
+          ? null
+          : person(
+              trip['labour_id'] as String?,
+              trip['labour_name'] as String?,
+              trip['labour_phone'] as String?,
+            ),
+      drivers: [
+        for (final d in await q.freeDrivers(id))
+          person(
+            d['user_id'] as String?,
+            d['name'] as String?,
+            d['phone'] as String?,
+          ),
+      ],
+      labourers: [
+        for (final l in await q.freeLabour(id))
+          person(
+            l['id'] as String?,
+            l['name'] as String?,
+            l['phone'] as String?,
+          ),
+      ],
+      stopIds: [
+        for (final s in await q.tripStopsWithState(id)) s['id']! as String,
+      ],
+    );
+  }
 }
 
 class _ChangeTeamView extends StatefulWidget {
-  const _ChangeTeamView({required this.screen});
+  const _ChangeTeamView({required this.screen, this.live});
 
   final ChangeTeamScreen screen;
+  final _LiveTeam? live;
 
   @override
   State<_ChangeTeamView> createState() => _ChangeTeamViewState();
 }
 
 class _ChangeTeamViewState extends State<_ChangeTeamView> {
-  static const _driver = RouteActionsMockData.routeDriver;
-  static const _labour = RouteActionsMockData.routeLabour;
+  _LiveTeam? get _live => widget.live;
+  TeamPerson get _driver => _live?.driver ?? RouteActionsMockData.routeDriver;
+  TeamPerson get _labour =>
+      _live?.labour ??
+      (_live != null
+          ? const TeamPerson(name: '—', phoneTail: '')
+          : RouteActionsMockData.routeLabour);
 
-  // Opens as in Figma: the absent driver already replaced.
-  TeamPerson? _newDriver = RouteActionsMockData.people.first;
+  // Opens as in Figma: the absent driver already replaced. Live: no change.
+  late TeamPerson? _newDriver = widget.live != null
+      ? null
+      : RouteActionsMockData.people.first;
   TeamPerson? _newLabour;
   TeamChangeReason? _reason = TeamChangeReason.absent;
+  final _note = TextEditingController();
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _note.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
 
   bool get _canSave =>
-      _reason != null && (_newDriver != null || _newLabour != null);
+      !_saving &&
+      _reason != null &&
+      (_newDriver != null || _newLabour != null) &&
+      (_live == null ||
+          _reason != TeamChangeReason.other ||
+          _note.text.trim().isNotEmpty);
+
+  /// Live: Change for today with the new driver or labourer
+  /// (`POST /pickup-trips/{id}/change-for-today`), keeping the stops.
+  Future<void> _save() async {
+    final navigator = Navigator.of(context);
+    final change = TripTeamChange(
+      driver: (_newDriver ?? _driver).name,
+      replaces: _driver.name,
+    );
+    final live = _live;
+    final session = OutboundLiveSession.of(context);
+    if (live != null && session != null) {
+      final trip = live.trip;
+      final driver = _newDriver ?? _driver;
+      final labour = _newLabour ?? live.labour;
+      final rented = trip['vehicle_kind'] == 'CONTRACT';
+      setState(() => _saving = true);
+      try {
+        await session.change(
+          () => session.writes.changeTripForToday(
+            tripId: trip['id']! as String,
+            team: TripTeam(
+              vehicleId: rented ? null : trip['vehicle_id'] as String?,
+              vehiclePlate: trip['vehicle_plate'] as String?,
+              rented: rented
+                  ? RentedVehicle(
+                      vehicleNumber:
+                          trip['rented_vehicle_number'] as String? ?? '',
+                      transporterName: trip['transporter_name'] as String?,
+                      driverName: trip['rented_driver_name'] as String?,
+                      driverPhone: trip['rented_driver_phone'] as String?,
+                      capacityKg: (trip['rented_capacity_kg'] as num?)
+                          ?.toDouble(),
+                    )
+                  : null,
+              driverId: driver.id,
+              driverName: driver.name,
+              driverPhone: driver.phone,
+              labourId: labour?.id,
+              labourName: labour?.name,
+              labourPhone: labour?.phone,
+            ),
+            stopIds: live.stopIds,
+            reason: _reason == TeamChangeReason.absent ? 'ABSENT' : 'OTHER',
+            note: _reason == TeamChangeReason.other ? _note.text.trim() : null,
+          ),
+        );
+      } on LocalWriteValidationException catch (error) {
+        if (mounted) {
+          setState(() => _saving = false);
+          ScaffoldMessenger.maybeOf(
+            context,
+          )?.showSnackBar(SnackBar(content: Text(error.message)));
+        }
+        return;
+      }
+    }
+    navigator.pop(change);
+  }
 
   Future<void> _pick({required bool driver}) async {
     final l10n = DriverLocalizations.of(context);
@@ -65,7 +243,9 @@ class _ChangeTeamViewState extends State<_ChangeTeamView> {
             RouteActionsMockData.shiftWindow,
           ),
           busyNote: driver ? l10n.ctBusyDriverNote : l10n.ctBusyLabourNote,
-          people: RouteActionsMockData.people,
+          people: _live == null
+              ? RouteActionsMockData.people
+              : (driver ? _live!.drivers : _live!.labourers),
           selected: driver ? _newDriver : _newLabour,
         ),
       ),
@@ -149,6 +329,13 @@ class _ChangeTeamViewState extends State<_ChangeTeamView> {
                   isSelected: (r) => r == _reason,
                   onTap: (r) => setState(() => _reason = r),
                 ),
+                if (_live != null && _reason == TeamChangeReason.other) ...[
+                  const SizedBox(height: 12),
+                  ModuleRemarksField(
+                    fieldKey: const Key('change-team-note'),
+                    controller: _note,
+                  ),
+                ],
                 const SizedBox(height: 20),
                 Opacity(
                   opacity: _canSave ? 1 : .5,
@@ -156,14 +343,7 @@ class _ChangeTeamViewState extends State<_ChangeTeamView> {
                     key: const Key('change-team-save'),
                     label: l10n.ctSave,
                     height: 52,
-                    onPressed: _canSave
-                        ? () => Navigator.of(context).pop(
-                            TripTeamChange(
-                              driver: (_newDriver ?? _driver).name,
-                              replaces: _driver.name,
-                            ),
-                          )
-                        : null,
+                    onPressed: _canSave ? _save : null,
                   ),
                 ),
               ],

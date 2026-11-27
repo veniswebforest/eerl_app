@@ -92,7 +92,7 @@
   "zoneName": "EERL - સુરત ઝોન",
   "onlineStatus": "તમે ઑનલાઇન છો",
   "pendingCollections": "{count} સંગ્રહ બાકી",
-  "syncNow": "હમણાં સિંક કરો",
+  "syncNow": "હવે સિંક કરો",
   "todaysSummary": "આજનો સારાંશ",
   "hideTodaysSummary": "આજનો સારાંશ છુપાવો",
   "showTodaysSummary": "આજનો સારાંશ બતાવો",
@@ -246,7 +246,7 @@
   "expenseVehicleDate": "20 જુલાઈ 2026 • 01:15 PM",
   "expenseVehicleAmount": "-₹1500",
   "expenseFlagged": "ચિહ્નિત",
-  "expenseRejectedSupervisor": "સુપરવાઇઝર દ્વારા નકારેલ",
+  "expenseRejectedSupervisor": "સુપરવાઇઝર દ્વારા નકારાયેલ",
   "cashRequestEmergencyFuel": "કટોકટીનું ઇંધણ",
   "cashRequestEmergencyFuelDate": "12 મે 2026 • 02:30 PM",
   "cashRequestEmergencyFuelAmount": "+₹4,000",
@@ -267,9 +267,21 @@
   "d2dSelectTargetCenter": "લક્ષ્ય એજન્ટ / કેન્દ્ર સોંપો",
   "d2dSelectCenter": "કેન્દ્ર પસંદ કરો",
   "d2dVehicleActiveCount": "સક્રિય ({count})",
-  "@d2dVehicleActiveCount": {"placeholders": {"count": {"type": "int"}}},
+  "@d2dVehicleActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "d2dVehicleDeactivatedCount": "નિષ્ક્રિય ({count})",
-  "@d2dVehicleDeactivatedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@d2dVehicleDeactivatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "d2dAddVehicle": "વાહન ઉમેરો",
   "d2dNoVehicleAdded": "હજુ સુધી કોઈ વાહન ઉમેર્યું નથી",
   "d2dActivatedVehicleTitle": "વાહન સક્રિય છે!",
@@ -308,17 +320,29 @@
   "myTasks": "મારા કાર્યો",
   "taskOpenCount": "ખુલ્લા ({count})",
   "@taskOpenCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "taskClosedCount": "બંધ ({count})",
   "@taskClosedCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "taskSupervisorName": "ભાવેશ શાહ (સુપરવાઇઝર)",
   "taskDescription": "ફીલ્ડ એજન્ટ દ્વારા સબમિટ કરેલી નવીનતમ કલેક્શન એન્ટ્રીની સમીક્ષા અને ચકાસણી કરો...",
   "taskPhotoAttached": "{count} ફોટો જોડાયેલ છે",
   "@taskPhotoAttached": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "taskDueToday": "આજે, સાંજે 5:00 વાગ્યે",
   "taskDueTomorrow": "આવતીકાલે, બપોરે 2:00 વાગ્યે",
@@ -343,11 +367,19 @@
   "configureMaterialsSubtitle": "સામગ્રીનો ક્રમ બદલવા હેન્ડલ ખેંચો.",
   "configurePlasticCount": "પ્લાસ્ટિક ({count})",
   "@configurePlasticCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "configureNonPlasticCount": "નોન-પ્લાસ્ટિક ({count})",
   "@configureNonPlasticCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "configureSaveOrder": "ક્રમ સાચવો",
   "configureSequenceSaved": "ક્રમ સફળતાપૂર્વક સાચવાયો",
@@ -380,7 +412,13 @@
   "expenseAmountLabel": "ખર્ચની રકમ (₹)",
   "expenseAmountHint": "₹ ખર્ચની રકમ દાખલ કરો",
   "expenseAmountExceedsWalletBalance": "રકમ ઉપલબ્ધ વૉલેટ બેલેન્સ ₹{balance} કરતાં વધુ ન હોઈ શકે.",
-  "@expenseAmountExceedsWalletBalance": {"placeholders":{"balance":{"type":"String"}}},
+  "@expenseAmountExceedsWalletBalance": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
   "uploadReceiptLabel": "રસીદ અપલોડ કરો",
   "capturePhoto": "ફોટો લો",
   "receiptSupportMessage": "સમર્થિત: JPG, PNG (મહત્તમ 5MB). સુપરવાઇઝરની સમીક્ષા માટે રસીદ સ્પષ્ટ દેખાવી જોઈએ.",
@@ -391,11 +429,19 @@
   "expenseSubmittedTitle": "ખર્ચ સબમિટ થયો!",
   "expenseSubmittedDeduction": "તમારા વૉલેટ બેલેન્સમાંથી ₹{amount} કપાયા.",
   "@expenseSubmittedDeduction": {
-    "placeholders": {"amount": {"type": "String"}}
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "expenseSubmittedBalance": "બાકી બેલેન્સ: ₹{balance}",
   "@expenseSubmittedBalance": {
-    "placeholders": {"balance": {"type": "String"}}
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
   },
   "expenseBackToWallet": "વૉલેટ પર પાછા જાઓ",
   "expensePendingPrefix": "આ એન્ટ્રી ",
@@ -417,7 +463,6 @@
   "expenseRequestStatus": "વિનંતીની સ્થિતિ",
   "expenseWaitingSupervisor": "સુપરવાઇઝરની રાહમાં",
   "expenseVerifiedSupervisor": "સુપરવાઇઝર દ્વારા ચકાસાયેલ",
-  "expenseRejectedSupervisor": "સુપરવાઇઝર દ્વારા નકારાયેલ",
   "expenseUploadedPhoto": "અપલોડ કરેલો ફોટો",
   "expenseDetailDescription": "આ ખર્ચનો હેતુ અને સુપરવાઇઝરની મંજૂરી માટે જરૂરી સંબંધિત વિગતો જણાવો.",
   "expenseRejectReasonTitle": "નકારવાનું કારણ",
@@ -435,7 +480,11 @@
   "cashDetailApprovedSupervisor": "સુપરવાઇઝર દ્વારા મંજૂર",
   "cashDetailApprovedNote": "નોંધ: {amount} તમારા સક્રિય રોકડ વૉલેટ બેલેન્સમાં જમા થયા.",
   "@cashDetailApprovedNote": {
-    "placeholders": {"amount": {"type": "String"}}
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "cashDetailRejectReason": "અમાન્ય / અધૂરી વિનંતી",
   "cashDetailRejectRemarks": "તમારા આજના રૂટ માટે હાલનું વૉલેટ બેલેન્સ પૂરતું છે. કૃપા કરીને પહેલા બાકી ખર્ચ નોંધો.",
@@ -466,7 +515,13 @@
   "recordsYesterdayCollections": "ગઈકાલના કલેક્શન",
   "recordsOctoberCollections": "22 ઑક્ટોબરના કલેક્શન",
   "recordsDatedCollections": "{date} ના કલેક્શન",
-  "@recordsDatedCollections": {"placeholders": {"date": {"type": "String"}}},
+  "@recordsDatedCollections": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "recordsCollectionDrafts": "કલેક્શન ડ્રાફ્ટ",
   "recordsTodayTime": "આજે • 08:15 AM",
   "recordsOctober22Time": "22 ઑક્ટોબર • 11:15 AM",
@@ -544,7 +599,6 @@
   "syncPendingCollections": "3 કલેક્શન બાકી",
   "syncPendingItems": "{count} એન્ટ્રી સિંક થવાની બાકી",
   "syncInternetRequired": "ઇન્ટરનેટ કનેક્શન નથી. બાકી dataમાં કોઈ ફેરફાર થયો નથી.",
-  "syncNow": "હવે સિંક કરો",
   "syncAlreadySyncedTitle": "ડેટા પહેલેથી સિંક છે",
   "syncSuccessfulTitle": "ડેટા સફળતાપૂર્વક સિંક થયો",
   "syncBack": "પાછા",
@@ -578,7 +632,13 @@
   "collectionAddItemLabel": "વસ્તુ ઉમેરો",
   "collectionSelectWasteItem": "કચરાની વસ્તુ પસંદ કરો",
   "collectionItemsSelected": "{count} વસ્તુઓ પસંદ કરી",
-  "@collectionItemsSelected": {"placeholders":{"count":{"type":"int"}}},
+  "@collectionItemsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "collectionVehicleNumber": "વાહન નંબર પ્લેટ",
   "collectionD2dVehicleNumber": "વાહન નંબર",
   "collectionGivenBy": "આપનાર",
@@ -610,7 +670,13 @@
   "collectionUnitKg": "કિગ્રા",
   "collectionUnitPcs": "નંગ",
   "collectionRatePerUnit": "દર/{unit}",
-  "@collectionRatePerUnit": {"placeholders":{"unit":{"type":"String"}}},
+  "@collectionRatePerUnit": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "collectionPaymentCash": "રોકડ",
   "collectionPaymentUpi": "UPI",
   "collectionPaymentType": "ચુકવણીનો પ્રકાર",
@@ -697,7 +763,13 @@
   "collectionReceiptDateTime": "તારીખ અને સમય",
   "collectionReceiptBreakdown": "એકત્રિત વસ્તુઓની વિગત",
   "collectionItemsCount": "{count} વસ્તુઓ",
-  "@collectionItemsCount": {"placeholders":{"count":{"type":"int"}}},
+  "@collectionItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "collectionReceiptAggregateSummary": "એકંદર સારાંશ",
   "collectionReceiptAggregateHint": "વજન અને સંખ્યાનો સારાંશ",
   "collectionReceiptLaborInvolved": "સામેલ મજૂર",
@@ -754,8 +826,8 @@
   "notificationFiveHours": "5 કલાક પહેલાં",
   "notificationSevenHours": "7 કલાક પહેલાં",
   "notificationYesterday": "ગઈકાલે, 11:30 AM",
-  "notificationPreviousDate": "24 ઑક્ટો, 08:00 AM"
-  ,"homePendingTask": "બાકી ટાસ્ક જુઓ",
+  "notificationPreviousDate": "24 ઑક્ટો, 08:00 AM",
+  "homePendingTask": "બાકી ટાસ્ક જુઓ",
   "homePendingTaskSubtitle": "તમને સોંપાયેલા કાર્યો જુઓ.",
   "homeSuratEastZone": "EERL - સુરત પૂર્વ ઝોન",
   "homeSuratNorthZone": "EERL - સુરત ઉત્તર ઝોન",
@@ -785,8 +857,8 @@
   "supervisorManageApprovals": "મંજૂરીઓ સંચાલિત કરો",
   "supervisorTasksNav": "કાર્યો",
   "supervisorStockNav": "સ્ટોક",
-  "viewTask": "ટાસ્ક જુઓ"
-  ,"endDayOpeningBalance": "શરૂઆતની બેલેન્સ",
+  "viewTask": "ટાસ્ક જુઓ",
+  "endDayOpeningBalance": "શરૂઆતની બેલેન્સ",
   "endDayOpeningBalanceValue": "₹ 5,000.00",
   "endDayExpensesLogged": "નોંધાયેલ કુલ ખર્ચ",
   "endDayExpensesValue": "₹ 720.00",
@@ -835,9 +907,21 @@
   "endDayInternetOk": "ઠીક છે",
   "requestTitle": "વિનંતીઓ",
   "requestOpenCount": "ખુલ્લી ({count})",
-  "@requestOpenCount": {"placeholders": {"count": {"type": "int"}}},
+  "@requestOpenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "requestClosedCount": "બંધ ({count})",
-  "@requestClosedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@requestClosedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "requestSearchHint": "અહીં શોધો...",
   "requestSupervisorName": "ભાવેશ શાહ (સુપરવાઇઝર)",
   "requestOpenDescriptionOne": "કેલિબ્રેશન દરમિયાન રેમ્પ Bનું વેઇંગ સ્કેલ ઝીરો એરર બતાવે છે અને સતત ઝબકે છે...",
@@ -849,7 +933,13 @@
   "requestAwaitingResponse": "પ્રતિસાદની રાહમાં",
   "requestClosedBySupervisor": "સુપરવાઇઝર દ્વારા બંધ",
   "requestTodayTime": "આજે, {time}",
-  "@requestTodayTime": {"placeholders": {"time": {"type": "String"}}},
+  "@requestTodayTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "requestEmptyMessage": "હાલ કોઈ વિનંતી નથી",
   "requestRaiseButton": "વિનંતી કરો",
   "requestRaiseTitle": "વિનંતી કરો",
@@ -862,7 +952,13 @@
   "requestFollowupDateTime": "આગામી ફોલો-અપ તારીખ અને સમય *",
   "requestFollowupFutureError": "આગામી ફોલો-અપ માટે ભવિષ્યની તારીખ અને સમય પસંદ કરો.",
   "requestFollowupBy": "ફોલો-અપ {dateTime} સુધી",
-  "@requestFollowupBy": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@requestFollowupBy": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "requestOverdue": "સમય વીતી ગયો",
   "requestSubmitFailed": "વિનંતી સેવ થઈ શકી નથી. ફરી પ્રયત્ન કરો.",
   "requestSelectDateTime": "તારીખ અને સમય પસંદ કરો",
@@ -892,7 +988,13 @@
   "requestCompletedStatus": "પૂર્ણ: આજે, 11:30 AM",
   "requestCompletedLabel": "પૂર્ણ",
   "requestCompletedValue": "પૂર્ણ: {dateTime}",
-  "@requestCompletedValue": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@requestCompletedValue": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "requestDetailDescription": "ફિલ્ડ એજન્ટ દ્વારા સબમિટ કરેલી નવીનતમ કલેક્શન એન્ટ્રીની સમીક્ષા અને ચકાસણી કરો. નોંધાયેલા કલેક્શન વજનને ચકાસાયેલ વજન સાથે સરખાવો, અપલોડ કરેલા તમામ ફોટા તપાસો અને અંતિમ મંજૂરી પહેલાં ગ્રાહક તથા મટિરિયલની વિગતો સિસ્ટમ રેકોર્ડ સાથે મેળ ખાય છે તેની ખાતરી કરો.",
   "transferDetailTitle": "ટ્રાન્સફર વિનંતીની વિગતો",
   "transferDetailRequestId": "#TRF-2026-089",
@@ -904,7 +1006,13 @@
   "transferVehicleInformation": "વાહનની માહિતી",
   "supervisorTransferDispatchStatus": "ડિસ્પેચ",
   "transferEstimateHours": "{count} કલાક",
-  "@transferEstimateHours": {"placeholders": {"count": {"type": "int"}}},
+  "@transferEstimateHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "transferDetailVehicleNumber": "GJ-05-AB-1234",
   "transferDetailVehicleUnavailable": "વાહન ઉપલબ્ધ નથી (એજન્ટ)",
   "transferDetailVehicleCapacity": "ટ્રક (ક્ષમતા 3000 કિગ્રા)",
@@ -998,9 +1106,21 @@
   "saveAndSelect": "સેવ કરો અને પસંદ કરો",
   "ragpickerDirectoryTitle": "રેગપિકર ડિરેક્ટરી",
   "ragpickerActiveCount": "સક્રિય ({count})",
-  "@ragpickerActiveCount": {"placeholders": {"count": {"type": "int"}}},
+  "@ragpickerActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ragpickerDeactivatedCount": "નિષ્ક્રિય ({count})",
-  "@ragpickerDeactivatedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@ragpickerDeactivatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ragpickerSearchHint": "અહીં શોધો...",
   "ragpickerAddButton": "રેગપિકર ઉમેરો",
   "ragpickerNoDetailsFound": "રેગપિકરની કોઈ વિગતો મળી નથી",
@@ -1015,7 +1135,13 @@
   "ragpickerNameHint": "પૂરું નામ દાખલ કરો",
   "ragpickerNameRequired": "કૃપા કરીને પૂરું નામ દાખલ કરો.",
   "ragpickerNameAlreadyExists": "{name} નામ રેગપિકર યાદીમાં પહેલેથી હાજર છે.",
-  "@ragpickerNameAlreadyExists": {"placeholders":{"name":{"type":"String"}}},
+  "@ragpickerNameAlreadyExists": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "ragpickerInvalidMobile": "માન્ય 10 અંકનો મોબાઇલ નંબર દાખલ કરો અથવા ખાલી રાખો.",
   "ragpickerPhoneLabel": "મોબાઇલ નંબર *",
   "ragpickerPhoneHint": "મોબાઇલ નંબર દાખલ કરો",
@@ -1301,7 +1427,13 @@
   "supervisorTaskInProgress": "કાર્ય પ્રગતિમાં છે",
   "supervisorTaskCompletedAt": "પૂર્ણ: આજે, 11:30 AM",
   "supervisorTaskCompletedValue": "પૂર્ણ: {dateTime}",
-  "@supervisorTaskCompletedValue": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@supervisorTaskCompletedValue": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "supervisorTaskCompletionProof": "કાર્ય પૂર્ણ થયાનો પુરાવો",
   "supervisorTaskCompletionDescription": "10 કિગ્રા પ્રમાણભૂત ટેસ્ટ વજનથી વજન માપક કેલિબ્રેટ કર્યું. શૂન્ય-ભૂલ ચકાસી.",
   "supervisorTaskAgentName": "રાહુલ પટેલ",
@@ -1351,9 +1483,21 @@
   "supervisorMrfAddLabor": "+ મજૂર ઉમેરો",
   "supervisorMrfSave": "સેવ કરો",
   "supervisorMrfLaborNumber": "મજૂર {number}",
-  "@supervisorMrfLaborNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@supervisorMrfLaborNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "supervisorMrfLaborAssigned": "{count} મજૂરો સોંપ્યા",
-  "@supervisorMrfLaborAssigned": {"placeholders": {"count": {"type": "int"}}},
+  "@supervisorMrfLaborAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "supervisorMrfFullNamePlain": "પૂરું નામ",
   "supervisorMrfMobileNumberPlain": "મોબાઇલ નંબર",
   "supervisorMrfAssignedCenter": "લક્ષ્ય એજન્ટ / કેન્દ્ર સોંપો",
@@ -1381,10 +1525,7 @@
   "supervisorMrfLocationSilver": "સિલ્વર ચોક, પુણાગામ",
   "supervisorMrfLocationSardar": "સરદાર માર્કેટ, ઉધના",
   "locationServiceTitle": "લોકેશન ચાલુ કરો",
-  "locationServiceMessage": "લોકેશન બંધ છે. Collection recordમાં GPS coordinates offline સ્થિતિમાં પણ જોડાય તે માટે તેને ચાલુ કરો.",
   "locationPermissionTitle": "લોકેશન પરવાનગી જરૂરી છે",
-  "locationPermissionSettingsMessage": "Collection recordમાં GPS coordinates જોડવા માટે app settingsમાં location access મંજૂર કરો.",
-  "locationPermissionDenied": "લોકેશન પરવાનગી મળી નથી. પરવાનગી આપ્યા સુધી GPS જોડાશે નહીં.",
   "locationUnavailable": "હાલ લોકેશન મળી શક્યું નથી. ઉપલબ્ધ હોય ત્યારે છેલ્લું સાચવેલું લોકેશન વપરાશે.",
   "collectionLocationRequired": "Collection save અથવા submit કરવા માટે location જરૂરી છે. Location ચાલુ કરીને પરવાનગી આપો અને ફરી પ્રયાસ કરો.",
   "collectionDetailsNotReady": "સંગ્રહની વિગતો હજી તૈયાર નથી. કૃપા કરીને ફરી પ્રયાસ કરો.",
@@ -1393,9 +1534,7 @@
   "collectionDraftSaved": "ડ્રાફ્ટ સેવ થયો!",
   "collectionDraftSavedSubtitle": "કલેક્શન ડ્રાફ્ટ સફળતાપૂર્વક સેવ થયો. તે આપમેળે સિંક થશે.",
   "collectionAlreadySubmitted": "આ સંગ્રહ પહેલેથી સબમિટ થઈ ગયો છે. ડુપ્લિકેટ એન્ટ્રી બનાવવામાં આવી નથી.",
-  "locationNotNow": "હમણાં નહીં",
   "locationOpenSettings": "Settings ખોલો",
-  "locationSettingsUnavailable": "Location settings ખોલી શકાઈ નથી.",
   "supervisorTransferReject": "નકારો",
   "supervisorTransferApprove": "મંજૂર કરો",
   "supervisorTransferRejectHint": "નકારવાનું કારણ દાખલ કરો",
@@ -1512,5 +1651,10 @@
   "supervisorTransferTransporterPlain": "ટ્રાન્સપોર્ટર",
   "supervisorTaskTitleRequired": "કૃપા કરીને કાર્યનું શીર્ષક દાખલ કરો.",
   "validationVehiclePlate": "માન્ય વાહન નંબર દાખલ કરો, દા.ત. GJ-05-BX-1234.",
-  "validationVehicleNumberLength": "4 થી 20 અક્ષરોનો વાહન નંબર દાખલ કરો."
+  "validationVehicleNumberLength": "4 થી 20 અક્ષરોનો વાહન નંબર દાખલ કરો.",
+  "locationGateAllow": "લોકેશન મંજૂર કરો",
+  "locationGateTurnOn": "લોકેશન ચાલુ કરો",
+  "locationGatePermissionMessage": "EERL દરેક કલેક્શન ક્યાં થયું તે નોંધે છે, તેથી તેને તમારું લોકેશન જોઈએ. આગળ વધવા લોકેશનની મંજૂરી આપો.",
+  "locationGateServiceMessage": "તમારા ફોનનું લોકેશન (GPS) બંધ છે. આગળ વધવા તેને ચાલુ કરો; તે ઑફલાઇન પણ ચાલે છે.",
+  "locationGateSettingsMessage": "EERL માટે લોકેશન ઍક્સેસ બંધ છે. સેટિંગ્સ ખોલો, લોકેશનની મંજૂરી આપો, પછી પાછા આવો."
 }

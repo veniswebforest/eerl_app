@@ -3169,5 +3169,272 @@
         "type": "String"
       }
     }
+  },
+  "dhDateAdajan": "Thu, 22 Oct · Adajan",
+  "dhEverythingSynced": "Everything is synced",
+  "dhNotStarted": "Not started",
+  "dhStartTrip": "Start trip",
+  "dhStartTripHint": "Tap when you leave the warehouse. Your supervisor sees the time and place.",
+  "dhMorningTripTime": "8:00 am – 2:00 pm · {count} stops",
+  "dhVehicleCrew": "GJ-05-BX-1234 · Vikram, Ravi",
+  "dhDropAdajan": "Drop at Adajan Central Warehouse",
+  "dhZeroSoFar": "0 kg so far",
+  "@dhMorningTripTime": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveTripTitle": "Trip {index} · {shift}",
+  "@liveTripTitle": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "liveTripTime": "{start} – {end} · {count} stops",
+  "@liveTripTime": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveDropAt": "Drop at {warehouse}",
+  "@liveDropAt": {
+    "placeholders": {
+      "warehouse": {
+        "type": "String"
+      }
+    }
+  },
+  "liveKgSoFar": "{kg} kg so far",
+  "@liveKgSoFar": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "liveKg": "{kg} kg",
+  "@liveKg": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "liveAnyTime": "Any time",
+  "liveHandedOverNet": "Handed over · {kg} kg net",
+  "@liveHandedOverNet": {
+    "placeholders": {
+      "kg": {
+        "type": "String"
+      }
+    }
+  },
+  "liveHandedOver": "Handed over",
+  "liveNoSupervisor": "No supervisor set",
+  "liveDateAndPlace": "{date} · {place}",
+  "@liveDateAndPlace": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "liveNeedsConnection": "Needs a connection",
+  "liveSaved": "Saved. It will be sent when online.",
+  "liveCollectedOf": "{name}  •  {done} of {total} collected",
+  "@liveCollectedOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "liveRentedTruck": "Rented truck",
+  "liveNotSent": "{count} changes not sent yet",
+  "@liveNotSent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveAllSent": "Everything is sent",
+  "liveNoTripsToday": "No trips today",
+  "liveTripsTodayCount": "{count} trips today",
+  "@liveTripsTodayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livePickupPointsByCategory": "{count} in {areas} · by category",
+  "@livePickupPointsByCategory": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "areas": {
+        "type": "String"
+      }
+    }
+  },
+  "liveAtGate": "At the gate",
+  "liveReasonHoliday": "Holiday",
+  "liveReasonShifted": "Moved to another day",
+  "liveNotVisitedHint": "Tick the stops the vehicle did not reach. They go back to Unassigned; the others wait for the gate team.",
+  "liveCollectedCount": "{done} of {total} collected",
+  "@liveCollectedCount": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "liveNoTripToday": "No trip today",
+  "liveKindVehicle": "Vehicle",
+  "liveKindLabour": "Labour",
+  "liveKindPointChange": "Pickup point change",
+  "liveKindStart": "Start pickups",
+  "liveKindStop": "Stop pickups",
+  "liveKindPause": "Pause pickups",
+  "liveKindSchedule": "Schedule change",
+  "liveKindRoute": "Route or vehicle",
+  "liveKindOther": "Other",
+  "liveKindCorrection": "Correction",
+  "liveKindFrom": "{kind} · from {who}",
+  "@liveKindFrom": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "liveKindFor": "{kind} · {target}",
+  "@liveKindFor": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "liveAllCount": "All {count}",
+  "@liveAllCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveWaitingCount": "Waiting {count}",
+  "@liveWaitingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveApprovedCount": "Approved {count}",
+  "@liveApprovedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveDeclinedCount": "Declined {count}",
+  "@liveDeclinedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveSentOn": "Sent {date}",
+  "@liveSentOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "liveAnsweredBy": "{name} · {date}",
+  "@liveAnsweredBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "liveSourcesTab": "Sources ({count})",
+  "@liveSourcesTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "livePickupsTab": "Pickups ({count})",
+  "@livePickupsTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "liveSourceAdded": "{source} is now on {route}.",
+  "@liveSourceAdded": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "route": {
+        "type": "String"
+      }
+    }
+  },
+  "liveAssignedCount": "{count} pickup points",
+  "@liveAssignedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

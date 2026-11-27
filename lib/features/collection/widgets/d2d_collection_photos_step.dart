@@ -208,7 +208,6 @@ class _D2dMaterialCard extends StatelessWidget {
         : '$_displayUnitLabel '
               '(${_compactNumber(unitFactor!)} ${baseUnitLabel.toLowerCase()})';
     final verifiedQuantity = double.tryParse(verifiedWeight.trim());
-    final collectedQuantity = double.tryParse(collectionWeight.trim());
     final materialTotal = rate == null || verifiedQuantity == null
         ? null
         : rate! * verifiedQuantity;
@@ -227,7 +226,7 @@ class _D2dMaterialCard extends StatelessWidget {
             centreUnitName: centreUnitName!,
             unitFactor: unitFactor!,
             baseUnitLabel: baseUnitLabel,
-            collectedQuantity: collectedQuantity,
+            verifiedQuantity: verifiedQuantity,
             baseRate: baseRate,
             moneyFormat: moneyFormat,
           );
@@ -467,7 +466,7 @@ class _D2dMaterialCard extends StatelessWidget {
     required String centreUnitName,
     required double unitFactor,
     required String baseUnitLabel,
-    required double? collectedQuantity,
+    required double? verifiedQuantity,
     required double? baseRate,
     required NumberFormat moneyFormat,
   }) {
@@ -476,12 +475,12 @@ class _D2dMaterialCard extends StatelessWidget {
       '1 $centreUnit = ${_compactNumber(unitFactor)} '
           '${baseUnitLabel.toUpperCase()}',
     ];
-    if (collectedQuantity != null) {
-      final quantityText = _compactNumber(collectedQuantity);
-      final pluralUnit = collectedQuantity == 1 ? centreUnit : '${centreUnit}s';
+    if (verifiedQuantity != null) {
+      final quantityText = _compactNumber(verifiedQuantity);
+      final pluralUnit = verifiedQuantity == 1 ? centreUnit : '${centreUnit}s';
       parts.add(
         '$quantityText $pluralUnit = '
-        '${(collectedQuantity * unitFactor).toStringAsFixed(2)} '
+        '${(verifiedQuantity * unitFactor).toStringAsFixed(2)} '
         '${baseUnitLabel.toUpperCase()}',
       );
     }

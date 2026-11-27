@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:eerl_app/features/outbound/data/outbound_writes.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_stop_entry.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/features/driver/service/driver_photo_capture.dart';
@@ -15,16 +17,21 @@ import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 
 class DriverMixedWasteFormScreen extends StatelessWidget {
-  const DriverMixedWasteFormScreen({super.key});
+  const DriverMixedWasteFormScreen({super.key, this.target});
+
+  /// The live stop; null shows the design preview.
+  final DriverStopTarget? target;
 
   @override
   Widget build(BuildContext context) {
-    return const DriverLocalizationScope(child: _MixedWasteFormView());
+    return DriverLocalizationScope(child: _MixedWasteFormView(target: target));
   }
 }
 
 class _MixedWasteFormView extends StatefulWidget {
-  const _MixedWasteFormView();
+  const _MixedWasteFormView({this.target});
+
+  final DriverStopTarget? target;
 
   @override
   State<_MixedWasteFormView> createState() => _MixedWasteFormViewState();
@@ -34,9 +41,35 @@ class _MixedWasteFormViewState extends State<_MixedWasteFormView> {
   static const _maximumPhotos = 2;
   static const _recoveryId = 'driver.pickup.mixed';
   final List<XFile> _photos = [];
-  final TextEditingController _weightController = TextEditingController(
-    text: '300.00',
+  late final TextEditingController _weightController = TextEditingController(
+    text: widget.target == null ? '300.00' : '',
   );
+  bool _saving = false;
+
+  /// Saves a Collected Mixed entry: one weight in KG.
+  Future<void> _saveLive(DriverStopTarget target) async {
+    setState(() => _saving = true);
+    final saved = await recordDriverStop(
+      context,
+      target: target,
+      outcome: StopOutcome.collected,
+      totalKg: double.parse(_weightController.text.trim()),
+      photoPaths: [for (final photo in _photos) photo.path],
+      note: _noteController.text,
+    );
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (!saved) return;
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => DriverPickupSuccessScreen(
+          isLastStop: target.isLastOpen,
+          tripId: target.tripId,
+        ),
+      ),
+    );
+  }
+
   final TextEditingController _noteController = TextEditingController();
   bool _restoredPhoto = false;
 
@@ -101,14 +134,17 @@ class _MixedWasteFormViewState extends State<_MixedWasteFormView> {
             label: l10n.savePickup,
             // The weight is required and must be more than 0.
             enabled:
+                !_saving &&
                 _photos.isNotEmpty &&
                 (double.tryParse(_weightController.text.trim()) ?? 0) > 0,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    const DriverPickupSuccessScreen(isLastStop: true),
-              ),
-            ),
+            onPressed: widget.target != null
+                ? () => _saveLive(widget.target!)
+                : () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          const DriverPickupSuccessScreen(isLastStop: true),
+                    ),
+                  ),
           ),
         ),
         body: LayoutBuilder(
@@ -146,8 +182,14 @@ class _MixedWasteFormViewState extends State<_MixedWasteFormView> {
                           ),
                           const SizedBox(height: 24),
                           DriverPickupStopSummary(
-                            title: l10n.shreeSaiDairy,
-                            subtitle: l10n.mixedStopSevenOfSeven,
+                            title:
+                                widget.target?.sourceName ?? l10n.shreeSaiDairy,
+                            subtitle: widget.target != null
+                                ? l10n.stopPosition(
+                                    widget.target!.stopOrder,
+                                    widget.target!.totalStops,
+                                  )
+                                : l10n.mixedStopSevenOfSeven,
                             locationLabel: l10n.locationMatched,
                           ),
                           const SizedBox(height: 32),

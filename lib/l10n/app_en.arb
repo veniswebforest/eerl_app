@@ -1,265 +1,346 @@
 {
   "@@locale": "en",
-
   "appTitle": "EERL App",
-  "@appTitle": { "description": "Application title" },
-
+  "@appTitle": {
+    "description": "Application title"
+  },
   "home": "Home",
-  "@home": { "description": "Home tab label" },
-
+  "@home": {
+    "description": "Home tab label"
+  },
   "profile": "Profile",
-  "@profile": { "description": "Profile tab label" },
-
+  "@profile": {
+    "description": "Profile tab label"
+  },
   "settings": "Settings",
-  "@settings": { "description": "Settings tab label" },
-
+  "@settings": {
+    "description": "Settings tab label"
+  },
   "details": "Details",
-  "@details": { "description": "Details screen title" },
-
+  "@details": {
+    "description": "Details screen title"
+  },
   "welcomeMessage": "Welcome to EERL",
-  "@welcomeMessage": { "description": "Welcome greeting on home screen" },
-
+  "@welcomeMessage": {
+    "description": "Welcome greeting on home screen"
+  },
   "welcomeSubtitle": "Your production-ready Flutter application",
-  "@welcomeSubtitle": { "description": "Subtitle on home screen" },
-
+  "@welcomeSubtitle": {
+    "description": "Subtitle on home screen"
+  },
   "exploreFeatures": "Explore Features",
-  "@exploreFeatures": { "description": "Section title for feature cards" },
-
+  "@exploreFeatures": {
+    "description": "Section title for feature cards"
+  },
   "localization": "Localization",
-  "@localization": { "description": "Localization feature name" },
-
+  "@localization": {
+    "description": "Localization feature name"
+  },
   "localizationDesc": "Multi-language support with English and Hindi",
-  "@localizationDesc": { "description": "Description of localization feature" },
-
+  "@localizationDesc": {
+    "description": "Description of localization feature"
+  },
   "darkMode": "Dark Mode",
-  "@darkMode": { "description": "Dark mode feature name" },
-
+  "@darkMode": {
+    "description": "Dark mode feature name"
+  },
   "darkModeDesc": "Seamless light and dark theme switching",
-  "@darkModeDesc": { "description": "Description of dark mode feature" },
-
+  "@darkModeDesc": {
+    "description": "Description of dark mode feature"
+  },
   "theming": "Theming",
-  "@theming": { "description": "Theming feature name" },
-
+  "@theming": {
+    "description": "Theming feature name"
+  },
   "themingDesc": "Centralized color and style management",
-  "@themingDesc": { "description": "Description of theming feature" },
-
+  "@themingDesc": {
+    "description": "Description of theming feature"
+  },
   "navigation": "Navigation",
-  "@navigation": { "description": "Navigation feature name" },
-
+  "@navigation": {
+    "description": "Navigation feature name"
+  },
   "navigationDesc": "Declarative routing with GoRouter",
-  "@navigationDesc": { "description": "Description of navigation feature" },
-
+  "@navigationDesc": {
+    "description": "Description of navigation feature"
+  },
   "viewDetails": "View Details",
-  "@viewDetails": { "description": "Button text to view details" },
-
+  "@viewDetails": {
+    "description": "Button text to view details"
+  },
   "featureDetail": "Feature Detail",
-  "@featureDetail": { "description": "Title for feature detail screen" },
-
+  "@featureDetail": {
+    "description": "Title for feature detail screen"
+  },
   "featureDetailBody": "This screen demonstrates route navigation with arguments. The feature you selected is displayed below.",
-  "@featureDetailBody": { "description": "Body text for feature detail screen" },
-
+  "@featureDetailBody": {
+    "description": "Body text for feature detail screen"
+  },
   "featureName": "Feature: {name}",
   "@featureName": {
     "description": "Displays feature name with label",
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
-
   "goBack": "Go Back",
-  "@goBack": { "description": "Button text to navigate back" },
-
+  "@goBack": {
+    "description": "Button text to navigate back"
+  },
   "profileTitle": "My Profile",
-  "@profileTitle": { "description": "Profile screen title" },
-
+  "@profileTitle": {
+    "description": "Profile screen title"
+  },
   "profileName": "EERL User",
-  "@profileName": { "description": "Default profile name" },
-
+  "@profileName": {
+    "description": "Default profile name"
+  },
   "profileEmail": "user@eerl.app",
-  "@profileEmail": { "description": "Default profile email" },
-
+  "@profileEmail": {
+    "description": "Default profile email"
+  },
   "profileBio": "A Flutter developer building amazing applications.",
-  "@profileBio": { "description": "Default profile bio" },
-
+  "@profileBio": {
+    "description": "Default profile bio"
+  },
   "editProfile": "Edit Profile",
-  "@editProfile": { "description": "Button text to edit profile" },
-
+  "@editProfile": {
+    "description": "Button text to edit profile"
+  },
   "accountInfo": "Account Information",
-  "@accountInfo": { "description": "Section title for account info" },
-
+  "@accountInfo": {
+    "description": "Section title for account info"
+  },
   "memberSince": "Member Since",
-  "@memberSince": { "description": "Label for member since date" },
-
+  "@memberSince": {
+    "description": "Label for member since date"
+  },
   "memberSinceDate": "January 2025",
-  "@memberSinceDate": { "description": "Default member since date" },
-
+  "@memberSinceDate": {
+    "description": "Default member since date"
+  },
   "appVersion": "App Version",
-  "@appVersion": { "description": "Label for app version" },
-
+  "@appVersion": {
+    "description": "Label for app version"
+  },
   "appVersionNumber": "1.0.0",
-  "@appVersionNumber": { "description": "Current app version number" },
-
+  "@appVersionNumber": {
+    "description": "Current app version number"
+  },
   "status": "Status",
-  "@status": { "description": "Label for account status" },
-
+  "@status": {
+    "description": "Label for account status"
+  },
   "activeStatus": "Active",
-  "@activeStatus": { "description": "Active status text" },
-
+  "@activeStatus": {
+    "description": "Active status text"
+  },
   "settingsTitle": "Settings",
-  "@settingsTitle": { "description": "Settings screen title" },
-
+  "@settingsTitle": {
+    "description": "Settings screen title"
+  },
   "appearance": "Appearance",
-  "@appearance": { "description": "Appearance section title" },
-
+  "@appearance": {
+    "description": "Appearance section title"
+  },
   "theme": "Theme",
-  "@theme": { "description": "Theme setting label" },
-
+  "@theme": {
+    "description": "Theme setting label"
+  },
   "systemTheme": "System Default",
-  "@systemTheme": { "description": "System theme option" },
-
+  "@systemTheme": {
+    "description": "System theme option"
+  },
   "lightTheme": "Light",
-  "@lightTheme": { "description": "Light theme option" },
-
+  "@lightTheme": {
+    "description": "Light theme option"
+  },
   "darkThemeOption": "Dark",
-  "@darkThemeOption": { "description": "Dark theme option" },
-
+  "@darkThemeOption": {
+    "description": "Dark theme option"
+  },
   "language": "Language",
-  "@language": { "description": "Language setting label" },
-
+  "@language": {
+    "description": "Language setting label"
+  },
   "english": "English",
-  "@english": { "description": "English language name" },
-
+  "@english": {
+    "description": "English language name"
+  },
   "hindi": "हिन्दी",
-  "@hindi": { "description": "Hindi language name" },
-
+  "@hindi": {
+    "description": "Hindi language name"
+  },
   "gujarati": "ગુજરાતી",
-  "@gujarati": { "description": "Gujarati language name" },
-
+  "@gujarati": {
+    "description": "Gujarati language name"
+  },
   "general": "General",
-  "@general": { "description": "General section title" },
-
+  "@general": {
+    "description": "General section title"
+  },
   "notifications": "Notifications",
-  "@notifications": { "description": "Notifications setting label" },
-
+  "@notifications": {
+    "description": "Notifications setting label"
+  },
   "notificationsDesc": "Receive push notifications",
-  "@notificationsDesc": { "description": "Notifications setting description" },
-
+  "@notificationsDesc": {
+    "description": "Notifications setting description"
+  },
   "about": "About",
-  "@about": { "description": "About section title" },
-
+  "@about": {
+    "description": "About section title"
+  },
   "privacyPolicy": "Privacy Policy",
-  "@privacyPolicy": { "description": "Privacy policy label" },
-
+  "@privacyPolicy": {
+    "description": "Privacy policy label"
+  },
   "termsOfService": "Terms of Service",
-  "@termsOfService": { "description": "Terms of service label" },
-
+  "@termsOfService": {
+    "description": "Terms of service label"
+  },
   "licenses": "Open Source Licenses",
-  "@licenses": { "description": "Licenses label" },
-
+  "@licenses": {
+    "description": "Licenses label"
+  },
   "showBottomSheet": "Show Bottom Sheet",
-  "@showBottomSheet": { "description": "Button text to show bottom sheet" },
-
+  "@showBottomSheet": {
+    "description": "Button text to show bottom sheet"
+  },
   "showDialog": "Show Dialog",
-  "@showDialog": { "description": "Button text to show dialog" },
-
+  "@showDialog": {
+    "description": "Button text to show dialog"
+  },
   "showSnackbar": "Show Snackbar",
-  "@showSnackbar": { "description": "Button text to show snackbar" },
-
+  "@showSnackbar": {
+    "description": "Button text to show snackbar"
+  },
   "sampleBottomSheetTitle": "Bottom Sheet",
-  "@sampleBottomSheetTitle": { "description": "Title for sample bottom sheet" },
-
+  "@sampleBottomSheetTitle": {
+    "description": "Title for sample bottom sheet"
+  },
   "sampleBottomSheetMessage": "This is a themed bottom sheet that adapts to light and dark modes with localized text.",
-  "@sampleBottomSheetMessage": { "description": "Message in sample bottom sheet" },
-
+  "@sampleBottomSheetMessage": {
+    "description": "Message in sample bottom sheet"
+  },
   "sampleDialogTitle": "Confirmation",
-  "@sampleDialogTitle": { "description": "Title for sample dialog" },
-
+  "@sampleDialogTitle": {
+    "description": "Title for sample dialog"
+  },
   "sampleDialogMessage": "This dialog adapts to both light and dark themes. All text is localized.",
-  "@sampleDialogMessage": { "description": "Message in sample dialog" },
-
+  "@sampleDialogMessage": {
+    "description": "Message in sample dialog"
+  },
   "sampleSnackbarMessage": "This is a themed snackbar message! ✨",
-  "@sampleSnackbarMessage": { "description": "Message in sample snackbar" },
-
+  "@sampleSnackbarMessage": {
+    "description": "Message in sample snackbar"
+  },
   "cancel": "Cancel",
-  "@cancel": { "description": "Cancel button text" },
-
+  "@cancel": {
+    "description": "Cancel button text"
+  },
   "confirm": "Confirm",
-  "@confirm": { "description": "Confirm button text" },
-
+  "@confirm": {
+    "description": "Confirm button text"
+  },
   "close": "Close",
-  "@close": { "description": "Close button text" },
-
+  "@close": {
+    "description": "Close button text"
+  },
   "ok": "OK",
-  "@ok": { "description": "OK button text" },
-
+  "@ok": {
+    "description": "OK button text"
+  },
   "error": "Error",
   "toastSuccessTitle": "Success",
   "toastInfoTitle": "Information",
-  "@error": { "description": "Error title" },
-
+  "@error": {
+    "description": "Error title"
+  },
   "pageNotFound": "Page Not Found",
-  "@pageNotFound": { "description": "404 error title" },
-
+  "@pageNotFound": {
+    "description": "404 error title"
+  },
   "pageNotFoundMessage": "The page you're looking for doesn't exist.",
-  "@pageNotFoundMessage": { "description": "404 error message" },
-
+  "@pageNotFoundMessage": {
+    "description": "404 error message"
+  },
   "returnHome": "Return Home",
-  "@returnHome": { "description": "Button text to return to home" },
-
+  "@returnHome": {
+    "description": "Button text to return to home"
+  },
   "quickActions": "Quick Actions",
-  "@quickActions": { "description": "Section title for quick actions" },
-
+  "@quickActions": {
+    "description": "Section title for quick actions"
+  },
   "selectTheme": "Select Theme",
-  "@selectTheme": { "description": "Title for theme selection dialog" },
-
+  "@selectTheme": {
+    "description": "Title for theme selection dialog"
+  },
   "selectLanguage": "Select Language",
-  "@selectLanguage": { "description": "Title for language selection dialog" },
-
+  "@selectLanguage": {
+    "description": "Title for language selection dialog"
+  },
   "loginWelcome": "Welcome!",
-  "@loginWelcome": { "description": "Welcome title on login screen" },
-
+  "@loginWelcome": {
+    "description": "Welcome title on login screen"
+  },
   "loginSubtitle": "Login with your phone number",
-  "@loginSubtitle": { "description": "Subtitle on login screen" },
-
+  "@loginSubtitle": {
+    "description": "Subtitle on login screen"
+  },
   "mobileNumberLabel": "Enter Your Mobile Number",
-  "@mobileNumberLabel": { "description": "Label for mobile input" },
-
+  "@mobileNumberLabel": {
+    "description": "Label for mobile input"
+  },
   "mobileNumberHint": "Enter your number",
-  "@mobileNumberHint": { "description": "Hint for mobile input" },
-
+  "@mobileNumberHint": {
+    "description": "Hint for mobile input"
+  },
   "invalidMobileNumber": "Please Enter Valid Mobile Number",
-  "@invalidMobileNumber": { "description": "Error message for invalid mobile number" },
-
+  "@invalidMobileNumber": {
+    "description": "Error message for invalid mobile number"
+  },
   "continueBtn": "Continue",
-  "@continueBtn": { "description": "Continue button text" },
-
+  "@continueBtn": {
+    "description": "Continue button text"
+  },
   "otpTitle": "Enter OTP Code",
-  "@otpTitle": { "description": "Title on OTP screen" },
-
+  "@otpTitle": {
+    "description": "Title on OTP screen"
+  },
   "otpDescription": "We sent a security code to your Reporting Manager for approval ({phone})",
   "@otpDescription": {
     "description": "Description on OTP screen",
     "placeholders": {
-      "phone": { "type": "String" }
+      "phone": {
+        "type": "String"
+      }
     }
   },
-
   "invalidOtp": "This Code has expired, Please Request New One.",
-  "@invalidOtp": { "description": "Error message for invalid OTP" },
-
+  "@invalidOtp": {
+    "description": "Error message for invalid OTP"
+  },
   "otpVerified": "OTP Verified Successfully!",
-  "@otpVerified": { "description": "Success message for OTP verification" },
-
+  "@otpVerified": {
+    "description": "Success message for OTP verification"
+  },
   "didntGetOtp": "Didn't get OTP?",
-  "@didntGetOtp": { "description": "Prompt for resending OTP" },
-
+  "@didntGetOtp": {
+    "description": "Prompt for resending OTP"
+  },
   "resendOtp": "Resend",
-  "@resendOtp": { "description": "Resend OTP button text" },
+  "@resendOtp": {
+    "description": "Resend OTP button text"
+  },
   "otpResentSuccess": "A new login code has been sent.",
-
   "verifyBtn": "Verify",
-  "@verifyBtn": { "description": "Verify button text" },
-
+  "@verifyBtn": {
+    "description": "Verify button text"
+  },
   "welcomeBack": "Welcome back",
   "homeInitialDataSyncing": "Syncing data...",
   "homeInitialDataSyncingSubtitle": "Setting up the app for offline use. This only takes this long the first time",
@@ -267,14 +348,26 @@
   "zoneName": "EERL - Surat Zone",
   "onlineStatus": "You’re Online",
   "pendingCollections": "{count} collection pending",
-  "@pendingCollections": { "placeholders": { "count": { "type": "int" } } },
+  "@pendingCollections": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "syncNow": "Sync Now",
   "todaysSummary": "Today's Summary",
   "hideTodaysSummary": "Hide today's summary",
   "showTodaysSummary": "Show today's summary",
   "collectedToday": "Collected Today",
   "weightKg": "{value} KG",
-  "@weightKg": { "placeholders": { "value": { "type": "int" } } },
+  "@weightKg": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
   "verifiedEntries": "Verified Entries",
   "transferRequests": "Transfer Requests",
   "transferSearchHint": "Search Here...",
@@ -291,13 +384,21 @@
   "transferStatusRejected": "Rejected",
   "transferTotalWeight": "Total : {weight}",
   "@transferTotalWeight": {
-    "placeholders": { "weight": { "type": "String" } }
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
   },
   "transferDateTime": "{date} • {time}",
   "@transferDateTime": {
     "placeholders": {
-      "date": { "type": "String" },
-      "time": { "type": "String" }
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
     }
   },
   "transferSelectItemsTitle": "Select Items to Transfer",
@@ -306,11 +407,19 @@
   "transferToyWaste": "Toy Waste",
   "transferCapacity": "Capacity {weight}",
   "@transferCapacity": {
-    "placeholders": { "weight": { "type": "String" } }
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
   },
   "transferAvailableStock": "Stock in Hand {weight}",
   "@transferAvailableStock": {
-    "placeholders": {"weight": {"type": "String"}}
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
   },
   "transferCardboard": "Cardboard",
   "transferPaperWaste": "Paper Waste",
@@ -360,7 +469,13 @@
   "transferBackToList": "Back to Transfer List",
   "walletBalance": "Wallet Balance",
   "walletAmount": "₹{amount}",
-  "@walletAmount": { "placeholders": { "amount": { "type": "String" } } },
+  "@walletAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "startCollection": "Start Collection",
   "recordWeightProof": "Record weight & upload proof.",
   "addCollection": "Add Collection",
@@ -387,9 +502,24 @@
   "reports": "Reports",
   "collections": "Collections",
   "otpExpiresIn": "Code will expire in {time}",
-  "@otpExpiresIn": { "placeholders": { "time": { "type": "String" } } },
+  "@otpExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "resendOtpCountdown": "{label} ({seconds}s)",
-  "@resendOtpCountdown": { "placeholders": { "label": { "type": "String" }, "seconds": { "type": "int" } } },
+  "@resendOtpCountdown": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "plasticWasteManagement": "PLASTIC WASTE MANAGEMENT",
   "walletTab": "Wallet",
   "records": "Records",
@@ -427,7 +557,11 @@
   "cashRequestSubmittedTitle": "Request Submitted!",
   "cashRequestSubmittedMessage": "Your cash request of ₹ {amount} has been submitted successfully.",
   "@cashRequestSubmittedMessage": {
-    "placeholders": {"amount": {"type": "String"}}
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "cashRequestBackToWallet": "Back to Wallet",
   "filterPending": "Pending",
@@ -465,9 +599,21 @@
   "d2dSelectTargetCenter": "Assign Target Agent / Center",
   "d2dSelectCenter": "Select Center",
   "d2dVehicleActiveCount": "Active ({count})",
-  "@d2dVehicleActiveCount": {"placeholders": {"count": {"type": "int"}}},
+  "@d2dVehicleActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "d2dVehicleDeactivatedCount": "Deactivated ({count})",
-  "@d2dVehicleDeactivatedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@d2dVehicleDeactivatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "d2dAddVehicle": "Add Vehicle",
   "d2dNoVehicleAdded": "No Vehicle Added Yet",
   "d2dActivatedVehicleTitle": "Activated Vehicle!",
@@ -506,33 +652,75 @@
   "myTasks": "My Tasks",
   "taskOpenCount": "Open ({count})",
   "@taskOpenCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "taskClosedCount": "Closed ({count})",
   "@taskClosedCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "taskSupervisorName": "Bhavesh Shah (Supervisor)",
   "taskDescription": "Review and verify the latest collection entry submitted by the field agent...",
   "taskPhotoAttached": "{count} Photo attached",
   "@taskPhotoAttached": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "taskDueToday": "Due Today, 5:00 PM",
   "taskDueTomorrow": "Due Tomorrow, 2:00 PM",
   "taskDueDate": "Due 25 Aug 2026",
   "taskCompletedTime": "Completed: Today, 11:30 AM",
   "taskDueTodayAt": "Due Today, {time}",
-  "@taskDueTodayAt": {"placeholders": {"time": {"type": "String"}}},
+  "@taskDueTodayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "taskDueTomorrowAt": "Due Tomorrow, {time}",
-  "@taskDueTomorrowAt": {"placeholders": {"time": {"type": "String"}}},
+  "@taskDueTomorrowAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "taskDueAt": "Due {dateTime}",
-  "@taskDueAt": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@taskDueAt": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "taskCompletedLabel": "Completed",
   "taskCompletedTodayAt": "Completed: Today, {time}",
-  "@taskCompletedTodayAt": {"placeholders": {"time": {"type": "String"}}},
+  "@taskCompletedTodayAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "taskCompletedAt": "Completed: {dateTime}",
-  "@taskCompletedAt": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@taskCompletedAt": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "taskListTime0900": "Today, 09:00 AM",
   "taskListTime1000": "Today, 10:00 AM",
   "taskListTime1145": "Today, 11:45 AM",
@@ -546,11 +734,19 @@
   "configureMaterialsSubtitle": "Drag handle to reorder materials.",
   "configurePlasticCount": "Plastic ({count})",
   "@configurePlasticCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "configureNonPlasticCount": "Non-Plastic ({count})",
   "@configureNonPlasticCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "configureSaveOrder": "Save Order",
   "configureSequenceSaved": "Sequence saved successfully",
@@ -583,7 +779,13 @@
   "expenseAmountLabel": "Expense Amount (₹)",
   "expenseAmountHint": "₹ Enter Expense Amount",
   "expenseAmountExceedsWalletBalance": "Amount cannot exceed the available wallet balance of ₹{balance}.",
-  "@expenseAmountExceedsWalletBalance": {"placeholders":{"balance":{"type":"String"}}},
+  "@expenseAmountExceedsWalletBalance": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
   "uploadReceiptLabel": "Upload Receipt",
   "capturePhoto": "Capture Photo",
   "receiptSupportMessage": "Supported: JPG, PNG (Max 5MB). Receipt must be clearly visible for supervisor review.",
@@ -594,11 +796,19 @@
   "expenseSubmittedTitle": "Expense Submitted!",
   "expenseSubmittedDeduction": "₹{amount} deducted from your wallet balance.",
   "@expenseSubmittedDeduction": {
-    "placeholders": {"amount": {"type": "String"}}
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "expenseSubmittedBalance": "Remaining Balance: ₹{balance}",
   "@expenseSubmittedBalance": {
-    "placeholders": {"balance": {"type": "String"}}
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
   },
   "expenseBackToWallet": "Back to Wallet",
   "expensePendingPrefix": "This entry will be marked as ",
@@ -620,7 +830,6 @@
   "expenseRequestStatus": "Request Status",
   "expenseWaitingSupervisor": "Waiting for Supervisor",
   "expenseVerifiedSupervisor": "Verified by Supervisor",
-  "expenseRejectedSupervisor": "Rejected by Supervisor",
   "expenseUploadedPhoto": "Uploaded Photo",
   "expenseDetailDescription": "Please state the purpose of this expense and any relevant details needed for supervisor approval.",
   "expenseRejectReasonTitle": "Reason for Reject",
@@ -638,7 +847,11 @@
   "cashDetailApprovedSupervisor": "Approved by Supervisor",
   "cashDetailApprovedNote": "Note: {amount} credited to your active cash wallet balance.",
   "@cashDetailApprovedNote": {
-    "placeholders": {"amount": {"type": "String"}}
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "cashDetailRejectReason": "Invalid / Incomplete Request",
   "cashDetailRejectRemarks": "Your existing wallet balance is sufficient for today's route. Please log pending expenses first.",
@@ -669,7 +882,13 @@
   "recordsYesterdayCollections": "Yesterday’s Collections",
   "recordsOctoberCollections": "22 October Collections",
   "recordsDatedCollections": "{date} Collections",
-  "@recordsDatedCollections": {"placeholders": {"date": {"type": "String"}}},
+  "@recordsDatedCollections": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "recordsCollectionDrafts": "Collection Drafts",
   "recordsTodayTime": "Today • 08:15 AM",
   "recordsOctober22Time": "22 October • 11:15 AM",
@@ -746,9 +965,14 @@
   "syncOfflineDataTitle": "Sync Offline Data",
   "syncPendingCollections": "3 collection Pending",
   "syncPendingItems": "{count} item(s) pending sync",
-  "@syncPendingItems": { "placeholders": { "count": { "type": "int" } } },
+  "@syncPendingItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "syncInternetRequired": "No internet connection. Pending data was not changed.",
-  "syncNow": "Sync Now",
   "syncAlreadySyncedTitle": "Data Already Synced",
   "syncSuccessfulTitle": "Data Synced Successfully",
   "syncBack": "Back",
@@ -782,7 +1006,13 @@
   "collectionAddItemLabel": "Add Item",
   "collectionSelectWasteItem": "Select Waste Item",
   "collectionItemsSelected": "{count} Items Selected",
-  "@collectionItemsSelected": {"placeholders":{"count":{"type":"int"}}},
+  "@collectionItemsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "collectionVehicleNumber": "Vehicle Number Plate",
   "collectionD2dVehicleNumber": "Vehicle Number",
   "collectionGivenBy": "Given By",
@@ -814,7 +1044,13 @@
   "collectionUnitKg": "KG",
   "collectionUnitPcs": "PCS",
   "collectionRatePerUnit": "Rate/{unit}",
-  "@collectionRatePerUnit": {"placeholders":{"unit":{"type":"String"}}},
+  "@collectionRatePerUnit": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "collectionPaymentCash": "Cash",
   "collectionPaymentUpi": "UPI",
   "collectionPaymentType": "Payment Type",
@@ -901,7 +1137,13 @@
   "collectionReceiptDateTime": "Date & Time",
   "collectionReceiptBreakdown": "Collected Items Breakdown",
   "collectionItemsCount": "{count} Items",
-  "@collectionItemsCount": {"placeholders":{"count":{"type":"int"}}},
+  "@collectionItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "collectionReceiptAggregateSummary": "Aggregate Summary",
   "collectionReceiptAggregateHint": "Weight & Count Summary",
   "collectionReceiptLaborInvolved": "Labor Involved",
@@ -935,10 +1177,22 @@
   "taskDescriptionPlain": "Description",
   "notificationTitle": "Notifications",
   "notificationForRole": "For your {roleName} role",
-  "@notificationForRole": { "placeholders": { "roleName": { "type": "String" } } },
+  "@notificationForRole": {
+    "placeholders": {
+      "roleName": {
+        "type": "String"
+      }
+    }
+  },
   "notificationSwitchRoleTitle": "Switch role?",
   "notificationSwitchRoleMessage": "This notification is for your {roleName} role. Switch roles to open it?",
-  "@notificationSwitchRoleMessage": { "placeholders": { "roleName": { "type": "String" } } },
+  "@notificationSwitchRoleMessage": {
+    "placeholders": {
+      "roleName": {
+        "type": "String"
+      }
+    }
+  },
   "notificationToday": "Today,",
   "notificationEarlier": "Earlier,",
   "notificationEmptyTitle": "All Caught Up!",
@@ -960,8 +1214,8 @@
   "notificationFiveHours": "5 Hours ago",
   "notificationSevenHours": "7 Hours ago",
   "notificationYesterday": "Yesterday, 11:30 AM",
-  "notificationPreviousDate": "24 Oct, 08:00 AM"
-  ,"homePendingTask": "View Pending Tasks",
+  "notificationPreviousDate": "24 Oct, 08:00 AM",
+  "homePendingTask": "View Pending Tasks",
   "homePendingTaskSubtitle": "View tasks assigned to you.",
   "homeSuratEastZone": "EERL - Surat East Zone",
   "homeSuratNorthZone": "EERL - Surat North Zone",
@@ -992,8 +1246,10 @@
   "supervisorTasksNav": "Tasks",
   "supervisorStockNav": "Stock",
   "viewTask": "View Task",
-  "@viewTask": { "description": "Button label to view pending tasks" }
-  ,"endDayOpeningBalance": "Opening Balance",
+  "@viewTask": {
+    "description": "Button label to view pending tasks"
+  },
+  "endDayOpeningBalance": "Opening Balance",
   "endDayOpeningBalanceValue": "₹ 5,000.00",
   "endDayExpensesLogged": "Total Expenses Logged",
   "endDayExpensesValue": "₹ 720.00",
@@ -1027,21 +1283,39 @@
   "endDayExpensesCount": "02",
   "endDayWarning": "Once you close the day, you won’t be able to\nadd or edit any entries.",
   "endDayConfirmTitle": "End Your Day?",
-  "@endDayConfirmTitle": { "description": "Title of end-day confirmation dialog" },
+  "@endDayConfirmTitle": {
+    "description": "Title of end-day confirmation dialog"
+  },
   "endDayConfirmMessage": "Once you close the day, all entries will be locked. Make sure all collections and expenses are logged before closing.",
-  "@endDayConfirmMessage": { "description": "Body message of end-day confirmation dialog" },
+  "@endDayConfirmMessage": {
+    "description": "Body message of end-day confirmation dialog"
+  },
   "endDayConfirmYes": "Yes, End My Day",
-  "@endDayConfirmYes": { "description": "Confirm button in end-day dialog" },
+  "@endDayConfirmYes": {
+    "description": "Confirm button in end-day dialog"
+  },
   "endDayConfirmNo": "Go Back",
-  "@endDayConfirmNo": { "description": "Cancel button in end-day dialog" },
+  "@endDayConfirmNo": {
+    "description": "Cancel button in end-day dialog"
+  },
   "endDaySuccessTitle": "Day Closed!",
-  "@endDaySuccessTitle": { "description": "Success title after day is closed" },
+  "@endDaySuccessTitle": {
+    "description": "Success title after day is closed"
+  },
   "endDaySuccessMessage": "Your day has been closed successfully. All data has been synced.",
-  "@endDaySuccessMessage": { "description": "Success message after day is closed" },
+  "@endDaySuccessMessage": {
+    "description": "Success message after day is closed"
+  },
   "endDayLoadError": "Unable to load day-close data.",
   "endDayRetry": "Retry",
   "endDayCloseAfterTime": "Day closing is available after {time}.",
-  "@endDayCloseAfterTime": { "placeholders": { "time": { "type": "String" } } },
+  "@endDayCloseAfterTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "endDayCloseBlocked": "The day cannot be closed yet.",
   "endDayCloseFailed": "The day could not be closed. Please try again.",
   "endDayInternetTitle": "No Internet Connection",
@@ -1049,9 +1323,21 @@
   "endDayInternetOk": "OK",
   "requestTitle": "Requests",
   "requestOpenCount": "Open ({count})",
-  "@requestOpenCount": {"placeholders": {"count": {"type": "int"}}},
+  "@requestOpenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "requestClosedCount": "Closed ({count})",
-  "@requestClosedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@requestClosedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "requestSearchHint": "Search Here...",
   "requestSupervisorName": "Bhavesh Shah (Supervisor)",
   "requestOpenDescriptionOne": "Ramp B weighing scale is showing zero error and flickering constantly during calibration...",
@@ -1063,7 +1349,13 @@
   "requestAwaitingResponse": "Awaiting Response",
   "requestClosedBySupervisor": "Closed by Supervisor",
   "requestTodayTime": "Today, {time}",
-  "@requestTodayTime": {"placeholders": {"time": {"type": "String"}}},
+  "@requestTodayTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "requestEmptyMessage": "No Requests for now",
   "requestRaiseButton": "Raise Request",
   "requestRaiseTitle": "Raise Request",
@@ -1076,7 +1368,13 @@
   "requestFollowupDateTime": "Next Follow-up Date & Time *",
   "requestFollowupFutureError": "Choose a follow-up date and time in the future.",
   "requestFollowupBy": "Follow up by {dateTime}",
-  "@requestFollowupBy": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@requestFollowupBy": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "requestOverdue": "Overdue",
   "requestSubmitFailed": "Request could not be saved. Please try again.",
   "requestSelectDateTime": "Select Date & Time",
@@ -1106,7 +1404,13 @@
   "requestCompletedStatus": "Completed: Today, 11:30 AM",
   "requestCompletedLabel": "Completed",
   "requestCompletedValue": "Completed: {dateTime}",
-  "@requestCompletedValue": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@requestCompletedValue": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "requestDetailDescription": "Review and verify the latest collection entry submitted by the field agent. Cross-check the reported collection weight against the verified weight, inspect all uploaded item photos (before and after verification), and ensure customer details and material categories match the system records before final approval.",
   "transferDetailTitle": "Transfer Request Details",
   "transferDetailRequestId": "#TRF-2026-089",
@@ -1118,7 +1422,13 @@
   "transferVehicleInformation": "Vehicle Information",
   "supervisorTransferDispatchStatus": "Dispatch",
   "transferEstimateHours": "{count} Hours",
-  "@transferEstimateHours": {"placeholders": {"count": {"type": "int"}}},
+  "@transferEstimateHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "transferDetailVehicleNumber": "GJ-05-AB-1234",
   "transferDetailVehicleUnavailable": "Vehicle Not Available (Agent)",
   "transferDetailVehicleCapacity": "Truck (Capacity 3000 KG)",
@@ -1161,9 +1471,15 @@
   "transferDispatchStockExceeded": "This center holds {quantity} {unit} of {item}.",
   "@transferDispatchStockExceeded": {
     "placeholders": {
-      "quantity": {"type": "String"},
-      "unit": {"type": "String"},
-      "item": {"type": "String"}
+      "quantity": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      }
     }
   },
   "transferNumberOfBales": "Number of Bales / Boris",
@@ -1219,9 +1535,21 @@
   "saveAndSelect": "Save & Select",
   "ragpickerDirectoryTitle": "Ragpicker Directory",
   "ragpickerActiveCount": "Active ({count})",
-  "@ragpickerActiveCount": {"placeholders": {"count": {"type": "int"}}},
+  "@ragpickerActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ragpickerDeactivatedCount": "Deactivated ({count})",
-  "@ragpickerDeactivatedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@ragpickerDeactivatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ragpickerSearchHint": "Search Here...",
   "ragpickerAddButton": "Add Ragpicker",
   "ragpickerNoDetailsFound": "No Ragpicker Details Found",
@@ -1236,7 +1564,13 @@
   "ragpickerNameHint": "Enter Full Name",
   "ragpickerNameRequired": "Please enter the full name.",
   "ragpickerNameAlreadyExists": "{name} already exists in the ragpicker list.",
-  "@ragpickerNameAlreadyExists": {"placeholders":{"name":{"type":"String"}}},
+  "@ragpickerNameAlreadyExists": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "ragpickerInvalidMobile": "Enter a valid 10-digit mobile number or leave it blank.",
   "ragpickerPhoneLabel": "Mobile Number *",
   "ragpickerPhoneHint": "Enter Mobile Number",
@@ -1358,7 +1692,13 @@
   "stockFgDetail": "FG Detail",
   "stockCenterValue": "Stock Center : EERL – Surat South",
   "stockCenterName": "Stock Center : {name}",
-  "@stockCenterName": {"placeholders": {"name": {"type": "String"}}},
+  "@stockCenterName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "stockUpdatedAgo": "10m ago",
   "stockRawBinPrefix": "RM",
   "stockSortedBinPrefix": "A",
@@ -1368,7 +1708,16 @@
   "stockSortedBinD": "D",
   "stockSortedBinE": "E",
   "stockBinValue": "Bin: {prefix}-{number}",
-  "@stockBinValue": {"placeholders": {"prefix": {"type": "String"}, "number": {"type": "String"}}},
+  "@stockBinValue": {
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
   "stockWeight980": "980.00 KG",
   "stockWeight720": "720.00 KG",
   "stockWeight2100": "2,100.00 KG",
@@ -1443,9 +1792,21 @@
   "supervisorCategoryTitle": "Add Category Request",
   "supervisorCategoryEmpty": "No Category Request to Review",
   "supervisorCategoryPendingTab": "Pending ({count})",
-  "@supervisorCategoryPendingTab": {"placeholders": {"count": {"type": "int"}}},
+  "@supervisorCategoryPendingTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "supervisorCategoryClosedTab": "Closed ({count})",
-  "@supervisorCategoryClosedTab": {"placeholders": {"count": {"type": "int"}}},
+  "@supervisorCategoryClosedTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "supervisorCategoryAgent": "Rahul Patel",
   "supervisorCategoryFacility": "EERL South",
   "supervisorCategoryTyreReplacement": "Tyre Replacement",
@@ -1526,7 +1887,13 @@
   "supervisorTaskInProgress": "Task in Progress",
   "supervisorTaskCompletedAt": "Completed: Today, 11:30 AM",
   "supervisorTaskCompletedValue": "Completed: {dateTime}",
-  "@supervisorTaskCompletedValue": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@supervisorTaskCompletedValue": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "supervisorTaskCompletionProof": "Task Completion Proof",
   "supervisorTaskCompletionDescription": "Weight scale calibrated using 10kg standard test weight. Zero-error verified.",
   "supervisorTaskAgentName": "Rahul Patel",
@@ -1576,9 +1943,21 @@
   "supervisorMrfAddLabor": "+ Add Labor",
   "supervisorMrfSave": "Save",
   "supervisorMrfLaborNumber": "Labor {number}",
-  "@supervisorMrfLaborNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@supervisorMrfLaborNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "supervisorMrfLaborAssigned": "{count, plural, =1 {1 Labour assigned} other {{count} Labours assigned}}",
-  "@supervisorMrfLaborAssigned": {"placeholders": {"count": {"type": "int"}}},
+  "@supervisorMrfLaborAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "supervisorMrfFullNamePlain": "Full Name",
   "supervisorMrfMobileNumberPlain": "Mobile Number",
   "supervisorMrfAssignedCenter": "Assign Target Agent / Center",
@@ -1606,10 +1985,7 @@
   "supervisorMrfLocationSilver": "Silver Chowk, Punagam",
   "supervisorMrfLocationSardar": "Sardar Market, Udhana",
   "locationServiceTitle": "Turn on location",
-  "locationServiceMessage": "Location is off. Turn it on so collection records can include GPS coordinates, even when the app is offline.",
   "locationPermissionTitle": "Location permission required",
-  "locationPermissionSettingsMessage": "Allow location access in app settings so collection records can include GPS coordinates.",
-  "locationPermissionDenied": "Location permission was not granted. GPS will not be included until permission is allowed.",
   "locationUnavailable": "A location fix is temporarily unavailable. The last saved location will be used when available.",
   "collectionLocationRequired": "Location is required to save or submit a collection. Turn on location and allow access, then try again.",
   "collectionDetailsNotReady": "Collection details are not ready yet. Please try again.",
@@ -1618,9 +1994,7 @@
   "collectionDraftSaved": "Draft Saved!",
   "collectionDraftSavedSubtitle": "Collection draft saved successfully. It will sync automatically.",
   "collectionAlreadySubmitted": "This collection has already been submitted. A duplicate entry was not created.",
-  "locationNotNow": "Not now",
   "locationOpenSettings": "Open settings",
-  "locationSettingsUnavailable": "Location settings could not be opened.",
   "supervisorTransferReject": "Reject",
   "supervisorTransferApprove": "Approve",
   "supervisorTransferRejectHint": "Enter reason for rejection",
@@ -1629,7 +2003,13 @@
   "supervisorTransferSelectVehicle": "Select Vehicle *",
   "supervisorTransferVehicleHint": "Select Vehicle for dispatch",
   "supervisorTransferCapacity": "Capacity {capacity} KG",
-  "@supervisorTransferCapacity": {"placeholders": {"capacity": {"type": "String"}}},
+  "@supervisorTransferCapacity": {
+    "placeholders": {
+      "capacity": {
+        "type": "String"
+      }
+    }
+  },
   "supervisorTransferVehicleNumber": "Vehicle Number *",
   "supervisorTransferTransporter": "Transporter *",
   "supervisorTransferTransporterHint": "Enter transporter name",
@@ -1638,7 +2018,13 @@
   "supervisorTransferHiredTruck": "Hired truck",
   "supervisorTransferCompanyTruck": "Company truck",
   "supervisorTransferHiredFrom": "Hired from {name}",
-  "@supervisorTransferHiredFrom": {"placeholders": {"name": {"type": "String"}}},
+  "@supervisorTransferHiredFrom": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "supervisorTransferSelectDestination": "Select Destination",
   "supervisorTransferSelectDestinationRequired": "Select Destination *",
   "supervisorTransferDestinationHint": "Select the destination",
@@ -1649,9 +2035,30 @@
   "supervisorTransferMaxCharacters": "Max 150 Characters",
   "supervisorTransferConfirm": "Confirm Transfer",
   "supervisorTransferApprovedTitle": "{id} approved!",
-  "@supervisorTransferApprovedTitle": {"placeholders": {"id": {"type": "String"}}},
+  "@supervisorTransferApprovedTitle": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
   "supervisorTransferApprovedMessage": "{requester} will send it to {destination}. Truck {vehicle}, expected {expected}.",
-  "@supervisorTransferApprovedMessage": {"placeholders": {"requester": {"type": "String"}, "destination": {"type": "String"}, "vehicle": {"type": "String"}, "expected": {"type": "String"}}},
+  "@supervisorTransferApprovedMessage": {
+    "placeholders": {
+      "requester": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      },
+      "vehicle": {
+        "type": "String"
+      },
+      "expected": {
+        "type": "String"
+      }
+    }
+  },
   "supervisorTransferBackToRequests": "Back to Requests",
   "offlineStatus": "Offline",
   "offlineStatusSubtitle": "No internet connection",
@@ -1660,7 +2067,13 @@
   "pricesCentreSuratSouth": "EERL – Surat South",
   "pricesYourRequests": "Your price requests:",
   "pricesWaitingCount": "{count} waiting  ›",
-  "@pricesWaitingCount": {"placeholders": {"count": {"type": "int"}}},
+  "@pricesWaitingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "pricesMaterials": "Materials",
   "pricesPetBottles": "PET Bottles",
   "pricesHdpeRigid": "HDPE Rigid",
@@ -1669,23 +2082,68 @@
   "pricesPlasticType": "(Plastic)",
   "pricesPaperType": "(Paper)",
   "pricesAmountPerKg": "₹{amount}/KG",
-  "@pricesAmountPerKg": {"placeholders": {"amount": {"type": "String"}}},
+  "@pricesAmountPerKg": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "pricesFromSmc": "From SMC (Channel)",
   "pricesOwnPrice": "Its own price",
   "pricesFromEvsk": "From EVSK (Partner cluster)",
   "pricesAskedWaiting": "You asked for ₹{amount} · waiting",
-  "@pricesAskedWaiting": {"placeholders": {"amount": {"type": "String"}}},
+  "@pricesAskedWaiting": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "pricesNoPrice": "No price",
   "pricesAskForOne": "Ask for one",
   "priceRequestsTitle": "Your price requests",
   "priceRequestsWaitingTab": "Waiting ({count})",
-  "@priceRequestsWaitingTab": {"placeholders": {"count": {"type": "int"}}},
+  "@priceRequestsWaitingTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "priceRequestsDecidedTab": "Decided ({count})",
-  "@priceRequestsDecidedTab": {"placeholders": {"count": {"type": "int"}}},
+  "@priceRequestsDecidedTab": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "priceRequestItemCentre": "{item} · {centre}",
-  "@priceRequestItemCentre": {"placeholders": {"item": {"type": "String"}, "centre": {"type": "String"}}},
+  "@priceRequestItemCentre": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "centre": {
+        "type": "String"
+      }
+    }
+  },
   "priceRequestChange": "₹{oldRate} → ₹{newRate} /KG  ({percent})",
-  "@priceRequestChange": {"placeholders": {"oldRate": {"type": "String"}, "newRate": {"type": "String"}, "percent": {"type": "String"}}},
+  "@priceRequestChange": {
+    "placeholders": {
+      "oldRate": {
+        "type": "String"
+      },
+      "newRate": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
   "priceRequestPetReason": "Buyers near Surat pay ₹48 for PET this month; agents are losing givers to other dealers.",
   "priceRequestPpReason": "PP prices went up at the Sachin buyers this week.",
   "priceRequestHdpeReason": "Other dealers in Pandesara pay ₹35.",
@@ -1719,15 +2177,45 @@
   "priceAskSendRequest": "Send request",
   "drawerSupervisorPrices": "Prices",
   "pricesFromSource": "From {name} ({level})",
-  "@pricesFromSource": {"placeholders": {"name": {"type": "String"}, "level": {"type": "String"}}},
+  "@pricesFromSource": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "pricesNoMaterials": "No prices are available for this centre.",
   "priceRequestsEmpty": "No price requests here.",
   "priceRequestApprovedByPerson": "Approved by {name}.",
-  "@priceRequestApprovedByPerson": {"placeholders": {"name": {"type": "String"}}},
+  "@priceRequestApprovedByPerson": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "priceRequestRejectedByPerson": "By {name} · {time}",
-  "@priceRequestRejectedByPerson": {"placeholders": {"name": {"type": "String"}, "time": {"type": "String"}}},
+  "@priceRequestRejectedByPerson": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "priceRequestReasonValue": "Reason: {reason}",
-  "@priceRequestReasonValue": {"placeholders": {"reason": {"type": "String"}}},
+  "@priceRequestReasonValue": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "priceRequestAlreadyWaiting": "A change of this price is already waiting for a decision.",
   "priceRequestSaved": "Price change request saved locally.",
   "priceRequestLoadFailed": "Price data could not be loaded.",
@@ -1736,29 +2224,103 @@
   "priceAskSubmitFailed": "The price request could not be saved.",
   "priceAskMaxCharacters1000": "Max 1000 Characters",
   "priceRequestCurrentValueDynamic": "₹{rate}/{unit}, {source}",
-  "@priceRequestCurrentValueDynamic": {"placeholders": {"rate": {"type": "String"}, "unit": {"type": "String"}, "source": {"type": "String"}}},
+  "@priceRequestCurrentValueDynamic": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "priceRequestAskedValueDynamic": "₹{rate}/{unit}  ({percent})",
-  "@priceRequestAskedValueDynamic": {"placeholders": {"rate": {"type": "String"}, "unit": {"type": "String"}, "percent": {"type": "String"}}},
+  "@priceRequestAskedValueDynamic": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
   "priceRequestAskedByDynamic": "{name} · {time}",
-  "@priceRequestAskedByDynamic": {"placeholders": {"name": {"type": "String"}, "time": {"type": "String"}}},
+  "@priceRequestAskedByDynamic": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "priceRequestWaitingMessageDynamic": "You get a notification when they decide. Until then the price stays ₹{rate}/{unit}, and you cannot ask again for {item} at this centre.",
-  "@priceRequestWaitingMessageDynamic": {"placeholders": {"rate": {"type": "String"}, "unit": {"type": "String"}, "item": {"type": "String"}}},
+  "@priceRequestWaitingMessageDynamic": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      }
+    }
+  },
   "validationRequired": "This field is required.",
   "validationMinLength": "Enter at least {min} characters.",
-  "@validationMinLength": {"placeholders": {"min": {"type": "int"}}},
+  "@validationMinLength": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
   "validationMaxLength": "Enter no more than {max} characters.",
-  "@validationMaxLength": {"placeholders": {"max": {"type": "int"}}},
+  "@validationMaxLength": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "validationInvalidNumber": "Enter a valid number.",
   "validationMaxDecimals": "Enter up to {places} decimal places.",
-  "@validationMaxDecimals": {"placeholders": {"places": {"type": "int"}}},
+  "@validationMaxDecimals": {
+    "placeholders": {
+      "places": {
+        "type": "int"
+      }
+    }
+  },
   "validationGreaterThanZero": "Enter a value greater than 0.",
   "validationMaxValue": "Enter a value up to {max}.",
-  "@validationMaxValue": {"placeholders": {"max": {"type": "String"}}},
+  "@validationMaxValue": {
+    "placeholders": {
+      "max": {
+        "type": "String"
+      }
+    }
+  },
   "validationWholeNumber": "Enter a whole number.",
   "requestAddPhotoPlain": "Add Photo",
   "transferBalesLabel": "Bales / boris",
   "supervisorTransferTransporterPlain": "Transporter",
   "supervisorTaskTitleRequired": "Please enter a task title.",
   "validationVehiclePlate": "Enter a valid vehicle number, e.g. GJ-05-BX-1234.",
-  "validationVehicleNumberLength": "Enter a vehicle number of 4 to 20 characters."
+  "validationVehicleNumberLength": "Enter a vehicle number of 4 to 20 characters.",
+  "locationGateAllow": "Allow location",
+  "locationGateTurnOn": "Turn on location",
+  "locationGatePermissionMessage": "EERL records where each collection happens, so it needs your location. Allow location access to continue.",
+  "locationGateServiceMessage": "Your phone’s location (GPS) is off. Turn it on to continue; it works offline too.",
+  "locationGateSettingsMessage": "Location access is turned off for EERL. Open Settings, allow location, then come back."
 }

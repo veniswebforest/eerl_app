@@ -73,6 +73,8 @@ class BootstrapMe {
     required this.centers,
     required this.supervisor,
     required this.session,
+    this.warehouses = const [],
+    this.outbound,
   });
 
   final String? scopeKey;
@@ -81,6 +83,14 @@ class BootstrapMe {
   final List<BootstrapCenter> centers;
   final BootstrapSupervisor? supervisor;
   final BootstrapSession? session;
+
+  /// `me.warehouses`: where a Driver or Warehouse Incharge works; empty for
+  /// everyone else. Each entry carries `id` and `isPrimary`.
+  final List<Map<String, Object?>> warehouses;
+
+  /// `me.outbound`: the outbound settings, or null for anyone without an
+  /// outbound role (outbound SQLite doc, Sync, step `me`).
+  final Map<String, Object?>? outbound;
 
   factory BootstrapMe.fromJson(Map<String, dynamic> json) {
     final rawUser = json['user'];
@@ -100,6 +110,14 @@ class BootstrapMe {
           : null,
       session: rawSession is Map
           ? BootstrapSession.fromJson(Map<String, dynamic>.from(rawSession))
+          : null,
+      warehouses: [
+        if (json['warehouses'] is List)
+          for (final entry in json['warehouses'] as List)
+            if (entry is Map) Map<String, Object?>.from(entry),
+      ],
+      outbound: json['outbound'] is Map
+          ? Map<String, Object?>.from(json['outbound'] as Map)
           : null,
     );
   }

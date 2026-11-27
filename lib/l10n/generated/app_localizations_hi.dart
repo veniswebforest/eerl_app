@@ -4285,19 +4285,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get locationServiceTitle => 'लोकेशन चालू करें';
 
   @override
-  String get locationServiceMessage =>
-      'लोकेशन बंद है। इसे चालू करें ताकि ऑफलाइन होने पर भी collection record में GPS coordinates जोड़े जा सकें।';
-
-  @override
   String get locationPermissionTitle => 'लोकेशन अनुमति आवश्यक है';
-
-  @override
-  String get locationPermissionSettingsMessage =>
-      'Collection record में GPS coordinates जोड़ने के लिए app settings में location access की अनुमति दें।';
-
-  @override
-  String get locationPermissionDenied =>
-      'लोकेशन की अनुमति नहीं मिली। अनुमति मिलने तक GPS नहीं जोड़ा जाएगा।';
 
   @override
   String get locationUnavailable =>
@@ -4331,13 +4319,7 @@ class AppLocalizationsHi extends AppLocalizations {
       'यह कलेक्शन पहले ही सबमिट हो चुका है। डुप्लिकेट एंट्री नहीं बनाई गई।';
 
   @override
-  String get locationNotNow => 'अभी नहीं';
-
-  @override
   String get locationOpenSettings => 'Settings खोलें';
-
-  @override
-  String get locationSettingsUnavailable => 'Location settings नहीं खुल सकीं।';
 
   @override
   String get supervisorTransferReject => 'अस्वीकार करें';
@@ -4767,4 +4749,22 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get validationVehicleNumberLength =>
       '4 से 20 अक्षरों का वाहन नंबर दर्ज करें।';
+
+  @override
+  String get locationGateAllow => 'लोकेशन की अनुमति दें';
+
+  @override
+  String get locationGateTurnOn => 'लोकेशन चालू करें';
+
+  @override
+  String get locationGatePermissionMessage =>
+      'EERL हर कलेक्शन कहाँ हुआ यह दर्ज करता है, इसलिए उसे आपकी लोकेशन चाहिए। आगे बढ़ने के लिए लोकेशन की अनुमति दें।';
+
+  @override
+  String get locationGateServiceMessage =>
+      'आपके फ़ोन की लोकेशन (GPS) बंद है। आगे बढ़ने के लिए इसे चालू करें; यह ऑफ़लाइन भी चलती है।';
+
+  @override
+  String get locationGateSettingsMessage =>
+      'EERL के लिए लोकेशन ऐक्सेस बंद है। सेटिंग्स खोलें, लोकेशन की अनुमति दें, फिर वापस आएँ।';
 }

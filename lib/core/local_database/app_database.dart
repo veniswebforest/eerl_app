@@ -7,6 +7,8 @@ import 'package:sqflite/sqflite.dart';
 import '../logging/app_logger.dart';
 import 'database_schema.dart';
 import 'database_tables.dart';
+import 'outbound/outbound_schema.dart';
+import 'outbound/outbound_tables.dart';
 
 class AppDatabase {
   AppDatabase._internal();
@@ -15,7 +17,7 @@ class AppDatabase {
 
   static const _logTag = '[AppDatabase]';
   static const databaseName = 'eerl_local.db';
-  static const databaseVersion = 15;
+  static const databaseVersion = 16;
 
   static Database? _database;
   static Future<Database>? _openingDatabase;
@@ -85,10 +87,21 @@ class AppDatabase {
       batch.execute(sql);
     }
 
+    // Outbound (Driver, Pickup Supervisor, IEC, Warehouse Incharge) runs
+    // after the fixed-point schema, per the outbound SQLite doc.
+    for (final sql in OutboundSchema.createTableQueries) {
+      batch.execute(sql);
+    }
+    for (final sql in OutboundSchema.createIndexQueries) {
+      batch.execute(sql);
+    }
+
     await batch.commit(noResult: true);
     _log(
-      'Database created with ${DatabaseTables.values.length} tables and '
-      '${DatabaseSchema.indexNames.length} indexes',
+      'Database created with '
+      '${DatabaseTables.values.length + OutboundTables.values.length} tables '
+      'and ${DatabaseSchema.indexNames.length + OutboundSchema.indexNames.length}'
+      ' indexes',
     );
   }
 
@@ -338,6 +351,22 @@ class AppDatabase {
       }, conflictAlgorithm: ConflictAlgorithm.replace);
       _log('Added fixed-point schema in version 15');
     }
+    if (oldVersion < 16) {
+      await _ensureOutboundSchema(db);
+      _log('Added outbound schema in version 16');
+    }
+  }
+
+  /// Creates every outbound table and index that is missing. All statements
+  /// are `IF NOT EXISTS`, so this is safe on a fresh, upgraded or repaired
+  /// database and never touches existing rows.
+  Future<void> _ensureOutboundSchema(DatabaseExecutor db) async {
+    for (final sql in OutboundSchema.createTableQueries) {
+      await db.execute(sql);
+    }
+    for (final sql in OutboundSchema.createIndexQueries) {
+      await db.execute(sql);
+    }
   }
 
   Future<void> _rebuildNotificationsWithRoleScope(Database db) async {
@@ -464,6 +493,7 @@ class AppDatabase {
   Future<void> _onOpen(Database db) async {
     await db.execute('PRAGMA foreign_keys = OFF');
     await _ensureVersionOneSchema(db);
+    await _ensureOutboundSchema(db);
     await _removeOrphanedOutboxPhotoLinks(db);
     final foreignKeyErrors = await db.rawQuery('PRAGMA foreign_key_check');
     if (foreignKeyErrors.isNotEmpty) {
@@ -766,6 +796,14 @@ class AppDatabase {
       for (final table in tablesToClear) {
         await txn.delete(table);
       }
+      // Outbound scope reset (outbound SQLite doc, "Scope reset").
+      for (final table in OutboundTables.scopeResetOrder) {
+        await txn.delete(table);
+      }
+      await txn.delete(
+        DatabaseTables.syncMeta,
+        where: "key LIKE 'outbound\\_%' ESCAPE '\\'",
+      );
 
       await txn.delete(
         DatabaseTables.photos,
@@ -820,6 +858,7 @@ class AppDatabase {
         DatabaseTables.items,
         DatabaseTables.centers,
         DatabaseTables.syncMeta,
+        ...OutboundTables.scopeResetOrder,
       ];
 
       for (final table in tablesToClear) {
@@ -855,7 +894,9 @@ class AppDatabase {
     final indexNames = (await getExistingIndexNames()).toSet();
 
     return tableNames.containsAll(DatabaseTables.values) &&
-        indexNames.containsAll(DatabaseSchema.indexNames);
+        tableNames.containsAll(OutboundTables.values) &&
+        indexNames.containsAll(DatabaseSchema.indexNames) &&
+        indexNames.containsAll(OutboundSchema.indexNames);
   }
 
   Future<void> debugPrintTableNames() async {

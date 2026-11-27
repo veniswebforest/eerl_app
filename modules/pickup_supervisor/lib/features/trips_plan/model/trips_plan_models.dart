@@ -60,6 +60,7 @@ class TripProgress {
 
 class TripPlanTrip {
   const TripPlanTrip({
+    this.id,
     required this.name,
     required this.time,
     required this.status,
@@ -72,6 +73,8 @@ class TripPlanTrip {
     this.weightKg,
   });
 
+  /// The live trip id; null in the design samples.
+  final String? id;
   final String name;
   final String time;
   final TripStatus status;

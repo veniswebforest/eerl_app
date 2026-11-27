@@ -3,8 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_live_data.dart';
 import 'package:pickup_supervisor/features/driver/model/driver_bottom_nav_item.dart';
 import 'package:pickup_supervisor/features/driver/model/driver_pickup_stop.dart';
 import 'package:pickup_supervisor/features/driver/view/driver_dashboard_shell.dart';
@@ -19,13 +22,15 @@ import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 const _assetRoot = 'assets/icons/driver/home_v2';
 const _assetPackage = 'pickup_supervisor';
 
-enum DriverHomeViewMode { morning, laterInDay, noTrip }
+/// Home states. [notStarted] is the app start, before Start trip; Start
+/// trip moves it to [morning] (the trip shows On the way).
+enum DriverHomeViewMode { notStarted, morning, laterInDay, noTrip }
 
 /// First screen for users whose authenticated role is `DRIVER`.
 class DriverHomeScreen extends StatelessWidget {
   const DriverHomeScreen({
     super.key,
-    this.viewMode = DriverHomeViewMode.morning,
+    this.viewMode = DriverHomeViewMode.notStarted,
     this.onLogout,
   });
 
@@ -79,23 +84,46 @@ class _DriverHomePage extends StatefulWidget {
 
 class _DriverHomePageState extends State<_DriverHomePage> {
   late bool _showSummary;
+  late DriverHomeViewMode _mode;
 
   @override
   void initState() {
     super.initState();
-    _showSummary = widget.viewMode != DriverHomeViewMode.laterInDay;
+    _mode = widget.viewMode;
+    _showSummary = _mode != DriverHomeViewMode.laterInDay;
   }
 
   @override
   void didUpdateWidget(covariant _DriverHomePage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.viewMode != widget.viewMode) {
-      _showSummary = widget.viewMode != DriverHomeViewMode.laterInDay;
+      _mode = widget.viewMode;
+      _showSummary = _mode != DriverHomeViewMode.laterInDay;
     }
   }
 
+  /// Static: the real app sends the time and GPS (queued offline); here the
+  /// trip just switches to On the way.
+  void _startTrip() => setState(() => _mode = DriverHomeViewMode.morning);
+
+  /// Start trip: today's Planned trip, queued (outbound doc, Driver writes).
+  Future<void> _startLiveTrip(OutboundLiveSession session, String tripId) =>
+      session.change(() => session.writes.startTrip(tripId: tripId));
+
   @override
   Widget build(BuildContext context) {
+    return OutboundLiveBuilder<DriverHomeLive>(
+      load: DriverHomeLive.load,
+      fallback: _page(context, null, null),
+      builder: (context, live, session) => _page(context, live, session),
+    );
+  }
+
+  Widget _page(
+    BuildContext context,
+    DriverHomeLive? live,
+    OutboundLiveSession? session,
+  ) {
     final topInset = MediaQuery.paddingOf(context).top;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -118,7 +146,9 @@ class _DriverHomePageState extends State<_DriverHomePage> {
                         SliverToBoxAdapter(
                           child: _DashboardHeader(
                             topInset: topInset,
-                            viewMode: widget.viewMode,
+                            viewMode: _mode,
+                            live: live,
+                            session: session,
                             onLogout: widget.onLogout,
                             showSummary: _showSummary,
                             onToggleSummary: () =>
@@ -135,7 +165,14 @@ class _DriverHomePageState extends State<_DriverHomePage> {
                           ),
                           sliver: SliverList.list(
                             children: [
-                              _TripsSection(viewMode: widget.viewMode),
+                              _TripsSection(
+                                viewMode: _mode,
+                                onStartTrip: _startTrip,
+                                live: live,
+                                onStartLiveTrip: session == null
+                                    ? null
+                                    : (id) => _startLiveTrip(session, id),
+                              ),
                               const SizedBox(height: 24),
                               DriverSectionTitle(
                                 title: DriverLocalizations.of(
@@ -143,7 +180,7 @@ class _DriverHomePageState extends State<_DriverHomePage> {
                                 ).quickAction,
                               ),
                               const SizedBox(height: 16),
-                              const _IssueCard(),
+                              _IssueCard(tripId: live?.current?.id),
                             ],
                           ),
                         ),
@@ -190,10 +227,14 @@ class _DashboardHeader extends StatelessWidget {
     required this.showSummary,
     required this.onToggleSummary,
     this.onLogout,
+    this.live,
+    this.session,
   });
 
   final double topInset;
   final DriverHomeViewMode viewMode;
+  final DriverHomeLive? live;
+  final OutboundLiveSession? session;
   final Future<void> Function(BuildContext context)? onLogout;
   final bool showSummary;
   final VoidCallback onToggleSummary;
@@ -231,7 +272,11 @@ class _DashboardHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      l10n.homeDateAndZone,
+                      live != null
+                          ? _liveDateLine(context, live!)
+                          : viewMode == DriverHomeViewMode.notStarted
+                          ? l10n.dhDateAdajan
+                          : l10n.homeDateAndZone,
                       style: DriverTextStyles.medium12.copyWith(
                         color: DriverColors.neutral600,
                       ),
@@ -240,15 +285,29 @@ class _DashboardHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              _ProfileButton(onLogout: onLogout),
+              _ProfileButton(
+                onLogout: onLogout,
+                outline: viewMode == DriverHomeViewMode.notStarted,
+              ),
             ],
           ),
           const SizedBox(height: 24),
-          const _PickupSupervisorCard(),
+          _PickupSupervisorCard(
+            name: live == null
+                ? null
+                : (live!.supervisorName ?? l10n.liveNoSupervisor),
+          ),
           const SizedBox(height: 12),
-          const _OnlineCard(),
+          _OnlineCard(
+            synced: live != null
+                ? live!.unsent == 0
+                : viewMode == DriverHomeViewMode.notStarted,
+            pending: live?.unsent ?? 3,
+            onSync: session?.syncNow,
+          ),
           const SizedBox(height: 24),
           _SummarySection(
+            live: live,
             viewMode: viewMode,
             expanded: showSummary,
             onToggle: onToggleSummary,
@@ -261,9 +320,12 @@ class _DashboardHeader extends StatelessWidget {
 
 /// Top-right profile avatar; opens the driver profile screen.
 class _ProfileButton extends StatelessWidget {
-  const _ProfileButton({this.onLogout});
+  const _ProfileButton({this.onLogout, this.outline = false});
 
   final Future<void> Function(BuildContext context)? onLogout;
+
+  /// Person icon on a light green circle instead of the photo.
+  final bool outline;
 
   @override
   Widget build(BuildContext context) => InkWell(
@@ -274,26 +336,43 @@ class _ProfileButton extends StatelessWidget {
       ),
     ),
     customBorder: const CircleBorder(),
-    child: Container(
-      width: 45,
-      height: 45,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: DriverColors.neutral50, width: 2),
-      ),
-      child: ClipOval(
-        child: Image.asset(
-          'assets/images/driver/profile/ramesh_kumar.png',
-          package: _assetPackage,
-          fit: BoxFit.cover,
-        ),
-      ),
-    ),
+    child: outline
+        ? Container(
+            width: 45,
+            height: 45,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: DriverColors.primary50,
+              shape: BoxShape.circle,
+            ),
+            child: const _ExactSvg(
+              asset: '$_assetRoot/profile_outline.svg',
+              size: 24,
+            ),
+          )
+        : Container(
+            width: 45,
+            height: 45,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: DriverColors.neutral50, width: 2),
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                'assets/images/driver/profile/ramesh_kumar.png',
+                package: _assetPackage,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
   );
 }
 
 class _PickupSupervisorCard extends StatelessWidget {
-  const _PickupSupervisorCard();
+  const _PickupSupervisorCard({this.name});
+
+  /// `me.supervisor.name`; null shows the design sample.
+  final String? name;
 
   @override
   Widget build(BuildContext context) {
@@ -314,7 +393,7 @@ class _PickupSupervisorCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      l10n.supervisorName,
+                      name ?? l10n.supervisorName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: DriverTextStyles.semibold16.copyWith(
@@ -399,7 +478,14 @@ class _ContactButton extends StatelessWidget {
 }
 
 class _OnlineCard extends StatelessWidget {
-  const _OnlineCard();
+  const _OnlineCard({this.synced = false, this.pending = 3, this.onSync});
+
+  /// "Everything is synced" instead of the pending count.
+  final bool synced;
+
+  /// Changes not sent yet (the outbox).
+  final int pending;
+  final Future<void> Function()? onSync;
 
   @override
   Widget build(BuildContext context) {
@@ -427,7 +513,9 @@ class _OnlineCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  l10n.pendingCollections(3),
+                  synced
+                      ? l10n.dhEverythingSynced
+                      : l10n.pendingCollections(pending),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: DriverTextStyles.medium14.copyWith(
@@ -441,7 +529,7 @@ class _OnlineCard extends StatelessWidget {
           SizedBox(
             height: 40,
             child: FilledButton(
-              onPressed: () {},
+              onPressed: onSync ?? () {},
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 backgroundColor: DriverColors.primary500,
@@ -461,11 +549,13 @@ class _OnlineCard extends StatelessWidget {
 
 class _SummarySection extends StatelessWidget {
   const _SummarySection({
+    this.live,
     required this.viewMode,
     required this.expanded,
     required this.onToggle,
   });
 
+  final DriverHomeLive? live;
   final DriverHomeViewMode viewMode;
   final bool expanded;
   final VoidCallback onToggle;
@@ -474,7 +564,41 @@ class _SummarySection extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
     final noTrip = viewMode == DriverHomeViewMode.noTrip;
-    final metrics = noTrip
+    final notStarted = viewMode == DriverHomeViewMode.notStarted;
+    final day = live;
+    String two(int n) => n.toString().padLeft(2, '0');
+    final metrics = day != null
+        ? [
+            _SummaryMetricData(
+              '$_assetRoot/scale.svg',
+              l10n.zeroKg,
+              two(day.zeroKg),
+              DriverColors.cool300,
+              DriverColors.neutral800,
+            ),
+            _SummaryMetricData(
+              '$_assetRoot/cancelled.svg',
+              l10n.cancelled,
+              two(day.cancelled),
+              DriverColors.purple50,
+              DriverColors.purple600,
+            ),
+            _SummaryMetricData(
+              '$_assetRoot/check.svg',
+              l10n.collected,
+              two(day.collected),
+              DriverColors.primary50,
+              DriverColors.primary500,
+            ),
+            _SummaryMetricData(
+              '$_assetRoot/pending_clock.svg',
+              l10n.pendingStatus,
+              two(day.pending),
+              DriverColors.yellow50,
+              DriverColors.yellow700,
+            ),
+          ]
+        : noTrip
         ? [
             _SummaryMetricData(
               '$_assetRoot/check.svg',
@@ -509,28 +633,28 @@ class _SummarySection extends StatelessWidget {
             _SummaryMetricData(
               '$_assetRoot/scale.svg',
               l10n.zeroKg,
-              '01',
+              notStarted ? '00' : '01',
               DriverColors.cool300,
               DriverColors.neutral800,
             ),
             _SummaryMetricData(
               '$_assetRoot/cancelled.svg',
               l10n.cancelled,
-              '01',
+              notStarted ? '00' : '01',
               DriverColors.purple50,
               DriverColors.purple600,
             ),
             _SummaryMetricData(
               '$_assetRoot/check.svg',
               l10n.collected,
-              '03',
+              notStarted ? '00' : '03',
               DriverColors.primary50,
               DriverColors.primary500,
             ),
             _SummaryMetricData(
               '$_assetRoot/pending_clock.svg',
               l10n.pendingStatus,
-              '08',
+              notStarted ? '13' : '08',
               DriverColors.yellow50,
               DriverColors.yellow700,
             ),
@@ -583,8 +707,12 @@ class _SummarySection extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        noTrip
+                        day != null
+                            ? l10n.liveKgSoFar(formatKg(day.collectedKg))
+                            : noTrip
                             ? l10n.collectedWeightZero
+                            : notStarted
+                            ? l10n.dhZeroSoFar
                             : l10n.collectedWeight420,
                         style: DriverTextStyles.bold20.copyWith(
                           color: DriverColors.neutral950,
@@ -679,12 +807,22 @@ class _SummaryMetric extends StatelessWidget {
 }
 
 class _TripsSection extends StatelessWidget {
-  const _TripsSection({required this.viewMode});
+  const _TripsSection({
+    required this.viewMode,
+    this.onStartTrip,
+    this.live,
+    this.onStartLiveTrip,
+  });
   final DriverHomeViewMode viewMode;
+  final VoidCallback? onStartTrip;
+  final DriverHomeLive? live;
+  final Future<void> Function(String tripId)? onStartLiveTrip;
 
   @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
+    final day = live;
+    if (day != null) return _buildLive(context, day);
     if (viewMode == DriverHomeViewMode.noTrip) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -695,10 +833,42 @@ class _TripsSection extends StatelessWidget {
         ],
       );
     }
+    if (viewMode == DriverHomeViewMode.notStarted) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DriverSectionTitle(title: l10n.todaysTripsCount(2)),
+          const SizedBox(height: 16),
+          _ExpandedTripCard(
+            data: _TripData(
+              title: l10n.tripMorning,
+              time: l10n.dhMorningTripTime(7),
+              crew: l10n.dhVehicleCrew,
+              drop: l10n.dhDropAdajan,
+              collected: 0,
+              pending: 7,
+              zeroKg: 0,
+              cancelled: 0,
+              collectedWeight: l10n.collectedWeightZero,
+              completedStops: 0,
+              totalStops: 7,
+              progress: 0,
+              started: false,
+            ),
+            onStartTrip: onStartTrip,
+          ),
+          const SizedBox(height: 16),
+          _SubsectionTitle(l10n.laterToday),
+          const SizedBox(height: 12),
+          const _CollapsedTripCard(later: false),
+        ],
+      );
+    }
     final later = viewMode == DriverHomeViewMode.laterInDay;
     final trip = _TripData(
       title: later ? l10n.tripAfternoon : l10n.tripMorning,
       time: later ? l10n.afternoonTripTime : l10n.morningTripTime,
+      crew: l10n.vehicleCrew,
       drop: later ? l10n.dropSachin : l10n.dropMagdalla,
       collected: later ? 2 : 3,
       pending: later ? 4 : 2,
@@ -776,6 +946,146 @@ class _TripsSection extends StatelessWidget {
   }
 }
 
+extension on _TripsSection {
+  /// Home from SQLite: today's trips, the current one in full with its next
+  /// stop and the one after; the others as one line (outbound doc, Driver
+  /// screens · Home).
+  Widget _buildLive(BuildContext context, DriverHomeLive day) {
+    final l10n = DriverLocalizations.of(context);
+    if (day.trips.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DriverSectionTitle(title: l10n.todaysTrips),
+          const SizedBox(height: 16),
+          const _NoTripCard(),
+        ],
+      );
+    }
+    final current = day.current;
+    final index = current == null ? -1 : day.trips.indexOf(current);
+    final earlier = index < 0 ? day.trips : day.trips.sublist(0, index);
+    final later = index < 0
+        ? const <DriverTripLive>[]
+        : day.trips.sublist(index + 1);
+    final next = day.nextStop;
+    final after = day.afterStop;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DriverSectionTitle(title: l10n.todaysTripsCount(day.trips.length)),
+        const SizedBox(height: 16),
+        if (current != null) ...[
+          _ExpandedTripCard(
+            data: _liveTripData(l10n, current, index + 1),
+            tripId: current.id,
+            onStartTrip: current.started || onStartLiveTrip == null
+                ? null
+                : () => onStartLiveTrip!(current.id),
+          ),
+          if (next != null) ...[
+            const SizedBox(height: 16),
+            _SubsectionTitle(l10n.nextStopOnTrip(index + 1)),
+            const SizedBox(height: 12),
+            _StopCard(data: _liveStopData(l10n, next), isNext: true),
+          ],
+          if (after != null) ...[
+            const SizedBox(height: 16),
+            _SubsectionTitle(l10n.afterThat(1)),
+            const SizedBox(height: 12),
+            _StopCard(
+              data: _liveStopData(l10n, after, lockedAfter: next?.stopOrder),
+            ),
+          ],
+        ],
+        if (later.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _SubsectionTitle(l10n.laterToday),
+          for (final trip in later) ...[
+            const SizedBox(height: 12),
+            _CollapsedTripCard(
+              later: false,
+              live: trip,
+              index: day.trips.indexOf(trip) + 1,
+            ),
+          ],
+        ],
+        if (earlier.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _SubsectionTitle(l10n.earlierToday),
+          for (final trip in earlier) ...[
+            const SizedBox(height: 12),
+            _CollapsedTripCard(
+              later: true,
+              live: trip,
+              index: day.trips.indexOf(trip) + 1,
+            ),
+          ],
+        ],
+      ],
+    );
+  }
+}
+
+_TripData _liveTripData(
+  DriverLocalizations l10n,
+  DriverTripLive trip,
+  int index,
+) => _TripData(
+  title: l10n.liveTripTitle(index, trip.shiftName),
+  time: l10n.liveTripTime(
+    formatClock(trip.shiftStart),
+    formatClock(trip.shiftEnd),
+    trip.stops,
+  ),
+  crew: trip.crew,
+  drop: l10n.liveDropAt(trip.warehouseName),
+  collected: trip.collected,
+  pending: trip.pending,
+  zeroKg: trip.zeroKg,
+  cancelled: trip.cancelled,
+  collectedWeight: l10n.liveKg(formatKg(trip.collectedKg)),
+  completedStops: trip.done,
+  totalStops: trip.stops,
+  progress: trip.progress,
+  started: trip.started,
+);
+
+_StopData _liveStopData(
+  DriverLocalizations l10n,
+  DriverStopLive stop, {
+  int? lockedAfter,
+}) => _StopData(
+  stop.sourceName,
+  stop.pickupType == DriverPickupType.sorted
+      ? l10n.sortedMaterial
+      : l10n.mixedMaterial,
+  stop.stopOrder,
+  stop.totalStops,
+  stop.address,
+  stop.window ?? l10n.liveAnyTime,
+  stop.contact,
+  stop.pickupType,
+  lockedAfterStop: lockedAfter,
+  stopId: stop.id,
+  tripId: stop.tripId,
+);
+
+String _liveDateLine(BuildContext context, DriverHomeLive live) {
+  final locale = Localizations.localeOf(context).toLanguageTag();
+  final day = DateTime.tryParse(live.today) ?? DateTime.now();
+  String date;
+  try {
+    date = DateFormat('EEE, d MMM', locale).format(day);
+  } on Object {
+    date = DateFormat('EEE, d MMM').format(day);
+  }
+  final place = live.warehouseName;
+  return place == null || place.isEmpty
+      ? date
+      : DriverLocalizations.of(context).liveDateAndPlace(date, place);
+}
+
 class _SubsectionTitle extends StatelessWidget {
   const _SubsectionTitle(this.text);
   final String text;
@@ -799,9 +1109,15 @@ class _TripData {
     required this.completedStops,
     required this.totalStops,
     required this.progress,
+    required this.crew,
+    this.started = true,
   });
   final String title;
   final String time;
+  final String crew;
+
+  /// False before Start trip: "Not started" and the Start trip button.
+  final bool started;
   final String drop;
   final int collected;
   final int pending;
@@ -814,8 +1130,12 @@ class _TripData {
 }
 
 class _ExpandedTripCard extends StatelessWidget {
-  const _ExpandedTripCard({required this.data});
+  const _ExpandedTripCard({required this.data, this.onStartTrip, this.tripId});
   final _TripData data;
+  final VoidCallback? onStartTrip;
+
+  /// The live trip; null in the design preview.
+  final String? tripId;
 
   @override
   Widget build(BuildContext context) {
@@ -838,8 +1158,6 @@ class _ExpandedTripCard extends StatelessWidget {
                   children: [
                     Text(
                       data.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: DriverTextStyles.semibold16.copyWith(
                         color: DriverColors.neutral950,
                       ),
@@ -847,8 +1165,6 @@ class _ExpandedTripCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       data.time,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                       style: DriverTextStyles.medium12.copyWith(
                         color: DriverColors.neutral700,
                       ),
@@ -857,7 +1173,9 @@ class _ExpandedTripCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              _TripBadge(label: l10n.onTheWay, active: true),
+              data.started
+                  ? _TripBadge(label: l10n.onTheWay, active: true)
+                  : _TripBadge(label: l10n.dhNotStarted, idle: true),
             ],
           ),
           const SizedBox(height: 12),
@@ -871,7 +1189,7 @@ class _ExpandedTripCard extends StatelessWidget {
               children: [
                 _TripInfoRow(
                   asset: '$_assetRoot/vehicle.svg',
-                  value: l10n.vehicleCrew,
+                  value: data.crew,
                 ),
                 const SizedBox(height: 8),
                 _TripInfoRow(
@@ -945,11 +1263,41 @@ class _ExpandedTripCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          if (!data.started) ...[
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: FilledButton.icon(
+                key: const Key('driver-start-trip'),
+                onPressed: onStartTrip ?? () {},
+                icon: const _ExactSvg(
+                  asset: '$_assetRoot/play_white.svg',
+                  size: 20,
+                ),
+                label: Text(l10n.dhStartTrip),
+                style: FilledButton.styleFrom(
+                  backgroundColor: DriverColors.primary500,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  textStyle: DriverTextStyles.bold16,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              l10n.dhStartTripHint,
+              style: DriverTextStyles.medium12.copyWith(
+                color: DriverColors.slate600,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           SizedBox(
             width: double.infinity,
             height: 44,
             child: OutlinedButton(
-              onPressed: () => _openStops(context),
+              onPressed: () => _openStops(context, tripId: tripId),
               style: OutlinedButton.styleFrom(
                 foregroundColor: DriverColors.primary500,
                 side: const BorderSide(color: DriverColors.primary500),
@@ -1077,7 +1425,11 @@ class _StopData {
     this.contact,
     this.pickupType, {
     this.lockedAfterStop,
+    this.stopId,
+    this.tripId,
   });
+  final String? stopId;
+  final String? tripId;
   final String name;
   final String material;
   final int current;
@@ -1228,8 +1580,12 @@ class _StopCard extends StatelessWidget {
                             ),
                           )
                         : FilledButton.icon(
-                            onPressed: () =>
-                                _openStop(context, data.pickupType),
+                            onPressed: () => _openStop(
+                              context,
+                              data.pickupType,
+                              stopId: data.stopId,
+                              tripId: data.tripId,
+                            ),
                             icon: const _ExactSvg(
                               asset: '$_assetRoot/pencil.svg',
                               size: 20,
@@ -1342,8 +1698,12 @@ class _StatusChip extends StatelessWidget {
 }
 
 class _CollapsedTripCard extends StatelessWidget {
-  const _CollapsedTripCard({required this.later});
+  const _CollapsedTripCard({required this.later, this.live, this.index = 1});
   final bool later;
+
+  /// A live trip; null shows the design sample.
+  final DriverTripLive? live;
+  final int index;
   @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
@@ -1361,18 +1721,32 @@ class _CollapsedTripCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  later ? l10n.tripMorning : l10n.tripAfternoon,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  live != null
+                      ? l10n.liveTripTitle(index, live!.shiftName)
+                      : later
+                      ? l10n.tripMorning
+                      : l10n.tripAfternoon,
                   style: DriverTextStyles.semibold16.copyWith(
                     color: DriverColors.neutral950,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  later ? l10n.handedOverWeight : l10n.afternoonTripTime,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  live != null
+                      ? (later
+                            ? (live!.netKg == null
+                                  ? l10n.liveHandedOver
+                                  : l10n.liveHandedOverNet(
+                                      formatKg(live!.netKg!),
+                                    ))
+                            : l10n.liveTripTime(
+                                formatClock(live!.shiftStart),
+                                formatClock(live!.shiftEnd),
+                                live!.stops,
+                              ))
+                      : later
+                      ? l10n.handedOverWeight
+                      : l10n.afternoonTripTime,
                   style: DriverTextStyles.medium12.copyWith(
                     color: DriverColors.neutral700,
                   ),
@@ -1381,11 +1755,17 @@ class _CollapsedTripCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 6),
-          Flexible(
+          // Capped so a long translation can't push the title out.
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 130),
             child: _TripBadge(
               label: later
                   ? l10n.delivered
-                  : l10n.startsAt(l10n.afternoonStartTime),
+                  : l10n.startsAt(
+                      live != null
+                          ? formatClock(live!.shiftStart)
+                          : l10n.afternoonStartTime,
+                    ),
               delivered: later,
             ),
           ),
@@ -1400,16 +1780,24 @@ class _TripBadge extends StatelessWidget {
     required this.label,
     this.active = false,
     this.delivered = false,
+    this.idle = false,
   });
   final String label;
   final bool active;
   final bool delivered;
+
+  /// Grey "Not started".
+  final bool idle;
   @override
   Widget build(BuildContext context) {
-    final background = delivered
+    final background = idle
+        ? DriverColors.tagGrey
+        : delivered
         ? DriverColors.primary50
         : (active ? DriverColors.secondary100 : DriverColors.cool300);
-    final foreground = delivered
+    final foreground = idle
+        ? DriverColors.slate600
+        : delivered
         ? DriverColors.primary500
         : (active ? DriverColors.blue600 : DriverColors.neutral800);
     return Container(
@@ -1460,7 +1848,10 @@ class _NoTripCard extends StatelessWidget {
 }
 
 class _IssueCard extends StatelessWidget {
-  const _IssueCard();
+  const _IssueCard({this.tripId});
+
+  /// The trip the issue is about (the current one), if any.
+  final String? tripId;
   @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
@@ -1498,7 +1889,7 @@ class _IssueCard extends StatelessWidget {
             label: l10n.reportIssue,
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => const DriverRaiseIssueScreen(),
+                builder: (_) => DriverRaiseIssueScreen(tripId: tripId),
               ),
             ),
           ),
@@ -1545,19 +1936,28 @@ class _ExactSvg extends StatelessWidget {
   );
 }
 
-void _openStops(BuildContext context) {
+void _openStops(BuildContext context, {String? tripId}) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
       settings: const RouteSettings(name: DriverStopsScreen.routeName),
-      builder: (_) => const DriverStopsScreen(),
+      builder: (_) => DriverStopsScreen(tripId: tripId),
     ),
   );
 }
 
-void _openStop(BuildContext context, DriverPickupType pickupType) {
+void _openStop(
+  BuildContext context,
+  DriverPickupType pickupType, {
+  String? stopId,
+  String? tripId,
+}) {
   Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => DriverStopDetailScreen(pickupType: pickupType),
+      builder: (_) => DriverStopDetailScreen(
+        pickupType: pickupType,
+        stopId: stopId,
+        tripId: tripId,
+      ),
     ),
   );
 }

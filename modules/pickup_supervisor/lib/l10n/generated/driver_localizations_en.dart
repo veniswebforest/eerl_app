@@ -4685,4 +4685,224 @@ class DriverLocalizationsEn extends DriverLocalizations {
   @override
   String get vlVehicleNumber =>
       'Enter a valid vehicle number, e.g. GJ-05-EE-1002.';
+
+  @override
+  String get dhDateAdajan => 'Thu, 22 Oct · Adajan';
+
+  @override
+  String get dhEverythingSynced => 'Everything is synced';
+
+  @override
+  String get dhNotStarted => 'Not started';
+
+  @override
+  String get dhStartTrip => 'Start trip';
+
+  @override
+  String get dhStartTripHint =>
+      'Tap when you leave the warehouse. Your supervisor sees the time and place.';
+
+  @override
+  String dhMorningTripTime(int count) {
+    return '8:00 am – 2:00 pm · $count stops';
+  }
+
+  @override
+  String get dhVehicleCrew => 'GJ-05-BX-1234 · Vikram, Ravi';
+
+  @override
+  String get dhDropAdajan => 'Drop at Adajan Central Warehouse';
+
+  @override
+  String get dhZeroSoFar => '0 kg so far';
+
+  @override
+  String liveTripTitle(int index, String shift) {
+    return 'Trip $index · $shift';
+  }
+
+  @override
+  String liveTripTime(String start, String end, int count) {
+    return '$start – $end · $count stops';
+  }
+
+  @override
+  String liveDropAt(String warehouse) {
+    return 'Drop at $warehouse';
+  }
+
+  @override
+  String liveKgSoFar(String kg) {
+    return '$kg kg so far';
+  }
+
+  @override
+  String liveKg(String kg) {
+    return '$kg kg';
+  }
+
+  @override
+  String get liveAnyTime => 'Any time';
+
+  @override
+  String liveHandedOverNet(String kg) {
+    return 'Handed over · $kg kg net';
+  }
+
+  @override
+  String get liveHandedOver => 'Handed over';
+
+  @override
+  String get liveNoSupervisor => 'No supervisor set';
+
+  @override
+  String liveDateAndPlace(String date, String place) {
+    return '$date · $place';
+  }
+
+  @override
+  String get liveNeedsConnection => 'Needs a connection';
+
+  @override
+  String get liveSaved => 'Saved. It will be sent when online.';
+
+  @override
+  String liveCollectedOf(String name, int done, int total) {
+    return '$name  •  $done of $total collected';
+  }
+
+  @override
+  String get liveRentedTruck => 'Rented truck';
+
+  @override
+  String liveNotSent(int count) {
+    return '$count changes not sent yet';
+  }
+
+  @override
+  String get liveAllSent => 'Everything is sent';
+
+  @override
+  String get liveNoTripsToday => 'No trips today';
+
+  @override
+  String liveTripsTodayCount(int count) {
+    return '$count trips today';
+  }
+
+  @override
+  String livePickupPointsByCategory(int count, String areas) {
+    return '$count in $areas · by category';
+  }
+
+  @override
+  String get liveAtGate => 'At the gate';
+
+  @override
+  String get liveReasonHoliday => 'Holiday';
+
+  @override
+  String get liveReasonShifted => 'Moved to another day';
+
+  @override
+  String get liveNotVisitedHint =>
+      'Tick the stops the vehicle did not reach. They go back to Unassigned; the others wait for the gate team.';
+
+  @override
+  String liveCollectedCount(int done, int total) {
+    return '$done of $total collected';
+  }
+
+  @override
+  String get liveNoTripToday => 'No trip today';
+
+  @override
+  String get liveKindVehicle => 'Vehicle';
+
+  @override
+  String get liveKindLabour => 'Labour';
+
+  @override
+  String get liveKindPointChange => 'Pickup point change';
+
+  @override
+  String get liveKindStart => 'Start pickups';
+
+  @override
+  String get liveKindStop => 'Stop pickups';
+
+  @override
+  String get liveKindPause => 'Pause pickups';
+
+  @override
+  String get liveKindSchedule => 'Schedule change';
+
+  @override
+  String get liveKindRoute => 'Route or vehicle';
+
+  @override
+  String get liveKindOther => 'Other';
+
+  @override
+  String get liveKindCorrection => 'Correction';
+
+  @override
+  String liveKindFrom(String kind, String who) {
+    return '$kind · from $who';
+  }
+
+  @override
+  String liveKindFor(String kind, String target) {
+    return '$kind · $target';
+  }
+
+  @override
+  String liveAllCount(int count) {
+    return 'All $count';
+  }
+
+  @override
+  String liveWaitingCount(int count) {
+    return 'Waiting $count';
+  }
+
+  @override
+  String liveApprovedCount(int count) {
+    return 'Approved $count';
+  }
+
+  @override
+  String liveDeclinedCount(int count) {
+    return 'Declined $count';
+  }
+
+  @override
+  String liveSentOn(String date) {
+    return 'Sent $date';
+  }
+
+  @override
+  String liveAnsweredBy(String name, String date) {
+    return '$name · $date';
+  }
+
+  @override
+  String liveSourcesTab(int count) {
+    return 'Sources ($count)';
+  }
+
+  @override
+  String livePickupsTab(int count) {
+    return 'Pickups ($count)';
+  }
+
+  @override
+  String liveSourceAdded(String source, String route) {
+    return '$source is now on $route.';
+  }
+
+  @override
+  String liveAssignedCount(int count) {
+    return '$count pickup points';
+  }
 }

@@ -1,4 +1,7 @@
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
+import 'package:pickup_supervisor/features/issues/data/issue_live_data.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/widgets/module_button.dart';
 import 'package:pickup_supervisor/core/widgets/module_modal.dart';
@@ -55,6 +58,41 @@ class _IssueDetailViewState extends State<_IssueDetailView> {
     widget.onChanged?.call(updated);
   }
 
+  /// Live: queue the decision (outbound doc, Pickup Supervisor writes ·
+  /// Decide an issue). False when the phone's checks refused it.
+  Future<bool> _decide({required bool resolve, String? note}) async {
+    final session = OutboundLiveSession.of(context);
+    if (session == null) return true;
+    try {
+      await session.change(
+        () => session.writes.decideIssue(
+          issueId: _issue.id,
+          resolve: resolve,
+          note: note,
+        ),
+      );
+      return true;
+    } on LocalWriteValidationException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.maybeOf(
+          context,
+        )?.showSnackBar(SnackBar(content: Text(error.message)));
+      }
+      return false;
+    }
+  }
+
+  String get _actor =>
+      OutboundLiveSession.of(context)?.actor.name ??
+      IssueMockData.supervisorName;
+
+  String get _now {
+    final session = OutboundLiveSession.of(context);
+    return session == null
+        ? IssueMockData.actionTime
+        : issueTime(session.clock.now);
+  }
+
   Future<void> _resolve() async {
     final done = await showModuleSheet<String>(
       context,
@@ -62,11 +100,12 @@ class _IssueDetailViewState extends State<_IssueDetailView> {
       builder: (_) => const DriverLocalizationScope(child: ResolveIssueSheet()),
     );
     if (done == null || !mounted) return;
+    if (!await _decide(resolve: true, note: done) || !mounted) return;
     _update(
       _issue.copyWith(
         status: IssueStatus.resolved,
-        actedBy: IssueMockData.supervisorName,
-        actedAt: IssueMockData.actionTime,
+        actedBy: _actor,
+        actedAt: _now,
         resolution: done,
       ),
     );
@@ -86,11 +125,12 @@ class _IssueDetailViewState extends State<_IssueDetailView> {
           const DriverLocalizationScope(child: EscalateIssuePopup()),
     );
     if (ok != true || !mounted) return;
+    if (!await _decide(resolve: false) || !mounted) return;
     _update(
       _issue.copyWith(
         status: IssueStatus.escalated,
-        actedBy: IssueMockData.supervisorName,
-        actedAt: IssueMockData.actionTime,
+        actedBy: _actor,
+        actedAt: _now,
       ),
     );
     final l10n = DriverLocalizations.of(context);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_button.dart';
@@ -28,14 +29,98 @@ class PickupSupervisorFlagsScreen extends StatelessWidget {
   final bool showEmpty;
 
   @override
-  Widget build(BuildContext context) =>
-      DriverLocalizationScope(child: _FlagsView(showEmpty: showEmpty));
+  Widget build(BuildContext context) => DriverLocalizationScope(
+    child: OutboundLiveBuilder<List<_LiveFlag>>(
+      load: _LiveFlag.loadOpen,
+      fallback: _FlagsView(showEmpty: showEmpty),
+      builder: (context, flags, session) => _FlagsView(
+        key: ValueKey(flags),
+        showEmpty: false,
+        live: flags,
+        session: session,
+      ),
+    ),
+  );
+}
+
+/// An open flag from SQLite with the pickup point it names (outbound doc,
+/// Pickup Supervisor screens · Flags).
+class _LiveFlag {
+  const _LiveFlag({
+    required this.id,
+    required this.type,
+    required this.message,
+    required this.sourceName,
+    required this.sourceAddress,
+  });
+
+  final String id;
+  final PickupSupervisorFlagDetailType type;
+  final String message;
+  final String sourceName;
+  final String sourceAddress;
+
+  static const _types = {
+    'TIME_CLASH': PickupSupervisorFlagDetailType.timeClash,
+    'OFF_ROUTE': PickupSupervisorFlagDetailType.offRoute,
+    'SCHEDULE_CHANGED': PickupSupervisorFlagDetailType.scheduleChanged,
+    'SOURCE_PAUSED': PickupSupervisorFlagDetailType.sourcePaused,
+    'UNASSIGNED_SOURCE': PickupSupervisorFlagDetailType.newSource,
+    'UNASSIGNED_EXTRA': PickupSupervisorFlagDetailType.extraPickup,
+    'SOURCE_REASSIGNED': PickupSupervisorFlagDetailType.sourceMoved,
+  };
+
+  static Future<List<_LiveFlag>> loadOpen(OutboundLiveSession session) async {
+    final flags = <_LiveFlag>[];
+    for (final row in await session.queries.flags()) {
+      if (row['done_at'] != null) continue;
+      final type = _types[row['type']];
+      if (type == null) continue;
+      final sourceId = row['source_id'] as String?;
+      final source = sourceId == null
+          ? null
+          : await session.queries.pickupPointDetail(sourceId);
+      flags.add(
+        _LiveFlag(
+          id: row['id']! as String,
+          type: type,
+          message: row['message'] as String? ?? '',
+          sourceName: source?['name'] as String? ?? '',
+          sourceAddress: source?['address'] as String? ?? '',
+        ),
+      );
+    }
+    return flags;
+  }
+
+  /// The design's flag of this type, with this flag's point and words.
+  PickupFlag toFlag(DriverLocalizations l10n) {
+    final base = PickupFlagsMockData.of(l10n, type);
+    return PickupFlag(
+      type: type,
+      name: sourceName,
+      address: sourceAddress,
+      summary: message,
+      title: base.title,
+      rows: [(base.title, message)],
+      whatToDo: base.whatToDo,
+      action: base.action,
+      closesByItself: base.closesByItself,
+    );
+  }
 }
 
 class _FlagsView extends StatefulWidget {
-  const _FlagsView({required this.showEmpty});
+  const _FlagsView({
+    super.key,
+    required this.showEmpty,
+    this.live,
+    this.session,
+  });
 
   final bool showEmpty;
+  final List<_LiveFlag>? live;
+  final OutboundLiveSession? session;
 
   @override
   State<_FlagsView> createState() => _FlagsViewState();
@@ -45,16 +130,27 @@ class _FlagsViewState extends State<_FlagsView> {
   /// Flags marked done in this visit.
   final _done = <PickupSupervisorFlagDetailType>{};
 
-  Future<void> _open(PickupFlag flag) async {
+  /// Live flags marked done in this visit.
+  final _doneIds = <String>{};
+
+  Future<void> _open(PickupFlag flag, {String? liveId}) async {
     final done = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (_) => PickupSupervisorFlagDetailScreen(type: flag.type),
+        builder: (_) =>
+            PickupSupervisorFlagDetailScreen(type: flag.type, flag: flag),
       ),
     );
     if (done != true || !mounted) return;
     final l10n = DriverLocalizations.of(context);
-    setState(() => _done.add(flag.type));
+    final session = widget.session;
+    if (liveId != null && session != null) {
+      await session.change(() => session.writes.markFlagDone(liveId));
+      if (!mounted) return;
+      setState(() => _doneIds.add(liveId));
+    } else {
+      setState(() => _done.add(flag.type));
+    }
     ModuleToast.show(
       context,
       kind: ModuleToastKind.success,
@@ -66,7 +162,12 @@ class _FlagsViewState extends State<_FlagsView> {
   @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
-    final flags = widget.showEmpty
+    final live = widget.live
+        ?.where((f) => !_doneIds.contains(f.id))
+        .toList(growable: false);
+    final flags = live != null
+        ? [for (final f in live) f.toFlag(l10n)]
+        : widget.showEmpty
         ? const <PickupFlag>[]
         : PickupFlagsMockData.all(
             l10n,
@@ -103,7 +204,7 @@ class _FlagsViewState extends State<_FlagsView> {
                       separatorBuilder: (_, _) => const SizedBox(height: 16),
                       itemBuilder: (_, i) => _FlagTile(
                         flag: flags[i],
-                        onTap: () => _open(flags[i]),
+                        onTap: () => _open(flags[i], liveId: live?[i].id),
                       ),
                     ),
                   ),
@@ -119,16 +220,23 @@ class _FlagsViewState extends State<_FlagsView> {
 /// One flag: its "what happened" box, what to do, and Mark done. Pops with
 /// `true` when the flag is marked done.
 class PickupSupervisorFlagDetailScreen extends StatelessWidget {
-  const PickupSupervisorFlagDetailScreen({super.key, required this.type});
+  const PickupSupervisorFlagDetailScreen({
+    super.key,
+    required this.type,
+    this.flag,
+  });
 
   final PickupSupervisorFlagDetailType type;
+
+  /// A live flag; null shows the design sample of [type].
+  final PickupFlag? flag;
 
   @override
   Widget build(BuildContext context) => DriverLocalizationScope(
     child: Builder(
       builder: (context) {
         final l10n = DriverLocalizations.of(context);
-        final flag = PickupFlagsMockData.of(l10n, type);
+        final flag = this.flag ?? PickupFlagsMockData.of(l10n, type);
         final actionLabel = switch (flag.action) {
           FlagAction.openRoutes => l10n.fgOpenRoutes,
           FlagAction.checkRoute => l10n.fgCheckRoute,

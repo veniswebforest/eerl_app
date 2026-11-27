@@ -14,10 +14,16 @@ class ConfigurableMaterialTile extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     this.color,
+    this.subtitle,
   });
 
   final int index;
+
+  /// Title: the centre's local name, or the item name when it has none.
   final String label;
+
+  /// The `items` table name under a local name; null hides the line.
+  final String? subtitle;
   final String? color;
   final bool selected;
   final ValueChanged<bool> onSelected;
@@ -30,11 +36,12 @@ class ConfigurableMaterialTile extends StatelessWidget {
         : AppColors.neutral900;
 
     return Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      // At least 64 tall; grows when a long title and subtitle need room.
+      constraints: const BoxConstraints(minHeight: 64),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.white, backgroundColor.withValues(alpha: 0.35)],
+          colors: [Colors.white, backgroundColor.withValues(alpha: 0.8)],stops: [0.0, 0.76],
         ),
         border: Border.all(
           color: selected ? AppColors.primary500 : AppColors.cool200,
@@ -67,13 +74,34 @@ class ConfigurableMaterialTile extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              label,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.regularB7_14.copyWith(
-                // color: foregroundColor,
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  key: Key('configure-material-title-$index'),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.regularB7_14.copyWith(
+                    // color: foregroundColor,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    key: Key('configure-material-subtitle-$index'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.regularB7_14.copyWith(
+                      fontSize: 12,
+                      height: 16 / 12,
+                      color: AppColors.neutral600,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           const SizedBox(width: 8),

@@ -4,7 +4,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_live_data.dart';
+import 'package:pickup_supervisor/features/driver/model/driver_pickup_stop.dart';
+import 'package:pickup_supervisor/features/driver/view/driver_stop_detail_screen.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/features/driver/view/driver_location_flow_screen.dart';
 import 'package:pickup_supervisor/features/driver/view/driver_stops_screen.dart';
@@ -19,22 +23,59 @@ const _successIcons = 'assets/icons/driver/pickup_success_v2';
 const _successImages = 'assets/images/driver/pickup_success_v2';
 
 class DriverPickupSuccessScreen extends StatelessWidget {
-  const DriverPickupSuccessScreen({super.key, this.isLastStop = false});
+  const DriverPickupSuccessScreen({
+    super.key,
+    this.isLastStop = false,
+    this.tripId,
+  });
 
   final bool isLastStop;
+
+  /// The live trip; null shows the design preview.
+  final String? tripId;
 
   @override
   Widget build(BuildContext context) {
     return DriverLocalizationScope(
-      child: _PickupSuccessView(isLastStop: isLastStop),
+      child: tripId == null
+          ? _PickupSuccessView(isLastStop: isLastStop)
+          : OutboundLiveBuilder<_LiveAfterStop>(
+              load: (session) => _LiveAfterStop.load(session, tripId!),
+              fallback: _PickupSuccessView(isLastStop: isLastStop),
+              builder: (context, data, _) =>
+                  _PickupSuccessView(isLastStop: data.next == null, live: data),
+            ),
+    );
+  }
+}
+
+class _LiveAfterStop {
+  const _LiveAfterStop(this.trip, this.next);
+
+  final DriverTripLive? trip;
+  final DriverStopLive? next;
+
+  static Future<_LiveAfterStop> load(
+    OutboundLiveSession session,
+    String tripId,
+  ) async {
+    final tripRow = await session.queries.driverTrip(tripId);
+    final trip = tripRow == null ? null : DriverTripLive.fromRow(tripRow);
+    final nextRow = await session.queries.nextStop(tripId);
+    return _LiveAfterStop(
+      trip,
+      nextRow == null
+          ? null
+          : DriverStopLive.fromRow(nextRow, totalStops: trip?.stops ?? 0),
     );
   }
 }
 
 class _PickupSuccessView extends StatelessWidget {
-  const _PickupSuccessView({required this.isLastStop});
+  const _PickupSuccessView({required this.isLastStop, this.live});
 
   final bool isLastStop;
+  final _LiveAfterStop? live;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +139,9 @@ class _PickupSuccessView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    isLastStop ? const _TripDoneCard() : const _NextStopCard(),
+                    isLastStop
+                        ? _TripDoneCard(trip: live?.trip)
+                        : _NextStopCard(stop: live?.next),
                     const SizedBox(height: 16),
                     _SuccessActionButton(
                       key: Key(
@@ -114,7 +157,9 @@ class _PickupSuccessView extends StatelessWidget {
                       onPressed: isLastStop
                           ? () => Navigator.of(context).push(
                               MaterialPageRoute<void>(
-                                builder: (_) => const DriverTripSummaryScreen(),
+                                builder: (_) => DriverTripSummaryScreen(
+                                  tripId: live?.trip?.id,
+                                ),
                               ),
                             )
                           : () => _goToNextStop(context),
@@ -136,9 +181,19 @@ class _PickupSuccessView extends StatelessWidget {
   }
 
   void _goToNextStop(BuildContext context) {
+    final next = live?.next;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const DriverLocationFlowScreen()),
-      (route) => route.settings.name == DriverStopsScreen.routeName,
+      MaterialPageRoute<void>(
+        builder: (_) => next == null
+            ? const DriverLocationFlowScreen()
+            : DriverStopDetailScreen(
+                pickupType: next.pickupType,
+                stopId: next.id,
+                tripId: next.tripId,
+              ),
+      ),
+      (route) =>
+          route.settings.name == DriverStopsScreen.routeName || route.isFirst,
     );
   }
 
@@ -151,7 +206,9 @@ class _PickupSuccessView extends StatelessWidget {
 }
 
 class _NextStopCard extends StatelessWidget {
-  const _NextStopCard();
+  const _NextStopCard({this.stop});
+
+  final DriverStopLive? stop;
 
   @override
   Widget build(BuildContext context) {
@@ -162,7 +219,10 @@ class _NextStopCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.nextStopSevenOfSeven,
+            stop != null
+                ? '${l10n.nextStop} · '
+                      '${l10n.stopPosition(stop!.stopOrder, stop!.totalStops)}'
+                : l10n.nextStopSevenOfSeven,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: DriverTextStyles.semibold12.copyWith(
@@ -171,7 +231,14 @@ class _NextStopCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.stopCardTitle(l10n.shreeSaiDairy, l10n.mixedMaterial),
+            stop != null
+                ? l10n.stopCardTitle(
+                    stop!.sourceName,
+                    stop!.pickupType == DriverPickupType.sorted
+                        ? l10n.sortedMaterial
+                        : l10n.mixedMaterial,
+                  )
+                : l10n.stopCardTitle(l10n.shreeSaiDairy, l10n.mixedMaterial),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: DriverTextStyles.semibold16.copyWith(
@@ -181,12 +248,12 @@ class _NextStopCard extends StatelessWidget {
           const SizedBox(height: 8),
           _SuccessInfoRow(
             asset: '$_successIcons/pin.svg',
-            text: l10n.nextStopDistance,
+            text: stop?.address ?? l10n.nextStopDistance,
           ),
           const SizedBox(height: 8),
           _SuccessInfoRow(
             asset: '$_successIcons/user.svg',
-            text: l10n.maheshOwner,
+            text: stop?.contact ?? l10n.maheshOwner,
           ),
         ],
       ),
@@ -195,7 +262,9 @@ class _NextStopCard extends StatelessWidget {
 }
 
 class _TripDoneCard extends StatelessWidget {
-  const _TripDoneCard();
+  const _TripDoneCard({this.trip});
+
+  final DriverTripLive? trip;
 
   @override
   Widget build(BuildContext context) {
@@ -226,12 +295,16 @@ class _TripDoneCard extends StatelessWidget {
           const SizedBox(height: 8),
           _SuccessInfoRow(
             asset: '$_successIcons/package.svg',
-            text: l10n.vehicleLoadTotal,
+            text: trip != null
+                ? l10n.liveKg(formatKg(trip!.collectedKg))
+                : l10n.vehicleLoadTotal,
           ),
           const SizedBox(height: 8),
           _SuccessInfoRow(
             asset: '$_successIcons/warehouse.svg',
-            text: l10n.warehouseDistance,
+            text: trip != null
+                ? l10n.liveDropAt(trip!.warehouseName)
+                : l10n.warehouseDistance,
           ),
         ],
       ),

@@ -267,14 +267,15 @@ class _ApprovalDeclineSheetState extends State<ApprovalDeclineSheet> {
           label: widget.confirmLabel,
           variant: ModuleButtonVariant.danger,
           height: 52,
-          onPressed: () => Navigator.of(context).pop(true),
+          // The reply goes back to the caller (required to decline).
+          onPressed: () => Navigator.of(context).pop(_reply.text.trim()),
         ),
         const SizedBox(height: 12),
         ModuleButton(
           key: const Key('approval-decline-cancel'),
           label: widget.cancelLabel,
           variant: ModuleButtonVariant.neutral,
-          onPressed: () => Navigator.of(context).pop(false),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ],
     );

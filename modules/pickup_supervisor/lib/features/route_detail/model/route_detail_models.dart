@@ -40,6 +40,10 @@ enum StopScheduleKind {
 
   /// "Every day except Sun · 12–2 pm".
   everyDayExceptSun,
+
+  /// A schedule summary as the server words it (live data): shown as is
+  /// from [StopSchedule.time].
+  text,
 }
 
 enum StopNote {
@@ -55,11 +59,14 @@ enum ContactRole { manager, owner, storeManager, office }
 
 /// Person at the pickup point.
 class StopContact {
-  const StopContact(this.name, this.role, this.phone);
+  const StopContact(this.name, this.role, this.phone, {this.roleText});
 
   final String name;
   final ContactRole role;
   final String phone;
+
+  /// The role as typed on the server (live data); shown instead of [role].
+  final String? roleText;
 }
 
 class StopSchedule {
@@ -80,6 +87,8 @@ class StopSchedule {
 
 class RouteStop {
   const RouteStop({
+    this.id,
+    this.noteText,
     required this.name,
     required this.type,
     required this.address,
@@ -100,6 +109,12 @@ class RouteStop {
     this.distanceKm,
     this.record,
   });
+
+  /// The due pickup id (live data); null in the design samples.
+  final String? id;
+
+  /// A note in the server's words (live data), shown when [note] is null.
+  final String? noteText;
 
   final String name;
   final StopType type;
@@ -134,6 +149,8 @@ class RouteStop {
   final StopRecord? record;
 
   RouteStop copyWith({String? name, StopStatus? status}) => RouteStop(
+    id: id,
+    noteText: noteText,
     name: name ?? this.name,
     type: type,
     address: address,

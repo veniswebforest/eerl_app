@@ -1,4 +1,6 @@
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/forms/module_input_rules.dart';
 import 'package:pickup_supervisor/core/utils/module_money.dart';
 import 'package:pickup_supervisor/core/widgets/module_button.dart';
@@ -56,6 +58,28 @@ class _RequestViewState extends State<_RequestView> {
   Future<void> _send() async {
     final l10n = DriverLocalizations.of(context);
     final navigator = Navigator.of(context);
+    // Live: queue "Ask the office for cash" (outbound doc, Pickup
+    // Supervisor writes); the answer comes as a notification and a sync.
+    final session = OutboundLiveSession.of(context);
+    if (session != null) {
+      try {
+        await session.change(
+          () => session.writes.requestCash(
+            id: session.newId(),
+            amount: _value.toDouble(),
+            reason: _reason.text.trim(),
+          ),
+        );
+      } on LocalWriteValidationException catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.maybeOf(
+            context,
+          )?.showSnackBar(SnackBar(content: Text(error.message)));
+        }
+        return;
+      }
+      if (!mounted) return;
+    }
     await showModulePopup<void>(
       context,
       builder: (_) => DriverLocalizationScope(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_live_data.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_toast.dart';
@@ -77,7 +79,7 @@ class _PickupSupervisorRoutesScreenState
       if (RouteSwitchStore.event.value == null) return;
       RouteSwitchStore.event.value = null;
       final l10n = DriverLocalizations.of(scoped);
-      final name = _routeName(l10n, event.$1);
+      final name = _liveNames[event.$1] ?? _routeName(l10n, event.$1);
       final on = event.$2 == RouteSwitchEvent.switchedOn;
       // A route switched on moves to the top: show it.
       if (on && _listController.hasClients) _listController.jumpTo(0);
@@ -91,6 +93,32 @@ class _PickupSupervisorRoutesScreenState
   }
 
   void _openRoute(_RouteItem route) {
+    if (route.liveTripId != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (_) => RouteDetailScreen(tripId: route.liveTripId),
+        ),
+      );
+      return;
+    }
+    if (route.liveSummary != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (_) => route.status == _RouteStatus.switchedOff
+              ? RouteDetailScreen(
+                  tripState: TripState.planned,
+                  switchedOff: true,
+                  routeKey: route.keyName,
+                  liveRouteId: route.keyName,
+                  summary: route.liveSummary,
+                )
+              : const TripsPlanScreen(),
+        ),
+      );
+      return;
+    }
     if (route.status != _RouteStatus.switchedOff) {
       Navigator.push(
         context,
@@ -125,130 +153,147 @@ class _PickupSupervisorRoutesScreenState
     }
   }
 
+  /// Live route names, for the switch toast.
+  final _liveNames = <String, String>{};
+
   @override
   Widget build(BuildContext context) {
     return DriverLocalizationScope(
       child: Builder(
-        builder: (context) {
-          _scopedContext = context;
-          final l10n = DriverLocalizations.of(context);
-          final routes = _routes(l10n)
-              .where((route) {
-                final matchesFilter =
-                    _selectedFilter == 0 ||
-                    (_selectedFilter == 1 && !route.isContract) ||
-                    (_selectedFilter == 2 && route.isContract);
-                final matchesQuery =
-                    _query.isEmpty ||
-                    route.title.toLowerCase().contains(_query.toLowerCase());
-                return matchesFilter && matchesQuery;
-              })
-              .toList(growable: false);
+        builder: (context) => OutboundLiveBuilder<List<_RouteItem>>(
+          load: (session) =>
+              _loadLiveRoutes(session, DriverLocalizations.of(context)),
+          fallback: _page(null),
+          builder: (context, live, _) => _page(live),
+        ),
+      ),
+    );
+  }
 
-          return Scaffold(
-            key: const Key('supervisor-routes-screen'),
-            extendBody: true,
-            backgroundColor: DriverColors.background,
-            body: Stack(
-              children: [
-                const Positioned.fill(
-                  child: ColoredBox(color: DriverColors.background),
-                ),
-                const Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: 160,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        colors: [Color(0xFFB9F0C4), DriverColors.background],
-                      ),
+  Widget _page(List<_RouteItem>? live) {
+    for (final r in live ?? const <_RouteItem>[]) {
+      _liveNames[r.keyName] = r.title;
+    }
+    return Builder(
+      builder: (context) {
+        _scopedContext = context;
+        final l10n = DriverLocalizations.of(context);
+        final routes = (live ?? _routes(l10n))
+            .where((route) {
+              final matchesFilter =
+                  _selectedFilter == 0 ||
+                  (_selectedFilter == 1 && !route.isContract) ||
+                  (_selectedFilter == 2 && route.isContract);
+              final matchesQuery =
+                  _query.isEmpty ||
+                  route.title.toLowerCase().contains(_query.toLowerCase());
+              return matchesFilter && matchesQuery;
+            })
+            .toList(growable: false);
+
+        return Scaffold(
+          key: const Key('supervisor-routes-screen'),
+          extendBody: true,
+          backgroundColor: DriverColors.background,
+          body: Stack(
+            children: [
+              const Positioned.fill(
+                child: ColoredBox(color: DriverColors.background),
+              ),
+              const Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: 160,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [Color(0xFFB9F0C4), DriverColors.background],
                     ),
                   ),
                 ),
-                SafeArea(
-                  bottom: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-                        child: _RoutesHeader(l10n: l10n),
+              ),
+              SafeArea(
+                bottom: false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                      child: _RoutesHeader(l10n: l10n),
+                    ),
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: _RoutesSearch(
+                        hint: l10n.routesSearchHint,
+                        onChanged: (value) => setState(() => _query = value),
                       ),
-                      const SizedBox(height: 24),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: _RoutesSearch(
-                          hint: l10n.routesSearchHint,
-                          onChanged: (value) => setState(() => _query = value),
-                        ),
+                    ),
+                    if (widget.showEmpty)
+                      Expanded(child: _EmptyRoutes(l10n: l10n))
+                    else ...[
+                      const SizedBox(height: 16),
+                      _RouteFilters(
+                        l10n: l10n,
+                        selected: _selectedFilter,
+                        onSelected: (value) =>
+                            setState(() => _selectedFilter = value),
                       ),
-                      if (widget.showEmpty)
-                        Expanded(child: _EmptyRoutes(l10n: l10n))
-                      else ...[
-                        const SizedBox(height: 16),
-                        _RouteFilters(
-                          l10n: l10n,
-                          selected: _selectedFilter,
-                          onSelected: (value) =>
-                              setState(() => _selectedFilter = value),
-                        ),
-                        const SizedBox(height: 16),
-                        Expanded(
-                          child: ListView.separated(
-                            key: const Key('supervisor-routes-list'),
-                            controller: _listController,
-                            padding: EdgeInsets.fromLTRB(
-                              20,
-                              0,
-                              20,
-                              MediaQuery.paddingOf(context).bottom + 132,
-                            ),
-                            itemCount: routes.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(height: 16),
-                            itemBuilder: (_, index) => _RouteCard(
-                              route: routes[index],
-                              highlighted: routes[index].highlighted,
-                              onTap: () => _openRoute(routes[index]),
-                            ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: ListView.separated(
+                          key: const Key('supervisor-routes-list'),
+                          controller: _listController,
+                          padding: EdgeInsets.fromLTRB(
+                            20,
+                            0,
+                            20,
+                            MediaQuery.paddingOf(context).bottom + 132,
+                          ),
+                          itemCount: routes.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 16),
+                          itemBuilder: (_, index) => _RouteCard(
+                            route: routes[index],
+                            highlighted: routes[index].highlighted,
+                            onTap: () => _openRoute(routes[index]),
                           ),
                         ),
-                      ],
+                      ),
                     ],
-                  ),
+                  ],
                 ),
+              ),
+              Positioned(
+                right: 20,
+                bottom: 92,
+                child: _AddRouteButton(onTap: _openAddRoute),
+              ),
+              if (_showSavedBanner)
                 Positioned(
-                  right: 20,
-                  bottom: 92,
-                  child: _AddRouteButton(onTap: _openAddRoute),
-                ),
-                if (_showSavedBanner)
-                  Positioned(
-                    top: MediaQuery.paddingOf(context).top + 8,
-                    left: 15,
-                    right: 15,
-                    child: _SavedRouteBanner(
-                      l10n: l10n,
-                      onClose: () => setState(() => _showSavedBanner = false),
-                    ),
+                  top: MediaQuery.paddingOf(context).top + 8,
+                  left: 15,
+                  right: 15,
+                  child: _SavedRouteBanner(
+                    l10n: l10n,
+                    onClose: () => setState(() => _showSavedBanner = false),
                   ),
-              ],
-            ),
-            bottomNavigationBar: widget.showBottomNavigation
-                ? PickupSupervisorBottomNavigation(
-                    items: _standaloneNavigationItems(l10n),
-                    selectedIndex: 2,
-                    onItemSelected: (index) =>
-                        widget.onNavigationSelected?.call(index),
-                  )
-                : null,
-          );
-        },
-      ),
+                ),
+            ],
+          ),
+          bottomNavigationBar: widget.showBottomNavigation
+              ? PickupSupervisorBottomNavigation(
+                  items: _standaloneNavigationItems(l10n),
+                  selectedIndex: 2,
+                  onItemSelected: (index) =>
+                      widget.onNavigationSelected?.call(index),
+                )
+              : null,
+        );
+      },
     );
   }
 }
@@ -850,6 +895,97 @@ class _SavedRouteBanner extends StatelessWidget {
 
 enum _RouteStatus { onRoute, planned, approved, switchedOff }
 
+/// The route cards from SQLite, each with its trip today (outbound doc,
+/// Pickup Supervisor screens · Your Routes).
+Future<List<_RouteItem>> _loadLiveRoutes(
+  OutboundLiveSession session,
+  DriverLocalizations l10n,
+) async {
+  final q = session.queries;
+  final trips = <String, Map<String, Object?>>{};
+  for (final t in await q.supervisorTripsOfDay(session.clock.today)) {
+    if (t['status'] == 'CANCELLED') continue;
+    final routeTrip = await q.driverTrip(t['id']! as String);
+    final routeId = routeTrip?['route_id'] as String?;
+    if (routeId != null) trips[routeId] = t;
+  }
+  final notUsing = {
+    for (final row in await q.driverNotUsingApp())
+      if (row['vehicle_kind'] == 'OWN') row['id'],
+  };
+  final items = <_RouteItem>[];
+  for (final r in await q.routeCards()) {
+    final id = r['id']! as String;
+    final name = r['name'] as String? ?? '';
+    final active = r['is_active'] == 1;
+    final trip = active ? trips[id] : null;
+    final contract = r['rented'] == 1;
+    final tripId = trip?['id'] as String?;
+    var stops = 0;
+    var collected = 0;
+    if (tripId != null) {
+      final rows = await q.tripStopsWithState(tripId);
+      stops = rows.length;
+      collected = rows.where((s) => s['display_state'] == 'COLLECTED').length;
+    }
+    final status = !active
+        ? _RouteStatus.switchedOff
+        : switch (trip?['status']) {
+            'APPROVED' => _RouteStatus.approved,
+            'PLANNED' || null => _RouteStatus.planned,
+            _ => _RouteStatus.onRoute,
+          };
+    final time =
+        '${formatClock(r['start_time'] as String? ?? '')} – '
+        '${formatClock(r['end_time'] as String? ?? '')}';
+    items.add(
+      _RouteItem(
+        keyName: id,
+        title: name,
+        vehicleType: contract
+            ? l10n.routesContractVehicle
+            : l10n.routesOwnVehicle,
+        secondaryTag: notUsing.contains(tripId)
+            ? l10n.routesDriverNotUsingApp
+            : null,
+        vehicleNumber: r['vehicle'] as String? ?? '',
+        time: time,
+        status: status,
+        statusText: switch (status) {
+          _RouteStatus.switchedOff => l10n.routesSwitchedOff,
+          _RouteStatus.approved => l10n.routesApproved,
+          _RouteStatus.onRoute => l10n.routesOnRoute,
+          _RouteStatus.planned => l10n.routesPlanned,
+        },
+        progressText: !active
+            ? l10n.routesNoTripsUntilOn
+            : tripId == null
+            ? l10n.liveNoTripToday
+            : l10n.liveCollectedCount(collected, stops),
+        isContract: contract,
+        driverNotUsingApp: notUsing.contains(tripId),
+        progress: stops == 0 ? 0 : collected / stops,
+        liveTripId: tripId,
+        liveSummary: RouteSummary(
+          name: name,
+          plate: r['vehicle'] as String? ?? '',
+          shiftTime: time,
+          assignedSources: (r['sources'] as num?)?.toInt() ?? 0,
+          pausedSources: 0,
+          warehouse: r['warehouse_name'] as String? ?? '',
+          driverName: r['driver_name'] as String? ?? '',
+          driverPhone: '',
+          labourName: r['labour_name'] as String? ?? '',
+          daily: 0,
+          weekly: 0,
+          contractVehicle: contract,
+        ),
+      ),
+    );
+  }
+  return items;
+}
+
 class _RouteItem {
   const _RouteItem({
     required this.keyName,
@@ -865,8 +1001,13 @@ class _RouteItem {
     this.driverNotUsingApp = false,
     this.highlighted = false,
     this.progress = 0,
+    this.liveTripId,
+    this.liveSummary,
   });
 
+  /// Live: today's trip of the route, and the route for its detail.
+  final String? liveTripId;
+  final RouteSummary? liveSummary;
   final String keyName;
   final String title;
   final String vehicleType;
@@ -901,6 +1042,8 @@ class _RouteItem {
     driverNotUsingApp: driverNotUsingApp,
     highlighted: highlighted ?? this.highlighted,
     progress: progress ?? this.progress,
+    liveTripId: liveTripId,
+    liveSummary: liveSummary,
   );
 }
 

@@ -1,4 +1,7 @@
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
+import 'package:pickup_supervisor/features/route_detail/data/route_detail_live_data.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/widgets/module_confirm_popup.dart';
@@ -8,6 +11,7 @@ import 'package:pickup_supervisor/core/widgets/module_page.dart';
 import 'package:pickup_supervisor/core/widgets/module_segmented_switch.dart';
 import 'package:pickup_supervisor/core/widgets/module_toast.dart';
 import 'package:pickup_supervisor/features/driver/widgets/driver_dashboard_widgets.dart';
+import 'package:pickup_supervisor/features/route_actions/model/route_actions_mock_data.dart';
 import 'package:pickup_supervisor/features/route_actions/model/route_actions_models.dart';
 import 'package:pickup_supervisor/features/route_actions/view/ask_collection_head_screen.dart';
 import 'package:pickup_supervisor/features/route_actions/view/change_team_screen.dart';
@@ -44,7 +48,20 @@ class RouteDetailScreen extends StatelessWidget {
     this.switchedOff = false,
     this.routeKey = RouteSwitchStore.adajan,
     this.driverNotUsingApp = false,
+    this.tripId,
+    this.live,
+    this.liveRouteId,
   });
+
+  /// A live route opened without a trip (switched off): switching it on
+  /// queues the write for this route.
+  final String? liveRouteId;
+
+  /// The live trip; null shows the design preview.
+  final String? tripId;
+
+  /// The loaded live trip (set by this screen itself).
+  final LiveTripDetail? live;
 
   /// Pal Gam Morning: the shift started 30+ min ago and the driver's app
   /// recorded no stop. Shows the red alert; the stops are all pending.
@@ -65,12 +82,41 @@ class RouteDetailScreen extends StatelessWidget {
   final String routeKey;
 
   @override
-  Widget build(BuildContext context) =>
-      DriverLocalizationScope(child: _RouteDetailView(screen: this));
+  Widget build(BuildContext context) {
+    final id = tripId;
+    if (id == null || live != null) {
+      return DriverLocalizationScope(child: _RouteDetailView(screen: this));
+    }
+    return DriverLocalizationScope(
+      child: Builder(
+        builder: (context) {
+          final l10n = DriverLocalizations.of(context);
+          return OutboundLiveBuilder<LiveTripDetail?>(
+            load: (session) => LiveTripDetail.load(session, id, l10n),
+            fallback: _RouteDetailView(screen: this),
+            builder: (context, data, _) => data == null
+                ? _RouteDetailView(screen: this)
+                : _RouteDetailView(
+                    key: ValueKey(data),
+                    screen: RouteDetailScreen(
+                      tripState: data.state,
+                      summary: data.summary,
+                      switchedOff: !data.routeActive,
+                      routeKey: data.routeId,
+                      driverNotUsingApp: data.driverNotUsingApp,
+                      tripId: id,
+                      live: data,
+                    ),
+                  ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _RouteDetailView extends StatefulWidget {
-  const _RouteDetailView({required this.screen});
+  const _RouteDetailView({super.key, required this.screen});
 
   final RouteDetailScreen screen;
 
@@ -85,17 +131,41 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
   late TripTeamChange? _change = widget.screen.teamChange;
 
   /// Set once the trip is cancelled (the reason typed in the popup).
-  String? _cancelReason;
+  late String? _cancelReason = widget.screen.live?.cancelReason;
+
+  LiveTripDetail? get _live => widget.screen.live;
+  OutboundLiveSession? get _session => OutboundLiveSession.of(context);
+
+  /// Runs a queued trip write; false (message shown) when refused.
+  Future<bool> _write(
+    Future<void> Function(OutboundLiveSession s) write,
+  ) async {
+    final session = _session;
+    if (session == null || _live == null) return true;
+    try {
+      await session.change(() => write(session));
+      return true;
+    } on LocalWriteValidationException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.maybeOf(
+          context,
+        )?.showSnackBar(SnackBar(content: Text(error.message)));
+      }
+      return false;
+    }
+  }
 
   /// Planned stops can be skipped, so they live in state.
   late final List<RouteStop> _stops = [
-    ...widget.screen.driverNotUsingApp
-        ? RouteDetailMockData.palGamStops
-        : switch (widget.screen.tripState) {
-            TripState.onRoute => RouteDetailMockData.todayStops,
-            TripState.planned => RouteDetailMockData.plannedStops,
-            TripState.approved => RouteDetailMockData.approvedStops,
-          },
+    ...?widget.screen.live?.stops,
+    if (widget.screen.live == null)
+      ...widget.screen.driverNotUsingApp
+          ? RouteDetailMockData.palGamStops
+          : switch (widget.screen.tripState) {
+              TripState.onRoute => RouteDetailMockData.todayStops,
+              TripState.planned => RouteDetailMockData.plannedStops,
+              TripState.approved => RouteDetailMockData.approvedStops,
+            },
   ];
 
   TripState get _state => widget.screen.tripState;
@@ -106,7 +176,8 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
 
   /// A not-started trip lists a few stops, then "and 4 more stops …".
   static const _notStartedShown = 4;
-  static const _tripDate = RouteDetailMockData.plannedTripDate;
+  String get _tripDate =>
+      _live?.tripDateLabel ?? RouteDetailMockData.plannedTripDate;
 
   RouteSummary get _summary =>
       widget.screen.summary ??
@@ -128,7 +199,7 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
           summary: summary,
           stopNumber: _stops.indexOf(stop) + 1,
           totalStops: _stops.length,
-          tripDate: RouteDetailMockData.plannedTripDate,
+          tripDate: _tripDate,
         ),
       ),
     );
@@ -140,8 +211,8 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
       title: l10n.skPickupSkippedTitle,
       message: l10n.skPickupSkippedBody(
         stop.name,
-        RouteDetailMockData.plannedTripDate,
-        RouteDetailMockData.nextVisitAfterSkip,
+        _tripDate,
+        _live != null ? '—' : RouteDetailMockData.nextVisitAfterSkip,
       ),
     );
   }
@@ -150,7 +221,11 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
     final l10n = DriverLocalizations.of(context);
     final change = await Navigator.of(context).push<TripTeamChange>(
       MaterialPageRoute(
-        builder: (_) => ChangeTeamScreen(routeName: _summary.name),
+        builder: (_) => ChangeTeamScreen(
+          routeName: _summary.name,
+          tripDate: _live?.tripDateLabel ?? RouteActionsMockData.tripDate,
+          tripId: _live?.tripId,
+        ),
       ),
     );
     if (change == null || !mounted) return;
@@ -166,8 +241,21 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
   Future<void> _moveStops() async {
     final moved = await Navigator.of(context).push<Set<String>>(
       MaterialPageRoute(
-        builder: (_) =>
-            MoveStopsScreen(routeName: _summary.name, stops: List.of(_stops)),
+        builder: (_) => MoveStopsScreen(
+          routeName: _summary.name,
+          tripDate: _live?.tripDateLabel ?? RouteActionsMockData.tripDate,
+          tripId: _live?.tripId,
+          // Live: only the trip's own open stops can move.
+          stops: _live == null
+              ? List.of(_stops)
+              : [
+                  for (final s in _stops)
+                    if (s.id != null &&
+                        (s.status == StopStatus.pending ||
+                            s.status == StopStatus.nextStop))
+                      s,
+                ],
+        ),
       ),
     );
     if (moved == null || moved.isEmpty || !mounted) return;
@@ -176,7 +264,18 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
 
   void _completeTrip() => Navigator.of(context).push<void>(
     MaterialPageRoute(
-      builder: (_) => CompleteTripScreen(routeName: _summary.name),
+      builder: (_) => CompleteTripScreen(
+        routeName: _summary.name,
+        tripDate: _live?.tripDateLabel ?? RouteActionsMockData.todayDate,
+        tripId: _live?.tripId,
+        openStops: [
+          for (final s in _stops)
+            if (s.status == StopStatus.pending ||
+                s.status == StopStatus.nextStop ||
+                s.status == StopStatus.missed)
+              s,
+        ],
+      ),
     ),
   );
 
@@ -199,6 +298,14 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
       ),
     );
     if (reason == null || !mounted) return;
+    final live = _live;
+    if (live != null &&
+        !await _write(
+          (s) => s.writes.cancelTrip(tripId: live.tripId, reason: reason),
+        )) {
+      return;
+    }
+    if (!mounted) return;
     setState(() => _cancelReason = reason);
     ModuleToast.show(
       context,
@@ -232,6 +339,23 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
       ),
     );
     if (ok != true || !mounted) return;
+    final routeId = _live?.routeId ?? widget.screen.liveRouteId;
+    final session = _session;
+    if (routeId != null && session != null) {
+      try {
+        await session.change(
+          () => session.writes.setRouteActive(routeId: routeId, active: on),
+        );
+      } on LocalWriteValidationException catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.maybeOf(
+            context,
+          )?.showSnackBar(SnackBar(content: Text(error.message)));
+        }
+        return;
+      }
+    }
+    if (!mounted) return;
     final key = widget.screen.routeKey;
     on ? RouteSwitchStore.switchOn(key) : RouteSwitchStore.switchOff(key);
     // Lands on Routes, which shows the toast once.
@@ -322,7 +446,9 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
   @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
+    // Live trips show the list: the design's map has no real pin layout yet.
     final showMap =
+        _live == null &&
         _state == TripState.onRoute &&
         _isThisTrip &&
         _view == RouteDetailView.map;
@@ -378,7 +504,9 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
             alert: _notUsingApp
                 ? DriverNotUsingAppAlert(
                     driver: _summary.driverName,
-                    shiftStart: RouteDetailMockData.palGamShiftStart,
+                    shiftStart: _live != null
+                        ? _summary.shiftTime.split(' – ').first
+                        : RouteDetailMockData.palGamShiftStart,
                     onComplete: _completeTrip,
                   )
                 : null,
@@ -388,8 +516,10 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
           else ...[
             if (_state == TripState.approved) ...[
               const SizedBox(height: 24),
-              const RouteDetailWarehouseCard(
-                result: RouteDetailMockData.warehouseResult,
+              RouteDetailWarehouseCard(
+                result:
+                    _live?.warehouseResult ??
+                    RouteDetailMockData.warehouseResult,
               ),
             ],
             const SizedBox(height: 24),
@@ -495,7 +625,10 @@ class _RouteDetailViewState extends State<_RouteDetailView> {
   }
 
   List<Widget> _upcomingContent(DriverLocalizations l10n) {
-    const stops = RouteDetailMockData.nextSevenDaysStops;
+    // Live: later days are the online trips plan; nothing is made up here.
+    final stops = _live != null
+        ? const <RouteStop>[]
+        : RouteDetailMockData.nextSevenDaysStops;
     return [
       for (var i = 0; i < stops.length; i++) ...[
         if (i > 0) const SizedBox(height: 16),

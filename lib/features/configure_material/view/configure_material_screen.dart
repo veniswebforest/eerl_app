@@ -197,7 +197,10 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
                           child: ConfigurableMaterialTile(
                             color: item.colour,
                             index: index,
-                            label: item.name,
+                            // Local name first; the items-table name under it.
+                            // Without a local name, the item name is the title.
+                            label: item.displayName,
+                            subtitle: _hasLocalName(item) ? item.name : null,
                             selected: item.isSelected == true,
                             onSelected: (selected) =>
                                 _toggleItem(index, selected),
@@ -291,6 +294,12 @@ class _ConfigureMaterialScreenState extends State<ConfigureMaterialScreen> {
       list.insert(newIndex, item);
       _hasChanges = true;
     });
+  }
+
+  /// A local name that is set and differs from the item name.
+  bool _hasLocalName(ItemModel item) {
+    final local = item.localName?.trim() ?? '';
+    return local.isNotEmpty && local != item.name.trim();
   }
 
   Future<void> _saveOrder() async {

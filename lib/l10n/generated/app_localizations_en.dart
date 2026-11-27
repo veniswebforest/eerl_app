@@ -4292,19 +4292,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get locationServiceTitle => 'Turn on location';
 
   @override
-  String get locationServiceMessage =>
-      'Location is off. Turn it on so collection records can include GPS coordinates, even when the app is offline.';
-
-  @override
   String get locationPermissionTitle => 'Location permission required';
-
-  @override
-  String get locationPermissionSettingsMessage =>
-      'Allow location access in app settings so collection records can include GPS coordinates.';
-
-  @override
-  String get locationPermissionDenied =>
-      'Location permission was not granted. GPS will not be included until permission is allowed.';
 
   @override
   String get locationUnavailable =>
@@ -4338,14 +4326,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This collection has already been submitted. A duplicate entry was not created.';
 
   @override
-  String get locationNotNow => 'Not now';
-
-  @override
   String get locationOpenSettings => 'Open settings';
-
-  @override
-  String get locationSettingsUnavailable =>
-      'Location settings could not be opened.';
 
   @override
   String get supervisorTransferReject => 'Reject';
@@ -4773,4 +4754,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get validationVehicleNumberLength =>
       'Enter a vehicle number of 4 to 20 characters.';
+
+  @override
+  String get locationGateAllow => 'Allow location';
+
+  @override
+  String get locationGateTurnOn => 'Turn on location';
+
+  @override
+  String get locationGatePermissionMessage =>
+      'EERL records where each collection happens, so it needs your location. Allow location access to continue.';
+
+  @override
+  String get locationGateServiceMessage =>
+      'Your phone’s location (GPS) is off. Turn it on to continue; it works offline too.';
+
+  @override
+  String get locationGateSettingsMessage =>
+      'Location access is turned off for EERL. Open Settings, allow location, then come back.';
 }

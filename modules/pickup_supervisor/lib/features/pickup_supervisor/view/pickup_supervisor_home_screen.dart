@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
+import 'package:pickup_supervisor/features/pickup_supervisor/data/supervisor_live_data.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/core/utils/module_date_format.dart';
 import 'package:pickup_supervisor/core/widgets/module_date_range_sheet.dart';
@@ -142,6 +145,18 @@ class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    return OutboundLiveBuilder<SupervisorHomeLive>(
+      load: SupervisorHomeLive.load,
+      fallback: _page(context, null, null),
+      builder: (context, live, session) => _page(context, live, session),
+    );
+  }
+
+  Widget _page(
+    BuildContext context,
+    SupervisorHomeLive? live,
+    OutboundLiveSession? session,
+  ) {
     final l10n = DriverLocalizations.of(context);
 
     return Scaffold(
@@ -192,6 +207,8 @@ class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
                 SliverToBoxAdapter(
                   child: _HeaderArea(
                     l10n: l10n,
+                    live: live,
+                    session: session,
                     summaryExpanded: _summaryExpanded,
                     onMenuPressed: widget.onMenuPressed,
                     onToggleSummary: () =>
@@ -208,9 +225,9 @@ class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
                   sliver: SliverList.list(
                     children: [
                       const SizedBox(height: 24),
-                      _TripsCard(l10n: l10n),
+                      _TripsCard(l10n: l10n, live: live),
                       const SizedBox(height: 24),
-                      _PickupPointsCard(l10n: l10n),
+                      _PickupPointsCard(l10n: l10n, live: live),
                       const SizedBox(height: 24),
                       Text(
                         l10n.supervisorQuickActions,
@@ -225,7 +242,7 @@ class _PickupSupervisorHomePageState extends State<_PickupSupervisorHomePage> {
                         title: l10n.supervisorUnassignedSources,
                         subtitle: l10n.supervisorManageUnassigned,
                         button: l10n.supervisorViewSource,
-                        badge: '5',
+                        badge: live != null ? '${live.unassignedSources}' : '5',
                         onPressed: _openSources,
                       ),
                       const SizedBox(height: 16),
@@ -267,8 +284,12 @@ class _HeaderArea extends StatelessWidget {
     required this.summaryExpanded,
     required this.onToggleSummary,
     required this.onMenuPressed,
+    this.live,
+    this.session,
   });
 
+  final SupervisorHomeLive? live;
+  final OutboundLiveSession? session;
   final DriverLocalizations l10n;
   final bool summaryExpanded;
   final VoidCallback onToggleSummary;
@@ -298,11 +319,19 @@ class _HeaderArea extends StatelessWidget {
       // ),
       child: Column(
         children: [
-          _DashboardHeader(l10n: l10n, onMenuPressed: onMenuPressed),
+          _DashboardHeader(
+            l10n: l10n,
+            onMenuPressed: onMenuPressed,
+            subtitle: live == null ? null : _liveSubtitle(context, live!),
+          ),
           const SizedBox(height: 24),
-          _OnlineCard(l10n: l10n),
+          _OnlineCard(
+            l10n: l10n,
+            unsent: live?.unsent,
+            onSync: session?.syncNow,
+          ),
           const SizedBox(height: 24),
-          _AttentionCard(l10n: l10n),
+          _AttentionCard(l10n: l10n, live: live),
           const SizedBox(height: 24),
           Row(
             children: [
@@ -333,7 +362,7 @@ class _HeaderArea extends StatelessWidget {
             child: summaryExpanded
                 ? Padding(
                     padding: const EdgeInsets.only(top: 16),
-                    child: _CollectionSummary(l10n: l10n),
+                    child: _CollectionSummary(l10n: l10n, live: live),
                   )
                 : const SizedBox.shrink(),
           ),
@@ -343,11 +372,30 @@ class _HeaderArea extends StatelessWidget {
   }
 }
 
+/// "Fri 27 Nov 2026 · Adajan, Vesu, Pal".
+String _liveSubtitle(BuildContext context, SupervisorHomeLive live) {
+  String date;
+  try {
+    date = DateFormat(
+      'EEE d MMM y',
+      Localizations.localeOf(context).toLanguageTag(),
+    ).format(live.today);
+  } on Object {
+    date = DateFormat('EEE d MMM y').format(live.today);
+  }
+  return live.areas.isEmpty ? date : '$date · ${live.areas}';
+}
+
 class _DashboardHeader extends StatelessWidget {
-  const _DashboardHeader({required this.l10n, required this.onMenuPressed});
+  const _DashboardHeader({
+    required this.l10n,
+    required this.onMenuPressed,
+    this.subtitle,
+  });
 
   final DriverLocalizations l10n;
   final VoidCallback? onMenuPressed;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -379,7 +427,7 @@ class _DashboardHeader extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                l10n.supervisorHeaderSubtitle,
+                subtitle ?? l10n.supervisorHeaderSubtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: DriverTextStyles.medium12.copyWith(
@@ -397,9 +445,13 @@ class _DashboardHeader extends StatelessWidget {
 }
 
 class _OnlineCard extends StatelessWidget {
-  const _OnlineCard({required this.l10n});
+  const _OnlineCard({required this.l10n, this.unsent, this.onSync});
 
   final DriverLocalizations l10n;
+
+  /// Outbox items not sent yet; null shows the design sample.
+  final int? unsent;
+  final Future<void> Function()? onSync;
 
   @override
   Widget build(BuildContext context) {
@@ -425,7 +477,11 @@ class _OnlineCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  l10n.supervisorLastSynced,
+                  unsent == null
+                      ? l10n.supervisorLastSynced
+                      : unsent == 0
+                      ? l10n.liveAllSent
+                      : l10n.liveNotSent(unsent!),
                   style: DriverTextStyles.medium14.copyWith(
                     color: DriverColors.neutral600,
                   ),
@@ -435,7 +491,7 @@ class _OnlineCard extends StatelessWidget {
           ),
           FilledButton(
             key: const Key('supervisor-sync-now'),
-            onPressed: () {},
+            onPressed: onSync ?? () {},
             style: FilledButton.styleFrom(
               minimumSize: const Size(0, 40),
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -456,16 +512,19 @@ class _OnlineCard extends StatelessWidget {
 }
 
 class _AttentionCard extends StatelessWidget {
-  const _AttentionCard({required this.l10n});
+  const _AttentionCard({required this.l10n, this.live});
 
   final DriverLocalizations l10n;
+  final SupervisorHomeLive? live;
 
   @override
   Widget build(BuildContext context) {
+    String two(int? v, String sample) =>
+        v == null ? sample : v.toString().padLeft(2, '0');
     final items = [
       _AttentionData(
         l10n.supervisorApprovals,
-        '03',
+        two(live?.approvals, '03'),
         '$_assetRoot/check.svg',
         DriverColors.primary50,
         DriverColors.primary500,
@@ -478,7 +537,7 @@ class _AttentionCard extends StatelessWidget {
       ),
       _AttentionData(
         l10n.supervisorIssues,
-        '02',
+        two(live?.openIssues, '02'),
         '$_assetRoot/alert.svg',
         DriverColors.red100,
         DriverColors.red600,
@@ -491,7 +550,7 @@ class _AttentionCard extends StatelessWidget {
       ),
       _AttentionData(
         l10n.supervisorMyRequests,
-        '01',
+        two(live?.myRequests, '01'),
         '$_assetRoot/request.svg',
         DriverColors.pink100,
         DriverColors.pink600,
@@ -504,7 +563,7 @@ class _AttentionCard extends StatelessWidget {
       ),
       _AttentionData(
         l10n.supervisorFlags,
-        '03',
+        two(live?.openFlags, '03'),
         '$_assetRoot/flag_attention.svg',
         DriverColors.yellow50,
         DriverColors.amber800,
@@ -681,9 +740,10 @@ class _StatTileGrid extends StatelessWidget {
 /// figures; View full report and the Collected tile open the report for the
 /// chosen period, and the calendar pill opens Pick dates.
 class _CollectionSummary extends StatefulWidget {
-  const _CollectionSummary({required this.l10n});
+  const _CollectionSummary({required this.l10n, this.live});
 
   final DriverLocalizations l10n;
+  final SupervisorHomeLive? live;
 
   @override
   State<_CollectionSummary> createState() => _CollectionSummaryState();
@@ -729,11 +789,14 @@ class _CollectionSummaryState extends State<_CollectionSummary> {
   Widget build(BuildContext context) {
     final l10n = widget.l10n;
     final data = _data;
+    // Live: the chip's figures from this phone's 30 days; a custom range
+    // is the online report.
+    final live = widget.live?.summaries[_period];
     String two(int v) => v.toString().padLeft(2, '0');
     final outcomes = [
       _OutcomeData(
         l10n.supervisorCollected,
-        two(data.collected),
+        two(live?.collected ?? data.collected),
         DriverColors.primary500,
         '$_assetRoot/check.svg',
         DriverColors.primary50,
@@ -741,7 +804,7 @@ class _CollectionSummaryState extends State<_CollectionSummary> {
       ),
       _OutcomeData(
         l10n.supervisorKg,
-        two(data.zeroKg),
+        two(live?.zeroKg ?? data.zeroKg),
         DriverColors.slate600,
         '$_assetRoot/scale.svg',
         DriverColors.slate50,
@@ -749,7 +812,7 @@ class _CollectionSummaryState extends State<_CollectionSummary> {
       ),
       _OutcomeData(
         l10n.supervisorMissed,
-        two(data.missed),
+        two(live?.missed ?? data.missed),
         DriverColors.red600,
         '$_assetRoot/alert.svg',
         DriverColors.red100,
@@ -757,7 +820,7 @@ class _CollectionSummaryState extends State<_CollectionSummary> {
       ),
       _OutcomeData(
         l10n.supervisorCancelled,
-        two(data.cancelled),
+        two(live?.cancelled ?? data.cancelled),
         DriverColors.purple600,
         '$_assetRoot/ban.svg',
         DriverColors.purple50,
@@ -765,7 +828,7 @@ class _CollectionSummaryState extends State<_CollectionSummary> {
       ),
       _OutcomeData(
         l10n.supervisorTripsToday,
-        '05',
+        live != null ? two(live.trips) : '05',
         DriverColors.blue600,
         '$_assetRoot/trips_today.svg',
         DriverColors.secondary100,
@@ -812,8 +875,8 @@ class _CollectionSummaryState extends State<_CollectionSummary> {
                       key: const Key('supervisor-summary-label'),
                       l10n.rpCollectedStops(
                         l10n.collectedPeriodLabel(_period),
-                        l10n.number(data.collected),
-                        l10n.number(data.due),
+                        l10n.number(live?.collected ?? data.collected),
+                        l10n.number(live?.stops ?? data.due),
                       ),
                       style: DriverTextStyles.medium12.copyWith(
                         color: DriverColors.neutral900,
@@ -821,7 +884,12 @@ class _CollectionSummaryState extends State<_CollectionSummary> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.totalText(data),
+                      live != null
+                          ? l10n.rpTotal(
+                              l10n.number(live.kg.round()),
+                              l10n.number(live.pieces.round()),
+                            )
+                          : l10n.totalText(data),
                       style: DriverTextStyles.bold20.copyWith(
                         color: DriverColors.neutral950,
                       ),
@@ -893,9 +961,10 @@ class _OutcomeData {
 }
 
 class _TripsCard extends StatelessWidget {
-  const _TripsCard({required this.l10n});
+  const _TripsCard({required this.l10n, this.live});
 
   final DriverLocalizations l10n;
+  final SupervisorHomeLive? live;
 
   @override
   Widget build(BuildContext context) {
@@ -910,29 +979,61 @@ class _TripsCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.supervisorTripsSubtitle,
+            live != null
+                ? l10n.liveTripsTodayCount(live!.tripsToday)
+                : l10n.supervisorTripsSubtitle,
             style: DriverTextStyles.medium14.copyWith(
               color: DriverColors.neutral700,
             ),
           ),
           const SizedBox(height: 16),
-          _TripTile(
-            title: l10n.supervisorAdajanMorning,
-            progress: l10n.supervisorVikramProgress,
-            firstTag: l10n.supervisorOwnVehicle,
-            secondTag: l10n.supervisorDailyWeekly,
-            secondTagWarning: false,
-            button: l10n.supervisorCallDriver,
-          ),
-          const SizedBox(height: 8),
-          _TripTile(
-            title: l10n.supervisorPalGamMorning,
-            progress: l10n.supervisorAmitProgress,
-            firstTag: l10n.supervisorOwnVehicle,
-            secondTag: l10n.supervisorDriverNotSetUp,
-            secondTagWarning: true,
-            button: l10n.supervisorCallDriver,
-          ),
+          if (live != null) ...[
+            if (live!.trips.isEmpty)
+              Text(
+                l10n.liveNoTripsToday,
+                style: DriverTextStyles.medium14.copyWith(
+                  color: DriverColors.neutral700,
+                ),
+              ),
+            for (final trip in live!.trips) ...[
+              _TripTile(
+                title: '${trip.routeName} · ${trip.shiftName}',
+                progress: l10n.liveCollectedOf(
+                  trip.driverName ?? '—',
+                  trip.collected,
+                  trip.stops,
+                ),
+                firstTag: trip.vehicleKind == 'CONTRACT'
+                    ? l10n.liveRentedTruck
+                    : l10n.supervisorOwnVehicle,
+                secondTag: trip.driverNotUsingApp
+                    ? l10n.supervisorDriverNotSetUp
+                    : trip.status,
+                secondTagWarning: trip.driverNotUsingApp,
+                button: l10n.supervisorCallDriver,
+                tripId: trip.id,
+              ),
+              if (trip != live!.trips.last) const SizedBox(height: 8),
+            ],
+          ] else ...[
+            _TripTile(
+              title: l10n.supervisorAdajanMorning,
+              progress: l10n.supervisorVikramProgress,
+              firstTag: l10n.supervisorOwnVehicle,
+              secondTag: l10n.supervisorDailyWeekly,
+              secondTagWarning: false,
+              button: l10n.supervisorCallDriver,
+            ),
+            const SizedBox(height: 8),
+            _TripTile(
+              title: l10n.supervisorPalGamMorning,
+              progress: l10n.supervisorAmitProgress,
+              firstTag: l10n.supervisorOwnVehicle,
+              secondTag: l10n.supervisorDriverNotSetUp,
+              secondTagWarning: true,
+              button: l10n.supervisorCallDriver,
+            ),
+          ],
           const SizedBox(height: 16),
           FilledButton(
             key: const Key('supervisor-see-trips-plan'),
@@ -966,8 +1067,11 @@ class _TripTile extends StatelessWidget {
     required this.secondTag,
     required this.secondTagWarning,
     required this.button,
+    this.tripId,
   });
 
+  /// The live trip; null opens the design sample.
+  final String? tripId;
   final String title;
   final String progress;
   final String firstTag;
@@ -986,7 +1090,9 @@ class _TripTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute<void>(builder: (_) => const RouteDetailScreen()),
+          MaterialPageRoute<void>(
+            builder: (_) => RouteDetailScreen(tripId: tripId),
+          ),
         ),
         child: Container(
           width: double.infinity,
@@ -1110,12 +1216,27 @@ class _Tag extends StatelessWidget {
 }
 
 class _PickupPointsCard extends StatelessWidget {
-  const _PickupPointsCard({required this.l10n});
+  const _PickupPointsCard({required this.l10n, this.live});
 
   final DriverLocalizations l10n;
+  final SupervisorHomeLive? live;
 
   @override
   Widget build(BuildContext context) {
+    final counts = live?.categories;
+    if (counts != null) {
+      final values = [
+        (l10n.supervisorDaily, counts['DAILY'] ?? 0),
+        (l10n.supervisorWeekly, counts['WEEKLY'] ?? 0),
+        (l10n.supervisorBiWeekly, counts['BI_WEEKLY'] ?? 0),
+        (l10n.supervisorMonthly, counts['MONTHLY'] ?? 0),
+        (l10n.supervisorOnCall, counts['ON_CALL'] ?? 0),
+      ];
+      final top = values.fold<int>(0, (m, v) => v.$2 > m ? v.$2 : m);
+      return _pickupCard([
+        for (final v in values) (v.$1, v.$2, top == 0 ? 0.0 : v.$2 / top),
+      ]);
+    }
     final rows = [
       (l10n.supervisorDaily, 42, 1.0),
       (l10n.supervisorWeekly, 18, 18 / 42),
@@ -1124,6 +1245,10 @@ class _PickupPointsCard extends StatelessWidget {
       (l10n.supervisorOnCall, 9, 9 / 42),
     ];
 
+    return _pickupCard(rows);
+  }
+
+  Widget _pickupCard(List<(String, int, double)> rows) {
     return _SurfaceCard(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -1147,7 +1272,12 @@ class _PickupPointsCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      l10n.supervisorPickupPointsSubtitle,
+                      live != null
+                          ? l10n.livePickupPointsByCategory(
+                              live!.categories.values.fold(0, (a, b) => a + b),
+                              live!.areas,
+                            )
+                          : l10n.supervisorPickupPointsSubtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: DriverTextStyles.medium12.copyWith(

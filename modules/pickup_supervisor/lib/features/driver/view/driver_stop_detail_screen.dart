@@ -3,8 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_live_data.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_stop_entry.dart';
 import 'package:pickup_supervisor/features/driver/model/driver_pickup_stop.dart';
 import 'package:pickup_supervisor/features/driver/view/driver_mixed_waste_form_screen.dart';
 import 'package:pickup_supervisor/features/driver/view/driver_nothing_to_collect_screen.dart';
@@ -21,21 +24,58 @@ class DriverStopDetailScreen extends StatelessWidget {
   const DriverStopDetailScreen({
     super.key,
     this.pickupType = DriverPickupType.sorted,
+    this.stopId,
+    this.tripId,
   });
 
   final DriverPickupType pickupType;
 
+  /// The live stop; null shows the design preview.
+  final String? stopId;
+  final String? tripId;
+
   @override
   Widget build(BuildContext context) {
+    final id = stopId;
+    final preview = _DriverStopDetailView(pickupType: pickupType);
     return DriverLocalizationScope(
-      child: _DriverStopDetailView(pickupType: pickupType),
+      child: id == null
+          ? preview
+          : OutboundLiveBuilder<_LiveStop?>(
+              load: (session) => _LiveStop.load(session, id),
+              fallback: preview,
+              builder: (context, data, _) => data == null
+                  ? preview
+                  : _DriverStopDetailView(
+                      pickupType: data.stop.pickupType,
+                      live: data,
+                    ),
+            ),
+    );
+  }
+}
+
+class _LiveStop {
+  const _LiveStop(this.stop, this.target);
+
+  final DriverStopLive stop;
+  final DriverStopTarget target;
+
+  static Future<_LiveStop?> load(OutboundLiveSession session, String id) async {
+    final row = await session.queries.driverStop(id);
+    final target = await DriverStopTarget.load(session, id);
+    if (row == null || target == null) return null;
+    return _LiveStop(
+      DriverStopLive.fromRow(row, totalStops: target.totalStops),
+      target,
     );
   }
 }
 
 class _DriverStopDetailView extends StatelessWidget {
-  const _DriverStopDetailView({required this.pickupType});
+  const _DriverStopDetailView({required this.pickupType, this.live});
   final DriverPickupType pickupType;
+  final _LiveStop? live;
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +113,16 @@ class _DriverStopDetailView extends StatelessWidget {
                             onBack: () => Navigator.of(context).pop(),
                           ),
                           const SizedBox(height: 24),
-                          _SourceCard(isMixed: isMixed),
+                          _SourceCard(isMixed: isMixed, live: live?.stop),
                           const SizedBox(height: 16),
-                          _PickupPersonCard(isMixed: isMixed),
+                          _PickupPersonCard(isMixed: isMixed, live: live?.stop),
                           const SizedBox(height: 16),
-                          _RequestInformationCard(isMixed: isMixed),
+                          _RequestInformationCard(
+                            isMixed: isMixed,
+                            live: live?.stop,
+                          ),
                           const SizedBox(height: 16),
-                          const _DescriptionCard(),
+                          _DescriptionCard(live: live?.stop),
                           const SizedBox(height: 32),
                           DriverPrimaryButton(
                             key: const Key('driver-start-pickup'),
@@ -88,8 +131,12 @@ class _DriverStopDetailView extends StatelessWidget {
                             onPressed: () => Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (_) => isMixed
-                                    ? const DriverMixedWasteFormScreen()
-                                    : const DriverSortedWasteFormScreen(),
+                                    ? DriverMixedWasteFormScreen(
+                                        target: live?.target,
+                                      )
+                                    : DriverSortedWasteFormScreen(
+                                        target: live?.target,
+                                      ),
                               ),
                             ),
                           ),
@@ -101,8 +148,9 @@ class _DriverStopDetailView extends StatelessWidget {
                               key: const Key('driver-nothing-to-collect'),
                               onPressed: () => Navigator.of(context).push(
                                 MaterialPageRoute<void>(
-                                  builder: (_) =>
-                                      const DriverNothingToCollectScreen(),
+                                  builder: (_) => DriverNothingToCollectScreen(
+                                    target: live?.target,
+                                  ),
                                 ),
                               ),
                               icon: SvgPicture.asset(
@@ -139,8 +187,9 @@ class _DriverStopDetailView extends StatelessWidget {
 }
 
 class _SourceCard extends StatelessWidget {
-  const _SourceCard({required this.isMixed});
+  const _SourceCard({required this.isMixed, this.live});
   final bool isMixed;
+  final DriverStopLive? live;
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +216,8 @@ class _SourceCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isMixed ? l10n.shreeSaiDairy : l10n.abcTextileMills,
+                  live?.sourceName ??
+                      (isMixed ? l10n.shreeSaiDairy : l10n.abcTextileMills),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: DriverTextStyles.semibold16.copyWith(
@@ -176,7 +226,9 @@ class _SourceCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  l10n.stopTripPosition,
+                  live != null
+                      ? l10n.stopPosition(live!.stopOrder, live!.totalStops)
+                      : l10n.stopTripPosition,
                   style: DriverTextStyles.medium12.copyWith(
                     color: DriverColors.neutral500,
                   ),
@@ -191,8 +243,9 @@ class _SourceCard extends StatelessWidget {
 }
 
 class _PickupPersonCard extends StatelessWidget {
-  const _PickupPersonCard({required this.isMixed});
+  const _PickupPersonCard({required this.isMixed, this.live});
   final bool isMixed;
+  final DriverStopLive? live;
 
   @override
   Widget build(BuildContext context) {
@@ -232,7 +285,9 @@ class _PickupPersonCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isMixed
+                      live != null
+                          ? (live!.contactName ?? '')
+                          : isMixed
                           ? l10n.maheshOwner.split(' · ').first
                           : l10n.rakeshShah,
                       maxLines: 1,
@@ -242,7 +297,9 @@ class _PickupPersonCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      isMixed
+                      live != null
+                          ? (live!.contactRole ?? '')
+                          : isMixed
                           ? l10n.maheshOwner.split(' · ').last
                           : l10n.storeManager,
                       style: DriverTextStyles.medium12.copyWith(
@@ -250,7 +307,9 @@ class _PickupPersonCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      isMixed
+                      live != null
+                          ? (live!.contactPhone ?? '')
+                          : isMixed
                           ? l10n.mixedDriverPhoneNumber
                           : l10n.pickupContactPhone,
                       style: DriverTextStyles.medium12.copyWith(
@@ -292,8 +351,9 @@ class _PickupPersonCard extends StatelessWidget {
 }
 
 class _RequestInformationCard extends StatelessWidget {
-  const _RequestInformationCard({required this.isMixed});
+  const _RequestInformationCard({required this.isMixed, this.live});
   final bool isMixed;
+  final DriverStopLive? live;
 
   @override
   Widget build(BuildContext context) {
@@ -313,11 +373,19 @@ class _RequestInformationCard extends StatelessWidget {
           const SizedBox(height: 12),
           const _Divider(),
           const SizedBox(height: 12),
-          _BulletInfo(label: l10n.address, value: l10n.pickupAddress),
+          _BulletInfo(
+            label: l10n.address,
+            value: live?.address ?? l10n.pickupAddress,
+          ),
           const SizedBox(height: 12),
           const _Divider(),
           const SizedBox(height: 12),
-          _BulletInfo(label: l10n.schedule, value: l10n.pickupSchedule),
+          _BulletInfo(
+            label: l10n.schedule,
+            value: live != null
+                ? (live!.window ?? l10n.liveAnyTime)
+                : l10n.pickupSchedule,
+          ),
           const SizedBox(height: 12),
           const _Divider(),
           const SizedBox(height: 12),
@@ -351,7 +419,7 @@ class _RequestInformationCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (!isMixed)
+              if (!isMixed && live == null)
                 Text(
                   l10n.materialItems,
                   style: DriverTextStyles.regular14.copyWith(
@@ -365,7 +433,11 @@ class _RequestInformationCard extends StatelessWidget {
           const SizedBox(height: 12),
           _BulletInfo(
             label: l10n.expectedWeight,
-            value: isMixed
+            value: live != null
+                ? (live!.expectedQtyKg == null
+                      ? '—'
+                      : l10n.liveKg(formatKg(live!.expectedQtyKg!)))
+                : isMixed
                 ? l10n.mixedExpectedWeightValue
                 : l10n.expectedWeightValue,
           ),
@@ -470,7 +542,8 @@ class _BulletInfo extends StatelessWidget {
 }
 
 class _DescriptionCard extends StatelessWidget {
-  const _DescriptionCard();
+  const _DescriptionCard({this.live});
+  final DriverStopLive? live;
 
   @override
   Widget build(BuildContext context) {
@@ -489,7 +562,7 @@ class _DescriptionCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            l10n.pickupDescription,
+            live != null ? (live!.note ?? '—') : l10n.pickupDescription,
             style: DriverTextStyles.medium12.copyWith(
               color: DriverColors.neutral900,
             ),

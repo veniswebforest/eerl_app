@@ -3,8 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_live_data.dart';
 import 'package:pickup_supervisor/features/driver/model/driver_pickup_stop.dart';
 import 'package:pickup_supervisor/features/driver/view/driver_collected_stop_detail_screen.dart';
 import 'package:pickup_supervisor/features/driver/view/driver_location_flow_screen.dart';
@@ -18,13 +20,178 @@ const _homeAssets = 'assets/icons/driver/home_v2';
 const _package = 'pickup_supervisor';
 
 class DriverStopsScreen extends StatelessWidget {
-  const DriverStopsScreen({super.key});
+  const DriverStopsScreen({super.key, this.tripId});
 
   static const routeName = 'driver-stops';
 
+  /// The live trip; null shows the design preview.
+  final String? tripId;
+
   @override
   Widget build(BuildContext context) {
-    return const DriverLocalizationScope(child: _DriverStopsView());
+    final id = tripId;
+    return DriverLocalizationScope(
+      child: id == null
+          ? const _DriverStopsView()
+          : OutboundLiveBuilder<_LiveTripStops>(
+              load: (session) => _LiveTripStops.load(session, id),
+              fallback: const _DriverStopsView(),
+              builder: (context, data, _) => _LiveStopsView(data: data),
+            ),
+    );
+  }
+}
+
+class _LiveTripStops {
+  const _LiveTripStops(this.trip, this.stops);
+
+  final DriverTripLive? trip;
+  final List<DriverStopLive> stops;
+
+  static Future<_LiveTripStops> load(
+    OutboundLiveSession session,
+    String tripId,
+  ) async {
+    final row = await session.queries.driverTrip(tripId);
+    return _LiveTripStops(
+      row == null ? null : DriverTripLive.fromRow(row),
+      await loadDriverTripStops(session, tripId),
+    );
+  }
+}
+
+/// Trip stops from SQLite: the next stop, the ones still to collect, then
+/// the stops done (outbound doc, Driver screens · Trip stops).
+class _LiveStopsView extends StatelessWidget {
+  const _LiveStopsView({required this.data});
+
+  final _LiveTripStops data;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = DriverLocalizations.of(context);
+    final topInset = MediaQuery.paddingOf(context).top;
+    final open = data.stops.where((s) => s.isOpen).toList();
+    final done = data.stops.where((s) => !s.isOpen).toList();
+    final trip = data.trip;
+    String material(DriverStopLive s) => s.pickupType == DriverPickupType.sorted
+        ? l10n.sortedMaterial
+        : l10n.mixedMaterial;
+    Widget openCard(DriverStopLive stop, {required bool isNext}) =>
+        _FullStopCard(
+          key: ValueKey('driver-stop-${stop.id}'),
+          title: l10n.stopCardTitle(stop.sourceName, material(stop)),
+          position: l10n.stopPosition(stop.stopOrder, data.stops.length),
+          location: stop.address,
+          schedule: stop.window ?? l10n.liveAnyTime,
+          contact: stop.contact,
+          isNext: isNext,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => DriverStopDetailScreen(
+                pickupType: stop.pickupType,
+                stopId: stop.id,
+                tripId: stop.tripId,
+              ),
+            ),
+          ),
+        );
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: DriverColors.background,
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: ListView(
+              key: const Key('driver-stops-list'),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                topInset + 18,
+                20,
+                math.max(MediaQuery.paddingOf(context).bottom, 20),
+              ),
+              children: [
+                DriverStopsPageHeader(
+                  title: trip?.routeName ?? l10n.tripOneStops,
+                  backAsset: 'assets/icons/driver/stops_v2/back.svg',
+                  onBack: () => Navigator.of(context).pop(),
+                ),
+                const SizedBox(height: 24),
+                _TripHeaderCard(live: trip),
+                if (open.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _SectionLabel(l10n.nextStop),
+                  const SizedBox(height: 12),
+                  openCard(open.first, isNext: true),
+                ],
+                if (open.length > 1) ...[
+                  const SizedBox(height: 12),
+                  _SectionLabel(l10n.stillToCollect(open.length - 1)),
+                  for (final stop in open.skip(1)) ...[
+                    const SizedBox(height: 12),
+                    openCard(stop, isNext: false),
+                  ],
+                ],
+                if (done.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  _SectionLabel(l10n.doneStops(done.length)),
+                  for (final stop in done) ...[
+                    const SizedBox(height: 8),
+                    _liveDoneCard(context, stop, material(stop)),
+                  ],
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _liveDoneCard(
+    BuildContext context,
+    DriverStopLive stop,
+    String material,
+  ) {
+    final l10n = DriverLocalizations.of(context);
+    final (status, value, type) = switch (stop.status) {
+      'COLLECTED' => (
+        l10n.collectedLabel,
+        l10n.liveKg(formatKg(stop.totalKg ?? _linesKg(stop))),
+        _DoneType.collected,
+      ),
+      'NOT_COLLECTED' => (l10n.zeroKg, l10n.nothingToCollect, _DoneType.zero),
+      'AT_GATE' => (l10n.gateTeamWillEnter, '', _DoneType.zero),
+      _ => (l10n.cancelledBySource, '', _DoneType.cancelled),
+    };
+    return _DoneStopCard(
+      key: ValueKey('driver-done-stop-${stop.id}'),
+      title: l10n.stopCardTitle(stop.sourceName, material),
+      position: l10n.stopNumber(stop.stopOrder),
+      status: status,
+      value: value,
+      type: type,
+      onTap: stop.status == 'COLLECTED'
+          ? () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) =>
+                    DriverCollectedStopDetailScreen(stopId: stop.id),
+              ),
+            )
+          : null,
+    );
+  }
+
+  static double _linesKg(DriverStopLive stop) {
+    var total = 0.0;
+    for (final line in stop.entryLines) {
+      if (line is Map && line['unit'] == 'KG') {
+        total += (line['quantity'] as num?)?.toDouble() ?? 0;
+      }
+    }
+    return total;
   }
 }
 
@@ -206,7 +373,10 @@ class _SectionLabel extends StatelessWidget {
 }
 
 class _TripHeaderCard extends StatelessWidget {
-  const _TripHeaderCard();
+  const _TripHeaderCard({this.live});
+
+  /// The live trip; null shows the design sample.
+  final DriverTripLive? live;
 
   @override
   Widget build(BuildContext context) {
@@ -219,7 +389,13 @@ class _TripHeaderCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  l10n.morningTripWindow,
+                  live != null
+                      ? l10n.liveTripTime(
+                          formatClock(live!.shiftStart),
+                          formatClock(live!.shiftEnd),
+                          live!.stops,
+                        )
+                      : l10n.morningTripWindow,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: DriverTextStyles.semibold16.copyWith(
@@ -229,7 +405,9 @@ class _TripHeaderCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                l10n.fiveOfSevenDone,
+                live != null
+                    ? '${live!.done}/${live!.stops}'
+                    : l10n.fiveOfSevenDone,
                 style: DriverTextStyles.semibold14.copyWith(
                   color: DriverColors.primary500,
                 ),
@@ -247,12 +425,14 @@ class _TripHeaderCard extends StatelessWidget {
               children: [
                 _InfoLine(
                   asset: '$_homeAssets/vehicle.svg',
-                  text: l10n.vehicleCrew,
+                  text: live?.crew ?? l10n.vehicleCrew,
                 ),
                 const SizedBox(height: 8),
                 _InfoLine(
                   asset: '$_homeAssets/warehouse.svg',
-                  text: l10n.dropMagdalla,
+                  text: live != null
+                      ? l10n.liveDropAt(live!.warehouseName)
+                      : l10n.dropMagdalla,
                   strong: true,
                 ),
               ],
@@ -262,28 +442,28 @@ class _TripHeaderCard extends StatelessWidget {
           Row(
             children: [
               _Count(
-                3,
+                live?.collected ?? 3,
                 l10n.collectedLabel,
                 DriverColors.primary50,
                 DriverColors.primary500,
               ),
               const SizedBox(width: 6),
               _Count(
-                2,
+                live?.pending ?? 2,
                 l10n.pendingStatus,
                 DriverColors.yellow50,
                 DriverColors.yellow700,
               ),
               const SizedBox(width: 6),
               _Count(
-                1,
+                live?.zeroKg ?? 1,
                 l10n.zeroKg,
                 DriverColors.cool300,
                 DriverColors.neutral800,
               ),
               const SizedBox(width: 6),
               _Count(
-                1,
+                live?.cancelled ?? 1,
                 l10n.cancelled,
                 DriverColors.purple50,
                 DriverColors.purple600,
@@ -302,7 +482,9 @@ class _TripHeaderCard extends StatelessWidget {
                 ),
               ),
               Text(
-                l10n.weight420Kg,
+                live != null
+                    ? l10n.liveKg(formatKg(live!.collectedKg))
+                    : l10n.weight420Kg,
                 style: DriverTextStyles.bold16.copyWith(
                   color: DriverColors.neutral950,
                 ),

@@ -4,9 +4,48 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pickup_supervisor/features/driver/view/driver_home_screen.dart';
 
 void main() {
-  testWidgets('renders the Figma morning dashboard state', (tester) async {
+  testWidgets('app start: trip not started, Start trip puts it on the way', (
+    tester,
+  ) async {
     _setDesignSize(tester);
     await tester.pumpWidget(const MaterialApp(home: DriverHomeScreen()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Thu, 22 Oct · Adajan'), findsOneWidget);
+    expect(find.text('Everything is synced'), findsOneWidget);
+    expect(find.text('0 kg so far'), findsOneWidget);
+    expect(find.text('13'), findsOneWidget);
+
+    final start = find.byKey(const Key('driver-start-trip'));
+    await tester.ensureVisible(start);
+    await tester.pumpAndSettle();
+    for (final t in [
+      'Not started',
+      '8:00 am – 2:00 pm · 7 stops',
+      'GJ-05-BX-1234 · Vikram, Ravi',
+      'Drop at Adajan Central Warehouse',
+      '0 of 7 stops done',
+      'Start trip',
+      'Tap when you leave the warehouse. Your supervisor sees the time and place.',
+      'See all 7 stops',
+    ]) {
+      expect(find.text(t), findsOneWidget, reason: t);
+    }
+    expect(find.text('Starts 2:00 pm'), findsOneWidget);
+
+    await tester.tap(start);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('driver-start-trip')), findsNothing);
+    expect(find.text('On the way'), findsOneWidget);
+  });
+
+  testWidgets('renders the Figma morning dashboard state', (tester) async {
+    _setDesignSize(tester);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: DriverHomeScreen(viewMode: DriverHomeViewMode.morning),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('driver-home-title')), findsOneWidget);

@@ -1,173 +1,90 @@
 {
   "@@locale": "hi",
-
   "appTitle": "ईआरएल ऐप",
-
   "home": "होम",
-
   "profile": "प्रोफाइल",
-
   "settings": "सेटिंग्स",
-
   "details": "विवरण",
-
   "welcomeMessage": "ईआरएल में आपका स्वागत है",
-
   "welcomeSubtitle": "आपका प्रोडक्शन-रेडी फ़्लटर ऐप्लिकेशन",
-
   "exploreFeatures": "विशेषताएँ देखें",
-
   "localization": "भाषा समर्थन",
-
   "localizationDesc": "अंग्रेज़ी और हिन्दी में बहु-भाषा समर्थन",
-
   "darkMode": "डार्क मोड",
-
   "darkModeDesc": "लाइट और डार्क थीम के बीच आसान स्विचिंग",
-
   "theming": "थीमिंग",
-
   "themingDesc": "केंद्रीकृत रंग और शैली प्रबंधन",
-
   "navigation": "नेविगेशन",
-
   "navigationDesc": "GoRouter के साथ डिक्लेरेटिव रूटिंग",
-
   "viewDetails": "विवरण देखें",
-
   "featureDetail": "फ़ीचर विवरण",
-
   "featureDetailBody": "यह स्क्रीन आर्गुमेंट्स के साथ रूट नेविगेशन दर्शाती है। आपके द्वारा चुनी गई सुविधा नीचे प्रदर्शित है।",
-
   "featureName": "फ़ीचर: {name}",
-
   "goBack": "वापस जाएँ",
-
   "profileTitle": "मेरी प्रोफाइल",
-
   "profileName": "ईआरएल उपयोगकर्ता",
-
   "profileEmail": "user@eerl.app",
-
   "profileBio": "अद्भुत ऐप्लिकेशन बनाने वाला एक फ़्लटर डेवलपर।",
-
   "editProfile": "प्रोफाइल संपादित करें",
-
   "accountInfo": "खाता जानकारी",
-
   "memberSince": "सदस्य तिथि",
-
   "memberSinceDate": "जनवरी 2025",
-
   "appVersion": "ऐप संस्करण",
-
   "appVersionNumber": "1.0.0",
-
   "status": "स्थिति",
-
   "activeStatus": "सक्रिय",
-
   "settingsTitle": "सेटिंग्स",
-
   "appearance": "दिखावट",
-
   "theme": "थीम",
-
   "systemTheme": "सिस्टम डिफ़ॉल्ट",
-
   "lightTheme": "लाइट",
-
   "darkThemeOption": "डार्क",
-
   "language": "भाषा",
-
   "english": "English",
-
   "hindi": "हिन्दी",
-
   "gujarati": "ગુજરાતી",
-
   "general": "सामान्य",
-
   "notifications": "सूचनाएँ",
-
   "notificationsDesc": "पुश सूचनाएँ प्राप्त करें",
-
   "about": "ऐप के बारे में",
-
   "privacyPolicy": "गोपनीयता नीति",
-
   "termsOfService": "सेवा की शर्तें",
-
   "licenses": "ओपन सोर्स लाइसेंस",
-
   "showBottomSheet": "बॉटम शीट दिखाएँ",
-
   "showDialog": "डायलॉग दिखाएँ",
-
   "showSnackbar": "स्नैकबार दिखाएँ",
-
   "sampleBottomSheetTitle": "बॉटम शीट",
-
   "sampleBottomSheetMessage": "यह एक थीम्ड बॉटम शीट है जो लाइट और डार्क मोड में स्थानीयकृत टेक्स्ट के साथ अनुकूलित होती है।",
-
   "sampleDialogTitle": "पुष्टिकरण",
-
   "sampleDialogMessage": "यह डायलॉग लाइट और डार्क दोनों थीम में अनुकूलित होता है। सभी टेक्स्ट स्थानीयकृत हैं।",
-
   "sampleSnackbarMessage": "यह एक थीम्ड स्नैकबार संदेश है! ✨",
-
   "cancel": "रद्द करें",
-
   "confirm": "पुष्टि करें",
-
   "close": "बंद करें",
-
   "ok": "ठीक है",
-
   "error": "त्रुटि",
   "toastSuccessTitle": "सफलता",
   "toastInfoTitle": "जानकारी",
-
   "pageNotFound": "पृष्ठ नहीं मिला",
-
   "pageNotFoundMessage": "आप जिस पृष्ठ की तलाश कर रहे हैं वह मौजूद नहीं है।",
-
   "returnHome": "होम पर वापस जाएँ",
-
   "quickActions": "त्वरित कार्य",
-
   "selectTheme": "थीम चुनें",
-
   "selectLanguage": "भाषा चुनें",
-
   "loginWelcome": "स्वागत है!",
-
   "loginSubtitle": "अपने फोन नंबर से लॉगिन करें",
-
   "mobileNumberLabel": "अपना मोबाइल नंबर दर्ज करें",
-
   "mobileNumberHint": "अपना नंबर दर्ज करें",
-
   "invalidMobileNumber": "कृपया मान्य मोबाइल नंबर दर्ज करें",
-
   "continueBtn": "आगे बढ़ें",
-
   "otpTitle": "OTP कोड दर्ज करें",
-
   "otpDescription": "हमने अनुमोदन के लिए आपके रिपोर्टिंग प्रबंधक को एक सुरक्षा कोड भेजा है ({phone})",
-
   "invalidOtp": "यह कोड समाप्त हो गया है, कृपया नए का अनुरोध करें।",
-
   "otpVerified": "OTP सफलतापूर्वक सत्यापित हो गया!",
-
   "didntGetOtp": "क्या आपको OTP नहीं मिला?",
-
   "resendOtp": "पुनः भेजें",
   "otpResentSuccess": "नया लॉगिन कोड फिर से भेज दिया गया है।",
-
   "verifyBtn": "सत्यापित करें",
-
   "welcomeBack": "वापसी पर स्वागत है",
   "homeInitialDataSyncing": "डेटा सिंक हो रहा है...",
   "homeInitialDataSyncingSubtitle": "ऑफ़लाइन उपयोग के लिए आपका नवीनतम डेटा अपडेट हो रहा है। इसके बाद आप इंटरनेट के बिना भी काम जारी रख सकते हैं, और दोबारा ऑनलाइन होने पर आपके बदलाव अपने-आप सिंक हो जाएंगे।",
@@ -329,7 +246,7 @@
   "expenseVehicleDate": "20 जुलाई 2026 • 01:15 अपराह्न",
   "expenseVehicleAmount": "-₹1500",
   "expenseFlagged": "चिह्नित",
-  "expenseRejectedSupervisor": "सुपरवाइज़र द्वारा अस्वीकृत",
+  "expenseRejectedSupervisor": "पर्यवेक्षक द्वारा अस्वीकृत",
   "cashRequestEmergencyFuel": "आपातकालीन ईंधन",
   "cashRequestEmergencyFuelDate": "12 मई 2026 • 02:30 PM",
   "cashRequestEmergencyFuelAmount": "+₹4,000",
@@ -350,9 +267,21 @@
   "d2dSelectTargetCenter": "लक्षित एजेंट / केंद्र असाइन करें",
   "d2dSelectCenter": "केंद्र चुनें",
   "d2dVehicleActiveCount": "सक्रिय ({count})",
-  "@d2dVehicleActiveCount": {"placeholders": {"count": {"type": "int"}}},
+  "@d2dVehicleActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "d2dVehicleDeactivatedCount": "निष्क्रिय ({count})",
-  "@d2dVehicleDeactivatedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@d2dVehicleDeactivatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "d2dAddVehicle": "वाहन जोड़ें",
   "d2dNoVehicleAdded": "अभी तक कोई वाहन नहीं जोड़ा गया",
   "d2dActivatedVehicleTitle": "वाहन सक्रिय है!",
@@ -391,17 +320,29 @@
   "myTasks": "मेरे कार्य",
   "taskOpenCount": "खुले ({count})",
   "@taskOpenCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "taskClosedCount": "बंद ({count})",
   "@taskClosedCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "taskSupervisorName": "भावेश शाह (सुपरवाइज़र)",
   "taskDescription": "फील्ड एजेंट द्वारा जमा की गई नवीनतम संग्रह प्रविष्टि की समीक्षा और सत्यापन करें...",
   "taskPhotoAttached": "{count} फोटो संलग्न",
   "@taskPhotoAttached": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "taskDueToday": "आज, शाम 5:00 बजे",
   "taskDueTomorrow": "कल, दोपहर 2:00 बजे",
@@ -426,11 +367,19 @@
   "configureMaterialsSubtitle": "सामग्री का क्रम बदलने के लिए हैंडल खींचें।",
   "configurePlasticCount": "प्लास्टिक ({count})",
   "@configurePlasticCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "configureNonPlasticCount": "गैर-प्लास्टिक ({count})",
   "@configureNonPlasticCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "configureSaveOrder": "क्रम सहेजें",
   "configureSequenceSaved": "क्रम सफलतापूर्वक सहेजा गया",
@@ -463,7 +412,13 @@
   "expenseAmountLabel": "व्यय राशि (₹)",
   "expenseAmountHint": "₹ व्यय राशि दर्ज करें",
   "expenseAmountExceedsWalletBalance": "राशि उपलब्ध वॉलेट बैलेंस ₹{balance} से अधिक नहीं हो सकती।",
-  "@expenseAmountExceedsWalletBalance": {"placeholders":{"balance":{"type":"String"}}},
+  "@expenseAmountExceedsWalletBalance": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
   "uploadReceiptLabel": "रसीद अपलोड करें",
   "capturePhoto": "फोटो लें",
   "receiptSupportMessage": "समर्थित: JPG, PNG (अधिकतम 5MB)। पर्यवेक्षक की समीक्षा के लिए रसीद स्पष्ट दिखाई देनी चाहिए।",
@@ -474,11 +429,19 @@
   "expenseSubmittedTitle": "व्यय जमा हो गया!",
   "expenseSubmittedDeduction": "आपके वॉलेट बैलेंस से ₹{amount} काटे गए।",
   "@expenseSubmittedDeduction": {
-    "placeholders": {"amount": {"type": "String"}}
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "expenseSubmittedBalance": "शेष राशि: ₹{balance}",
   "@expenseSubmittedBalance": {
-    "placeholders": {"balance": {"type": "String"}}
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
   },
   "expenseBackToWallet": "वॉलेट पर वापस जाएँ",
   "expensePendingPrefix": "यह प्रविष्टि ",
@@ -500,7 +463,6 @@
   "expenseRequestStatus": "अनुरोध स्थिति",
   "expenseWaitingSupervisor": "पर्यवेक्षक की प्रतीक्षा में",
   "expenseVerifiedSupervisor": "पर्यवेक्षक द्वारा सत्यापित",
-  "expenseRejectedSupervisor": "पर्यवेक्षक द्वारा अस्वीकृत",
   "expenseUploadedPhoto": "अपलोड की गई फोटो",
   "expenseDetailDescription": "इस व्यय का उद्देश्य और पर्यवेक्षक की स्वीकृति के लिए आवश्यक संबंधित विवरण बताएं।",
   "expenseRejectReasonTitle": "अस्वीकृति का कारण",
@@ -518,7 +480,11 @@
   "cashDetailApprovedSupervisor": "सुपरवाइज़र द्वारा स्वीकृत",
   "cashDetailApprovedNote": "नोट: {amount} आपके सक्रिय नकद वॉलेट बैलेंस में जमा किए गए।",
   "@cashDetailApprovedNote": {
-    "placeholders": {"amount": {"type": "String"}}
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
   },
   "cashDetailRejectReason": "अमान्य / अधूरा अनुरोध",
   "cashDetailRejectRemarks": "आज के मार्ग के लिए आपका मौजूदा वॉलेट बैलेंस पर्याप्त है। कृपया पहले लंबित खर्च दर्ज करें।",
@@ -549,7 +515,13 @@
   "recordsYesterdayCollections": "कल के संग्रह",
   "recordsOctoberCollections": "22 अक्टूबर के संग्रह",
   "recordsDatedCollections": "{date} के संग्रह",
-  "@recordsDatedCollections": {"placeholders": {"date": {"type": "String"}}},
+  "@recordsDatedCollections": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "recordsCollectionDrafts": "संग्रह ड्राफ्ट",
   "recordsTodayTime": "आज • 08:15 AM",
   "recordsOctober22Time": "22 अक्टूबर • 11:15 AM",
@@ -627,7 +599,6 @@
   "syncPendingCollections": "3 संग्रह लंबित",
   "syncPendingItems": "{count} एंट्री सिंक होना बाकी",
   "syncInternetRequired": "इंटरनेट कनेक्शन नहीं है। लंबित डेटा में कोई बदलाव नहीं हुआ।",
-  "syncNow": "अभी सिंक करें",
   "syncAlreadySyncedTitle": "डेटा पहले से सिंक है",
   "syncSuccessfulTitle": "डेटा सफलतापूर्वक सिंक हो गया",
   "syncBack": "वापस",
@@ -661,7 +632,13 @@
   "collectionAddItemLabel": "वस्तु जोड़ें",
   "collectionSelectWasteItem": "कचरे की वस्तु चुनें",
   "collectionItemsSelected": "{count} वस्तुएँ चुनी गईं",
-  "@collectionItemsSelected": {"placeholders":{"count":{"type":"int"}}},
+  "@collectionItemsSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "collectionVehicleNumber": "वाहन नंबर प्लेट",
   "collectionD2dVehicleNumber": "वाहन नंबर",
   "collectionGivenBy": "दिया गया द्वारा",
@@ -693,7 +670,13 @@
   "collectionUnitKg": "किग्रा",
   "collectionUnitPcs": "नग",
   "collectionRatePerUnit": "दर/{unit}",
-  "@collectionRatePerUnit": {"placeholders":{"unit":{"type":"String"}}},
+  "@collectionRatePerUnit": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "collectionPaymentCash": "नकद",
   "collectionPaymentUpi": "UPI",
   "collectionPaymentType": "भुगतान प्रकार",
@@ -780,7 +763,13 @@
   "collectionReceiptDateTime": "दिनांक और समय",
   "collectionReceiptBreakdown": "एकत्रित वस्तुओं का विवरण",
   "collectionItemsCount": "{count} वस्तुएँ",
-  "@collectionItemsCount": {"placeholders":{"count":{"type":"int"}}},
+  "@collectionItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "collectionReceiptAggregateSummary": "कुल सारांश",
   "collectionReceiptAggregateHint": "वज़न और संख्या सारांश",
   "collectionReceiptLaborInvolved": "शामिल श्रमिक",
@@ -837,8 +826,8 @@
   "notificationFiveHours": "5 घंटे पहले",
   "notificationSevenHours": "7 घंटे पहले",
   "notificationYesterday": "कल, 11:30 AM",
-  "notificationPreviousDate": "24 अक्टू., 08:00 AM"
-  ,"homePendingTask": "लंबित टास्क देखें",
+  "notificationPreviousDate": "24 अक्टू., 08:00 AM",
+  "homePendingTask": "लंबित टास्क देखें",
   "homePendingTaskSubtitle": "आपको सौंपे गए कार्य देखें।",
   "homeSuratEastZone": "EERL - सूरत पूर्व ज़ोन",
   "homeSuratNorthZone": "EERL - सूरत उत्तर ज़ोन",
@@ -868,8 +857,8 @@
   "supervisorManageApprovals": "अनुमोदन प्रबंधित करें",
   "supervisorTasksNav": "कार्य",
   "supervisorStockNav": "स्टॉक",
-  "viewTask": "टास्क देखें"
-  ,"endDayOpeningBalance": "आरंभिक शेष",
+  "viewTask": "टास्क देखें",
+  "endDayOpeningBalance": "आरंभिक शेष",
   "endDayOpeningBalanceValue": "₹ 5,000.00",
   "endDayExpensesLogged": "कुल दर्ज खर्च",
   "endDayExpensesValue": "₹ 720.00",
@@ -918,9 +907,21 @@
   "endDayInternetOk": "ठीक है",
   "requestTitle": "अनुरोध",
   "requestOpenCount": "खुले ({count})",
-  "@requestOpenCount": {"placeholders": {"count": {"type": "int"}}},
+  "@requestOpenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "requestClosedCount": "बंद ({count})",
-  "@requestClosedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@requestClosedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "requestSearchHint": "यहाँ खोजें...",
   "requestSupervisorName": "भावेश शाह (सुपरवाइज़र)",
   "requestOpenDescriptionOne": "कैलिब्रेशन के दौरान रैम्प B का वज़न मापने वाला स्केल शून्य त्रुटि और लगातार झिलमिलाहट दिखा रहा है...",
@@ -932,7 +933,13 @@
   "requestAwaitingResponse": "उत्तर की प्रतीक्षा",
   "requestClosedBySupervisor": "सुपरवाइज़र द्वारा बंद",
   "requestTodayTime": "आज, {time}",
-  "@requestTodayTime": {"placeholders": {"time": {"type": "String"}}},
+  "@requestTodayTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "requestEmptyMessage": "अभी कोई अनुरोध नहीं",
   "requestRaiseButton": "अनुरोध करें",
   "requestRaiseTitle": "अनुरोध करें",
@@ -945,7 +952,13 @@
   "requestFollowupDateTime": "अगली फ़ॉलो-अप तारीख और समय *",
   "requestFollowupFutureError": "फ़ॉलो-अप के लिए भविष्य की तारीख और समय चुनें।",
   "requestFollowupBy": "फ़ॉलो-अप {dateTime} तक",
-  "@requestFollowupBy": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@requestFollowupBy": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "requestOverdue": "समय सीमा पार",
   "requestSubmitFailed": "अनुरोध सहेजा नहीं जा सका। फिर प्रयास करें।",
   "requestSelectDateTime": "तारीख और समय चुनें",
@@ -975,7 +988,13 @@
   "requestCompletedStatus": "पूर्ण: आज, 11:30 AM",
   "requestCompletedLabel": "पूर्ण",
   "requestCompletedValue": "पूर्ण: {dateTime}",
-  "@requestCompletedValue": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@requestCompletedValue": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "requestDetailDescription": "फील्ड एजेंट द्वारा जमा की गई नवीनतम कलेक्शन एंट्री की समीक्षा और सत्यापन करें। दर्ज कलेक्शन वज़न को सत्यापित वज़न से मिलाएँ, अपलोड किए गए सभी फ़ोटो जाँचें और अंतिम स्वीकृति से पहले ग्राहक तथा सामग्री विवरण का सिस्टम रिकॉर्ड से मिलान सुनिश्चित करें।",
   "transferDetailTitle": "ट्रांसफर अनुरोध विवरण",
   "transferDetailRequestId": "#TRF-2026-089",
@@ -987,7 +1006,13 @@
   "transferVehicleInformation": "वाहन की जानकारी",
   "supervisorTransferDispatchStatus": "डिस्पैच",
   "transferEstimateHours": "{count} घंटे",
-  "@transferEstimateHours": {"placeholders": {"count": {"type": "int"}}},
+  "@transferEstimateHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "transferDetailVehicleNumber": "GJ-05-AB-1234",
   "transferDetailVehicleUnavailable": "वाहन उपलब्ध नहीं (एजेंट)",
   "transferDetailVehicleCapacity": "ट्रक (क्षमता 3000 किग्रा)",
@@ -1081,9 +1106,21 @@
   "saveAndSelect": "सहेजें और चुनें",
   "ragpickerDirectoryTitle": "रैगपिकर निर्देशिका",
   "ragpickerActiveCount": "सक्रिय ({count})",
-  "@ragpickerActiveCount": {"placeholders": {"count": {"type": "int"}}},
+  "@ragpickerActiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ragpickerDeactivatedCount": "निष्क्रिय ({count})",
-  "@ragpickerDeactivatedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@ragpickerDeactivatedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ragpickerSearchHint": "यहाँ खोजें...",
   "ragpickerAddButton": "रैगपिकर जोड़ें",
   "ragpickerNoDetailsFound": "रैगपिकर का कोई विवरण नहीं मिला",
@@ -1098,7 +1135,13 @@
   "ragpickerNameHint": "पूरा नाम दर्ज करें",
   "ragpickerNameRequired": "कृपया पूरा नाम दर्ज करें।",
   "ragpickerNameAlreadyExists": "{name} नाम रैगपिकर सूची में पहले से मौजूद है।",
-  "@ragpickerNameAlreadyExists": {"placeholders":{"name":{"type":"String"}}},
+  "@ragpickerNameAlreadyExists": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "ragpickerInvalidMobile": "मान्य 10 अंकों का मोबाइल नंबर दर्ज करें या खाली छोड़ें।",
   "ragpickerPhoneLabel": "मोबाइल नंबर *",
   "ragpickerPhoneHint": "मोबाइल नंबर दर्ज करें",
@@ -1384,7 +1427,13 @@
   "supervisorTaskInProgress": "कार्य प्रगति पर है",
   "supervisorTaskCompletedAt": "पूर्ण: आज, 11:30 AM",
   "supervisorTaskCompletedValue": "पूर्ण: {dateTime}",
-  "@supervisorTaskCompletedValue": {"placeholders": {"dateTime": {"type": "String"}}},
+  "@supervisorTaskCompletedValue": {
+    "placeholders": {
+      "dateTime": {
+        "type": "String"
+      }
+    }
+  },
   "supervisorTaskCompletionProof": "कार्य पूर्ण होने का प्रमाण",
   "supervisorTaskCompletionDescription": "10 किग्रा मानक परीक्षण वजन से वज़न मापक कैलिब्रेट किया गया। शून्य-त्रुटि सत्यापित की गई।",
   "supervisorTaskAgentName": "राहुल पटेल",
@@ -1434,9 +1483,21 @@
   "supervisorMrfAddLabor": "+ श्रमिक जोड़ें",
   "supervisorMrfSave": "सहेजें",
   "supervisorMrfLaborNumber": "श्रमिक {number}",
-  "@supervisorMrfLaborNumber": {"placeholders": {"number": {"type": "int"}}},
+  "@supervisorMrfLaborNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "supervisorMrfLaborAssigned": "{count} श्रमिक नियुक्त",
-  "@supervisorMrfLaborAssigned": {"placeholders": {"count": {"type": "int"}}},
+  "@supervisorMrfLaborAssigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "supervisorMrfFullNamePlain": "पूरा नाम",
   "supervisorMrfMobileNumberPlain": "मोबाइल नंबर",
   "supervisorMrfAssignedCenter": "लक्ष्य एजेंट / केंद्र सौंपें",
@@ -1464,10 +1525,7 @@
   "supervisorMrfLocationSilver": "सिल्वर चौक, पुणागाम",
   "supervisorMrfLocationSardar": "सरदार मार्केट, उधना",
   "locationServiceTitle": "लोकेशन चालू करें",
-  "locationServiceMessage": "लोकेशन बंद है। इसे चालू करें ताकि ऑफलाइन होने पर भी collection record में GPS coordinates जोड़े जा सकें।",
   "locationPermissionTitle": "लोकेशन अनुमति आवश्यक है",
-  "locationPermissionSettingsMessage": "Collection record में GPS coordinates जोड़ने के लिए app settings में location access की अनुमति दें।",
-  "locationPermissionDenied": "लोकेशन की अनुमति नहीं मिली। अनुमति मिलने तक GPS नहीं जोड़ा जाएगा।",
   "locationUnavailable": "अभी लोकेशन उपलब्ध नहीं है। उपलब्ध होने पर अंतिम सहेजी गई लोकेशन का उपयोग होगा।",
   "collectionLocationRequired": "Collection save या submit करने के लिए location आवश्यक है। Location चालू करके अनुमति दें और फिर प्रयास करें।",
   "collectionDetailsNotReady": "कलेक्शन की जानकारी अभी तैयार नहीं है। कृपया फिर से प्रयास करें।",
@@ -1476,9 +1534,7 @@
   "collectionDraftSaved": "ड्राफ्ट सेव हुआ!",
   "collectionDraftSavedSubtitle": "कलेक्शन ड्राफ्ट सफलतापूर्वक सेव हुआ। यह अपने-आप सिंक होगा।",
   "collectionAlreadySubmitted": "यह कलेक्शन पहले ही सबमिट हो चुका है। डुप्लिकेट एंट्री नहीं बनाई गई।",
-  "locationNotNow": "अभी नहीं",
   "locationOpenSettings": "Settings खोलें",
-  "locationSettingsUnavailable": "Location settings नहीं खुल सकीं।",
   "supervisorTransferReject": "अस्वीकार करें",
   "supervisorTransferApprove": "स्वीकृत करें",
   "supervisorTransferRejectHint": "अस्वीकृति का कारण दर्ज करें",
@@ -1595,5 +1651,10 @@
   "supervisorTransferTransporterPlain": "ट्रांसपोर्टर",
   "supervisorTaskTitleRequired": "कृपया कार्य का शीर्षक दर्ज करें।",
   "validationVehiclePlate": "मान्य वाहन नंबर दर्ज करें, जैसे GJ-05-BX-1234।",
-  "validationVehicleNumberLength": "4 से 20 अक्षरों का वाहन नंबर दर्ज करें।"
+  "validationVehicleNumberLength": "4 से 20 अक्षरों का वाहन नंबर दर्ज करें।",
+  "locationGateAllow": "लोकेशन की अनुमति दें",
+  "locationGateTurnOn": "लोकेशन चालू करें",
+  "locationGatePermissionMessage": "EERL हर कलेक्शन कहाँ हुआ यह दर्ज करता है, इसलिए उसे आपकी लोकेशन चाहिए। आगे बढ़ने के लिए लोकेशन की अनुमति दें।",
+  "locationGateServiceMessage": "आपके फ़ोन की लोकेशन (GPS) बंद है। आगे बढ़ने के लिए इसे चालू करें; यह ऑफ़लाइन भी चलती है।",
+  "locationGateSettingsMessage": "EERL के लिए लोकेशन ऐक्सेस बंद है। सेटिंग्स खोलें, लोकेशन की अनुमति दें, फिर वापस आएँ।"
 }

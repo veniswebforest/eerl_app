@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:eerl_app/features/outbound/data/outbound_writes.dart';
+import 'package:pickup_supervisor/features/driver/data/driver_stop_entry.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
 import 'package:pickup_supervisor/features/driver/service/driver_photo_capture.dart';
@@ -16,22 +18,33 @@ import 'package:pickup_supervisor/l10n/driver_localization_scope.dart';
 import 'package:pickup_supervisor/l10n/generated/driver_localizations.dart';
 
 class DriverSortedWasteFormScreen extends StatelessWidget {
-  const DriverSortedWasteFormScreen({super.key, this.locationMatched = true});
+  const DriverSortedWasteFormScreen({
+    super.key,
+    this.locationMatched = true,
+    this.target,
+  });
 
   final bool locationMatched;
+
+  /// The live stop; null shows the design preview.
+  final DriverStopTarget? target;
 
   @override
   Widget build(BuildContext context) {
     return DriverLocalizationScope(
-      child: _SortedWasteFormView(locationMatched: locationMatched),
+      child: _SortedWasteFormView(
+        locationMatched: locationMatched,
+        target: target,
+      ),
     );
   }
 }
 
 class _SortedWasteFormView extends StatefulWidget {
-  const _SortedWasteFormView({required this.locationMatched});
+  const _SortedWasteFormView({required this.locationMatched, this.target});
 
   final bool locationMatched;
+  final DriverStopTarget? target;
 
   @override
   State<_SortedWasteFormView> createState() => _SortedWasteFormViewState();
@@ -39,11 +52,16 @@ class _SortedWasteFormView extends StatefulWidget {
 
 class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
   static const _maximumPhotos = 2;
-  final List<List<XFile>> _photos = List.generate(3, (_) => <XFile>[]);
-  final List<TextEditingController> _collectedControllers = List.generate(
-    3,
+  late final int _count = widget.target?.items.length ?? 3;
+  late final List<List<XFile>> _photos = List.generate(
+    _count,
+    (_) => <XFile>[],
+  );
+  late final List<TextEditingController> _collectedControllers = List.generate(
+    _count,
     (_) => TextEditingController(),
   );
+  bool _saving = false;
   final TextEditingController _noteController = TextEditingController();
   bool _restoredPhotos = false;
 
@@ -106,6 +124,7 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
   }
 
   void _applyMockCollectedValue(int index) {
+    if (widget.target != null) return;
     if (_collectedControllers[index].text.isNotEmpty) return;
     _collectedControllers[index].text = index == 2 ? '25' : '270.00';
   }
@@ -121,35 +140,88 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
     super.dispose();
   }
 
-  String _recoveryId(int index) => 'driver.pickup.sorted.$index';
+  String _recoveryId(int index) =>
+      'driver.pickup.sorted.${widget.target?.stopId ?? ''}.$index';
+
+  /// Saves a Collected Sorted entry: each item of the stop once, in its unit.
+  Future<void> _saveLive(DriverStopTarget target) async {
+    setState(() => _saving = true);
+    final saved = await recordDriverStop(
+      context,
+      target: target,
+      outcome: StopOutcome.collected,
+      lines: [
+        for (var i = 0; i < target.items.length; i++)
+          DriverEntryLineInput(
+            itemId: target.items[i]['id']! as String,
+            itemName: target.items[i]['name'] as String? ?? '',
+            unit: target.items[i]['unit_code'] == 'KG' ? 'KG' : 'PCS',
+            quantity: double.parse(_collectedControllers[i].text.trim()),
+            photoPaths: [for (final photo in _photos[i]) photo.path],
+          ),
+      ],
+      note: _noteController.text,
+    );
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (!saved) return;
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => DriverPickupSuccessScreen(
+          isLastStop: target.isLastOpen,
+          tripId: target.tripId,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = DriverLocalizations.of(context);
     final topInset = MediaQuery.paddingOf(context).top;
-    final materials = [
-      _SortedMaterialData(
-        name: l10n.petBottles,
-        unit: l10n.kgUnit,
-        emptyImage: '$driverPickupImageRoot/pet_empty.png',
-        filledImage: '$driverPickupImageRoot/pet_filled.png',
-        allowDecimal: true,
-      ),
-      _SortedMaterialData(
-        name: l10n.hdpeRigid,
-        unit: l10n.kgUnit,
-        emptyImage: '$driverPickupImageRoot/hdpe_empty.png',
-        filledImage: '$driverPickupImageRoot/hdpe_filled.png',
-        allowDecimal: true,
-      ),
-      _SortedMaterialData(
-        name: l10n.eWaste,
-        unit: l10n.pcsUnit,
-        emptyImage: '$driverPickupImageRoot/ewaste_empty.png',
-        filledImage: '$driverPickupImageRoot/ewaste_filled.png',
-        allowDecimal: false,
-      ),
-    ];
+    final target = widget.target;
+    final materials = target != null
+        ? [
+            for (final item in target.items)
+              item['unit_code'] == 'KG'
+                  ? _SortedMaterialData(
+                      name: item['name'] as String? ?? '',
+                      unit: l10n.kgUnit,
+                      emptyImage: '$driverPickupImageRoot/pet_empty.png',
+                      filledImage: '$driverPickupImageRoot/pet_filled.png',
+                      allowDecimal: true,
+                    )
+                  : _SortedMaterialData(
+                      name: item['name'] as String? ?? '',
+                      unit: l10n.pcsUnit,
+                      emptyImage: '$driverPickupImageRoot/ewaste_empty.png',
+                      filledImage: '$driverPickupImageRoot/ewaste_filled.png',
+                      allowDecimal: false,
+                    ),
+          ]
+        : [
+            _SortedMaterialData(
+              name: l10n.petBottles,
+              unit: l10n.kgUnit,
+              emptyImage: '$driverPickupImageRoot/pet_empty.png',
+              filledImage: '$driverPickupImageRoot/pet_filled.png',
+              allowDecimal: true,
+            ),
+            _SortedMaterialData(
+              name: l10n.hdpeRigid,
+              unit: l10n.kgUnit,
+              emptyImage: '$driverPickupImageRoot/hdpe_empty.png',
+              filledImage: '$driverPickupImageRoot/hdpe_filled.png',
+              allowDecimal: true,
+            ),
+            _SortedMaterialData(
+              name: l10n.eWaste,
+              unit: l10n.pcsUnit,
+              emptyImage: '$driverPickupImageRoot/ewaste_empty.png',
+              filledImage: '$driverPickupImageRoot/ewaste_filled.png',
+              allowDecimal: false,
+            ),
+          ];
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
@@ -183,8 +255,13 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
                           ),
                           const SizedBox(height: 24),
                           DriverPickupStopSummary(
-                            title: l10n.abcTextileMills,
-                            subtitle: l10n.sortedStopSixOfSeven,
+                            title: target?.sourceName ?? l10n.abcTextileMills,
+                            subtitle: target != null
+                                ? l10n.stopPosition(
+                                    target.stopOrder,
+                                    target.totalStops,
+                                  )
+                                : l10n.sortedStopSixOfSeven,
                             locationLabel: widget.locationMatched
                                 ? l10n.locationMatched
                                 : l10n.locationNotMatched,
@@ -247,13 +324,15 @@ class _SortedWasteFormViewState extends State<_SortedWasteFormView> {
                           const SizedBox(height: 24),
                           DriverFormButton(
                             label: l10n.savePickup,
-                            enabled: _canSave,
-                            onPressed: () => Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) =>
-                                    const DriverPickupSuccessScreen(),
-                              ),
-                            ),
+                            enabled: _canSave && !_saving,
+                            onPressed: target != null
+                                ? () => _saveLive(target)
+                                : () => Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) =>
+                                          const DriverPickupSuccessScreen(),
+                                    ),
+                                  ),
                           ),
                         ],
                       ),
