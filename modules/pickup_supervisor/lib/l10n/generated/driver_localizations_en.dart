@@ -1879,7 +1879,7 @@ class DriverLocalizationsEn extends DriverLocalizations {
   String get sourcesExtraPickupSchedule => 'Sat 24 Oct · 11 am–12 pm';
 
   @override
-  String get sourcesEmptyMessage => 'No Unassigned trips available';
+  String get sourcesEmptyMessage => 'No pickup points waiting for a route';
 
   @override
   String get sourcesAbcTextileMills => 'ABC Textile Mills';
@@ -4905,4 +4905,7 @@ class DriverLocalizationsEn extends DriverLocalizations {
   String liveAssignedCount(int count) {
     return '$count pickup points';
   }
+
+  @override
+  String get liveNoExtraPickups => 'No extra pickups waiting for a trip';
 }

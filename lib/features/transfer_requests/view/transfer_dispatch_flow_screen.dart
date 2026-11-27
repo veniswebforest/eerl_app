@@ -510,7 +510,9 @@ class _TransferNumberCard extends StatelessWidget {
             color: AppColors.primary100,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: SvgPicture.asset('assets/icons/transfer_requests/request_route.svg'),
+          child: SvgPicture.asset(
+            'assets/icons/transfer_requests/request_route.svg',
+          ),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -727,7 +729,7 @@ class _DispatchField extends StatelessWidget {
           ),
         ),
       ),
-      if (errorText!=null) ...[
+      if (errorText != null) ...[
         Text(
           errorText ?? '',
           style: AppTextStyles.regularB8_12.copyWith(color: AppColors.red500),

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import 'package:eerl_app/features/home/widgets/home_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
 
 import 'package:eerl_app/core/extensions/context_extensions.dart';
@@ -14,13 +13,13 @@ import 'package:eerl_app/core/providers/locale_provider.dart';
 import 'package:eerl_app/core/router/app_routes.dart';
 import 'package:eerl_app/core/theme/app_colors.dart';
 import 'package:eerl_app/core/theme/app_text_styles.dart';
+import 'package:eerl_app/shared/widgets/app_language_selector.dart';
 import 'package:eerl_app/shared/widgets/app_screen_header.dart';
 import 'package:eerl_app/shared/widgets/app_snackbar.dart';
 import 'package:eerl_app/shared/widgets/app_top_notification.dart';
 import 'package:eerl_app/shared/widgets/cached_app_image.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../home/widgets/home_assets.dart';
 import '../service/outbox_export_service.dart';
 import '../widgets/profile_action_card.dart';
 import '../widgets/profile_assets.dart';
@@ -334,7 +333,7 @@ class _ProfileHeader extends StatelessWidget {
                 title: context.l10n.profileUserProfile,
                 subtitle: context.l10n.profileSubtitle,
                 actions: [
-                  _ProfileLanguageSelector(provider: localeProvider),
+                  AppLanguageSelector(provider: localeProvider),
                   InkWell(
                     key: const Key('profile-notification-button'),
                     onTap: () => context.push(AppRoutes.notifications),
@@ -436,123 +435,6 @@ class _ProfileHeader extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileLanguageSelector extends StatelessWidget {
-  const _ProfileLanguageSelector({required this.provider});
-
-  final LocaleProvider provider;
-
-  @override
-  Widget build(BuildContext context) {
-    final selectedCode = provider.locale?.languageCode ?? 'en';
-    final shortLabels = {
-      'en': context.l10n.profileLanguageEnglishShort,
-      'gu': context.l10n.profileLanguageGujaratiShort,
-      'hi': context.l10n.profileLanguageHindiShort,
-    };
-    final menuLabels = shortLabels;
-
-    return InkWell(
-      key: const Key('profile-language-selector'),
-      borderRadius: BorderRadius.circular(20),
-      onTap: () => _showLanguagePopover(
-        context,
-        selectedCode: selectedCode,
-        labels: menuLabels,
-      ),
-      child: Container(
-        width: 60,
-        height: 40,
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.cool400),
-          color: AppColors.neutral50,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              shortLabels[selectedCode]!.substring(0, 2),
-              style: AppTextStyles.semiboldH9_14.copyWith(
-                color: AppColors.neutral950,
-              ),
-            ),
-            const SizedBox(width: 8),
-            SvgPicture.asset(HomeAssets.chevronDown, width: 18, height: 18),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showLanguagePopover(
-    BuildContext context, {
-    required String selectedCode,
-    required Map<String, String> labels,
-  }) async {
-    await showPopover<void>(
-      context: context,
-      direction: PopoverDirection.bottom,
-      backgroundColor: AppColors.neutral50,
-      barrierColor: Colors.transparent,
-      radius: 12,
-      width: 60,
-      height: 110,
-      arrowWidth: 0,
-      arrowHeight: 0,
-      contentDxOffset: 0,
-      contentDyOffset: 2,
-      shadow: [HomeStyles.cardShadow],
-      bodyBuilder: (popoverContext) => Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.cool400),
-          color: AppColors.neutral50,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: ListView.separated(
-          shrinkWrap: true,
-          padding: const EdgeInsets.symmetric(vertical: 0),
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: labels.length,
-          separatorBuilder: (_, _) => const Divider(
-            height: 0,
-            indent: 0,
-            endIndent: 0,
-            color: AppColors.neutral200,
-          ),
-          itemBuilder: (_, index) {
-            final entry = labels.entries.elementAt(index);
-            final selected = entry.key == selectedCode;
-            return InkWell(
-              key: Key('profile-language-${entry.key}'),
-              onTap: () {
-                provider.setLocale(Locale(entry.key));
-                Navigator.of(popoverContext).pop();
-              },
-              child: SizedBox(
-                height: 35,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Center(
-                    child: Text(
-                      entry.value,
-                      style: AppTextStyles.mediumSH8_14.copyWith(
-                        color: selected
-                            ? AppColors.primary500
-                            : AppColors.neutral950,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
         ),
       ),
     );

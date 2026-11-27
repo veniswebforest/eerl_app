@@ -728,7 +728,7 @@
   "sourcesSecondWedSchedule": "2nd Wed of the month · 10–11 am",
   "sourcesMahavirSorted": "Mahavir Paper Mill · Sorted",
   "sourcesExtraPickupSchedule": "Sat 24 Oct · 11 am–12 pm",
-  "sourcesEmptyMessage": "No Unassigned trips available",
+  "sourcesEmptyMessage": "No pickup points waiting for a route",
   "sourcesAbcTextileMills": "ABC Textile Mills",
   "sourcesShreeSaiDairy": "Shree Sai Dairy",
   "sourcesMahavirPaperMill": "Mahavir Paper Mill",
@@ -3436,5 +3436,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "liveNoExtraPickups": "No extra pickups waiting for a trip"
 }

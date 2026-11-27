@@ -24,8 +24,11 @@ class SupervisorAvatar extends StatelessWidget {
 
   static String initials(String? name) {
     if (name == null || name.trim().isEmpty) return '?';
-    final parts =
-        name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    final parts = name
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((p) => p.isNotEmpty)
+        .toList();
     if (parts.isEmpty) return '?';
     if (parts.length > 1) {
       return '${parts.first.characters.first}${parts.last.characters.first}'
@@ -40,10 +43,7 @@ class SupervisorAvatar extends StatelessWidget {
     final placeholder = Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: backgroundColor, shape: BoxShape.circle),
       alignment: Alignment.center,
       child: Text(
         initialsText,

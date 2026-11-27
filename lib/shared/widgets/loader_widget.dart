@@ -58,7 +58,8 @@ class LoadingWidget extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 13,
-                      height: 1.5,                    fontWeight: FontWeight.w500,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
 
                       // color: AppColors.cool900,
                     ),

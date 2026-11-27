@@ -1,4 +1,6 @@
+import 'package:eerl_app/core/local_database/mobile_write_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
 import 'package:pickup_supervisor/core/forms/module_input_rules.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
@@ -25,8 +27,12 @@ class ExtraPickupScreen extends StatelessWidget {
     required this.time,
     required this.routeName,
     required this.initialDate,
+    this.sourceId,
   });
 
+  /// The live pickup point; with a session, Submit queues the extra pickup
+  /// (due at once: the supervisor's own needs no approval).
+  final String? sourceId;
   final String stopName;
   final String address;
 
@@ -90,6 +96,36 @@ class _ExtraPickupViewState extends State<_ExtraPickupView> {
     FocusScope.of(context).unfocus();
     final s = widget.screen;
     final navigator = Navigator.of(context);
+    final session = OutboundLiveSession.of(context);
+    final sourceId = s.sourceId;
+    if (session != null && sourceId != null) {
+      final amount = double.tryParse(_amount.text.trim());
+      final note = _remarks.text.trim();
+      final day =
+          '${_date.year.toString().padLeft(4, '0')}-'
+          '${_date.month.toString().padLeft(2, '0')}-'
+          '${_date.day.toString().padLeft(2, '0')}';
+      try {
+        await session.change(
+          () => session.writes.addExtraPickup(
+            id: session.newId(),
+            sourceId: sourceId,
+            date: day,
+            asSupervisor: true,
+            expectedQtyKg: amount,
+            note: note.isEmpty ? null : note,
+          ),
+        );
+      } on LocalWriteValidationException catch (error) {
+        if (mounted) {
+          ScaffoldMessenger.maybeOf(
+            context,
+          )?.showSnackBar(SnackBar(content: Text(error.message)));
+        }
+        return;
+      }
+      if (!mounted) return;
+    }
     await showModulePopup<void>(
       context,
       builder: (popupContext) => DriverLocalizationScope(

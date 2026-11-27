@@ -199,7 +199,8 @@ class TaskListCard extends StatelessWidget {
     return DateFormat('dd MMM yyyy').format(due);
   }
 
-  String _timeLabel() => IstDateTime.formatUtc(item.createdAt, 'dd MMM, hh:mm a');
+  String _timeLabel() =>
+      IstDateTime.formatUtc(item.createdAt, 'dd MMM, hh:mm a');
 }
 
 class _StatusChip extends StatelessWidget {

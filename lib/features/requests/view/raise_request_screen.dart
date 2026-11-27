@@ -77,7 +77,8 @@ class _RaiseRequestScreenState extends State<RaiseRequestScreen> {
 
   Future<void> _loadProfile() async {
     try {
-      final loader = widget.profileLoader ?? EerlLocalRepository.instance.getProfile;
+      final loader =
+          widget.profileLoader ?? EerlLocalRepository.instance.getProfile;
       final profile = await loader();
       if (!mounted) return;
       setState(() => _profile = profile);

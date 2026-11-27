@@ -728,7 +728,7 @@
   "sourcesSecondWedSchedule": "મહિનાનો બીજો બુધ · 10–11 am",
   "sourcesMahavirSorted": "મહાવીર પેપર મિલ · સોર્ટેડ",
   "sourcesExtraPickupSchedule": "શનિ 24 ઑક્ટો · 11 am–12 pm",
-  "sourcesEmptyMessage": "કોઈ ફાળવ્યા વગરની ટ્રિપ ઉપલબ્ધ નથી",
+  "sourcesEmptyMessage": "રૂટની રાહ જોતા કોઈ પિકઅપ પોઇન્ટ નથી",
   "sourcesAbcTextileMills": "ABC ટેક્સટાઇલ મિલ્સ",
   "sourcesShreeSaiDairy": "શ્રી સાઈ ડેરી",
   "sourcesMahavirPaperMill": "મહાવીર પેપર મિલ",
@@ -1543,5 +1543,6 @@
   "liveSourcesTab": "સ્રોત ({count})",
   "livePickupsTab": "પિકઅપ ({count})",
   "liveSourceAdded": "{source} હવે {route} પર છે.",
-  "liveAssignedCount": "{count} પિકઅપ પોઇન્ટ"
+  "liveAssignedCount": "{count} પિકઅપ પોઇન્ટ",
+  "liveNoExtraPickups": "ટ્રિપની રાહ જોતા કોઈ વધારાના પિકઅપ નથી"
 }

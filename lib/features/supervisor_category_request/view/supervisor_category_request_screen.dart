@@ -519,7 +519,8 @@ class _CategoryRequestDetailScreen extends StatelessWidget {
                               ),
                             ],
                             if (!pending &&
-                                request.decidedAt?.trim().isNotEmpty == true) ...[
+                                request.decidedAt?.trim().isNotEmpty ==
+                                    true) ...[
                               const _CategoryDivider(),
                               ExpenseDetailRow(
                                 label: l.expenseDateTime,

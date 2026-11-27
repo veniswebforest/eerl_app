@@ -27,6 +27,7 @@ class ExpenseClaimDetailScreen extends StatefulWidget {
   State<ExpenseClaimDetailScreen> createState() =>
       _ExpenseClaimDetailScreenState();
 }
+
 class _ExpenseClaimDetailScreenState extends State<ExpenseClaimDetailScreen> {
   Future<List<String>>? _receiptSources;
 
@@ -288,6 +289,7 @@ class _DetailDivider extends StatelessWidget {
     );
   }
 }
+
 class _ExpensePhotosCard extends StatelessWidget {
   const _ExpensePhotosCard({required this.sources});
 

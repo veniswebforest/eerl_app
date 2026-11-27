@@ -178,7 +178,10 @@ class _PickupSupervisorRoutesScreenState
       builder: (context) {
         _scopedContext = context;
         final l10n = DriverLocalizations.of(context);
-        final routes = (live ?? _routes(l10n))
+        final allRoutes = live ?? _routes(l10n);
+        // No routes at all: the Figma empty state, without the filters.
+        final noRoutes = widget.showEmpty || allRoutes.isEmpty;
+        final routes = allRoutes
             .where((route) {
               final matchesFilter =
                   _selectedFilter == 0 ||
@@ -232,7 +235,7 @@ class _PickupSupervisorRoutesScreenState
                         onChanged: (value) => setState(() => _query = value),
                       ),
                     ),
-                    if (widget.showEmpty)
+                    if (noRoutes)
                       Expanded(child: _EmptyRoutes(l10n: l10n))
                     else ...[
                       const SizedBox(height: 16),
@@ -244,24 +247,28 @@ class _PickupSupervisorRoutesScreenState
                       ),
                       const SizedBox(height: 16),
                       Expanded(
-                        child: ListView.separated(
-                          key: const Key('supervisor-routes-list'),
-                          controller: _listController,
-                          padding: EdgeInsets.fromLTRB(
-                            20,
-                            0,
-                            20,
-                            MediaQuery.paddingOf(context).bottom + 132,
-                          ),
-                          itemCount: routes.length,
-                          separatorBuilder: (_, _) =>
-                              const SizedBox(height: 16),
-                          itemBuilder: (_, index) => _RouteCard(
-                            route: routes[index],
-                            highlighted: routes[index].highlighted,
-                            onTap: () => _openRoute(routes[index]),
-                          ),
-                        ),
+                        // A filter or search with no match keeps the
+                        // filters, with the same empty picture.
+                        child: routes.isEmpty
+                            ? _EmptyRoutes(l10n: l10n)
+                            : ListView.separated(
+                                key: const Key('supervisor-routes-list'),
+                                controller: _listController,
+                                padding: EdgeInsets.fromLTRB(
+                                  20,
+                                  0,
+                                  20,
+                                  MediaQuery.paddingOf(context).bottom + 132,
+                                ),
+                                itemCount: routes.length,
+                                separatorBuilder: (_, _) =>
+                                    const SizedBox(height: 16),
+                                itemBuilder: (_, index) => _RouteCard(
+                                  route: routes[index],
+                                  highlighted: routes[index].highlighted,
+                                  onTap: () => _openRoute(routes[index]),
+                                ),
+                              ),
                       ),
                     ],
                   ],
@@ -469,6 +476,7 @@ class _EmptyRoutes extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 l10n.routesEmptyMessage,
+                key: const Key('supervisor-routes-empty'),
                 textAlign: TextAlign.center,
                 style: DriverTextStyles.semibold16.copyWith(
                   color: DriverColors.neutral400,

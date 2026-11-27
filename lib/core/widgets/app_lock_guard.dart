@@ -168,8 +168,9 @@ class _AppLockGuardState extends State<AppLockGuard>
                     height: 52,
                     child: ElevatedButton(
                       key: const Key('app-lock-unlock-button'),
-                      onPressed:
-                          _isAuthenticating ? null : _triggerAuthentication,
+                      onPressed: _isAuthenticating
+                          ? null
+                          : _triggerAuthentication,
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
                         backgroundColor: AppColors.primary500,

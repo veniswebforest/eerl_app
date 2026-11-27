@@ -1874,7 +1874,7 @@ class DriverLocalizationsGu extends DriverLocalizations {
   String get sourcesExtraPickupSchedule => 'શનિ 24 ઑક્ટો · 11 am–12 pm';
 
   @override
-  String get sourcesEmptyMessage => 'કોઈ ફાળવ્યા વગરની ટ્રિપ ઉપલબ્ધ નથી';
+  String get sourcesEmptyMessage => 'રૂટની રાહ જોતા કોઈ પિકઅપ પોઇન્ટ નથી';
 
   @override
   String get sourcesAbcTextileMills => 'ABC ટેક્સટાઇલ મિલ્સ';
@@ -4891,4 +4891,7 @@ class DriverLocalizationsGu extends DriverLocalizations {
   String liveAssignedCount(int count) {
     return '$count પિકઅપ પોઇન્ટ';
   }
+
+  @override
+  String get liveNoExtraPickups => 'ટ્રિપની રાહ જોતા કોઈ વધારાના પિકઅપ નથી';
 }

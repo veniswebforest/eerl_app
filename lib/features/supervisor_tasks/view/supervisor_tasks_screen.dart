@@ -151,7 +151,8 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
                                   ),
                                 ),
                               ),
-                            ),                            const SizedBox(height: 8),
+                            ),
+                            const SizedBox(height: 8),
 
                             TaskSegmentedControl(
                               status: _selectedStatus,
@@ -162,7 +163,6 @@ class _SupervisorTasksScreenState extends State<SupervisorTasksScreen> {
                               onChanged: (status) =>
                                   setState(() => _selectedStatus = status),
                             ),
-
                           ],
                         ),
                       ),

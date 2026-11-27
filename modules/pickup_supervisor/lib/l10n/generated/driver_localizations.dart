@@ -3643,7 +3643,7 @@ abstract class DriverLocalizations {
   /// No description provided for @sourcesEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'No Unassigned trips available'**
+  /// **'No pickup points waiting for a route'**
   String get sourcesEmptyMessage;
 
   /// No description provided for @sourcesAbcTextileMills.
@@ -8551,6 +8551,12 @@ abstract class DriverLocalizations {
   /// In en, this message translates to:
   /// **'{count} pickup points'**
   String liveAssignedCount(int count);
+
+  /// No description provided for @liveNoExtraPickups.
+  ///
+  /// In en, this message translates to:
+  /// **'No extra pickups waiting for a trip'**
+  String get liveNoExtraPickups;
 }
 
 class _DriverLocalizationsDelegate

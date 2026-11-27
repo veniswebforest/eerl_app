@@ -41,7 +41,8 @@ class ConfigurableMaterialTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.white, backgroundColor.withValues(alpha: 0.8)],stops: [0.0, 0.76],
+          colors: [Colors.white, backgroundColor.withValues(alpha: 0.8)],
+          stops: [0.0, 0.76],
         ),
         border: Border.all(
           color: selected ? AppColors.primary500 : AppColors.cool200,

@@ -16,9 +16,7 @@ class SupervisorCompletedRequestScreen extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
     key: const Key('supervisor-completed-request-screen'),
     backgroundColor: AppColors.backgroundColor,
-    appBar: SupervisorTaskHeader(
-      title: context.l10n.requestDetailsTitle,
-    ),
+    appBar: SupervisorTaskHeader(title: context.l10n.requestDetailsTitle),
     body: SafeArea(
       top: false,
       child: Center(

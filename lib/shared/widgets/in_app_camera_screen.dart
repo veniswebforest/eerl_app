@@ -214,9 +214,9 @@ class _InAppCameraScreenState extends State<InAppCameraScreen>
     } catch (e) {
       if (mounted) {
         setState(() => _isCapturing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to capture photo: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to capture photo: $e')));
       }
     }
   }
@@ -285,12 +285,7 @@ class _InAppCameraScreenState extends State<InAppCameraScreen>
               _buildLiveCamera(),
 
             // Top control header
-            Positioned(
-              top: 12,
-              left: 16,
-              right: 16,
-              child: _buildTopHeader(),
-            ),
+            Positioned(top: 12, left: 16, right: 16, child: _buildTopHeader()),
 
             // Bottom control bar
             Positioned(
@@ -375,7 +370,10 @@ class _InAppCameraScreenState extends State<InAppCameraScreen>
         margin: const EdgeInsets.all(28),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 1.5),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.35),
+            width: 1.5,
+          ),
         ),
       ),
     );
@@ -385,16 +383,14 @@ class _InAppCameraScreenState extends State<InAppCameraScreen>
     return Center(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Image.file(
-          File(_capturedPhoto!.path),
-          fit: BoxFit.contain,
-        ),
+        child: Image.file(File(_capturedPhoto!.path), fit: BoxFit.contain),
       ),
     );
   }
 
   Widget _buildCaptureBottomBar() {
-    final isReady = _controller?.value.isInitialized == true && !_isInitializing;
+    final isReady =
+        _controller?.value.isInitialized == true && !_isInitializing;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -452,9 +448,13 @@ class _InAppCameraScreenState extends State<InAppCameraScreen>
               icon: const Icon(Icons.refresh_rounded, color: Colors.black),
               label: const Text(
                 'Retake',
-                style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              style: OutlinedButton.styleFrom(backgroundColor: Colors.white,
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Colors.white,
                 side: const BorderSide(color: Colors.white60),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(

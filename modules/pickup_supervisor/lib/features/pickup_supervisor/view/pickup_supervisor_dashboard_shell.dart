@@ -40,6 +40,15 @@ class _PickupSupervisorDashboardShellState
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   var _selectedIndex = 0;
 
+  /// The Sources tab's own tab: 0 Sources, 1 Extra pickups.
+  final _sourcesTab = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    _sourcesTab.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DriverLocalizationScope(
@@ -61,7 +70,24 @@ class _PickupSupervisorDashboardShellState
             backgroundColor: DriverColors.background,
             drawer: PickupSupervisorHomeDrawer(
               onItemSelected: (item) {
-                if (item == 'notifications') {
+                // Unassigned sources and Routes are bottom-bar tabs.
+                void openTab(String pageKey) {
+                  final index = items.indexWhere((i) => i.pageKey == pageKey);
+                  if (index >= 0) setState(() => _selectedIndex = index);
+                }
+
+                if (item == 'unassigned-sources') {
+                  _sourcesTab.value = 0;
+                  openTab('sources');
+                } else if (item == 'routes') {
+                  openTab('routes');
+                } else if (item == 'extra-pickup') {
+                  // Nav item 2 (Sources), on its second tab: Extra pickups.
+                  _sourcesTab.value = 1;
+                  openTab('sources');
+                } else if (item == 'sync-status') {
+                  showSupervisorSyncDialog(context);
+                } else if (item == 'notifications') {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const DriverLocalizationScope(
@@ -140,7 +166,10 @@ class _PickupSupervisorDashboardShellState
       title: l10n.sourcesNavLabel,
       selectedIcon: '$_assetRoot/nav_trips.svg',
       unselectedIcon: '$_assetRoot/nav_trips.svg',
-      page: const PickupSupervisorSourcesScreen(showBottomNavigation: false),
+      page: PickupSupervisorSourcesScreen(
+        showBottomNavigation: false,
+        selectedTab: _sourcesTab,
+      ),
       pageKey: 'sources',
       roles: const {PickupSupervisorModuleRole.pickupSupervisor},
     ),

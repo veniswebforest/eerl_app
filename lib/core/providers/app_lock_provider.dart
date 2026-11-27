@@ -40,7 +40,8 @@ class AppLockProvider extends ChangeNotifier {
         localizedReason: 'Please authenticate to enable App Lock',
       );
       if (!authenticated) {
-        _lastErrorMessage = _lockService.lastErrorMessage ??
+        _lastErrorMessage =
+            _lockService.lastErrorMessage ??
             'Authentication failed. App lock not enabled.';
         notifyListeners();
         return false;

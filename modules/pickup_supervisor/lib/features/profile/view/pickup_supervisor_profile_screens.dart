@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:eerl_app/shared/widgets/app_language_selector.dart';
+import 'package:eerl_app/shared/widgets/cached_app_image.dart';
+import 'package:pickup_supervisor/core/data/outbound_live_session.dart';
+import 'package:pickup_supervisor/features/profile/data/supervisor_profile_live_data.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pickup_supervisor/core/theme/driver_colors.dart';
 import 'package:pickup_supervisor/core/theme/driver_text_styles.dart';
@@ -10,6 +14,34 @@ const _drawerImages = 'assets/images/supervisor/drawer';
 const _profileImages = 'assets/images/supervisor/profile';
 const _profileIcons = 'assets/icons/supervisor/profile';
 const _helpIcons = 'assets/icons/supervisor/help_support';
+
+/// The Sync data flow of the Pickup Supervisor profile: "Sync offline
+/// data", then "Data already synced" once Sync now is tapped. Shared by the
+/// profile and the drawer's Sync status. Returns true when synced.
+Future<bool> showSupervisorSyncDialog(BuildContext context) async {
+  // Live: how many changes wait in the outbox; none means already synced.
+  final session = OutboundLiveSession.of(context);
+  final unsent = session == null ? null : await session.queries.unsentChanges();
+  if (!context.mounted) return false;
+  if (unsent != 0) {
+    final synced = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: .58),
+      builder: (_) =>
+          DriverLocalizationScope(child: _SyncOfflineDialog(unsent: unsent)),
+    );
+    if (!context.mounted || synced != true) return false;
+    await session?.syncNow();
+    if (!context.mounted) return false;
+  }
+  await showDialog<void>(
+    context: context,
+    barrierColor: Colors.black.withValues(alpha: .58),
+    builder: (_) =>
+        const DriverLocalizationScope(child: _AlreadySyncedDialog()),
+  );
+  return true;
+}
 
 class PickupSupervisorProfileScreen extends StatefulWidget {
   const PickupSupervisorProfileScreen({super.key, this.onLogout});
@@ -28,25 +60,23 @@ class _PickupSupervisorProfileScreenState
   bool _hasPendingSync = true;
 
   Future<void> _showSync() async {
-    final synced = await showDialog<bool>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: .58),
-      builder: (_) =>
-          const DriverLocalizationScope(child: _SyncOfflineDialog()),
-    );
-    if (!mounted || synced != true) return;
-    setState(() => _hasPendingSync = false);
-    await showDialog<void>(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: .58),
-      builder: (_) =>
-          const DriverLocalizationScope(child: _AlreadySyncedDialog()),
-    );
+    final synced = await showSupervisorSyncDialog(context);
+    if (mounted && synced) setState(() => _hasPendingSync = false);
   }
 
   @override
   Widget build(BuildContext context) {
+    return OutboundLiveBuilder<SupervisorProfileLive>(
+      load: SupervisorProfileLive.load,
+      fallback: _page(context, null),
+      builder: (context, live, _) => _page(context, live),
+    );
+  }
+
+  Widget _page(BuildContext context, SupervisorProfileLive? live) {
     final l10n = DriverLocalizations.of(context);
+    // Live: the logout warning follows the outbox.
+    final pending = live == null ? _hasPendingSync : live.unsent > 0;
     return Container(
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
@@ -79,11 +109,11 @@ class _PickupSupervisorProfileScreenState
                 ),
               ),
               const SizedBox(height: 20),
-              _ProfileHero(l10n: l10n),
+              _ProfileHero(l10n: l10n, live: live),
               const SizedBox(height: 28),
               _SectionTitle(l10n.profileAccountInformation),
               const SizedBox(height: 12),
-              _InfoCard(l10n: l10n),
+              _InfoCard(l10n: l10n, live: live),
               const SizedBox(height: 24),
               _SectionTitle(l10n.profileActions),
               const SizedBox(height: 12),
@@ -109,7 +139,7 @@ class _PickupSupervisorProfileScreenState
                   barrierColor: Colors.black.withValues(alpha: .58),
                   builder: (_) => DriverLocalizationScope(
                     child: _LogoutDialog(
-                      showPendingWarning: _hasPendingSync,
+                      showPendingWarning: pending,
                       onLogout: widget.onLogout == null
                           ? null
                           : () => widget.onLogout!(this.context),
@@ -155,28 +185,7 @@ class _ProfileHeader extends StatelessWidget {
             ],
           ),
         ),
-        Container(
-          width: 60,
-          height: 40,
-          decoration: BoxDecoration(
-            color: DriverColors.neutral50,
-            border: Border.all(color: DriverColors.cool400),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                l10n.profileLanguageCode,
-                style: DriverTextStyles.semibold14.copyWith(
-                  color: DriverColors.neutral900,
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
-            ],
-          ),
-        ),
+        const AppLanguageSelector(),
         const SizedBox(width: 10),
         InkWell(
           key: const Key('profile-notifications'),
@@ -195,9 +204,32 @@ class _ProfileHeader extends StatelessWidget {
 }
 
 class _ProfileHero extends StatelessWidget {
-  const _ProfileHero({required this.l10n});
+  const _ProfileHero({required this.l10n, this.live});
 
   final DriverLocalizations l10n;
+  final SupervisorProfileLive? live;
+
+  /// The photo, or the first letter of the name, as the main profile does.
+  Widget _livePhoto(SupervisorProfileLive live) {
+    final initial = Text(
+      (live.name.isNotEmpty ? live.name[0] : '?').toUpperCase(),
+      style: DriverTextStyles.bold24.copyWith(color: DriverColors.primary500),
+    );
+    return CircleAvatar(
+      radius: 60,
+      backgroundColor: DriverColors.primary100,
+      child: (live.photoUrl?.isNotEmpty ?? false)
+          ? ClipOval(
+              child: CachedAppImage(
+                source: live.photoUrl,
+                width: 120,
+                height: 120,
+                placeholder: Center(child: initial),
+              ),
+            )
+          : initial,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -224,18 +256,22 @@ class _ProfileHero extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ClipOval(
-                  child: Image.asset(
-                    '$_drawerImages/kiran_shah.png',
-                    package: _package,
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
+                if (live != null)
+                  _livePhoto(live!)
+                else
+                  ClipOval(
+                    child: Image.asset(
+                      '$_drawerImages/kiran_shah.png',
+                      package: _package,
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
                 const SizedBox(height: 8),
                 Text(
-                  l10n.profileUserName,
+                  live?.name ?? l10n.profileUserName,
+                  key: const Key('supervisor-profile-name'),
                   style: DriverTextStyles.semibold20.copyWith(
                     color: DriverColors.neutral950,
                   ),
@@ -251,7 +287,7 @@ class _ProfileHero extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    l10n.profileRole,
+                    live?.roleName ?? l10n.profileRole,
                     style: DriverTextStyles.bold14.copyWith(
                       color: DriverColors.primary400,
                     ),
@@ -316,8 +352,9 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.l10n});
+  const _InfoCard({required this.l10n, this.live});
   final DriverLocalizations l10n;
+  final SupervisorProfileLive? live;
 
   @override
   Widget build(BuildContext context) {
@@ -339,7 +376,7 @@ class _InfoCard extends StatelessWidget {
           _InfoRow(
             '$_profileIcons/facility.svg',
             l10n.profileMyAreas,
-            l10n.profileAreasValue,
+            live?.areas ?? l10n.profileAreasValue,
           ),
           const SizedBox(height: 12),
           const Divider(height: 1, color: DriverColors.cool400),
@@ -347,7 +384,7 @@ class _InfoCard extends StatelessWidget {
           _InfoRow(
             '$_profileIcons/mobile.svg',
             l10n.profileMobileNumber,
-            l10n.profileMobileValue,
+            live?.phone ?? l10n.profileMobileValue,
           ),
           const SizedBox(height: 12),
           const Divider(height: 1, color: DriverColors.cool400),
@@ -355,7 +392,7 @@ class _InfoCard extends StatelessWidget {
           _InfoRow(
             '$_profileIcons/role.svg',
             l10n.profileRoleLabel,
-            l10n.profileRole,
+            live?.roleName ?? l10n.profileRole,
           ),
           const SizedBox(height: 12),
           const Divider(height: 1, color: DriverColors.cool400),
@@ -363,7 +400,7 @@ class _InfoCard extends StatelessWidget {
           _InfoRow(
             '$_profileIcons/session_expiry.svg',
             l10n.profileSessionExpires,
-            l10n.profileSessionValue,
+            live?.sessionExpires ?? l10n.profileSessionValue,
           ),
         ],
       ),
@@ -506,7 +543,10 @@ class _CardDivider extends StatelessWidget {
 }
 
 class _SyncOfflineDialog extends StatelessWidget {
-  const _SyncOfflineDialog();
+  const _SyncOfflineDialog({this.unsent});
+
+  /// Changes not sent yet; null shows the design sample.
+  final int? unsent;
 
   @override
   Widget build(BuildContext context) {
@@ -542,7 +582,9 @@ class _SyncOfflineDialog extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    l10n.profileChangesNotSent,
+                    unsent == null
+                        ? l10n.profileChangesNotSent
+                        : l10n.liveNotSent(unsent!),
                     style: DriverTextStyles.semibold16,
                   ),
                 ),

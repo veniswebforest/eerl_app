@@ -24,7 +24,12 @@ class PickupSupervisorSourcesScreen extends StatefulWidget {
     this.showEmpty = false,
     this.showBottomNavigation = true,
     this.onNavigationSelected,
+    this.selectedTab,
   });
+
+  /// The open tab (0 Sources, 1 Extra pickups), shared with the dashboard
+  /// so its drawer can open either tab. Null: the screen keeps its own.
+  final ValueNotifier<int>? selectedTab;
 
   final bool showEmpty;
   final bool showBottomNavigation;
@@ -37,8 +42,37 @@ class PickupSupervisorSourcesScreen extends StatefulWidget {
 
 class _PickupSupervisorSourcesScreenState
     extends State<PickupSupervisorSourcesScreen> {
-  var _selectedTab = 0;
+  final _ownTab = ValueNotifier<int>(0);
   var _query = '';
+
+  ValueNotifier<int> get _tab => widget.selectedTab ?? _ownTab;
+  int get _selectedTab => _tab.value;
+
+  @override
+  void initState() {
+    super.initState();
+    _tab.addListener(_refresh);
+  }
+
+  @override
+  void didUpdateWidget(covariant PickupSupervisorSourcesScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedTab != widget.selectedTab) {
+      (oldWidget.selectedTab ?? _ownTab).removeListener(_refresh);
+      _tab.addListener(_refresh);
+    }
+  }
+
+  @override
+  void dispose() {
+    _tab.removeListener(_refresh);
+    _ownTab.dispose();
+    super.dispose();
+  }
+
+  void _refresh() {
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -140,14 +174,19 @@ class _PickupSupervisorSourcesScreenState
                                 l10n.livePickupsTab(live.pickups.length),
                               ],
                         selected: _selectedTab,
-                        onSelected: (index) =>
-                            setState(() => _selectedTab = index),
+                        onSelected: (index) => _tab.value = index,
                       ),
                     ),
                     const SizedBox(height: 20),
                     Expanded(
-                      child: widget.showEmpty
-                          ? _EmptySources(l10n: l10n)
+                      // Nothing on this tab: the Figma empty state.
+                      child: widget.showEmpty || visibleItems.isEmpty
+                          ? _EmptySources(
+                              l10n: l10n,
+                              message: _selectedTab == 1
+                                  ? l10n.liveNoExtraPickups
+                                  : null,
+                            )
                           : ListView.separated(
                               key: const Key('supervisor-sources-list'),
                               padding: EdgeInsets.fromLTRB(
@@ -881,9 +920,12 @@ class _SourceInfoRow extends StatelessWidget {
 }
 
 class _EmptySources extends StatelessWidget {
-  const _EmptySources({required this.l10n});
+  const _EmptySources({required this.l10n, this.message});
 
   final DriverLocalizations l10n;
+
+  /// Replaces the Sources tab's message (the Extra pickups tab's own).
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
@@ -903,7 +945,9 @@ class _EmptySources extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              l10n.sourcesEmptyMessage,
+              message ?? l10n.sourcesEmptyMessage,
+              key: const Key('supervisor-sources-empty'),
+              textAlign: TextAlign.center,
               style: DriverTextStyles.semibold16.copyWith(
                 color: DriverColors.neutral400,
               ),

@@ -52,7 +52,7 @@ void main() {
       const PickupSupervisorSourcesScreen(showEmpty: true),
     );
 
-    expect(find.text('No Unassigned trips available'), findsOneWidget);
+    expect(find.text('No pickup points waiting for a route'), findsOneWidget);
     expect(find.byType(Image), findsOneWidget);
   });
 
